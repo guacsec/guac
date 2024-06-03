@@ -8749,395 +8749,6 @@ func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns CertifyScorecardSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyScorecardSpec) GetDocumentRef() *string { return v.DocumentRef }
 
-// CertifyVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
-// The GraphQL type's documentation follows.
-//
-// CertifyVEXStatement is an attestation to attach VEX statements to a package or
-// artifact to clarify the impact of a specific vulnerability.
-type CertifyVEXStatementCertifyVEXStatement struct {
-	AllCertifyVEXStatement `json:"-"`
-}
-
-// GetId returns CertifyVEXStatementCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetId() string { return v.AllCertifyVEXStatement.Id }
-
-// GetSubject returns CertifyVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
-	return v.AllCertifyVEXStatement.Subject
-}
-
-// GetVulnerability returns CertifyVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
-	return v.AllCertifyVEXStatement.Vulnerability
-}
-
-// GetStatus returns CertifyVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
-	return v.AllCertifyVEXStatement.Status
-}
-
-// GetVexJustification returns CertifyVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
-	return v.AllCertifyVEXStatement.VexJustification
-}
-
-// GetStatement returns CertifyVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetStatement() string {
-	return v.AllCertifyVEXStatement.Statement
-}
-
-// GetStatusNotes returns CertifyVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetStatusNotes() string {
-	return v.AllCertifyVEXStatement.StatusNotes
-}
-
-// GetKnownSince returns CertifyVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetKnownSince() time.Time {
-	return v.AllCertifyVEXStatement.KnownSince
-}
-
-// GetOrigin returns CertifyVEXStatementCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetOrigin() string {
-	return v.AllCertifyVEXStatement.Origin
-}
-
-// GetCollector returns CertifyVEXStatementCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementCertifyVEXStatement) GetCollector() string {
-	return v.AllCertifyVEXStatement.Collector
-}
-
-func (v *CertifyVEXStatementCertifyVEXStatement) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyVEXStatementCertifyVEXStatement
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyVEXStatementCertifyVEXStatement = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyVEXStatement)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyVEXStatementCertifyVEXStatement struct {
-	Id string `json:"id"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
-
-	Status VexStatus `json:"status"`
-
-	VexJustification VexJustification `json:"vexJustification"`
-
-	Statement string `json:"statement"`
-
-	StatusNotes string `json:"statusNotes"`
-
-	KnownSince time.Time `json:"knownSince"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *CertifyVEXStatementCertifyVEXStatement) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalCertifyVEXStatementCertifyVEXStatement, error) {
-	var retval __premarshalCertifyVEXStatementCertifyVEXStatement
-
-	retval.Id = v.AllCertifyVEXStatement.Id
-	{
-
-		dst := &retval.Subject
-		src := v.AllCertifyVEXStatement.Subject
-		var err error
-		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal CertifyVEXStatementCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
-		}
-	}
-	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
-	retval.Status = v.AllCertifyVEXStatement.Status
-	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
-	retval.Statement = v.AllCertifyVEXStatement.Statement
-	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
-	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
-	retval.Origin = v.AllCertifyVEXStatement.Origin
-	retval.Collector = v.AllCertifyVEXStatement.Collector
-	return &retval, nil
-}
-
-// CertifyVEXStatementListCertifyVEXStatementListVEXConnection includes the requested fields of the GraphQL type VEXConnection.
-// The GraphQL type's documentation follows.
-//
-// VEXConnection returns the paginated results for CertifyVEXStatement.
-//
-// totalCount is the total number of results returned.
-//
-// pageInfo provides information to the client if there is
-// a next page of results and the starting and
-// ending cursor for the current set.
-//
-// edges contains the VEXEdge which contains the current cursor
-// and the CertifyVEXStatement node itself
-type CertifyVEXStatementListCertifyVEXStatementListVEXConnection struct {
-	TotalCount int                                                                       `json:"totalCount"`
-	Edges      []CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge `json:"edges"`
-	PageInfo   CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo       `json:"pageInfo"`
-}
-
-// GetTotalCount returns CertifyVEXStatementListCertifyVEXStatementListVEXConnection.TotalCount, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnection) GetTotalCount() int {
-	return v.TotalCount
-}
-
-// GetEdges returns CertifyVEXStatementListCertifyVEXStatementListVEXConnection.Edges, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnection) GetEdges() []CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge {
-	return v.Edges
-}
-
-// GetPageInfo returns CertifyVEXStatementListCertifyVEXStatementListVEXConnection.PageInfo, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnection) GetPageInfo() CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo {
-	return v.PageInfo
-}
-
-// CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge includes the requested fields of the GraphQL type VEXEdge.
-// The GraphQL type's documentation follows.
-//
-// VEXEdge contains the cursor for the resulting node and
-// the CertifyVEXStatement node itself.
-type CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge struct {
-	Cursor string                                                                                         `json:"cursor"`
-	Node   CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement `json:"node"`
-}
-
-// GetCursor returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Cursor, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetCursor() string {
-	return v.Cursor
-}
-
-// GetNode returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Node, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetNode() CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement {
-	return v.Node
-}
-
-// CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
-// The GraphQL type's documentation follows.
-//
-// CertifyVEXStatement is an attestation to attach VEX statements to a package or
-// artifact to clarify the impact of a specific vulnerability.
-type CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
-	AllCertifyVEXStatement `json:"-"`
-}
-
-// GetId returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetId() string {
-	return v.AllCertifyVEXStatement.Id
-}
-
-// GetSubject returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
-	return v.AllCertifyVEXStatement.Subject
-}
-
-// GetVulnerability returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
-	return v.AllCertifyVEXStatement.Vulnerability
-}
-
-// GetStatus returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatus() VexStatus {
-	return v.AllCertifyVEXStatement.Status
-}
-
-// GetVexJustification returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVexJustification() VexJustification {
-	return v.AllCertifyVEXStatement.VexJustification
-}
-
-// GetStatement returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatement() string {
-	return v.AllCertifyVEXStatement.Statement
-}
-
-// GetStatusNotes returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatusNotes() string {
-	return v.AllCertifyVEXStatement.StatusNotes
-}
-
-// GetKnownSince returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetKnownSince() time.Time {
-	return v.AllCertifyVEXStatement.KnownSince
-}
-
-// GetOrigin returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetOrigin() string {
-	return v.AllCertifyVEXStatement.Origin
-}
-
-// GetCollector returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetCollector() string {
-	return v.AllCertifyVEXStatement.Collector
-}
-
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyVEXStatement)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
-	Id string `json:"id"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
-
-	Status VexStatus `json:"status"`
-
-	VexJustification VexJustification `json:"vexJustification"`
-
-	Statement string `json:"statement"`
-
-	StatusNotes string `json:"statusNotes"`
-
-	KnownSince time.Time `json:"knownSince"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalCertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement, error) {
-	var retval __premarshalCertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
-
-	retval.Id = v.AllCertifyVEXStatement.Id
-	{
-
-		dst := &retval.Subject
-		src := v.AllCertifyVEXStatement.Subject
-		var err error
-		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
-		}
-	}
-	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
-	retval.Status = v.AllCertifyVEXStatement.Status
-	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
-	retval.Statement = v.AllCertifyVEXStatement.Statement
-	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
-	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
-	retval.Origin = v.AllCertifyVEXStatement.Origin
-	retval.Collector = v.AllCertifyVEXStatement.Collector
-	return &retval, nil
-}
-
-// CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
-// The GraphQL type's documentation follows.
-//
-// PageInfo serves the client information about the paginated query results.
-//
-// hasNextPage is true when there are results to be returned.
-//
-// hasPreviousPage is true when there is a previous page to return to.
-//
-// startCursor is the ID where the query started from.
-//
-// endCursor is where the query ended.
-type CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo struct {
-	StartCursor *string `json:"startCursor"`
-	EndCursor   *string `json:"endCursor"`
-	HasNextPage bool    `json:"hasNextPage"`
-}
-
-// GetStartCursor returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetStartCursor() *string {
-	return v.StartCursor
-}
-
-// GetEndCursor returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetEndCursor() *string {
-	return v.EndCursor
-}
-
-// GetHasNextPage returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetHasNextPage() bool {
-	return v.HasNextPage
-}
-
-// CertifyVEXStatementListResponse is returned by CertifyVEXStatementList on success.
-type CertifyVEXStatementListResponse struct {
-	// Returns a paginated results via CertifyVexConnection
-	CertifyVEXStatementList *CertifyVEXStatementListCertifyVEXStatementListVEXConnection `json:"CertifyVEXStatementList"`
-}
-
-// GetCertifyVEXStatementList returns CertifyVEXStatementListResponse.CertifyVEXStatementList, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementListResponse) GetCertifyVEXStatementList() *CertifyVEXStatementListCertifyVEXStatementListVEXConnection {
-	return v.CertifyVEXStatementList
-}
-
-// CertifyVEXStatementResponse is returned by CertifyVEXStatement on success.
-type CertifyVEXStatementResponse struct {
-	// Returns all VEX certifications matching the input filter.
-	CertifyVEXStatement []CertifyVEXStatementCertifyVEXStatement `json:"CertifyVEXStatement"`
-}
-
-// GetCertifyVEXStatement returns CertifyVEXStatementResponse.CertifyVEXStatement, and is useful for accessing the field via an interface.
-func (v *CertifyVEXStatementResponse) GetCertifyVEXStatement() []CertifyVEXStatementCertifyVEXStatement {
-	return v.CertifyVEXStatement
-}
-
 // CertifyVEXStatementSpec allows filtering the list of VEX statements to
 // return in a query.
 //
@@ -11113,6 +10724,191 @@ func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HashEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HashEqualListHashEqualListHashEqualConnection includes the requested fields of the GraphQL type HashEqualConnection.
+// The GraphQL type's documentation follows.
+//
+// HashEqualConnection returns the paginated results for HashEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HashEqualEdge which contains the current cursor
+// and the HashEqual node itself
+type HashEqualListHashEqualListHashEqualConnection struct {
+	TotalCount int                                                               `json:"totalCount"`
+	Edges      []HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge `json:"edges"`
+	PageInfo   HashEqualListHashEqualListHashEqualConnectionPageInfo             `json:"pageInfo"`
+}
+
+// GetTotalCount returns HashEqualListHashEqualListHashEqualConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns HashEqualListHashEqualListHashEqualConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnection) GetEdges() []HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HashEqualListHashEqualListHashEqualConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnection) GetPageInfo() HashEqualListHashEqualListHashEqualConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge includes the requested fields of the GraphQL type HashEqualEdge.
+// The GraphQL type's documentation follows.
+//
+// HashEqualEdge contains the cursor for the resulting node and
+// the HashEqual node itself.
+type HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge struct {
+	Cursor string                                                                       `json:"cursor"`
+	Node   HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual `json:"node"`
+}
+
+// GetCursor returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge.Node, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge) GetNode() HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual {
+	return v.Node
+}
+
+// HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that two artifacts are identical.
+type HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual struct {
+	AllHashEqualTree `json:"-"`
+}
+
+// GetId returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Id, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetId() string {
+	return v.AllHashEqualTree.Id
+}
+
+// GetJustification returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetJustification() string {
+	return v.AllHashEqualTree.Justification
+}
+
+// GetArtifacts returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetArtifacts() []AllHashEqualTreeArtifactsArtifact {
+	return v.AllHashEqualTree.Artifacts
+}
+
+// GetOrigin returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetOrigin() string {
+	return v.AllHashEqualTree.Origin
+}
+
+// GetCollector returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetCollector() string {
+	return v.AllHashEqualTree.Collector
+}
+
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Artifacts []AllHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) __premarshalJSON() (*__premarshalHashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual, error) {
+	var retval __premarshalHashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual
+
+	retval.Id = v.AllHashEqualTree.Id
+	retval.Justification = v.AllHashEqualTree.Justification
+	retval.Artifacts = v.AllHashEqualTree.Artifacts
+	retval.Origin = v.AllHashEqualTree.Origin
+	retval.Collector = v.AllHashEqualTree.Collector
+	return &retval, nil
+}
+
+// HashEqualListHashEqualListHashEqualConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HashEqualListHashEqualListHashEqualConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HashEqualListHashEqualListHashEqualConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HashEqualListHashEqualListHashEqualConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns HashEqualListHashEqualListHashEqualConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// HashEqualListResponse is returned by HashEqualList on success.
+type HashEqualListResponse struct {
+	// Returns a paginated results via HashEqualConnection
+	HashEqualList *HashEqualListHashEqualListHashEqualConnection `json:"HashEqualList"`
+}
+
+// GetHashEqualList returns HashEqualListResponse.HashEqualList, and is useful for accessing the field via an interface.
+func (v *HashEqualListResponse) GetHashEqualList() *HashEqualListHashEqualListHashEqualConnection {
+	return v.HashEqualList
+}
 
 // HashEqualSpec allows filtering the list of artifact equality statements to
 // return in a query.
@@ -25345,6 +25141,441 @@ func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns PointOfContactInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *PointOfContactInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// PointOfContactListPointOfContactListPointOfContactConnection includes the requested fields of the GraphQL type PointOfContactConnection.
+// The GraphQL type's documentation follows.
+//
+// PointOfContactConnection returns the paginated results for PointOfContact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PointOfContactEdge which contains the current cursor
+// and the PointOfContact node itself
+type PointOfContactListPointOfContactListPointOfContactConnection struct {
+	TotalCount int                                                                                   `json:"totalCount"`
+	Edges      []PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge `json:"edges"`
+	PageInfo   PointOfContactListPointOfContactListPointOfContactConnectionPageInfo                  `json:"pageInfo"`
+}
+
+// GetTotalCount returns PointOfContactListPointOfContactListPointOfContactConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns PointOfContactListPointOfContactListPointOfContactConnection.Edges, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnection) GetEdges() []PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns PointOfContactListPointOfContactListPointOfContactConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnection) GetPageInfo() PointOfContactListPointOfContactListPointOfContactConnectionPageInfo {
+	return v.PageInfo
+}
+
+// PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge includes the requested fields of the GraphQL type PointOfContactEdge.
+// The GraphQL type's documentation follows.
+//
+// PointOfContactEdge contains the cursor for the resulting node and
+// the PointOfContact node itself.
+type PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge struct {
+	Cursor string                                                                                                `json:"cursor"`
+	Node   PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact `json:"node"`
+}
+
+// GetCursor returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge.Node, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge) GetNode() PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact {
+	return v.Node
+}
+
+// PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact struct {
+	AllPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetId() string {
+	return v.AllPointOfContact.Id
+}
+
+// GetSubject returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetEmail() string {
+	return v.AllPointOfContact.Email
+}
+
+// GetInfo returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetInfo() string {
+	return v.AllPointOfContact.Info
+}
+
+// GetSince returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetSince() time.Time {
+	return v.AllPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetJustification() string {
+	return v.AllPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetOrigin() string {
+	return v.AllPointOfContact.Origin
+}
+
+// GetCollector returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetCollector() string {
+	return v.AllPointOfContact.Collector
+}
+
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) __premarshalJSON() (*__premarshalPointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact, error) {
+	var retval __premarshalPointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact
+
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactListPointOfContactListPointOfContactConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PointOfContactListPointOfContactListPointOfContactConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns PointOfContactListPointOfContactListPointOfContactConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns PointOfContactListPointOfContactListPointOfContactConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns PointOfContactListPointOfContactListPointOfContactConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// PointOfContactListResponse is returned by PointOfContactList on success.
+type PointOfContactListResponse struct {
+	// Returns a paginated results via PointOfContactConnection
+	PointOfContactList *PointOfContactListPointOfContactListPointOfContactConnection `json:"PointOfContactList"`
+}
+
+// GetPointOfContactList returns PointOfContactListResponse.PointOfContactList, and is useful for accessing the field via an interface.
+func (v *PointOfContactListResponse) GetPointOfContactList() *PointOfContactListPointOfContactListPointOfContactConnection {
+	return v.PointOfContactList
+}
+
+// PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since filters attestations with a value of since later or equal to the provided filter.
+type PointOfContactSpec struct {
+	Id            *string                      `json:"id"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Email         *string                      `json:"email"`
+	Info          *string                      `json:"info"`
+	Since         *time.Time                   `json:"since"`
+	Justification *string                      `json:"justification"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
+	DocumentRef   *string                      `json:"documentRef"`
+}
+
+// GetId returns PointOfContactSpec.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetId() *string { return v.Id }
+
+// GetSubject returns PointOfContactSpec.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Subject }
+
+// GetEmail returns PointOfContactSpec.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetEmail() *string { return v.Email }
+
+// GetInfo returns PointOfContactSpec.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetInfo() *string { return v.Info }
+
+// GetSince returns PointOfContactSpec.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetSince() *time.Time { return v.Since }
+
+// GetJustification returns PointOfContactSpec.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns PointOfContactSpec.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns PointOfContactSpec.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns PointOfContactSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// PointOfContactsPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactsPointOfContact struct {
+	AllPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactsPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetId() string { return v.AllPointOfContact.Id }
+
+// GetSubject returns PointOfContactsPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactsPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetEmail() string { return v.AllPointOfContact.Email }
+
+// GetInfo returns PointOfContactsPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetInfo() string { return v.AllPointOfContact.Info }
+
+// GetSince returns PointOfContactsPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetSince() time.Time { return v.AllPointOfContact.Since }
+
+// GetJustification returns PointOfContactsPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetJustification() string {
+	return v.AllPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactsPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetOrigin() string { return v.AllPointOfContact.Origin }
+
+// GetCollector returns PointOfContactsPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetCollector() string { return v.AllPointOfContact.Collector }
+
+func (v *PointOfContactsPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactsPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactsPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactsPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactsPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactsPointOfContact) __premarshalJSON() (*__premarshalPointOfContactsPointOfContact, error) {
+	var retval __premarshalPointOfContactsPointOfContact
+
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactsPointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactsResponse is returned by PointOfContacts on success.
+type PointOfContactsResponse struct {
+	// Returns all PointOfContact attestations matching a filter.
+	PointOfContact []PointOfContactsPointOfContact `json:"PointOfContact"`
+}
+
+// GetPointOfContact returns PointOfContactsResponse.PointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactsResponse) GetPointOfContact() []PointOfContactsPointOfContact {
+	return v.PointOfContact
+}
+
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
@@ -26084,6 +26315,393 @@ func (v *SourcesSourcesSource) __premarshalJSON() (*__premarshalSourcesSourcesSo
 	return &retval, nil
 }
 
+// VEXStatementListCertifyVEXStatementListVEXConnection includes the requested fields of the GraphQL type VEXConnection.
+// The GraphQL type's documentation follows.
+//
+// VEXConnection returns the paginated results for CertifyVEXStatement.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VEXEdge which contains the current cursor
+// and the CertifyVEXStatement node itself
+type VEXStatementListCertifyVEXStatementListVEXConnection struct {
+	TotalCount int                                                                `json:"totalCount"`
+	Edges      []VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge `json:"edges"`
+	PageInfo   VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo       `json:"pageInfo"`
+}
+
+// GetTotalCount returns VEXStatementListCertifyVEXStatementListVEXConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns VEXStatementListCertifyVEXStatementListVEXConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnection) GetEdges() []VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VEXStatementListCertifyVEXStatementListVEXConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnection) GetPageInfo() VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge includes the requested fields of the GraphQL type VEXEdge.
+// The GraphQL type's documentation follows.
+//
+// VEXEdge contains the cursor for the resulting node and
+// the CertifyVEXStatement node itself.
+type VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge struct {
+	Cursor string                                                                                  `json:"cursor"`
+	Node   VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement `json:"node"`
+}
+
+// GetCursor returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Node, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetNode() VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement {
+	return v.Node
+}
+
+// VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability.
+type VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
+	AllCertifyVEXStatement `json:"-"`
+}
+
+// GetId returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetId() string {
+	return v.AllCertifyVEXStatement.Id
+}
+
+// GetSubject returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.AllCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
+	return v.AllCertifyVEXStatement.Vulnerability
+}
+
+// GetStatus returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatus() VexStatus {
+	return v.AllCertifyVEXStatement.Status
+}
+
+// GetVexJustification returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.AllCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatement() string {
+	return v.AllCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatusNotes() string {
+	return v.AllCertifyVEXStatement.StatusNotes
+}
+
+// GetKnownSince returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.AllCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetOrigin() string {
+	return v.AllCertifyVEXStatement.Origin
+}
+
+// GetCollector returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetCollector() string {
+	return v.AllCertifyVEXStatement.Collector
+}
+
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
+
+	Status VexStatus `json:"status"`
+
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement, error) {
+	var retval __premarshalVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
+
+	retval.Id = v.AllCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
+	retval.Status = v.AllCertifyVEXStatement.Status
+	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
+	retval.Statement = v.AllCertifyVEXStatement.Statement
+	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
+	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
+	retval.Origin = v.AllCertifyVEXStatement.Origin
+	retval.Collector = v.AllCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// VEXStatementListResponse is returned by VEXStatementList on success.
+type VEXStatementListResponse struct {
+	// Returns a paginated results via CertifyVexConnection
+	CertifyVEXStatementList *VEXStatementListCertifyVEXStatementListVEXConnection `json:"CertifyVEXStatementList"`
+}
+
+// GetCertifyVEXStatementList returns VEXStatementListResponse.CertifyVEXStatementList, and is useful for accessing the field via an interface.
+func (v *VEXStatementListResponse) GetCertifyVEXStatementList() *VEXStatementListCertifyVEXStatementListVEXConnection {
+	return v.CertifyVEXStatementList
+}
+
+// VEXStatementsCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability.
+type VEXStatementsCertifyVEXStatement struct {
+	AllCertifyVEXStatement `json:"-"`
+}
+
+// GetId returns VEXStatementsCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetId() string { return v.AllCertifyVEXStatement.Id }
+
+// GetSubject returns VEXStatementsCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.AllCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VEXStatementsCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
+	return v.AllCertifyVEXStatement.Vulnerability
+}
+
+// GetStatus returns VEXStatementsCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetStatus() VexStatus {
+	return v.AllCertifyVEXStatement.Status
+}
+
+// GetVexJustification returns VEXStatementsCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.AllCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VEXStatementsCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetStatement() string {
+	return v.AllCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VEXStatementsCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetStatusNotes() string {
+	return v.AllCertifyVEXStatement.StatusNotes
+}
+
+// GetKnownSince returns VEXStatementsCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.AllCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VEXStatementsCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetOrigin() string { return v.AllCertifyVEXStatement.Origin }
+
+// GetCollector returns VEXStatementsCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetCollector() string {
+	return v.AllCertifyVEXStatement.Collector
+}
+
+func (v *VEXStatementsCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXStatementsCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXStatementsCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXStatementsCertifyVEXStatement struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
+
+	Status VexStatus `json:"status"`
+
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VEXStatementsCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXStatementsCertifyVEXStatement) __premarshalJSON() (*__premarshalVEXStatementsCertifyVEXStatement, error) {
+	var retval __premarshalVEXStatementsCertifyVEXStatement
+
+	retval.Id = v.AllCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal VEXStatementsCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
+	retval.Status = v.AllCertifyVEXStatement.Status
+	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
+	retval.Statement = v.AllCertifyVEXStatement.Statement
+	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
+	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
+	retval.Origin = v.AllCertifyVEXStatement.Origin
+	retval.Collector = v.AllCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VEXStatementsResponse is returned by VEXStatements on success.
+type VEXStatementsResponse struct {
+	// Returns all VEX certifications matching the input filter.
+	CertifyVEXStatement []VEXStatementsCertifyVEXStatement `json:"CertifyVEXStatement"`
+}
+
+// GetCertifyVEXStatement returns VEXStatementsResponse.CertifyVEXStatement, and is useful for accessing the field via an interface.
+func (v *VEXStatementsResponse) GetCertifyVEXStatement() []VEXStatementsCertifyVEXStatement {
+	return v.CertifyVEXStatement
+}
+
 // Records the justification included in the VEX statement.
 type VexJustification string
 
@@ -26672,30 +27290,6 @@ type __CertifyLegalsInput struct {
 // GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
 
-// __CertifyVEXStatementInput is used internally by genqlient
-type __CertifyVEXStatementInput struct {
-	Filter CertifyVEXStatementSpec `json:"filter"`
-}
-
-// GetFilter returns __CertifyVEXStatementInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyVEXStatementInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
-
-// __CertifyVEXStatementListInput is used internally by genqlient
-type __CertifyVEXStatementListInput struct {
-	Filter CertifyVEXStatementSpec `json:"filter"`
-	After  *string                 `json:"after"`
-	First  *int                    `json:"first"`
-}
-
-// GetFilter returns __CertifyVEXStatementListInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyVEXStatementListInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
-
-// GetAfter returns __CertifyVEXStatementListInput.After, and is useful for accessing the field via an interface.
-func (v *__CertifyVEXStatementListInput) GetAfter() *string { return v.After }
-
-// GetFirst returns __CertifyVEXStatementListInput.First, and is useful for accessing the field via an interface.
-func (v *__CertifyVEXStatementListInput) GetFirst() *int { return v.First }
-
 // __CertifyVulnInput is used internally by genqlient
 type __CertifyVulnInput struct {
 	Filter CertifyVulnSpec `json:"filter"`
@@ -26783,6 +27377,22 @@ func (v *__HasSLSAListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __HasSLSAListInput.First, and is useful for accessing the field via an interface.
 func (v *__HasSLSAListInput) GetFirst() *int { return v.First }
+
+// __HashEqualListInput is used internally by genqlient
+type __HashEqualListInput struct {
+	Filter HashEqualSpec `json:"filter"`
+	After  *string       `json:"after"`
+	First  *int          `json:"first"`
+}
+
+// GetFilter returns __HashEqualListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HashEqualListInput) GetFilter() HashEqualSpec { return v.Filter }
+
+// GetAfter returns __HashEqualListInput.After, and is useful for accessing the field via an interface.
+func (v *__HashEqualListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HashEqualListInput.First, and is useful for accessing the field via an interface.
+func (v *__HashEqualListInput) GetFirst() *int { return v.First }
 
 // __HashEqualsInput is used internally by genqlient
 type __HashEqualsInput struct {
@@ -27982,6 +28592,30 @@ func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
 // GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
+// __PointOfContactListInput is used internally by genqlient
+type __PointOfContactListInput struct {
+	Filter PointOfContactSpec `json:"filter"`
+	After  *string            `json:"after"`
+	First  *int               `json:"first"`
+}
+
+// GetFilter returns __PointOfContactListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PointOfContactListInput) GetFilter() PointOfContactSpec { return v.Filter }
+
+// GetAfter returns __PointOfContactListInput.After, and is useful for accessing the field via an interface.
+func (v *__PointOfContactListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __PointOfContactListInput.First, and is useful for accessing the field via an interface.
+func (v *__PointOfContactListInput) GetFirst() *int { return v.First }
+
+// __PointOfContactsInput is used internally by genqlient
+type __PointOfContactsInput struct {
+	Filter PointOfContactSpec `json:"filter"`
+}
+
+// GetFilter returns __PointOfContactsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PointOfContactsInput) GetFilter() PointOfContactSpec { return v.Filter }
+
 // __ScorecardsInput is used internally by genqlient
 type __ScorecardsInput struct {
 	Filter CertifyScorecardSpec `json:"filter"`
@@ -28029,6 +28663,30 @@ func (v *__SourcesListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __SourcesListInput.First, and is useful for accessing the field via an interface.
 func (v *__SourcesListInput) GetFirst() *int { return v.First }
+
+// __VEXStatementListInput is used internally by genqlient
+type __VEXStatementListInput struct {
+	Filter CertifyVEXStatementSpec `json:"filter"`
+	After  *string                 `json:"after"`
+	First  *int                    `json:"first"`
+}
+
+// GetFilter returns __VEXStatementListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VEXStatementListInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
+
+// GetAfter returns __VEXStatementListInput.After, and is useful for accessing the field via an interface.
+func (v *__VEXStatementListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VEXStatementListInput.First, and is useful for accessing the field via an interface.
+func (v *__VEXStatementListInput) GetFirst() *int { return v.First }
+
+// __VEXStatementsInput is used internally by genqlient
+type __VEXStatementsInput struct {
+	Filter CertifyVEXStatementSpec `json:"filter"`
+}
+
+// GetFilter returns __VEXStatementsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VEXStatementsInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
 
 // __VulnerabilitiesInput is used internally by genqlient
 type __VulnerabilitiesInput struct {
@@ -28871,205 +29529,6 @@ func CertifyLegals(
 	return &data_, err_
 }
 
-// The query or mutation executed by CertifyVEXStatement.
-const CertifyVEXStatement_Operation = `
-query CertifyVEXStatement ($filter: CertifyVEXStatementSpec!) {
-	CertifyVEXStatement(certifyVEXStatementSpec: $filter) {
-		... AllCertifyVEXStatement
-	}
-}
-fragment AllCertifyVEXStatement on CertifyVEXStatement {
-	id
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Artifact {
-			... AllArtifactTree
-		}
-	}
-	vulnerability {
-		... AllVulnerabilityTree
-	}
-	status
-	vexJustification
-	statement
-	statusNotes
-	knownSince
-	origin
-	collector
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				purl
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-fragment AllVulnerabilityTree on Vulnerability {
-	id
-	type
-	vulnerabilityIDs {
-		id
-		vulnerabilityID
-	}
-}
-`
-
-func CertifyVEXStatement(
-	ctx_ context.Context,
-	client_ graphql.Client,
-	filter CertifyVEXStatementSpec,
-) (*CertifyVEXStatementResponse, error) {
-	req_ := &graphql.Request{
-		OpName: "CertifyVEXStatement",
-		Query:  CertifyVEXStatement_Operation,
-		Variables: &__CertifyVEXStatementInput{
-			Filter: filter,
-		},
-	}
-	var err_ error
-
-	var data_ CertifyVEXStatementResponse
-	resp_ := &graphql.Response{Data: &data_}
-
-	err_ = client_.MakeRequest(
-		ctx_,
-		req_,
-		resp_,
-	)
-
-	return &data_, err_
-}
-
-// The query or mutation executed by CertifyVEXStatementList.
-const CertifyVEXStatementList_Operation = `
-query CertifyVEXStatementList ($filter: CertifyVEXStatementSpec!, $after: ID, $first: Int) {
-	CertifyVEXStatementList(certifyVEXStatementSpec: $filter, after: $after, first: $first) {
-		totalCount
-		edges {
-			cursor
-			node {
-				... AllCertifyVEXStatement
-			}
-		}
-		pageInfo {
-			startCursor
-			endCursor
-			hasNextPage
-		}
-	}
-}
-fragment AllCertifyVEXStatement on CertifyVEXStatement {
-	id
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Artifact {
-			... AllArtifactTree
-		}
-	}
-	vulnerability {
-		... AllVulnerabilityTree
-	}
-	status
-	vexJustification
-	statement
-	statusNotes
-	knownSince
-	origin
-	collector
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				purl
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-fragment AllVulnerabilityTree on Vulnerability {
-	id
-	type
-	vulnerabilityIDs {
-		id
-		vulnerabilityID
-	}
-}
-`
-
-func CertifyVEXStatementList(
-	ctx_ context.Context,
-	client_ graphql.Client,
-	filter CertifyVEXStatementSpec,
-	after *string,
-	first *int,
-) (*CertifyVEXStatementListResponse, error) {
-	req_ := &graphql.Request{
-		OpName: "CertifyVEXStatementList",
-		Query:  CertifyVEXStatementList_Operation,
-		Variables: &__CertifyVEXStatementListInput{
-			Filter: filter,
-			After:  after,
-			First:  first,
-		},
-	}
-	var err_ error
-
-	var data_ CertifyVEXStatementListResponse
-	resp_ := &graphql.Response{Data: &data_}
-
-	err_ = client_.MakeRequest(
-		ctx_,
-		req_,
-		resp_,
-	)
-
-	return &data_, err_
-}
-
 // The query or mutation executed by CertifyVuln.
 const CertifyVuln_Operation = `
 query CertifyVuln ($filter: CertifyVulnSpec!) {
@@ -29848,6 +30307,70 @@ func HasSLSAList(
 	var err_ error
 
 	var data_ HasSLSAListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HashEqualList.
+const HashEqualList_Operation = `
+query HashEqualList ($filter: HashEqualSpec!, $after: ID, $first: Int) {
+	HashEqualList(hashEqualSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHashEqualTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHashEqualTree on HashEqual {
+	id
+	justification
+	artifacts {
+		... AllArtifactTree
+	}
+	origin
+	collector
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HashEqualList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HashEqualSpec,
+	after *string,
+	first *int,
+) (*HashEqualListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HashEqualList",
+		Query:  HashEqualList_Operation,
+		Variables: &__HashEqualListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HashEqualListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -34803,6 +35326,215 @@ func Path(
 	return &data_, err_
 }
 
+// The query or mutation executed by PointOfContactList.
+const PointOfContactList_Operation = `
+query PointOfContactList ($filter: PointOfContactSpec!, $after: ID, $first: Int) {
+	PointOfContactList(pointOfContactSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPointOfContact
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PointOfContactSpec,
+	after *string,
+	first *int,
+) (*PointOfContactListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PointOfContactList",
+		Query:  PointOfContactList_Operation,
+		Variables: &__PointOfContactListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ PointOfContactListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by PointOfContacts.
+const PointOfContacts_Operation = `
+query PointOfContacts ($filter: PointOfContactSpec!) {
+	PointOfContact(pointOfContactSpec: $filter) {
+		... AllPointOfContact
+	}
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContacts(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PointOfContactSpec,
+) (*PointOfContactsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PointOfContacts",
+		Query:  PointOfContacts_Operation,
+		Variables: &__PointOfContactsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ PointOfContactsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by Scorecards.
 const Scorecards_Operation = `
 query Scorecards ($filter: CertifyScorecardSpec!) {
@@ -35054,6 +35786,205 @@ func SourcesList(
 	var err_ error
 
 	var data_ SourcesListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VEXStatementList.
+const VEXStatementList_Operation = `
+query VEXStatementList ($filter: CertifyVEXStatementSpec!, $after: ID, $first: Int) {
+	CertifyVEXStatementList(certifyVEXStatementSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyVEXStatement
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	status
+	vexJustification
+	statement
+	statusNotes
+	knownSince
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VEXStatementList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVEXStatementSpec,
+	after *string,
+	first *int,
+) (*VEXStatementListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VEXStatementList",
+		Query:  VEXStatementList_Operation,
+		Variables: &__VEXStatementListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VEXStatementListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VEXStatements.
+const VEXStatements_Operation = `
+query VEXStatements ($filter: CertifyVEXStatementSpec!) {
+	CertifyVEXStatement(certifyVEXStatementSpec: $filter) {
+		... AllCertifyVEXStatement
+	}
+}
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	status
+	vexJustification
+	statement
+	statusNotes
+	knownSince
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VEXStatements(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVEXStatementSpec,
+) (*VEXStatementsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VEXStatements",
+		Query:  VEXStatements_Operation,
+		Variables: &__VEXStatementsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ VEXStatementsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
