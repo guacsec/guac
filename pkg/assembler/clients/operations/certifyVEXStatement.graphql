@@ -68,3 +68,27 @@ mutation IngestCertifyVexArtifacts(
     vexStatements: $vexStatements)
 }
 
+# Exposes GraphQL queries to retrieve GUAC Scorecards
+
+query CertifyVEXStatement($filter: CertifyVEXStatementSpec!) {
+  CertifyVEXStatement(certifyVEXStatementSpec: $filter) {
+    ...AllCertifyVEXStatement
+  }
+}
+
+query CertifyVEXStatementList($filter: CertifyVEXStatementSpec!, $after: ID, $first: Int) {
+  CertifyVEXStatementList(certifyVEXStatementSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyVEXStatement
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

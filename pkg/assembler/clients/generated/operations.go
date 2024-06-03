@@ -8749,6 +8749,448 @@ func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns CertifyScorecardSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyScorecardSpec) GetDocumentRef() *string { return v.DocumentRef }
 
+// CertifyVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability.
+type CertifyVEXStatementCertifyVEXStatement struct {
+	AllCertifyVEXStatement `json:"-"`
+}
+
+// GetId returns CertifyVEXStatementCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetId() string { return v.AllCertifyVEXStatement.Id }
+
+// GetSubject returns CertifyVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.AllCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns CertifyVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
+	return v.AllCertifyVEXStatement.Vulnerability
+}
+
+// GetStatus returns CertifyVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
+	return v.AllCertifyVEXStatement.Status
+}
+
+// GetVexJustification returns CertifyVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.AllCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns CertifyVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.AllCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns CertifyVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.AllCertifyVEXStatement.StatusNotes
+}
+
+// GetKnownSince returns CertifyVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.AllCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns CertifyVEXStatementCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetOrigin() string {
+	return v.AllCertifyVEXStatement.Origin
+}
+
+// GetCollector returns CertifyVEXStatementCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementCertifyVEXStatement) GetCollector() string {
+	return v.AllCertifyVEXStatement.Collector
+}
+
+func (v *CertifyVEXStatementCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVEXStatementCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVEXStatementCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVEXStatementCertifyVEXStatement struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
+
+	Status VexStatus `json:"status"`
+
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyVEXStatementCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalCertifyVEXStatementCertifyVEXStatement, error) {
+	var retval __premarshalCertifyVEXStatementCertifyVEXStatement
+
+	retval.Id = v.AllCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyVEXStatementCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
+	retval.Status = v.AllCertifyVEXStatement.Status
+	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
+	retval.Statement = v.AllCertifyVEXStatement.Statement
+	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
+	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
+	retval.Origin = v.AllCertifyVEXStatement.Origin
+	retval.Collector = v.AllCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// CertifyVEXStatementListCertifyVEXStatementListVEXConnection includes the requested fields of the GraphQL type VEXConnection.
+// The GraphQL type's documentation follows.
+//
+// VEXConnection returns the paginated results for CertifyVEXStatement.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VEXEdge which contains the current cursor
+// and the CertifyVEXStatement node itself
+type CertifyVEXStatementListCertifyVEXStatementListVEXConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge `json:"edges"`
+	PageInfo   CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo       `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyVEXStatementListCertifyVEXStatementListVEXConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyVEXStatementListCertifyVEXStatementListVEXConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnection) GetEdges() []CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyVEXStatementListCertifyVEXStatementListVEXConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnection) GetPageInfo() CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge includes the requested fields of the GraphQL type VEXEdge.
+// The GraphQL type's documentation follows.
+//
+// VEXEdge contains the cursor for the resulting node and
+// the CertifyVEXStatement node itself.
+type CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge struct {
+	Cursor string                                                                                         `json:"cursor"`
+	Node   CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement `json:"node"`
+}
+
+// GetCursor returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetNode() CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement {
+	return v.Node
+}
+
+// CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability.
+type CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
+	AllCertifyVEXStatement `json:"-"`
+}
+
+// GetId returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetId() string {
+	return v.AllCertifyVEXStatement.Id
+}
+
+// GetSubject returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.AllCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
+	return v.AllCertifyVEXStatement.Vulnerability
+}
+
+// GetStatus returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatus() VexStatus {
+	return v.AllCertifyVEXStatement.Status
+}
+
+// GetVexJustification returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.AllCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatement() string {
+	return v.AllCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatusNotes() string {
+	return v.AllCertifyVEXStatement.StatusNotes
+}
+
+// GetKnownSince returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.AllCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetOrigin() string {
+	return v.AllCertifyVEXStatement.Origin
+}
+
+// GetCollector returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetCollector() string {
+	return v.AllCertifyVEXStatement.Collector
+}
+
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
+
+	Status VexStatus `json:"status"`
+
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalCertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement, error) {
+	var retval __premarshalCertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
+
+	retval.Id = v.AllCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
+	retval.Status = v.AllCertifyVEXStatement.Status
+	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
+	retval.Statement = v.AllCertifyVEXStatement.Statement
+	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
+	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
+	retval.Origin = v.AllCertifyVEXStatement.Origin
+	retval.Collector = v.AllCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyVEXStatementListResponse is returned by CertifyVEXStatementList on success.
+type CertifyVEXStatementListResponse struct {
+	// Returns a paginated results via CertifyVexConnection
+	CertifyVEXStatementList *CertifyVEXStatementListCertifyVEXStatementListVEXConnection `json:"CertifyVEXStatementList"`
+}
+
+// GetCertifyVEXStatementList returns CertifyVEXStatementListResponse.CertifyVEXStatementList, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementListResponse) GetCertifyVEXStatementList() *CertifyVEXStatementListCertifyVEXStatementListVEXConnection {
+	return v.CertifyVEXStatementList
+}
+
+// CertifyVEXStatementResponse is returned by CertifyVEXStatement on success.
+type CertifyVEXStatementResponse struct {
+	// Returns all VEX certifications matching the input filter.
+	CertifyVEXStatement []CertifyVEXStatementCertifyVEXStatement `json:"CertifyVEXStatement"`
+}
+
+// GetCertifyVEXStatement returns CertifyVEXStatementResponse.CertifyVEXStatement, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementResponse) GetCertifyVEXStatement() []CertifyVEXStatementCertifyVEXStatement {
+	return v.CertifyVEXStatement
+}
+
+// CertifyVEXStatementSpec allows filtering the list of VEX statements to
+// return in a query.
+//
+// Only one subject type (package or artifact) and one vulnerability may be specified.
+//
+// Note that setting noVuln vulnerability type is invalid for VEX statements!
+type CertifyVEXStatementSpec struct {
+	Id               *string                `json:"id"`
+	Subject          *PackageOrArtifactSpec `json:"subject"`
+	Vulnerability    *VulnerabilitySpec     `json:"vulnerability"`
+	Status           *VexStatus             `json:"status"`
+	VexJustification *VexJustification      `json:"vexJustification"`
+	Statement        *string                `json:"statement"`
+	StatusNotes      *string                `json:"statusNotes"`
+	KnownSince       *time.Time             `json:"knownSince"`
+	Origin           *string                `json:"origin"`
+	Collector        *string                `json:"collector"`
+	DocumentRef      *string                `json:"documentRef"`
+}
+
+// GetId returns CertifyVEXStatementSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetId() *string { return v.Id }
+
+// GetSubject returns CertifyVEXStatementSpec.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetSubject() *PackageOrArtifactSpec { return v.Subject }
+
+// GetVulnerability returns CertifyVEXStatementSpec.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetVulnerability() *VulnerabilitySpec { return v.Vulnerability }
+
+// GetStatus returns CertifyVEXStatementSpec.Status, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetStatus() *VexStatus { return v.Status }
+
+// GetVexJustification returns CertifyVEXStatementSpec.VexJustification, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetVexJustification() *VexJustification { return v.VexJustification }
+
+// GetStatement returns CertifyVEXStatementSpec.Statement, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetStatement() *string { return v.Statement }
+
+// GetStatusNotes returns CertifyVEXStatementSpec.StatusNotes, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetStatusNotes() *string { return v.StatusNotes }
+
+// GetKnownSince returns CertifyVEXStatementSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetOrigin returns CertifyVEXStatementSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyVEXStatementSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyVEXStatementSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetDocumentRef() *string { return v.DocumentRef }
+
 // CertifyVulnCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
 // The GraphQL type's documentation follows.
 //
@@ -25060,6 +25502,178 @@ func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns ScorecardInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *ScorecardInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// ScorecardsListResponse is returned by ScorecardsList on success.
+type ScorecardsListResponse struct {
+	// Returns a paginated results via CertifyScorecardConnection
+	ScorecardsList *ScorecardsListScorecardsListCertifyScorecardConnection `json:"scorecardsList"`
+}
+
+// GetScorecardsList returns ScorecardsListResponse.ScorecardsList, and is useful for accessing the field via an interface.
+func (v *ScorecardsListResponse) GetScorecardsList() *ScorecardsListScorecardsListCertifyScorecardConnection {
+	return v.ScorecardsList
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnection includes the requested fields of the GraphQL type CertifyScorecardConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecardConnection returns the paginated results for CertifyScorecard.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyScorecardEdge which contains the current cursor
+// and the CertifyScorecard node itself
+type ScorecardsListScorecardsListCertifyScorecardConnection struct {
+	TotalCount int                                                                               `json:"totalCount"`
+	Edges      []ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge `json:"edges"`
+	PageInfo   ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo                    `json:"pageInfo"`
+}
+
+// GetTotalCount returns ScorecardsListScorecardsListCertifyScorecardConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns ScorecardsListScorecardsListCertifyScorecardConnection.Edges, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnection) GetEdges() []ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns ScorecardsListScorecardsListCertifyScorecardConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnection) GetPageInfo() ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge includes the requested fields of the GraphQL type CertifyScorecardEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecardEdge contains the cursor for the resulting node and
+// the CertifyScorecard node itself.
+type ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge struct {
+	Cursor string                                                                                              `json:"cursor"`
+	Node   ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard `json:"node"`
+}
+
+// GetCursor returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge.Node, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge) GetNode() ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard {
+	return v.Node
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation to attach a Scorecard analysis to a
+// particular source repository.
+type ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard struct {
+	AllCertifyScorecard `json:"-"`
+}
+
+// GetId returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) GetId() string {
+	return v.AllCertifyScorecard.Id
+}
+
+// GetSource returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
+}
+
+// GetScorecard returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
+}
+
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard struct {
+	Id string `json:"id"`
+
+	Source AllCertifyScorecardSource `json:"source"`
+
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) __premarshalJSON() (*__premarshalScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard, error) {
+	var retval __premarshalScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard
+
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
 // ScorecardsResponse is returned by Scorecards on success.
 type ScorecardsResponse struct {
 	// Returns all Scorecard certifications matching the filter.
@@ -26057,6 +26671,30 @@ type __CertifyLegalsInput struct {
 
 // GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
+
+// __CertifyVEXStatementInput is used internally by genqlient
+type __CertifyVEXStatementInput struct {
+	Filter CertifyVEXStatementSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyVEXStatementInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyVEXStatementInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
+
+// __CertifyVEXStatementListInput is used internally by genqlient
+type __CertifyVEXStatementListInput struct {
+	Filter CertifyVEXStatementSpec `json:"filter"`
+	After  *string                 `json:"after"`
+	First  *int                    `json:"first"`
+}
+
+// GetFilter returns __CertifyVEXStatementListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyVEXStatementListInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
+
+// GetAfter returns __CertifyVEXStatementListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyVEXStatementListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyVEXStatementListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyVEXStatementListInput) GetFirst() *int { return v.First }
 
 // __CertifyVulnInput is used internally by genqlient
 type __CertifyVulnInput struct {
@@ -27352,6 +27990,22 @@ type __ScorecardsInput struct {
 // GetFilter returns __ScorecardsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__ScorecardsInput) GetFilter() CertifyScorecardSpec { return v.Filter }
 
+// __ScorecardsListInput is used internally by genqlient
+type __ScorecardsListInput struct {
+	Filter CertifyScorecardSpec `json:"filter"`
+	After  *string              `json:"after"`
+	First  *int                 `json:"first"`
+}
+
+// GetFilter returns __ScorecardsListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ScorecardsListInput) GetFilter() CertifyScorecardSpec { return v.Filter }
+
+// GetAfter returns __ScorecardsListInput.After, and is useful for accessing the field via an interface.
+func (v *__ScorecardsListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __ScorecardsListInput.First, and is useful for accessing the field via an interface.
+func (v *__ScorecardsListInput) GetFirst() *int { return v.First }
+
 // __SourcesInput is used internally by genqlient
 type __SourcesInput struct {
 	Filter SourceSpec `json:"filter"`
@@ -28206,6 +28860,205 @@ func CertifyLegals(
 	var err_ error
 
 	var data_ CertifyLegalsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyVEXStatement.
+const CertifyVEXStatement_Operation = `
+query CertifyVEXStatement ($filter: CertifyVEXStatementSpec!) {
+	CertifyVEXStatement(certifyVEXStatementSpec: $filter) {
+		... AllCertifyVEXStatement
+	}
+}
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	status
+	vexJustification
+	statement
+	statusNotes
+	knownSince
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVEXStatement(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVEXStatementSpec,
+) (*CertifyVEXStatementResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyVEXStatement",
+		Query:  CertifyVEXStatement_Operation,
+		Variables: &__CertifyVEXStatementInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyVEXStatementResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyVEXStatementList.
+const CertifyVEXStatementList_Operation = `
+query CertifyVEXStatementList ($filter: CertifyVEXStatementSpec!, $after: ID, $first: Int) {
+	CertifyVEXStatementList(certifyVEXStatementSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyVEXStatement
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	status
+	vexJustification
+	statement
+	statusNotes
+	knownSince
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVEXStatementList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVEXStatementSpec,
+	after *string,
+	first *int,
+) (*CertifyVEXStatementListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyVEXStatementList",
+		Query:  CertifyVEXStatementList_Operation,
+		Variables: &__CertifyVEXStatementListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyVEXStatementListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -34006,6 +34859,88 @@ func Scorecards(
 	var err_ error
 
 	var data_ ScorecardsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by ScorecardsList.
+const ScorecardsList_Operation = `
+query ScorecardsList ($filter: CertifyScorecardSpec!, $after: ID, $first: Int) {
+	scorecardsList(scorecardSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyScorecard
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... AllSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func ScorecardsList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyScorecardSpec,
+	after *string,
+	first *int,
+) (*ScorecardsListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "ScorecardsList",
+		Query:  ScorecardsList_Operation,
+		Variables: &__ScorecardsListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ ScorecardsListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
