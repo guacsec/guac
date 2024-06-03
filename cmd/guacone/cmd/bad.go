@@ -60,12 +60,12 @@ var queryBadCmd = &cobra.Command{
 		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, model.CertifyBadSpec{})
+		certifyBadResponse, err := model.CertifyBad(ctx, gqlclient, model.CertifyBadSpec{})
 		if err != nil {
 			logger.Fatalf("error querying for package: %v", err)
 		}
 
-		mapCertifyBad := map[string][]model.CertifyBadsCertifyBad{}
+		mapCertifyBad := map[string][]model.CertifyBadCertifyBad{}
 		for _, certifyBad := range certifyBadResponse.CertifyBad {
 			switch subject := certifyBad.Subject.(type) {
 			case *model.AllCertifyBadSubjectPackage:

@@ -75,7 +75,6 @@ query Occurrences($filter: IsOccurrenceSpec!) {
   }
 }
 
-
 query OccurrenceList($filter: IsOccurrenceSpec!, $after: ID, $first: Int) {
   IsOccurrenceList(isOccurrenceSpec: $filter, after: $after, first: $first) {
     totalCount

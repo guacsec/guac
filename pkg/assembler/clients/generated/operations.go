@@ -7392,6 +7392,114 @@ type BuildersResponse struct {
 // GetBuilders returns BuildersResponse.Builders, and is useful for accessing the field via an interface.
 func (v *BuildersResponse) GetBuilders() []BuildersBuildersBuilder { return v.Builders }
 
+// CertifyBadCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetId() string { return v.AllCertifyBad.Id }
+
+// GetJustification returns CertifyBadCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
+
+// GetKnownSince returns CertifyBadCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
+// GetSubject returns CertifyBadCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetOrigin() string { return v.AllCertifyBad.Origin }
+
+// GetCollector returns CertifyBadCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetCollector() string { return v.AllCertifyBad.Collector }
+
+func (v *CertifyBadCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadCertifyBad) __premarshalJSON() (*__premarshalCertifyBadCertifyBad, error) {
+	var retval __premarshalCertifyBadCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
+
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
@@ -7631,6 +7739,15 @@ func (v *CertifyBadListResponse) GetCertifyBadList() *CertifyBadListCertifyBadLi
 	return v.CertifyBadList
 }
 
+// CertifyBadResponse is returned by CertifyBad on success.
+type CertifyBadResponse struct {
+	// Returns all CertifyBad attestations matching a filter.
+	CertifyBad []CertifyBadCertifyBad `json:"CertifyBad"`
+}
+
+// GetCertifyBad returns CertifyBadResponse.CertifyBad, and is useful for accessing the field via an interface.
+func (v *CertifyBadResponse) GetCertifyBad() []CertifyBadCertifyBad { return v.CertifyBad }
+
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
 // query.
 //
@@ -7673,123 +7790,6 @@ func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
 
 // GetDocumentRef returns CertifyBadSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetDocumentRef() *string { return v.DocumentRef }
-
-// CertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
-// The GraphQL type's documentation follows.
-//
-// CertifyBad is an attestation that a package, source, or artifact is considered
-// bad.
-//
-// All evidence trees record a justification for the property they represent as
-// well as the document that contains the attestation (origin) and the collector
-// that collected the document (collector).
-//
-// The certification applies to a subject which is a package, source, or artifact.
-// If the attestation targets a package, it must target a PackageName or a
-// PackageVersion. If the attestation targets a source, it must target a
-// SourceName.
-type CertifyBadsCertifyBad struct {
-	AllCertifyBad `json:"-"`
-}
-
-// GetId returns CertifyBadsCertifyBad.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
-
-// GetJustification returns CertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
-
-// GetKnownSince returns CertifyBadsCertifyBad.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
-
-// GetSubject returns CertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
-	return v.AllCertifyBad.Subject
-}
-
-// GetOrigin returns CertifyBadsCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetOrigin() string { return v.AllCertifyBad.Origin }
-
-// GetCollector returns CertifyBadsCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetCollector() string { return v.AllCertifyBad.Collector }
-
-func (v *CertifyBadsCertifyBad) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyBadsCertifyBad
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyBadsCertifyBad = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyBad)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyBadsCertifyBad struct {
-	Id string `json:"id"`
-
-	Justification string `json:"justification"`
-
-	KnownSince time.Time `json:"knownSince"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *CertifyBadsCertifyBad) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadsCertifyBad, error) {
-	var retval __premarshalCertifyBadsCertifyBad
-
-	retval.Id = v.AllCertifyBad.Id
-	retval.Justification = v.AllCertifyBad.Justification
-	retval.KnownSince = v.AllCertifyBad.KnownSince
-	{
-
-		dst := &retval.Subject
-		src := v.AllCertifyBad.Subject
-		var err error
-		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal CertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
-		}
-	}
-	retval.Origin = v.AllCertifyBad.Origin
-	retval.Collector = v.AllCertifyBad.Collector
-	return &retval, nil
-}
-
-// CertifyBadsResponse is returned by CertifyBads on success.
-type CertifyBadsResponse struct {
-	// Returns all CertifyBad attestations matching a filter.
-	CertifyBad []CertifyBadsCertifyBad `json:"CertifyBad"`
-}
-
-// GetCertifyBad returns CertifyBadsResponse.CertifyBad, and is useful for accessing the field via an interface.
-func (v *CertifyBadsResponse) GetCertifyBad() []CertifyBadsCertifyBad { return v.CertifyBad }
 
 // CertifyGoodCertifyGood includes the requested fields of the GraphQL type CertifyGood.
 // The GraphQL type's documentation follows.
@@ -8191,6 +8191,159 @@ func (v *CertifyGoodSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns CertifyGoodSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyGoodSpec) GetDocumentRef() *string { return v.DocumentRef }
 
+// CertifyLegalCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
+
+// GetSubject returns CertifyLegalCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetAttribution() string { return v.AllCertifyLegalTree.Attribution }
+
+// GetJustification returns CertifyLegalCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
+
+// GetCollector returns CertifyLegalCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetCollector() string { return v.AllCertifyLegalTree.Collector }
+
+func (v *CertifyLegalCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalCertifyLegal, error) {
+	var retval __premarshalCertifyLegalCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
 type CertifyLegalInputSpec struct {
@@ -8487,6 +8640,15 @@ func (v *CertifyLegalListResponse) GetCertifyLegalList() *CertifyLegalListCertif
 	return v.CertifyLegalList
 }
 
+// CertifyLegalResponse is returned by CertifyLegal on success.
+type CertifyLegalResponse struct {
+	// Returns all legal certifications matching the input filter.
+	CertifyLegal []CertifyLegalCertifyLegal `json:"CertifyLegal"`
+}
+
+// GetCertifyLegal returns CertifyLegalResponse.CertifyLegal, and is useful for accessing the field via an interface.
+func (v *CertifyLegalResponse) GetCertifyLegal() []CertifyLegalCertifyLegal { return v.CertifyLegal }
+
 // CertifyLegalSpec allows filtering the list of legal certifications to
 // return in a query.
 //
@@ -8542,168 +8704,6 @@ func (v *CertifyLegalSpec) GetCollector() *string { return v.Collector }
 
 // GetDocumentRef returns CertifyLegalSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyLegalSpec) GetDocumentRef() *string { return v.DocumentRef }
-
-// CertifyLegalsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
-// The GraphQL type's documentation follows.
-//
-// CertifyLegal is an attestation to attach legal information to a package or source.
-//
-// The certification information is either copied from an attestation found in an
-// SBOM or created by a collector/scanner.
-//
-// Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
-//
-// Attribution is also known as Copyright Text. It is what could be displayed to
-// comply with notice
-// requirements. https://www.nexb.com/oss-attribution-best-practices/
-//
-// License expressions follow this format:
-// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
-type CertifyLegalsCertifyLegal struct {
-	AllCertifyLegalTree `json:"-"`
-}
-
-// GetId returns CertifyLegalsCertifyLegal.Id, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
-
-// GetSubject returns CertifyLegalsCertifyLegal.Subject, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
-	return v.AllCertifyLegalTree.Subject
-}
-
-// GetDeclaredLicense returns CertifyLegalsCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDeclaredLicense() string {
-	return v.AllCertifyLegalTree.DeclaredLicense
-}
-
-// GetDeclaredLicenses returns CertifyLegalsCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
-	return v.AllCertifyLegalTree.DeclaredLicenses
-}
-
-// GetDiscoveredLicense returns CertifyLegalsCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDiscoveredLicense() string {
-	return v.AllCertifyLegalTree.DiscoveredLicense
-}
-
-// GetDiscoveredLicenses returns CertifyLegalsCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
-	return v.AllCertifyLegalTree.DiscoveredLicenses
-}
-
-// GetAttribution returns CertifyLegalsCertifyLegal.Attribution, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetAttribution() string { return v.AllCertifyLegalTree.Attribution }
-
-// GetJustification returns CertifyLegalsCertifyLegal.Justification, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetJustification() string {
-	return v.AllCertifyLegalTree.Justification
-}
-
-// GetTimeScanned returns CertifyLegalsCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetTimeScanned() time.Time {
-	return v.AllCertifyLegalTree.TimeScanned
-}
-
-// GetOrigin returns CertifyLegalsCertifyLegal.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
-
-// GetCollector returns CertifyLegalsCertifyLegal.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetCollector() string { return v.AllCertifyLegalTree.Collector }
-
-func (v *CertifyLegalsCertifyLegal) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyLegalsCertifyLegal
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyLegalsCertifyLegal = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyLegalTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyLegalsCertifyLegal struct {
-	Id string `json:"id"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	DeclaredLicense string `json:"declaredLicense"`
-
-	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
-
-	DiscoveredLicense string `json:"discoveredLicense"`
-
-	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
-
-	Attribution string `json:"attribution"`
-
-	Justification string `json:"justification"`
-
-	TimeScanned time.Time `json:"timeScanned"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *CertifyLegalsCertifyLegal) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyLegalsCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalsCertifyLegal, error) {
-	var retval __premarshalCertifyLegalsCertifyLegal
-
-	retval.Id = v.AllCertifyLegalTree.Id
-	{
-
-		dst := &retval.Subject
-		src := v.AllCertifyLegalTree.Subject
-		var err error
-		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal CertifyLegalsCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
-		}
-	}
-	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
-	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
-	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
-	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
-	retval.Attribution = v.AllCertifyLegalTree.Attribution
-	retval.Justification = v.AllCertifyLegalTree.Justification
-	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
-	retval.Origin = v.AllCertifyLegalTree.Origin
-	retval.Collector = v.AllCertifyLegalTree.Collector
-	return &retval, nil
-}
-
-// CertifyLegalsResponse is returned by CertifyLegals on success.
-type CertifyLegalsResponse struct {
-	// Returns all legal certifications matching the input filter.
-	CertifyLegal []CertifyLegalsCertifyLegal `json:"CertifyLegal"`
-}
-
-// GetCertifyLegal returns CertifyLegalsResponse.CertifyLegal, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsResponse) GetCertifyLegal() []CertifyLegalsCertifyLegal { return v.CertifyLegal }
 
 // CertifyScorecardSpec allows filtering the list of Scorecards to return.
 type CertifyScorecardSpec struct {
@@ -29615,6 +29615,14 @@ func (v *__BuildersListInput) GetAfter() *string { return v.After }
 // GetFirst returns __BuildersListInput.First, and is useful for accessing the field via an interface.
 func (v *__BuildersListInput) GetFirst() *int { return v.First }
 
+// __CertifyBadInput is used internally by genqlient
+type __CertifyBadInput struct {
+	Filter CertifyBadSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyBadInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyBadInput) GetFilter() CertifyBadSpec { return v.Filter }
+
 // __CertifyBadListInput is used internally by genqlient
 type __CertifyBadListInput struct {
 	Filter CertifyBadSpec `json:"filter"`
@@ -29630,14 +29638,6 @@ func (v *__CertifyBadListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __CertifyBadListInput.First, and is useful for accessing the field via an interface.
 func (v *__CertifyBadListInput) GetFirst() *int { return v.First }
-
-// __CertifyBadsInput is used internally by genqlient
-type __CertifyBadsInput struct {
-	Filter CertifyBadSpec `json:"filter"`
-}
-
-// GetFilter returns __CertifyBadsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyBadsInput) GetFilter() CertifyBadSpec { return v.Filter }
 
 // __CertifyGoodInput is used internally by genqlient
 type __CertifyGoodInput struct {
@@ -29663,6 +29663,14 @@ func (v *__CertifyGoodListInput) GetAfter() *string { return v.After }
 // GetFirst returns __CertifyGoodListInput.First, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodListInput) GetFirst() *int { return v.First }
 
+// __CertifyLegalInput is used internally by genqlient
+type __CertifyLegalInput struct {
+	Filter CertifyLegalSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyLegalInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalInput) GetFilter() CertifyLegalSpec { return v.Filter }
+
 // __CertifyLegalListInput is used internally by genqlient
 type __CertifyLegalListInput struct {
 	Filter CertifyLegalSpec `json:"filter"`
@@ -29678,14 +29686,6 @@ func (v *__CertifyLegalListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __CertifyLegalListInput.First, and is useful for accessing the field via an interface.
 func (v *__CertifyLegalListInput) GetFirst() *int { return v.First }
-
-// __CertifyLegalsInput is used internally by genqlient
-type __CertifyLegalsInput struct {
-	Filter CertifyLegalSpec `json:"filter"`
-}
-
-// GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
 
 // __CertifyVulnInput is used internally by genqlient
 type __CertifyVulnInput struct {
@@ -31465,6 +31465,101 @@ func BuildersList(
 	return &data_, err_
 }
 
+// The query or mutation executed by CertifyBad.
+const CertifyBad_Operation = `
+query CertifyBad ($filter: CertifyBadSpec!) {
+	CertifyBad(certifyBadSpec: $filter) {
+		... AllCertifyBad
+	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyBad(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyBadSpec,
+) (*CertifyBadResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyBad",
+		Query:  CertifyBad_Operation,
+		Variables: &__CertifyBadInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyBadResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by CertifyBadList.
 const CertifyBadList_Operation = `
 query CertifyBadList ($filter: CertifyBadSpec!, $after: ID, $first: Int) {
@@ -31564,101 +31659,6 @@ func CertifyBadList(
 	var err_ error
 
 	var data_ CertifyBadListResponse
-	resp_ := &graphql.Response{Data: &data_}
-
-	err_ = client_.MakeRequest(
-		ctx_,
-		req_,
-		resp_,
-	)
-
-	return &data_, err_
-}
-
-// The query or mutation executed by CertifyBads.
-const CertifyBads_Operation = `
-query CertifyBads ($filter: CertifyBadSpec!) {
-	CertifyBad(certifyBadSpec: $filter) {
-		... AllCertifyBad
-	}
-}
-fragment AllCertifyBad on CertifyBad {
-	id
-	justification
-	knownSince
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-		... on Artifact {
-			... AllArtifactTree
-		}
-	}
-	origin
-	collector
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				purl
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-`
-
-func CertifyBads(
-	ctx_ context.Context,
-	client_ graphql.Client,
-	filter CertifyBadSpec,
-) (*CertifyBadsResponse, error) {
-	req_ := &graphql.Request{
-		OpName: "CertifyBads",
-		Query:  CertifyBads_Operation,
-		Variables: &__CertifyBadsInput{
-			Filter: filter,
-		},
-	}
-	var err_ error
-
-	var data_ CertifyBadsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -31875,6 +31875,108 @@ func CertifyGoodList(
 	return &data_, err_
 }
 
+// The query or mutation executed by CertifyLegal.
+const CertifyLegal_Operation = `
+query CertifyLegal ($filter: CertifyLegalSpec!) {
+	CertifyLegal(certifyLegalSpec: $filter) {
+		... AllCertifyLegalTree
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegal(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyLegalSpec,
+) (*CertifyLegalResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyLegal",
+		Query:  CertifyLegal_Operation,
+		Variables: &__CertifyLegalInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyLegalResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by CertifyLegalList.
 const CertifyLegalList_Operation = `
 query CertifyLegalList ($filter: CertifyLegalSpec!, $after: ID, $first: Int) {
@@ -31981,108 +32083,6 @@ func CertifyLegalList(
 	var err_ error
 
 	var data_ CertifyLegalListResponse
-	resp_ := &graphql.Response{Data: &data_}
-
-	err_ = client_.MakeRequest(
-		ctx_,
-		req_,
-		resp_,
-	)
-
-	return &data_, err_
-}
-
-// The query or mutation executed by CertifyLegals.
-const CertifyLegals_Operation = `
-query CertifyLegals ($filter: CertifyLegalSpec!) {
-	CertifyLegal(certifyLegalSpec: $filter) {
-		... AllCertifyLegalTree
-	}
-}
-fragment AllCertifyLegalTree on CertifyLegal {
-	id
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-	}
-	declaredLicense
-	declaredLicenses {
-		... AllLicenseTree
-	}
-	discoveredLicense
-	discoveredLicenses {
-		... AllLicenseTree
-	}
-	attribution
-	justification
-	timeScanned
-	origin
-	collector
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				purl
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
-}
-fragment AllLicenseTree on License {
-	id
-	name
-	inline
-	listVersion
-}
-`
-
-func CertifyLegals(
-	ctx_ context.Context,
-	client_ graphql.Client,
-	filter CertifyLegalSpec,
-) (*CertifyLegalsResponse, error) {
-	req_ := &graphql.Request{
-		OpName: "CertifyLegals",
-		Query:  CertifyLegals_Operation,
-		Variables: &__CertifyLegalsInput{
-			Filter: filter,
-		},
-	}
-	var err_ error
-
-	var data_ CertifyLegalsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

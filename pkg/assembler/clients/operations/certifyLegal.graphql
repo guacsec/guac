@@ -35,7 +35,7 @@ mutation IngestCertifyLegalSrcs($srcs: [IDorSourceInput!]!, $declaredLicensesLis
 
 # Exposes GraphQL queries to retrieve GUAC CertifyLegal
 
-query CertifyLegals($filter: CertifyLegalSpec!) {
+query CertifyLegal($filter: CertifyLegalSpec!) {
   CertifyLegal(certifyLegalSpec: $filter) {
     ...AllCertifyLegalTree
   }
