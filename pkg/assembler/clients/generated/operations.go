@@ -8228,6 +8228,265 @@ func (v *CertifyLegalInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns CertifyLegalInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyLegalInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// CertifyLegalListCertifyLegalListCertifyLegalConnection includes the requested fields of the GraphQL type CertifyLegalConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegalConnection returns the paginated results for CertifyLegal.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyLegalEdge which contains the current cursor
+// and the CertifyLegal node itself
+type CertifyLegalListCertifyLegalListCertifyLegalConnection struct {
+	TotalCount int                                                                           `json:"totalCount"`
+	Edges      []CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge `json:"edges"`
+	PageInfo   CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyLegalListCertifyLegalListCertifyLegalConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyLegalListCertifyLegalListCertifyLegalConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnection) GetEdges() []CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyLegalListCertifyLegalListCertifyLegalConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnection) GetPageInfo() CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge includes the requested fields of the GraphQL type CertifyLegalEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegalEdge contains the cursor for the resulting node and
+// the CertifyLegal node itself.
+type CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge struct {
+	Cursor string                                                                                      `json:"cursor"`
+	Node   CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal `json:"node"`
+}
+
+// GetCursor returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge) GetNode() CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal {
+	return v.Node
+}
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetId() string {
+	return v.AllCertifyLegalTree.Id
+}
+
+// GetSubject returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetAttribution() string {
+	return v.AllCertifyLegalTree.Attribution
+}
+
+// GetJustification returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetOrigin() string {
+	return v.AllCertifyLegalTree.Origin
+}
+
+// GetCollector returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetCollector() string {
+	return v.AllCertifyLegalTree.Collector
+}
+
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal, error) {
+	var retval __premarshalCertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyLegalListResponse is returned by CertifyLegalList on success.
+type CertifyLegalListResponse struct {
+	// Returns a paginated results via CertifyLegalConnection
+	CertifyLegalList *CertifyLegalListCertifyLegalListCertifyLegalConnection `json:"CertifyLegalList"`
+}
+
+// GetCertifyLegalList returns CertifyLegalListResponse.CertifyLegalList, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListResponse) GetCertifyLegalList() *CertifyLegalListCertifyLegalListCertifyLegalConnection {
+	return v.CertifyLegalList
+}
+
 // CertifyLegalSpec allows filtering the list of legal certifications to
 // return in a query.
 //
@@ -25775,6 +26034,22 @@ func (v *__CertifyGoodListInput) GetAfter() *string { return v.After }
 // GetFirst returns __CertifyGoodListInput.First, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodListInput) GetFirst() *int { return v.First }
 
+// __CertifyLegalListInput is used internally by genqlient
+type __CertifyLegalListInput struct {
+	Filter CertifyLegalSpec `json:"filter"`
+	After  *string          `json:"after"`
+	First  *int             `json:"first"`
+}
+
+// GetFilter returns __CertifyLegalListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalListInput) GetFilter() CertifyLegalSpec { return v.Filter }
+
+// GetAfter returns __CertifyLegalListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyLegalListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalListInput) GetFirst() *int { return v.First }
+
 // __CertifyLegalsInput is used internally by genqlient
 type __CertifyLegalsInput struct {
 	Filter CertifyLegalSpec `json:"filter"`
@@ -27712,6 +27987,123 @@ func CertifyGoodList(
 	var err_ error
 
 	var data_ CertifyGoodListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyLegalList.
+const CertifyLegalList_Operation = `
+query CertifyLegalList ($filter: CertifyLegalSpec!, $after: ID, $first: Int) {
+	CertifyLegalList(certifyLegalSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyLegalTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegalList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyLegalSpec,
+	after *string,
+	first *int,
+) (*CertifyLegalListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyLegalList",
+		Query:  CertifyLegalList_Operation,
+		Variables: &__CertifyLegalListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyLegalListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
