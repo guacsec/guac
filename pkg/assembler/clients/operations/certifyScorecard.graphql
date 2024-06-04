@@ -33,8 +33,27 @@ mutation IngestCertifyScorecards(
   ingestScorecards(sources: $sources, scorecards: $scorecards)
 }
 
+# Exposes GraphQL queries to retrieve GUAC Scorecards
+
 query Scorecards($filter: CertifyScorecardSpec!) {
   scorecards(scorecardSpec: $filter) {
     ...AllCertifyScorecard
+  }
+}
+
+query ScorecardsList($filter: CertifyScorecardSpec!, $after: ID, $first: Int) {
+  scorecardsList(scorecardSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyScorecard
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
   }
 }

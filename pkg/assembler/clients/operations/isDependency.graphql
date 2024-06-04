@@ -54,3 +54,20 @@ query Dependencies($filter: IsDependencySpec!) {
     ...AllIsDependencyTree
   }
 }
+
+query DependencyList($filter: IsDependencySpec!, $after: ID, $first: Int) {
+  IsDependencyList(isDependencySpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllIsDependencyTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

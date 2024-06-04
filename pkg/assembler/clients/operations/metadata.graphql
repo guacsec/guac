@@ -86,3 +86,28 @@ mutation IngestHasMetadataArtifacts(
     hasMetadataList: $hasMetadataList
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC HasMetadata
+
+query HasMetadata($filter: HasMetadataSpec!) {
+  HasMetadata(hasMetadataSpec: $filter) {
+    ...AllHasMetadata
+  }
+}
+
+query HasMetadataList($filter: HasMetadataSpec!, $after: ID, $first: Int) {
+  HasMetadataList(hasMetadataSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllHasMetadata
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

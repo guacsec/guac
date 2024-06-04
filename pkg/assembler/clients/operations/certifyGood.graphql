@@ -86,3 +86,28 @@ mutation IngestCertifyGoodArtifacts(
     certifyGoods: $certifyGoods
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC CertifyGood
+
+query CertifyGood($filter: CertifyGoodSpec!) {
+  CertifyGood(certifyGoodSpec: $filter) {
+    ...AllCertifyGood
+  }
+}
+
+query CertifyGoodList($filter: CertifyGoodSpec!, $after: ID, $first: Int) {
+  CertifyGoodList(certifyGoodSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyGood
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

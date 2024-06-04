@@ -33,8 +33,27 @@ mutation IngestCertifyLegalSrcs($srcs: [IDorSourceInput!]!, $declaredLicensesLis
   ingestCertifyLegals(subjects: {sources: $srcs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals)
 }
 
-query CertifyLegals($filter: CertifyLegalSpec!) {
+# Exposes GraphQL queries to retrieve GUAC CertifyLegal
+
+query CertifyLegal($filter: CertifyLegalSpec!) {
   CertifyLegal(certifyLegalSpec: $filter) {
     ...AllCertifyLegalTree
+  }
+}
+
+query CertifyLegalList($filter: CertifyLegalSpec!, $after: ID, $first: Int) {
+  CertifyLegalList(certifyLegalSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyLegalTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
   }
 }
