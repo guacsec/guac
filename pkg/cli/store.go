@@ -100,6 +100,8 @@ func init() {
 
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
+	set.IntP("daysSinceLastScan", "l", 0, "days since the last vulnerability scan was run. 0 means only run once")
+
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")
 

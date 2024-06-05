@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
 )
@@ -102,8 +103,9 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 			Type:   processor.DocumentITE6Vul,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
-				Collector: INVOC_URI,
-				Source:    INVOC_URI,
+				Collector:   INVOC_URI,
+				Source:      INVOC_URI,
+				DocumentRef: events.GetDocRef(payload),
 			},
 		}
 		docChannel <- doc

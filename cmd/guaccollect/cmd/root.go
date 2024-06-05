@@ -37,6 +37,9 @@ func init() {
 		"service-poll",
 		"enable-prometheus",
 		"publish-to-queue",
+		"interval",
+		"daysSinceLastScan",
+		"gql-addr",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
