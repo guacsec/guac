@@ -128,6 +128,9 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 		if err != nil {
 			return fmt.Errorf("failed to query packages with error: %w", err)
 		}
+		if pkgConn == nil || pkgConn.PackagesList == nil {
+			continue
+		}
 		pkgEdges := pkgConn.PackagesList.Edges
 
 		for _, pkgNode := range pkgEdges {
