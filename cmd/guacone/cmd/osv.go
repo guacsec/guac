@@ -230,7 +230,6 @@ func validateOSVFlags(
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 	opts.csubClientOptions = csubOpts
-
 	return opts, nil
 }
 

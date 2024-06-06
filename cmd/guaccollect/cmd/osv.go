@@ -54,6 +54,9 @@ type osvOptions struct {
 	interval time.Duration
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// days since the last vulnerability scan was run.
+	// 0 means only run once
+	daysSinceLastScan int
 }
 
 var osvCmd = &cobra.Command{
@@ -83,6 +86,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("interval"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetInt("daysSinceLastScan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -101,7 +105,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		packageQueryFunc, err := getPackageQuery(gqlclient)
+		packageQueryFunc, err := getPackageQuery(gqlclient, opts.daysSinceLastScan)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -118,7 +122,7 @@ func validateOSVFlags(
 	blobAddr,
 	interval string,
 	poll bool,
-	pubToQueue bool) (osvOptions, error) {
+	pubToQueue bool, daysSince int) (osvOptions, error) {
 
 	var opts osvOptions
 
@@ -134,7 +138,7 @@ func validateOSVFlags(
 		return opts, fmt.Errorf("failed to parser duration with error: %w", err)
 	}
 	opts.interval = i
-
+	opts.daysSinceLastScan = daysSince
 	return opts, nil
 }
 
@@ -144,9 +148,9 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 	}, nil
 }
 
-func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
+func getPackageQuery(client graphql.Client, daysSinceLastScan int) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, 0)
+		packageQuery := root_package.NewPackageQuery(client, daysSinceLastScan)
 		return packageQuery
 	}, nil
 }
@@ -210,7 +214,7 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := certify.Certify(ctx, query, emit, errHandler, poll, time.Minute*time.Duration(interval)); err != nil {
+		if err := certify.Certify(ctx, query, emit, errHandler, poll, interval); err != nil {
 			logger.Fatal(err)
 		}
 		done <- true

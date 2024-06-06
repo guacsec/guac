@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
 )
@@ -37,10 +38,11 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
-	URI         string = "osv.dev"
-	VERSION     string = "0.0.14"
-	INVOC_URI   string = "guac"
-	PRODUCER_ID string = "guacsec/guac"
+	URI          string = "osv.dev"
+	VERSION      string = "0.0.14"
+	INVOC_URI    string = "guac"
+	PRODUCER_ID  string = "guacsec/guac"
+	osvCollector string = "osv_certifier"
 )
 
 var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -102,8 +104,9 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 			Type:   processor.DocumentITE6Vul,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
-				Collector: INVOC_URI,
-				Source:    INVOC_URI,
+				Collector:   osvCollector,
+				Source:      osvCollector,
+				DocumentRef: events.GetDocRef(payload),
 			},
 		}
 		docChannel <- doc
