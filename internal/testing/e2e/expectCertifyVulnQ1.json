@@ -34,8 +34,8 @@
         "dbVersion": "",
         "scannerUri": "osv.dev",
         "scannerVersion": "0.0.14",
-        "origin": "guac",
-        "collector": "guac"
+        "origin": "osv_certifier",
+        "collector": "osv_certifier"
       }
     }
   ]
