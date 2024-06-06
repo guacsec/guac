@@ -86,7 +86,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("interval"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
-			viper.GetInt("daysSinceLastScan"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -232,5 +232,16 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"interval",
+		"last-scan", "header-file"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	osvCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(osvCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(osvCmd)
 }

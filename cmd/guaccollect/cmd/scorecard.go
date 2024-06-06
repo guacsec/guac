@@ -25,7 +25,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
@@ -46,6 +46,8 @@ type scorecardOptions struct {
 	interval time.Duration
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
+	daysSinceLastScan int
 }
 
 var scorecardCmd = &cobra.Command{
@@ -75,6 +77,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("interval"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -111,13 +114,13 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		sourceQueryFunc, err := getSourceQuery(gqlclient)
+		query, err := sc.NewCertifier(gqlclient, opts.daysSinceLastScan)
 		if err != nil {
-			logger.Errorf("error: %v", err)
+			logger.Errorf("unable to create source query: %v\n", err)
 			os.Exit(1)
 		}
 
-		initializeNATsandCertifier(ctx, opts.blobAddr, opts.pubsubAddr, opts.poll, opts.publishToQueue, opts.interval, sourceQueryFunc())
+		initializeNATsandCertifier(ctx, opts.blobAddr, opts.pubsubAddr, opts.poll, opts.publishToQueue, opts.interval, query)
 	},
 }
 
@@ -128,7 +131,7 @@ func validateScorecardFlags(
 	blobAddr,
 	interval string,
 	poll bool,
-	pubToQueue bool) (scorecardOptions, error) {
+	pubToQueue bool, daysSince int) (scorecardOptions, error) {
 
 	var opts scorecardOptions
 
@@ -144,17 +147,22 @@ func validateScorecardFlags(
 		return opts, fmt.Errorf("failed to parser duration with error: %w", err)
 	}
 	opts.interval = i
+	opts.daysSinceLastScan = daysSince
 
 	return opts, nil
 }
 
-func getSourceQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
-	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, 0)
-		return packageQuery
-	}, nil
-}
-
 func init() {
+	set, err := cli.BuildFlags([]string{"interval",
+		"last-scan", "header-file"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	scorecardCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(scorecardCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(scorecardCmd)
 }
