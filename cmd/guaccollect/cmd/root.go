@@ -37,8 +37,6 @@ func init() {
 		"service-poll",
 		"enable-prometheus",
 		"publish-to-queue",
-		"interval",
-		"daysSinceLastScan",
 		"gql-addr",
 	})
 	if err != nil {

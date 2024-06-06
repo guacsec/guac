@@ -27,7 +27,7 @@ blob-addr: file:///tmp/blobstore?no_tmp_dir=true
 # certifier interval
 interval: 20m
 # days since the last vulnerability scan was run. 0 means only run once
-daysSinceLastScan: 0
+last-scan: 0
 
 # CSub setup
 csub-addr: localhost:2782
