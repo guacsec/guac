@@ -42,7 +42,7 @@ const (
 	VERSION      string = "0.0.14"
 	INVOC_URI    string = "guac"
 	PRODUCER_ID  string = "guacsec/guac"
-	osvCollector string = "osv_certifier"
+	OSVCollector string = "osv_certifier"
 )
 
 var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -95,7 +95,7 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, docChannel chan<- *processor.Document) error {
 	currentTime := time.Now()
 	for _, node := range packNodes {
-		payload, err := json.Marshal(createAttestation(node, vulns, currentTime))
+		payload, err := json.Marshal(CreateAttestation(node, vulns, currentTime))
 		if err != nil {
 			return fmt.Errorf("unable to marshal attestation: %w", err)
 		}
@@ -104,8 +104,8 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 			Type:   processor.DocumentITE6Vul,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
-				Collector:   osvCollector,
-				Source:      osvCollector,
+				Collector:   OSVCollector,
+				Source:      OSVCollector,
 				DocumentRef: events.GetDocRef(payload),
 			},
 		}
@@ -114,8 +114,7 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 	return nil
 }
 
-func createAttestation(packageNode *root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
-
+func CreateAttestation(packageNode *root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
 	attestation := &attestation_vuln.VulnerabilityStatement{
 		StatementHeader: intoto.StatementHeader{
 			Type:          intoto.StatementInTotoV01,

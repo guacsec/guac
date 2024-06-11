@@ -31,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
+	"github.com/guacsec/guac/pkg/misc/scanner"
 )
 
 func init() {
@@ -92,6 +93,22 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		} else {
 			logger.Debugf("parser did not find ID strings with err: %v", err)
 		}
+	}
+
+	var purls []string
+	for _, idString := range identifierStrings {
+		purls = append(purls, idString.PurlStrings...)
+	}
+
+	// scan purls via OSV on initial ingestion
+	vulnEquals, certVulns, err := scanner.PurlsToScan(ctx, purls)
+	if err != nil {
+		logger.Errorf("error scanning the purls for vulnerabilities %v", err)
+	} else {
+		var preds assembler.AssemblerInput
+		preds.VulnEqual = append(preds.VulnEqual, vulnEquals...)
+		preds.CertifyVuln = append(preds.CertifyVuln, certVulns...)
+		assemblerInputs = append(assemblerInputs, preds)
 	}
 
 	return assemblerInputs, identifierStrings, nil
