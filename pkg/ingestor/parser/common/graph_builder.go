@@ -43,7 +43,7 @@ func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities
 	if predicates == nil {
 		predicates = &assembler.IngestPredicates{}
 	}
-	addMetadata(predicates, foundIdentities, srcInfo)
+	AddMetadata(predicates, foundIdentities, srcInfo)
 
 	return predicates
 }
@@ -58,7 +58,7 @@ func (b *GraphBuilder) GetIdentifiers(ctx context.Context) (*IdentifierStrings, 
 }
 
 // addMetadata adds trust and source collector metadata
-func addMetadata(predicates *assembler.IngestPredicates, foundIdentities []TrustInformation, srcInfo processor.SourceInformation) {
+func AddMetadata(predicates *assembler.IngestPredicates, foundIdentities []TrustInformation, srcInfo processor.SourceInformation) {
 	// TODO: when trust information fields need to be added to GQL nodes
 	// and added here.
 	_ = foundIdentities

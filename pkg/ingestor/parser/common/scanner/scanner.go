@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/version"
 )
@@ -60,6 +61,7 @@ func PurlsToScan(ctx context.Context, purls []string) ([]assembler.VulnEqualInge
 		if err != nil {
 			docChan <- docResult{doc: nil,
 				docErr: fmt.Errorf("osv.dev batched request failed: %w", err)}
+			return
 		}
 		for i, query := range query.Queries {
 			response := resp.Results[i]
@@ -70,6 +72,7 @@ func PurlsToScan(ctx context.Context, purls []string) ([]assembler.VulnEqualInge
 			if err != nil {
 				docChan <- docResult{doc: nil,
 					docErr: fmt.Errorf("unable to marshal attestation: %w", err)}
+				return
 			}
 			doc := &processor.Document{
 				Blob:   payload,
@@ -98,7 +101,7 @@ func PurlsToScan(ctx context.Context, purls []string) ([]assembler.VulnEqualInge
 			return nil, nil, err
 		}
 		preds := vulnParser.GetPredicates(ctx)
-
+		common.AddMetadata(preds, nil, response.doc.SourceInformation)
 		certifyVulns = append(certifyVulns, preds.CertifyVuln...)
 		vulnEquals = append(vulnEquals, preds.VulnEqual...)
 	}

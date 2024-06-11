@@ -22,6 +22,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common/scanner"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/deps_dev"
@@ -31,7 +32,6 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
-	"github.com/guacsec/guac/pkg/misc/scanner"
 )
 
 func init() {
@@ -72,7 +72,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.IngestPredicates{}
 	identifierStrings := []*common.IdentifierStrings{}
 	logger := docTree.Document.ChildLogger
@@ -100,17 +100,18 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		purls = append(purls, idString.PurlStrings...)
 	}
 
-	// scan purls via OSV on initial ingestion
-	vulnEquals, certVulns, err := scanner.PurlsToScan(ctx, purls)
-	if err != nil {
-		logger.Errorf("error scanning the purls for vulnerabilities %v", err)
-	} else {
-		var preds assembler.AssemblerInput
-		preds.VulnEqual = append(preds.VulnEqual, vulnEquals...)
-		preds.CertifyVuln = append(preds.CertifyVuln, certVulns...)
-		assemblerInputs = append(assemblerInputs, preds)
+	if scanForVulns {
+		// scan purls via OSV on initial ingestion to capture vulnerability information
+		vulnEquals, certVulns, err := scanner.PurlsToScan(ctx, purls)
+		if err != nil {
+			logger.Errorf("error scanning the purls for vulnerabilities %v", err)
+		} else {
+			if len(assemblerInputs) > 0 {
+				assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
+				assemblerInputs[0].CertifyVuln = append(assemblerInputs[0].CertifyVuln, certVulns...)
+			}
+		}
 	}
-
 	return assemblerInputs, identifierStrings, nil
 }
 
