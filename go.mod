@@ -285,7 +285,7 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/deepmap/oapi-codegen/v2 v2.1.0
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/getkin/kin-openapi v0.123.0
+	github.com/getkin/kin-openapi v0.125.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-git/go-git/v5 v5.12.0
