@@ -29,6 +29,9 @@ interval: 20m
 # days since the last vulnerability scan was run. 0 means only run once
 last-scan: 0
 
+# query vulnerability during ingestion
+query-vuln: false
+
 # CSub setup
 csub-addr: localhost:2782
 csub-listen-port: 2782

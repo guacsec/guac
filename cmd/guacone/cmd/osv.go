@@ -32,7 +32,6 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -42,11 +41,12 @@ import (
 )
 
 type osvOptions struct {
-	graphqlEndpoint   string
-	headerFile        string
-	poll              bool
-	csubClientOptions client.CsubClientOptions
-	interval          time.Duration
+	graphqlEndpoint      string
+	headerFile           string
+	poll                 bool
+	csubClientOptions    csub_client.CsubClientOptions
+	interval             time.Duration
+	queryVulnOnIngestion bool
 }
 
 var osvCmd = &cobra.Command{
@@ -61,6 +61,7 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("query-vuln"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -106,7 +107,7 @@ var osvCmd = &cobra.Command{
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -119,7 +120,7 @@ var osvCmd = &cobra.Command{
 					totalNum += 1
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -138,7 +139,7 @@ var osvCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -147,7 +148,7 @@ var osvCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
@@ -214,6 +215,7 @@ func validateOSVFlags(
 	poll,
 	csubTls,
 	csubTlsSkipVerify bool,
+	queryVulnIngestion bool,
 ) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -225,11 +227,13 @@ func validateOSVFlags(
 	}
 	opts.interval = i
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 	opts.csubClientOptions = csubOpts
+	opts.queryVulnOnIngestion = queryVulnIngestion
+
 	return opts, nil
 }
 

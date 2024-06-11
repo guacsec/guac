@@ -37,18 +37,19 @@ import (
 
 // s3Options flags for configuring the command
 type s3Options struct {
-	s3url             string // base url of the s3 to collect from
-	s3bucket          string // name of bucket to collect from
-	s3path            string // path to s3 folder with documents to collect
-	s3item            string // s3 item (only for non-polling behaviour)
-	region            string // AWS region, for s3/sqs configuration (defaults to us-east-1)
-	queues            string // comma-separated list of queues/topics (only for polling behaviour)
-	mp                string // message provider name (sqs or kafka, will default to kafka)
-	mpEndpoint        string // endpoint for the message provider (only for polling behaviour)
-	poll              bool   // polling or non-polling behaviour? (defaults to non-polling)
-	graphqlEndpoint   string // endpoint for the graphql server
-	headerFile        string
-	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
+	s3url                string // base url of the s3 to collect from
+	s3bucket             string // name of bucket to collect from
+	s3path               string // path to s3 folder with documents to collect
+	s3item               string // s3 item (only for non-polling behaviour)
+	region               string // AWS region, for s3/sqs configuration (defaults to us-east-1)
+	queues               string // comma-separated list of queues/topics (only for polling behaviour)
+	mp                   string // message provider name (sqs or kafka, will default to kafka)
+	mpEndpoint           string // endpoint for the message provider (only for polling behaviour)
+	poll                 bool   // polling or non-polling behaviour? (defaults to non-polling)
+	graphqlEndpoint      string // endpoint for the graphql server
+	headerFile           string
+	csubClientOptions    csub_client.CsubClientOptions // options for the collectsub client
+	queryVulnOnIngestion bool
 }
 
 var s3Cmd = &cobra.Command{
@@ -92,6 +93,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
+			viper.GetBool("query-vuln"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -133,7 +135,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 		errFound := false
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, transport, csubClient)
+			err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, transport, csubClient, s3Opts.queryVulnOnIngestion)
 
 			if err != nil {
 				errFound = true
@@ -179,7 +181,8 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 	},
 }
 
-func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, s3path, region, s3item, mp, mpEndpoint, queues string, csubTls, csubTlsSkipVerify, poll bool) (s3Options, error) {
+func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, s3path, region, s3item, mp, mpEndpoint, queues string,
+	csubTls, csubTlsSkipVerify, poll bool, queryVulnIngestion bool) (s3Options, error) {
 	var opts s3Options
 
 	if poll {
@@ -202,7 +205,7 @@ func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, s3pa
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 
-	opts = s3Options{s3url, s3bucket, s3path, s3item, region, queues, mp, mpEndpoint, poll, graphqlEndpoint, headerFile, csubClientOptions}
+	opts = s3Options{s3url, s3bucket, s3path, s3item, region, queues, mp, mpEndpoint, poll, graphqlEndpoint, headerFile, csubClientOptions, queryVulnIngestion}
 
 	return opts, nil
 }

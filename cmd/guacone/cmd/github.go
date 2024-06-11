@@ -33,8 +33,7 @@ import (
 	"os/signal"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
-	"github.com/guacsec/guac/pkg/collectsub/client"
-	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
+	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
@@ -64,10 +63,11 @@ type githubOptions struct {
 	// the owner/repo name to use for the collector
 	ownerRepoName string
 	// csub client options for identifier strings
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 	// graphql endpoint
-	graphqlEndpoint string
-	headerFile      string
+	graphqlEndpoint      string
+	headerFile           string
+	queryVulnOnIngestion bool
 }
 
 var githubCmd = &cobra.Command{
@@ -88,6 +88,7 @@ var githubCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("poll"),
+			viper.GetBool("query-vuln"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -141,7 +142,7 @@ var githubCmd = &cobra.Command{
 			logger.Errorf("unable to register Github collector: %v", err)
 		}
 
-		csubClient, err := csubclient.NewClient(opts.csubClientOptions)
+		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -152,7 +153,7 @@ var githubCmd = &cobra.Command{
 		var errFound bool
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
 
 			if err != nil {
 				errFound = true
@@ -205,7 +206,7 @@ var githubCmd = &cobra.Command{
 	},
 }
 
-func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, queryVulnIngestion bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -213,13 +214,14 @@ func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, work
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
+	opts.queryVulnOnIngestion = queryVulnIngestion
 
 	if useCsub {
-		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+		csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {
 			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 		}
-		c, err := csubclient.NewClient(csubOpts)
+		c, err := csub_client.NewClient(csubOpts)
 		if err != nil {
 			return opts, err
 		}

@@ -114,7 +114,7 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMe
 }
 
 // TODO (pxp928): Remove creation of osv node and just create the vulnerability nodes specified
-func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
+func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
 	[]assembler.VulnEqualIngest, error) {
 	var vs []*generated.VulnerabilityInputSpec
 	var ivs []assembler.VulnEqualIngest

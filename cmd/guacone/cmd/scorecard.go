@@ -28,7 +28,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/ingestor"
 
@@ -43,11 +42,12 @@ import (
 )
 
 type scorecardOptions struct {
-	graphqlEndpoint   string
-	headerFile        string
-	poll              bool
-	interval          time.Duration
-	csubClientOptions client.CsubClientOptions
+	graphqlEndpoint      string
+	headerFile           string
+	poll                 bool
+	interval             time.Duration
+	csubClientOptions    csub_client.CsubClientOptions
+	queryVulnOnIngestion bool
 }
 
 var scorecardCmd = &cobra.Command{
@@ -62,6 +62,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
+			viper.GetBool("query-vuln"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -124,7 +125,7 @@ var scorecardCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
 
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
@@ -181,12 +182,13 @@ func validateScorecardFlags(
 	csubTls,
 	csubTlsSkipVerify,
 	poll bool,
+	queryVulnIngestion bool,
 ) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
@@ -198,7 +200,7 @@ func validateScorecardFlags(
 		return opts, err
 	}
 	opts.interval = i
-
+	opts.queryVulnOnIngestion = queryVulnIngestion
 	return opts, nil
 }
 

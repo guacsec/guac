@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -51,7 +50,8 @@ type fileOptions struct {
 	graphqlEndpoint string
 	headerFile      string
 	// csub client options for identifier strings
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions    csub_client.CsubClientOptions
+	queryVulnOnIngestion bool
 }
 
 var filesCmd = &cobra.Command{
@@ -66,6 +66,7 @@ var filesCmd = &cobra.Command{
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("query-vuln"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -126,7 +127,7 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient); err != nil {
+			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
@@ -158,7 +159,7 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool, args []string) (fileOptions, error) {
+func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool, queryVulnIngestion bool, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -178,13 +179,13 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 		return opts, fmt.Errorf("expected positional argument for file_path")
 	}
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 	opts.csubClientOptions = csubOpts
 	opts.path = args[0]
-
+	opts.queryVulnOnIngestion = queryVulnIngestion
 	return opts, nil
 }
 
