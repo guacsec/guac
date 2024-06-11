@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
@@ -48,11 +49,14 @@ func PurlsToScan(ctx context.Context, purls []string) ([]assembler.VulnEqualInge
 		var query osv_scanner.BatchedQuery
 		packMap := map[string]bool{}
 		for _, purl := range purls {
+			if strings.Contains(purl, "pkg:guac") {
+				continue
+			}
 			if _, ok := packMap[purl]; !ok {
 				purlQuery := osv_scanner.MakePURLRequest(purl)
 				query.Queries = append(query.Queries, purlQuery)
+				packMap[purl] = true
 			}
-			packMap[purl] = true
 		}
 
 		resp, err := osv_scanner.MakeRequestWithClient(query, &http.Client{
@@ -98,7 +102,7 @@ func PurlsToScan(ctx context.Context, purls []string) ([]assembler.VulnEqualInge
 		}
 		err := vulnParser.Parse(ctx, response.doc)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("vulnerability parser failed with error: %w", err)
 		}
 		preds := vulnParser.GetPredicates(ctx)
 		common.AddMetadata(preds, nil, response.doc.SourceInformation)

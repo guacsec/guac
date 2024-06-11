@@ -301,6 +301,12 @@ func TestPurlsToScan(t *testing.T) {
 		wantCVs: []assembler.CertifyVulnIngest{},
 		wantVEs: []assembler.VulnEqualIngest{},
 		wantErr: true,
+	}, {
+		name:    "skip guac purl",
+		purls:   []string{"pkg:guac/io.vertx/vertx-web-common@4.3.7?type=jar"},
+		wantCVs: []assembler.CertifyVulnIngest{},
+		wantVEs: []assembler.VulnEqualIngest{},
+		wantErr: false,
 	}}
 	ivSortOpt := cmp.Transformer("Sort", func(in []assembler.VulnEqualIngest) []assembler.VulnEqualIngest {
 		out := append([]assembler.VulnEqualIngest(nil), in...)
