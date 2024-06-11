@@ -23,6 +23,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/ossf/scorecard/v4/docs/checks"
 	"github.com/ossf/scorecard/v4/log"
 
@@ -82,7 +83,9 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		Format: processor.FormatJSON,
 		Type:   processor.DocumentScorecard,
 		SourceInformation: processor.SourceInformation{
-			Collector: "scorecard",
+			Collector:   "scorecard",
+			Source:      "scorecard",
+			DocumentRef: events.GetDocRef(scorecardResults.Bytes()),
 		},
 	}
 	if sourceNode.Commit != "" {

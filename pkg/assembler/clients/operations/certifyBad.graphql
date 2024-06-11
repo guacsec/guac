@@ -89,8 +89,25 @@ mutation IngestCertifyBadArtifacts(
 
 # Exposes GraphQL queries to retrieve GUAC CertifyBads
 
-query CertifyBads($filter: CertifyBadSpec!) {
+query CertifyBad($filter: CertifyBadSpec!) {
   CertifyBad(certifyBadSpec: $filter) {
     ...AllCertifyBad
+  }
+}
+
+query CertifyBadList($filter: CertifyBadSpec!, $after: ID, $first: Int) {
+  CertifyBadList(certifyBadSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyBad
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
   }
 }

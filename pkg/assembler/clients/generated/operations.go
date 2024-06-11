@@ -4007,6 +4007,345 @@ func __marshalAllHasSBOMTreeSubjectPackageOrArtifact(v *AllHasSBOMTreeSubjectPac
 	}
 }
 
+// AllHasSLSATree includes the GraphQL fields of HasSLSA requested by the fragment AllHasSLSATree.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type AllHasSLSATree struct {
+	Id string `json:"id"`
+	// The subject of SLSA attestation
+	Subject AllHasSLSATreeSubjectArtifact `json:"subject"`
+	// The SLSA attestation
+	Slsa AllHasSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+// GetId returns AllHasSLSATree.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATree) GetId() string { return v.Id }
+
+// GetSubject returns AllHasSLSATree.Subject, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATree) GetSubject() AllHasSLSATreeSubjectArtifact { return v.Subject }
+
+// GetSlsa returns AllHasSLSATree.Slsa, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATree) GetSlsa() AllHasSLSATreeSlsaSLSA { return v.Slsa }
+
+// AllHasSLSATreeSlsaSLSA includes the requested fields of the GraphQL type SLSA.
+// The GraphQL type's documentation follows.
+//
+// SLSA contains all of the fields present in a SLSA attestation.
+//
+// The materials and builders are objects of the HasSLSA predicate, everything
+// else are properties extracted from the attestation.
+//
+// We also include fields to specify under what conditions the check was performed
+// (time of scan, version of scanners, etc.) as well as how this information got
+// included into GUAC (origin document and the collector for that document).
+type AllHasSLSATreeSlsaSLSA struct {
+	// Materials of the build resulting in subject
+	BuiltFrom []AllHasSLSATreeSlsaSLSABuiltFromArtifact `json:"builtFrom"`
+	// Builder performing the build
+	BuiltBy AllHasSLSATreeSlsaSLSABuiltByBuilder `json:"builtBy"`
+	// Type of the builder
+	BuildType string `json:"buildType"`
+	// Individual predicates found in the attestation
+	SlsaPredicate []AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate `json:"slsaPredicate"`
+	// Version of the SLSA predicate
+	SlsaVersion string `json:"slsaVersion"`
+	// Timestamp (RFC3339Nano format) of build start time
+	StartedOn *time.Time `json:"startedOn"`
+	// Timestamp (RFC3339Nano format) of build end time
+	FinishedOn *time.Time `json:"finishedOn"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef string `json:"documentRef"`
+}
+
+// GetBuiltFrom returns AllHasSLSATreeSlsaSLSA.BuiltFrom, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetBuiltFrom() []AllHasSLSATreeSlsaSLSABuiltFromArtifact {
+	return v.BuiltFrom
+}
+
+// GetBuiltBy returns AllHasSLSATreeSlsaSLSA.BuiltBy, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetBuiltBy() AllHasSLSATreeSlsaSLSABuiltByBuilder { return v.BuiltBy }
+
+// GetBuildType returns AllHasSLSATreeSlsaSLSA.BuildType, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetBuildType() string { return v.BuildType }
+
+// GetSlsaPredicate returns AllHasSLSATreeSlsaSLSA.SlsaPredicate, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetSlsaPredicate() []AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate {
+	return v.SlsaPredicate
+}
+
+// GetSlsaVersion returns AllHasSLSATreeSlsaSLSA.SlsaVersion, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetSlsaVersion() string { return v.SlsaVersion }
+
+// GetStartedOn returns AllHasSLSATreeSlsaSLSA.StartedOn, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetStartedOn() *time.Time { return v.StartedOn }
+
+// GetFinishedOn returns AllHasSLSATreeSlsaSLSA.FinishedOn, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetFinishedOn() *time.Time { return v.FinishedOn }
+
+// GetOrigin returns AllHasSLSATreeSlsaSLSA.Origin, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllHasSLSATreeSlsaSLSA.Collector, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns AllHasSLSATreeSlsaSLSA.DocumentRef, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetDocumentRef() string { return v.DocumentRef }
+
+// AllHasSLSATreeSlsaSLSABuiltByBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type AllHasSLSATreeSlsaSLSABuiltByBuilder struct {
+	AllBuilderTree `json:"-"`
+}
+
+// GetId returns AllHasSLSATreeSlsaSLSABuiltByBuilder.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) GetId() string { return v.AllBuilderTree.Id }
+
+// GetUri returns AllHasSLSATreeSlsaSLSABuiltByBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) GetUri() string { return v.AllBuilderTree.Uri }
+
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSLSATreeSlsaSLSABuiltByBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSLSATreeSlsaSLSABuiltByBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSLSATreeSlsaSLSABuiltByBuilder struct {
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) __premarshalJSON() (*__premarshalAllHasSLSATreeSlsaSLSABuiltByBuilder, error) {
+	var retval __premarshalAllHasSLSATreeSlsaSLSABuiltByBuilder
+
+	retval.Id = v.AllBuilderTree.Id
+	retval.Uri = v.AllBuilderTree.Uri
+	return &retval, nil
+}
+
+// AllHasSLSATreeSlsaSLSABuiltFromArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type AllHasSLSATreeSlsaSLSABuiltFromArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns AllHasSLSATreeSlsaSLSABuiltFromArtifact.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns AllHasSLSATreeSlsaSLSABuiltFromArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns AllHasSLSATreeSlsaSLSABuiltFromArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSLSATreeSlsaSLSABuiltFromArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSLSATreeSlsaSLSABuiltFromArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSLSATreeSlsaSLSABuiltFromArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) __premarshalJSON() (*__premarshalAllHasSLSATreeSlsaSLSABuiltFromArtifact, error) {
+	var retval __premarshalAllHasSLSATreeSlsaSLSABuiltFromArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate includes the requested fields of the GraphQL type SLSAPredicate.
+// The GraphQL type's documentation follows.
+//
+// SLSAPredicate are the values from the SLSA predicate in key-value pair form.
+//
+// # For example, given the following predicate
+//
+// ```
+// "predicate": {
+// "buildDefinition": {
+// "externalParameters": {
+// "repository": "https://github.com/octocat/hello-world",
+// ...
+// },
+// ...
+// },
+// ...
+// }
+// ```
+//
+// we have
+//
+// ```
+// key   = "buildDefinition.externalParameters.repository"
+// value = "https://github.com/octocat/hello-world"
+// ```
+//
+// This node cannot be directly referred by other parts of GUAC.
+type AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate.Key, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate) GetKey() string { return v.Key }
+
+// GetValue returns AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate.Value, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate) GetValue() string { return v.Value }
+
+// AllHasSLSATreeSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type AllHasSLSATreeSubjectArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns AllHasSLSATreeSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns AllHasSLSATreeSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns AllHasSLSATreeSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *AllHasSLSATreeSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSLSATreeSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSLSATreeSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSLSATreeSubjectArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *AllHasSLSATreeSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalAllHasSLSATreeSubjectArtifact, error) {
+	var retval __premarshalAllHasSLSATreeSubjectArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
 // AllHasSourceAt includes the GraphQL fields of HasSourceAt requested by the fragment AllHasSourceAt.
 // The GraphQL type's documentation follows.
 //
@@ -5247,6 +5586,7 @@ func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageName) GetVersions() []A
 // the trie.
 type AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
 	Id         string                                                                                                 `json:"id"`
+	Purl       string                                                                                                 `json:"purl"`
 	Version    string                                                                                                 `json:"version"`
 	Qualifiers []AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
 	Subpath    string                                                                                                 `json:"subpath"`
@@ -5255,6 +5595,11 @@ type AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion 
 // GetId returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Id, and is useful for accessing the field via an interface.
 func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetId() string {
 	return v.Id
+}
+
+// GetPurl returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Purl, and is useful for accessing the field via an interface.
+func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetPurl() string {
+	return v.Purl
 }
 
 // GetVersion returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
@@ -6608,6 +6953,181 @@ func (v *ArtifactsArtifactsArtifact) __premarshalJSON() (*__premarshalArtifactsA
 	return &retval, nil
 }
 
+// ArtifactsListArtifactsListArtifactConnection includes the requested fields of the GraphQL type ArtifactConnection.
+// The GraphQL type's documentation follows.
+//
+// ArtifactConnection returns the paginated results for artifact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the ArtifactEdge which contains the current cursor
+// and the artifact node itself
+type ArtifactsListArtifactsListArtifactConnection struct {
+	TotalCount int                                                             `json:"totalCount"`
+	Edges      []ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge `json:"edges"`
+	PageInfo   ArtifactsListArtifactsListArtifactConnectionPageInfo            `json:"pageInfo"`
+}
+
+// GetTotalCount returns ArtifactsListArtifactsListArtifactConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns ArtifactsListArtifactsListArtifactConnection.Edges, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnection) GetEdges() []ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns ArtifactsListArtifactsListArtifactConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnection) GetPageInfo() ArtifactsListArtifactsListArtifactConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge includes the requested fields of the GraphQL type ArtifactEdge.
+// The GraphQL type's documentation follows.
+//
+// ArtifactEdge contains the cursor for the resulting node and
+// the artifact node itself.
+type ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge struct {
+	Cursor string                                                                    `json:"cursor"`
+	Node   ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact `json:"node"`
+}
+
+// GetCursor returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge.Node, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge) GetNode() ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact {
+	return v.Node
+}
+
+// ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact.Id, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) GetId() string {
+	return v.AllArtifactTree.Id
+}
+
+// GetAlgorithm returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) GetDigest() string {
+	return v.AllArtifactTree.Digest
+}
+
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) __premarshalJSON() (*__premarshalArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact, error) {
+	var retval __premarshalArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// ArtifactsListArtifactsListArtifactConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type ArtifactsListArtifactsListArtifactConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns ArtifactsListArtifactsListArtifactConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns ArtifactsListArtifactsListArtifactConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns ArtifactsListArtifactsListArtifactConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// ArtifactsListResponse is returned by ArtifactsList on success.
+type ArtifactsListResponse struct {
+	// Returns a paginated results via ArtifactConnection
+	ArtifactsList *ArtifactsListArtifactsListArtifactConnection `json:"artifactsList"`
+}
+
+// GetArtifactsList returns ArtifactsListResponse.ArtifactsList, and is useful for accessing the field via an interface.
+func (v *ArtifactsListResponse) GetArtifactsList() *ArtifactsListArtifactsListArtifactConnection {
+	return v.ArtifactsList
+}
+
 // ArtifactsResponse is returned by Artifacts on success.
 type ArtifactsResponse struct {
 	// Returns all artifacts matching a filter.
@@ -6624,6 +7144,361 @@ type BuilderInputSpec struct {
 
 // GetUri returns BuilderInputSpec.Uri, and is useful for accessing the field via an interface.
 func (v *BuilderInputSpec) GetUri() string { return v.Uri }
+
+// BuilderSpec allows filtering the list of builders to return in a query.
+type BuilderSpec struct {
+	Id  *string `json:"id"`
+	Uri *string `json:"uri"`
+}
+
+// GetId returns BuilderSpec.Id, and is useful for accessing the field via an interface.
+func (v *BuilderSpec) GetId() *string { return v.Id }
+
+// GetUri returns BuilderSpec.Uri, and is useful for accessing the field via an interface.
+func (v *BuilderSpec) GetUri() *string { return v.Uri }
+
+// BuildersBuildersBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type BuildersBuildersBuilder struct {
+	AllBuilderTree `json:"-"`
+}
+
+// GetId returns BuildersBuildersBuilder.Id, and is useful for accessing the field via an interface.
+func (v *BuildersBuildersBuilder) GetId() string { return v.AllBuilderTree.Id }
+
+// GetUri returns BuildersBuildersBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *BuildersBuildersBuilder) GetUri() string { return v.AllBuilderTree.Uri }
+
+func (v *BuildersBuildersBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*BuildersBuildersBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.BuildersBuildersBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalBuildersBuildersBuilder struct {
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *BuildersBuildersBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *BuildersBuildersBuilder) __premarshalJSON() (*__premarshalBuildersBuildersBuilder, error) {
+	var retval __premarshalBuildersBuildersBuilder
+
+	retval.Id = v.AllBuilderTree.Id
+	retval.Uri = v.AllBuilderTree.Uri
+	return &retval, nil
+}
+
+// BuildersListBuildersListBuilderConnection includes the requested fields of the GraphQL type BuilderConnection.
+// The GraphQL type's documentation follows.
+//
+// BuilderConnection returns the paginated results for builder.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the BuilderEdge which contains the current cursor
+// and the Builder node itself
+type BuildersListBuildersListBuilderConnection struct {
+	TotalCount int                                                         `json:"totalCount"`
+	Edges      []BuildersListBuildersListBuilderConnectionEdgesBuilderEdge `json:"edges"`
+	PageInfo   BuildersListBuildersListBuilderConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns BuildersListBuildersListBuilderConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns BuildersListBuildersListBuilderConnection.Edges, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnection) GetEdges() []BuildersListBuildersListBuilderConnectionEdgesBuilderEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns BuildersListBuildersListBuilderConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnection) GetPageInfo() BuildersListBuildersListBuilderConnectionPageInfo {
+	return v.PageInfo
+}
+
+// BuildersListBuildersListBuilderConnectionEdgesBuilderEdge includes the requested fields of the GraphQL type BuilderEdge.
+// The GraphQL type's documentation follows.
+//
+// BuilderEdge contains the cursor for the resulting node and
+// the Builder node itself.
+type BuildersListBuildersListBuilderConnectionEdgesBuilderEdge struct {
+	Cursor string                                                               `json:"cursor"`
+	Node   BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder `json:"node"`
+}
+
+// GetCursor returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdge.Node, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdge) GetNode() BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder {
+	return v.Node
+}
+
+// BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder struct {
+	AllBuilderTree `json:"-"`
+}
+
+// GetId returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder.Id, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) GetId() string {
+	return v.AllBuilderTree.Id
+}
+
+// GetUri returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) GetUri() string {
+	return v.AllBuilderTree.Uri
+}
+
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalBuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder struct {
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) __premarshalJSON() (*__premarshalBuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder, error) {
+	var retval __premarshalBuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder
+
+	retval.Id = v.AllBuilderTree.Id
+	retval.Uri = v.AllBuilderTree.Uri
+	return &retval, nil
+}
+
+// BuildersListBuildersListBuilderConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type BuildersListBuildersListBuilderConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns BuildersListBuildersListBuilderConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns BuildersListBuildersListBuilderConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns BuildersListBuildersListBuilderConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// BuildersListResponse is returned by BuildersList on success.
+type BuildersListResponse struct {
+	// Returns a paginated results via BuilderConnection
+	BuildersList *BuildersListBuildersListBuilderConnection `json:"buildersList"`
+}
+
+// GetBuildersList returns BuildersListResponse.BuildersList, and is useful for accessing the field via an interface.
+func (v *BuildersListResponse) GetBuildersList() *BuildersListBuildersListBuilderConnection {
+	return v.BuildersList
+}
+
+// BuildersResponse is returned by Builders on success.
+type BuildersResponse struct {
+	// Returns all builders matching a filter.
+	Builders []BuildersBuildersBuilder `json:"builders"`
+}
+
+// GetBuilders returns BuildersResponse.Builders, and is useful for accessing the field via an interface.
+func (v *BuildersResponse) GetBuilders() []BuildersBuildersBuilder { return v.Builders }
+
+// CertifyBadCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetId() string { return v.AllCertifyBad.Id }
+
+// GetJustification returns CertifyBadCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
+
+// GetKnownSince returns CertifyBadCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
+// GetSubject returns CertifyBadCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetOrigin() string { return v.AllCertifyBad.Origin }
+
+// GetCollector returns CertifyBadCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadCertifyBad) GetCollector() string { return v.AllCertifyBad.Collector }
+
+func (v *CertifyBadCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadCertifyBad) __premarshalJSON() (*__premarshalCertifyBadCertifyBad, error) {
+	var retval __premarshalCertifyBadCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
 
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
@@ -6649,6 +7524,229 @@ func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns CertifyBadInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// CertifyBadListCertifyBadListCertifyBadConnection includes the requested fields of the GraphQL type CertifyBadConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyBadConnection returns the paginated results for CertifyBad.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyBadEdge which contains the current cursor
+// and the CertifyBad node itself
+type CertifyBadListCertifyBadListCertifyBadConnection struct {
+	TotalCount int                                                                   `json:"totalCount"`
+	Edges      []CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge `json:"edges"`
+	PageInfo   CertifyBadListCertifyBadListCertifyBadConnectionPageInfo              `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyBadListCertifyBadListCertifyBadConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns CertifyBadListCertifyBadListCertifyBadConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnection) GetEdges() []CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyBadListCertifyBadListCertifyBadConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnection) GetPageInfo() CertifyBadListCertifyBadListCertifyBadConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge includes the requested fields of the GraphQL type CertifyBadEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyBadEdge contains the cursor for the resulting node and
+// the CertifyBad node itself.
+type CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge struct {
+	Cursor string                                                                            `json:"cursor"`
+	Node   CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad `json:"node"`
+}
+
+// GetCursor returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge) GetNode() CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad {
+	return v.Node
+}
+
+// CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetId() string {
+	return v.AllCertifyBad.Id
+}
+
+// GetJustification returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetJustification() string {
+	return v.AllCertifyBad.Justification
+}
+
+// GetKnownSince returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetKnownSince() time.Time {
+	return v.AllCertifyBad.KnownSince
+}
+
+// GetSubject returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetOrigin() string {
+	return v.AllCertifyBad.Origin
+}
+
+// GetCollector returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetCollector() string {
+	return v.AllCertifyBad.Collector
+}
+
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) __premarshalJSON() (*__premarshalCertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad, error) {
+	var retval __premarshalCertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
+
+// CertifyBadListCertifyBadListCertifyBadConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyBadListCertifyBadListCertifyBadConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyBadListCertifyBadListCertifyBadConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyBadListCertifyBadListCertifyBadConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyBadListCertifyBadListCertifyBadConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyBadListResponse is returned by CertifyBadList on success.
+type CertifyBadListResponse struct {
+	// Returns a paginated results via CertifyBadConnection
+	CertifyBadList *CertifyBadListCertifyBadListCertifyBadConnection `json:"CertifyBadList"`
+}
+
+// GetCertifyBadList returns CertifyBadListResponse.CertifyBadList, and is useful for accessing the field via an interface.
+func (v *CertifyBadListResponse) GetCertifyBadList() *CertifyBadListCertifyBadListCertifyBadConnection {
+	return v.CertifyBadList
+}
+
+// CertifyBadResponse is returned by CertifyBad on success.
+type CertifyBadResponse struct {
+	// Returns all CertifyBad attestations matching a filter.
+	CertifyBad []CertifyBadCertifyBad `json:"CertifyBad"`
+}
+
+// GetCertifyBad returns CertifyBadResponse.CertifyBad, and is useful for accessing the field via an interface.
+func (v *CertifyBadResponse) GetCertifyBad() []CertifyBadCertifyBad { return v.CertifyBad }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
 // query.
@@ -6693,11 +7791,11 @@ func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns CertifyBadSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetDocumentRef() *string { return v.DocumentRef }
 
-// CertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// CertifyGoodCertifyGood includes the requested fields of the GraphQL type CertifyGood.
 // The GraphQL type's documentation follows.
 //
-// CertifyBad is an attestation that a package, source, or artifact is considered
-// bad.
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
 //
 // All evidence trees record a justification for the property they represent as
 // well as the document that contains the attestation (origin) and the collector
@@ -6707,41 +7805,41 @@ func (v *CertifyBadSpec) GetDocumentRef() *string { return v.DocumentRef }
 // If the attestation targets a package, it must target a PackageName or a
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
-type CertifyBadsCertifyBad struct {
-	AllCertifyBad `json:"-"`
+type CertifyGoodCertifyGood struct {
+	AllCertifyGood `json:"-"`
 }
 
-// GetId returns CertifyBadsCertifyBad.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
+// GetId returns CertifyGoodCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 
-// GetJustification returns CertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
+// GetJustification returns CertifyGoodCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
-// GetKnownSince returns CertifyBadsCertifyBad.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+// GetKnownSince returns CertifyGoodCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
 
-// GetSubject returns CertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
-	return v.AllCertifyBad.Subject
+// GetSubject returns CertifyGoodCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
 }
 
-// GetOrigin returns CertifyBadsCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetOrigin() string { return v.AllCertifyBad.Origin }
+// GetOrigin returns CertifyGoodCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetOrigin() string { return v.AllCertifyGood.Origin }
 
-// GetCollector returns CertifyBadsCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadsCertifyBad) GetCollector() string { return v.AllCertifyBad.Collector }
+// GetCollector returns CertifyGoodCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetCollector() string { return v.AllCertifyGood.Collector }
 
-func (v *CertifyBadsCertifyBad) UnmarshalJSON(b []byte) error {
+func (v *CertifyGoodCertifyGood) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*CertifyBadsCertifyBad
+		*CertifyGoodCertifyGood
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.CertifyBadsCertifyBad = v
+	firstPass.CertifyGoodCertifyGood = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -6749,14 +7847,14 @@ func (v *CertifyBadsCertifyBad) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllCertifyBad)
+		b, &v.AllCertifyGood)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type __premarshalCertifyBadsCertifyBad struct {
+type __premarshalCertifyGoodCertifyGood struct {
 	Id string `json:"id"`
 
 	Justification string `json:"justification"`
@@ -6770,7 +7868,7 @@ type __premarshalCertifyBadsCertifyBad struct {
 	Collector string `json:"collector"`
 }
 
-func (v *CertifyBadsCertifyBad) MarshalJSON() ([]byte, error) {
+func (v *CertifyGoodCertifyGood) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -6778,37 +7876,28 @@ func (v *CertifyBadsCertifyBad) MarshalJSON() ([]byte, error) {
 	return json.Marshal(premarshaled)
 }
 
-func (v *CertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadsCertifyBad, error) {
-	var retval __premarshalCertifyBadsCertifyBad
+func (v *CertifyGoodCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodCertifyGood, error) {
+	var retval __premarshalCertifyGoodCertifyGood
 
-	retval.Id = v.AllCertifyBad.Id
-	retval.Justification = v.AllCertifyBad.Justification
-	retval.KnownSince = v.AllCertifyBad.KnownSince
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
-		src := v.AllCertifyBad.Subject
+		src := v.AllCertifyGood.Subject
 		var err error
-		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"unable to marshal CertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal CertifyGoodCertifyGood.AllCertifyGood.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.AllCertifyBad.Origin
-	retval.Collector = v.AllCertifyBad.Collector
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
 	return &retval, nil
 }
-
-// CertifyBadsResponse is returned by CertifyBads on success.
-type CertifyBadsResponse struct {
-	// Returns all CertifyBad attestations matching a filter.
-	CertifyBad []CertifyBadsCertifyBad `json:"CertifyBad"`
-}
-
-// GetCertifyBad returns CertifyBadsResponse.CertifyBad, and is useful for accessing the field via an interface.
-func (v *CertifyBadsResponse) GetCertifyBad() []CertifyBadsCertifyBad { return v.CertifyBad }
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
@@ -6833,6 +7922,427 @@ func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns CertifyGoodInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnection includes the requested fields of the GraphQL type CertifyGoodConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyGoodConnection returns the paginated results for CertifyGood.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyGoodEdge which contains the current cursor
+// and the CertifyGood node itself
+type CertifyGoodListCertifyGoodListCertifyGoodConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge `json:"edges"`
+	PageInfo   CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyGoodListCertifyGoodListCertifyGoodConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyGoodListCertifyGoodListCertifyGoodConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnection) GetEdges() []CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyGoodListCertifyGoodListCertifyGoodConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnection) GetPageInfo() CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge includes the requested fields of the GraphQL type CertifyGoodEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyGoodEdge contains the cursor for the resulting node and
+// the CertifyGood node itself.
+type CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood `json:"node"`
+}
+
+// GetCursor returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge) GetNode() CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood {
+	return v.Node
+}
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood includes the requested fields of the GraphQL type CertifyGood.
+// The GraphQL type's documentation follows.
+//
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood struct {
+	AllCertifyGood `json:"-"`
+}
+
+// GetId returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetId() string {
+	return v.AllCertifyGood.Id
+}
+
+// GetJustification returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetJustification() string {
+	return v.AllCertifyGood.Justification
+}
+
+// GetKnownSince returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetKnownSince() time.Time {
+	return v.AllCertifyGood.KnownSince
+}
+
+// GetSubject returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
+}
+
+// GetOrigin returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetOrigin() string {
+	return v.AllCertifyGood.Origin
+}
+
+// GetCollector returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetCollector() string {
+	return v.AllCertifyGood.Collector
+}
+
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood, error) {
+	var retval __premarshalCertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood
+
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyGood.Subject
+		var err error
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.AllCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
+	return &retval, nil
+}
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyGoodListResponse is returned by CertifyGoodList on success.
+type CertifyGoodListResponse struct {
+	// Returns a paginated results via CertifyGoodConnection
+	CertifyGoodList *CertifyGoodListCertifyGoodListCertifyGoodConnection `json:"CertifyGoodList"`
+}
+
+// GetCertifyGoodList returns CertifyGoodListResponse.CertifyGoodList, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListResponse) GetCertifyGoodList() *CertifyGoodListCertifyGoodListCertifyGoodConnection {
+	return v.CertifyGoodList
+}
+
+// CertifyGoodResponse is returned by CertifyGood on success.
+type CertifyGoodResponse struct {
+	// Returns all CertifyGood attestations matching a filter.
+	CertifyGood []CertifyGoodCertifyGood `json:"CertifyGood"`
+}
+
+// GetCertifyGood returns CertifyGoodResponse.CertifyGood, and is useful for accessing the field via an interface.
+func (v *CertifyGoodResponse) GetCertifyGood() []CertifyGoodCertifyGood { return v.CertifyGood }
+
+// CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
+type CertifyGoodSpec struct {
+	Id            *string                      `json:"id"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Justification *string                      `json:"justification"`
+	KnownSince    *time.Time                   `json:"knownSince"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
+	DocumentRef   *string                      `json:"documentRef"`
+}
+
+// GetId returns CertifyGoodSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetId() *string { return v.Id }
+
+// GetSubject returns CertifyGoodSpec.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Subject }
+
+// GetJustification returns CertifyGoodSpec.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetJustification() *string { return v.Justification }
+
+// GetKnownSince returns CertifyGoodSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetOrigin returns CertifyGoodSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyGoodSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyGoodSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// CertifyLegalCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
+
+// GetSubject returns CertifyLegalCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetAttribution() string { return v.AllCertifyLegalTree.Attribution }
+
+// GetJustification returns CertifyLegalCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
+
+// GetCollector returns CertifyLegalCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalCertifyLegal) GetCollector() string { return v.AllCertifyLegalTree.Collector }
+
+func (v *CertifyLegalCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalCertifyLegal, error) {
+	var retval __premarshalCertifyLegalCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
 
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
@@ -6870,6 +8380,274 @@ func (v *CertifyLegalInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns CertifyLegalInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyLegalInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnection includes the requested fields of the GraphQL type CertifyLegalConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegalConnection returns the paginated results for CertifyLegal.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyLegalEdge which contains the current cursor
+// and the CertifyLegal node itself
+type CertifyLegalListCertifyLegalListCertifyLegalConnection struct {
+	TotalCount int                                                                           `json:"totalCount"`
+	Edges      []CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge `json:"edges"`
+	PageInfo   CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyLegalListCertifyLegalListCertifyLegalConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyLegalListCertifyLegalListCertifyLegalConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnection) GetEdges() []CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyLegalListCertifyLegalListCertifyLegalConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnection) GetPageInfo() CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge includes the requested fields of the GraphQL type CertifyLegalEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegalEdge contains the cursor for the resulting node and
+// the CertifyLegal node itself.
+type CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge struct {
+	Cursor string                                                                                      `json:"cursor"`
+	Node   CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal `json:"node"`
+}
+
+// GetCursor returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdge) GetNode() CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal {
+	return v.Node
+}
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetId() string {
+	return v.AllCertifyLegalTree.Id
+}
+
+// GetSubject returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetAttribution() string {
+	return v.AllCertifyLegalTree.Attribution
+}
+
+// GetJustification returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetOrigin() string {
+	return v.AllCertifyLegalTree.Origin
+}
+
+// GetCollector returns CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) GetCollector() string {
+	return v.AllCertifyLegalTree.Collector
+}
+
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal, error) {
+	var retval __premarshalCertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegalEdgeNodeCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyLegalListResponse is returned by CertifyLegalList on success.
+type CertifyLegalListResponse struct {
+	// Returns a paginated results via CertifyLegalConnection
+	CertifyLegalList *CertifyLegalListCertifyLegalListCertifyLegalConnection `json:"CertifyLegalList"`
+}
+
+// GetCertifyLegalList returns CertifyLegalListResponse.CertifyLegalList, and is useful for accessing the field via an interface.
+func (v *CertifyLegalListResponse) GetCertifyLegalList() *CertifyLegalListCertifyLegalListCertifyLegalConnection {
+	return v.CertifyLegalList
+}
+
+// CertifyLegalResponse is returned by CertifyLegal on success.
+type CertifyLegalResponse struct {
+	// Returns all legal certifications matching the input filter.
+	CertifyLegal []CertifyLegalCertifyLegal `json:"CertifyLegal"`
+}
+
+// GetCertifyLegal returns CertifyLegalResponse.CertifyLegal, and is useful for accessing the field via an interface.
+func (v *CertifyLegalResponse) GetCertifyLegal() []CertifyLegalCertifyLegal { return v.CertifyLegal }
 
 // CertifyLegalSpec allows filtering the list of legal certifications to
 // return in a query.
@@ -6927,168 +8705,6 @@ func (v *CertifyLegalSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns CertifyLegalSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyLegalSpec) GetDocumentRef() *string { return v.DocumentRef }
 
-// CertifyLegalsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
-// The GraphQL type's documentation follows.
-//
-// CertifyLegal is an attestation to attach legal information to a package or source.
-//
-// The certification information is either copied from an attestation found in an
-// SBOM or created by a collector/scanner.
-//
-// Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
-//
-// Attribution is also known as Copyright Text. It is what could be displayed to
-// comply with notice
-// requirements. https://www.nexb.com/oss-attribution-best-practices/
-//
-// License expressions follow this format:
-// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
-type CertifyLegalsCertifyLegal struct {
-	AllCertifyLegalTree `json:"-"`
-}
-
-// GetId returns CertifyLegalsCertifyLegal.Id, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
-
-// GetSubject returns CertifyLegalsCertifyLegal.Subject, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
-	return v.AllCertifyLegalTree.Subject
-}
-
-// GetDeclaredLicense returns CertifyLegalsCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDeclaredLicense() string {
-	return v.AllCertifyLegalTree.DeclaredLicense
-}
-
-// GetDeclaredLicenses returns CertifyLegalsCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
-	return v.AllCertifyLegalTree.DeclaredLicenses
-}
-
-// GetDiscoveredLicense returns CertifyLegalsCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDiscoveredLicense() string {
-	return v.AllCertifyLegalTree.DiscoveredLicense
-}
-
-// GetDiscoveredLicenses returns CertifyLegalsCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
-	return v.AllCertifyLegalTree.DiscoveredLicenses
-}
-
-// GetAttribution returns CertifyLegalsCertifyLegal.Attribution, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetAttribution() string { return v.AllCertifyLegalTree.Attribution }
-
-// GetJustification returns CertifyLegalsCertifyLegal.Justification, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetJustification() string {
-	return v.AllCertifyLegalTree.Justification
-}
-
-// GetTimeScanned returns CertifyLegalsCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetTimeScanned() time.Time {
-	return v.AllCertifyLegalTree.TimeScanned
-}
-
-// GetOrigin returns CertifyLegalsCertifyLegal.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
-
-// GetCollector returns CertifyLegalsCertifyLegal.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsCertifyLegal) GetCollector() string { return v.AllCertifyLegalTree.Collector }
-
-func (v *CertifyLegalsCertifyLegal) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyLegalsCertifyLegal
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyLegalsCertifyLegal = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyLegalTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyLegalsCertifyLegal struct {
-	Id string `json:"id"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	DeclaredLicense string `json:"declaredLicense"`
-
-	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
-
-	DiscoveredLicense string `json:"discoveredLicense"`
-
-	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
-
-	Attribution string `json:"attribution"`
-
-	Justification string `json:"justification"`
-
-	TimeScanned time.Time `json:"timeScanned"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *CertifyLegalsCertifyLegal) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyLegalsCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalsCertifyLegal, error) {
-	var retval __premarshalCertifyLegalsCertifyLegal
-
-	retval.Id = v.AllCertifyLegalTree.Id
-	{
-
-		dst := &retval.Subject
-		src := v.AllCertifyLegalTree.Subject
-		var err error
-		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal CertifyLegalsCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
-		}
-	}
-	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
-	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
-	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
-	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
-	retval.Attribution = v.AllCertifyLegalTree.Attribution
-	retval.Justification = v.AllCertifyLegalTree.Justification
-	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
-	retval.Origin = v.AllCertifyLegalTree.Origin
-	retval.Collector = v.AllCertifyLegalTree.Collector
-	return &retval, nil
-}
-
-// CertifyLegalsResponse is returned by CertifyLegals on success.
-type CertifyLegalsResponse struct {
-	// Returns all legal certifications matching the input filter.
-	CertifyLegal []CertifyLegalsCertifyLegal `json:"CertifyLegal"`
-}
-
-// GetCertifyLegal returns CertifyLegalsResponse.CertifyLegal, and is useful for accessing the field via an interface.
-func (v *CertifyLegalsResponse) GetCertifyLegal() []CertifyLegalsCertifyLegal { return v.CertifyLegal }
-
 // CertifyScorecardSpec allows filtering the list of Scorecards to return.
 type CertifyScorecardSpec struct {
 	Id               *string              `json:"id"`
@@ -7132,6 +8748,398 @@ func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
 
 // GetDocumentRef returns CertifyScorecardSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyScorecardSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// CertifyVEXStatementSpec allows filtering the list of VEX statements to
+// return in a query.
+//
+// Only one subject type (package or artifact) and one vulnerability may be specified.
+//
+// Note that setting noVuln vulnerability type is invalid for VEX statements!
+type CertifyVEXStatementSpec struct {
+	Id               *string                `json:"id"`
+	Subject          *PackageOrArtifactSpec `json:"subject"`
+	Vulnerability    *VulnerabilitySpec     `json:"vulnerability"`
+	Status           *VexStatus             `json:"status"`
+	VexJustification *VexJustification      `json:"vexJustification"`
+	Statement        *string                `json:"statement"`
+	StatusNotes      *string                `json:"statusNotes"`
+	KnownSince       *time.Time             `json:"knownSince"`
+	Origin           *string                `json:"origin"`
+	Collector        *string                `json:"collector"`
+	DocumentRef      *string                `json:"documentRef"`
+}
+
+// GetId returns CertifyVEXStatementSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetId() *string { return v.Id }
+
+// GetSubject returns CertifyVEXStatementSpec.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetSubject() *PackageOrArtifactSpec { return v.Subject }
+
+// GetVulnerability returns CertifyVEXStatementSpec.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetVulnerability() *VulnerabilitySpec { return v.Vulnerability }
+
+// GetStatus returns CertifyVEXStatementSpec.Status, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetStatus() *VexStatus { return v.Status }
+
+// GetVexJustification returns CertifyVEXStatementSpec.VexJustification, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetVexJustification() *VexJustification { return v.VexJustification }
+
+// GetStatement returns CertifyVEXStatementSpec.Statement, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetStatement() *string { return v.Statement }
+
+// GetStatusNotes returns CertifyVEXStatementSpec.StatusNotes, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetStatusNotes() *string { return v.StatusNotes }
+
+// GetKnownSince returns CertifyVEXStatementSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetOrigin returns CertifyVEXStatementSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyVEXStatementSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyVEXStatementSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyVEXStatementSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// CertifyVulnCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation to attach vulnerability information to a package.
+//
+// This information is obtained via a scanner. If there is no vulnerability
+// detected, we attach the a vulnerability with "NoVuln" type and an empty string
+// for the vulnerability ID.
+type CertifyVulnCertifyVuln struct {
+	AllCertifyVuln `json:"-"`
+}
+
+// GetId returns CertifyVulnCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetId() string { return v.AllCertifyVuln.Id }
+
+// GetPackage returns CertifyVulnCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetPackage() AllCertifyVulnPackage { return v.AllCertifyVuln.Package }
+
+// GetVulnerability returns CertifyVulnCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
+	return v.AllCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns CertifyVulnCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
+	return v.AllCertifyVuln.Metadata
+}
+
+func (v *CertifyVulnCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVulnCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVulnCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVulnCertifyVuln struct {
+	Id string `json:"id"`
+
+	Package AllCertifyVulnPackage `json:"package"`
+
+	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
+
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
+}
+
+func (v *CertifyVulnCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVulnCertifyVuln) __premarshalJSON() (*__premarshalCertifyVulnCertifyVuln, error) {
+	var retval __premarshalCertifyVulnCertifyVuln
+
+	retval.Id = v.AllCertifyVuln.Id
+	retval.Package = v.AllCertifyVuln.Package
+	retval.Vulnerability = v.AllCertifyVuln.Vulnerability
+	retval.Metadata = v.AllCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnection includes the requested fields of the GraphQL type CertifyVulnConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyVulnConnection returns the paginated results for CertifyVuln.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyVulnEdge which contains the current cursor
+// and the CertifyVuln node itself
+type CertifyVulnListCertifyVulnListCertifyVulnConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge `json:"edges"`
+	PageInfo   CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyVulnListCertifyVulnListCertifyVulnConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyVulnListCertifyVulnListCertifyVulnConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnection) GetEdges() []CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyVulnListCertifyVulnListCertifyVulnConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnection) GetPageInfo() CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge includes the requested fields of the GraphQL type CertifyVulnEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyVulnEdge contains the cursor for the resulting node and
+// the CertifyVuln node itself.
+type CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln `json:"node"`
+}
+
+// GetCursor returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge) GetNode() CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln {
+	return v.Node
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation to attach vulnerability information to a package.
+//
+// This information is obtained via a scanner. If there is no vulnerability
+// detected, we attach the a vulnerability with "NoVuln" type and an empty string
+// for the vulnerability ID.
+type CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln struct {
+	AllCertifyVuln `json:"-"`
+}
+
+// GetId returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetId() string {
+	return v.AllCertifyVuln.Id
+}
+
+// GetPackage returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetPackage() AllCertifyVulnPackage {
+	return v.AllCertifyVuln.Package
+}
+
+// GetVulnerability returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
+	return v.AllCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
+	return v.AllCertifyVuln.Metadata
+}
+
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln struct {
+	Id string `json:"id"`
+
+	Package AllCertifyVulnPackage `json:"package"`
+
+	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
+
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
+}
+
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) __premarshalJSON() (*__premarshalCertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln, error) {
+	var retval __premarshalCertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln
+
+	retval.Id = v.AllCertifyVuln.Id
+	retval.Package = v.AllCertifyVuln.Package
+	retval.Vulnerability = v.AllCertifyVuln.Vulnerability
+	retval.Metadata = v.AllCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyVulnListResponse is returned by CertifyVulnList on success.
+type CertifyVulnListResponse struct {
+	// Returns a paginated results via CertifyVulnConnection
+	CertifyVulnList *CertifyVulnListCertifyVulnListCertifyVulnConnection `json:"CertifyVulnList"`
+}
+
+// GetCertifyVulnList returns CertifyVulnListResponse.CertifyVulnList, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListResponse) GetCertifyVulnList() *CertifyVulnListCertifyVulnListCertifyVulnConnection {
+	return v.CertifyVulnList
+}
+
+// CertifyVulnResponse is returned by CertifyVuln on success.
+type CertifyVulnResponse struct {
+	// Returns all vulnerability certifications matching the input filter.
+	CertifyVuln []CertifyVulnCertifyVuln `json:"CertifyVuln"`
+}
+
+// GetCertifyVuln returns CertifyVulnResponse.CertifyVuln, and is useful for accessing the field via an interface.
+func (v *CertifyVulnResponse) GetCertifyVuln() []CertifyVulnCertifyVuln { return v.CertifyVuln }
+
+// CertifyVulnSpec allows filtering the list of vulnerability certifications to
+// return in a query.
+//
+// Specifying just the package allows to query for all vulnerabilities associated
+// with the package.
+//
+// Only one vulnerability (or NoVuln vulnerability type) may be
+// specified.
+type CertifyVulnSpec struct {
+	Id             *string            `json:"id"`
+	Package        *PkgSpec           `json:"package"`
+	Vulnerability  *VulnerabilitySpec `json:"vulnerability"`
+	TimeScanned    *time.Time         `json:"timeScanned"`
+	DbUri          *string            `json:"dbUri"`
+	DbVersion      *string            `json:"dbVersion"`
+	ScannerUri     *string            `json:"scannerUri"`
+	ScannerVersion *string            `json:"scannerVersion"`
+	Origin         *string            `json:"origin"`
+	Collector      *string            `json:"collector"`
+	DocumentRef    *string            `json:"documentRef"`
+}
+
+// GetId returns CertifyVulnSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetId() *string { return v.Id }
+
+// GetPackage returns CertifyVulnSpec.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetVulnerability returns CertifyVulnSpec.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetVulnerability() *VulnerabilitySpec { return v.Vulnerability }
+
+// GetTimeScanned returns CertifyVulnSpec.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetTimeScanned() *time.Time { return v.TimeScanned }
+
+// GetDbUri returns CertifyVulnSpec.DbUri, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetDbUri() *string { return v.DbUri }
+
+// GetDbVersion returns CertifyVulnSpec.DbVersion, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetDbVersion() *string { return v.DbVersion }
+
+// GetScannerUri returns CertifyVulnSpec.ScannerUri, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetScannerUri() *string { return v.ScannerUri }
+
+// GetScannerVersion returns CertifyVulnSpec.ScannerVersion, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetScannerVersion() *string { return v.ScannerVersion }
+
+// GetOrigin returns CertifyVulnSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyVulnSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyVulnSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// The Comparator is used by the vulnerability score filter on ranges
+type Comparator string
+
+const (
+	ComparatorGreater      Comparator = "GREATER"
+	ComparatorEqual        Comparator = "EQUAL"
+	ComparatorLess         Comparator = "LESS"
+	ComparatorGreaterEqual Comparator = "GREATER_EQUAL"
+	ComparatorLessEqual    Comparator = "LESS_EQUAL"
+)
 
 // DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
@@ -7248,6 +9256,217 @@ type DependenciesResponse struct {
 
 // GetIsDependency returns DependenciesResponse.IsDependency, and is useful for accessing the field via an interface.
 func (v *DependenciesResponse) GetIsDependency() []DependenciesIsDependency { return v.IsDependency }
+
+// DependencyListIsDependencyListIsDependencyConnection includes the requested fields of the GraphQL type IsDependencyConnection.
+// The GraphQL type's documentation follows.
+//
+// IsDependencyConnection returns the paginated results for IsDependency.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsDependencyEdge which contains the current cursor
+// and the IsDependency node itself
+type DependencyListIsDependencyListIsDependencyConnection struct {
+	TotalCount int                                                                         `json:"totalCount"`
+	Edges      []DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge `json:"edges"`
+	PageInfo   DependencyListIsDependencyListIsDependencyConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetTotalCount returns DependencyListIsDependencyListIsDependencyConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns DependencyListIsDependencyListIsDependencyConnection.Edges, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnection) GetEdges() []DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns DependencyListIsDependencyListIsDependencyConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnection) GetPageInfo() DependencyListIsDependencyListIsDependencyConnectionPageInfo {
+	return v.PageInfo
+}
+
+// DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge includes the requested fields of the GraphQL type IsDependencyEdge.
+// The GraphQL type's documentation follows.
+//
+// IsDependencyEdge contains the cursor for the resulting node and
+// the IsDependency node itself.
+type DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge struct {
+	Cursor string                                                                                    `json:"cursor"`
+	Node   DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency `json:"node"`
+}
+
+// GetCursor returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge.Node, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge) GetNode() DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency {
+	return v.Node
+}
+
+// DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// IsDependency is an attestation to record that a package depends on another.
+type DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency struct {
+	AllIsDependencyTree `json:"-"`
+}
+
+// GetId returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetId() string {
+	return v.AllIsDependencyTree.Id
+}
+
+// GetJustification returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetJustification() string {
+	return v.AllIsDependencyTree.Justification
+}
+
+// GetPackage returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetPackage() AllIsDependencyTreePackage {
+	return v.AllIsDependencyTree.Package
+}
+
+// GetDependencyPackage returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
+}
+
+// GetDependencyType returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetDependencyType() DependencyType {
+	return v.AllIsDependencyTree.DependencyType
+}
+
+// GetVersionRange returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetVersionRange() string {
+	return v.AllIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetOrigin() string {
+	return v.AllIsDependencyTree.Origin
+}
+
+// GetCollector returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetCollector() string {
+	return v.AllIsDependencyTree.Collector
+}
+
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package AllIsDependencyTreePackage `json:"package"`
+
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
+
+	DependencyType DependencyType `json:"dependencyType"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) __premarshalJSON() (*__premarshalDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency, error) {
+	var retval __premarshalDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency
+
+	retval.Id = v.AllIsDependencyTree.Id
+	retval.Justification = v.AllIsDependencyTree.Justification
+	retval.Package = v.AllIsDependencyTree.Package
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
+	retval.DependencyType = v.AllIsDependencyTree.DependencyType
+	retval.VersionRange = v.AllIsDependencyTree.VersionRange
+	retval.Origin = v.AllIsDependencyTree.Origin
+	retval.Collector = v.AllIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// DependencyListIsDependencyListIsDependencyConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type DependencyListIsDependencyListIsDependencyConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns DependencyListIsDependencyListIsDependencyConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns DependencyListIsDependencyListIsDependencyConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns DependencyListIsDependencyListIsDependencyConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *DependencyListIsDependencyListIsDependencyConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// DependencyListResponse is returned by DependencyList on success.
+type DependencyListResponse struct {
+	// Returns a paginated results via IsDependencyConnection
+	IsDependencyList *DependencyListIsDependencyListIsDependencyConnection `json:"IsDependencyList"`
+}
+
+// GetIsDependencyList returns DependencyListResponse.IsDependencyList, and is useful for accessing the field via an interface.
+func (v *DependencyListResponse) GetIsDependencyList() *DependencyListIsDependencyListIsDependencyConnection {
+	return v.IsDependencyList
+}
 
 // DependencyType determines the type of the dependency.
 type DependencyType string
@@ -7822,6 +10041,129 @@ func (v *FindSoftwareResponse) __premarshalJSON() (*__premarshalFindSoftwareResp
 	return &retval, nil
 }
 
+// HasMetadataHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataHasMetadata struct {
+	AllHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetId() string { return v.AllHasMetadata.Id }
+
+// GetSubject returns HasMetadataHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetKey() string { return v.AllHasMetadata.Key }
+
+// GetValue returns HasMetadataHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetValue() string { return v.AllHasMetadata.Value }
+
+// GetTimestamp returns HasMetadataHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetTimestamp() time.Time { return v.AllHasMetadata.Timestamp }
+
+// GetJustification returns HasMetadataHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetJustification() string { return v.AllHasMetadata.Justification }
+
+// GetOrigin returns HasMetadataHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetOrigin() string { return v.AllHasMetadata.Origin }
+
+// GetCollector returns HasMetadataHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetCollector() string { return v.AllHasMetadata.Collector }
+
+func (v *HasMetadataHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataHasMetadata) __premarshalJSON() (*__premarshalHasMetadataHasMetadata, error) {
+	var retval __premarshalHasMetadataHasMetadata
+
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
+
 // HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type HasMetadataInputSpec struct {
 	Key           string    `json:"key"`
@@ -7853,6 +10195,300 @@ func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HasMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HasMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HasMetadataListHasMetadataListHasMetadataConnection includes the requested fields of the GraphQL type HasMetadataConnection.
+// The GraphQL type's documentation follows.
+//
+// HasMetadataConnection returns the paginated results for HasMetadata.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasMetadataEdge which contains the current cursor
+// and the HasMetadata node itself
+type HasMetadataListHasMetadataListHasMetadataConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge `json:"edges"`
+	PageInfo   HasMetadataListHasMetadataListHasMetadataConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasMetadataListHasMetadataListHasMetadataConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns HasMetadataListHasMetadataListHasMetadataConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnection) GetEdges() []HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasMetadataListHasMetadataListHasMetadataConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnection) GetPageInfo() HasMetadataListHasMetadataListHasMetadataConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge includes the requested fields of the GraphQL type HasMetadataEdge.
+// The GraphQL type's documentation follows.
+//
+// HasMetadataEdge contains the cursor for the resulting node and
+// the HasMetadata node itself.
+type HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata `json:"node"`
+}
+
+// GetCursor returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge) GetNode() HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata {
+	return v.Node
+}
+
+// HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata struct {
+	AllHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetId() string {
+	return v.AllHasMetadata.Id
+}
+
+// GetSubject returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetKey() string {
+	return v.AllHasMetadata.Key
+}
+
+// GetValue returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetValue() string {
+	return v.AllHasMetadata.Value
+}
+
+// GetTimestamp returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetTimestamp() time.Time {
+	return v.AllHasMetadata.Timestamp
+}
+
+// GetJustification returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetJustification() string {
+	return v.AllHasMetadata.Justification
+}
+
+// GetOrigin returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetOrigin() string {
+	return v.AllHasMetadata.Origin
+}
+
+// GetCollector returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetCollector() string {
+	return v.AllHasMetadata.Collector
+}
+
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) __premarshalJSON() (*__premarshalHasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata, error) {
+	var retval __premarshalHasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata
+
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
+
+// HasMetadataListHasMetadataListHasMetadataConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasMetadataListHasMetadataListHasMetadataConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasMetadataListHasMetadataListHasMetadataConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasMetadataListHasMetadataListHasMetadataConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns HasMetadataListHasMetadataListHasMetadataConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// HasMetadataListResponse is returned by HasMetadataList on success.
+type HasMetadataListResponse struct {
+	// Returns a paginated results via HasMetadataConnection
+	HasMetadataList *HasMetadataListHasMetadataListHasMetadataConnection `json:"HasMetadataList"`
+}
+
+// GetHasMetadataList returns HasMetadataListResponse.HasMetadataList, and is useful for accessing the field via an interface.
+func (v *HasMetadataListResponse) GetHasMetadataList() *HasMetadataListHasMetadataListHasMetadataConnection {
+	return v.HasMetadataList
+}
+
+// HasMetadataResponse is returned by HasMetadata on success.
+type HasMetadataResponse struct {
+	// Returns all HasMetdata attestations matching a filter.
+	HasMetadata []HasMetadataHasMetadata `json:"HasMetadata"`
+}
+
+// GetHasMetadata returns HasMetadataResponse.HasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataResponse) GetHasMetadata() []HasMetadataHasMetadata { return v.HasMetadata }
+
+// HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since specified indicates filtering timestamps after the specified time
+type HasMetadataSpec struct {
+	Id            *string                      `json:"id"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Since         *time.Time                   `json:"since"`
+	Key           *string                      `json:"key"`
+	Value         *string                      `json:"value"`
+	Justification *string                      `json:"justification"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
+	DocumentRef   *string                      `json:"documentRef"`
+}
+
+// GetId returns HasMetadataSpec.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetId() *string { return v.Id }
+
+// GetSubject returns HasMetadataSpec.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Subject }
+
+// GetSince returns HasMetadataSpec.Since, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetSince() *time.Time { return v.Since }
+
+// GetKey returns HasMetadataSpec.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetKey() *string { return v.Key }
+
+// GetValue returns HasMetadataSpec.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetValue() *string { return v.Value }
+
+// GetJustification returns HasMetadataSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns HasMetadataSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasMetadataSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HasMetadataSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 type HasSBOMIncludesInputSpec struct {
 	Packages     []string `json:"packages"`
@@ -8393,6 +11029,388 @@ type HasSBOMsResponse struct {
 // GetHasSBOM returns HasSBOMsResponse.HasSBOM, and is useful for accessing the field via an interface.
 func (v *HasSBOMsResponse) GetHasSBOM() []HasSBOMsHasSBOM { return v.HasSBOM }
 
+// HasSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type HasSLSAHasSLSA struct {
+	AllHasSLSATree `json:"-"`
+}
+
+// GetId returns HasSLSAHasSLSA.Id, and is useful for accessing the field via an interface.
+func (v *HasSLSAHasSLSA) GetId() string { return v.AllHasSLSATree.Id }
+
+// GetSubject returns HasSLSAHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *HasSLSAHasSLSA) GetSubject() AllHasSLSATreeSubjectArtifact { return v.AllHasSLSATree.Subject }
+
+// GetSlsa returns HasSLSAHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *HasSLSAHasSLSA) GetSlsa() AllHasSLSATreeSlsaSLSA { return v.AllHasSLSATree.Slsa }
+
+func (v *HasSLSAHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSLSAHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSLSAHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSLSAHasSLSA struct {
+	Id string `json:"id"`
+
+	Subject AllHasSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa AllHasSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *HasSLSAHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSLSAHasSLSA) __premarshalJSON() (*__premarshalHasSLSAHasSLSA, error) {
+	var retval __premarshalHasSLSAHasSLSA
+
+	retval.Id = v.AllHasSLSATree.Id
+	retval.Subject = v.AllHasSLSATree.Subject
+	retval.Slsa = v.AllHasSLSATree.Slsa
+	return &retval, nil
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnection includes the requested fields of the GraphQL type HasSLSAConnection.
+// The GraphQL type's documentation follows.
+//
+// HasSLSAConnection returns the paginated results for HasSLSA.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSLSAEdge which contains the current cursor
+// and the HasSLSA node itself
+type HasSLSAListHasSLSAListHasSLSAConnection struct {
+	TotalCount int                                                       `json:"totalCount"`
+	Edges      []HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge `json:"edges"`
+	PageInfo   HasSLSAListHasSLSAListHasSLSAConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasSLSAListHasSLSAListHasSLSAConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns HasSLSAListHasSLSAListHasSLSAConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnection) GetEdges() []HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasSLSAListHasSLSAListHasSLSAConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnection) GetPageInfo() HasSLSAListHasSLSAListHasSLSAConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge includes the requested fields of the GraphQL type HasSLSAEdge.
+// The GraphQL type's documentation follows.
+//
+// HasSLSAEdge contains the cursor for the resulting node and
+// the HasSLSA node itself.
+type HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge struct {
+	Cursor string                                                             `json:"cursor"`
+	Node   HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA `json:"node"`
+}
+
+// GetCursor returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge) GetCursor() string { return v.Cursor }
+
+// GetNode returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge) GetNode() HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA {
+	return v.Node
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA struct {
+	AllHasSLSATree `json:"-"`
+}
+
+// GetId returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA.Id, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) GetId() string {
+	return v.AllHasSLSATree.Id
+}
+
+// GetSubject returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) GetSubject() AllHasSLSATreeSubjectArtifact {
+	return v.AllHasSLSATree.Subject
+}
+
+// GetSlsa returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) GetSlsa() AllHasSLSATreeSlsaSLSA {
+	return v.AllHasSLSATree.Slsa
+}
+
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA struct {
+	Id string `json:"id"`
+
+	Subject AllHasSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa AllHasSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) __premarshalJSON() (*__premarshalHasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA, error) {
+	var retval __premarshalHasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA
+
+	retval.Id = v.AllHasSLSATree.Id
+	retval.Subject = v.AllHasSLSATree.Subject
+	retval.Slsa = v.AllHasSLSATree.Slsa
+	return &retval, nil
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasSLSAListHasSLSAListHasSLSAConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasSLSAListHasSLSAListHasSLSAConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasSLSAListHasSLSAListHasSLSAConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// GetHasNextPage returns HasSLSAListHasSLSAListHasSLSAConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// HasSLSAListResponse is returned by HasSLSAList on success.
+type HasSLSAListResponse struct {
+	// Returns a paginated results via HasSLSAConnection
+	HasSLSAList *HasSLSAListHasSLSAListHasSLSAConnection `json:"HasSLSAList"`
+}
+
+// GetHasSLSAList returns HasSLSAListResponse.HasSLSAList, and is useful for accessing the field via an interface.
+func (v *HasSLSAListResponse) GetHasSLSAList() *HasSLSAListHasSLSAListHasSLSAConnection {
+	return v.HasSLSAList
+}
+
+// HasSLSAResponse is returned by HasSLSA on success.
+type HasSLSAResponse struct {
+	// Returns all SLSA attestations matching the filter.
+	HasSLSA []HasSLSAHasSLSA `json:"HasSLSA"`
+}
+
+// GetHasSLSA returns HasSLSAResponse.HasSLSA, and is useful for accessing the field via an interface.
+func (v *HasSLSAResponse) GetHasSLSA() []HasSLSAHasSLSA { return v.HasSLSA }
+
+// HasSLSASpec allows filtering the list of HasSLSA to return.
+type HasSLSASpec struct {
+	Id          *string             `json:"id"`
+	Subject     *ArtifactSpec       `json:"subject"`
+	BuiltFrom   []ArtifactSpec      `json:"builtFrom"`
+	BuiltBy     *BuilderSpec        `json:"builtBy"`
+	BuildType   *string             `json:"buildType"`
+	Predicate   []SLSAPredicateSpec `json:"predicate"`
+	SlsaVersion *string             `json:"slsaVersion"`
+	StartedOn   *time.Time          `json:"startedOn"`
+	FinishedOn  *time.Time          `json:"finishedOn"`
+	Origin      *string             `json:"origin"`
+	Collector   *string             `json:"collector"`
+	DocumentRef *string             `json:"documentRef"`
+}
+
+// GetId returns HasSLSASpec.Id, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetId() *string { return v.Id }
+
+// GetSubject returns HasSLSASpec.Subject, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetSubject() *ArtifactSpec { return v.Subject }
+
+// GetBuiltFrom returns HasSLSASpec.BuiltFrom, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetBuiltFrom() []ArtifactSpec { return v.BuiltFrom }
+
+// GetBuiltBy returns HasSLSASpec.BuiltBy, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetBuiltBy() *BuilderSpec { return v.BuiltBy }
+
+// GetBuildType returns HasSLSASpec.BuildType, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetBuildType() *string { return v.BuildType }
+
+// GetPredicate returns HasSLSASpec.Predicate, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetPredicate() []SLSAPredicateSpec { return v.Predicate }
+
+// GetSlsaVersion returns HasSLSASpec.SlsaVersion, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetSlsaVersion() *string { return v.SlsaVersion }
+
+// GetStartedOn returns HasSLSASpec.StartedOn, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetStartedOn() *time.Time { return v.StartedOn }
+
+// GetFinishedOn returns HasSLSASpec.FinishedOn, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetFinishedOn() *time.Time { return v.FinishedOn }
+
+// GetOrigin returns HasSLSASpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasSLSASpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HasSLSASpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// HasSourceAtHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAt records that a package's repository is a given source.
+type HasSourceAtHasSourceAt struct {
+	AllHasSourceAt `json:"-"`
+}
+
+// GetId returns HasSourceAtHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetId() string { return v.AllHasSourceAt.Id }
+
+// GetJustification returns HasSourceAtHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetJustification() string { return v.AllHasSourceAt.Justification }
+
+// GetKnownSince returns HasSourceAtHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetKnownSince() time.Time { return v.AllHasSourceAt.KnownSince }
+
+// GetPackage returns HasSourceAtHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetPackage() AllHasSourceAtPackage { return v.AllHasSourceAt.Package }
+
+// GetSource returns HasSourceAtHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetSource() AllHasSourceAtSource { return v.AllHasSourceAt.Source }
+
+// GetOrigin returns HasSourceAtHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetOrigin() string { return v.AllHasSourceAt.Origin }
+
+// GetCollector returns HasSourceAtHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetCollector() string { return v.AllHasSourceAt.Collector }
+
+func (v *HasSourceAtHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtHasSourceAt struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package AllHasSourceAtPackage `json:"package"`
+
+	Source AllHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSourceAtHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtHasSourceAt) __premarshalJSON() (*__premarshalHasSourceAtHasSourceAt, error) {
+	var retval __premarshalHasSourceAtHasSourceAt
+
+	retval.Id = v.AllHasSourceAt.Id
+	retval.Justification = v.AllHasSourceAt.Justification
+	retval.KnownSince = v.AllHasSourceAt.KnownSince
+	retval.Package = v.AllHasSourceAt.Package
+	retval.Source = v.AllHasSourceAt.Source
+	retval.Origin = v.AllHasSourceAt.Origin
+	retval.Collector = v.AllHasSourceAt.Collector
+	return &retval, nil
+}
+
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
@@ -8417,6 +11435,254 @@ func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns HasSourceAtInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HasSourceAtInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// HasSourceAtListHasSourceAtListHasSourceAtConnection includes the requested fields of the GraphQL type HasSourceAtConnection.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAtConnection returns the paginated results for HasSourceAt.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSourceAtEdge which contains the current cursor
+// and the HasSourceAt node itself
+type HasSourceAtListHasSourceAtListHasSourceAtConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge `json:"edges"`
+	PageInfo   HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasSourceAtListHasSourceAtListHasSourceAtConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns HasSourceAtListHasSourceAtListHasSourceAtConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnection) GetEdges() []HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasSourceAtListHasSourceAtListHasSourceAtConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnection) GetPageInfo() HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge includes the requested fields of the GraphQL type HasSourceAtEdge.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAtEdge contains the cursor for the resulting node and
+// the HasSourceAt node itself.
+type HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt `json:"node"`
+}
+
+// GetCursor returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge) GetNode() HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt {
+	return v.Node
+}
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAt records that a package's repository is a given source.
+type HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt struct {
+	AllHasSourceAt `json:"-"`
+}
+
+// GetId returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetId() string {
+	return v.AllHasSourceAt.Id
+}
+
+// GetJustification returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetJustification() string {
+	return v.AllHasSourceAt.Justification
+}
+
+// GetKnownSince returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetKnownSince() time.Time {
+	return v.AllHasSourceAt.KnownSince
+}
+
+// GetPackage returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetPackage() AllHasSourceAtPackage {
+	return v.AllHasSourceAt.Package
+}
+
+// GetSource returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetSource() AllHasSourceAtSource {
+	return v.AllHasSourceAt.Source
+}
+
+// GetOrigin returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetOrigin() string {
+	return v.AllHasSourceAt.Origin
+}
+
+// GetCollector returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetCollector() string {
+	return v.AllHasSourceAt.Collector
+}
+
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package AllHasSourceAtPackage `json:"package"`
+
+	Source AllHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) __premarshalJSON() (*__premarshalHasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt, error) {
+	var retval __premarshalHasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt
+
+	retval.Id = v.AllHasSourceAt.Id
+	retval.Justification = v.AllHasSourceAt.Justification
+	retval.KnownSince = v.AllHasSourceAt.KnownSince
+	retval.Package = v.AllHasSourceAt.Package
+	retval.Source = v.AllHasSourceAt.Source
+	retval.Origin = v.AllHasSourceAt.Origin
+	retval.Collector = v.AllHasSourceAt.Collector
+	return &retval, nil
+}
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// HasSourceAtListResponse is returned by HasSourceAtList on success.
+type HasSourceAtListResponse struct {
+	// Returns a paginated results via HasSourceAtConnection
+	HasSourceAtList *HasSourceAtListHasSourceAtListHasSourceAtConnection `json:"HasSourceAtList"`
+}
+
+// GetHasSourceAtList returns HasSourceAtListResponse.HasSourceAtList, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListResponse) GetHasSourceAtList() *HasSourceAtListHasSourceAtListHasSourceAtConnection {
+	return v.HasSourceAtList
+}
+
+// HasSourceAtResponse is returned by HasSourceAt on success.
+type HasSourceAtResponse struct {
+	// Returns all source mappings that match the filter.
+	HasSourceAt []HasSourceAtHasSourceAt `json:"HasSourceAt"`
+}
+
+// GetHasSourceAt returns HasSourceAtResponse.HasSourceAt, and is useful for accessing the field via an interface.
+func (v *HasSourceAtResponse) GetHasSourceAt() []HasSourceAtHasSourceAt { return v.HasSourceAt }
+
+// HasSourceAtSpec allows filtering the list of HasSourceAt to return.
+type HasSourceAtSpec struct {
+	Id            *string     `json:"id"`
+	Package       *PkgSpec    `json:"package"`
+	Source        *SourceSpec `json:"source"`
+	KnownSince    *time.Time  `json:"knownSince"`
+	Justification *string     `json:"justification"`
+	Origin        *string     `json:"origin"`
+	Collector     *string     `json:"collector"`
+	DocumentRef   *string     `json:"documentRef"`
+}
+
+// GetId returns HasSourceAtSpec.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetId() *string { return v.Id }
+
+// GetPackage returns HasSourceAtSpec.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetSource returns HasSourceAtSpec.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetSource() *SourceSpec { return v.Source }
+
+// GetKnownSince returns HasSourceAtSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetJustification returns HasSourceAtSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns HasSourceAtSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasSourceAtSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HasSourceAtSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetDocumentRef() *string { return v.DocumentRef }
+
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
 	Justification string `json:"justification"`
@@ -8436,6 +11702,191 @@ func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HashEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HashEqualListHashEqualListHashEqualConnection includes the requested fields of the GraphQL type HashEqualConnection.
+// The GraphQL type's documentation follows.
+//
+// HashEqualConnection returns the paginated results for HashEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HashEqualEdge which contains the current cursor
+// and the HashEqual node itself
+type HashEqualListHashEqualListHashEqualConnection struct {
+	TotalCount int                                                               `json:"totalCount"`
+	Edges      []HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge `json:"edges"`
+	PageInfo   HashEqualListHashEqualListHashEqualConnectionPageInfo             `json:"pageInfo"`
+}
+
+// GetTotalCount returns HashEqualListHashEqualListHashEqualConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns HashEqualListHashEqualListHashEqualConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnection) GetEdges() []HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HashEqualListHashEqualListHashEqualConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnection) GetPageInfo() HashEqualListHashEqualListHashEqualConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge includes the requested fields of the GraphQL type HashEqualEdge.
+// The GraphQL type's documentation follows.
+//
+// HashEqualEdge contains the cursor for the resulting node and
+// the HashEqual node itself.
+type HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge struct {
+	Cursor string                                                                       `json:"cursor"`
+	Node   HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual `json:"node"`
+}
+
+// GetCursor returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge.Node, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdge) GetNode() HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual {
+	return v.Node
+}
+
+// HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that two artifacts are identical.
+type HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual struct {
+	AllHashEqualTree `json:"-"`
+}
+
+// GetId returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Id, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetId() string {
+	return v.AllHashEqualTree.Id
+}
+
+// GetJustification returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetJustification() string {
+	return v.AllHashEqualTree.Justification
+}
+
+// GetArtifacts returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetArtifacts() []AllHashEqualTreeArtifactsArtifact {
+	return v.AllHashEqualTree.Artifacts
+}
+
+// GetOrigin returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetOrigin() string {
+	return v.AllHashEqualTree.Origin
+}
+
+// GetCollector returns HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) GetCollector() string {
+	return v.AllHashEqualTree.Collector
+}
+
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Artifacts []AllHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual) __premarshalJSON() (*__premarshalHashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual, error) {
+	var retval __premarshalHashEqualListHashEqualListHashEqualConnectionEdgesHashEqualEdgeNodeHashEqual
+
+	retval.Id = v.AllHashEqualTree.Id
+	retval.Justification = v.AllHashEqualTree.Justification
+	retval.Artifacts = v.AllHashEqualTree.Artifacts
+	retval.Origin = v.AllHashEqualTree.Origin
+	retval.Collector = v.AllHashEqualTree.Collector
+	return &retval, nil
+}
+
+// HashEqualListHashEqualListHashEqualConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HashEqualListHashEqualListHashEqualConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HashEqualListHashEqualListHashEqualConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HashEqualListHashEqualListHashEqualConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns HashEqualListHashEqualListHashEqualConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HashEqualListHashEqualListHashEqualConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// HashEqualListResponse is returned by HashEqualList on success.
+type HashEqualListResponse struct {
+	// Returns a paginated results via HashEqualConnection
+	HashEqualList *HashEqualListHashEqualListHashEqualConnection `json:"HashEqualList"`
+}
+
+// GetHashEqualList returns HashEqualListResponse.HashEqualList, and is useful for accessing the field via an interface.
+func (v *HashEqualListResponse) GetHashEqualList() *HashEqualListHashEqualListHashEqualConnection {
+	return v.HashEqualList
+}
 
 // HashEqualSpec allows filtering the list of artifact equality statements to
 // return in a query.
@@ -9618,119 +13069,6 @@ func (v *IsOccurrenceSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns IsOccurrenceSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceSpec) GetDocumentRef() *string { return v.DocumentRef }
 
-// IsOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
-// The GraphQL type's documentation follows.
-//
-// IsOccurrence is an attestation to link an artifact to a package or source.
-//
-// Attestation must occur at the PackageVersion or at the SourceName.
-type IsOccurrencesIsOccurrence struct {
-	AllIsOccurrencesTree `json:"-"`
-}
-
-// GetId returns IsOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesIsOccurrence) GetId() string { return v.AllIsOccurrencesTree.Id }
-
-// GetSubject returns IsOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
-	return v.AllIsOccurrencesTree.Subject
-}
-
-// GetArtifact returns IsOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
-	return v.AllIsOccurrencesTree.Artifact
-}
-
-// GetJustification returns IsOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesIsOccurrence) GetJustification() string {
-	return v.AllIsOccurrencesTree.Justification
-}
-
-// GetOrigin returns IsOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesIsOccurrence) GetOrigin() string { return v.AllIsOccurrencesTree.Origin }
-
-// GetCollector returns IsOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesIsOccurrence) GetCollector() string { return v.AllIsOccurrencesTree.Collector }
-
-func (v *IsOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsOccurrencesIsOccurrence
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsOccurrencesIsOccurrence = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllIsOccurrencesTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsOccurrencesIsOccurrence struct {
-	Id string `json:"id"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
-
-	Justification string `json:"justification"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *IsOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesIsOccurrence, error) {
-	var retval __premarshalIsOccurrencesIsOccurrence
-
-	retval.Id = v.AllIsOccurrencesTree.Id
-	{
-
-		dst := &retval.Subject
-		src := v.AllIsOccurrencesTree.Subject
-		var err error
-		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"unable to marshal IsOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
-		}
-	}
-	retval.Artifact = v.AllIsOccurrencesTree.Artifact
-	retval.Justification = v.AllIsOccurrencesTree.Justification
-	retval.Origin = v.AllIsOccurrencesTree.Origin
-	retval.Collector = v.AllIsOccurrencesTree.Collector
-	return &retval, nil
-}
-
-// IsOccurrencesResponse is returned by IsOccurrences on success.
-type IsOccurrencesResponse struct {
-	// Returns all artifacts-source/package mappings that match a filter.
-	IsOccurrence []IsOccurrencesIsOccurrence `json:"IsOccurrence"`
-}
-
-// GetIsOccurrence returns IsOccurrencesResponse.IsOccurrence, and is useful for accessing the field via an interface.
-func (v *IsOccurrencesResponse) GetIsOccurrence() []IsOccurrencesIsOccurrence { return v.IsOccurrence }
-
 // LicenseInputSpec specifies an license for mutations. One of inline or
 // listVersion should be empty or missing.
 type LicenseInputSpec struct {
@@ -9747,6 +13085,201 @@ func (v *LicenseInputSpec) GetInline() *string { return v.Inline }
 
 // GetListVersion returns LicenseInputSpec.ListVersion, and is useful for accessing the field via an interface.
 func (v *LicenseInputSpec) GetListVersion() *string { return v.ListVersion }
+
+// LicenseListLicenseListLicenseConnection includes the requested fields of the GraphQL type LicenseConnection.
+// The GraphQL type's documentation follows.
+//
+// LicenseConnection returns the paginated results for License.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the LicenseEdge which contains the current cursor
+// and the License node itself
+type LicenseListLicenseListLicenseConnection struct {
+	TotalCount int                                                       `json:"totalCount"`
+	Edges      []LicenseListLicenseListLicenseConnectionEdgesLicenseEdge `json:"edges"`
+	PageInfo   LicenseListLicenseListLicenseConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns LicenseListLicenseListLicenseConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns LicenseListLicenseListLicenseConnection.Edges, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnection) GetEdges() []LicenseListLicenseListLicenseConnectionEdgesLicenseEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns LicenseListLicenseListLicenseConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnection) GetPageInfo() LicenseListLicenseListLicenseConnectionPageInfo {
+	return v.PageInfo
+}
+
+// LicenseListLicenseListLicenseConnectionEdgesLicenseEdge includes the requested fields of the GraphQL type LicenseEdge.
+// The GraphQL type's documentation follows.
+//
+// LicenseEdge contains the cursor for the resulting node and
+// the License node itself.
+type LicenseListLicenseListLicenseConnectionEdgesLicenseEdge struct {
+	Cursor string                                                             `json:"cursor"`
+	Node   LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense `json:"node"`
+}
+
+// GetCursor returns LicenseListLicenseListLicenseConnectionEdgesLicenseEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdge) GetCursor() string { return v.Cursor }
+
+// GetNode returns LicenseListLicenseListLicenseConnectionEdgesLicenseEdge.Node, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdge) GetNode() LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense {
+	return v.Node
+}
+
+// LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense struct {
+	AllLicenseTree `json:"-"`
+}
+
+// GetId returns LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense.Id, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) GetId() string {
+	return v.AllLicenseTree.Id
+}
+
+// GetName returns LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense.Name, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) GetName() string {
+	return v.AllLicenseTree.Name
+}
+
+// GetInline returns LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense.Inline, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) GetInline() *string {
+	return v.AllLicenseTree.Inline
+}
+
+// GetListVersion returns LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense.ListVersion, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) GetListVersion() *string {
+	return v.AllLicenseTree.ListVersion
+}
+
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllLicenseTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalLicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Inline *string `json:"inline"`
+
+	ListVersion *string `json:"listVersion"`
+}
+
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *LicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense) __premarshalJSON() (*__premarshalLicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense, error) {
+	var retval __premarshalLicenseListLicenseListLicenseConnectionEdgesLicenseEdgeNodeLicense
+
+	retval.Id = v.AllLicenseTree.Id
+	retval.Name = v.AllLicenseTree.Name
+	retval.Inline = v.AllLicenseTree.Inline
+	retval.ListVersion = v.AllLicenseTree.ListVersion
+	return &retval, nil
+}
+
+// LicenseListLicenseListLicenseConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type LicenseListLicenseListLicenseConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns LicenseListLicenseListLicenseConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns LicenseListLicenseListLicenseConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// GetHasNextPage returns LicenseListLicenseListLicenseConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *LicenseListLicenseListLicenseConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// LicenseListResponse is returned by LicenseList on success.
+type LicenseListResponse struct {
+	// Returns a paginated results via LicenseConnection
+	LicenseList *LicenseListLicenseListLicenseConnection `json:"licenseList"`
+}
+
+// GetLicenseList returns LicenseListResponse.LicenseList, and is useful for accessing the field via an interface.
+func (v *LicenseListResponse) GetLicenseList() *LicenseListLicenseListLicenseConnection {
+	return v.LicenseList
+}
 
 // LicenseSpec allows filtering the list of licenses to return in a query.
 type LicenseSpec struct {
@@ -18824,6 +22357,327 @@ func (v *NodesResponse) __premarshalJSON() (*__premarshalNodesResponse, error) {
 	return &retval, nil
 }
 
+// OccurrenceListIsOccurrenceListIsOccurrenceConnection includes the requested fields of the GraphQL type IsOccurrenceConnection.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrenceConnection returns the paginated results for IsOccurrence.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsOccurrenceEdge which contains the current cursor
+// and the IsOccurrence node itself
+type OccurrenceListIsOccurrenceListIsOccurrenceConnection struct {
+	TotalCount int                                                                         `json:"totalCount"`
+	Edges      []OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge `json:"edges"`
+	PageInfo   OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetTotalCount returns OccurrenceListIsOccurrenceListIsOccurrenceConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns OccurrenceListIsOccurrenceListIsOccurrenceConnection.Edges, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnection) GetEdges() []OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns OccurrenceListIsOccurrenceListIsOccurrenceConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnection) GetPageInfo() OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo {
+	return v.PageInfo
+}
+
+// OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge includes the requested fields of the GraphQL type IsOccurrenceEdge.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrenceEdge contains the cursor for the resulting node and
+// the IsOccurrence node itself.
+type OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge struct {
+	Cursor string                                                                                    `json:"cursor"`
+	Node   OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence `json:"node"`
+}
+
+// GetCursor returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge.Node, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdge) GetNode() OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence {
+	return v.Node
+}
+
+// OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) GetId() string {
+	return v.AllIsOccurrencesTree.Id
+}
+
+// GetSubject returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) GetOrigin() string {
+	return v.AllIsOccurrencesTree.Origin
+}
+
+// GetCollector returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) GetCollector() string {
+	return v.AllIsOccurrencesTree.Collector
+}
+
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalOccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence) __premarshalJSON() (*__premarshalOccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence, error) {
+	var retval __premarshalOccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal OccurrenceListIsOccurrenceListIsOccurrenceConnectionEdgesIsOccurrenceEdgeNodeIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *OccurrenceListIsOccurrenceListIsOccurrenceConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// OccurrenceListResponse is returned by OccurrenceList on success.
+type OccurrenceListResponse struct {
+	// Returns a paginated results via IsOccurrenceConnection
+	IsOccurrenceList *OccurrenceListIsOccurrenceListIsOccurrenceConnection `json:"IsOccurrenceList"`
+}
+
+// GetIsOccurrenceList returns OccurrenceListResponse.IsOccurrenceList, and is useful for accessing the field via an interface.
+func (v *OccurrenceListResponse) GetIsOccurrenceList() *OccurrenceListIsOccurrenceListIsOccurrenceConnection {
+	return v.IsOccurrenceList
+}
+
+// OccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type OccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns OccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *OccurrencesIsOccurrence) GetId() string { return v.AllIsOccurrencesTree.Id }
+
+// GetSubject returns OccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *OccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns OccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *OccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns OccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *OccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns OccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *OccurrencesIsOccurrence) GetOrigin() string { return v.AllIsOccurrencesTree.Origin }
+
+// GetCollector returns OccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *OccurrencesIsOccurrence) GetCollector() string { return v.AllIsOccurrencesTree.Collector }
+
+func (v *OccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*OccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.OccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *OccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *OccurrencesIsOccurrence) __premarshalJSON() (*__premarshalOccurrencesIsOccurrence, error) {
+	var retval __premarshalOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal OccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// OccurrencesResponse is returned by Occurrences on success.
+type OccurrencesResponse struct {
+	// Returns all artifacts-source/package mappings that match a filter.
+	IsOccurrence []OccurrencesIsOccurrence `json:"IsOccurrence"`
+}
+
+// GetIsOccurrence returns OccurrencesResponse.IsOccurrence, and is useful for accessing the field via an interface.
+func (v *OccurrencesResponse) GetIsOccurrence() []OccurrencesIsOccurrence { return v.IsOccurrence }
+
 // PackageNamesPackagesPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
 //
@@ -19286,6 +23140,188 @@ type PackageVersionsResponse struct {
 
 // GetPackages returns PackageVersionsResponse.Packages, and is useful for accessing the field via an interface.
 func (v *PackageVersionsResponse) GetPackages() []PackageVersionsPackagesPackage { return v.Packages }
+
+// PackagesListPackagesListPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+// The GraphQL type's documentation follows.
+//
+// PackageConnection returns the paginated results for Package.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PackageEdge which contains the current cursor
+// and the Package node itself
+type PackagesListPackagesListPackageConnection struct {
+	TotalCount int                                                         `json:"totalCount"`
+	Edges      []PackagesListPackagesListPackageConnectionEdgesPackageEdge `json:"edges"`
+	PageInfo   PackagesListPackagesListPackageConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns PackagesListPackagesListPackageConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns PackagesListPackagesListPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnection) GetEdges() []PackagesListPackagesListPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns PackagesListPackagesListPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnection) GetPageInfo() PackagesListPackagesListPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// PackagesListPackagesListPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// PackageEdge contains the cursor for the resulting node and
+// the Package node itself.
+type PackagesListPackagesListPackageConnectionEdgesPackageEdge struct {
+	Cursor string                                                               `json:"cursor"`
+	Node   PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetCursor returns PackagesListPackagesListPackageConnectionEdgesPackageEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns PackagesListPackagesListPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdge) GetNode() PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.AllPkgTree.Id
+}
+
+// GetType returns PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage.Type, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage) GetType() string {
+	return v.AllPkgTree.Type
+}
+
+// GetNamespaces returns PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage) __premarshalJSON() (*__premarshalPackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage, error) {
+	var retval __premarshalPackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// PackagesListPackagesListPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PackagesListPackagesListPackageConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns PackagesListPackagesListPackageConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns PackagesListPackagesListPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns PackagesListPackagesListPackageConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *PackagesListPackagesListPackageConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// PackagesListResponse is returned by PackagesList on success.
+type PackagesListResponse struct {
+	// Returns a paginated results via PackageConnection
+	PackagesList *PackagesListPackagesListPackageConnection `json:"packagesList"`
+}
+
+// GetPackagesList returns PackagesListResponse.PackagesList, and is useful for accessing the field via an interface.
+func (v *PackagesListResponse) GetPackagesList() *PackagesListPackagesListPackageConnection {
+	return v.PackagesList
+}
 
 // PackagesPackagesPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -22364,6 +26400,311 @@ func (v *PkgEqualInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns PkgEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *PkgEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// PkgEqualListPkgEqualListPkgEqualConnection includes the requested fields of the GraphQL type PkgEqualConnection.
+// The GraphQL type's documentation follows.
+//
+// PkgEqualConnection returns the paginated results for PkgEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PkgEqualEdge which contains the current cursor
+// and the PkgEqual node itself
+type PkgEqualListPkgEqualListPkgEqualConnection struct {
+	TotalCount int                                                           `json:"totalCount"`
+	Edges      []PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge `json:"edges"`
+	PageInfo   PkgEqualListPkgEqualListPkgEqualConnectionPageInfo            `json:"pageInfo"`
+}
+
+// GetTotalCount returns PkgEqualListPkgEqualListPkgEqualConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns PkgEqualListPkgEqualListPkgEqualConnection.Edges, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnection) GetEdges() []PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns PkgEqualListPkgEqualListPkgEqualConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnection) GetPageInfo() PkgEqualListPkgEqualListPkgEqualConnectionPageInfo {
+	return v.PageInfo
+}
+
+// PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge includes the requested fields of the GraphQL type PkgEqualEdge.
+// The GraphQL type's documentation follows.
+//
+// PkgEqualEdge contains the cursor for the resulting node and
+// the PkgEqual node itself.
+type PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge struct {
+	Cursor string                                                                  `json:"cursor"`
+	Node   PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual `json:"node"`
+}
+
+// GetCursor returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge.Node, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge) GetNode() PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual {
+	return v.Node
+}
+
+// PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual includes the requested fields of the GraphQL type PkgEqual.
+// The GraphQL type's documentation follows.
+//
+// PkgEqual is an attestation that two packages are similar.
+type PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual struct {
+	AllPkgEqual `json:"-"`
+}
+
+// GetId returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Id, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetId() string {
+	return v.AllPkgEqual.Id
+}
+
+// GetJustification returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Justification, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetJustification() string {
+	return v.AllPkgEqual.Justification
+}
+
+// GetPackages returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Packages, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetPackages() []AllPkgEqualPackagesPackage {
+	return v.AllPkgEqual.Packages
+}
+
+// GetOrigin returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Origin, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetOrigin() string {
+	return v.AllPkgEqual.Origin
+}
+
+// GetCollector returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Collector, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetCollector() string {
+	return v.AllPkgEqual.Collector
+}
+
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Packages []AllPkgEqualPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) __premarshalJSON() (*__premarshalPkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual, error) {
+	var retval __premarshalPkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual
+
+	retval.Id = v.AllPkgEqual.Id
+	retval.Justification = v.AllPkgEqual.Justification
+	retval.Packages = v.AllPkgEqual.Packages
+	retval.Origin = v.AllPkgEqual.Origin
+	retval.Collector = v.AllPkgEqual.Collector
+	return &retval, nil
+}
+
+// PkgEqualListPkgEqualListPkgEqualConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PkgEqualListPkgEqualListPkgEqualConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns PkgEqualListPkgEqualListPkgEqualConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns PkgEqualListPkgEqualListPkgEqualConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns PkgEqualListPkgEqualListPkgEqualConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// PkgEqualListResponse is returned by PkgEqualList on success.
+type PkgEqualListResponse struct {
+	// Returns a paginated results via PkgEqualConnection
+	PkgEqualList *PkgEqualListPkgEqualListPkgEqualConnection `json:"PkgEqualList"`
+}
+
+// GetPkgEqualList returns PkgEqualListResponse.PkgEqualList, and is useful for accessing the field via an interface.
+func (v *PkgEqualListResponse) GetPkgEqualList() *PkgEqualListPkgEqualListPkgEqualConnection {
+	return v.PkgEqualList
+}
+
+// PkgEqualSpec allows filtering the list of package equality statements to return
+// in a query.
+//
+// Specifying just one package allows to query for all similar packages (if any
+// exists).
+type PkgEqualSpec struct {
+	Id            *string    `json:"id"`
+	Packages      []*PkgSpec `json:"packages"`
+	Justification *string    `json:"justification"`
+	Origin        *string    `json:"origin"`
+	Collector     *string    `json:"collector"`
+	DocumentRef   *string    `json:"documentRef"`
+}
+
+// GetId returns PkgEqualSpec.Id, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetId() *string { return v.Id }
+
+// GetPackages returns PkgEqualSpec.Packages, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetPackages() []*PkgSpec { return v.Packages }
+
+// GetJustification returns PkgEqualSpec.Justification, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns PkgEqualSpec.Origin, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns PkgEqualSpec.Collector, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns PkgEqualSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// PkgEqualsPkgEqual includes the requested fields of the GraphQL type PkgEqual.
+// The GraphQL type's documentation follows.
+//
+// PkgEqual is an attestation that two packages are similar.
+type PkgEqualsPkgEqual struct {
+	AllPkgEqual `json:"-"`
+}
+
+// GetId returns PkgEqualsPkgEqual.Id, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetId() string { return v.AllPkgEqual.Id }
+
+// GetJustification returns PkgEqualsPkgEqual.Justification, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetJustification() string { return v.AllPkgEqual.Justification }
+
+// GetPackages returns PkgEqualsPkgEqual.Packages, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetPackages() []AllPkgEqualPackagesPackage { return v.AllPkgEqual.Packages }
+
+// GetOrigin returns PkgEqualsPkgEqual.Origin, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetOrigin() string { return v.AllPkgEqual.Origin }
+
+// GetCollector returns PkgEqualsPkgEqual.Collector, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetCollector() string { return v.AllPkgEqual.Collector }
+
+func (v *PkgEqualsPkgEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PkgEqualsPkgEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PkgEqualsPkgEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPkgEqualsPkgEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Packages []AllPkgEqualPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PkgEqualsPkgEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PkgEqualsPkgEqual) __premarshalJSON() (*__premarshalPkgEqualsPkgEqual, error) {
+	var retval __premarshalPkgEqualsPkgEqual
+
+	retval.Id = v.AllPkgEqual.Id
+	retval.Justification = v.AllPkgEqual.Justification
+	retval.Packages = v.AllPkgEqual.Packages
+	retval.Origin = v.AllPkgEqual.Origin
+	retval.Collector = v.AllPkgEqual.Collector
+	return &retval, nil
+}
+
+// PkgEqualsResponse is returned by PkgEquals on success.
+type PkgEqualsResponse struct {
+	// Returns all package equality statements matching a filter.
+	PkgEqual []PkgEqualsPkgEqual `json:"PkgEqual"`
+}
+
+// GetPkgEqual returns PkgEqualsResponse.PkgEqual, and is useful for accessing the field via an interface.
+func (v *PkgEqualsResponse) GetPkgEqual() []PkgEqualsPkgEqual { return v.PkgEqual }
+
 // PkgInputSpec specifies a package for mutations.
 //
 // This is different than PkgSpec because we want to encode mandatory fields:
@@ -22486,6 +26827,441 @@ func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns PointOfContactInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *PointOfContactInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// PointOfContactListPointOfContactListPointOfContactConnection includes the requested fields of the GraphQL type PointOfContactConnection.
+// The GraphQL type's documentation follows.
+//
+// PointOfContactConnection returns the paginated results for PointOfContact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PointOfContactEdge which contains the current cursor
+// and the PointOfContact node itself
+type PointOfContactListPointOfContactListPointOfContactConnection struct {
+	TotalCount int                                                                                   `json:"totalCount"`
+	Edges      []PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge `json:"edges"`
+	PageInfo   PointOfContactListPointOfContactListPointOfContactConnectionPageInfo                  `json:"pageInfo"`
+}
+
+// GetTotalCount returns PointOfContactListPointOfContactListPointOfContactConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns PointOfContactListPointOfContactListPointOfContactConnection.Edges, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnection) GetEdges() []PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns PointOfContactListPointOfContactListPointOfContactConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnection) GetPageInfo() PointOfContactListPointOfContactListPointOfContactConnectionPageInfo {
+	return v.PageInfo
+}
+
+// PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge includes the requested fields of the GraphQL type PointOfContactEdge.
+// The GraphQL type's documentation follows.
+//
+// PointOfContactEdge contains the cursor for the resulting node and
+// the PointOfContact node itself.
+type PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge struct {
+	Cursor string                                                                                                `json:"cursor"`
+	Node   PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact `json:"node"`
+}
+
+// GetCursor returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge.Node, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdge) GetNode() PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact {
+	return v.Node
+}
+
+// PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact struct {
+	AllPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetId() string {
+	return v.AllPointOfContact.Id
+}
+
+// GetSubject returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetEmail() string {
+	return v.AllPointOfContact.Email
+}
+
+// GetInfo returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetInfo() string {
+	return v.AllPointOfContact.Info
+}
+
+// GetSince returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetSince() time.Time {
+	return v.AllPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetJustification() string {
+	return v.AllPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetOrigin() string {
+	return v.AllPointOfContact.Origin
+}
+
+// GetCollector returns PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) GetCollector() string {
+	return v.AllPointOfContact.Collector
+}
+
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact) __premarshalJSON() (*__premarshalPointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact, error) {
+	var retval __premarshalPointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact
+
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactListPointOfContactListPointOfContactConnectionEdgesPointOfContactEdgeNodePointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactListPointOfContactListPointOfContactConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PointOfContactListPointOfContactListPointOfContactConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns PointOfContactListPointOfContactListPointOfContactConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns PointOfContactListPointOfContactListPointOfContactConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns PointOfContactListPointOfContactListPointOfContactConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *PointOfContactListPointOfContactListPointOfContactConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// PointOfContactListResponse is returned by PointOfContactList on success.
+type PointOfContactListResponse struct {
+	// Returns a paginated results via PointOfContactConnection
+	PointOfContactList *PointOfContactListPointOfContactListPointOfContactConnection `json:"PointOfContactList"`
+}
+
+// GetPointOfContactList returns PointOfContactListResponse.PointOfContactList, and is useful for accessing the field via an interface.
+func (v *PointOfContactListResponse) GetPointOfContactList() *PointOfContactListPointOfContactListPointOfContactConnection {
+	return v.PointOfContactList
+}
+
+// PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since filters attestations with a value of since later or equal to the provided filter.
+type PointOfContactSpec struct {
+	Id            *string                      `json:"id"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Email         *string                      `json:"email"`
+	Info          *string                      `json:"info"`
+	Since         *time.Time                   `json:"since"`
+	Justification *string                      `json:"justification"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
+	DocumentRef   *string                      `json:"documentRef"`
+}
+
+// GetId returns PointOfContactSpec.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetId() *string { return v.Id }
+
+// GetSubject returns PointOfContactSpec.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Subject }
+
+// GetEmail returns PointOfContactSpec.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetEmail() *string { return v.Email }
+
+// GetInfo returns PointOfContactSpec.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetInfo() *string { return v.Info }
+
+// GetSince returns PointOfContactSpec.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetSince() *time.Time { return v.Since }
+
+// GetJustification returns PointOfContactSpec.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns PointOfContactSpec.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns PointOfContactSpec.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns PointOfContactSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PointOfContactSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// PointOfContactsPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactsPointOfContact struct {
+	AllPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactsPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetId() string { return v.AllPointOfContact.Id }
+
+// GetSubject returns PointOfContactsPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactsPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetEmail() string { return v.AllPointOfContact.Email }
+
+// GetInfo returns PointOfContactsPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetInfo() string { return v.AllPointOfContact.Info }
+
+// GetSince returns PointOfContactsPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetSince() time.Time { return v.AllPointOfContact.Since }
+
+// GetJustification returns PointOfContactsPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetJustification() string {
+	return v.AllPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactsPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetOrigin() string { return v.AllPointOfContact.Origin }
+
+// GetCollector returns PointOfContactsPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactsPointOfContact) GetCollector() string { return v.AllPointOfContact.Collector }
+
+func (v *PointOfContactsPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactsPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactsPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactsPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactsPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactsPointOfContact) __premarshalJSON() (*__premarshalPointOfContactsPointOfContact, error) {
+	var retval __premarshalPointOfContactsPointOfContact
+
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactsPointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactsResponse is returned by PointOfContacts on success.
+type PointOfContactsResponse struct {
+	// Returns all PointOfContact attestations matching a filter.
+	PointOfContact []PointOfContactsPointOfContact `json:"PointOfContact"`
+}
+
+// GetPointOfContact returns PointOfContactsResponse.PointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactsResponse) GetPointOfContact() []PointOfContactsPointOfContact {
+	return v.PointOfContact
+}
+
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
@@ -22533,6 +27309,18 @@ func (v *SLSAPredicateInputSpec) GetKey() string { return v.Key }
 
 // GetValue returns SLSAPredicateInputSpec.Value, and is useful for accessing the field via an interface.
 func (v *SLSAPredicateInputSpec) GetValue() string { return v.Value }
+
+// SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input.
+type SLSAPredicateSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns SLSAPredicateSpec.Key, and is useful for accessing the field via an interface.
+func (v *SLSAPredicateSpec) GetKey() string { return v.Key }
+
+// GetValue returns SLSAPredicateSpec.Value, and is useful for accessing the field via an interface.
+func (v *SLSAPredicateSpec) GetValue() string { return v.Value }
 
 // ScanMetadataInput represents the input for certifying vulnerability
 // scans in mutations.
@@ -22630,6 +27418,178 @@ func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns ScorecardInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *ScorecardInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// ScorecardsListResponse is returned by ScorecardsList on success.
+type ScorecardsListResponse struct {
+	// Returns a paginated results via CertifyScorecardConnection
+	ScorecardsList *ScorecardsListScorecardsListCertifyScorecardConnection `json:"scorecardsList"`
+}
+
+// GetScorecardsList returns ScorecardsListResponse.ScorecardsList, and is useful for accessing the field via an interface.
+func (v *ScorecardsListResponse) GetScorecardsList() *ScorecardsListScorecardsListCertifyScorecardConnection {
+	return v.ScorecardsList
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnection includes the requested fields of the GraphQL type CertifyScorecardConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecardConnection returns the paginated results for CertifyScorecard.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyScorecardEdge which contains the current cursor
+// and the CertifyScorecard node itself
+type ScorecardsListScorecardsListCertifyScorecardConnection struct {
+	TotalCount int                                                                               `json:"totalCount"`
+	Edges      []ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge `json:"edges"`
+	PageInfo   ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo                    `json:"pageInfo"`
+}
+
+// GetTotalCount returns ScorecardsListScorecardsListCertifyScorecardConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns ScorecardsListScorecardsListCertifyScorecardConnection.Edges, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnection) GetEdges() []ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns ScorecardsListScorecardsListCertifyScorecardConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnection) GetPageInfo() ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge includes the requested fields of the GraphQL type CertifyScorecardEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecardEdge contains the cursor for the resulting node and
+// the CertifyScorecard node itself.
+type ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge struct {
+	Cursor string                                                                                              `json:"cursor"`
+	Node   ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard `json:"node"`
+}
+
+// GetCursor returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge.Node, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdge) GetNode() ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard {
+	return v.Node
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation to attach a Scorecard analysis to a
+// particular source repository.
+type ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard struct {
+	AllCertifyScorecard `json:"-"`
+}
+
+// GetId returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) GetId() string {
+	return v.AllCertifyScorecard.Id
+}
+
+// GetSource returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
+}
+
+// GetScorecard returns ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
+}
+
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard struct {
+	Id string `json:"id"`
+
+	Source AllCertifyScorecardSource `json:"source"`
+
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard) __premarshalJSON() (*__premarshalScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard, error) {
+	var retval __premarshalScorecardsListScorecardsListCertifyScorecardConnectionEdgesCertifyScorecardEdgeNodeCertifyScorecard
+
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
+// ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ScorecardsListScorecardsListCertifyScorecardConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
 
 // ScorecardsResponse is returned by Scorecards on success.
 type ScorecardsResponse struct {
@@ -22780,6 +27740,179 @@ func (v *SourceSpec) GetTag() *string { return v.Tag }
 // GetCommit returns SourceSpec.Commit, and is useful for accessing the field via an interface.
 func (v *SourceSpec) GetCommit() *string { return v.Commit }
 
+// SourcesListResponse is returned by SourcesList on success.
+type SourcesListResponse struct {
+	// Returns a paginated results via SourceConnection
+	SourcesList *SourcesListSourcesListSourceConnection `json:"sourcesList"`
+}
+
+// GetSourcesList returns SourcesListResponse.SourcesList, and is useful for accessing the field via an interface.
+func (v *SourcesListResponse) GetSourcesList() *SourcesListSourcesListSourceConnection {
+	return v.SourcesList
+}
+
+// SourcesListSourcesListSourceConnection includes the requested fields of the GraphQL type SourceConnection.
+// The GraphQL type's documentation follows.
+//
+// SourceConnection returns the paginated results for Source.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the SourceEdge which contains the current cursor
+// and the Source node itself
+type SourcesListSourcesListSourceConnection struct {
+	TotalCount int                                                     `json:"totalCount"`
+	Edges      []SourcesListSourcesListSourceConnectionEdgesSourceEdge `json:"edges"`
+	PageInfo   SourcesListSourcesListSourceConnectionPageInfo          `json:"pageInfo"`
+}
+
+// GetTotalCount returns SourcesListSourcesListSourceConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns SourcesListSourcesListSourceConnection.Edges, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnection) GetEdges() []SourcesListSourcesListSourceConnectionEdgesSourceEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns SourcesListSourcesListSourceConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnection) GetPageInfo() SourcesListSourcesListSourceConnectionPageInfo {
+	return v.PageInfo
+}
+
+// SourcesListSourcesListSourceConnectionEdgesSourceEdge includes the requested fields of the GraphQL type SourceEdge.
+// The GraphQL type's documentation follows.
+//
+// SourceEdge contains the cursor for the resulting node and
+// the Source node itself.
+type SourcesListSourcesListSourceConnectionEdgesSourceEdge struct {
+	Cursor string                                                          `json:"cursor"`
+	Node   SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource `json:"node"`
+}
+
+// GetCursor returns SourcesListSourcesListSourceConnectionEdgesSourceEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdge) GetCursor() string { return v.Cursor }
+
+// GetNode returns SourcesListSourcesListSourceConnectionEdgesSourceEdge.Node, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdge) GetNode() SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource {
+	return v.Node
+}
+
+// SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource struct {
+	AllSourceTree `json:"-"`
+}
+
+// GetId returns SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource.Id, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource) GetId() string {
+	return v.AllSourceTree.Id
+}
+
+// GetType returns SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource.Type, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource) GetType() string {
+	return v.AllSourceTree.Type
+}
+
+// GetNamespaces returns SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource) __premarshalJSON() (*__premarshalSourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource, error) {
+	var retval __premarshalSourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource
+
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
+// SourcesListSourcesListSourceConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type SourcesListSourcesListSourceConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns SourcesListSourcesListSourceConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns SourcesListSourcesListSourceConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// GetHasNextPage returns SourcesListSourcesListSourceConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *SourcesListSourcesListSourceConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
 // SourcesResponse is returned by Sources on success.
 type SourcesResponse struct {
 	// Returns all sources matching a filter.
@@ -22868,6 +28001,393 @@ func (v *SourcesSourcesSource) __premarshalJSON() (*__premarshalSourcesSourcesSo
 	return &retval, nil
 }
 
+// VEXStatementListCertifyVEXStatementListVEXConnection includes the requested fields of the GraphQL type VEXConnection.
+// The GraphQL type's documentation follows.
+//
+// VEXConnection returns the paginated results for CertifyVEXStatement.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VEXEdge which contains the current cursor
+// and the CertifyVEXStatement node itself
+type VEXStatementListCertifyVEXStatementListVEXConnection struct {
+	TotalCount int                                                                `json:"totalCount"`
+	Edges      []VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge `json:"edges"`
+	PageInfo   VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo       `json:"pageInfo"`
+}
+
+// GetTotalCount returns VEXStatementListCertifyVEXStatementListVEXConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns VEXStatementListCertifyVEXStatementListVEXConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnection) GetEdges() []VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VEXStatementListCertifyVEXStatementListVEXConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnection) GetPageInfo() VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge includes the requested fields of the GraphQL type VEXEdge.
+// The GraphQL type's documentation follows.
+//
+// VEXEdge contains the cursor for the resulting node and
+// the CertifyVEXStatement node itself.
+type VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge struct {
+	Cursor string                                                                                  `json:"cursor"`
+	Node   VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement `json:"node"`
+}
+
+// GetCursor returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge.Node, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdge) GetNode() VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement {
+	return v.Node
+}
+
+// VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability.
+type VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
+	AllCertifyVEXStatement `json:"-"`
+}
+
+// GetId returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetId() string {
+	return v.AllCertifyVEXStatement.Id
+}
+
+// GetSubject returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.AllCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
+	return v.AllCertifyVEXStatement.Vulnerability
+}
+
+// GetStatus returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatus() VexStatus {
+	return v.AllCertifyVEXStatement.Status
+}
+
+// GetVexJustification returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.AllCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatement() string {
+	return v.AllCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetStatusNotes() string {
+	return v.AllCertifyVEXStatement.StatusNotes
+}
+
+// GetKnownSince returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.AllCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetOrigin() string {
+	return v.AllCertifyVEXStatement.Origin
+}
+
+// GetCollector returns VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) GetCollector() string {
+	return v.AllCertifyVEXStatement.Collector
+}
+
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
+
+	Status VexStatus `json:"status"`
+
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement, error) {
+	var retval __premarshalVEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement
+
+	retval.Id = v.AllCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal VEXStatementListCertifyVEXStatementListVEXConnectionEdgesVEXEdgeNodeCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
+	retval.Status = v.AllCertifyVEXStatement.Status
+	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
+	retval.Statement = v.AllCertifyVEXStatement.Statement
+	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
+	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
+	retval.Origin = v.AllCertifyVEXStatement.Origin
+	retval.Collector = v.AllCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VEXStatementListCertifyVEXStatementListVEXConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// VEXStatementListResponse is returned by VEXStatementList on success.
+type VEXStatementListResponse struct {
+	// Returns a paginated results via CertifyVexConnection
+	CertifyVEXStatementList *VEXStatementListCertifyVEXStatementListVEXConnection `json:"CertifyVEXStatementList"`
+}
+
+// GetCertifyVEXStatementList returns VEXStatementListResponse.CertifyVEXStatementList, and is useful for accessing the field via an interface.
+func (v *VEXStatementListResponse) GetCertifyVEXStatementList() *VEXStatementListCertifyVEXStatementListVEXConnection {
+	return v.CertifyVEXStatementList
+}
+
+// VEXStatementsCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability.
+type VEXStatementsCertifyVEXStatement struct {
+	AllCertifyVEXStatement `json:"-"`
+}
+
+// GetId returns VEXStatementsCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetId() string { return v.AllCertifyVEXStatement.Id }
+
+// GetSubject returns VEXStatementsCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetSubject() AllCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.AllCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VEXStatementsCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetVulnerability() AllCertifyVEXStatementVulnerability {
+	return v.AllCertifyVEXStatement.Vulnerability
+}
+
+// GetStatus returns VEXStatementsCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetStatus() VexStatus {
+	return v.AllCertifyVEXStatement.Status
+}
+
+// GetVexJustification returns VEXStatementsCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.AllCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VEXStatementsCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetStatement() string {
+	return v.AllCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VEXStatementsCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetStatusNotes() string {
+	return v.AllCertifyVEXStatement.StatusNotes
+}
+
+// GetKnownSince returns VEXStatementsCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.AllCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VEXStatementsCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetOrigin() string { return v.AllCertifyVEXStatement.Origin }
+
+// GetCollector returns VEXStatementsCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VEXStatementsCertifyVEXStatement) GetCollector() string {
+	return v.AllCertifyVEXStatement.Collector
+}
+
+func (v *VEXStatementsCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXStatementsCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXStatementsCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXStatementsCertifyVEXStatement struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability AllCertifyVEXStatementVulnerability `json:"vulnerability"`
+
+	Status VexStatus `json:"status"`
+
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VEXStatementsCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXStatementsCertifyVEXStatement) __premarshalJSON() (*__premarshalVEXStatementsCertifyVEXStatement, error) {
+	var retval __premarshalVEXStatementsCertifyVEXStatement
+
+	retval.Id = v.AllCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal VEXStatementsCertifyVEXStatement.AllCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	retval.Vulnerability = v.AllCertifyVEXStatement.Vulnerability
+	retval.Status = v.AllCertifyVEXStatement.Status
+	retval.VexJustification = v.AllCertifyVEXStatement.VexJustification
+	retval.Statement = v.AllCertifyVEXStatement.Statement
+	retval.StatusNotes = v.AllCertifyVEXStatement.StatusNotes
+	retval.KnownSince = v.AllCertifyVEXStatement.KnownSince
+	retval.Origin = v.AllCertifyVEXStatement.Origin
+	retval.Collector = v.AllCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VEXStatementsResponse is returned by VEXStatements on success.
+type VEXStatementsResponse struct {
+	// Returns all VEX certifications matching the input filter.
+	CertifyVEXStatement []VEXStatementsCertifyVEXStatement `json:"CertifyVEXStatement"`
+}
+
+// GetCertifyVEXStatement returns VEXStatementsResponse.CertifyVEXStatement, and is useful for accessing the field via an interface.
+func (v *VEXStatementsResponse) GetCertifyVEXStatement() []VEXStatementsCertifyVEXStatement {
+	return v.CertifyVEXStatement
+}
+
 // Records the justification included in the VEX statement.
 type VexJustification string
 
@@ -22945,6 +28465,314 @@ func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns VulnEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *VulnEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// VulnEqualListResponse is returned by VulnEqualList on success.
+type VulnEqualListResponse struct {
+	// Returns a paginated results via VulnEqualConnection
+	VulnEqualList *VulnEqualListVulnEqualListVulnEqualConnection `json:"vulnEqualList"`
+}
+
+// GetVulnEqualList returns VulnEqualListResponse.VulnEqualList, and is useful for accessing the field via an interface.
+func (v *VulnEqualListResponse) GetVulnEqualList() *VulnEqualListVulnEqualListVulnEqualConnection {
+	return v.VulnEqualList
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnection includes the requested fields of the GraphQL type VulnEqualConnection.
+// The GraphQL type's documentation follows.
+//
+// VulnEqualConnection returns the paginated results for VulnEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnEqualEdge which contains the current cursor
+// and the VulnEqual node itself
+type VulnEqualListVulnEqualListVulnEqualConnection struct {
+	TotalCount int                                                               `json:"totalCount"`
+	Edges      []VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge `json:"edges"`
+	PageInfo   VulnEqualListVulnEqualListVulnEqualConnectionPageInfo             `json:"pageInfo"`
+}
+
+// GetTotalCount returns VulnEqualListVulnEqualListVulnEqualConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns VulnEqualListVulnEqualListVulnEqualConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnection) GetEdges() []VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VulnEqualListVulnEqualListVulnEqualConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnection) GetPageInfo() VulnEqualListVulnEqualListVulnEqualConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge includes the requested fields of the GraphQL type VulnEqualEdge.
+// The GraphQL type's documentation follows.
+//
+// VulnEqualEdge contains the cursor for the resulting node and
+// the VulnEqual node itself.
+type VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge struct {
+	Cursor string                                                                       `json:"cursor"`
+	Node   VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual `json:"node"`
+}
+
+// GetCursor returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge.Node, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge) GetNode() VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual {
+	return v.Node
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual includes the requested fields of the GraphQL type VulnEqual.
+// The GraphQL type's documentation follows.
+//
+// VulnEqual is an attestation to link two vulnerabilities together as being equal"
+//
+// Note that setting noVuln vulnerability type is invalid for VulnEqual!
+type VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual struct {
+	AllVulnEqual `json:"-"`
+}
+
+// GetId returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Id, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetId() string {
+	return v.AllVulnEqual.Id
+}
+
+// GetVulnerabilities returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetVulnerabilities() []AllVulnEqualVulnerabilitiesVulnerability {
+	return v.AllVulnEqual.Vulnerabilities
+}
+
+// GetJustification returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Justification, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetJustification() string {
+	return v.AllVulnEqual.Justification
+}
+
+// GetOrigin returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Origin, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetOrigin() string {
+	return v.AllVulnEqual.Origin
+}
+
+// GetCollector returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Collector, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetCollector() string {
+	return v.AllVulnEqual.Collector
+}
+
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual struct {
+	Id string `json:"id"`
+
+	Vulnerabilities []AllVulnEqualVulnerabilitiesVulnerability `json:"vulnerabilities"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) __premarshalJSON() (*__premarshalVulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual, error) {
+	var retval __premarshalVulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual
+
+	retval.Id = v.AllVulnEqual.Id
+	retval.Vulnerabilities = v.AllVulnEqual.Vulnerabilities
+	retval.Justification = v.AllVulnEqual.Justification
+	retval.Origin = v.AllVulnEqual.Origin
+	retval.Collector = v.AllVulnEqual.Collector
+	return &retval, nil
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VulnEqualListVulnEqualListVulnEqualConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VulnEqualListVulnEqualListVulnEqualConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VulnEqualListVulnEqualListVulnEqualConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VulnEqualListVulnEqualListVulnEqualConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// VulnEqualSpec allows filtering the list of vulnerability links to return
+// in a query.
+type VulnEqualSpec struct {
+	Id              *string              `json:"id"`
+	Vulnerabilities []*VulnerabilitySpec `json:"vulnerabilities"`
+	Justification   *string              `json:"justification"`
+	Origin          *string              `json:"origin"`
+	Collector       *string              `json:"collector"`
+	DocumentRef     *string              `json:"documentRef"`
+}
+
+// GetId returns VulnEqualSpec.Id, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetId() *string { return v.Id }
+
+// GetVulnerabilities returns VulnEqualSpec.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetVulnerabilities() []*VulnerabilitySpec { return v.Vulnerabilities }
+
+// GetJustification returns VulnEqualSpec.Justification, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns VulnEqualSpec.Origin, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns VulnEqualSpec.Collector, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns VulnEqualSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// VulnEqualsResponse is returned by VulnEquals on success.
+type VulnEqualsResponse struct {
+	// Returns all equal vulnerability mappings that match a filter.
+	VulnEqual []VulnEqualsVulnEqual `json:"vulnEqual"`
+}
+
+// GetVulnEqual returns VulnEqualsResponse.VulnEqual, and is useful for accessing the field via an interface.
+func (v *VulnEqualsResponse) GetVulnEqual() []VulnEqualsVulnEqual { return v.VulnEqual }
+
+// VulnEqualsVulnEqual includes the requested fields of the GraphQL type VulnEqual.
+// The GraphQL type's documentation follows.
+//
+// VulnEqual is an attestation to link two vulnerabilities together as being equal"
+//
+// Note that setting noVuln vulnerability type is invalid for VulnEqual!
+type VulnEqualsVulnEqual struct {
+	AllVulnEqual `json:"-"`
+}
+
+// GetId returns VulnEqualsVulnEqual.Id, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetId() string { return v.AllVulnEqual.Id }
+
+// GetVulnerabilities returns VulnEqualsVulnEqual.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetVulnerabilities() []AllVulnEqualVulnerabilitiesVulnerability {
+	return v.AllVulnEqual.Vulnerabilities
+}
+
+// GetJustification returns VulnEqualsVulnEqual.Justification, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetJustification() string { return v.AllVulnEqual.Justification }
+
+// GetOrigin returns VulnEqualsVulnEqual.Origin, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetOrigin() string { return v.AllVulnEqual.Origin }
+
+// GetCollector returns VulnEqualsVulnEqual.Collector, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetCollector() string { return v.AllVulnEqual.Collector }
+
+func (v *VulnEqualsVulnEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnEqualsVulnEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnEqualsVulnEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnEqualsVulnEqual struct {
+	Id string `json:"id"`
+
+	Vulnerabilities []AllVulnEqualVulnerabilitiesVulnerability `json:"vulnerabilities"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnEqualsVulnEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnEqualsVulnEqual) __premarshalJSON() (*__premarshalVulnEqualsVulnEqual, error) {
+	var retval __premarshalVulnEqualsVulnEqual
+
+	retval.Id = v.AllVulnEqual.Id
+	retval.Vulnerabilities = v.AllVulnEqual.Vulnerabilities
+	retval.Justification = v.AllVulnEqual.Justification
+	retval.Origin = v.AllVulnEqual.Origin
+	retval.Collector = v.AllVulnEqual.Collector
+	return &retval, nil
+}
 
 // VulnerabilitiesResponse is returned by Vulnerabilities on success.
 type VulnerabilitiesResponse struct {
@@ -23292,6 +29120,409 @@ func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collec
 // GetDocumentRef returns VulnerabilityMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// VulnerabilityMetadataListResponse is returned by VulnerabilityMetadataList on success.
+type VulnerabilityMetadataListResponse struct {
+	// Returns a paginated results via VulnerabilityMetadataConnection
+	VulnerabilityMetadataList *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection `json:"vulnerabilityMetadataList"`
+}
+
+// GetVulnerabilityMetadataList returns VulnerabilityMetadataListResponse.VulnerabilityMetadataList, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListResponse) GetVulnerabilityMetadataList() *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection {
+	return v.VulnerabilityMetadataList
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection includes the requested fields of the GraphQL type VulnerabilityMetadataConnection.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadataConnection returns the paginated results for VulnerabilityMetadata.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnerabilityMetadataEdge which contains the current cursor
+// and the VulnerabilityMetadata node itself
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection struct {
+	TotalCount int                                                                                                               `json:"totalCount"`
+	Edges      []VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge `json:"edges"`
+	PageInfo   VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo                         `json:"pageInfo"`
+}
+
+// GetTotalCount returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection) GetEdges() []VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection) GetPageInfo() VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge includes the requested fields of the GraphQL type VulnerabilityMetadataEdge.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadataEdge contains the cursor for the resulting node and
+// the VulnerabilityMetadata node itself.
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge struct {
+	Cursor string                                                                                                                                   `json:"cursor"`
+	Node   VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata `json:"node"`
+}
+
+// GetCursor returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge.Node, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge) GetNode() VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata {
+	return v.Node
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata struct {
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetId returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetId() string {
+	return v.AllVulnMetadataTree.Id
+}
+
+// GetVulnerability returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetOrigin() string {
+	return v.AllVulnMetadataTree.Origin
+}
+
+// GetCollector returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata struct {
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) __premarshalJSON() (*__premarshalVulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata, error) {
+	var retval __premarshalVulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata
+
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// VulnerabilityMetadataResponse is returned by VulnerabilityMetadata on success.
+type VulnerabilityMetadataResponse struct {
+	// Returns all vulnerabilityMetadata attestations matching a filter.
+	VulnerabilityMetadata []VulnerabilityMetadataVulnerabilityMetadata `json:"vulnerabilityMetadata"`
+}
+
+// GetVulnerabilityMetadata returns VulnerabilityMetadataResponse.VulnerabilityMetadata, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataResponse) GetVulnerabilityMetadata() []VulnerabilityMetadataVulnerabilityMetadata {
+	return v.VulnerabilityMetadata
+}
+
+// VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence
+// to return in a query.
+//
+// Comparator field is an enum that be set to filter the score and return a
+// range that matches. If the comparator is not specified, it will default to equal operation.
+//
+// Timestamp specified indicates filtering timestamps after the specified time
+type VulnerabilityMetadataSpec struct {
+	Id            *string                 `json:"id"`
+	Vulnerability *VulnerabilitySpec      `json:"vulnerability"`
+	ScoreType     *VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue    *float64                `json:"scoreValue"`
+	Comparator    *Comparator             `json:"comparator"`
+	Timestamp     *time.Time              `json:"timestamp"`
+	Origin        *string                 `json:"origin"`
+	Collector     *string                 `json:"collector"`
+	DocumentRef   *string                 `json:"documentRef"`
+}
+
+// GetId returns VulnerabilityMetadataSpec.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetId() *string { return v.Id }
+
+// GetVulnerability returns VulnerabilityMetadataSpec.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetVulnerability() *VulnerabilitySpec { return v.Vulnerability }
+
+// GetScoreType returns VulnerabilityMetadataSpec.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetScoreType() *VulnerabilityScoreType { return v.ScoreType }
+
+// GetScoreValue returns VulnerabilityMetadataSpec.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetScoreValue() *float64 { return v.ScoreValue }
+
+// GetComparator returns VulnerabilityMetadataSpec.Comparator, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetComparator() *Comparator { return v.Comparator }
+
+// GetTimestamp returns VulnerabilityMetadataSpec.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetTimestamp() *time.Time { return v.Timestamp }
+
+// GetOrigin returns VulnerabilityMetadataSpec.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns VulnerabilityMetadataSpec.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns VulnerabilityMetadataSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// VulnerabilityMetadataVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type VulnerabilityMetadataVulnerabilityMetadata struct {
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetId returns VulnerabilityMetadataVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns VulnerabilityMetadataVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns VulnerabilityMetadataVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns VulnerabilityMetadataVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns VulnerabilityMetadataVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns VulnerabilityMetadataVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetOrigin() string {
+	return v.AllVulnMetadataTree.Origin
+}
+
+// GetCollector returns VulnerabilityMetadataVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *VulnerabilityMetadataVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnerabilityMetadataVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnerabilityMetadataVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnerabilityMetadataVulnerabilityMetadata struct {
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnerabilityMetadataVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnerabilityMetadataVulnerabilityMetadata) __premarshalJSON() (*__premarshalVulnerabilityMetadataVulnerabilityMetadata, error) {
+	var retval __premarshalVulnerabilityMetadataVulnerabilityMetadata
+
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
+
 // Records the type of the score being captured by the score node
 type VulnerabilityScoreType string
 
@@ -23344,21 +29575,141 @@ type __ArtifactsInput struct {
 // GetFilter returns __ArtifactsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__ArtifactsInput) GetFilter() ArtifactSpec { return v.Filter }
 
-// __CertifyBadsInput is used internally by genqlient
-type __CertifyBadsInput struct {
+// __ArtifactsListInput is used internally by genqlient
+type __ArtifactsListInput struct {
+	Filter ArtifactSpec `json:"filter"`
+	After  *string      `json:"after"`
+	First  *int         `json:"first"`
+}
+
+// GetFilter returns __ArtifactsListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ArtifactsListInput) GetFilter() ArtifactSpec { return v.Filter }
+
+// GetAfter returns __ArtifactsListInput.After, and is useful for accessing the field via an interface.
+func (v *__ArtifactsListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __ArtifactsListInput.First, and is useful for accessing the field via an interface.
+func (v *__ArtifactsListInput) GetFirst() *int { return v.First }
+
+// __BuildersInput is used internally by genqlient
+type __BuildersInput struct {
+	Filter BuilderSpec `json:"filter"`
+}
+
+// GetFilter returns __BuildersInput.Filter, and is useful for accessing the field via an interface.
+func (v *__BuildersInput) GetFilter() BuilderSpec { return v.Filter }
+
+// __BuildersListInput is used internally by genqlient
+type __BuildersListInput struct {
+	Filter BuilderSpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
+}
+
+// GetFilter returns __BuildersListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__BuildersListInput) GetFilter() BuilderSpec { return v.Filter }
+
+// GetAfter returns __BuildersListInput.After, and is useful for accessing the field via an interface.
+func (v *__BuildersListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __BuildersListInput.First, and is useful for accessing the field via an interface.
+func (v *__BuildersListInput) GetFirst() *int { return v.First }
+
+// __CertifyBadInput is used internally by genqlient
+type __CertifyBadInput struct {
 	Filter CertifyBadSpec `json:"filter"`
 }
 
-// GetFilter returns __CertifyBadsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyBadsInput) GetFilter() CertifyBadSpec { return v.Filter }
+// GetFilter returns __CertifyBadInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyBadInput) GetFilter() CertifyBadSpec { return v.Filter }
 
-// __CertifyLegalsInput is used internally by genqlient
-type __CertifyLegalsInput struct {
+// __CertifyBadListInput is used internally by genqlient
+type __CertifyBadListInput struct {
+	Filter CertifyBadSpec `json:"filter"`
+	After  *string        `json:"after"`
+	First  *int           `json:"first"`
+}
+
+// GetFilter returns __CertifyBadListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyBadListInput) GetFilter() CertifyBadSpec { return v.Filter }
+
+// GetAfter returns __CertifyBadListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyBadListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyBadListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyBadListInput) GetFirst() *int { return v.First }
+
+// __CertifyGoodInput is used internally by genqlient
+type __CertifyGoodInput struct {
+	Filter CertifyGoodSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyGoodInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodInput) GetFilter() CertifyGoodSpec { return v.Filter }
+
+// __CertifyGoodListInput is used internally by genqlient
+type __CertifyGoodListInput struct {
+	Filter CertifyGoodSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __CertifyGoodListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodListInput) GetFilter() CertifyGoodSpec { return v.Filter }
+
+// GetAfter returns __CertifyGoodListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyGoodListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodListInput) GetFirst() *int { return v.First }
+
+// __CertifyLegalInput is used internally by genqlient
+type __CertifyLegalInput struct {
 	Filter CertifyLegalSpec `json:"filter"`
 }
 
-// GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
+// GetFilter returns __CertifyLegalInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalInput) GetFilter() CertifyLegalSpec { return v.Filter }
+
+// __CertifyLegalListInput is used internally by genqlient
+type __CertifyLegalListInput struct {
+	Filter CertifyLegalSpec `json:"filter"`
+	After  *string          `json:"after"`
+	First  *int             `json:"first"`
+}
+
+// GetFilter returns __CertifyLegalListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalListInput) GetFilter() CertifyLegalSpec { return v.Filter }
+
+// GetAfter returns __CertifyLegalListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyLegalListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalListInput) GetFirst() *int { return v.First }
+
+// __CertifyVulnInput is used internally by genqlient
+type __CertifyVulnInput struct {
+	Filter CertifyVulnSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyVulnInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnInput) GetFilter() CertifyVulnSpec { return v.Filter }
+
+// __CertifyVulnListInput is used internally by genqlient
+type __CertifyVulnListInput struct {
+	Filter CertifyVulnSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __CertifyVulnListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnListInput) GetFilter() CertifyVulnSpec { return v.Filter }
+
+// GetAfter returns __CertifyVulnListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyVulnListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnListInput) GetFirst() *int { return v.First }
 
 // __DependenciesInput is used internally by genqlient
 type __DependenciesInput struct {
@@ -23368,6 +29719,22 @@ type __DependenciesInput struct {
 // GetFilter returns __DependenciesInput.Filter, and is useful for accessing the field via an interface.
 func (v *__DependenciesInput) GetFilter() IsDependencySpec { return v.Filter }
 
+// __DependencyListInput is used internally by genqlient
+type __DependencyListInput struct {
+	Filter IsDependencySpec `json:"filter"`
+	After  *string          `json:"after"`
+	First  *int             `json:"first"`
+}
+
+// GetFilter returns __DependencyListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__DependencyListInput) GetFilter() IsDependencySpec { return v.Filter }
+
+// GetAfter returns __DependencyListInput.After, and is useful for accessing the field via an interface.
+func (v *__DependencyListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __DependencyListInput.First, and is useful for accessing the field via an interface.
+func (v *__DependencyListInput) GetFirst() *int { return v.First }
+
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
 	SearchText string `json:"searchText"`
@@ -23375,6 +29742,30 @@ type __FindSoftwareInput struct {
 
 // GetSearchText returns __FindSoftwareInput.SearchText, and is useful for accessing the field via an interface.
 func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
+
+// __HasMetadataInput is used internally by genqlient
+type __HasMetadataInput struct {
+	Filter HasMetadataSpec `json:"filter"`
+}
+
+// GetFilter returns __HasMetadataInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasMetadataInput) GetFilter() HasMetadataSpec { return v.Filter }
+
+// __HasMetadataListInput is used internally by genqlient
+type __HasMetadataListInput struct {
+	Filter HasMetadataSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __HasMetadataListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasMetadataListInput) GetFilter() HasMetadataSpec { return v.Filter }
+
+// GetAfter returns __HasMetadataListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasMetadataListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasMetadataListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasMetadataListInput) GetFirst() *int { return v.First }
 
 // __HasSBOMListInput is used internally by genqlient
 type __HasSBOMListInput struct {
@@ -23399,6 +29790,70 @@ type __HasSBOMsInput struct {
 
 // GetFilter returns __HasSBOMsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__HasSBOMsInput) GetFilter() HasSBOMSpec { return v.Filter }
+
+// __HasSLSAInput is used internally by genqlient
+type __HasSLSAInput struct {
+	Filter HasSLSASpec `json:"filter"`
+}
+
+// GetFilter returns __HasSLSAInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSLSAInput) GetFilter() HasSLSASpec { return v.Filter }
+
+// __HasSLSAListInput is used internally by genqlient
+type __HasSLSAListInput struct {
+	Filter HasSLSASpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
+}
+
+// GetFilter returns __HasSLSAListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSLSAListInput) GetFilter() HasSLSASpec { return v.Filter }
+
+// GetAfter returns __HasSLSAListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasSLSAListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasSLSAListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasSLSAListInput) GetFirst() *int { return v.First }
+
+// __HasSourceAtInput is used internally by genqlient
+type __HasSourceAtInput struct {
+	Filter HasSourceAtSpec `json:"filter"`
+}
+
+// GetFilter returns __HasSourceAtInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtInput) GetFilter() HasSourceAtSpec { return v.Filter }
+
+// __HasSourceAtListInput is used internally by genqlient
+type __HasSourceAtListInput struct {
+	Filter HasSourceAtSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __HasSourceAtListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtListInput) GetFilter() HasSourceAtSpec { return v.Filter }
+
+// GetAfter returns __HasSourceAtListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasSourceAtListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtListInput) GetFirst() *int { return v.First }
+
+// __HashEqualListInput is used internally by genqlient
+type __HashEqualListInput struct {
+	Filter HashEqualSpec `json:"filter"`
+	After  *string       `json:"after"`
+	First  *int          `json:"first"`
+}
+
+// GetFilter returns __HashEqualListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HashEqualListInput) GetFilter() HashEqualSpec { return v.Filter }
+
+// GetAfter returns __HashEqualListInput.After, and is useful for accessing the field via an interface.
+func (v *__HashEqualListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HashEqualListInput.First, and is useful for accessing the field via an interface.
+func (v *__HashEqualListInput) GetFirst() *int { return v.First }
 
 // __HashEqualsInput is used internally by genqlient
 type __HashEqualsInput struct {
@@ -24478,13 +30933,21 @@ type __IngestVulnerabilityInput struct {
 // GetVuln returns __IngestVulnerabilityInput.Vuln, and is useful for accessing the field via an interface.
 func (v *__IngestVulnerabilityInput) GetVuln() IDorVulnerabilityInput { return v.Vuln }
 
-// __IsOccurrencesInput is used internally by genqlient
-type __IsOccurrencesInput struct {
-	Filter IsOccurrenceSpec `json:"filter"`
+// __LicenseListInput is used internally by genqlient
+type __LicenseListInput struct {
+	Filter LicenseSpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
 }
 
-// GetFilter returns __IsOccurrencesInput.Filter, and is useful for accessing the field via an interface.
-func (v *__IsOccurrencesInput) GetFilter() IsOccurrenceSpec { return v.Filter }
+// GetFilter returns __LicenseListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__LicenseListInput) GetFilter() LicenseSpec { return v.Filter }
+
+// GetAfter returns __LicenseListInput.After, and is useful for accessing the field via an interface.
+func (v *__LicenseListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __LicenseListInput.First, and is useful for accessing the field via an interface.
+func (v *__LicenseListInput) GetFirst() *int { return v.First }
 
 // __LicensesInput is used internally by genqlient
 type __LicensesInput struct {
@@ -24521,6 +30984,30 @@ type __NodesInput struct {
 
 // GetNodes returns __NodesInput.Nodes, and is useful for accessing the field via an interface.
 func (v *__NodesInput) GetNodes() []string { return v.Nodes }
+
+// __OccurrenceListInput is used internally by genqlient
+type __OccurrenceListInput struct {
+	Filter IsOccurrenceSpec `json:"filter"`
+	After  *string          `json:"after"`
+	First  *int             `json:"first"`
+}
+
+// GetFilter returns __OccurrenceListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__OccurrenceListInput) GetFilter() IsOccurrenceSpec { return v.Filter }
+
+// GetAfter returns __OccurrenceListInput.After, and is useful for accessing the field via an interface.
+func (v *__OccurrenceListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __OccurrenceListInput.First, and is useful for accessing the field via an interface.
+func (v *__OccurrenceListInput) GetFirst() *int { return v.First }
+
+// __OccurrencesInput is used internally by genqlient
+type __OccurrencesInput struct {
+	Filter IsOccurrenceSpec `json:"filter"`
+}
+
+// GetFilter returns __OccurrencesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__OccurrencesInput) GetFilter() IsOccurrenceSpec { return v.Filter }
 
 // __PackageNamesInput is used internally by genqlient
 type __PackageNamesInput struct {
@@ -24562,6 +31049,22 @@ type __PackagesInput struct {
 // GetFilter returns __PackagesInput.Filter, and is useful for accessing the field via an interface.
 func (v *__PackagesInput) GetFilter() PkgSpec { return v.Filter }
 
+// __PackagesListInput is used internally by genqlient
+type __PackagesListInput struct {
+	Filter PkgSpec `json:"filter"`
+	After  *string `json:"after"`
+	First  *int    `json:"first"`
+}
+
+// GetFilter returns __PackagesListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PackagesListInput) GetFilter() PkgSpec { return v.Filter }
+
+// GetAfter returns __PackagesListInput.After, and is useful for accessing the field via an interface.
+func (v *__PackagesListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __PackagesListInput.First, and is useful for accessing the field via an interface.
+func (v *__PackagesListInput) GetFirst() *int { return v.First }
+
 // __PathInput is used internally by genqlient
 type __PathInput struct {
 	Subject       string `json:"subject"`
@@ -24582,6 +31085,54 @@ func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
 // GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
+// __PkgEqualListInput is used internally by genqlient
+type __PkgEqualListInput struct {
+	Filter PkgEqualSpec `json:"filter"`
+	After  *string      `json:"after"`
+	First  *int         `json:"first"`
+}
+
+// GetFilter returns __PkgEqualListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PkgEqualListInput) GetFilter() PkgEqualSpec { return v.Filter }
+
+// GetAfter returns __PkgEqualListInput.After, and is useful for accessing the field via an interface.
+func (v *__PkgEqualListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __PkgEqualListInput.First, and is useful for accessing the field via an interface.
+func (v *__PkgEqualListInput) GetFirst() *int { return v.First }
+
+// __PkgEqualsInput is used internally by genqlient
+type __PkgEqualsInput struct {
+	Filter PkgEqualSpec `json:"filter"`
+}
+
+// GetFilter returns __PkgEqualsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PkgEqualsInput) GetFilter() PkgEqualSpec { return v.Filter }
+
+// __PointOfContactListInput is used internally by genqlient
+type __PointOfContactListInput struct {
+	Filter PointOfContactSpec `json:"filter"`
+	After  *string            `json:"after"`
+	First  *int               `json:"first"`
+}
+
+// GetFilter returns __PointOfContactListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PointOfContactListInput) GetFilter() PointOfContactSpec { return v.Filter }
+
+// GetAfter returns __PointOfContactListInput.After, and is useful for accessing the field via an interface.
+func (v *__PointOfContactListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __PointOfContactListInput.First, and is useful for accessing the field via an interface.
+func (v *__PointOfContactListInput) GetFirst() *int { return v.First }
+
+// __PointOfContactsInput is used internally by genqlient
+type __PointOfContactsInput struct {
+	Filter PointOfContactSpec `json:"filter"`
+}
+
+// GetFilter returns __PointOfContactsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PointOfContactsInput) GetFilter() PointOfContactSpec { return v.Filter }
+
 // __ScorecardsInput is used internally by genqlient
 type __ScorecardsInput struct {
 	Filter CertifyScorecardSpec `json:"filter"`
@@ -24590,6 +31141,22 @@ type __ScorecardsInput struct {
 // GetFilter returns __ScorecardsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__ScorecardsInput) GetFilter() CertifyScorecardSpec { return v.Filter }
 
+// __ScorecardsListInput is used internally by genqlient
+type __ScorecardsListInput struct {
+	Filter CertifyScorecardSpec `json:"filter"`
+	After  *string              `json:"after"`
+	First  *int                 `json:"first"`
+}
+
+// GetFilter returns __ScorecardsListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ScorecardsListInput) GetFilter() CertifyScorecardSpec { return v.Filter }
+
+// GetAfter returns __ScorecardsListInput.After, and is useful for accessing the field via an interface.
+func (v *__ScorecardsListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __ScorecardsListInput.First, and is useful for accessing the field via an interface.
+func (v *__ScorecardsListInput) GetFirst() *int { return v.First }
+
 // __SourcesInput is used internally by genqlient
 type __SourcesInput struct {
 	Filter SourceSpec `json:"filter"`
@@ -24597,6 +31164,70 @@ type __SourcesInput struct {
 
 // GetFilter returns __SourcesInput.Filter, and is useful for accessing the field via an interface.
 func (v *__SourcesInput) GetFilter() SourceSpec { return v.Filter }
+
+// __SourcesListInput is used internally by genqlient
+type __SourcesListInput struct {
+	Filter SourceSpec `json:"filter"`
+	After  *string    `json:"after"`
+	First  *int       `json:"first"`
+}
+
+// GetFilter returns __SourcesListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__SourcesListInput) GetFilter() SourceSpec { return v.Filter }
+
+// GetAfter returns __SourcesListInput.After, and is useful for accessing the field via an interface.
+func (v *__SourcesListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __SourcesListInput.First, and is useful for accessing the field via an interface.
+func (v *__SourcesListInput) GetFirst() *int { return v.First }
+
+// __VEXStatementListInput is used internally by genqlient
+type __VEXStatementListInput struct {
+	Filter CertifyVEXStatementSpec `json:"filter"`
+	After  *string                 `json:"after"`
+	First  *int                    `json:"first"`
+}
+
+// GetFilter returns __VEXStatementListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VEXStatementListInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
+
+// GetAfter returns __VEXStatementListInput.After, and is useful for accessing the field via an interface.
+func (v *__VEXStatementListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VEXStatementListInput.First, and is useful for accessing the field via an interface.
+func (v *__VEXStatementListInput) GetFirst() *int { return v.First }
+
+// __VEXStatementsInput is used internally by genqlient
+type __VEXStatementsInput struct {
+	Filter CertifyVEXStatementSpec `json:"filter"`
+}
+
+// GetFilter returns __VEXStatementsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VEXStatementsInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
+
+// __VulnEqualListInput is used internally by genqlient
+type __VulnEqualListInput struct {
+	Filter VulnEqualSpec `json:"filter"`
+	After  *string       `json:"after"`
+	First  *int          `json:"first"`
+}
+
+// GetFilter returns __VulnEqualListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnEqualListInput) GetFilter() VulnEqualSpec { return v.Filter }
+
+// GetAfter returns __VulnEqualListInput.After, and is useful for accessing the field via an interface.
+func (v *__VulnEqualListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VulnEqualListInput.First, and is useful for accessing the field via an interface.
+func (v *__VulnEqualListInput) GetFirst() *int { return v.First }
+
+// __VulnEqualsInput is used internally by genqlient
+type __VulnEqualsInput struct {
+	Filter VulnEqualSpec `json:"filter"`
+}
+
+// GetFilter returns __VulnEqualsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnEqualsInput) GetFilter() VulnEqualSpec { return v.Filter }
 
 // __VulnerabilitiesInput is used internally by genqlient
 type __VulnerabilitiesInput struct {
@@ -24621,6 +31252,30 @@ func (v *__VulnerabilityListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __VulnerabilityListInput.First, and is useful for accessing the field via an interface.
 func (v *__VulnerabilityListInput) GetFirst() *int { return v.First }
+
+// __VulnerabilityMetadataInput is used internally by genqlient
+type __VulnerabilityMetadataInput struct {
+	Filter VulnerabilityMetadataSpec `json:"filter"`
+}
+
+// GetFilter returns __VulnerabilityMetadataInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataInput) GetFilter() VulnerabilityMetadataSpec { return v.Filter }
+
+// __VulnerabilityMetadataListInput is used internally by genqlient
+type __VulnerabilityMetadataListInput struct {
+	Filter VulnerabilityMetadataSpec `json:"filter"`
+	After  *string                   `json:"after"`
+	First  *int                      `json:"first"`
+}
+
+// GetFilter returns __VulnerabilityMetadataListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataListInput) GetFilter() VulnerabilityMetadataSpec { return v.Filter }
+
+// GetAfter returns __VulnerabilityMetadataListInput.After, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VulnerabilityMetadataListInput.First, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataListInput) GetFirst() *int { return v.First }
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
@@ -24662,9 +31317,157 @@ func Artifacts(
 	return &data_, err_
 }
 
-// The query or mutation executed by CertifyBads.
-const CertifyBads_Operation = `
-query CertifyBads ($filter: CertifyBadSpec!) {
+// The query or mutation executed by ArtifactsList.
+const ArtifactsList_Operation = `
+query ArtifactsList ($filter: ArtifactSpec!, $after: ID, $first: Int) {
+	artifactsList(artifactSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllArtifactTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func ArtifactsList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter ArtifactSpec,
+	after *string,
+	first *int,
+) (*ArtifactsListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "ArtifactsList",
+		Query:  ArtifactsList_Operation,
+		Variables: &__ArtifactsListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ ArtifactsListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by Builders.
+const Builders_Operation = `
+query Builders ($filter: BuilderSpec!) {
+	builders(builderSpec: $filter) {
+		... AllBuilderTree
+	}
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func Builders(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter BuilderSpec,
+) (*BuildersResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "Builders",
+		Query:  Builders_Operation,
+		Variables: &__BuildersInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ BuildersResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by BuildersList.
+const BuildersList_Operation = `
+query BuildersList ($filter: BuilderSpec!, $after: ID, $first: Int) {
+	buildersList(builderSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllBuilderTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func BuildersList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter BuilderSpec,
+	after *string,
+	first *int,
+) (*BuildersListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "BuildersList",
+		Query:  BuildersList_Operation,
+		Variables: &__BuildersListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ BuildersListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyBad.
+const CertifyBad_Operation = `
+query CertifyBad ($filter: CertifyBadSpec!) {
 	CertifyBad(certifyBadSpec: $filter) {
 		... AllCertifyBad
 	}
@@ -24699,6 +31502,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24730,21 +31534,21 @@ fragment AllArtifactTree on Artifact {
 }
 `
 
-func CertifyBads(
+func CertifyBad(
 	ctx_ context.Context,
 	client_ graphql.Client,
 	filter CertifyBadSpec,
-) (*CertifyBadsResponse, error) {
+) (*CertifyBadResponse, error) {
 	req_ := &graphql.Request{
-		OpName: "CertifyBads",
-		Query:  CertifyBads_Operation,
-		Variables: &__CertifyBadsInput{
+		OpName: "CertifyBad",
+		Query:  CertifyBad_Operation,
+		Variables: &__CertifyBadInput{
 			Filter: filter,
 		},
 	}
 	var err_ error
 
-	var data_ CertifyBadsResponse
+	var data_ CertifyBadResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -24756,9 +31560,324 @@ func CertifyBads(
 	return &data_, err_
 }
 
-// The query or mutation executed by CertifyLegals.
-const CertifyLegals_Operation = `
-query CertifyLegals ($filter: CertifyLegalSpec!) {
+// The query or mutation executed by CertifyBadList.
+const CertifyBadList_Operation = `
+query CertifyBadList ($filter: CertifyBadSpec!, $after: ID, $first: Int) {
+	CertifyBadList(certifyBadSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyBad
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyBadList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyBadSpec,
+	after *string,
+	first *int,
+) (*CertifyBadListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyBadList",
+		Query:  CertifyBadList_Operation,
+		Variables: &__CertifyBadListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyBadListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyGood.
+const CertifyGood_Operation = `
+query CertifyGood ($filter: CertifyGoodSpec!) {
+	CertifyGood(certifyGoodSpec: $filter) {
+		... AllCertifyGood
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGood(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyGoodSpec,
+) (*CertifyGoodResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyGood",
+		Query:  CertifyGood_Operation,
+		Variables: &__CertifyGoodInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyGoodResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyGoodList.
+const CertifyGoodList_Operation = `
+query CertifyGoodList ($filter: CertifyGoodSpec!, $after: ID, $first: Int) {
+	CertifyGoodList(certifyGoodSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyGood
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGoodList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyGoodSpec,
+	after *string,
+	first *int,
+) (*CertifyGoodListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyGoodList",
+		Query:  CertifyGoodList_Operation,
+		Variables: &__CertifyGoodListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyGoodListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyLegal.
+const CertifyLegal_Operation = `
+query CertifyLegal ($filter: CertifyLegalSpec!) {
 	CertifyLegal(certifyLegalSpec: $filter) {
 		... AllCertifyLegalTree
 	}
@@ -24799,6 +31918,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24831,21 +31951,319 @@ fragment AllLicenseTree on License {
 }
 `
 
-func CertifyLegals(
+func CertifyLegal(
 	ctx_ context.Context,
 	client_ graphql.Client,
 	filter CertifyLegalSpec,
-) (*CertifyLegalsResponse, error) {
+) (*CertifyLegalResponse, error) {
 	req_ := &graphql.Request{
-		OpName: "CertifyLegals",
-		Query:  CertifyLegals_Operation,
-		Variables: &__CertifyLegalsInput{
+		OpName: "CertifyLegal",
+		Query:  CertifyLegal_Operation,
+		Variables: &__CertifyLegalInput{
 			Filter: filter,
 		},
 	}
 	var err_ error
 
-	var data_ CertifyLegalsResponse
+	var data_ CertifyLegalResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyLegalList.
+const CertifyLegalList_Operation = `
+query CertifyLegalList ($filter: CertifyLegalSpec!, $after: ID, $first: Int) {
+	CertifyLegalList(certifyLegalSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyLegalTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegalList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyLegalSpec,
+	after *string,
+	first *int,
+) (*CertifyLegalListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyLegalList",
+		Query:  CertifyLegalList_Operation,
+		Variables: &__CertifyLegalListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyLegalListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyVuln.
+const CertifyVuln_Operation = `
+query CertifyVuln ($filter: CertifyVulnSpec!) {
+	CertifyVuln(certifyVulnSpec: $filter) {
+		... AllCertifyVuln
+	}
+}
+fragment AllCertifyVuln on CertifyVuln {
+	id
+	package {
+		... AllPkgTree
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVuln(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVulnSpec,
+) (*CertifyVulnResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyVuln",
+		Query:  CertifyVuln_Operation,
+		Variables: &__CertifyVulnInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyVulnResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyVulnList.
+const CertifyVulnList_Operation = `
+query CertifyVulnList ($filter: CertifyVulnSpec!, $after: ID, $first: Int) {
+	CertifyVulnList(certifyVulnSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyVuln
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyVuln on CertifyVuln {
+	id
+	package {
+		... AllPkgTree
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVulnList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVulnSpec,
+	after *string,
+	first *int,
+) (*CertifyVulnListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyVulnList",
+		Query:  CertifyVulnList_Operation,
+		Variables: &__CertifyVulnListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyVulnListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -24889,6 +32307,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24927,6 +32346,92 @@ func Dependencies(
 	return &data_, err_
 }
 
+// The query or mutation executed by DependencyList.
+const DependencyList_Operation = `
+query DependencyList ($filter: IsDependencySpec!, $after: ID, $first: Int) {
+	IsDependencyList(isDependencySpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllIsDependencyTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependencyPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func DependencyList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter IsDependencySpec,
+	after *string,
+	first *int,
+) (*DependencyListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "DependencyList",
+		Query:  DependencyList_Operation,
+		Variables: &__DependencyListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ DependencyListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by FindSoftware.
 const FindSoftware_Operation = `
 query FindSoftware ($searchText: String!) {
@@ -24954,6 +32459,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -25000,6 +32506,215 @@ func FindSoftware(
 	var err_ error
 
 	var data_ FindSoftwareResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasMetadata.
+const HasMetadata_Operation = `
+query HasMetadata ($filter: HasMetadataSpec!) {
+	HasMetadata(hasMetadataSpec: $filter) {
+		... AllHasMetadata
+	}
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadata(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasMetadataSpec,
+) (*HasMetadataResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasMetadata",
+		Query:  HasMetadata_Operation,
+		Variables: &__HasMetadataInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HasMetadataResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasMetadataList.
+const HasMetadataList_Operation = `
+query HasMetadataList ($filter: HasMetadataSpec!, $after: ID, $first: Int) {
+	HasMetadataList(hasMetadataSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasMetadata
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadataList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasMetadataSpec,
+	after *string,
+	first *int,
+) (*HasMetadataListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasMetadataList",
+		Query:  HasMetadataList_Operation,
+		Variables: &__HasMetadataListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasMetadataListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -25079,6 +32794,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -25224,6 +32940,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -25297,6 +33014,406 @@ func HasSBOMs(
 	var err_ error
 
 	var data_ HasSBOMsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSLSA.
+const HasSLSA_Operation = `
+query HasSLSA ($filter: HasSLSASpec!) {
+	HasSLSA(hasSLSASpec: $filter) {
+		... AllHasSLSATree
+	}
+}
+fragment AllHasSLSATree on HasSLSA {
+	id
+	subject {
+		... AllArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... AllArtifactTree
+		}
+		builtBy {
+			... AllBuilderTree
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+		documentRef
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func HasSLSA(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSLSASpec,
+) (*HasSLSAResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSLSA",
+		Query:  HasSLSA_Operation,
+		Variables: &__HasSLSAInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HasSLSAResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSLSAList.
+const HasSLSAList_Operation = `
+query HasSLSAList ($filter: HasSLSASpec!, $after: ID, $first: Int) {
+	HasSLSAList(hasSLSASpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasSLSATree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasSLSATree on HasSLSA {
+	id
+	subject {
+		... AllArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... AllArtifactTree
+		}
+		builtBy {
+			... AllBuilderTree
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+		documentRef
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func HasSLSAList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSLSASpec,
+	after *string,
+	first *int,
+) (*HasSLSAListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSLSAList",
+		Query:  HasSLSAList_Operation,
+		Variables: &__HasSLSAListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasSLSAListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSourceAt.
+const HasSourceAt_Operation = `
+query HasSourceAt ($filter: HasSourceAtSpec!) {
+	HasSourceAt(hasSourceAtSpec: $filter) {
+		... AllHasSourceAt
+	}
+}
+fragment AllHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... AllPkgTree
+	}
+	source {
+		... AllSourceTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSourceAt(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSourceAtSpec,
+) (*HasSourceAtResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSourceAt",
+		Query:  HasSourceAt_Operation,
+		Variables: &__HasSourceAtInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HasSourceAtResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSourceAtList.
+const HasSourceAtList_Operation = `
+query HasSourceAtList ($filter: HasSourceAtSpec!, $after: ID, $first: Int) {
+	HasSourceAtList(hasSourceAtSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasSourceAt
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... AllPkgTree
+	}
+	source {
+		... AllSourceTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSourceAtList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSourceAtSpec,
+	after *string,
+	first *int,
+) (*HasSourceAtListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSourceAtList",
+		Query:  HasSourceAtList_Operation,
+		Variables: &__HasSourceAtListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasSourceAtListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HashEqualList.
+const HashEqualList_Operation = `
+query HashEqualList ($filter: HashEqualSpec!, $after: ID, $first: Int) {
+	HashEqualList(hashEqualSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHashEqualTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHashEqualTree on HashEqual {
+	id
+	justification
+	artifacts {
+		... AllArtifactTree
+	}
+	origin
+	collector
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HashEqualList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HashEqualSpec,
+	after *string,
+	first *int,
+) (*HashEqualListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HashEqualList",
+		Query:  HashEqualList_Operation,
+		Variables: &__HashEqualListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HashEqualListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -27903,88 +36020,51 @@ func IngestVulnerability(
 	return &data_, err_
 }
 
-// The query or mutation executed by IsOccurrences.
-const IsOccurrences_Operation = `
-query IsOccurrences ($filter: IsOccurrenceSpec!) {
-	IsOccurrence(isOccurrenceSpec: $filter) {
-		... AllIsOccurrencesTree
-	}
-}
-fragment AllIsOccurrencesTree on IsOccurrence {
-	id
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-	}
-	artifact {
-		... AllArtifactTree
-	}
-	justification
-	origin
-	collector
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
+// The query or mutation executed by LicenseList.
+const LicenseList_Operation = `
+query LicenseList ($filter: LicenseSpec!, $after: ID, $first: Int) {
+	licenseList(licenseSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllLicenseTree
 			}
 		}
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment AllLicenseTree on License {
 	id
-	algorithm
-	digest
+	name
+	inline
+	listVersion
 }
 `
 
-func IsOccurrences(
+func LicenseList(
 	ctx_ context.Context,
 	client_ graphql.Client,
-	filter IsOccurrenceSpec,
-) (*IsOccurrencesResponse, error) {
+	filter LicenseSpec,
+	after *string,
+	first *int,
+) (*LicenseListResponse, error) {
 	req_ := &graphql.Request{
-		OpName: "IsOccurrences",
-		Query:  IsOccurrences_Operation,
-		Variables: &__IsOccurrencesInput{
+		OpName: "LicenseList",
+		Query:  LicenseList_Operation,
+		Variables: &__LicenseListInput{
 			Filter: filter,
+			After:  after,
+			First:  first,
 		},
 	}
 	var err_ error
 
-	var data_ IsOccurrencesResponse
+	var data_ LicenseListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -28127,6 +36207,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -28604,6 +36685,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -29079,6 +37161,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -29464,6 +37547,209 @@ func Nodes(
 	return &data_, err_
 }
 
+// The query or mutation executed by OccurrenceList.
+const OccurrenceList_Operation = `
+query OccurrenceList ($filter: IsOccurrenceSpec!, $after: ID, $first: Int) {
+	IsOccurrenceList(isOccurrenceSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllIsOccurrencesTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func OccurrenceList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter IsOccurrenceSpec,
+	after *string,
+	first *int,
+) (*OccurrenceListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "OccurrenceList",
+		Query:  OccurrenceList_Operation,
+		Variables: &__OccurrenceListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ OccurrenceListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by Occurrences.
+const Occurrences_Operation = `
+query Occurrences ($filter: IsOccurrenceSpec!) {
+	IsOccurrence(isOccurrenceSpec: $filter) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func Occurrences(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter IsOccurrenceSpec,
+) (*OccurrencesResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "Occurrences",
+		Query:  Occurrences_Operation,
+		Variables: &__OccurrencesInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ OccurrencesResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by PackageNames.
 const PackageNames_Operation = `
 query PackageNames ($filter: PkgSpec!) {
@@ -29655,6 +37941,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -29682,6 +37969,78 @@ func Packages(
 	var err_ error
 
 	var data_ PackagesResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by PackagesList.
+const PackagesList_Operation = `
+query PackagesList ($filter: PkgSpec!, $after: ID, $first: Int) {
+	packagesList(pkgSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPkgTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func PackagesList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgSpec,
+	after *string,
+	first *int,
+) (*PackagesListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PackagesList",
+		Query:  PackagesList_Operation,
+		Variables: &__PackagesListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ PackagesListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -29783,6 +38142,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -30174,6 +38534,362 @@ func Path(
 	return &data_, err_
 }
 
+// The query or mutation executed by PkgEqualList.
+const PkgEqualList_Operation = `
+query PkgEqualList ($filter: PkgEqualSpec!, $after: ID, $first: Int) {
+	PkgEqualList(pkgEqualSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPkgEqual
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPkgEqual on PkgEqual {
+	id
+	justification
+	packages {
+		... AllPkgTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func PkgEqualList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgEqualSpec,
+	after *string,
+	first *int,
+) (*PkgEqualListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PkgEqualList",
+		Query:  PkgEqualList_Operation,
+		Variables: &__PkgEqualListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ PkgEqualListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by PkgEquals.
+const PkgEquals_Operation = `
+query PkgEquals ($filter: PkgEqualSpec!) {
+	PkgEqual(pkgEqualSpec: $filter) {
+		... AllPkgEqual
+	}
+}
+fragment AllPkgEqual on PkgEqual {
+	id
+	justification
+	packages {
+		... AllPkgTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func PkgEquals(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgEqualSpec,
+) (*PkgEqualsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PkgEquals",
+		Query:  PkgEquals_Operation,
+		Variables: &__PkgEqualsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ PkgEqualsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by PointOfContactList.
+const PointOfContactList_Operation = `
+query PointOfContactList ($filter: PointOfContactSpec!, $after: ID, $first: Int) {
+	PointOfContactList(pointOfContactSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPointOfContact
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PointOfContactSpec,
+	after *string,
+	first *int,
+) (*PointOfContactListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PointOfContactList",
+		Query:  PointOfContactList_Operation,
+		Variables: &__PointOfContactListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ PointOfContactListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by PointOfContacts.
+const PointOfContacts_Operation = `
+query PointOfContacts ($filter: PointOfContactSpec!) {
+	PointOfContact(pointOfContactSpec: $filter) {
+		... AllPointOfContact
+	}
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContacts(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PointOfContactSpec,
+) (*PointOfContactsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PointOfContacts",
+		Query:  PointOfContacts_Operation,
+		Variables: &__PointOfContactsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ PointOfContactsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by Scorecards.
 const Scorecards_Operation = `
 query Scorecards ($filter: CertifyScorecardSpec!) {
@@ -30241,6 +38957,88 @@ func Scorecards(
 	return &data_, err_
 }
 
+// The query or mutation executed by ScorecardsList.
+const ScorecardsList_Operation = `
+query ScorecardsList ($filter: CertifyScorecardSpec!, $after: ID, $first: Int) {
+	scorecardsList(scorecardSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyScorecard
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... AllSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func ScorecardsList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyScorecardSpec,
+	after *string,
+	first *int,
+) (*ScorecardsListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "ScorecardsList",
+		Query:  ScorecardsList_Operation,
+		Variables: &__ScorecardsListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ ScorecardsListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by Sources.
 const Sources_Operation = `
 query Sources ($filter: SourceSpec!) {
@@ -30279,6 +39077,388 @@ func Sources(
 	var err_ error
 
 	var data_ SourcesResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by SourcesList.
+const SourcesList_Operation = `
+query SourcesList ($filter: SourceSpec!, $after: ID, $first: Int) {
+	sourcesList(sourceSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllSourceTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func SourcesList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter SourceSpec,
+	after *string,
+	first *int,
+) (*SourcesListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "SourcesList",
+		Query:  SourcesList_Operation,
+		Variables: &__SourcesListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ SourcesListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VEXStatementList.
+const VEXStatementList_Operation = `
+query VEXStatementList ($filter: CertifyVEXStatementSpec!, $after: ID, $first: Int) {
+	CertifyVEXStatementList(certifyVEXStatementSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyVEXStatement
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	status
+	vexJustification
+	statement
+	statusNotes
+	knownSince
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VEXStatementList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVEXStatementSpec,
+	after *string,
+	first *int,
+) (*VEXStatementListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VEXStatementList",
+		Query:  VEXStatementList_Operation,
+		Variables: &__VEXStatementListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VEXStatementListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VEXStatements.
+const VEXStatements_Operation = `
+query VEXStatements ($filter: CertifyVEXStatementSpec!) {
+	CertifyVEXStatement(certifyVEXStatementSpec: $filter) {
+		... AllCertifyVEXStatement
+	}
+}
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	status
+	vexJustification
+	statement
+	statusNotes
+	knownSince
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VEXStatements(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVEXStatementSpec,
+) (*VEXStatementsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VEXStatements",
+		Query:  VEXStatements_Operation,
+		Variables: &__VEXStatementsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ VEXStatementsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnEqualList.
+const VulnEqualList_Operation = `
+query VulnEqualList ($filter: VulnEqualSpec!, $after: ID, $first: Int) {
+	vulnEqualList(vulnEqualSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllVulnEqual
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllVulnEqual on VulnEqual {
+	id
+	vulnerabilities {
+		... AllVulnerabilityTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VulnEqualList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnEqualSpec,
+	after *string,
+	first *int,
+) (*VulnEqualListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnEqualList",
+		Query:  VulnEqualList_Operation,
+		Variables: &__VulnEqualListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VulnEqualListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnEquals.
+const VulnEquals_Operation = `
+query VulnEquals ($filter: VulnEqualSpec!) {
+	vulnEqual(vulnEqualSpec: $filter) {
+		... AllVulnEqual
+	}
+}
+fragment AllVulnEqual on VulnEqual {
+	id
+	vulnerabilities {
+		... AllVulnerabilityTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VulnEquals(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnEqualSpec,
+) (*VulnEqualsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnEquals",
+		Query:  VulnEquals_Operation,
+		Variables: &__VulnEqualsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ VulnEqualsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -30380,6 +39560,123 @@ func VulnerabilityList(
 	var err_ error
 
 	var data_ VulnerabilityListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnerabilityMetadata.
+const VulnerabilityMetadata_Operation = `
+query VulnerabilityMetadata ($filter: VulnerabilityMetadataSpec!) {
+	vulnerabilityMetadata(vulnerabilityMetadataSpec: $filter) {
+		... AllVulnMetadataTree
+	}
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
+	origin
+	collector
+}
+`
+
+func VulnerabilityMetadata(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnerabilityMetadataSpec,
+) (*VulnerabilityMetadataResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnerabilityMetadata",
+		Query:  VulnerabilityMetadata_Operation,
+		Variables: &__VulnerabilityMetadataInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ VulnerabilityMetadataResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnerabilityMetadataList.
+const VulnerabilityMetadataList_Operation = `
+query VulnerabilityMetadataList ($filter: VulnerabilityMetadataSpec!, $after: ID, $first: Int) {
+	vulnerabilityMetadataList(vulnerabilityMetadataSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllVulnMetadataTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
+	origin
+	collector
+}
+`
+
+func VulnerabilityMetadataList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnerabilityMetadataSpec,
+	after *string,
+	first *int,
+) (*VulnerabilityMetadataListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnerabilityMetadataList",
+		Query:  VulnerabilityMetadataList_Operation,
+		Variables: &__VulnerabilityMetadataListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VulnerabilityMetadataListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

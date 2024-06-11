@@ -47,3 +47,28 @@ mutation IngestHasSourcesAt(
     hasSourceAts: $hasSourceAts
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC HasSourceAt
+
+query HasSourceAt($filter: HasSourceAtSpec!) {
+  HasSourceAt(hasSourceAtSpec: $filter) {
+    ...AllHasSourceAt
+  }
+}
+
+query HasSourceAtList($filter: HasSourceAtSpec!, $after: ID, $first: Int) {
+  HasSourceAtList(hasSourceAtSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllHasSourceAt
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

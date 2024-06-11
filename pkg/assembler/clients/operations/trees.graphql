@@ -30,6 +30,7 @@ fragment AllPkgTree on Package {
       name
       versions {
         id
+        purl
         version
         qualifiers {
           key
@@ -410,4 +411,30 @@ fragment AllPointOfContact on PointOfContact {
   justification
   origin
   collector
+}
+
+fragment AllHasSLSATree on HasSLSA {
+  id
+  subject {
+    ...AllArtifactTree
+  }
+  slsa {
+    builtFrom {
+      ...AllArtifactTree
+    }
+    builtBy {
+      ...AllBuilderTree
+    }
+    buildType
+    slsaPredicate {
+      key
+      value
+    }
+    slsaVersion
+    startedOn
+    finishedOn
+    origin
+    collector
+    documentRef
+  }
 }

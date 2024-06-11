@@ -19,7 +19,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -259,7 +259,9 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			}
 		}
 
-		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(topLevelPkgs[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
+		if c.cdxBom.Dependencies == nil {
+			preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(topLevelPkgs[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
+		}
 
 		if len(topLevelArts) > 0 {
 			for _, topLevelArt := range topLevelArts {
@@ -291,31 +293,81 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		return preds
 	}
 
+	var directDependencies, indirectDependencies []string
+	accountForPackages := map[string]bool{}
+
+	// Note: some sboms do not account for all packages via c.cdxBom.Dependencies.
+	// in that case they need to map to the top level package dependency.
+	// accountForPackages is used to keep track of the packages that have been accounted for (isDep created).
+	// These will be deleted from packagePackages map once complete and the remainder will be added as a dependency to the
+	// top level package.
 	for _, deps := range *c.cdxBom.Dependencies {
+		dependencyType := model.DependencyTypeUnknown
 		currPkg, found := c.packagePackages[deps.Ref]
 		if !found {
 			continue
 		}
-		if reflect.DeepEqual(currPkg, topLevelPkgs) {
-			continue
+		accountForPackages[deps.Ref] = true
+		if deps.Ref == c.cdxBom.Metadata.Component.BOMRef {
+			dependencyType = model.DependencyTypeDirect
+		} else if slices.Contains(directDependencies, deps.Ref) || slices.Contains(indirectDependencies, deps.Ref) {
+			dependencyType = model.DependencyTypeIndirect
+		} else {
+			p, err := common.GetIsDep(topLevelPkgs[0], currPkg, []*model.PkgInputSpec{}, "top-level package GUAC heuristic connecting to each file/package", model.DependencyTypeUnknown)
+			if err != nil {
+				logger.Errorf("error generating CycloneDX edge %v", err)
+				continue
+			}
+			if p != nil {
+				preds.IsDependency = append(preds.IsDependency, *p)
+			}
 		}
 		if deps.Dependencies != nil {
-			for _, depPkg := range *deps.Dependencies {
-				if depPkg, exist := c.packagePackages[depPkg]; exist {
+			for _, depPkgRef := range *deps.Dependencies {
+				if depPkg, exist := c.packagePackages[depPkgRef]; exist {
+					accountForPackages[depPkgRef] = true
 					for _, packNode := range currPkg {
-						p, err := common.GetIsDep(packNode, depPkg, []*model.PkgInputSpec{}, "CDX BOM Dependency")
+						p, err := common.GetIsDep(packNode, depPkg, []*model.PkgInputSpec{}, "CDX BOM Dependency", model.DependencyTypeDirect)
 						if err != nil {
 							logger.Errorf("error generating CycloneDX edge %v", err)
 							continue
 						}
 						if p != nil {
 							preds.IsDependency = append(preds.IsDependency, *p)
+							switch dependencyType {
+							case model.DependencyTypeDirect:
+								directDependencies = append(directDependencies, depPkgRef)
+							case model.DependencyTypeIndirect:
+								indirectDependencies = append(indirectDependencies, depPkgRef)
+							}
+						}
+
+						if deps.Ref != c.cdxBom.Metadata.Component.BOMRef {
+							justificationStr := "CDX BOM Dependency"
+							if dependencyType == model.DependencyTypeUnknown {
+								justificationStr = "top-level package GUAC heuristic connecting to each file/package"
+							}
+							p, err := common.GetIsDep(topLevelPkgs[0], depPkg, []*model.PkgInputSpec{}, justificationStr, dependencyType)
+							if err != nil {
+								logger.Errorf("error generating CycloneDX edge %v", err)
+								continue
+							}
+							if p != nil {
+								preds.IsDependency = append(preds.IsDependency, *p)
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+
+	// remove all accounted for packages from packagePackages map to determine if there are any that still need to be accounted for
+	for pkgRef := range accountForPackages {
+		delete(c.packagePackages, pkgRef)
+	}
+	// create a isDependency with the remainder to the top level as an unknown dependency type.
+	preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(topLevelPkgs[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
 
 	return preds
 }

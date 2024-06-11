@@ -39,6 +39,23 @@ mutation IngestPackages($pkgs: [IDorPkgInput!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC packages
 
+query PackagesList($filter: PkgSpec!, $after: ID, $first: Int) {
+  packagesList(pkgSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllPkgTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
 query Packages($filter: PkgSpec!) {
   packages(pkgSpec: $filter) {
     ...AllPkgTree

@@ -61,7 +61,7 @@ func DecodeEventSubject(ctx context.Context, collectedEvent []byte) (string, err
 
 func GetKey(blob []byte) string {
 	generatedHash := getHash(blob)
-	return fmt.Sprintf("sha256:%s", generatedHash)
+	return fmt.Sprintf("sha256_%s", generatedHash)
 }
 
 // GetDocRef returns the Document Reference of a blob; i.e. the blob store key for this blob.

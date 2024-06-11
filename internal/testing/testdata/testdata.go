@@ -1033,9 +1033,9 @@ var (
 			DepPkg:          cdxResteasyPack,
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
+				DependencyType: model.DependencyTypeDirect,
 				VersionRange:   "2.13.4.Final",
-				Justification:  isDepJustifyTopPkgJustification,
+				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
@@ -1043,9 +1043,9 @@ var (
 			DepPkg:          cdxReactiveCommonPack,
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
+				DependencyType: model.DependencyTypeIndirect,
 				VersionRange:   "2.13.4.Final",
-				Justification:  isDepJustifyTopPkgJustification,
+				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
@@ -1053,7 +1053,7 @@ var (
 			DepPkg:          cdxReactiveCommonPack,
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
+				DependencyType: model.DependencyTypeDirect,
 				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
