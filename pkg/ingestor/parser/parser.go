@@ -95,16 +95,16 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scan
 		}
 	}
 
-	var purls []string
-	for _, idString := range identifierStrings {
-		purls = append(purls, idString.PurlStrings...)
-	}
-
 	if scanForVulns {
 		// scan purls via OSV on initial ingestion to capture vulnerability information
+		var purls []string
+		for _, idString := range identifierStrings {
+			purls = append(purls, idString.PurlStrings...)
+		}
+
 		vulnEquals, certVulns, err := scanner.PurlsToScan(ctx, purls)
 		if err != nil {
-			logger.Errorf("error scanning the purls for vulnerabilities %v", err)
+			logger.Errorf("error scanning purls for vulnerabilities %v", err)
 		} else {
 			if len(assemblerInputs) > 0 {
 				assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
