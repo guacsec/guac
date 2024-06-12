@@ -58,7 +58,7 @@ func (ec *executionContext) _HasSBOM_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -99,7 +99,7 @@ func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.
 	return ec.marshalNPackageOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifact(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_subject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -140,7 +140,7 @@ func (ec *executionContext) _HasSBOM_uri(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_uri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_uri(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -181,7 +181,7 @@ func (ec *executionContext) _HasSBOM_algorithm(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_algorithm(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_algorithm(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -222,7 +222,7 @@ func (ec *executionContext) _HasSBOM_digest(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_digest(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_digest(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -263,7 +263,7 @@ func (ec *executionContext) _HasSBOM_downloadLocation(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_downloadLocation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_downloadLocation(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -304,7 +304,7 @@ func (ec *executionContext) _HasSBOM_knownSince(ctx context.Context, field graph
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_knownSince(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_knownSince(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -345,7 +345,7 @@ func (ec *executionContext) _HasSBOM_origin(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_origin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -386,7 +386,7 @@ func (ec *executionContext) _HasSBOM_collector(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_collector(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -427,7 +427,7 @@ func (ec *executionContext) _HasSBOM_documentRef(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_documentRef(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -468,7 +468,7 @@ func (ec *executionContext) _HasSBOM_includedSoftware(ctx context.Context, field
 	return ec.marshalNPackageOrArtifact2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_includedSoftware(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_includedSoftware(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -509,7 +509,7 @@ func (ec *executionContext) _HasSBOM_includedDependencies(ctx context.Context, f
 	return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_includedDependencies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_includedDependencies(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -570,7 +570,7 @@ func (ec *executionContext) _HasSBOM_includedOccurrences(ctx context.Context, fi
 	return ec.marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_includedOccurrences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_includedOccurrences(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
@@ -627,7 +627,7 @@ func (ec *executionContext) _HasSBOMConnection_totalCount(ctx context.Context, f
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOMConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOMConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOMConnection",
 		Field:      field,
@@ -668,7 +668,7 @@ func (ec *executionContext) _HasSBOMConnection_pageInfo(ctx context.Context, fie
 	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOMConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOMConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOMConnection",
 		Field:      field,
@@ -717,7 +717,7 @@ func (ec *executionContext) _HasSBOMConnection_edges(ctx context.Context, field 
 	return ec.marshalNHasSBOMEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMEdgeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOMConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOMConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOMConnection",
 		Field:      field,
@@ -764,7 +764,7 @@ func (ec *executionContext) _HasSBOMEdge_cursor(ctx context.Context, field graph
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOMEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOMEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOMEdge",
 		Field:      field,
@@ -805,7 +805,7 @@ func (ec *executionContext) _HasSBOMEdge_node(ctx context.Context, field graphql
 	return ec.marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOMEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOMEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOMEdge",
 		Field:      field,

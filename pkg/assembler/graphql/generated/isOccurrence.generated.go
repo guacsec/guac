@@ -57,7 +57,7 @@ func (ec *executionContext) _IsOccurrence_id(ctx context.Context, field graphql.
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -98,7 +98,7 @@ func (ec *executionContext) _IsOccurrence_subject(ctx context.Context, field gra
 	return ec.marshalNPackageOrSource2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSource(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_subject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -139,7 +139,7 @@ func (ec *executionContext) _IsOccurrence_artifact(ctx context.Context, field gr
 	return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_artifact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_artifact(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -188,7 +188,7 @@ func (ec *executionContext) _IsOccurrence_justification(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_justification(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -229,7 +229,7 @@ func (ec *executionContext) _IsOccurrence_origin(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_origin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -270,7 +270,7 @@ func (ec *executionContext) _IsOccurrence_collector(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_collector(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -311,7 +311,7 @@ func (ec *executionContext) _IsOccurrence_documentRef(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_documentRef(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -352,7 +352,7 @@ func (ec *executionContext) _IsOccurrenceConnection_totalCount(ctx context.Conte
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrenceConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrenceConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrenceConnection",
 		Field:      field,
@@ -393,7 +393,7 @@ func (ec *executionContext) _IsOccurrenceConnection_pageInfo(ctx context.Context
 	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrenceConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrenceConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrenceConnection",
 		Field:      field,
@@ -442,7 +442,7 @@ func (ec *executionContext) _IsOccurrenceConnection_edges(ctx context.Context, f
 	return ec.marshalNIsOccurrenceEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceEdgeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrenceConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrenceConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrenceConnection",
 		Field:      field,
@@ -489,7 +489,7 @@ func (ec *executionContext) _IsOccurrenceEdge_cursor(ctx context.Context, field 
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrenceEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrenceEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrenceEdge",
 		Field:      field,
@@ -530,7 +530,7 @@ func (ec *executionContext) _IsOccurrenceEdge_node(ctx context.Context, field gr
 	return ec.marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrenceEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrenceEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrenceEdge",
 		Field:      field,

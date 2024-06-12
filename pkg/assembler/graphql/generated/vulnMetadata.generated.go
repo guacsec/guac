@@ -58,7 +58,7 @@ func (ec *executionContext) _VulnerabilityMetadata_id(ctx context.Context, field
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -99,7 +99,7 @@ func (ec *executionContext) _VulnerabilityMetadata_vulnerability(ctx context.Con
 	return ec.marshalNVulnerability2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_vulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_vulnerability(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -148,7 +148,7 @@ func (ec *executionContext) _VulnerabilityMetadata_scoreType(ctx context.Context
 	return ec.marshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_scoreType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_scoreType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -189,7 +189,7 @@ func (ec *executionContext) _VulnerabilityMetadata_scoreValue(ctx context.Contex
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_scoreValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_scoreValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -230,7 +230,7 @@ func (ec *executionContext) _VulnerabilityMetadata_timestamp(ctx context.Context
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -271,7 +271,7 @@ func (ec *executionContext) _VulnerabilityMetadata_origin(ctx context.Context, f
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_origin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -312,7 +312,7 @@ func (ec *executionContext) _VulnerabilityMetadata_collector(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_collector(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -353,7 +353,7 @@ func (ec *executionContext) _VulnerabilityMetadata_documentRef(ctx context.Conte
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_documentRef(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
@@ -394,7 +394,7 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_totalCount(ctx cont
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadataConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadataConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadataConnection",
 		Field:      field,
@@ -435,7 +435,7 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_pageInfo(ctx contex
 	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadataConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadataConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadataConnection",
 		Field:      field,
@@ -484,7 +484,7 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_edges(ctx context.C
 	return ec.marshalNVulnerabilityMetadataEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataEdgeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadataConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadataConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadataConnection",
 		Field:      field,
@@ -531,7 +531,7 @@ func (ec *executionContext) _VulnerabilityMetadataEdge_cursor(ctx context.Contex
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadataEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadataEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadataEdge",
 		Field:      field,
@@ -572,7 +572,7 @@ func (ec *executionContext) _VulnerabilityMetadataEdge_node(ctx context.Context,
 	return ec.marshalNVulnerabilityMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadata(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadataEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadataEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadataEdge",
 		Field:      field,

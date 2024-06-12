@@ -57,7 +57,7 @@ func (ec *executionContext) _FindSoftwareConnection_totalCount(ctx context.Conte
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FindSoftwareConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FindSoftwareConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FindSoftwareConnection",
 		Field:      field,
@@ -98,7 +98,7 @@ func (ec *executionContext) _FindSoftwareConnection_pageInfo(ctx context.Context
 	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FindSoftwareConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FindSoftwareConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FindSoftwareConnection",
 		Field:      field,
@@ -147,7 +147,7 @@ func (ec *executionContext) _FindSoftwareConnection_edges(ctx context.Context, f
 	return ec.marshalNSoftwareEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSoftwareEdgeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FindSoftwareConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FindSoftwareConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FindSoftwareConnection",
 		Field:      field,
@@ -194,7 +194,7 @@ func (ec *executionContext) _SoftwareEdge_cursor(ctx context.Context, field grap
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SoftwareEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SoftwareEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SoftwareEdge",
 		Field:      field,
@@ -235,7 +235,7 @@ func (ec *executionContext) _SoftwareEdge_node(ctx context.Context, field graphq
 	return ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SoftwareEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SoftwareEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SoftwareEdge",
 		Field:      field,
