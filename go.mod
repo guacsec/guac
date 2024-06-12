@@ -1,8 +1,7 @@
 module github.com/guacsec/guac
 
 go 1.21.8
-
-toolchain go1.22.1
+toolchain go1.22.3
 
 require (
 	cloud.google.com/go/storage v1.41.0
@@ -62,7 +61,7 @@ require (
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
-	github.com/BurntSushi/toml v1.3.2 // indirect
+	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/IBM/sarama v1.43.0 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
@@ -105,7 +104,7 @@ require (
 	github.com/containerd/typeurl/v2 v2.1.1 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -232,13 +231,13 @@ require (
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/twmb/murmur3 v1.1.3 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
-	github.com/urfave/cli/v2 v2.27.1 // indirect
+	github.com/urfave/cli/v2 v2.27.2 // indirect
 	github.com/vbatts/tar-split v0.11.5 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/go-gitlab v0.93.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	github.com/xrash/smetrics v0.0.0-20231213231151-1d8dd44e695e // indirect
+	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.12 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.12 // indirect
@@ -267,7 +266,7 @@ require (
 )
 
 require (
-	deps.dev/api/v3 v3.0.0-20240503042720-6166138ce783
+	deps.dev/api/v3 v3.0.0-20240516073147-b352d7eeeae6
 	entgo.io/contrib v0.5.0
 	entgo.io/ent v0.13.0
 	github.com/99designs/gqlgen v0.17.45
@@ -292,7 +291,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/go-github/v50 v50.2.0
-	github.com/google/osv-scanner v1.7.2
+	github.com/google/osv-scanner v1.7.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jedib0t/go-pretty/v6 v6.5.9
@@ -325,6 +324,6 @@ require (
 	gocloud.dev v0.37.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
 	gocloud.dev/pubsub/rabbitpubsub v0.37.0
-	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
+	golang.org/x/exp v0.0.0-20240525044651-4c93da0ed11d
 	gopkg.in/yaml.v3 v3.0.1
 )
