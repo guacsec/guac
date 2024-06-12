@@ -48,8 +48,9 @@ type depsDevOptions struct {
 	// query for dependencies
 	retrieveDependencies bool
 	// gql endpoint
-	graphqlEndpoint string
-	headerFile      string
+	graphqlEndpoint      string
+	headerFile           string
+	queryVulnOnIngestion bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -83,7 +84,7 @@ var depsDevCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc); err != nil {
+			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc, opts.queryVulnOnIngestion); err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
@@ -139,6 +140,7 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 		retrieveDependencies: viper.GetBool("retrieve-dependencies"),
 		graphqlEndpoint:      viper.GetString("gql-addr"),
 		headerFile:           viper.GetString("header-file"),
+		queryVulnOnIngestion: viper.GetBool("add-vuln-on-ingest"),
 	}
 	useCsub := viper.GetBool("use-csub")
 	if useCsub {

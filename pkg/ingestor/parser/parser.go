@@ -22,6 +22,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common/scanner"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/deps_dev"
@@ -71,7 +72,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.IngestPredicates{}
 	identifierStrings := []*common.IdentifierStrings{}
 	logger := docTree.Document.ChildLogger
@@ -94,6 +95,23 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		}
 	}
 
+	if scanForVulns {
+		// scan purls via OSV on initial ingestion to capture vulnerability information
+		var purls []string
+		for _, idString := range identifierStrings {
+			purls = append(purls, idString.PurlStrings...)
+		}
+
+		vulnEquals, certVulns, err := scanner.PurlsToScan(ctx, purls)
+		if err != nil {
+			logger.Errorf("error scanning purls for vulnerabilities %v", err)
+		} else {
+			if len(assemblerInputs) > 0 {
+				assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
+				assemblerInputs[0].CertifyVuln = append(assemblerInputs[0].CertifyVuln, certVulns...)
+			}
+		}
+	}
 	return assemblerInputs, identifierStrings, nil
 }
 
