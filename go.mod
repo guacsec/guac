@@ -221,7 +221,7 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
-	github.com/sosodev/duration v1.2.0 // indirect
+	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spdx/gordf v0.0.0-20221230105357-b735bd5aac89 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
@@ -270,7 +270,7 @@ require (
 	deps.dev/api/v3 v3.0.0-20240516073147-b352d7eeeae6
 	entgo.io/contrib v0.5.0
 	entgo.io/ent v0.13.0
-	github.com/99designs/gqlgen v0.17.45
+	github.com/99designs/gqlgen v0.17.48
 	github.com/CycloneDX/cyclonedx-go v0.8.0
 	github.com/Khan/genqlient v0.7.0
 	github.com/Masterminds/semver v1.5.0
@@ -320,7 +320,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
-	github.com/vektah/gqlparser/v2 v2.5.11
+	github.com/vektah/gqlparser/v2 v2.5.12
 	go.uber.org/mock v0.4.0
 	gocloud.dev v0.37.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
