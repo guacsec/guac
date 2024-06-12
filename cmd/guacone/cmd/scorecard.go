@@ -62,7 +62,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
-			viper.GetBool("query-vuln"),
+			viper.GetBool("add-vuln-on-ingest"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)

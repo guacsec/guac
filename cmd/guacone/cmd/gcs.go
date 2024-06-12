@@ -58,7 +58,7 @@ var gcsCmd = &cobra.Command{
 			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetBool("query-vuln"),
+			viper.GetBool("add-vuln-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)

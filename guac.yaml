@@ -30,7 +30,7 @@ interval: 20m
 last-scan: 0
 
 # query vulnerability during ingestion
-query-vuln: false
+add-vuln-on-ingest: false
 
 # CSub setup
 csub-addr: localhost:2782

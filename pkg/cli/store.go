@@ -92,7 +92,7 @@ func init() {
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
 	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
 
-	set.Bool("query-vuln", false, "if enabled, the ingestor will query OSV for vulnerabilities during ingestion")
+	set.Bool("add-vuln-on-ingest", false, "if enabled, the ingestor will query and ingest OSV for vulnerabilities. Warning: This will increase ingestion times")
 
 	set.Bool("retrieve-dependencies", true, "enable the deps.dev collector to retrieve package dependencies")
 

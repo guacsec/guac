@@ -93,7 +93,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
-			viper.GetBool("query-vuln"),
+			viper.GetBool("add-vuln-on-ingest"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)

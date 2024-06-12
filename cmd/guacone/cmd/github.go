@@ -88,7 +88,7 @@ var githubCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("poll"),
-			viper.GetBool("query-vuln"),
+			viper.GetBool("add-vuln-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)

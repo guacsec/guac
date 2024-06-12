@@ -140,7 +140,7 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 		retrieveDependencies: viper.GetBool("retrieve-dependencies"),
 		graphqlEndpoint:      viper.GetString("gql-addr"),
 		headerFile:           viper.GetString("header-file"),
-		queryVulnOnIngestion: viper.GetBool("query-vuln"),
+		queryVulnOnIngestion: viper.GetBool("add-vuln-on-ingest"),
 	}
 	useCsub := viper.GetBool("use-csub")
 	if useCsub {

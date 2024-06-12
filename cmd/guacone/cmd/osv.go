@@ -61,7 +61,7 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetBool("query-vuln"),
+			viper.GetBool("add-vuln-on-ingest"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
