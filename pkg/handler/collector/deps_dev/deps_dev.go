@@ -73,16 +73,18 @@ type depsCollector struct {
 	retrieveDependencies bool
 	interval             time.Duration
 	Metrics              metrics.MetricCollector
-	checkedPurls         map[string]*PackageComponent
-	ingestedSource       map[string]*model.SourceInputSpec
-	projectInfoMap       map[string]*pb.Project
-	versions             map[string]*pb.Version
-	dependencies         map[string]*pb.Dependencies
+	// add artificial latency to throttle the pagination query
+	addedLatency   *time.Duration
+	checkedPurls   map[string]*PackageComponent
+	ingestedSource map[string]*model.SourceInputSpec
+	projectInfoMap map[string]*pb.Project
+	versions       map[string]*pb.Version
+	dependencies   map[string]*pb.Dependencies
 }
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -113,6 +115,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		poll:                 poll,
 		retrieveDependencies: retrieveDependencies,
 		interval:             interval,
+		addedLatency:         addedLatency,
 		checkedPurls:         map[string]*PackageComponent{},
 		ingestedSource:       map[string]*model.SourceInputSpec{},
 		projectInfoMap:       map[string]*pb.Project{},
@@ -167,6 +170,10 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 		err := d.fetchDependencies(ctx, purl.Value, docChannel)
 		if err != nil {
 			return fmt.Errorf("failed to fetch dependencies: %w", err)
+		}
+		// add artificial latency to throttle the pagination query
+		if d.addedLatency != nil {
+			time.Sleep(*d.addedLatency)
 		}
 	}
 	return nil
