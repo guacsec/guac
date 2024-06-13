@@ -29,8 +29,13 @@ import (
 )
 
 type sourceQuery struct {
-	client            graphql.Client
+	client graphql.Client
+	// daysSinceLastScan sets the days since the last vulnerability scan was run
 	daysSinceLastScan int
+	// set the batch size for the package pagination query
+	batchSize int
+	// add artificial latency to throttle the pagination query
+	addedLatency *time.Duration
 }
 
 type SourceNode struct {
@@ -49,7 +54,9 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 	}
 
 	var afterCursor *string
-	first := 60000
+
+	first := s.batchSize
+	//first := 60000
 	for {
 		srcConn, err := getSources(ctx, s.client, generated.SourceSpec{}, afterCursor, &first)
 		if err != nil {
@@ -101,6 +108,10 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 			break
 		}
 		afterCursor = srcConn.SourcesList.PageInfo.EndCursor
+		// add artificial latency to throttle the pagination query
+		if s.addedLatency != nil {
+			time.Sleep(*s.addedLatency)
+		}
 	}
 	return nil
 }
@@ -128,7 +139,7 @@ func trimAlgorithm(commit string) string {
 }
 
 // NewCertifier returns a new sourceArtifacts certifier
-func NewCertifier(client graphql.Client, daysSinceLastScan int) (certifier.QueryComponents, error) {
+func NewCertifier(client graphql.Client, daysSinceLastScan, batchSize int, addedLatency *time.Duration) (certifier.QueryComponents, error) {
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}
@@ -137,5 +148,7 @@ func NewCertifier(client graphql.Client, daysSinceLastScan int) (certifier.Query
 	return &sourceQuery{
 		client:            client,
 		daysSinceLastScan: daysSinceLastScan,
+		batchSize:         batchSize,
+		addedLatency:      addedLatency,
 	}, nil
 }
