@@ -35,20 +35,27 @@ type PackageNode struct {
 }
 
 type packageQuery struct {
-	client            graphql.Client
+	client graphql.Client
+	// daysSinceLastScan sets the days since the last vulnerability scan was run
 	daysSinceLastScan int
+	// set the batch size for the package pagination query
+	batchSize int
+	// add artificial latency to throttle the pagination query
+	addedLatency *time.Duration
 }
 
 var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
 var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphql.Client, daysSinceLastScan int) certifier.QueryComponents {
+func NewPackageQuery(client graphql.Client, daysSinceLastScan, batchSize int, addedLatency *time.Duration) certifier.QueryComponents {
 	getPackages = generated.PackagesList
 	getNeighbors = generated.Neighbors
 	return &packageQuery{
 		client:            client,
 		daysSinceLastScan: daysSinceLastScan,
+		batchSize:         batchSize,
+		addedLatency:      addedLatency,
 	}
 }
 
@@ -122,7 +129,9 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 
 func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *PackageNode) error {
 	var afterCursor *string
-	first := 60000
+
+	first := p.batchSize
+	//first := 60000
 	for {
 		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, afterCursor, &first)
 		if err != nil {
@@ -179,6 +188,10 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 			break
 		}
 		afterCursor = pkgConn.PackagesList.PageInfo.EndCursor
+		// add artificial latency to throttle the pagination query
+		if p.addedLatency != nil {
+			time.Sleep(*p.addedLatency)
+		}
 	}
 	return nil
 }

@@ -48,7 +48,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -227,7 +227,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -345,8 +345,11 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	} else {
 		ctx = context.Background()
 	}
-
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval)
+	addedLatency, err := time.ParseDuration("3ms")
+	if err != nil {
+		t.Errorf("failed to parser duration with error: %v", err)
+	}
+	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return

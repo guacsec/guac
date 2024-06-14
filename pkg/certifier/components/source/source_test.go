@@ -35,6 +35,8 @@ func TestNewCertifier(t *testing.T) {
 	type args struct {
 		client            graphql.Client
 		daysSinceLastScan int
+		batchSize         int
+		addedLatency      *time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -46,15 +48,19 @@ func TestNewCertifier(t *testing.T) {
 		args: args{
 			client:            gqlclient,
 			daysSinceLastScan: 0,
+			batchSize:         60000,
+			addedLatency:      nil,
 		},
 		want: &sourceQuery{
 			client:            gqlclient,
 			daysSinceLastScan: 0,
+			batchSize:         60000,
+			addedLatency:      nil,
 		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewCertifier(tt.args.client, tt.args.daysSinceLastScan)
+			got, err := NewCertifier(tt.args.client, tt.args.daysSinceLastScan, tt.args.batchSize, tt.args.addedLatency)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewCertifier() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -372,12 +378,18 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantErr: false,
 		}}
+
+	addedLatency, err := time.ParseDuration("3ms")
+	if err != nil {
+		t.Errorf("failed to parser duration with error: %v", err)
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			p := &sourceQuery{
 				client:            nil,
 				daysSinceLastScan: tt.daysSinceLastScan,
+				addedLatency:      &addedLatency,
 			}
 			getSources = tt.getSources
 			getNeighbors = tt.getNeighbors

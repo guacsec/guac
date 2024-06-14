@@ -48,6 +48,10 @@ type scorecardOptions struct {
 	interval             time.Duration
 	csubClientOptions    csub_client.CsubClientOptions
 	queryVulnOnIngestion bool
+	// sets artificial latency on the certifier (default to nil)
+	addedLatency *time.Duration
+	// sets the batch size for pagination query for the certifier
+	batchSize int
 }
 
 var scorecardCmd = &cobra.Command{
@@ -63,6 +67,8 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
 			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetString("certifier-latency"),
+			viper.GetInt("certifier-batch-size"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -105,7 +111,7 @@ var scorecardCmd = &cobra.Command{
 
 		// scorecard certifier is the certifier that gets the scorecard data graphQL
 		// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
-		query, err := sc.NewCertifier(gqlclient, 0)
+		query, err := sc.NewCertifier(gqlclient, 0, opts.batchSize, opts.addedLatency)
 
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
@@ -183,10 +189,24 @@ func validateScorecardFlags(
 	csubTlsSkipVerify,
 	poll bool,
 	queryVulnIngestion bool,
+	certifierLatencyStr string,
+	batchSize int,
 ) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
+
+	if certifierLatencyStr != "" {
+		addedLatency, err := time.ParseDuration(certifierLatencyStr)
+		if err != nil {
+			return opts, fmt.Errorf("failed to parser duration with error: %w", err)
+		}
+		opts.addedLatency = &addedLatency
+	} else {
+		opts.addedLatency = nil
+	}
+
+	opts.batchSize = batchSize
 
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
@@ -205,5 +225,16 @@ func validateScorecardFlags(
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"certifier-latency",
+		"certifier-batch-size"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	scorecardCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(scorecardCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	certifierCmd.AddCommand(scorecardCmd)
 }

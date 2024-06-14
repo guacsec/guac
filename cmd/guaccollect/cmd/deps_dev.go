@@ -51,6 +51,8 @@ type depsDevOptions struct {
 	prometheusPort int
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// sets artificial latency on the deps.dev collector (default to nil)
+	addedLatency *time.Duration
 }
 
 var depsDevCmd = &cobra.Command{
@@ -87,6 +89,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("enable-prometheus"),
 			viper.GetInt("prometheus-port"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetString("deps-dev-latency"),
 			args,
 		)
 		if err != nil {
@@ -95,7 +98,7 @@ you have access to read and write to the respective blob store.`,
 			os.Exit(1)
 		}
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
 		}
@@ -129,6 +132,7 @@ func validateDepsDevFlags(
 	enablePrometheus bool,
 	prometheusPort int,
 	pubToQueue bool,
+	addedLatencyStr string,
 	args []string,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
@@ -139,6 +143,17 @@ func validateDepsDevFlags(
 	opts.enablePrometheus = enablePrometheus
 	opts.prometheusPort = prometheusPort
 	opts.publishToQueue = pubToQueue
+
+	if addedLatencyStr != "" {
+		addedLatency, err := time.ParseDuration(addedLatencyStr)
+		if err != nil {
+			return opts, fmt.Errorf("failed to parser duration with error: %w", err)
+		}
+		opts.addedLatency = &addedLatency
+	} else {
+		opts.addedLatency = nil
+	}
+
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {
@@ -174,7 +189,7 @@ func validateDepsDevFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"retrieve-dependencies", "prometheus-port"})
+	set, err := cli.BuildFlags([]string{"retrieve-dependencies", "prometheus-port", "deps-dev-latency"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

@@ -20,7 +20,21 @@ use-csub: true
 
 # certifier polling
 poll: true
-interval: 5m
+# certifier interval
+interval: 20m
+# days since the last vulnerability scan was run. 0 means only run once
+last-scan: 0
+# set the batch size for the package pagination query
+certifier-batch-size: 60000
+# add artificial latency to throttle the certifier
+certifier-latency: ""
 
 # REST API setup
 rest-api-server-port: 8081
+
+# deps.dev
+# add artificial latency to throttle deps.dev
+deps-dev-latency: ""
+
+# query vulnerability during ingestion
+add-vuln-on-ingest: false
