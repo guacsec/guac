@@ -65,6 +65,9 @@ func init() {
 	// enable/disable publish to queue
 	set.Bool("publish-to-queue", true, "enable/disable message publish to queue")
 
+	// the ingestor will query and ingest OSV for vulnerabilities
+	set.Bool("add-vuln-on-ingest", false, "if enabled, the ingestor will query and ingest OSV for vulnerabilities. Warning: This will increase ingestion times")
+
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")
 	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
@@ -90,10 +93,18 @@ func init() {
 	set.String("verifier-key-path", "", "path to pem file to verify dsse")
 	set.String("verifier-key-id", "", "ID of the key to be stored")
 
+	// certifier
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
 	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
 
-	set.Bool("add-vuln-on-ingest", false, "if enabled, the ingestor will query and ingest OSV for vulnerabilities. Warning: This will increase ingestion times")
+	// set the batch size for the package pagination query
+	set.Int("certifier-batch-size", 60000, "sets the batch size for pagination query for the certifier")
+	// add artificial latency to throttle the certifier
+	set.String("certifier-latency", "", "sets artificial latency on the certifier. Defaults to empty string (not enabled) but can set m, h, s...etc")
+
+	// deps.dev
+	// add artificial latency to throttle deps.dev
+	set.String("deps-dev-latency", "", "sets artificial latency on the deps.dev collector. Defaults to empty string (not enabled) but can set m, h, s...etc")
 
 	set.Bool("retrieve-dependencies", true, "enable the deps.dev collector to retrieve package dependencies")
 

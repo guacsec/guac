@@ -34,6 +34,8 @@ func TestNewPackageQuery(t *testing.T) {
 	type args struct {
 		client            graphql.Client
 		daysSinceLastScan int
+		batchSize         int
+		addedLatency      *time.Duration
 	}
 	tests := []struct {
 		name string
@@ -44,15 +46,19 @@ func TestNewPackageQuery(t *testing.T) {
 		args: args{
 			client:            gqlclient,
 			daysSinceLastScan: 0,
+			batchSize:         60000,
+			addedLatency:      nil,
 		},
 		want: &packageQuery{
 			client:            gqlclient,
 			daysSinceLastScan: 0,
+			batchSize:         60000,
+			addedLatency:      nil,
 		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewPackageQuery(tt.args.client, tt.args.daysSinceLastScan); !reflect.DeepEqual(got, tt.want) {
+			if got := NewPackageQuery(tt.args.client, tt.args.daysSinceLastScan, tt.args.batchSize, tt.args.addedLatency); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewPackageQuery() = %v, want %v", got, tt.want)
 			}
 		})
@@ -315,12 +321,18 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			}},
 			wantErr: false,
 		}}
+	addedLatency, err := time.ParseDuration("3ms")
+	if err != nil {
+		t.Errorf("failed to parser duration with error: %v", err)
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			p := &packageQuery{
 				client:            nil,
 				daysSinceLastScan: tt.daysSinceLastScan,
+				batchSize:         1,
+				addedLatency:      &addedLatency,
 			}
 			getPackages = tt.getPackages
 			getNeighbors = tt.getNeighbors
