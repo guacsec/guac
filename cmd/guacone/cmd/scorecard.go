@@ -224,10 +224,7 @@ func validateScorecardFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{
-		"certifier-latency",
-		"certifier-batch-size",
-	})
+	set, err := cli.BuildFlags([]string{"certifier-latency", "certifier-batch-size", "use-scorecard-api"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
@@ -238,6 +235,4 @@ func init() {
 		os.Exit(1)
 	}
 	certifierCmd.AddCommand(scorecardCmd)
-	scorecardCmd.Flags().Bool("use-scorecard-api", false, "use the scorecard API")
-	viper.BindPFlag("use-scorecard-api", scorecardCmd.Flags().Lookup("use-scorecard-api"))
 }
