@@ -129,14 +129,10 @@ func validateOSVFlags(
 	interval string,
 	poll bool,
 	pubToQueue bool,
-<<<<<<< HEAD
 	daysSince int,
 	certifierLatencyStr string,
 	batchSize int) (osvOptions, error) {
 
-=======
-) (osvOptions, error) {
->>>>>>> 080dbd51 (Including the Scorecard API)
 	var opts osvOptions
 
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -240,11 +236,7 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-<<<<<<< HEAD
-		if err := certify.Certify(ctx, query, emit, errHandler, poll, interval); err != nil {
-=======
 		if err := certify.Certify(ctx, query, emit, errHandler, poll, time.Minute*time.Duration(interval), false); err != nil {
->>>>>>> 080dbd51 (Including the Scorecard API)
 			logger.Fatal(err)
 		}
 		done <- true
