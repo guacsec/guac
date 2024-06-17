@@ -277,7 +277,7 @@ require (
 	github.com/ProtonMail/gluon v0.17.0
 	github.com/arangodb/go-driver v1.6.2
 	github.com/aws/aws-sdk-go v1.53.1
-	github.com/aws/aws-sdk-go-v2 v1.27.0
+	github.com/aws/aws-sdk-go-v2 v1.28.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.31.4
