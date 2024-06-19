@@ -101,6 +101,8 @@ func init() {
 	set.Int("certifier-batch-size", 60000, "sets the batch size for pagination query for the certifier")
 	// add artificial latency to throttle the certifier
 	set.String("certifier-latency", "", "sets artificial latency on the certifier. Defaults to empty string (not enabled) but can set m, h, s...etc")
+	// use scorecard api for retriving scorecard data
+	set.Bool("use-scorecard-api", false, "use scorecard api only")
 
 	// deps.dev
 	// add artificial latency to throttle deps.dev
