@@ -136,7 +136,7 @@ For more information on how to get involved in the community, mailing lists and
 meetings, please refer to our [community page](https://guac.sh/community/)
 
 For security issues or code of conduct concerns, an e-mail should be sent to
-guac-maintainers@googlegroups.com.
+GUAC-Maintainers@lists.openssf.org.
 
 ## Governance
 
