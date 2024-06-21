@@ -1,11 +1,9 @@
-FROM --platform=$BUILDPLATFORM alpine:latest as certs
-RUN apk --update add ca-certificates
+FROM --platform=$BUILDPLATFORM cgr.dev/chainguard/static:latest
 
-FROM --platform=$BUILDPLATFORM alpine:latest
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-RUN apk --update --no-cache add wget && rm -rf /var/cache/apk/*
+# Set the working directory
+WORKDIR /opt/guac
 
-WORKDIR /guac
+# Copy the necessary files to the working directory
 COPY guaccollect*  /opt/guac/guaccollect
 COPY guaccsub*  /opt/guac/guaccsub
 COPY guacgql*  /opt/guac/guacgql
