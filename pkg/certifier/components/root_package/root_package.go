@@ -169,6 +169,12 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 								if math.Abs(difference.Hours()) < float64(p.daysSinceLastScan*24) {
 									certifyVulnFound = true
 								}
+								if math.Abs(difference.Hours()) > float64(p.daysSinceLastScan*24) {
+									_, err := generated.Delete(ctx, p.client, vulns.Id)
+									if err != nil {
+										return fmt.Errorf("failed to delete certifyVuln node with ID: %s, with error: %w", vulns.Id, err)
+									}
+								}
 							} else {
 								certifyVulnFound = true
 								break

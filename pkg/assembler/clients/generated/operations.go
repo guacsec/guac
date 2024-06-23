@@ -9141,6 +9141,15 @@ const (
 	ComparatorLessEqual    Comparator = "LESS_EQUAL"
 )
 
+// DeleteResponse is returned by Delete on success.
+type DeleteResponse struct {
+	// Delete node with ID and all associated relationships
+	Delete bool `json:"delete"`
+}
+
+// GetDelete returns DeleteResponse.Delete, and is useful for accessing the field via an interface.
+func (v *DeleteResponse) GetDelete() bool { return v.Delete }
+
 // DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
 //
@@ -29711,6 +29720,14 @@ func (v *__CertifyVulnListInput) GetAfter() *string { return v.After }
 // GetFirst returns __CertifyVulnListInput.First, and is useful for accessing the field via an interface.
 func (v *__CertifyVulnListInput) GetFirst() *int { return v.First }
 
+// __DeleteInput is used internally by genqlient
+type __DeleteInput struct {
+	NodeID string `json:"nodeID"`
+}
+
+// GetNodeID returns __DeleteInput.NodeID, and is useful for accessing the field via an interface.
+func (v *__DeleteInput) GetNodeID() string { return v.NodeID }
+
 // __DependenciesInput is used internally by genqlient
 type __DependenciesInput struct {
 	Filter IsDependencySpec `json:"filter"`
@@ -32264,6 +32281,39 @@ func CertifyVulnList(
 	var err_ error
 
 	var data_ CertifyVulnListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by Delete.
+const Delete_Operation = `
+mutation Delete ($nodeID: ID!) {
+	delete(node: $nodeID)
+}
+`
+
+func Delete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	nodeID string,
+) (*DeleteResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "Delete",
+		Query:  Delete_Operation,
+		Variables: &__DeleteInput{
+			NodeID: nodeID,
+		},
+	}
+	var err_ error
+
+	var data_ DeleteResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

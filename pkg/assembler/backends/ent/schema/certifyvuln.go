@@ -51,6 +51,8 @@ func (CertifyVuln) Fields() []ent.Field {
 // Edges of the Vulnerability.
 func (CertifyVuln) Edges() []ent.Edge {
 	return []ent.Edge{
+		// edge.To("vulnerability", VulnerabilityID.Type).Unique().Field("vulnerability_id").Required().Annotations(entsql.OnDelete(entsql.Cascade)),
+		// edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("vulnerability", VulnerabilityID.Type).Unique().Field("vulnerability_id").Required(),
 		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required(),
 	}

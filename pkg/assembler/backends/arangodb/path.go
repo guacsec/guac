@@ -358,6 +358,6 @@ func (c *arangoClient) Nodes(ctx context.Context, nodeIDs []string) ([]model.Nod
 	return rv, nil
 }
 
-func (c *demoClient) Delete(ctx context.Context, node string) (bool, error) {
+func (c *arangoClient) Delete(ctx context.Context, node string) (bool, error) {
 	panic(fmt.Errorf("not implemented: Delete"))
 }
