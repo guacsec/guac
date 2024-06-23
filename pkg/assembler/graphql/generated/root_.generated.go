@@ -371,6 +371,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		Delete                          func(childComplexity int, node string) int
 		IngestArtifact                  func(childComplexity int, artifact *model.IDorArtifactInput) int
 		IngestArtifacts                 func(childComplexity int, artifacts []*model.IDorArtifactInput) int
 		IngestBuilder                   func(childComplexity int, builder *model.IDorBuilderInput) int
@@ -2071,6 +2072,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LicenseEdge.Node(childComplexity), true
+
+	case "Mutation.delete":
+		if e.complexity.Mutation.Delete == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_delete_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Delete(childComplexity, args["node"].(string)), true
 
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
@@ -5783,7 +5796,48 @@ extend type Mutation {
   ): [ID!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/directive.graphql", Input: `directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
+	{Name: "../schema/delete.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+extend type Mutation {
+  """
+  Delete node with ID and all associated relationships
+  """
+  delete(node: ID!): Boolean!
+}
+`, BuiltIn: false},
+	{Name: "../schema/directive.graphql", Input: `#
+# Copyright 2024 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
 enum FilterOperation {
   CONTAINS
   STARTSWITH

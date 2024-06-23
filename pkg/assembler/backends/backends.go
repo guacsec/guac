@@ -128,6 +128,9 @@ type Backend interface {
 	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
 	IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error)
 
+	// Delete Node and all relationships attached to it
+	Delete(ctx context.Context, node string) (bool, error)
+
 	// Topological queries: queries where node connectivity matters more than node type
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
 	NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error)

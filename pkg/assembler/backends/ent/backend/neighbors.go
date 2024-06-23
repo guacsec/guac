@@ -49,6 +49,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (b *EntBackend) Delete(ctx context.Context, node string) (bool, error) {
+	panic(fmt.Errorf("not implemented: Delete"))
+}
+
 func (b *EntBackend) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	return b.bfs(ctx, subject, target, maxPathLength, usingOnly)
 }
