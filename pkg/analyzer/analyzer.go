@@ -30,6 +30,28 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+type NodeType int
+type Action int
+
+const (
+	Pkg NodeType = iota
+	DepPkg
+)
+
+func (n NodeType) String() string {
+	return [...]string{"Pkg", "DepPkg"}[n]
+}
+
+const (
+	Difference Action = iota
+	Intersection
+	Union
+)
+
+func (a Action) String() string {
+	return [...]string{"Difference", "Intersectino", "Union"}[a]
+}
+
 type Node struct {
 	ID         string
 	Message    string
@@ -210,12 +232,12 @@ func FindPathsFromHasSBOMNode(g graph.Graph[string, *Node]) ([][]string, error) 
 	return paths, nil
 }
 
-func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*Node, [][]*Node, error) {
+func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action Action) ([][]*Node, [][]*Node, error) {
 	pathsOne, errOne := FindPathsFromHasSBOMNode(gOne)
 	pathsTwo, errTwo := FindPathsFromHasSBOMNode(gTwo)
-	var analysisOne, analysisTwo [][]*Node
+
 	if errOne != nil || errTwo != nil {
-		return analysisOne, analysisTwo, fmt.Errorf("error getting graph paths errOne-%v, errTwo-%v", errOne.Error(), errTwo.Error())
+		return [][]*Node{}, [][]*Node{}, fmt.Errorf("error getting graph paths errOne-%v, errTwo-%v", errOne.Error(), errTwo.Error())
 	}
 
 	pathsOneStrings := concatenateLists(pathsOne)
@@ -223,6 +245,8 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 
 	pathsOneMap := make(map[string][]*Node)
 	pathsTwoMap := make(map[string][]*Node)
+
+	var analysisOne, analysisTwo [][]*Node
 
 	for i := range pathsOne {
 		nodes, err := nodeIDListToNodeList(gOne, pathsOne[i])
@@ -242,12 +266,12 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 	}
 
 	switch action {
-	//0 is diff
-	case 0:
+
+	case Difference:
 		for key, val := range pathsOneMap {
 			_, ok := pathsTwoMap[key]
 			if !ok {
-				//missing
+
 				analysisOne = append(analysisOne, val)
 			}
 		}
@@ -255,24 +279,22 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 		for key, val := range pathsTwoMap {
 			_, ok := pathsOneMap[key]
 			if !ok {
-				//missing
+
 				analysisTwo = append(analysisTwo, val)
 			}
 		}
 
-		//do the compare here
-	case 1:
-		// 1 is intersect
+	case Intersection:
 		for key := range pathsOneMap {
 			val, ok := pathsTwoMap[key]
 			if ok {
-				//common
+
 				analysisOne = append(analysisOne, val)
 			}
 		}
-		//do the compare here
-	case 2:
-		//2 is union
+
+	case Union:
+
 		for _, val := range pathsOneMap {
 			analysisOne = append(analysisOne, val)
 		}
@@ -280,11 +302,10 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 		for key, val := range pathsTwoMap {
 			_, ok := pathsOneMap[key]
 			if !ok {
-				//common
 				analysisTwo = append(analysisTwo, val)
 			}
 		}
-		//do the compare here
+
 	}
 
 	return analysisOne, analysisTwo, nil
@@ -394,14 +415,14 @@ func nodeHasher(value []byte) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func AddGraphNode(g graph.Graph[string, *Node], _ID, color string) {
+func AddGraphNode(g graph.Graph[string, *Node], id, color string) {
 	var err error
-	if _, err = g.Vertex(_ID); err == nil {
+	if _, err = g.Vertex(id); err == nil {
 		return
 	}
 
 	newNode := &Node{
-		ID:         _ID,
+		ID:         id,
 		Color:      color,
 		Attributes: make(map[string]interface{}),
 	}
@@ -629,7 +650,6 @@ func compareNodes(nodeOne, nodeTwo Node, nodeType string) ([]string, error) {
 					if k >= len(versionSmall) {
 						diffs = append(diffs, fmt.Sprintf("Version %s not present for name %s in namespace %s,", version1.Version, name1.Name, namespace1.Namespace))
 						continue
-
 					}
 
 					version2 := versionSmall[k]
@@ -869,20 +889,20 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 
 	var small, big [][]*Node
 	if len(listOne) > len(listTwo) {
-		small= listTwo
+		small = listTwo
 		big = listOne
-	} else if  len(listTwo) > len(listOne) {
-		small= listOne
+	} else if len(listTwo) > len(listOne) {
+		small = listOne
 		big = listTwo
 	} else {
-		small= listTwo
+		small = listTwo
 		big = listOne
 	}
 
 	var results []DiffedPath
 	used := make(map[int]bool)
-	
-	for _, pathOne := range  small {
+
+	for _, pathOne := range small {
 
 		var diff DiffedPath
 		diff.PathOne = pathOne
@@ -891,16 +911,15 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 
 		for i, pathTwo := range big {
 			_, ok := used[i]
-			if ok{
+			if ok {
 				continue
 			}
-			
+
 			diffs, diffNum, err := CompareTwoPaths(pathOne, pathTwo)
 
 			if err != nil {
 				return results, fmt.Errorf(err.Error())
 			}
-			
 
 			if diffNum < min {
 				diff.PathTwo = pathTwo
@@ -914,20 +933,19 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 	}
 
 	for i, val := range big {
-		_, ok := used[i] 
+		_, ok := used[i]
 		if !ok {
-			results = append(results, DiffedPath{PathOne: val, })
+			results = append(results, DiffedPath{PathOne: val})
 		}
 	}
-
 
 	return results, nil
 }
 
-func GetNodeString(option int, node interface{}) (string, error) {
+func GetNodeString(option NodeType, node interface{}) (string, error) {
 	switch option {
 
-	case 1:
+	case Pkg:
 		pkg, ok := node.(model.AllIsDependencyTreePackage)
 		if !ok {
 			return "", fmt.Errorf("could not case node to tree Pkg")
@@ -960,7 +978,7 @@ func GetNodeString(option int, node interface{}) (string, error) {
 			message += "\n"
 		}
 		return message, nil
-	case 2:
+	case DepPkg:
 		depPkg, ok := node.(model.AllIsDependencyTreeDependencyPackage)
 		if !ok {
 			return "", fmt.Errorf("could not case node to tree depPkg")

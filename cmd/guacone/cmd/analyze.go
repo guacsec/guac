@@ -41,10 +41,9 @@ type AnalyzeOpts struct {
 	Namespaces bool
 	URI        bool
 	PURL       bool
-	ID         bool
 }
 
-var analyzeCmd = &cobra.Command{
+var analyzeCmd = &cobra.Command {
 	Use:   "analyze <operation> <sboms> [flags] ",
 	Short: "analyze is a CLI tool tailored for comparing, intersecting, and merging Software Bill of Materials (SBOMs) within GUAC",
 	Long: `Diff Analysis: Compare two SBOMs to identify differences in their software components, versions, and dependencies.
@@ -67,12 +66,12 @@ var analyzeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 1 || len(args) > 1 {
-			fmt.Println("Required 1 positional arguments, got", len(args))
+			fmt.Println("required 1 positional arguments, got", len(args))
 			os.Exit(1)
 		}
 
 		if args[0] != "intersect" && args[0] != "union" && args[0] != "diff" {
-			fmt.Println("Invalid positional argument. Must be one of: intersect, union or diff.")
+			fmt.Println("invalid positional argument. Must be one of: intersect, union or diff.")
 			os.Exit(1)
 		}
 
@@ -91,22 +90,21 @@ var analyzeCmd = &cobra.Command{
 		inclDeps, _ := cmd.Flags().GetBool("incl-deps")
 		inclOccur, _ := cmd.Flags().GetBool("incl-occur")
 		namespaces, _ := cmd.Flags().GetBool("namespaces")
-		id, _ := cmd.Flags().GetBool("id")
 		test, _ := cmd.Flags().GetString("test")
 
 		var graphs []graph.Graph[string, *analyzer.Node]
 		var err error
 
 		if test == "" {
-			if err = verifyAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl, id); err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %s", err)
+			if err = validateAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %s", err)
 				_ = cmd.Help()
 				os.Exit(1)
 			}
 
-			//create graphs
 			graphs, err = hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
-				Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur, Namespaces: namespaces, URI: uri, PURL: purl, ID: id})
+				Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur,
+				Namespaces: namespaces, URI: uri, PURL: purl, })
 
 			if err != nil {
 				logger.Fatalf("Unable to generate graphs: %v", err)
@@ -352,15 +350,6 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 		if err != nil {
 			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(purl)failed to lookup sbom: %v %v", sboms[1], err)
 		}
-	} else if opts.ID {
-		hasSBOMResponseOne, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, "", "", sboms[0], ctx, gqlclient)
-		if err != nil {
-			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[0], err)
-		}
-		hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, "", "", sboms[1], ctx, gqlclient)
-		if err != nil {
-			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[1], err)
-		}
 	}
 
 	if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
@@ -377,7 +366,6 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 	hasSBOMOne := hasSBOMResponseOne.HasSBOM[0]
 	hasSBOMTwo := hasSBOMResponseTwo.HasSBOM[0]
 
-	//create graphs
 	gOne, err := analyzer.MakeGraph(hasSBOMOne, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
 	if err != nil {
 		logger.Fatalf(err.Error())
@@ -392,7 +380,7 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 	}, nil
 }
 
-func verifyAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl, id bool) error {
+func validateAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl bool) error {
 
 	if (errSlsa != nil && errSbom != nil) || (len(slsas) == 0 && len(sboms) == 0) {
 		return fmt.Errorf("must specify slsa or sboms")
@@ -414,11 +402,15 @@ func verifyAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl
 		return fmt.Errorf("slsa diff to be implemented")
 	}
 
-	if !uri && !purl && !id {
+	if sboms[0] ==  "" || sboms[1] == "" {
+		return fmt.Errorf("expected sbom received \"\"")
+	}
+
+	if !uri && !purl {
 		return fmt.Errorf("must provide one of --uri or --purl")
 	}
 
-	if uri && purl || uri && id || purl && id {
+	if uri && purl {
 		return fmt.Errorf("must provide only one of --uri or --purl")
 	}
 
@@ -457,20 +449,21 @@ func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error)
 
 func init() {
 
-	analyzeCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to analyze")
-	analyzeCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to analyze")
-	analyzeCmd.PersistentFlags().Bool("uri", false, "input is a URI")
-	analyzeCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
-	analyzeCmd.PersistentFlags().Bool("id", false, "input is an Id")
-	analyzeCmd.PersistentFlags().Bool("metadata", false, "Compare SBOM metadata")
-	analyzeCmd.PersistentFlags().Bool("incl-soft", false, "Compare Included Softwares")
-	analyzeCmd.PersistentFlags().Bool("incl-deps", false, "Compare Included Dependencies")
-	analyzeCmd.PersistentFlags().Bool("incl-occur", false, "Compare Included Occurrences")
-	analyzeCmd.PersistentFlags().Bool("namespaces", false, "Compare Package Namespaces")
-	analyzeCmd.PersistentFlags().Bool("dot", false, "create diff dot file")
-	analyzeCmd.PersistentFlags().Bool("all", false, " lists all")
-	analyzeCmd.PersistentFlags().Int("maxprint", 20, "max number of items to print")
-	analyzeCmd.PersistentFlags().String("test", "", "test file with sbom")
+	// analyzeCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to analyze")
+	// analyzeCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to analyze")
+	// analyzeCmd.PersistentFlags().Bool("uri", false, "input is a URI")
+	// analyzeCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
+	// analyzeCmd.PersistentFlags().Bool("id", false, "input is an Id")
+	// analyzeCmd.PersistentFlags().Bool("metadata", false, "Compare SBOM metadata")
+	// analyzeCmd.PersistentFlags().Bool("incl-soft", false, "Compare Included Softwares")
+	// analyzeCmd.PersistentFlags().Bool("incl-deps", false, "Compare Included Dependencies")
+	// analyzeCmd.PersistentFlags().Bool("incl-occur", false, "Compare Included Occurrences")
+	// analyzeCmd.PersistentFlags().Bool("namespaces", false, "Compare Package Namespaces")
+	// analyzeCmd.PersistentFlags().Bool("dot", false, "create diff dot file")
+	// analyzeCmd.PersistentFlags().Bool("all", false, " lists all")
+	// analyzeCmd.PersistentFlags().Int("maxprint", 20, "max number of items to print")
+	// analyzeCmd.PersistentFlags().String("test", "", "test file with sbom")
 
 	rootCmd.AddCommand(analyzeCmd)
+	
 }
