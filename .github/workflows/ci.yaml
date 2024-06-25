@@ -128,6 +128,20 @@ jobs:
   end-to-end:
     name: E2E
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: guac
+          POSTGRES_PASSWORD: guac
+          POSTGRES_DB: guac
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U guac -d guac"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
     - uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
@@ -136,7 +150,29 @@ jobs:
     - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
       with:
         python-version: '3.10'
-    - run: ./internal/testing/e2e/e2e
+    - name: Install dependencies
+      run: |
+        go mod download
+        pip install gql[all]
+    - name: Set up JetStream
+      uses: nats-io/jetstream-gh-action@v1
+      with:
+        nats_version: '2.9.17'
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        until pg_isready -h localhost -p 5432 -U guac -d guac; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 5
+        done
+    - name: Run e2e tests
+      run: |
+        ./internal/testing/e2e/e2e
+      env:
+        POSTGRES_USER: guac
+        POSTGRES_PASSWORD: guac
+        POSTGRES_DB: guac
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
 
   tilt-ci:
     name: Run 'tilt ci'
