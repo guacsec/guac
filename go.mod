@@ -315,7 +315,7 @@ require (
 	github.com/regclient/regclient v0.6.1
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sigstore/sigstore v1.8.3
+	github.com/sigstore/sigstore v1.8.4
 	github.com/spdx/tools-golang v0.5.4
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
