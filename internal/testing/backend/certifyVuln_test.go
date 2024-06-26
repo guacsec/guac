@@ -1632,14 +1632,14 @@ func TestDeleteCertifyVuln(t *testing.T) {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			assert.True(t, deleted)
-			secondgot, err := b.CertifyVulnList(ctx, *test.Query, nil, nil)
+			secondGot, err := b.CertifyVulnList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			assert.True(t, len(secondgot.Edges) == 1)
+			assert.True(t, len(secondGot.Edges) == 1)
 		})
 	}
 }

@@ -63,14 +63,14 @@ func (Dependency) Edges() []ent.Edge {
 		edge.To("package", PackageVersion.Type).
 			Required().
 			Field("package_id").
-			Unique(),
+			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("dependent_package_name", PackageName.Type).
 			Field("dependent_package_name_id").
-			Unique(),
+			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("dependent_package_version", PackageVersion.Type).
 			Field("dependent_package_version_id").
-			Unique(),
-		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_dependencies"),
+			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_dependencies").Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

@@ -49,6 +49,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// Delete node and all associated relationships. This functionality is only implemented for
+// certifyVuln, HasSBOM and HasSLSA.
 func (b *EntBackend) Delete(ctx context.Context, node string) (bool, error) {
 	foundGlobalID := fromGlobalID(node)
 	if foundGlobalID.nodeType == "" {
@@ -61,219 +63,24 @@ func (b *EntBackend) Delete(ctx context.Context, node string) (bool, error) {
 	}
 
 	switch foundGlobalID.nodeType {
-	// case artifact.Table:
-	// 	artifacts, err := b.Artifacts(ctx, &model.ArtifactSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for Artifacts via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(artifacts) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple Artifacts nodes %s", nodeID.String())
-	// 	}
-	// 	return artifacts[0], nil
-	// case packageversion.Table:
-	// 	pv, err := b.client.PackageVersion.Query().
-	// 		Where(packageversion.ID(nodeID)).
-	// 		WithName(func(q *ent.PackageNameQuery) {}).
-	// 		Only(ctx)
-	// 	if err != nil {
-	// 		return false, err
-	// 	}
-	// 	return toModelPackage(backReferencePackageVersion(pv)), nil
-	// case packagename.Table:
-	// 	pn, err := b.client.PackageName.Query().
-	// 		Where(packagename.ID(nodeID)).
-	// 		WithVersions().
-	// 		Only(ctx)
-	// 	if err != nil {
-	// 		return false, err
-	// 	}
-	// 	return toModelPackage(backReferencePackageName(pn)), nil
-	// case sourcename.Table:
-	// 	sources, err := b.Sources(ctx, &model.SourceSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for Sources via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(sources) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple Sources nodes %s", nodeID.String())
-	// 	}
-	// 	return sources[0], nil
-	// case builder.Table:
-	// 	builders, err := b.Builders(ctx, &model.BuilderSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for Builders via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(builders) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple Builders nodes %s", nodeID.String())
-	// 	}
-	// 	return builders[0], nil
-	// case license.Table:
-	// 	licenses, err := b.Licenses(ctx, &model.LicenseSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for Licenses via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(licenses) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple Licenses nodes %s", nodeID.String())
-	// 	}
-	// 	return licenses[0], nil
-	// case vulnerabilityid.Table:
-	// 	vulnerabilities, err := b.Vulnerabilities(ctx, &model.VulnerabilitySpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for Vulnerabilities via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(vulnerabilities) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple Vulnerabilities nodes %s", nodeID.String())
-	// 	}
-	// 	return vulnerabilities[0], nil
-	// case certifyBadString:
-	// 	certs, err := b.CertifyBad(ctx, &model.CertifyBadSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for CertifyBad via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(certs) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple CertifyBad nodes %s", nodeID.String())
-	// 	}
-	// 	return certs[0], nil
-	// case certifyGoodString:
-	// 	certs, err := b.CertifyGood(ctx, &model.CertifyGoodSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for CertifyGood via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(certs) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple CertifyGood nodes %s", nodeID.String())
-	// 	}
-	// 	return certs[0], nil
-	// case certifylegal.Table:
-	// 	legals, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(legals) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", nodeID.String())
-	// 	}
-	// 	return legals[0], nil
-	// case certifyscorecard.Table:
-	// 	scores, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(scores) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple scorecard nodes %s", nodeID.String())
-	// 	}
-	// 	return scores[0], nil
-	// case certifyvex.Table:
-	// 	vexs, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(vexs) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", nodeID.String())
-	// 	}
-	// 	return vexs[0], nil
 	case certifyvuln.Table:
-		deleted, err := b.DeleteCertifyVuln(ctx, nodeID)
+		deleted, err := b.deleteCertifyVuln(ctx, nodeID)
 		if err != nil {
 			return false, fmt.Errorf("failed to delete CertifyVuln via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		return deleted, nil
-	// case hashequal.Table:
-	// 	hes, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(hes) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple HashEqual nodes %s", nodeID.String())
-	// 	}
-	// 	return hes[0], nil
-	// case hasmetadata.Table:
-	// 	hms, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(hms) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple HasMetadata nodes %s", nodeID.String())
-	// 	}
-	// 	return hms[0], nil
-	// case billofmaterials.Table:
-	// 	hbs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(hbs) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple HasSBOM nodes %s", nodeID.String())
-	// 	}
-	// 	return hbs[0], nil
-	// case slsaattestation.Table:
-	// 	slsas, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(slsas) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple HasSlsa nodes %s", nodeID.String())
-	// 	}
-	// 	return slsas[0], nil
-	// case hassourceat.Table:
-	// 	hsas, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(hsas) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", nodeID.String())
-	// 	}
-	// 	return hsas[0], nil
-	// case dependency.Table:
-	// 	deps, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(deps) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple IsDependency nodes %s", nodeID.String())
-	// 	}
-	// 	return deps[0], nil
-	// case occurrence.Table:
-	// 	occurs, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(occurs) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", nodeID.String())
-	// 	}
-	// 	return occurs[0], nil
-	// case pkgequal.Table:
-	// 	pes, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(pes) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple PkgEqual nodes %s", nodeID.String())
-	// 	}
-	// 	return pes[0], nil
-	// case pointofcontact.Table:
-	// 	pocs, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(pocs) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple PointOfContact nodes %s", nodeID.String())
-	// 	}
-	// 	return pocs[0], nil
-	// case vulnequal.Table:
-	// 	ves, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(ves) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple VulnEqual nodes %s", nodeID.String())
-	// 	}
-	// 	return ves[0], nil
-	// case vulnerabilitymetadata.Table:
-	// 	vms, err := b.VulnerabilityMetadata(ctx, &model.VulnerabilityMetadataSpec{ID: ptrfrom.String(nodeID.String())})
-	// 	if err != nil {
-	// 		return false, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", nodeID.String(), err)
-	// 	}
-	// 	if len(vms) != 1 {
-	// 		return false, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", nodeID.String())
-	// 	}
-	// 	return vms[0], nil
+	case billofmaterials.Table:
+		deleted, err := b.deleteHasSbom(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete hasSBOM via ID: %s, with error: %w", nodeID.String(), err)
+		}
+		return deleted, nil
+	case slsaattestation.Table:
+		deleted, err := b.deleteSLSA(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete hasSLSA via ID: %s, with error: %w", nodeID.String(), err)
+		}
+		return deleted, nil
 	default:
 		log.Printf("Unknown node type: %s", foundGlobalID.nodeType)
 	}

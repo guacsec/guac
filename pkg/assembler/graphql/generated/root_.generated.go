@@ -5815,7 +5815,11 @@ extend type Mutation {
 
 extend type Mutation {
   """
-  Delete node with ID and all associated relationships
+  Delete node with ID and all associated relationships.
+  Deletion is only implemented for HasSBOM, HasSLSA and CertifyVuln
+  for the time being. Other may be added based on usecase but these
+  were chosen to ensure that users do not end up making breaking changes
+  to their database.
   """
   delete(node: ID!): Boolean!
 }

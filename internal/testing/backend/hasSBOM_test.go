@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/stretchr/testify/assert"
 )
 
 type testDependency struct {
@@ -3166,6 +3167,246 @@ func TestIngestHasSBOMs(t *testing.T) {
 			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
+		})
+	}
+}
+
+func TestDeleteHasSBOM(t *testing.T) {
+	ctx := context.Background()
+	b := setupTest(t)
+	type call struct {
+		Sub model.PackageOrArtifactInputs
+		HS  []*model.HasSBOMInputSpec
+		Inc []*model.HasSBOMIncludesInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InArt        []*model.ArtifactInputSpec
+		PkgArt       *model.PackageOrArtifactInputs
+		IsDeps       []testDependency
+		IsOccs       []testOccurrence
+		Calls        []call
+		Query        *model.HasSBOMSpec
+		ExpHS        []*model.HasSbom
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+			},
+			IsDeps: []testDependency{{
+				pkg:       testdata.P2,
+				depPkg:    testdata.P4,
+				matchType: mSpecific,
+				isDep: &model.IsDependencyInputSpec{
+					Justification: "test justification",
+				},
+			}},
+			IsOccs: []testOccurrence{{
+				Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Art:   testdata.A1,
+				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
+			}},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+						{
+							URI: "test uri",
+						},
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+					},
+				},
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          testdata.P2out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.P4out, testdata.A1out},
+					IncludedDependencies: []*model.IsDependency{{
+						Package:           testdata.P2out,
+						DependencyPackage: testdata.P4out,
+						Justification:     "test justification",
+					}},
+					IncludedOccurrences: []*model.IsOccurrence{{
+						Subject:       testdata.P4out,
+						Artifact:      testdata.A1out,
+						Justification: "test justification",
+					}},
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
+			},
+			IsOccs: []testOccurrence{{
+				Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: testdata.P1}},
+				Art:   testdata.A2,
+				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
+			}},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+						{
+							URI: "test uri",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          testdata.A2out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out, testdata.A1out, testdata.A2out},
+					IncludedOccurrences: []*model.IsOccurrence{{
+						Subject:       testdata.P1out,
+						Artifact:      testdata.A2out,
+						Justification: "test justification",
+					}},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			includes := model.HasSBOMIncludesInputSpec{}
+			if test.PkgArt != nil {
+				if pkgs, err := b.IngestPackages(ctx, test.PkgArt.Packages); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					for _, pkg := range pkgs {
+						includes.Packages = append(includes.Packages, pkg.PackageVersionID)
+					}
+				}
+				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					includes.Artifacts = append(includes.Artifacts, arts...)
+				}
+			}
+
+			for _, dep := range test.IsDeps {
+				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
+					t.Fatalf("Could not ingest dependency: %v", err)
+				} else {
+					includes.Dependencies = append(includes.Dependencies, isDep)
+				}
+			}
+
+			for _, occ := range test.IsOccs {
+				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, model.IDorArtifactInput{ArtifactInput: occ.Art}, *occ.isOcc); err != nil {
+					t.Fatalf("Could not ingest occurrence: %v", err)
+				} else {
+					includes.Occurrences = append(includes.Occurrences, isOcc)
+				}
+			}
+			for _, o := range test.Calls {
+				var sbomIncludes []*model.HasSBOMIncludesInputSpec
+				for count := 0; count < len(o.HS); count++ {
+					sbomIncludes = append(sbomIncludes, &includes)
+				}
+				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS, sbomIncludes)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.HasSBOMList(ctx, *test.Query, nil, nil)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			var returnedObjects []*model.HasSbom
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+			deleted, err := b.Delete(ctx, returnedObjects[0].ID)
+			if err != nil {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			assert.True(t, deleted)
+			secondGot, err := b.HasSBOMList(ctx, *test.Query, nil, nil)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			assert.Nil(t, secondGot)
 		})
 	}
 }

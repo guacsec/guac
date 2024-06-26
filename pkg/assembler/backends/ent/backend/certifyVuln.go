@@ -40,7 +40,7 @@ func bulkCertifyVulnGlobalID(ids []string) []string {
 	return toGlobalIDs(certifyvuln.Table, ids)
 }
 
-func (b *EntBackend) DeleteCertifyVuln(ctx context.Context, certifyVulnID uuid.UUID) (bool, error) {
+func (b *EntBackend) deleteCertifyVuln(ctx context.Context, certifyVulnID uuid.UUID) (bool, error) {
 	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 

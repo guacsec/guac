@@ -116,6 +116,28 @@ func getIsDepObject(q *ent.DependencyQuery) *ent.DependencyQuery {
 		Order(ent.Asc(dependency.FieldID))
 }
 
+// getIsDepObjectWithoutEdges is used recreate the isDependency object without eager loading the edges
+func getIsDepObjectWithoutEdges(q *ent.DependencyQuery) *ent.DependencyQuery {
+	return q.
+		Order(ent.Asc(dependency.FieldID))
+}
+
+// deleteIsDependency is called by hasSBOM to delete the isDependency nodes that are part of the hasSBOM
+func (b *EntBackend) deleteIsDependency(ctx context.Context, isDependencyID uuid.UUID) error {
+	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		tx := ent.TxFromContext(ctx)
+
+		if err := tx.Dependency.DeleteOneID(isDependencyID).Exec(ctx); err != nil {
+			return nil, errors.Wrap(err, "failed to delete isDependency with error")
+		}
+		return nil, nil
+	})
+	if txErr != nil {
+		return txErr
+	}
+	return nil
+}
+
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	funcName := "IngestDependencies"
 	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {

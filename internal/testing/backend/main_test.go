@@ -93,9 +93,12 @@ var skipMatrix = map[string]map[string]bool{
 	// redis order issues
 	"TestVEX": {arango: true, redis: true, tikv: true},
 	// redis order issues
-	"TestVEXBulkIngest":     {arango: true, redis: true},
-	"TestFindSoftware":      {redis: true, arango: true},
+	"TestVEXBulkIngest": {arango: true, redis: true},
+	"TestFindSoftware":  {redis: true, arango: true},
+	// remove these once its implemented for the other backends
 	"TestDeleteCertifyVuln": {arango: true, memmap: true, redis: true, tikv: true},
+	"TestDeleteHasSBOM":     {arango: true, memmap: true, redis: true, tikv: true},
+	"TestDeleteHasSLSAs":    {arango: true, memmap: true, redis: true, tikv: true},
 }
 
 type backend interface {

@@ -145,6 +145,21 @@ func getSLSAObject(q *ent.SLSAAttestationQuery) *ent.SLSAAttestationQuery {
 		WithBuiltFrom()
 }
 
+func (b *EntBackend) deleteSLSA(ctx context.Context, SLSAID uuid.UUID) (bool, error) {
+	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		tx := ent.TxFromContext(ctx)
+
+		if err := tx.SLSAAttestation.DeleteOneID(SLSAID).Exec(ctx); err != nil {
+			return nil, errors.Wrap(err, "failed to delete hasSLSA with error")
+		}
+		return nil, nil
+	})
+	if txErr != nil {
+		return false, txErr
+	}
+	return true, nil
+}
+
 func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
 	id, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)

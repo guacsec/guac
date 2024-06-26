@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHasSLSA(t *testing.T) {
@@ -922,6 +923,271 @@ func TestIngestHasSLSAs(t *testing.T) {
 			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
+		})
+	}
+}
+
+func TestDeleteHasSLSAs(t *testing.T) {
+	ctx := context.Background()
+	b := setupTest(t)
+	type call struct {
+		Sub  []*model.IDorArtifactInput
+		BF   [][]*model.IDorArtifactInput
+		BB   []*model.IDorBuilderInput
+		SLSA []*model.SLSAInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InArt        []*model.ArtifactInputSpec
+		InBld        []*model.BuilderInputSpec
+		Calls        []call
+		Query        *model.HasSLSASpec
+		ExpHS        []*model.HasSlsa
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType: "test type",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("test type"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B1out,
+						BuiltFrom: []*model.Artifact{testdata.A2out},
+						BuildType: "test type",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Ingest twice",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType: "test type",
+						},
+						{
+							BuildType: "test type",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("test type"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B1out,
+						BuiltFrom: []*model.Artifact{testdata.A2out},
+						BuildType: "test type",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Build Type",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType: "test type one",
+						},
+						{
+							BuildType: "test type two",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("test type one"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B1out,
+						BuiltFrom: []*model.Artifact{testdata.A2out},
+						BuildType: "test type one",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Subject",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A3}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{SlsaVersion: "test type one"},
+						{},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				Subject: &model.ArtifactSpec{
+					Algorithm: ptrfrom.String("sha256"),
+					Digest:    ptrfrom.String("6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"),
+				},
+				SlsaVersion: ptrfrom.String("test type one"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:     testdata.B1out,
+						BuiltFrom:   []*model.Artifact{testdata.A2out},
+						SlsaVersion: "test type one",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Materials",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3, testdata.A4},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}, {ArtifactInput: testdata.A3}}, {{ArtifactInput: testdata.A4}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{},
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuiltFrom: []*model.ArtifactSpec{{
+					Digest: ptrfrom.String("5a787865sd676dacb0142afa0b83029cd7befd9"),
+				}},
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B1out,
+						BuiltFrom: []*model.Artifact{testdata.A4out},
+					},
+				},
+			},
+		}, {
+			Name:  "docref",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType:   "test type",
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:     testdata.B1out,
+						BuiltFrom:   []*model.Artifact{testdata.A2out},
+						BuildType:   "test type",
+						DocumentRef: "test",
+					},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, bld := range test.InBld {
+				if _, err := b.IngestBuilder(ctx, &model.IDorBuilderInput{BuilderInput: bld}); err != nil {
+					t.Fatalf("Could not ingest builder: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.HasSLSAList(ctx, *test.Query, nil, nil)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			var returnedObjects []*model.HasSlsa
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+			deleted, err := b.Delete(ctx, returnedObjects[0].ID)
+			if err != nil {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			assert.True(t, deleted)
+			secondGot, err := b.HasSLSAList(ctx, *test.Query, nil, nil)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			assert.Nil(t, secondGot)
 		})
 	}
 }
