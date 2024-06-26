@@ -1,0 +1,33 @@
+Script started
+@@@@ Running ingestion command: go run /Users/nathannaveen/go/src/github.com/nathannaveen/guac/cmd/guacone collect files /Users/nathannaveen/go/src/github.com/nathannaveen/guac/guac-data/docs/ --add-vuln-on-ingest=true
+@@@@ Running query PkgQ2
+@@@@ Running query PkgQ3
+@@@@ Running query PkgQ4
+@@@@ Running query IsDependencyQ1
+@@@@ Running query IsDependencyQ2
+@@@@ Running query OSVQ1
+@@@@ Running query CertifyVulnQ1
+@@@@ Running query ArtifactsQ1
+@@@@ Running query PkgQ9
+@@@@ Fully ingested command: go run /Users/nathannaveen/go/src/github.com/nathannaveen/guac/cmd/guacone collect files /Users/nathannaveen/go/src/github.com/nathannaveen/guac/guac-data/docs/ --add-vuln-on-ingest=true
+@@@@ Running ingestion command: go run /Users/nathannaveen/go/src/github.com/nathannaveen/guac/cmd/guaccollect files /Users/nathannaveen/go/src/github.com/nathannaveen/guac/guac-data/docs/ --service-poll=false
+@@@@ Running query PkgQ2
+--- /Users/nathannaveen/go/src/github.com/nathannaveen/guac/internal/testing/e2e/expectPkgQ2.json	2024-06-26 15:54:21
++++ /Users/nathannaveen/go/src/github.com/nathannaveen/guac/gotPkgQ2.json	2024-06-28 12:17:32
+@@ -1,15 +1,3 @@
+ {
+-  "packages": [
+-    {
+-      "type": "deb",
+-      "namespaces": [
+-        {
+-          "namespace": "debian"
+-        },
+-        {
+-          "namespace": "ubuntu"
+-        }
+-      ]
+-    }
+-  ]
++  "packages": []
+ }

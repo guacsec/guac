@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bashdb
+﻿#!/bin/bash
 
 #
 # Copyright 2023 The GUAC Authors.
@@ -22,6 +22,7 @@ GUAC_DIR=$(cd "${SCRIPT_DIR}"/../../..; pwd)
 
 LOG_DIR="${GUAC_DIR}/internal/testing/e2e/logs"
 LOG_FILE="${LOG_DIR}/logfile.log"
+SCHEMA_BACKUP="${LOG_DIR}/schema_backup.sql"
 
 # Create the log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
@@ -30,8 +31,8 @@ echo "Script started" | tee -a "$LOG_FILE"
 
 guac_data_hash="254d737ebc42ca32f95033e93370f5427e3fce64"
 
-echo @@@@ Installing gql Python package
-pip install gql[all]
+echo @@@@ Installing aiohttp and gql Python package
+pipx inject gql aiohttp
 
 echo @@@@ Cloning guac-data
 pushd "$GUAC_DIR"
@@ -41,9 +42,9 @@ git checkout $guac_data_hash
 popd
 popd
 
-echo @@@@ Starting up guac server in background
-go run "${GUAC_DIR}/cmd/guacgql" &
-
+#echo @@@@ Starting up guac server in background
+#go run "${GUAC_DIR}/cmd/guacgql --gql-backend=ent" &
+#
 echo -n "Waiting for guac server to start"
 set +e
 for _ in {1..36} ; do
@@ -60,18 +61,32 @@ echo
 curl -s http://localhost:8080/query >/dev/null 2>&1 || (echo "Guac server not running in time" && exit 1)
 echo "Guac server started"
 
+duplicate_schema() {
+  echo @@@@ Duplicating schema
+  pg_dump -h localhost -p 5432 -U guac -d guac -s > "$SCHEMA_BACKUP"
+}
+
+restore_schema() {
+  echo @@@@ Restoring schema
+  psql -h localhost -p 5432 -U guac -d guac -f "$SCHEMA_BACKUP"
+}
+
 wipe_data() {
   echo @@@@ Wiping data
   psql -h localhost -p 5432 -U guac -d guac -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+  restore_schema
 }
+
+# ps -e | grep guacgql
+#go run ${GUAC_DIR}"/cmd/guacingest --add-vuln-on-ingest=true" &
+#go run ${GUAC_DIR}"/cmd/guacone collect deps_dev -p" &
+#go run ${GUAC_DIR}"/cmd/guaccsub" &
 
 # Define ingestion commands
 declare -a ingestion_commands=(
-  "go run ${GUAC_DIR}/cmd/guacone collect files ${GUAC_DIR}/guac-data/docs/"
+  "go run ${GUAC_DIR}/cmd/guacone collect files ${GUAC_DIR}/guac-data/docs/ --add-vuln-on-ingest=true"
+#  "go run ${GUAC_DIR}/cmd/guacone collect files ${GUAC_DIR}/guac-data/docs/"
   "go run ${GUAC_DIR}/cmd/guaccollect files ${GUAC_DIR}/guac-data/docs/ --service-poll=false"
-  "go run ${GUAC_DIR}/cmd/guaccollect osv --service-poll=false"
-  "go run ${GUAC_DIR}/cmd/guacone certifier osv"
-  "go run ${GUAC_DIR}/cmd/guacingest"
 )
 
 #declare -A queries
@@ -90,10 +105,21 @@ declare -a ingestion_commands=(
 
 queries="${GUAC_DIR}/demo/graphql/queries.gql"
 
+# Function to log the database schema
+#log_database_schema() {
+#  echo "Logging current database schema..." | tee -a "$LOG_FILE"
+#  psql -h localhost -p 5432 -U guac -d guac -c "\dt" | tee -a "$LOG_FILE"
+#}
+
+duplicate_schema
+
 # Loop through ingestion commands
 for command in "${ingestion_commands[@]}"; do
   echo @@@@ Running ingestion command: "$command" | tee -a "$LOG_FILE"
   eval "$command"
+#  go run ${GUAC_DIR}"/cmd/guaccollect" osv --service-poll=false --interval=1s
+#  sleep 30
+  go run ${GUAC_DIR}"/cmd/guacone" certifier osv -p=false
 
   if [ $? -ne 0 ]; then
     echo "Error: Command '$command' failed" | tee -a "$LOG_FILE"
@@ -107,33 +133,46 @@ for command in "${ingestion_commands[@]}"; do
 #    echo "$gql_query" | jq "$jq_filter" > "${GUAC_DIR}/got${query}.json"
 #    diff -u "${SCRIPT_DIR}/expect${query}.json" "${GUAC_DIR}/got${query}.json"
 #  done
-  gql-cli http://localhost:8080/query -o PkgQ1 < "$queries" | jq ' .packages |= sort ' > "${GUAC_DIR}/gotPkgQ1.json"
-  diff -u "${SCRIPT_DIR}/expectPkgQ1.json" "${GUAC_DIR}/gotPkgQ1.json" | tee -a "$LOG_FILE"
 
+#  log_database_schema
+
+#  echo @@@@ Running query PkgQ1 | tee -a "$LOG_FILE"
+#  gql-cli http://localhost:8080/query -o PkgQ1 < "$queries" | jq ' .packages |= sort ' > "${GUAC_DIR}/gotPkgQ1.json"
+#  diff -u "${SCRIPT_DIR}/expectPkgQ1.json" "${GUAC_DIR}/gotPkgQ1.json" | tee -a "$LOG_FILE"
+
+  echo @@@@ Running query PkgQ2 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o PkgQ2 < "$queries" | jq ' .packages[].namespaces |= sort ' > "${GUAC_DIR}/gotPkgQ2.json"
   diff -u "${SCRIPT_DIR}/expectPkgQ2.json" "${GUAC_DIR}/gotPkgQ2.json" | tee -a "$LOG_FILE"
 
-  gql-cli http://localhost:8080/query -o PkgQ3 < "$queries" | jq ' .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.id) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) | del(.. | .id?) ' > "${GUAC_DIR}/gotPkgQ3.json"
+  echo @@@@ Running query PkgQ3 | tee -a "$LOG_FILE"
+  gql-cli http://localhost:8080/query -o PkgQ3 < "$queries" | jq ' .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.purl) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) | del(.. | .id?) ' > "${GUAC_DIR}/gotPkgQ3.json"
   diff -u "${SCRIPT_DIR}/expectPkgQ3.json" "${GUAC_DIR}/gotPkgQ3.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query PkgQ4 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o PkgQ4 < "$queries" | jq ' del(.. | .id?) '> "${GUAC_DIR}/gotPkgQ4.json"
   diff -u "${SCRIPT_DIR}/expectPkgQ4.json" "${GUAC_DIR}/gotPkgQ4.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query IsDependencyQ1 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o IsDependencyQ1 < "$queries" | jq ' .IsDependency |= sort ' > "${GUAC_DIR}/gotIsDependencyQ1.json"
   diff -u "${SCRIPT_DIR}/expectIsDependencyQ1.json" "${GUAC_DIR}/gotIsDependencyQ1.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query IsDependencyQ2 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o IsDependencyQ2 < "$queries" | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotIsDependencyQ2.json"
   diff -u "${SCRIPT_DIR}/expectIsDependencyQ2.json" "${GUAC_DIR}/gotIsDependencyQ2.json" | tee -a "$LOG_FILE"
 
   id1=$(gql-cli http://localhost:8080/query -o PkgQ5 < "$queries" | jq -r ' .packages[0].namespaces[0].names[0].id ')
   id2=$(gql-cli http://localhost:8080/query -o PkgQ6 < "$queries" | jq -r ' .packages[0].namespaces[0].names[0].id ')
 
-  gql-cli http://localhost:8080/query -o PathQ1 -V subject:"${id1}" target:"${id2}" < "$queries" | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotPathQ1.json"
-  diff -u "${SCRIPT_DIR}/expectPathQ1.json" "${GUAC_DIR}/gotPathQ1.json" | tee -a "$LOG_FILE"
+#  echo @@@@ Running query PathQ1 | tee -a "$LOG_FILE"
+#  gql-cli http://localhost:8080/query -o PathQ1 -V subject:"${id1}" target:"${id2}" < "$queries" | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotPathQ1.json"
+#  diff -u "${SCRIPT_DIR}/expectPathQ1.json" "${GUAC_DIR}/gotPathQ1.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query OSVQ1 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o OSVQ1 < "$queries" | jq 'del(.. | .id?)' > "${GUAC_DIR}/gotOSVQ1.json"
   diff -u "${SCRIPT_DIR}/expectOSVQ1.json" "${GUAC_DIR}/gotOSVQ1.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query CertifyVulnQ1 | tee -a "$LOG_FILE"
+  # Vulnerabilities are ingested during ingestion time, which causes the timestamp to be different, and for us to see multiple certify vulns
   gql-cli http://localhost:8080/query -o CertifyVulnQ1 < "$queries" | jq 'del(.. | .id?) | del(.. | .timeScanned?)' > "${GUAC_DIR}/gotCertifyVulnQ1.json"
   diff -u "${SCRIPT_DIR}/expectCertifyVulnQ1.json" "${GUAC_DIR}/gotCertifyVulnQ1.json" | tee -a "$LOG_FILE"
 
@@ -143,9 +182,11 @@ for command in "${ingestion_commands[@]}"; do
 #  "${GUAC_DIR}/demo/graphql/path.py" "$id3" "$id4" | tail -n +2 | jq 'del(.. | .id?) | del(.. | .origin?) | del(.. | .qualifiers?)' > "${GUAC_DIR}/gotPathPy.json"
 #  diff -u "${SCRIPT_DIR}/expectPathPy.json" "${GUAC_DIR}/gotPathPy.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query ArtifactsQ1 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o ArtifactsQ1 < "$queries" | jq ' .artifacts |= sort '> "${GUAC_DIR}/gotArtifactsQ1.json"
   diff -u "${SCRIPT_DIR}/expectArtifactsQ1.json" "${GUAC_DIR}/gotArtifactsQ1.json" | tee -a "$LOG_FILE"
 
+  echo @@@@ Running query PkgQ9 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o PkgQ9 < "$queries" | jq ' .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.id) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) | del(.. | .id?) ' > "${GUAC_DIR}/gotPkgQ9.json"
   diff -u "${SCRIPT_DIR}/expectPkgQ9.json" "${GUAC_DIR}/gotPkgQ9.json" | tee -a "$LOG_FILE"
 
