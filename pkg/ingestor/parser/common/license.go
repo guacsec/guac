@@ -21,7 +21,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
 var ignore = []string{
@@ -69,17 +69,17 @@ var ignore = []string{
 // "Universal-FOSS-exception-1.0",
 // "WxWindows-exception-3.1",
 
-func ParseLicenses(exp string, lv string) []generated.LicenseInputSpec {
+func ParseLicenses(exp string, lv string) []model.LicenseInputSpec {
 	if exp == "" {
 		return nil
 	}
-	var rv []generated.LicenseInputSpec
+	var rv []model.LicenseInputSpec
 	for _, part := range strings.Split(exp, " ") {
 		p := strings.Trim(part, "()+")
 		if slices.Contains(ignore, p) {
 			continue
 		}
-		rv = append(rv, generated.LicenseInputSpec{
+		rv = append(rv, model.LicenseInputSpec{
 			Name:        p,
 			ListVersion: &lv,
 		})

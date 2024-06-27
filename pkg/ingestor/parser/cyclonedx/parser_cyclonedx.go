@@ -85,17 +85,6 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 	}
 	c.cdxBom = cdxBom
 
-	if c.cdxBom.Metadata.Timestamp == "" {
-		// set the time to zero time if timestamp is not provided
-		c.timestamp = zeroTime
-	} else {
-		timestamp, err := time.Parse(time.RFC3339, c.cdxBom.Metadata.Timestamp)
-		if err != nil {
-			return fmt.Errorf("SPDX document had invalid created time %q : %w", c.cdxBom.Metadata.Timestamp, err)
-		}
-		c.timestamp = timestamp
-	}
-
 	if err := c.getTopLevelPackage(); err != nil {
 		return err
 	}
@@ -117,6 +106,17 @@ func (c *cyclonedxParser) GetIdentities(ctx context.Context) []common.TrustInfor
 func (c *cyclonedxParser) getTopLevelPackage() error {
 	if c.cdxBom.Metadata == nil {
 		return nil
+	}
+
+	if c.cdxBom.Metadata.Timestamp == "" {
+		// set the time to zero time if timestamp is not provided
+		c.timestamp = zeroTime
+	} else {
+		timestamp, err := time.Parse(time.RFC3339, c.cdxBom.Metadata.Timestamp)
+		if err != nil {
+			return fmt.Errorf("SPDX document had invalid created time %q : %w", c.cdxBom.Metadata.Timestamp, err)
+		}
+		c.timestamp = timestamp
 	}
 
 	if c.cdxBom.Metadata.Component != nil {
@@ -149,6 +149,11 @@ func (c *cyclonedxParser) getTopLevelPackage() error {
 				}
 				c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef] = append(c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef], artifact)
 			}
+		}
+
+		// get top level licenses
+		if err := c.getLicenseInformation(*c.cdxBom.Metadata.Component); err != nil {
+			return fmt.Errorf("failed to get license information for top level package with error: %w", err)
 		}
 		return nil
 	} else {
@@ -222,69 +227,75 @@ func (c *cyclonedxParser) getPackages() error {
 					c.packageArtifacts[comp.BOMRef] = append(c.packageArtifacts[comp.BOMRef], artifact)
 				}
 			}
+			// get other component packages
+			if err := c.getLicenseInformation(comp); err != nil {
+				return fmt.Errorf("failed to get license information for component package with error: %w", err)
+			}
+		}
+	}
+	return nil
+}
 
-			// legal information from CDX component
-			if comp.Licenses != nil {
-				compLicenses := *comp.Licenses
-				const justification string = "Found in CycloneDX document."
+func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
+	// legal information from CDX component
+	if comp.Licenses != nil {
+		compLicenses := *comp.Licenses
+		const justification string = "Found in CycloneDX document"
 
-				if len(compLicenses) == 1 {
-					var cl *model.CertifyLegalInputSpec
-					if compLicenses[0].Expression != "" {
-						cl = &model.CertifyLegalInputSpec{
-							Justification:     justification,
-							DeclaredLicense:   compLicenses[0].Expression,
-							DiscoveredLicense: "",
-							TimeScanned:       c.timestamp,
-							Attribution:       comp.Copyright,
-						}
-						c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
+		if len(compLicenses) == 1 {
+			if compLicenses[0].Expression != "" {
+				cl := &model.CertifyLegalInputSpec{
+					Justification:     justification,
+					DeclaredLicense:   compLicenses[0].Expression,
+					DiscoveredLicense: "",
+					TimeScanned:       c.timestamp,
+					Attribution:       comp.Copyright,
+				}
+				c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
+			} else {
+				var license string
+				if compLicenses[0].License.Name != "" {
+					if compLicenses[0].License.Text != nil {
+						license = compLicenses[0].License.Text.Content
 					} else {
-						var license string
-						if compLicenses[0].License.Name != "" {
-							if compLicenses[0].License.Text != nil {
-								license = compLicenses[0].License.Text.Content
-							} else {
-								license = compLicenses[0].License.Name
-							}
-						} else {
-							license = compLicenses[0].License.ID
-						}
-						if license != "" {
-							cl = &model.CertifyLegalInputSpec{
-								Justification:     justification,
-								DeclaredLicense:   compLicenses[0].License.ID,
-								DiscoveredLicense: "",
-								TimeScanned:       c.timestamp,
-								Attribution:       comp.Copyright,
-							}
-							c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
-						}
+						license = compLicenses[0].License.Name
 					}
 				} else {
-					for _, compLicense := range compLicenses {
-						var licenses []string
-						if compLicense.License.Name != "" {
-							if compLicense.License.Text != nil {
-								licenses = append(licenses, compLicense.License.Text.Content)
-							} else {
-								licenses = append(licenses, compLicense.License.Name)
-							}
-						} else {
-							licenses = append(licenses, compLicense.License.ID)
-						}
-						if len(licenses) > 0 {
-							cl := &model.CertifyLegalInputSpec{
-								Justification:     justification,
-								DeclaredLicense:   common.CombineLicense(licenses),
-								DiscoveredLicense: "",
-								TimeScanned:       c.timestamp,
-								Attribution:       comp.Copyright,
-							}
-							c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
-						}
-					}
+					license = compLicenses[0].License.ID
 				}
+				if license != "" {
+					cl := &model.CertifyLegalInputSpec{
+						Justification:     justification,
+						DeclaredLicense:   compLicenses[0].License.ID,
+						DiscoveredLicense: "",
+						TimeScanned:       c.timestamp,
+						Attribution:       comp.Copyright,
+					}
+					c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
+				}
+			}
+		} else {
+			var licenses []string
+			for _, compLicense := range compLicenses {
+				if compLicense.License.Name != "" && compLicense.License.Name != "UNKNOWN" {
+					if compLicense.License.Text != nil {
+						licenses = append(licenses, compLicense.License.Text.Content)
+					} else {
+						licenses = append(licenses, compLicense.License.Name)
+					}
+				} else {
+					licenses = append(licenses, compLicense.License.ID)
+				}
+			}
+			if len(licenses) > 0 {
+				cl := &model.CertifyLegalInputSpec{
+					Justification:     justification,
+					DeclaredLicense:   common.CombineLicense(licenses),
+					DiscoveredLicense: "",
+					TimeScanned:       c.timestamp,
+					Attribution:       comp.Copyright,
+				}
+				c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
 			}
 		}
 	}
@@ -359,6 +370,23 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	preds.CertifyVuln = c.vulnData.certifyVuln
 	if c.cdxBom.Dependencies == nil {
 		return preds
+	}
+
+	// license information
+	for id, cls := range c.packageLegals {
+		for _, cl := range cls {
+			dec := common.ParseLicenses(cl.DeclaredLicense, "UNKNOWN")
+			dis := common.ParseLicenses(cl.DiscoveredLicense, "UNKNOWN")
+			for _, pkg := range c.packagePackages[id] {
+				cli := assembler.CertifyLegalIngest{
+					Pkg:          pkg,
+					Declared:     dec,
+					Discovered:   dis,
+					CertifyLegal: cl,
+				}
+				preds.CertifyLegal = append(preds.CertifyLegal, cli)
+			}
+		}
 	}
 
 	var directDependencies, indirectDependencies []string

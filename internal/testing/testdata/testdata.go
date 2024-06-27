@@ -173,6 +173,9 @@ var (
 	//go:embed exampledata/ingest_predicates.json
 	IngestPredicatesExample []byte
 
+	//go:embed exampledata/small-legal-cyclonedx.json
+	CycloneDXLegalExample []byte
+
 	// json format
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// CycloneDX VEX testdata unaffected
@@ -968,6 +971,8 @@ var (
 
 	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11")
 
+	cdxSmallRye, _ = asmhelpers.PurlToPkg("pkg:maven/io.smallrye.reactive/smallrye-mutiny-vertx-uri-template@2.27.0?type=jar")
+
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
 			Pkg:             cdxTopLevelPack,
@@ -1027,7 +1032,7 @@ var (
 
 	cdxReactiveCommonPack, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar")
 
-	CdxQuarkusDeps = []assembler.IsDependencyIngest{
+	cdxQuarkusDeps = []assembler.IsDependencyIngest{
 		{
 			Pkg:             cdxTopQuarkusPack,
 			DepPkg:          cdxResteasyPack,
@@ -1059,8 +1064,39 @@ var (
 			},
 		},
 	}
+	lvUnknown       = "UNKNOWN"
+	cdxQuarkusLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxResteasyPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+	}
 
-	CdxQuarkusOccurrence = []assembler.IsOccurrenceIngest{
+	cdxQuarkusOccurrence = []assembler.IsOccurrenceIngest{
 		{
 			Pkg: cdxTopQuarkusPack,
 			Artifact: &model.ArtifactInputSpec{
@@ -1097,7 +1133,7 @@ var (
 
 	cdxQuarkusTime, _ = time.Parse(time.RFC3339, "2022-11-09T11:14:31Z")
 
-	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
+	cdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Artifact: &model.ArtifactInputSpec{
 				Algorithm: "sha3-512",
@@ -1114,9 +1150,193 @@ var (
 	}
 
 	CdxQuarkusIngestionPredicates = assembler.IngestPredicates{
-		IsDependency: CdxQuarkusDeps,
-		IsOccurrence: CdxQuarkusOccurrence,
-		HasSBOM:      CdxQuarkusHasSBOM,
+		IsDependency: cdxQuarkusDeps,
+		IsOccurrence: cdxQuarkusOccurrence,
+		HasSBOM:      cdxQuarkusHasSBOM,
+		CertifyLegal: cdxQuarkusLegal,
+	}
+
+	cdxLegalDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxResteasyPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.13.4.Final",
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxReactiveCommonPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeIndirect,
+				VersionRange:   "2.13.4.Final",
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:             cdxResteasyPack,
+			DepPkg:          cdxReactiveCommonPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.13.4.Final",
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxSmallRye,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				VersionRange:   "2.27.0",
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+	}
+	cdxLegalCertifyLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxResteasyPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "LGPL-3.0-or-later",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LGPL-3.0-or-later",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxSmallRye,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "MIT",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND (MIT OR GPL-2.0-only)",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxTopQuarkusPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "LGPL-3.0-or-later",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "GPL-2.0 AND LGPL-3.0-or-later",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+	}
+
+	cdxLegalOccurrence = []assembler.IsOccurrenceIngest{
+		{
+			Pkg: cdxTopQuarkusPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "md5",
+				Digest:    "bf39044af8c6ba66fc3beb034bc82ae8",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "615e56bdfeb591af8b5fdeadf019f8fa729643232d7e0768674411a7d959bb00e12e114280a6949f871514e1a86e01e0033372a0a826d15720050d7cffb80e69",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "54ffa51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxSmallRye,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "md5",
+				Digest:    "8756663af131035a2090d83f5f1b4054",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+	}
+
+	cdxLegalHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
+				Algorithm:        "sha256",
+				Digest:           "466af6d6649cac6cc0e12febeb1af8cb245dbbf1cd306970439e36253f89210f",
+				DownloadLocation: "",
+				KnownSince:       cdxQuarkusTime,
+			},
+		},
+	}
+
+	CdxQuarkusLegalPredicates = assembler.IngestPredicates{
+		IsDependency: cdxLegalDeps,
+		IsOccurrence: cdxLegalOccurrence,
+		HasSBOM:      cdxLegalHasSBOM,
+		CertifyLegal: cdxLegalCertifyLegal,
 	}
 
 	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")
@@ -1172,8 +1392,26 @@ var (
 		},
 	}
 
+	quarkusParentPackageLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: quarkusParentPackage,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     quarkusTime,
+			},
+		},
+	}
+
 	CdxEmptyIngestionPredicates = assembler.IngestPredicates{
-		HasSBOM: quarkusParentPackageHasSBOM,
+		HasSBOM:      quarkusParentPackageHasSBOM,
+		CertifyLegal: quarkusParentPackageLegal,
 	}
 
 	// ceritifer testdata
