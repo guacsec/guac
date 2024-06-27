@@ -1213,7 +1213,7 @@ var (
 		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
 		"subject":[
 		   {
-			  "name":"pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+			  "name":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io",
 			  "digest":null
 		   }
 		],
@@ -1237,7 +1237,7 @@ var (
 		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
 		"subject":[
 		   {
-			  "name":"pkg:oci/vul-image-latest?repository_url=grc.io",
+			  "name":"pkg:oci/vul-image-latest?repository_url=gcr.io",
 			  "digest":null
 		   }
 		],
@@ -1303,11 +1303,11 @@ var (
 	 }`
 
 	RootPackage = root_package.PackageNode{
-		Purl: "pkg:oci/vul-image-latest?repository_url=grc.io",
+		Purl: "pkg:oci/vul-image-latest?repository_url=gcr.io",
 	}
 
 	SecondLevelPackage = root_package.PackageNode{
-		Purl: "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+		Purl: "pkg:oci/vul-secondLevel-latest?repository_url=gcr.io",
 	}
 
 	Log4JPackage = root_package.PackageNode{
