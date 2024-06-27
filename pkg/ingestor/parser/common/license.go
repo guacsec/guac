@@ -93,3 +93,7 @@ func HashLicense(inline string) string {
 	s := h.Sum32()
 	return fmt.Sprintf("LicenseRef-%x", s)
 }
+
+func CombineLicense(licenses []string) string {
+	return strings.Join(licenses, " AND ")
+}

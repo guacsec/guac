@@ -54,9 +54,11 @@ type cyclonedxParser struct {
 	doc               *processor.Document
 	packagePackages   map[string][]*model.PkgInputSpec
 	packageArtifacts  map[string][]*model.ArtifactInputSpec
+	packageLegals     map[string][]*model.CertifyLegalInputSpec
 	identifierStrings *common.IdentifierStrings
 	cdxBom            *cdx.BOM
 	vulnData          vulnData
+	timestamp         time.Time
 }
 
 type vulnData struct {
@@ -69,6 +71,7 @@ func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
 		packagePackages:   map[string][]*model.PkgInputSpec{},
 		packageArtifacts:  map[string][]*model.ArtifactInputSpec{},
+		packageLegals:     map[string][]*model.CertifyLegalInputSpec{},
 		identifierStrings: &common.IdentifierStrings{},
 	}
 }
@@ -81,6 +84,18 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
 	}
 	c.cdxBom = cdxBom
+
+	if c.cdxBom.Metadata.Timestamp == "" {
+		// set the time to zero time if timestamp is not provided
+		c.timestamp = zeroTime
+	} else {
+		timestamp, err := time.Parse(time.RFC3339, c.cdxBom.Metadata.Timestamp)
+		if err != nil {
+			return fmt.Errorf("SPDX document had invalid created time %q : %w", c.cdxBom.Metadata.Timestamp, err)
+		}
+		c.timestamp = timestamp
+	}
+
 	if err := c.getTopLevelPackage(); err != nil {
 		return err
 	}
@@ -176,32 +191,98 @@ func (c *cyclonedxParser) getPackages() error {
 			// skipping over the "operating-system" type as it does not contain
 			// the required purl for package node. Currently there is no use-case
 			// to capture OS for GUAC.
-			if comp.Type != cdx.ComponentTypeOS {
-				purl := comp.PackageURL
-				if purl == "" {
-					if comp.Type == cdx.ComponentTypeContainer {
-						purl = parseContainerType(comp.Name, comp.Version, false)
-					} else if comp.Type == cdx.ComponentTypeFile {
-						purl = guacCDXFilePurl(comp.Name, comp.Version, false)
-					} else {
-						purl = asmhelpers.GuacPkgPurl(comp.Name, &comp.Version)
-					}
-				}
-				pkg, err := asmhelpers.PurlToPkg(purl)
-				if err != nil {
-					return err
-				}
-				c.packagePackages[comp.BOMRef] = append(c.packagePackages[comp.BOMRef], pkg)
-				c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, comp.PackageURL)
+			if comp.Type == cdx.ComponentTypeOS {
+				continue
+			}
 
-				// if checksums exists create an artifact for each of them
-				if comp.Hashes != nil {
-					for _, checksum := range *comp.Hashes {
-						artifact := &model.ArtifactInputSpec{
-							Algorithm: strings.ToLower(string(checksum.Algorithm)),
-							Digest:    checksum.Value,
+			purl := comp.PackageURL
+			if purl == "" {
+				if comp.Type == cdx.ComponentTypeContainer {
+					purl = parseContainerType(comp.Name, comp.Version, false)
+				} else if comp.Type == cdx.ComponentTypeFile {
+					purl = guacCDXFilePurl(comp.Name, comp.Version, false)
+				} else {
+					purl = asmhelpers.GuacPkgPurl(comp.Name, &comp.Version)
+				}
+			}
+			pkg, err := asmhelpers.PurlToPkg(purl)
+			if err != nil {
+				return err
+			}
+			c.packagePackages[comp.BOMRef] = append(c.packagePackages[comp.BOMRef], pkg)
+			c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, comp.PackageURL)
+
+			// if checksums exists create an artifact for each of them
+			if comp.Hashes != nil {
+				for _, checksum := range *comp.Hashes {
+					artifact := &model.ArtifactInputSpec{
+						Algorithm: strings.ToLower(string(checksum.Algorithm)),
+						Digest:    checksum.Value,
+					}
+					c.packageArtifacts[comp.BOMRef] = append(c.packageArtifacts[comp.BOMRef], artifact)
+				}
+			}
+
+			// legal information from CDX component
+			if comp.Licenses != nil {
+				compLicenses := *comp.Licenses
+				const justification string = "Found in CycloneDX document."
+
+				if len(compLicenses) == 1 {
+					var cl *model.CertifyLegalInputSpec
+					if compLicenses[0].Expression != "" {
+						cl = &model.CertifyLegalInputSpec{
+							Justification:     justification,
+							DeclaredLicense:   compLicenses[0].Expression,
+							DiscoveredLicense: "",
+							TimeScanned:       c.timestamp,
+							Attribution:       comp.Copyright,
 						}
-						c.packageArtifacts[comp.BOMRef] = append(c.packageArtifacts[comp.BOMRef], artifact)
+						c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
+					} else {
+						var license string
+						if compLicenses[0].License.Name != "" {
+							if compLicenses[0].License.Text != nil {
+								license = compLicenses[0].License.Text.Content
+							} else {
+								license = compLicenses[0].License.Name
+							}
+						} else {
+							license = compLicenses[0].License.ID
+						}
+						if license != "" {
+							cl = &model.CertifyLegalInputSpec{
+								Justification:     justification,
+								DeclaredLicense:   compLicenses[0].License.ID,
+								DiscoveredLicense: "",
+								TimeScanned:       c.timestamp,
+								Attribution:       comp.Copyright,
+							}
+							c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
+						}
+					}
+				} else {
+					for _, compLicense := range compLicenses {
+						var licenses []string
+						if compLicense.License.Name != "" {
+							if compLicense.License.Text != nil {
+								licenses = append(licenses, compLicense.License.Text.Content)
+							} else {
+								licenses = append(licenses, compLicense.License.Name)
+							}
+						} else {
+							licenses = append(licenses, compLicense.License.ID)
+						}
+						if len(licenses) > 0 {
+							cl := &model.CertifyLegalInputSpec{
+								Justification:     justification,
+								DeclaredLicense:   common.CombineLicense(licenses),
+								DiscoveredLicense: "",
+								TimeScanned:       c.timestamp,
+								Attribution:       comp.Copyright,
+							}
+							c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
+						}
 					}
 				}
 			}
@@ -246,29 +327,16 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the *c.cdxBom.Dependencies?
 	// see https://github.com/CycloneDX/specification/issues/33
 	if len(topLevelArts) > 0 || len(topLevelPkgs) > 0 {
-		var timestamp time.Time
-		var err error
-		if c.cdxBom.Metadata.Timestamp == "" {
-			// set the time to zero time if timestamp is not provided
-			timestamp = zeroTime
-		} else {
-			timestamp, err = time.Parse(time.RFC3339, c.cdxBom.Metadata.Timestamp)
-			if err != nil {
-				logger.Errorf("SPDX document had invalid created time %q : %v", c.cdxBom.Metadata.Timestamp, err)
-				return nil
-			}
-		}
-
 		if c.cdxBom.Dependencies == nil {
 			preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(topLevelPkgs[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
 		}
 
 		if len(topLevelArts) > 0 {
 			for _, topLevelArt := range topLevelArts {
-				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(topLevelArt, c.doc, c.cdxBom.SerialNumber, timestamp))
+				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(topLevelArt, c.doc, c.cdxBom.SerialNumber, c.timestamp))
 			}
 		} else {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(topLevelPkgs[0], c.doc, c.cdxBom.SerialNumber, timestamp))
+			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(topLevelPkgs[0], c.doc, c.cdxBom.SerialNumber, c.timestamp))
 		}
 	}
 
