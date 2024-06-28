@@ -46,7 +46,8 @@ import (
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurence input spec which will generate a predicate for each occurence
 
-var ErrMetadataNil = errors.New("SLSA01 Metadata is nil")
+var ErrMetadataNil = errors.New("SLSA Metadata is nil")
+var ErrBuilderNil = errors.New("SLSA Builder is nil")
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type slsaEntity struct {
@@ -92,7 +93,9 @@ func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
 	if err := s.getSLSA(); err != nil {
 		return err
 	}
-	s.getBuilder()
+	if err := s.getBuilder(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -120,10 +123,12 @@ func (s *slsaParser) getMaterials() error {
 			return err
 		}
 	case smtslsa1.PredicateSLSAProvenance:
+		if s.pred1.BuildDefinition == nil {
+			return errors.New("SLSA1 buildDefinition is nil")
+		}
 		if err := s.getMaterials1(s.pred1.BuildDefinition.ResolvedDependencies); err != nil {
 			return err
 		}
-
 	}
 	return nil
 }
@@ -221,19 +226,26 @@ func fillSLSA01(inp *model.SLSAInputSpec, pred *slsa01.ProvenancePredicate) erro
 	return nil
 }
 
-func fillSLSA02(inp *model.SLSAInputSpec, pred *slsa02.ProvenancePredicate) {
+func fillSLSA02(inp *model.SLSAInputSpec, pred *slsa02.ProvenancePredicate) error {
 	inp.BuildType = pred.BuildType
 
+	if pred.Metadata == nil {
+		return ErrMetadataNil
+	}
 	if pred.Metadata.BuildStartedOn != nil {
 		inp.StartedOn = pred.Metadata.BuildStartedOn
 	}
 	if pred.Metadata.BuildFinishedOn != nil {
 		inp.FinishedOn = pred.Metadata.BuildStartedOn
 	}
+	return nil
 }
 
-func fillSLSA1(inp *model.SLSAInputSpec, pred *slsa1.Provenance) {
+func fillSLSA1(inp *model.SLSAInputSpec, pred *slsa1.Provenance) error {
 	inp.BuildType = pred.BuildDefinition.BuildType
+	if pred.RunDetails == nil || pred.RunDetails.Metadata == nil {
+		return ErrMetadataNil
+	}
 	if pred.RunDetails.Metadata.StartedOn != nil {
 		startTimePB := time.Unix(pred.RunDetails.Metadata.StartedOn.GetSeconds(), int64(pred.RunDetails.Metadata.StartedOn.GetNanos()))
 		inp.StartedOn = &startTimePB
@@ -242,6 +254,7 @@ func fillSLSA1(inp *model.SLSAInputSpec, pred *slsa1.Provenance) {
 		finishTimePB := time.Unix(pred.RunDetails.Metadata.StartedOn.GetSeconds(), int64(pred.RunDetails.Metadata.StartedOn.GetNanos()))
 		inp.FinishedOn = &finishTimePB
 	}
+	return nil
 }
 
 func (s *slsaParser) getSLSA() error {
@@ -249,22 +262,25 @@ func (s *slsaParser) getSLSA() error {
 		SlsaVersion: s.smt.PredicateType,
 	}
 
-	var pred any
+	var data []byte
 	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
 		if err := fillSLSA01(inp, s.pred01); err != nil {
 			return fmt.Errorf("could not fill SLSA01: %w", err)
 		}
-		pred = s.pred01
+		data, _ = json.Marshal(s.pred01)
 	case slsa02.PredicateSLSAProvenance:
-		fillSLSA02(inp, s.pred02)
-		pred = s.pred02
+		if err := fillSLSA02(inp, s.pred02); err != nil {
+			return fmt.Errorf("could not fill SLSA02: %w", err)
+		}
+		data, _ = json.Marshal(s.pred02)
 	case smtslsa1.PredicateSLSAProvenance:
-		fillSLSA1(inp, s.pred1)
-		pred = s.pred1
+		if err := fillSLSA1(inp, s.pred1); err != nil {
+			return fmt.Errorf("could not fill SLSA1: %w", err)
+		}
+		data, _ = protojson.Marshal(s.pred1)
 	}
 
-	data, _ := json.Marshal(pred)
 	var genericMap map[string]any
 	err := json.Unmarshal(data, &genericMap)
 	if err != nil {
@@ -288,7 +304,7 @@ func (s *slsaParser) getSLSA() error {
 	return nil
 }
 
-func (s *slsaParser) getBuilder() {
+func (s *slsaParser) getBuilder() error {
 	s.builder = &model.BuilderInputSpec{}
 	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
@@ -296,8 +312,12 @@ func (s *slsaParser) getBuilder() {
 	case slsa02.PredicateSLSAProvenance:
 		s.builder.Uri = s.pred02.Builder.ID
 	case smtslsa1.PredicateSLSAProvenance:
+		if s.pred1.RunDetails == nil || s.pred1.RunDetails.Builder == nil {
+			return ErrBuilderNil
+		}
 		s.builder.Uri = s.pred1.RunDetails.Builder.Id
 	}
+	return nil
 }
 
 func (s *slsaParser) parseSlsaPredicate(p []byte) error {
@@ -306,7 +326,7 @@ func (s *slsaParser) parseSlsaPredicate(p []byte) error {
 		return fmt.Errorf("Could not unmarshal SLSA statement header: %w", err)
 	}
 
-	predBytes, err := protojson.Marshal(s.smt.Predicate)
+	predBytes, err := json.Marshal(s.smt.Predicate)
 	if err != nil {
 		return err
 	}
