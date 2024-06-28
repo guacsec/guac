@@ -177,10 +177,6 @@ func toModelIsOccurrenceWithSubject(id *ent.Occurrence) *model.IsOccurrence {
 	return toModelIsOccurrence(id, true)
 }
 
-func toModelIsOccurrenceWithoutSubject(id *ent.Occurrence) *model.IsOccurrence {
-	return toModelIsOccurrence(id, false)
-}
-
 func toModelIsOccurrence(o *ent.Occurrence, backrefs bool) *model.IsOccurrence {
 	if backrefs {
 		return &model.IsOccurrence{
@@ -205,10 +201,6 @@ func toModelIsOccurrence(o *ent.Occurrence, backrefs bool) *model.IsOccurrence {
 
 func toModelIsDependencyWithBackrefs(id *ent.Dependency) *model.IsDependency {
 	return toModelIsDependency(id, true)
-}
-
-func toModelIsDependencyWithoutBackrefs(id *ent.Dependency) *model.IsDependency {
-	return toModelIsDependency(id, false)
 }
 
 func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency {
@@ -276,25 +268,6 @@ func toModelHasSBOMWithIncluded(sbom *ent.BillOfMaterials, includedSoftwarePacka
 		IncludedSoftware:     toIncludedSoftware(includedSoftwarePackages, includedSoftwareArtifacts),
 		IncludedDependencies: collect(includedDependencies, toModelIsDependencyWithBackrefs),
 		IncludedOccurrences:  collect(includedOccurrences, toModelIsOccurrenceWithSubject),
-	}
-}
-
-func toModelHasSBOMWithJustIncludedIDs(sbom *ent.BillOfMaterials, includedDependencies []*ent.Dependency, includedOccurrences []*ent.Occurrence) *model.HasSbom {
-
-	return &model.HasSbom{
-		ID:                   hasSBOMGlobalID(sbom.ID.String()),
-		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
-		URI:                  sbom.URI,
-		Algorithm:            sbom.Algorithm,
-		Digest:               sbom.Digest,
-		DownloadLocation:     sbom.DownloadLocation,
-		Origin:               sbom.Origin,
-		Collector:            sbom.Collector,
-		DocumentRef:          sbom.DocumentRef,
-		KnownSince:           sbom.KnownSince,
-		IncludedSoftware:     nil,
-		IncludedDependencies: collect(includedDependencies, toModelIsDependencyWithoutBackrefs),
-		IncludedOccurrences:  collect(includedOccurrences, toModelIsOccurrenceWithoutSubject),
 	}
 }
 

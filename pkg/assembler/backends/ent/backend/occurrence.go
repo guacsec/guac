@@ -115,19 +115,17 @@ func getOccurrenceObject(q *ent.OccurrenceQuery) *ent.OccurrenceQuery {
 		WithSource(func(q *ent.SourceNameQuery) {})
 }
 
-// getOccurrenceObjectWithoutEdges is used recreate the occurrence object without eager loading the edges
-func getOccurrenceObjectWithoutEdges(q *ent.OccurrenceQuery) *ent.OccurrenceQuery {
-	return q
-}
-
 // deleteIsOccurrences is called by hasSBOM to delete the isOccurrence nodes that are part of the hasSBOM
-func (b *EntBackend) deleteIsOccurrences(ctx context.Context, isOccurrenceID uuid.UUID) error {
+func (b *EntBackend) deleteIsOccurrences(ctx context.Context, sbomID string) error {
 	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		if err := tx.Occurrence.DeleteOneID(isOccurrenceID).Exec(ctx); err != nil {
-			return nil, errors.Wrap(err, "failed to delete isOccurrenceID with error")
+		if _, err := tx.Occurrence.Delete().Where(occurrence.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
+			optionalPredicate(&sbomID, IDEQ)}...)).Exec(ctx); err != nil {
+
+			return nil, errors.Wrap(err, "failed to delete all occurrences based on the SBOM with error")
 		}
+
 		return nil, nil
 	})
 	if txErr != nil {
