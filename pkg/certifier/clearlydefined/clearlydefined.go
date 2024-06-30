@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package osv
+package clearlydefined
 
 import (
 	"context"
@@ -54,9 +54,9 @@ func NewClearlyDefinedCertifier() certifier.Certifier {
 	return &cdCertifier{}
 }
 
-func getDefinition(defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
-
-	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
+func getDefinition(defType, namespace, name, revision string) (*attestation.Definition, error) {
+	provider := map[string]string{"maven": "mavencentral"}
+	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider[defType], namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatalln(err)
@@ -99,7 +99,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 			if err != nil {
 				return fmt.Errorf("failed to parse purl with error: %w", err)
 			}
-			definition, err := getDefinition(pkg.Type, *pkg.Namespace, *pkg.Namespace, pkg.Name, *pkg.Version)
+			definition, err := getDefinition(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version)
 			if err != nil {
 				return fmt.Errorf("failed get definition from clearly defined with error: %w", err)
 			}
@@ -122,7 +122,7 @@ func generateDocument(purl string, definition *attestation.Definition, docChanne
 	}
 	doc := &processor.Document{
 		Blob:   payload,
-		Type:   processor.DocumentITE6Vul,
+		Type:   processor.DocumentITE6ClearlyDefined,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector:   cdCollector,

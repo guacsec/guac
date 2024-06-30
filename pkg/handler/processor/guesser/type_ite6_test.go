@@ -55,8 +55,11 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 		name:     "valid Vuln ITE6 Document",
 		blob:     testdata.ITE6VulnExample,
 		expected: processor.DocumentITE6Vul,
+	}, {
+		name:     "valid clearly defined ITE6 Document",
+		blob:     testdata.ITE6ClearlyDefinedExample,
+		expected: processor.DocumentITE6ClearlyDefined,
 	}}
-
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			guesser := &ite6TypeGuesser{}

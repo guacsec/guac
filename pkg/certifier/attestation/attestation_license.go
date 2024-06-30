@@ -16,6 +16,8 @@
 package attestation
 
 import (
+	"time"
+
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 )
 
@@ -37,14 +39,27 @@ type ClearlyDefinedStatement struct {
 
 // Definition represents the structure of the data returned by the API
 type Definition struct {
-	Coordinates struct {
-		Type      string `json:"type"`
-		Provider  string `json:"provider"`
-		Namespace string `json:"namespace"`
-		Name      string `json:"name"`
-		Revision  string `json:"revision"`
-	} `json:"coordinates"`
 	Described struct {
+		ReleaseDate    string `json:"releaseDate"`
+		SourceLocation struct {
+			Type      string `json:"type"`
+			Provider  string `json:"provider"`
+			Namespace string `json:"namespace"`
+			Name      string `json:"name"`
+			Revision  string `json:"revision"`
+			URL       string `json:"url"`
+		} `json:"sourceLocation"`
+		Urls struct {
+			Registry string `json:"registry"`
+			Version  string `json:"version"`
+			Download string `json:"download"`
+		} `json:"urls"`
+		Hashes struct {
+			Sha1   string `json:"sha1"`
+			Sha256 string `json:"sha256"`
+		} `json:"hashes"`
+		Files     int      `json:"files"`
+		Tools     []string `json:"tools"`
 		ToolScore struct {
 			Total  int `json:"total"`
 			Date   int `json:"date"`
@@ -56,7 +71,19 @@ type Definition struct {
 			Source int `json:"source"`
 		} `json:"score"`
 	} `json:"described"`
+	Files []struct {
+		Path    string   `json:"path"`
+		License string   `json:"license,omitempty"`
+		Natures []string `json:"natures,omitempty"`
+		Hashes  struct {
+			Sha1   string `json:"sha1"`
+			Sha256 string `json:"sha256"`
+		} `json:"hashes"`
+		Token        string   `json:"token,omitempty"`
+		Attributions []string `json:"attributions,omitempty"`
+	} `json:"files"`
 	Licensed struct {
+		Declared  string `json:"declared"`
 		ToolScore struct {
 			Total       int `json:"total"`
 			Declared    int `json:"declared"`
@@ -65,6 +92,19 @@ type Definition struct {
 			Spdx        int `json:"spdx"`
 			Texts       int `json:"texts"`
 		} `json:"toolScore"`
+		Facets struct {
+			Core struct {
+				Attribution struct {
+					Unknown int      `json:"unknown"`
+					Parties []string `json:"parties"`
+				} `json:"attribution"`
+				Discovered struct {
+					Unknown     int      `json:"unknown"`
+					Expressions []string `json:"expressions"`
+				} `json:"discovered"`
+				Files int `json:"files"`
+			} `json:"core"`
+		} `json:"facets"`
 		Score struct {
 			Total       int `json:"total"`
 			Declared    int `json:"declared"`
@@ -74,9 +114,16 @@ type Definition struct {
 			Texts       int `json:"texts"`
 		} `json:"score"`
 	} `json:"licensed"`
+	Coordinates struct {
+		Type      string `json:"type"`
+		Provider  string `json:"provider"`
+		Namespace string `json:"namespace"`
+		Name      string `json:"name"`
+		Revision  string `json:"revision"`
+	} `json:"coordinates"`
 	Meta struct {
-		SchemaVersion string `json:"schemaVersion"`
-		Updated       string `json:"updated"`
+		SchemaVersion string    `json:"schemaVersion"`
+		Updated       time.Time `json:"updated"`
 	} `json:"_meta"`
 	Scores struct {
 		Effective int `json:"effective"`

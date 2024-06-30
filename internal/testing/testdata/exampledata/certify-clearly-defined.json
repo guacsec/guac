@@ -1,0 +1,1092 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [
+    {
+      "name": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+    }
+  ],
+  "predicateType": "https://in-toto.io/attestation/clearlydefined/v0.1",
+  "predicate": {
+    "described": {
+      "releaseDate": "2001-01-09",
+      "sourceLocation": {
+        "type": "sourcearchive",
+        "provider": "mavencentral",
+        "namespace": "org.apache.commons",
+        "name": "commons-text",
+        "revision": "1.9",
+        "url": "https://search.maven.org/remotecontent?filepath=org/apache/commons/commons-text/1.9/commons-text-1.9-sources.jar"
+      },
+      "urls": {
+        "registry": "https://repo1.maven.org/maven2/org/apache/commons/commons-text",
+        "version": "https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9",
+        "download": "https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9.jar"
+      },
+      "hashes": {
+        "sha1": "ba6ac8c2807490944a0a27f6f8e68fb5ed2e80e2",
+        "sha256": "0812f284ac5dd0d617461d9a2ab6ac6811137f25122dfffd4788a4871e732d00"
+      },
+      "files": 140,
+      "tools": [
+        "clearlydefined/1.5.0",
+        "licensee/9.14.0",
+        "scancode/30.3.0"
+      ],
+      "toolScore": {
+        "total": 100,
+        "date": 30,
+        "source": 70
+      },
+      "score": {
+        "total": 100,
+        "date": 30,
+        "source": 70
+      }
+    },
+    "files": [
+      {
+        "path": "META-INF/LICENSE.txt",
+        "license": "Apache-2.0",
+        "natures": [
+          "license"
+        ],
+        "hashes": {
+          "sha1": "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        "token": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "META-INF/MANIFEST.MF",
+        "license": "Apache-2.0",
+        "hashes": {
+          "sha1": "3c1d1ee16661bcd4a491d648026d5d2236b68d7a",
+          "sha256": "2a5629e4093d689a5684a64041fbb7d85aea6b6062a2a2604faeee5aec1e7b4b"
+        }
+      },
+      {
+        "path": "META-INF/NOTICE.txt",
+        "license": "Apache-2.0",
+        "attributions": [
+          "Copyright 2014-2020 The Apache Software Foundation"
+        ],
+        "hashes": {
+          "sha1": "269264bca038f81194aa7a5dfa7304d8e141c5a4",
+          "sha256": "9ad4ec6b60a0d6ffa269c116fd117ce41d67c31fc301c8a2cba309f1d72cfde3"
+        },
+        "token": "9ad4ec6b60a0d6ffa269c116fd117ce41d67c31fc301c8a2cba309f1d72cfde3"
+      },
+      {
+        "path": "META-INF/maven/org.apache.commons/commons-text/pom.properties",
+        "hashes": {
+          "sha1": "dfbd7251f164a999aece50a1c38f151d40ad0ea2",
+          "sha256": "8e8e9c7dc088e721a9f0d9918dd0e4ece949cc9432e2688f8f63cc852f914f57"
+        }
+      },
+      {
+        "path": "META-INF/maven/org.apache.commons/commons-text/pom.xml",
+        "license": "Apache-2.0",
+        "hashes": {
+          "sha1": "9897c850c17b6919b0bb53d6e7d345c59f975b37",
+          "sha256": "9f9216cfc944dca782e6311d62757fd77164fe67da29b58f015687fa09f44050"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/AlphabetConverter.class",
+        "hashes": {
+          "sha1": "5430aab5a47022454a7c74fa654a0d3551da9be1",
+          "sha256": "dbf7ff5fcced1c2fae020767dbf61766c6ae240f34018e889520825476cad3c2"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/Builder.class",
+        "hashes": {
+          "sha1": "979aa0b8bca2a362f7393381070d1f8cd19d4798",
+          "sha256": "cd5a1326748da8b7ac4aca579049553f9e3652c93923326f3f25b37969f72090"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CaseUtils.class",
+        "hashes": {
+          "sha1": "7b45eee18c9ad3f6fc03d2879183473b2533e585",
+          "sha256": "7239f9e6733983cb6785e527e3272e700d8ce7b462b9345ccc3239364c14c85e"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicate.class",
+        "hashes": {
+          "sha1": "9bd27a8b536f35f5d534f845a33d76fb66aaf173",
+          "sha256": "b493061f3fc6d6fdf17d35cb926baf082fd2448c1812694f9213550cbcd33995"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$1.class",
+        "hashes": {
+          "sha1": "8ad9231a5d6a8aad844d019a8756fdf357e239cf",
+          "sha256": "526600658251d109000c769c6a9df744cd01cf295dba3e355bc4a7fa216a8070"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$2.class",
+        "hashes": {
+          "sha1": "5472815f5ea6dbfe11bc95ecd5fc7cffdc373c93",
+          "sha256": "bcbb78659b72094ed854d2653849594e50df1bf8775f5b814d852b05d65b992b"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$3.class",
+        "hashes": {
+          "sha1": "117c008258ccb34600090fec1702909a693430fe",
+          "sha256": "926830c4e4c2954b41265fd0001af7e305c0c263b99b76e9c09825833315be77"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$4.class",
+        "hashes": {
+          "sha1": "cb16c47edbe009622333ae8b12b07370dd993eab",
+          "sha256": "fd3670fc7e0946bb6d5510eb992108a7cf403cfd57ea2cc372a091b72870f1f5"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$5.class",
+        "hashes": {
+          "sha1": "c5d4d37e38c00138ecd31429e024a32562d8839a",
+          "sha256": "536c7cb5a287f889ee387b67205f7c899985435900262d34ba466bfdeba8966a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$6.class",
+        "hashes": {
+          "sha1": "a7e529c122aa5d76019c5d4f3940fcb54352eed5",
+          "sha256": "a44bdcb902bbeef83d3c2c033f14a97653f9febbfadc2ed0e25ca9a7947214d4"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates$7.class",
+        "hashes": {
+          "sha1": "d203a078c44f8f3572285b1f4a265d2f8528cc29",
+          "sha256": "9539628e4dc4e0229c9ecdffe8a38789772b0457281670c333994bf704e30aa7"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CharacterPredicates.class",
+        "hashes": {
+          "sha1": "d30bd8f7fb110ca3d5dd3fbced20c1351950c541",
+          "sha256": "87948a0a708ba8bd52d5f8b469e46ae62b450a43070162ecbca02b319cdb07ee"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/CompositeFormat.class",
+        "hashes": {
+          "sha1": "571ff690ed37ea7b5ff9d5413c4001e0791d1cf3",
+          "sha256": "02806a54389c6627292afe8ae4129f90dd8bce0ea2e3c4d5ecb73d5ab6ae2b66"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/ExtendedMessageFormat.class",
+        "hashes": {
+          "sha1": "981e11767be9f90c024b40852b89a456b944b965",
+          "sha256": "9c28ec975f02ad7b8fd56c5023e61f50bd15687d6a88ed22535f8e57cf396524"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/FormatFactory.class",
+        "hashes": {
+          "sha1": "c6ce047def15709c67c11f96ae306370ceb5eb62",
+          "sha256": "6022d2764c2e54d30c6087785ebf0d1718b08e4e1d3c52f12cca5b54c9b4b572"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/FormattableUtils.class",
+        "hashes": {
+          "sha1": "2821bd3a94228fcdc19f25a64732b84b21b7ba28",
+          "sha256": "3a80a1617f8713fc1aa4837f4814930ab7ef1e481fb04e15aeaf8798f70050eb"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/RandomStringGenerator$1.class",
+        "hashes": {
+          "sha1": "c81d14df89dc12f10f34c9745acc271901bd8c18",
+          "sha256": "3a153353d42929690bfbe870e4db1db86313c0f28396f4650d58a827960489e9"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/RandomStringGenerator$Builder.class",
+        "hashes": {
+          "sha1": "9f9ce66f4d609dbc03943ff4b0d3ec24ae06e33f",
+          "sha256": "09a5177f357f0dfd6154939f5b30051d43317e13ec4e120f1f3bb26a7809dc30"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/RandomStringGenerator.class",
+        "hashes": {
+          "sha1": "8c0c10752821c62c9caebea8ce9f971425bdd350",
+          "sha256": "aecdfb5f1a4b65ce4f7bd7d97f5a22bea9e9d690b605ebd43e0791caca6914bb"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrBuilder$StrBuilderReader.class",
+        "hashes": {
+          "sha1": "7cf64d569a8070ecfd6faf627e560d3d5baeba3c",
+          "sha256": "c0623738d1d2bf9660a3f54720840fa5681160c86522e60231f1d19447f1cc10"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrBuilder$StrBuilderTokenizer.class",
+        "hashes": {
+          "sha1": "db87c61db41a80cb1ddb612faa4a8b42aa8fcf5a",
+          "sha256": "a8c76ff1fc31545e921af2e6002e0a1584cd951facf4ddf3f5bb64ac7455d224"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrBuilder$StrBuilderWriter.class",
+        "hashes": {
+          "sha1": "c816f422afeec9c1027275378b802bc1f6e643e2",
+          "sha256": "a02e3742957514a464b2982ae5d1b0e05b91c0a253647717590012a95567d28e"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrBuilder.class",
+        "hashes": {
+          "sha1": "263daf04fb5a19df5257b55640466a21d60b4b82",
+          "sha256": "4621cf0314e1a580eb77ebe429c14767d64f20237423c0c0b22e779d6bcb87b9"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringEscapeUtils$1.class",
+        "hashes": {
+          "sha1": "63a655f64a36e6c2b3c5b2514696144f13c84471",
+          "sha256": "a38dc43f042e82b7395c6f873471510161a8acbca6a304cb0e5ff93382fd3ce1"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringEscapeUtils$Builder.class",
+        "hashes": {
+          "sha1": "561eb2763e7520985f88b08c3db46eb13f4dd186",
+          "sha256": "abd03b1b3db374e8aa23a3a1ec00f91cc239208a78c692505ab74807149cd055"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringEscapeUtils$XsiUnescaper.class",
+        "hashes": {
+          "sha1": "0f556d0386bfa20aee7ec18428c663128586dcf1",
+          "sha256": "44360df03da91d15aebb5ae858bd756359bb0370825775e7772334e83cfd894b"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringEscapeUtils.class",
+        "hashes": {
+          "sha1": "a748b0758a64bf941a9a324498fb93c819cc1045",
+          "sha256": "df5138826fff3075220325c2aa84ad82242d84b8e4df9c2b6486cabae6a20bd7"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringSubstitutor$1.class",
+        "hashes": {
+          "sha1": "9902b22fff62f03d39f49377955313703576e161",
+          "sha256": "e6839af182e620415559aac7710ef6e7c04740274bf1b0fec4338e41b0a5d595"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringSubstitutor$Result.class",
+        "hashes": {
+          "sha1": "bd1dab45b059311cf9c499a6b5bc6ffbb07c74ac",
+          "sha256": "ad3f769922f917c091faecad89e6268450d401a0bb36580323d92f2fab1efaf8"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringSubstitutor.class",
+        "hashes": {
+          "sha1": "0da470993e1cd717e240c7e9577b13c81b78acb8",
+          "sha256": "302c4e733b2b19fb478140952665cc8e9d7f9fc8d84580083cea418d17b899b7"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StringTokenizer.class",
+        "hashes": {
+          "sha1": "8f1149dbc40a4eaf1a3486a452e3fe4b6e72f184",
+          "sha256": "173d908f206fc7c62280c0816cfc507b8d526595e5e4b37f1285a6a727e6a94b"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrLookup$1.class",
+        "hashes": {
+          "sha1": "5735dc528c82193fdf19cc2260f03959635d9cae",
+          "sha256": "d8fc5c510174f6a4f1d2ecbd532232e31947674afded887281709ce43069eb3a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrLookup$MapStrLookup.class",
+        "hashes": {
+          "sha1": "75748da8bd4908ba01bc7a566cde67d7f433cb83",
+          "sha256": "a0ea020605dc11910fb974b0fb3ab3ab55a372d68ba010e820cea55cbe2ca267"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrLookup$ResourceBundleLookup.class",
+        "hashes": {
+          "sha1": "75376255f70ae62a7435fd1a9e7dc030d542e97b",
+          "sha256": "65909dcf56839c10b53da7ce53b465e492f36864705e69e01ff56d989724d859"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrLookup$SystemPropertiesStrLookup.class",
+        "hashes": {
+          "sha1": "d9906919fc50bcac1532b1224d778be97ec00b10",
+          "sha256": "f508b12c4ae051969e9b3f7983235f8c6bf07fe037ce09d3094db37ed5b21d88"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrLookup.class",
+        "hashes": {
+          "sha1": "96540bbe0857fb174fe0d4a65f9c94b15c4bb03c",
+          "sha256": "c6455f0446c52c880a1cf0c313df41db1afa733d68b0f7a7d16c26b821e274ea"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrMatcher$CharMatcher.class",
+        "hashes": {
+          "sha1": "621a67767e045cb8d6eb9c13303b139916107272",
+          "sha256": "be9885d68230ebbbf9d21d6c5b78ca6c0bca7da74c69c8ece8b575a9f28e53fd"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrMatcher$CharSetMatcher.class",
+        "hashes": {
+          "sha1": "9ee0bd824b4d2902739e14511a5477c98b27e867",
+          "sha256": "4287f76870beb5e6b0736f3dad0c039573e282402697ff693862b444e66de981"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrMatcher$NoMatcher.class",
+        "hashes": {
+          "sha1": "607e2375bcc7dbb8428956daf2e449fee2efaa28",
+          "sha256": "75de11e2ed5baf2be9d32aed44af692baa69774f0bb84fb88511b99bf3909520"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrMatcher$StringMatcher.class",
+        "hashes": {
+          "sha1": "895c5f85e204aad2e7b392c0dfd9769544d14d56",
+          "sha256": "3c7ed984de15ab175a73e9f8207a3f37a017dd2db07b87268a9e00f6da486fea"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrMatcher$TrimMatcher.class",
+        "hashes": {
+          "sha1": "0ba81f49386ba2a0851fbda5b0a1745a673453ad",
+          "sha256": "669108287b3e15ca0ae1b621704fc9e4b822240d1a1b8aadb1ad4c803787643b"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrMatcher.class",
+        "hashes": {
+          "sha1": "065d8261287c66e153d93b58e2c91b75a60b97b6",
+          "sha256": "b2ed3145d5aecbeb3d6cb72c5f87e8eaff0f6837af60412deefbd6a3eca1fd94"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrSubstitutor.class",
+        "hashes": {
+          "sha1": "5edff369591496565dc33386452b9a655812a1ad",
+          "sha256": "ea9551f2f0af220957fe4b7bc74cbd6e06ef8c23de4099149ad3d77dd0c31eb4"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/StrTokenizer.class",
+        "hashes": {
+          "sha1": "dc05a0c133e15b7f75b3dbf669b027214e82206a",
+          "sha256": "955346e9f2d2ac6bda51fcac5184585f7d0b6b1e46fd860c823e44de878f04df"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/TextRandomProvider.class",
+        "hashes": {
+          "sha1": "7564c16838fbf5d87bed1b5b13fad23040a79733",
+          "sha256": "64e3204fb58de7140fcc3e5a89d85df678c3defc22bd177b400607c58be02fd8"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/TextStringBuilder$TextStringBuilderReader.class",
+        "hashes": {
+          "sha1": "92031bd1493c8fc7aab43ff8ba3c2ed40caebbd0",
+          "sha256": "571e8e10c4df69719193fcd7e99ac4715c4101ad5e0c9e356f5571edd6b4a828"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/TextStringBuilder$TextStringBuilderTokenizer.class",
+        "hashes": {
+          "sha1": "4c2d0362e6e25050ab0d570ff149e3fe66e28356",
+          "sha256": "6224d6aacfc76a5e3f55eaa19d6bd5da26d305c26169e8284a6547b632e3b8d3"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/TextStringBuilder$TextStringBuilderWriter.class",
+        "hashes": {
+          "sha1": "ac60b0190c7c8e00759bfce8529d261ae1181a6a",
+          "sha256": "fbb81eb513e70aeaa32940af1855a3af20263adf3428793249dab77ec75a97fd"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/TextStringBuilder.class",
+        "hashes": {
+          "sha1": "03244e7fe3bdcebcabf40902b579ec3f439a7983",
+          "sha256": "c9f4a11a23e3b9524597730378bd8bf883421ead502658921de59a5d679fc965"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/WordUtils.class",
+        "hashes": {
+          "sha1": "70a39f20fa6e215bc0b4252d99c2807a8e5d92c8",
+          "sha256": "f3b3d7eabf4c5bf189a19b63f8986a4e81f67b18879be6b845645d32384f8cd5"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/CommandVisitor.class",
+        "hashes": {
+          "sha1": "ca80bfa1b7deb5509f4bd0d7f86de95c38fa7ca8",
+          "sha256": "b8da87a368c312f26ac0ba5563a026ddf3bc4e3cb6176f6bb36b404b1eb65187"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/DeleteCommand.class",
+        "hashes": {
+          "sha1": "a42340da91368d9931b7922a2c2487d4e73ffd7d",
+          "sha256": "53ae819d0d181bd6125118cb0296a8f5ad935c92bba368de0ee3e4fad02b5f4a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/EditCommand.class",
+        "hashes": {
+          "sha1": "96cb00141bac55e625e7aa6f1e1751285cfad1e0",
+          "sha256": "ad43cb399b2a55e682a47f9669d5ea1418725f48631c161d9d9dee9bc7c063ae"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/EditScript.class",
+        "hashes": {
+          "sha1": "05f5f4df24709b832c3193340ce664dee91a5f93",
+          "sha256": "5a3135755b9c00d934c881d43082cda08d11b6b8ed08a5032d1560b99239e15a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/InsertCommand.class",
+        "hashes": {
+          "sha1": "33aae75699664124d00119fac28b1c3feaec1b51",
+          "sha256": "cb87ea2858c9eb5a772fe9c01905d41532355543c437164bb297972d3790a4bc"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/KeepCommand.class",
+        "hashes": {
+          "sha1": "d5d12060085fecfefc97129d7570238992d8c69a",
+          "sha256": "ca7e94e804756bd129f5c5131aa518737623f50a494e23905c80cbef0b1ea0d4"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/ReplacementsFinder.class",
+        "hashes": {
+          "sha1": "dc95e5ad71dff0ef923755b290d1761b4ac4647d",
+          "sha256": "e797b480413596adaeb645f24a884da43ba591e71ac802d97bf1230832f0a856"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/ReplacementsHandler.class",
+        "hashes": {
+          "sha1": "650a38e05b03790528bf5748c78841a7f7d24bc9",
+          "sha256": "83e785deaa75d808f4eff0e869a5049aff7327bedace772e6bfb0f2e28c6cec3"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/StringsComparator$Snake.class",
+        "hashes": {
+          "sha1": "918e349df613d121dd235b6b5178b720d59e0828",
+          "sha256": "40d83862dba8f369c2716b6f3e6cd12e29e0b37a55f4326c22c55692a8867d66"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/diff/StringsComparator.class",
+        "hashes": {
+          "sha1": "5be61e8d4b3fcabd5196b163514109bf95013478",
+          "sha256": "047ca50700bdafb1b5df1f87dee0c6fcbb3617616f29382a6cac370ca380cf2d"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/io/StringSubstitutorReader.class",
+        "hashes": {
+          "sha1": "481417dbc217a81d1dd3091a83d07805afac8180",
+          "sha256": "6f6f42a1a508f7f3e962db80e90f05e77a1f670ccf3f07b5d96ecdf6a5e54fbc"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/AbstractStringLookup.class",
+        "hashes": {
+          "sha1": "3ef1efbf3d78ee057a49618236ac6d6313584940",
+          "sha256": "afcfc998821922eed045b96e04fad7450327c1f04e2098a58233db69624ca79f"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/BiFunctionStringLookup.class",
+        "hashes": {
+          "sha1": "af7ac593d67e193c2c72f79cf470ab829a7ae821",
+          "sha256": "85331a440e5f59eff2521dd73c89f1afe960695dd6db486c3f96cdb5bd07e0c5"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/BiStringLookup.class",
+        "hashes": {
+          "sha1": "964b78ceffe68e4d7e957b79bc3020ff85e9f88a",
+          "sha256": "745907fec0533bc0883a47dd5973305bc2c64b615113f4853bfc8924fbf516a4"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/ConstantStringLookup.class",
+        "hashes": {
+          "sha1": "3d7289faaa817347e03ab54b7f34d1d3791ad7a0",
+          "sha256": "21b4826cf9ef6296cc79c253ffdae51f020fee90b112409c3fc59916f9ef7965"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/DateStringLookup.class",
+        "hashes": {
+          "sha1": "b53df24dfd141e75093469be8f4ec9ed8347e7d7",
+          "sha256": "e8f1d159dbb80f35d195a52f2e1e7221f18bb3956c3d7ae3eeab02cca633adb8"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/DefaultStringLookup.class",
+        "hashes": {
+          "sha1": "ce1e9877bc9c9743cccf36b86f21184a1471cc90",
+          "sha256": "44f695908abca0bcc5e424782c08e8290103f4026bd2d05140ec2b9f85099e39"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/DnsStringLookup.class",
+        "hashes": {
+          "sha1": "a5c999aac0fc8ebbe144bfd54d8092f9e1c2ce02",
+          "sha256": "4aa7d8a3daf7aa6c7df1f21cc2fb8c0db665f3facdfa56d477961e1ae826c1f8"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/FileStringLookup.class",
+        "hashes": {
+          "sha1": "3cb2f3a2cea1d51aff5c714bb6344aaafbe6c949",
+          "sha256": "68ded8805071dc2f61320c647254170ebe8089212234c5aea120f175db7b9c50"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/FunctionStringLookup.class",
+        "hashes": {
+          "sha1": "b76d52a9a9836c8d9ca731392671749e3949a1e0",
+          "sha256": "a9b12eac15e6254ac876e8dd39cf84ab7b3048edd0cef6c1a1d098379b66a74c"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/IllegalArgumentExceptions.class",
+        "hashes": {
+          "sha1": "7244d6748b259609f90d38575a82fc4c062188d8",
+          "sha256": "4e867c42a8a68303469f731f58988769d1a857f4d91022792ff9b12dc1bad764"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/InetAddressKeys.class",
+        "hashes": {
+          "sha1": "36e95a52284cc96ce397bf5389e33b7897a9b7ca",
+          "sha256": "977e78fb6103f1e93c9d66b70abba8017b0d697fa0778a901eb615d35b8c2e83"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/InterpolatorStringLookup.class",
+        "hashes": {
+          "sha1": "92f6728ba356fae54d5962b6685c3234f6d74149",
+          "sha256": "64848f2ac1b4bb13e519df4637a5553c174d430617a7af41b5dfbb8c4e292323"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/JavaPlatformStringLookup.class",
+        "hashes": {
+          "sha1": "5b317558721433d7d514d7518dddf429ca6a2203",
+          "sha256": "7a106d2b4d54f9775be15b23a7209ff449ab4d48615ab752c447b9d023c28074"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/LocalHostStringLookup.class",
+        "hashes": {
+          "sha1": "0a32aa930d55c0de1e87c932faaa8b31bc331a5b",
+          "sha256": "f0039f3f065cd55d4c72ca2cacbf302b75d63be33a57f0c3afad847c870cdb86"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/PropertiesStringLookup.class",
+        "hashes": {
+          "sha1": "b6bcbf49e6ba23a493a5fbab8913727b9e35fdb1",
+          "sha256": "062ba95ca8af445e708b5686be96b69a64d47d5a46eef89c268d77a2a769ebc9"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/ResourceBundleStringLookup.class",
+        "hashes": {
+          "sha1": "96df389f75b7dc060c7e9bb75036a0e37fffa7f3",
+          "sha256": "6bedcbb75507b1f4c1f11a02a088ae0fd95ddbc916eb87f2d63b73cf94ba612a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/ScriptStringLookup.class",
+        "hashes": {
+          "sha1": "fa02d435058385c60ab59d791c873434f402c8a3",
+          "sha256": "1da534f2c3a410720c3a596015fa58f6c216b2838d75db654ddcae7a3c3563ca"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/StringLookup.class",
+        "hashes": {
+          "sha1": "e1e9826e76ac05f9e27c4fe5b692be8d35043194",
+          "sha256": "dc27931b12580fc7ae189a9173be84eea6db26d26276ed885f81d5994fd97737"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/StringLookupFactory.class",
+        "hashes": {
+          "sha1": "af01cb27bc60f6d3b76ceb5db2d9d0f4265963ff",
+          "sha256": "50018ff3ff87f163d805250d696b9070cab860b8177d15bf8181071807009634"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/UrlDecoderStringLookup.class",
+        "hashes": {
+          "sha1": "e8565df3f3c8942108d1a21c6ee2895f8e3e56ba",
+          "sha256": "dc14edb3121ee9d6e4659647856bd227234f611a9be4dc26816dc5a34f9c970f"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/UrlEncoderStringLookup.class",
+        "hashes": {
+          "sha1": "0d7a0b1a6188382f4ae23a69a249b9d06575ac03",
+          "sha256": "29b6c784cfd2e716d268da5bc3243dcfb8cc47b0a83654e38c6a07d284d4b10f"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/UrlStringLookup.class",
+        "hashes": {
+          "sha1": "91ec7e370b6a12f4ad9c595cacee44f8a5e7be21",
+          "sha256": "7d7d09d9920ddb37f256badc8f49e825188bc6d254cc3d31ebf1cf3b490de106"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/lookup/XmlStringLookup.class",
+        "hashes": {
+          "sha1": "9d825d4e241d22819a08db94f3c44954448c4847",
+          "sha256": "4701c769b0c7e1d7d88996cec9edf81eac8f7316d4e2a9971e81d45585de9ff7"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher$AndStringMatcher.class",
+        "hashes": {
+          "sha1": "4750361b418782fff68e958f8574037b83e347d1",
+          "sha256": "bfe1fb57a8c9ad6afb3a34876a7eef6185c5db90107c79a3d487893f0eba3fbc"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher$CharArrayMatcher.class",
+        "hashes": {
+          "sha1": "667120544b962c4e2bb639ba16522c503e31bb82",
+          "sha256": "0c2dd432282c1105bbed45cf38dd255a909c5eb3f7c1ea1fc59f603e3f05a150"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher$CharMatcher.class",
+        "hashes": {
+          "sha1": "0f9f7e9b75fcdac0e3d2833b6d23dd88949c1dcc",
+          "sha256": "2ac8a0ff238abc44db68902c3ce9c1d8e5253131eed7caa05c673d0a009fd7eb"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher$CharSetMatcher.class",
+        "hashes": {
+          "sha1": "23752e2af118a1a8e514f4dd64beb1a8dbe6ecd2",
+          "sha256": "3c39cdeb066e22b89a571971a65dfbcadee6a0060684ae8949e7b648560dd980"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher$NoneMatcher.class",
+        "hashes": {
+          "sha1": "560d3fbb763e1cb4a9728728fd0e2f13babebac3",
+          "sha256": "c026f35b237879aa3cec2fc36701e2bf11858a626bec8968dc36f7a5e0d692e5"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher$TrimMatcher.class",
+        "hashes": {
+          "sha1": "77eac0955ed717fef7e39e1686b5afbbe408fb63",
+          "sha256": "4edd92729771b9671696155c84f97f9a580bdda39dccc24faf5ef3336fc17887"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/AbstractStringMatcher.class",
+        "hashes": {
+          "sha1": "208eee70af0f720d60aa112ee1ea02781f820ff1",
+          "sha256": "e763b649f285db9908c6a9f63e7f8cff3058aa39773f5201d585ec58d509e45a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/StringMatcher.class",
+        "hashes": {
+          "sha1": "c3862edda81c39a882d1e836355c37189a3a7bed",
+          "sha256": "a114d2810676b26fd1613a696d377b52cd23cd615e75538f015c51ce5e88c2c5"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/matcher/StringMatcherFactory.class",
+        "hashes": {
+          "sha1": "3538c18baea192501f7d94b70d4dadce8b55d757",
+          "sha256": "2bf3900744d23feb2092b18b0d0b5943f9bf336a1808d9f0c4457e37a6f3921e"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/CosineDistance.class",
+        "hashes": {
+          "sha1": "17c660006546cdb8fed390f810a8de31fe49ed99",
+          "sha256": "6feb8867766042fde9155cfee4757cc899b0755883821060806f8427d7fc054a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/CosineSimilarity.class",
+        "hashes": {
+          "sha1": "81734e55dd9db212c6ed1b87724d4a92b872aab7",
+          "sha256": "78b473f326f22a95a7aeac2e4d622e9936c7d14c552a037444657a427f5ee592"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/Counter.class",
+        "hashes": {
+          "sha1": "1cc0d9b923438058100a12e575ded8780fe17137",
+          "sha256": "256a0cd26c306b683aa2f588def453a3467159f2fe02da92a7816a8b03ae340a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/EditDistance.class",
+        "hashes": {
+          "sha1": "71271e3252709c34218f926ac06b8fcdb0105598",
+          "sha256": "3254d7150b9ce7240819f9a1bc4fc02fcbe870fb43a0f8bf3255208241e624d1"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/EditDistanceFrom.class",
+        "hashes": {
+          "sha1": "a6cc5da4f2f37437dfa2ed48152788ae6576a0f0",
+          "sha256": "700bf4018cb63c0b9fc3a02c76da9a5762d768d6a04d270fae613129861e3df9"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/FuzzyScore.class",
+        "hashes": {
+          "sha1": "c2c1d7c91f8e8f1232b244f381ca58d35d213f06",
+          "sha256": "a51d77ad338bf7191d755d898365fb72dbd8d4c296a7c41688bbcf63755d81a1"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/HammingDistance.class",
+        "hashes": {
+          "sha1": "cda65164191a86e120466736fc1527909757f9ba",
+          "sha256": "3f3459b654a3b3814e1417cedafd06569dded560c28bb2073921dab418ee66d6"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/IntersectionResult.class",
+        "hashes": {
+          "sha1": "90be415329521622fce7c790510187fe74b66cb6",
+          "sha256": "376cba632c7b559a051469a69de3abc6323def93a07c0ea5fde091da654f5d69"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/IntersectionSimilarity$1.class",
+        "hashes": {
+          "sha1": "05da8ee66f1686affa3e122259600579a9b27ccd",
+          "sha256": "116e442bd3d55c3d1975b0e5bf4548f1ada59d5c7ca4d62ee2e51737c00f7a0f"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/IntersectionSimilarity$BagCount.class",
+        "hashes": {
+          "sha1": "f0b38cec83cd907f008bc7a663a618dc120fd79a",
+          "sha256": "70ae7b9d8d43fbeeb00857d2970d8ad1e384d1ec454ceb716caf799c877c6590"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/IntersectionSimilarity$TinyBag.class",
+        "hashes": {
+          "sha1": "068b7b337435d67705b013768723eab7bd845bd1",
+          "sha256": "23ba45f14747774052e1295b213a5b25f8f1f45fa1f7e87c6af1f0ff8236c3d6"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/IntersectionSimilarity.class",
+        "hashes": {
+          "sha1": "4d08be5f2ed83bf3ee6eb6508992133df6ebe1c6",
+          "sha256": "3eec4d287aebd4d2a0a046c9da33d88adaf48fcc8b06b5b0132a4c68dc4d7a6f"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/JaccardDistance.class",
+        "hashes": {
+          "sha1": "864f9c0d918a12335d611321a7560dae43a8c1f8",
+          "sha256": "b984486fe11ba3055411092b025f481cb6af8f1e5937425d727284b53caa7a86"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/JaccardSimilarity.class",
+        "hashes": {
+          "sha1": "1187ee437ac5002a53a5902570a505258f15992b",
+          "sha256": "64dd44c822be1ca0fbd2b7aa1c388340e3bf648fcaf11e5297bee46adc8f37fa"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/JaroWinklerDistance.class",
+        "hashes": {
+          "sha1": "755919c817a50b1af9ec3cd1d7889a1e9600f2df",
+          "sha256": "a77b70d87876ab191ab340d59e4546b4a69310b782bbe8b9c6fc5382a2178a51"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/JaroWinklerSimilarity.class",
+        "hashes": {
+          "sha1": "8084a0698df08297ced40349eaadf983381b2684",
+          "sha256": "178c88b42a313dac6127acc77ce268c96a914a93edabec88ddf2da6443e715c8"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/LevenshteinDetailedDistance.class",
+        "hashes": {
+          "sha1": "c02b3351a42130e9f26ad9620b995778c7eeafb4",
+          "sha256": "9efcf2d2f1d91aafec65ca3def244df52ddff32dbe242ea38503b90b00ea809f"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/LevenshteinDistance.class",
+        "hashes": {
+          "sha1": "e35c7c6a923a163867002b0a6b23811b89fbbc9f",
+          "sha256": "9668fc9a56074153a9e1ad209a4ef42ce2df79da280b557286810a56fe4b0acc"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/LevenshteinResults.class",
+        "hashes": {
+          "sha1": "cbba3fe3d47d6506f6f57fe31f45c24f1fd48de1",
+          "sha256": "ad6a0a1b3ae78580563eb0f4ef3db4b5cc20d858f5920a35a3dff925aa26c14b"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/LongestCommonSubsequence.class",
+        "hashes": {
+          "sha1": "48ee8a6553c632d93f56682217c7e89d89938add",
+          "sha256": "b7e4af8dfb24a54a0a90591a9322c10742bb5c7d30ff15f698185c7ee071e655"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/LongestCommonSubsequenceDistance.class",
+        "hashes": {
+          "sha1": "86be0c47de304c5fb0d2f8f85f6ab97d15549e05",
+          "sha256": "e850fd4fd318a216fa9ca419daa56cfc7c6d564a32b5015c967921e69373071b"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/RegexTokenizer.class",
+        "hashes": {
+          "sha1": "2c9be63cb309f29ca93497ebe54292a0d0cf940d",
+          "sha256": "3ba0aa410a304fd055ca6205c9f07b169c58b3a6479406f68fe7e8e04ab2517d"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/SimilarityScore.class",
+        "hashes": {
+          "sha1": "6c29be0892feb790845f9602928ce13b8c2c424d",
+          "sha256": "c57ff71abcb49cc9f1ab77e94e4315b9532d700386af274f4192183bc6d908f9"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/SimilarityScoreFrom.class",
+        "hashes": {
+          "sha1": "17f93ca0b15098984b8aabfbafadfc0a3b493159",
+          "sha256": "337d6dc47a35f807e66a95c0332ecb0bffab21bc1a662cddcd14fbda29c2a3af"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/similarity/Tokenizer.class",
+        "hashes": {
+          "sha1": "c6be9797d5d2075938cbcb3fa11f79d1f835a86a",
+          "sha256": "8edc17ad0ac3d9cbae640b5fc30be02c4ddc1eb4d67b09dcf7992b1492caaa36"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/AggregateTranslator.class",
+        "hashes": {
+          "sha1": "23fcaf0831a6510396d955c87138ddcfc1888805",
+          "sha256": "6c699d2ad59bb44d0926ee328f12f3528e9406652a9484e667f6bad802af7175"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/CharSequenceTranslator.class",
+        "hashes": {
+          "sha1": "ccee8cb1eed40adafc3ca95eca7d89fa1aea44ec",
+          "sha256": "af8222f8ca3dff75e0ab8e9bf17133c321cb09fc9f3d7f6640c6effc1d6082dc"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/CodePointTranslator.class",
+        "hashes": {
+          "sha1": "9b2b76edb273598ac30f3edcd38ec681322224fe",
+          "sha256": "8726faeadef8273c7085f0bd6e4f385219f474ba846ae507d82cb00ac5c136b2"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/CsvTranslators$CsvEscaper.class",
+        "hashes": {
+          "sha1": "0b93274684c6bbc8adcf603e8ba90117ce994052",
+          "sha256": "b48325c5dc810f8eb053ec691a5dda8c284e87d545a0a2cfde4e51040409808a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/CsvTranslators$CsvUnescaper.class",
+        "hashes": {
+          "sha1": "fddee95deea42fdb98927123117a2c6be1b05fb1",
+          "sha256": "1c0d65ff0c7fdc76c56deb2cdb3a5e239d47584a133e8b9eca8312f1e707249d"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/CsvTranslators.class",
+        "hashes": {
+          "sha1": "b64c825074f6d1a5d3263b30cd1bcd4b6cac57ea",
+          "sha256": "19a5b4606586af361d81e9b5f23e2721d737fade69b54ad89e8c6f77a9e0a365"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/EntityArrays.class",
+        "hashes": {
+          "sha1": "26f93690bbafe0cf4446c894930636a7c4d0ab95",
+          "sha256": "1d77127352f10ea27233f7ffff20cb68bab9db727ba982241387c2d91372b1c8"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/JavaUnicodeEscaper.class",
+        "hashes": {
+          "sha1": "dd4f245ac37153ec0c47d589ce8c782d1223efc4",
+          "sha256": "c6e9639d1466b2fdc0183e52fbe46a4c35f1647f2ad594e29918ad567cf6db38"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/LookupTranslator.class",
+        "hashes": {
+          "sha1": "d388d7d058a5ac85037f0ff485589c69bf640d1d",
+          "sha256": "637f5c9b0a7d1e65b16cfb63d03568042f36d390adeb86b6269b12662b64bc72"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/NumericEntityEscaper.class",
+        "hashes": {
+          "sha1": "466f06c04bb526721cde4dc1daa2842bdb2cc17c",
+          "sha256": "c58e4f2cd928d635771bcd52915b02ceddba6d65c9c4de1fee6cad54dc62fc4d"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/NumericEntityUnescaper$OPTION.class",
+        "hashes": {
+          "sha1": "ad3fe7b5a7f756029690b826d07a8aae20084a0a",
+          "sha256": "1940e63eb1ff7c58c2be6e02f18de199615b179e15f18af21ed23dcbdff69103"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/NumericEntityUnescaper.class",
+        "hashes": {
+          "sha1": "a7b96c46feaea7721dcffe8fe0d1cc355fdbcf4f",
+          "sha256": "ad5474162aea4242f854750be2496a326cbd3791c08b2603a170697474097f6d"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/OctalUnescaper.class",
+        "hashes": {
+          "sha1": "85d5c5fff44ff925bafc013db7c2a0d9a4109ab7",
+          "sha256": "8ef3dc3a3ba14d5ed993e73bd69eb0156e52c367d10129c4abdc92723cfd53de"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/SinglePassTranslator.class",
+        "hashes": {
+          "sha1": "c3ccb2baf7e14b6ba7e11e72d2e115a5ec5d48e5",
+          "sha256": "b7fe5734dc28fa4f886c04d18ef955d2f7d1626d6f7a62926f10ffa9190a2af4"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/UnicodeEscaper.class",
+        "hashes": {
+          "sha1": "1a99dee054c09baa8a3c5155d855e534a3d5c2e0",
+          "sha256": "dd6d29df15ba2c1c625d7a7243924925d82baf47a1647b78711782218ce0682a"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/UnicodeUnescaper.class",
+        "hashes": {
+          "sha1": "685ca7f43e3a638bff3c796379a34d23bdc854b5",
+          "sha256": "ed93a07fae188e1d6cd15fe8e47dc9b5b6621ad808153b3aa37256a8056b248c"
+        }
+      },
+      {
+        "path": "org/apache/commons/text/translate/UnicodeUnpairedSurrogateRemover.class",
+        "hashes": {
+          "sha1": "2b70c500b3551d13750a83dbe838f2fedde300f6",
+          "sha256": "e387d849c33ffa4221f2944435db5cb80c23d4d81cfd4cd20ca66c418fc108a4"
+        }
+      }
+    ],
+    "licensed": {
+      "declared": "Apache-2.0",
+      "toolScore": {
+        "total": 75,
+        "declared": 30,
+        "discovered": 0,
+        "consistency": 15,
+        "spdx": 15,
+        "texts": 15
+      },
+      "facets": {
+        "core": {
+          "attribution": {
+            "unknown": 139,
+            "parties": [
+              "Copyright 2014-2020 The Apache Software Foundation"
+            ]
+          },
+          "discovered": {
+            "unknown": 136,
+            "expressions": [
+              "Apache-2.0"
+            ]
+          },
+          "files": 140
+        }
+      },
+      "score": {
+        "total": 75,
+        "declared": 30,
+        "discovered": 0,
+        "consistency": 15,
+        "spdx": 15,
+        "texts": 15
+      }
+    },
+    "coordinates": {
+      "type": "maven",
+      "provider": "mavencentral",
+      "namespace": "org.apache.commons",
+      "name": "commons-text",
+      "revision": "1.9"
+    },
+    "_meta": {
+      "schemaVersion": "1.6.1",
+      "updated": "2022-04-25T13:41:50.197Z"
+    },
+    "scores": {
+      "effective": 87,
+      "tool": 87
+    }
+  }
+}

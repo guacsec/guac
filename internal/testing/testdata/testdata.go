@@ -125,6 +125,9 @@ var (
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
 
+	//go:embed exampledata/certify-clearly-defined.json
+	ITE6ClearlyDefinedExample []byte
+
 	//go:embed exampledata/certify-novuln.json
 	ITE6NoVulnExample []byte
 
