@@ -320,7 +320,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
-	github.com/vektah/gqlparser/v2 v2.5.14
+	github.com/vektah/gqlparser/v2 v2.5.16
 	go.uber.org/mock v0.4.0
 	gocloud.dev v0.37.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
