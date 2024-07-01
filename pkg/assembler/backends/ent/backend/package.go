@@ -491,11 +491,7 @@ func (b *EntBackend) getPkgNameSpace(ctx context.Context, nodeID string) (*model
 				{
 					ID:        pkgNamespaceGlobalID(strings.Join([]string{pn[0].Type, pn[0].Namespace}, ":")),
 					Namespace: pn[0].Namespace,
-					Names: []*model.PackageName{{
-						ID:       pkgNameGlobalID(pn[0].ID.String()),
-						Name:     pn[0].Name,
-						Versions: []*model.PackageVersion{},
-					}},
+					Names:     []*model.PackageName{},
 				},
 			},
 		}
