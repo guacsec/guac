@@ -30,7 +30,6 @@ import (
 	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
 	slsa02 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
-	smtslsa1 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v1"
 	"github.com/jeremywohl/flatten"
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -45,6 +44,8 @@ import (
 // - A artifact for each digest information
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurence input spec which will generate a predicate for each occurence
+
+const PredicateSLSAProvenancev1 = "https://slsa.dev/provenance/v1"
 
 var ErrMetadataNil = errors.New("SLSA Metadata is nil")
 var ErrBuilderNil = errors.New("SLSA Builder is nil")
@@ -122,7 +123,7 @@ func (s *slsaParser) getMaterials() error {
 		if err := s.getMaterials0(s.pred02.Materials); err != nil {
 			return err
 		}
-	case smtslsa1.PredicateSLSAProvenance:
+	case PredicateSLSAProvenancev1:
 		if s.pred1.BuildDefinition == nil {
 			return errors.New("SLSA1 buildDefinition is nil")
 		}
@@ -279,7 +280,7 @@ func (s *slsaParser) getSLSA() error {
 		if data, err = json.Marshal(s.pred02); err != nil {
 			return fmt.Errorf("could not marshal SLSA02: %w", err)
 		}
-	case smtslsa1.PredicateSLSAProvenance:
+	case PredicateSLSAProvenancev1:
 		if err := fillSLSA1(inp, s.pred1); err != nil {
 			return fmt.Errorf("could not fill SLSA1: %w", err)
 		}
@@ -318,7 +319,7 @@ func (s *slsaParser) getBuilder() error {
 		s.builder.Uri = s.pred01.Builder.ID
 	case slsa02.PredicateSLSAProvenance:
 		s.builder.Uri = s.pred02.Builder.ID
-	case smtslsa1.PredicateSLSAProvenance:
+	case PredicateSLSAProvenancev1:
 		if s.pred1.RunDetails == nil || s.pred1.RunDetails.Builder == nil {
 			return ErrBuilderNil
 		}
@@ -349,7 +350,7 @@ func (s *slsaParser) parseSlsaPredicate(p []byte) error {
 		if err := json.Unmarshal(predBytes, s.pred02); err != nil {
 			return fmt.Errorf("Could not unmarshal v0.2 SLSA provenance statement : %w", err)
 		}
-	case smtslsa1.PredicateSLSAProvenance:
+	case PredicateSLSAProvenancev1:
 		s.pred1 = &slsa1.Provenance{}
 		if err := protojson.Unmarshal(predBytes, s.pred1); err != nil {
 			return fmt.Errorf("Could not unmarshal v1.0 SLSA provenance statement : %w", err)
