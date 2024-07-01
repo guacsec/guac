@@ -85,7 +85,6 @@ wipe_data() {
 # Define ingestion commands
 declare -a ingestion_commands=(
   "go run ${GUAC_DIR}/cmd/guacone collect files ${GUAC_DIR}/guac-data/docs/ --add-vuln-on-ingest=true"
-#  "go run ${GUAC_DIR}/cmd/guacone collect files ${GUAC_DIR}/guac-data/docs/"
   "go run ${GUAC_DIR}/cmd/guaccollect files ${GUAC_DIR}/guac-data/docs/ --service-poll=false"
 )
 
@@ -126,6 +125,9 @@ for command in "${ingestion_commands[@]}"; do
     exit 1
   fi
 
+  echo @@@@ Waiting
+  sleep 60
+
   echo @@@@ Running queries and validating output
 #  for query in "${!queries[@]}"; do
 #    gql_query=$(gql-cli http://localhost:8080/query -o "$query")
@@ -136,9 +138,9 @@ for command in "${ingestion_commands[@]}"; do
 
 #  log_database_schema
 
-#  echo @@@@ Running query PkgQ1 | tee -a "$LOG_FILE"
-#  gql-cli http://localhost:8080/query -o PkgQ1 < "$queries" | jq ' .packages |= sort ' > "${GUAC_DIR}/gotPkgQ1.json"
-#  diff -u "${SCRIPT_DIR}/expectPkgQ1.json" "${GUAC_DIR}/gotPkgQ1.json" | tee -a "$LOG_FILE"
+  echo @@@@ Running query PkgQ1 | tee -a "$LOG_FILE"
+  gql-cli http://localhost:8080/query -o PkgQ1 < "$queries" | jq ' .packages |= sort ' > "${GUAC_DIR}/gotPkgQ1.json"
+  diff -u "${SCRIPT_DIR}/expectPkgQ1.json" "${GUAC_DIR}/gotPkgQ1.json" | tee -a "$LOG_FILE"
 
   echo @@@@ Running query PkgQ2 | tee -a "$LOG_FILE"
   gql-cli http://localhost:8080/query -o PkgQ2 < "$queries" | jq ' .packages[].namespaces |= sort ' > "${GUAC_DIR}/gotPkgQ2.json"
