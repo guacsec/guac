@@ -297,23 +297,22 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	if foundGlobalID.nodeType == "" {
 		return nil, fmt.Errorf("failed to parse globalID %s. Missing Node Type", node)
 	}
-	// return uuid if valid, else error
-	nodeID, err := uuid.Parse(foundGlobalID.id)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
-	}
-
 	switch foundGlobalID.nodeType {
 	case artifact.Table:
-		artifacts, err := b.Artifacts(ctx, &model.ArtifactSpec{ID: ptrfrom.String(nodeID.String())})
+		artifacts, err := b.Artifacts(ctx, &model.ArtifactSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for Artifacts via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for Artifacts via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(artifacts) != 1 {
-			return nil, fmt.Errorf("ID returned multiple Artifacts nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple Artifacts nodes %s", foundGlobalID.id)
 		}
 		return artifacts[0], nil
 	case packageversion.Table:
+		// return uuid if valid, else error
+		nodeID, err := uuid.Parse(foundGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		}
 		pv, err := b.client.PackageVersion.Query().
 			Where(packageversion.ID(nodeID)).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -323,6 +322,11 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		}
 		return toModelPackage(backReferencePackageVersion(pv)), nil
 	case packagename.Table:
+		// return uuid if valid, else error
+		nodeID, err := uuid.Parse(foundGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		}
 		pn, err := b.client.PackageName.Query().
 			Where(packagename.ID(nodeID)).
 			WithVersions().
@@ -331,193 +335,223 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 			return nil, err
 		}
 		return toModelPackage(backReferencePackageName(pn)), nil
-	case sourcename.Table:
-		sources, err := b.Sources(ctx, &model.SourceSpec{ID: ptrfrom.String(nodeID.String())})
+	case pkgNamespaceString:
+		pNamespace, err := b.getPkgNameSpace(ctx, foundGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for Sources via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to get package namespace node with ID: %s, with error: %w", foundGlobalID.id, err)
+		}
+		return pNamespace, nil
+	case pkgTypeString:
+		pType, err := b.getPkgType(ctx, foundGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get package Type node with ID: %s, with error: %w", foundGlobalID.id, err)
+		}
+		return pType, nil
+	case sourcename.Table:
+		sources, err := b.Sources(ctx, &model.SourceSpec{ID: ptrfrom.String(foundGlobalID.id)})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Sources via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(sources) != 1 {
-			return nil, fmt.Errorf("ID returned multiple Sources nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple Sources nodes %s", foundGlobalID.id)
 		}
 		return sources[0], nil
-	case builder.Table:
-		builders, err := b.Builders(ctx, &model.BuilderSpec{ID: ptrfrom.String(nodeID.String())})
+	case srcNamespaceString:
+		sNamespace, err := b.getSrcNameSpace(ctx, foundGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for Builders via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to get source namespace node with ID: %s, with error: %w", foundGlobalID.id, err)
+		}
+		return sNamespace, nil
+	case srcTypeString:
+		sType, err := b.getSrcType(ctx, foundGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get source Type node with ID: %s, with error: %w", foundGlobalID.id, err)
+		}
+		return sType, nil
+	case builder.Table:
+		builders, err := b.Builders(ctx, &model.BuilderSpec{ID: ptrfrom.String(foundGlobalID.id)})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Builders via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(builders) != 1 {
-			return nil, fmt.Errorf("ID returned multiple Builders nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple Builders nodes %s", foundGlobalID.id)
 		}
 		return builders[0], nil
 	case license.Table:
-		licenses, err := b.Licenses(ctx, &model.LicenseSpec{ID: ptrfrom.String(nodeID.String())})
+		licenses, err := b.Licenses(ctx, &model.LicenseSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for Licenses via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for Licenses via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(licenses) != 1 {
-			return nil, fmt.Errorf("ID returned multiple Licenses nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple Licenses nodes %s", foundGlobalID.id)
 		}
 		return licenses[0], nil
 	case vulnerabilityid.Table:
-		vulnerabilities, err := b.Vulnerabilities(ctx, &model.VulnerabilitySpec{ID: ptrfrom.String(nodeID.String())})
+		vulnerabilities, err := b.Vulnerabilities(ctx, &model.VulnerabilitySpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for Vulnerabilities via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for Vulnerabilities via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(vulnerabilities) != 1 {
-			return nil, fmt.Errorf("ID returned multiple Vulnerabilities nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple Vulnerabilities nodes %s", foundGlobalID.id)
 		}
 		return vulnerabilities[0], nil
-	case certifyBadString:
-		certs, err := b.CertifyBad(ctx, &model.CertifyBadSpec{ID: ptrfrom.String(nodeID.String())})
+	case vulnTypeString:
+		vType, err := b.getVulnType(ctx, foundGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyBad via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to get vulnerability Type node with ID: %s, with error: %w", foundGlobalID.id, err)
+		}
+		return vType, nil
+	case certifyBadString:
+		certs, err := b.CertifyBad(ctx, &model.CertifyBadSpec{ID: ptrfrom.String(foundGlobalID.id)})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for CertifyBad via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(certs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyBad nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyBad nodes %s", foundGlobalID.id)
 		}
 		return certs[0], nil
 	case certifyGoodString:
-		certs, err := b.CertifyGood(ctx, &model.CertifyGoodSpec{ID: ptrfrom.String(nodeID.String())})
+		certs, err := b.CertifyGood(ctx, &model.CertifyGoodSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyGood via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyGood via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(certs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyGood nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyGood nodes %s", foundGlobalID.id)
 		}
 		return certs[0], nil
 	case certifylegal.Table:
-		legals, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: ptrfrom.String(nodeID.String())})
+		legals, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(legals) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", foundGlobalID.id)
 		}
 		return legals[0], nil
 	case certifyscorecard.Table:
-		scores, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: ptrfrom.String(nodeID.String())})
+		scores, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(scores) != 1 {
-			return nil, fmt.Errorf("ID returned multiple scorecard nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple scorecard nodes %s", foundGlobalID.id)
 		}
 		return scores[0], nil
 	case certifyvex.Table:
-		vexs, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: ptrfrom.String(nodeID.String())})
+		vexs, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(vexs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", foundGlobalID.id)
 		}
 		return vexs[0], nil
 	case certifyvuln.Table:
-		vulns, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{ID: ptrfrom.String(nodeID.String())})
+		vulns, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyVuln via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyVuln via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(vulns) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyVuln nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyVuln nodes %s", foundGlobalID.id)
 		}
 		return vulns[0], nil
 	case hashequal.Table:
-		hes, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: ptrfrom.String(nodeID.String())})
+		hes, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(hes) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HashEqual nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple HashEqual nodes %s", foundGlobalID.id)
 		}
 		return hes[0], nil
 	case hasmetadata.Table:
-		hms, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: ptrfrom.String(nodeID.String())})
+		hms, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(hms) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasMetadata nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple HasMetadata nodes %s", foundGlobalID.id)
 		}
 		return hms[0], nil
 	case billofmaterials.Table:
-		hbs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: ptrfrom.String(nodeID.String())})
+		hbs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(hbs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasSBOM nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple HasSBOM nodes %s", foundGlobalID.id)
 		}
 		return hbs[0], nil
 	case slsaattestation.Table:
-		slsas, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: ptrfrom.String(nodeID.String())})
+		slsas, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(slsas) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasSlsa nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple HasSlsa nodes %s", foundGlobalID.id)
 		}
 		return slsas[0], nil
 	case hassourceat.Table:
-		hsas, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: ptrfrom.String(nodeID.String())})
+		hsas, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(hsas) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", foundGlobalID.id)
 		}
 		return hsas[0], nil
 	case dependency.Table:
-		deps, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(nodeID.String())})
+		deps, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(deps) != 1 {
-			return nil, fmt.Errorf("ID returned multiple IsDependency nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple IsDependency nodes %s", foundGlobalID.id)
 		}
 		return deps[0], nil
 	case occurrence.Table:
-		occurs, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(nodeID.String())})
+		occurs, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(occurs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", foundGlobalID.id)
 		}
 		return occurs[0], nil
 	case pkgequal.Table:
-		pes, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: ptrfrom.String(nodeID.String())})
+		pes, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(pes) != 1 {
-			return nil, fmt.Errorf("ID returned multiple PkgEqual nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple PkgEqual nodes %s", foundGlobalID.id)
 		}
 		return pes[0], nil
 	case pointofcontact.Table:
-		pocs, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: ptrfrom.String(nodeID.String())})
+		pocs, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(pocs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple PointOfContact nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple PointOfContact nodes %s", foundGlobalID.id)
 		}
 		return pocs[0], nil
 	case vulnequal.Table:
-		ves, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: ptrfrom.String(nodeID.String())})
+		ves, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(ves) != 1 {
-			return nil, fmt.Errorf("ID returned multiple VulnEqual nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple VulnEqual nodes %s", foundGlobalID.id)
 		}
 		return ves[0], nil
 	case vulnerabilitymetadata.Table:
-		vms, err := b.VulnerabilityMetadata(ctx, &model.VulnerabilityMetadataSpec{ID: ptrfrom.String(nodeID.String())})
+		vms, err := b.VulnerabilityMetadata(ctx, &model.VulnerabilityMetadataSpec{ID: ptrfrom.String(foundGlobalID.id)})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", nodeID.String(), err)
+			return nil, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", foundGlobalID.id, err)
 		}
 		if len(vms) != 1 {
-			return nil, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", nodeID.String())
+			return nil, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", foundGlobalID.id)
 		}
 		return vms[0], nil
 	default:

@@ -698,6 +698,60 @@ func getSourceNameID(ctx context.Context, client *ent.Client, s model.SourceInpu
 	return client.SourceName.Query().Where(sourceInputQuery(s)).OnlyID(ctx)
 }
 
+func (b *EntBackend) getSrcNameSpace(ctx context.Context, nodeID string) (*model.Source, error) {
+	// split to find the type and namespace value
+	splitQueryValue := strings.Split(nodeID, guacIDSplit)
+	if len(splitQueryValue) != 2 {
+		return nil, fmt.Errorf("invalid query for sourceNamespace with ID %s", nodeID)
+	}
+
+	query := b.client.SourceName.Query().
+		Where(sourceQuery(&model.SourceSpec{Type: &splitQueryValue[0], Namespace: &splitQueryValue[1]}))
+
+	sn, err := query.All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for sourceNamespace with node ID: %s with error: %w", nodeID, err)
+	}
+
+	if len(sn) > 0 {
+		srcNamespace := &model.Source{
+			ID:   srcTypeGlobalID(sn[0].Type),
+			Type: sn[0].Type,
+			Namespaces: []*model.SourceNamespace{
+				{
+					ID:        srcNamespaceGlobalID(strings.Join([]string{sn[0].Type, sn[0].Namespace}, guacIDSplit)),
+					Namespace: sn[0].Namespace,
+					Names:     []*model.SourceName{},
+				},
+			},
+		}
+		return srcNamespace, nil
+	} else {
+		return nil, fmt.Errorf("failed to get sourceNamespace for node ID: %s", nodeID)
+	}
+}
+
+func (b *EntBackend) getSrcType(ctx context.Context, nodeID string) (*model.Source, error) {
+	query := b.client.SourceName.Query().
+		Where(sourceQuery(&model.SourceSpec{Type: &nodeID}))
+
+	sn, err := query.All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get source type for node ID: %s with error: %w", nodeID, err)
+	}
+
+	if len(sn) > 0 {
+		srcType := &model.Source{
+			ID:         srcTypeGlobalID(sn[0].Type),
+			Type:       sn[0].Type,
+			Namespaces: []*model.SourceNamespace{},
+		}
+		return srcType, nil
+	} else {
+		return nil, fmt.Errorf("failed to get source type for node ID: %s", nodeID)
+	}
+}
+
 func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 	if allowedEdges[model.EdgeSourceTypeSourceNamespace] {

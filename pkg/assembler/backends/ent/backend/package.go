@@ -467,6 +467,67 @@ func getPkgVersion(ctx context.Context, client *ent.Client, pkgin model.PkgInput
 	return client.PackageVersion.Query().Where(packageVersionInputQuery(pkgin)).Only(ctx)
 }
 
+func (b *EntBackend) getPkgNameSpace(ctx context.Context, nodeID string) (*model.Package, error) {
+	// split to find the type and namespace value
+	splitQueryValue := strings.Split(nodeID, guacIDSplit)
+	if len(splitQueryValue) != 2 {
+		return nil, fmt.Errorf("invalid query for packageNamespaceNeighbors with ID %s", nodeID)
+	}
+	query := b.client.PackageName.Query().
+		Where([]predicate.PackageName{
+			optionalPredicate(&splitQueryValue[0], packagename.TypeEQ),
+			optionalPredicate(&splitQueryValue[1], packagename.NamespaceEQ),
+		}...)
+	pn, err := query.All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get packageNamespace for node ID: %s with error: %w", nodeID, err)
+	}
+
+	if len(pn) > 0 {
+		pkgNamespace := &model.Package{
+			ID:   pkgTypeGlobalID(pn[0].Type),
+			Type: pn[0].Type,
+			Namespaces: []*model.PackageNamespace{
+				{
+					ID:        pkgNamespaceGlobalID(strings.Join([]string{pn[0].Type, pn[0].Namespace}, ":")),
+					Namespace: pn[0].Namespace,
+					Names: []*model.PackageName{{
+						ID:       pkgNameGlobalID(pn[0].ID.String()),
+						Name:     pn[0].Name,
+						Versions: []*model.PackageVersion{},
+					}},
+				},
+			},
+		}
+		return pkgNamespace, nil
+	} else {
+		return nil, fmt.Errorf("failed to get packageNamespace for node ID: %s", nodeID)
+	}
+}
+
+func (b *EntBackend) getPkgType(ctx context.Context, nodeID string) (*model.Package, error) {
+	query := b.client.PackageName.Query().
+		Where([]predicate.PackageName{
+			optionalPredicate(&nodeID, packagename.TypeEQ),
+		}...)
+
+	pn, err := query.All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pkgType for node ID: %s with error: %w", nodeID, err)
+	}
+
+	if len(pn) > 0 {
+		pkgType := &model.Package{
+			ID:         pkgTypeGlobalID(pn[0].Type),
+			Type:       pn[0].Type,
+			Namespaces: []*model.PackageNamespace{},
+		}
+		return pkgType, nil
+	} else {
+		return nil, fmt.Errorf("failed to get package type for node ID: %s", nodeID)
+	}
+}
+
 func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 	if allowedEdges[model.EdgePackageTypePackageNamespace] {
