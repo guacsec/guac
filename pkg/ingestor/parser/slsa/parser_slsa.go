@@ -263,26 +263,33 @@ func (s *slsaParser) getSLSA() error {
 	}
 
 	var data []byte
+	var err error
 	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
 		if err := fillSLSA01(inp, s.pred01); err != nil {
 			return fmt.Errorf("could not fill SLSA01: %w", err)
 		}
-		data, _ = json.Marshal(s.pred01)
+		if data, err = json.Marshal(s.pred01); err != nil {
+			return fmt.Errorf("could not marshal SLSA01: %w", err)
+		}
 	case slsa02.PredicateSLSAProvenance:
 		if err := fillSLSA02(inp, s.pred02); err != nil {
 			return fmt.Errorf("could not fill SLSA02: %w", err)
 		}
-		data, _ = json.Marshal(s.pred02)
+		if data, err = json.Marshal(s.pred02); err != nil {
+			return fmt.Errorf("could not marshal SLSA02: %w", err)
+		}
 	case smtslsa1.PredicateSLSAProvenance:
 		if err := fillSLSA1(inp, s.pred1); err != nil {
 			return fmt.Errorf("could not fill SLSA1: %w", err)
 		}
-		data, _ = protojson.Marshal(s.pred1)
+		if data, err = protojson.Marshal(s.pred1); err != nil {
+			return fmt.Errorf("could not marshal SLSA1: %w", err)
+		}
 	}
 
 	var genericMap map[string]any
-	err := json.Unmarshal(data, &genericMap)
+	err = json.Unmarshal(data, &genericMap)
 	if err != nil {
 		return fmt.Errorf("Could not unmarshal SLSA Predicate to map: %w", err)
 	}
@@ -323,12 +330,12 @@ func (s *slsaParser) getBuilder() error {
 func (s *slsaParser) parseSlsaPredicate(p []byte) error {
 	s.smt = &attestationv1.Statement{}
 	if err := protojson.Unmarshal(p, s.smt); err != nil {
-		return fmt.Errorf("Could not unmarshal SLSA statement header: %w", err)
+		return fmt.Errorf("Could not unmarshal SLSA statement: %w", err)
 	}
 
 	predBytes, err := json.Marshal(s.smt.Predicate)
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not marshal SLSA predicate: %w", err)
 	}
 
 	switch s.smt.PredicateType {
