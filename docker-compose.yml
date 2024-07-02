@@ -25,120 +25,106 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5s
-  postgres:
-    image: docker.io/library/postgres:16
-    environment:
-      POSTGRES_USER: guac
-      POSTGRES_PASSWORD: guac
+
+  guac-collectsub:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guaccsub"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "2782:2782"
+    depends_on:
+      nats:
+        condition: service_healthy
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data:z
+      - ./container_files/guac:/guac:z
     healthcheck:
-      test: [ "CMD", "pg_isready", "--username=guac", "--dbname=guac" ]
+      test: [ "CMD", "wget", "--spider", "http://localhost:2782" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-#
-#  guac-collectsub:
-#    networks: [ frontend ]
-#    image: $GUAC_IMAGE
-#    command: "/opt/guac/guaccsub"
-#    working_dir: /guac
-#    restart: on-failure
-#    ports:
-#      - "2782:2782"
-#    depends_on:
-#      nats:
-#        condition: service_healthy
-#    volumes:
-#      - ./container_files/guac:/guac:z
-#    healthcheck:
-#      test: [ "CMD", "wget", "--spider", "http://localhost:2782" ]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 5s
-#
-#  guac-ingestor:
-#    networks: [ frontend ]
-#    image: $GUAC_IMAGE
-#    command: "/opt/guac/guacingest"
-#    working_dir: /guac
-#    restart: on-failure
-#    depends_on:
-#      guac-collectsub:
-#        condition: service_healthy
-#    volumes:
-#      - ./container_files/guac:/guac:z
-#      - blobstore:/tmp/blobstore
-#
-#  oci-collector:
-#    networks: [ frontend ]
-#    image: $GUAC_IMAGE
-#    command: "/opt/guac/guaccollect image"
-#    working_dir: /guac
-#    restart: on-failure
-#    depends_on:
-#      guac-collectsub:
-#        condition: service_healthy
-#    volumes:
-#      - ./container_files/guac:/guac:z
-#      - blobstore:/tmp/blobstore
-#
-#  depsdev-collector:
-#    networks: [ frontend ]
-#    image: $GUAC_IMAGE
-#    command: "/opt/guac/guaccollect deps_dev"
-#    working_dir: /guac
-#    restart: on-failure
-#    environment:
-#      - DEPS_DEV_APIKEY
-#    depends_on:
-#      guac-collectsub:
-#        condition: service_healthy
-#    volumes:
-#      - ./container_files/guac:/guac:z
-#      - blobstore:/tmp/blobstore
-#    ports:
-#      - "9091:9091" # for prometheus metrics
-#
-#  osv-certifier:
-#    networks: [ frontend ]
-#    image: $GUAC_IMAGE
-#    command: "/opt/guac/guacone certifier osv"
-#    working_dir: /guac
-#    restart: on-failure
-#    depends_on:
-#      guac-collectsub:
-#        condition: service_healthy
-#    volumes:
-#      - ./container_files/guac:/guac:z
-#
-#  guac-rest:
-#    networks: [ frontend ]
-#    image: $GUAC_IMAGE
-#    command: "/opt/guac/guacrest"
-#    working_dir: /guac
-#    restart: on-failure
-#    ports:
-#      - "8081:8081"
-#    volumes:
-#      - ./container_files/guac:/guac:z
-#    depends_on:
-#      guac-graphql:
-#        condition: service_healthy
-#    healthcheck:
-#      test:
-#        [
-#          "CMD",
-#          "wget",
-#          "--spider",
-#          "http://localhost:8081/healthz"
-#        ]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  guac-ingestor:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacingest"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      guac-collectsub:
+        condition: service_healthy
+    volumes:
+      - ./container_files/guac:/guac:z
+      - blobstore:/tmp/blobstore
+
+  oci-collector:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guaccollect image"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      guac-collectsub:
+        condition: service_healthy
+    volumes:
+      - ./container_files/guac:/guac:z
+      - blobstore:/tmp/blobstore
+
+  depsdev-collector:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guaccollect deps_dev"
+    working_dir: /guac
+    restart: on-failure
+    environment:
+      - DEPS_DEV_APIKEY
+    depends_on:
+      guac-collectsub:
+        condition: service_healthy
+    volumes:
+      - ./container_files/guac:/guac:z
+      - blobstore:/tmp/blobstore
+    ports:
+      - "9091:9091" # for prometheus metrics
+
+  osv-certifier:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacone certifier osv"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      guac-collectsub:
+        condition: service_healthy
+    volumes:
+      - ./container_files/guac:/guac:z
+  guac-rest:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacrest"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./container_files/guac:/guac:z
+    depends_on:
+      guac-graphql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "http://localhost:8081/healthz"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
 
 networks:
