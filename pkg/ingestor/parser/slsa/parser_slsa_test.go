@@ -114,7 +114,7 @@ func Test_fillSLSA01(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := fillSLSA01(test.args.inp, test.args.stmt)
+			err := fillSLSA01(test.args.inp, &test.args.stmt.Predicate)
 			if err != test.err {
 				t.Fatalf("fillSLSA01() error = %v, expected error %v", err, test.err)
 			}

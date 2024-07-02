@@ -256,7 +256,7 @@
             "value": "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"
           },
           {
-            "key": "slsa.runDetails.metadata.invocationID",
+            "key": "slsa.runDetails.metadata.invocationId",
             "value": "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"
           },
           {

@@ -19,16 +19,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"strings"
+	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/in-toto/in-toto-golang/in_toto"
+	slsa1 "github.com/in-toto/attestation/go/predicates/provenance/v1"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
 	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
 	slsa02 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
-	slsa1 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v1"
 	"github.com/jeremywohl/flatten"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -42,7 +45,10 @@ import (
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurence input spec which will generate a predicate for each occurence
 
-var ErrMetadataNil = errors.New("SLSA01 Metadata is nil")
+const PredicateSLSAProvenancev1 = "https://slsa.dev/provenance/v1"
+
+var ErrMetadataNil = errors.New("SLSA Metadata is nil")
+var ErrBuilderNil = errors.New("SLSA Builder is nil")
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type slsaEntity struct {
@@ -55,10 +61,10 @@ type slsaEntity struct {
 }
 
 type slsaParser struct {
-	header            *in_toto.StatementHeader
-	s01smt            *in_toto.ProvenanceStatementSLSA01
-	s02smt            *in_toto.ProvenanceStatementSLSA02
-	s1smt             *in_toto.ProvenanceStatementSLSA1
+	pred01            *slsa01.ProvenancePredicate
+	pred02            *slsa02.ProvenancePredicate
+	pred1             *slsa1.Provenance
+	smt               *attestationv1.Statement
 	subjects          []*slsaEntity
 	materials         []*slsaEntity
 	bareMaterials     []*model.ArtifactInputSpec
@@ -88,13 +94,15 @@ func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
 	if err := s.getSLSA(); err != nil {
 		return err
 	}
-	s.getBuilder()
+	if err := s.getBuilder(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (s *slsaParser) getSubject() error {
 	// append artifact node for the subjects
-	for _, sub := range s.header.Subject {
+	for _, sub := range s.smt.Subject {
 		s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, sub.Name)
 		se, err := getSlsaEntity(sub.Name, sub.Digest)
 		if err != nil {
@@ -106,24 +114,27 @@ func (s *slsaParser) getSubject() error {
 }
 
 func (s *slsaParser) getMaterials() error {
-	switch s.header.PredicateType {
+	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
-		if err := s.getMaterials0(s.s01smt.Predicate.Materials); err != nil {
+		if err := s.getMaterials0(s.pred01.Materials); err != nil {
 			return err
 		}
 	case slsa02.PredicateSLSAProvenance:
-		if err := s.getMaterials0(s.s02smt.Predicate.Materials); err != nil {
+		if err := s.getMaterials0(s.pred02.Materials); err != nil {
 			return err
 		}
-	case slsa1.PredicateSLSAProvenance:
-		if err := s.getMaterials1(s.s1smt.Predicate.BuildDefinition.ResolvedDependencies); err != nil {
+	case PredicateSLSAProvenancev1:
+		if s.pred1.BuildDefinition == nil {
+			return errors.New("SLSA1 buildDefinition is nil")
+		}
+		if err := s.getMaterials1(s.pred1.BuildDefinition.ResolvedDependencies); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (s *slsaParser) getMaterials1(rds []slsa1.ResourceDescriptor) error {
+func (s *slsaParser) getMaterials1(rds []*attestationv1.ResourceDescriptor) error {
 	for _, rd := range rds {
 		// Only one of URI, Digest, or Content is required.
 		// https://github.com/in-toto/attestation/blob/main/spec/v1.0/resource_descriptor.md
@@ -131,14 +142,14 @@ func (s *slsaParser) getMaterials1(rds []slsa1.ResourceDescriptor) error {
 			// Skip if Digest is empty
 			continue
 		}
-		if rd.URI == "" {
+		if rd.Uri == "" {
 			// If URI is empty, just add artifacts
 			s.bareMaterials = append(s.bareMaterials, getArtifacts(rd.Digest)...)
 			continue
 		}
 		// Digest(s) and URI are set, create IsOccurrence between them.
-		s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, rd.URI)
-		se, err := getSlsaEntity(rd.URI, rd.Digest)
+		s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, rd.Uri)
+		se, err := getSlsaEntity(rd.Uri, rd.Digest)
 		if err != nil {
 			return err
 		}
@@ -200,65 +211,86 @@ func getSlsaEntity(name string, digests scommon.DigestSet) (*slsaEntity, error) 
 	return nil, fmt.Errorf("%w unable to get Guac Generic Purl, this should not happen", err)
 }
 
-func fillSLSA01(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA01) error {
-	inp.BuildType = stmt.Predicate.Recipe.Type
+func fillSLSA01(inp *model.SLSAInputSpec, pred *slsa01.ProvenancePredicate) error {
+	inp.BuildType = pred.Recipe.Type
 
-	if stmt.Predicate.Metadata == nil {
+	if pred.Metadata == nil {
 		return ErrMetadataNil
 	}
-	if stmt.Predicate.Metadata.BuildStartedOn != nil {
-		inp.StartedOn = stmt.Predicate.Metadata.BuildStartedOn
+	if pred.Metadata.BuildStartedOn != nil {
+		inp.StartedOn = pred.Metadata.BuildStartedOn
 	}
-	if stmt.Predicate.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = stmt.Predicate.Metadata.BuildFinishedOn
+	if pred.Metadata.BuildFinishedOn != nil {
+		inp.FinishedOn = pred.Metadata.BuildFinishedOn
 	}
 
 	return nil
 }
 
-func fillSLSA02(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA02) {
-	inp.BuildType = stmt.Predicate.BuildType
-	if stmt.Predicate.Metadata.BuildStartedOn != nil {
-		inp.StartedOn = stmt.Predicate.Metadata.BuildStartedOn
+func fillSLSA02(inp *model.SLSAInputSpec, pred *slsa02.ProvenancePredicate) error {
+	inp.BuildType = pred.BuildType
+
+	if pred.Metadata == nil {
+		return ErrMetadataNil
 	}
-	if stmt.Predicate.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = stmt.Predicate.Metadata.BuildStartedOn
+	if pred.Metadata.BuildStartedOn != nil {
+		inp.StartedOn = pred.Metadata.BuildStartedOn
 	}
+	if pred.Metadata.BuildFinishedOn != nil {
+		inp.FinishedOn = pred.Metadata.BuildStartedOn
+	}
+	return nil
 }
 
-func fillSLSA1(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA1) {
-	inp.BuildType = stmt.Predicate.BuildDefinition.BuildType
-	if stmt.Predicate.RunDetails.BuildMetadata.StartedOn != nil {
-		inp.StartedOn = stmt.Predicate.RunDetails.BuildMetadata.StartedOn
+func fillSLSA1(inp *model.SLSAInputSpec, pred *slsa1.Provenance) error {
+	inp.BuildType = pred.BuildDefinition.BuildType
+	if pred.RunDetails == nil || pred.RunDetails.Metadata == nil {
+		return ErrMetadataNil
 	}
-	if stmt.Predicate.RunDetails.BuildMetadata.FinishedOn != nil {
-		inp.FinishedOn = stmt.Predicate.RunDetails.BuildMetadata.FinishedOn
+	if pred.RunDetails.Metadata.StartedOn != nil {
+		startTimePB := time.Unix(pred.RunDetails.Metadata.StartedOn.GetSeconds(), int64(pred.RunDetails.Metadata.StartedOn.GetNanos()))
+		inp.StartedOn = &startTimePB
 	}
+	if pred.RunDetails.Metadata.FinishedOn != nil {
+		finishTimePB := time.Unix(pred.RunDetails.Metadata.StartedOn.GetSeconds(), int64(pred.RunDetails.Metadata.StartedOn.GetNanos()))
+		inp.FinishedOn = &finishTimePB
+	}
+	return nil
 }
 
 func (s *slsaParser) getSLSA() error {
 	inp := &model.SLSAInputSpec{
-		SlsaVersion: s.header.PredicateType,
+		SlsaVersion: s.smt.PredicateType,
 	}
 
-	var pred any
-	switch s.header.PredicateType {
+	var data []byte
+	var err error
+	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
-		if err := fillSLSA01(inp, s.s01smt); err != nil {
+		if err := fillSLSA01(inp, s.pred01); err != nil {
 			return fmt.Errorf("could not fill SLSA01: %w", err)
 		}
-		pred = s.s01smt.Predicate
+		if data, err = json.Marshal(s.pred01); err != nil {
+			return fmt.Errorf("could not marshal SLSA01: %w", err)
+		}
 	case slsa02.PredicateSLSAProvenance:
-		fillSLSA02(inp, s.s02smt)
-		pred = s.s02smt.Predicate
-	case slsa1.PredicateSLSAProvenance:
-		fillSLSA1(inp, s.s1smt)
-		pred = s.s1smt.Predicate
+		if err := fillSLSA02(inp, s.pred02); err != nil {
+			return fmt.Errorf("could not fill SLSA02: %w", err)
+		}
+		if data, err = json.Marshal(s.pred02); err != nil {
+			return fmt.Errorf("could not marshal SLSA02: %w", err)
+		}
+	case PredicateSLSAProvenancev1:
+		if err := fillSLSA1(inp, s.pred1); err != nil {
+			return fmt.Errorf("could not fill SLSA1: %w", err)
+		}
+		if data, err = protojson.Marshal(s.pred1); err != nil {
+			return fmt.Errorf("could not marshal SLSA1: %w", err)
+		}
 	}
 
-	data, _ := json.Marshal(pred)
 	var genericMap map[string]any
-	err := json.Unmarshal(data, &genericMap)
+	err = json.Unmarshal(data, &genericMap)
 	if err != nil {
 		return fmt.Errorf("Could not unmarshal SLSA Predicate to map: %w", err)
 	}
@@ -280,41 +312,51 @@ func (s *slsaParser) getSLSA() error {
 	return nil
 }
 
-func (s *slsaParser) getBuilder() {
+func (s *slsaParser) getBuilder() error {
 	s.builder = &model.BuilderInputSpec{}
-	switch s.header.PredicateType {
+	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
-		s.builder.Uri = s.s01smt.Predicate.Builder.ID
+		s.builder.Uri = s.pred01.Builder.ID
 	case slsa02.PredicateSLSAProvenance:
-		s.builder.Uri = s.s02smt.Predicate.Builder.ID
-	case slsa1.PredicateSLSAProvenance:
-		s.builder.Uri = s.s1smt.Predicate.RunDetails.Builder.ID
+		s.builder.Uri = s.pred02.Builder.ID
+	case PredicateSLSAProvenancev1:
+		if s.pred1.RunDetails == nil || s.pred1.RunDetails.Builder == nil {
+			return ErrBuilderNil
+		}
+		s.builder.Uri = s.pred1.RunDetails.Builder.Id
 	}
+	return nil
 }
 
 func (s *slsaParser) parseSlsaPredicate(p []byte) error {
-	s.header = &in_toto.StatementHeader{}
-	if err := json.Unmarshal(p, s.header); err != nil {
-		return fmt.Errorf("Could not unmarshal SLSA statement header: %w", err)
+	s.smt = &attestationv1.Statement{}
+	if err := protojson.Unmarshal(p, s.smt); err != nil {
+		return fmt.Errorf("Could not unmarshal SLSA statement: %w", err)
 	}
-	switch s.header.PredicateType {
+
+	predBytes, err := json.Marshal(s.smt.Predicate)
+	if err != nil {
+		return fmt.Errorf("Could not marshal SLSA predicate: %w", err)
+	}
+
+	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
-		s.s01smt = &in_toto.ProvenanceStatementSLSA01{}
-		if err := json.Unmarshal(p, s.s01smt); err != nil {
+		s.pred01 = &slsa01.ProvenancePredicate{}
+		if err := json.Unmarshal(predBytes, s.pred01); err != nil {
 			return fmt.Errorf("Could not unmarshal v0.1 SLSA provenance statement : %w", err)
 		}
 	case slsa02.PredicateSLSAProvenance:
-		s.s02smt = &in_toto.ProvenanceStatementSLSA02{}
-		if err := json.Unmarshal(p, s.s02smt); err != nil {
+		s.pred02 = &slsa02.ProvenancePredicate{}
+		if err := json.Unmarshal(predBytes, s.pred02); err != nil {
 			return fmt.Errorf("Could not unmarshal v0.2 SLSA provenance statement : %w", err)
 		}
-	case slsa1.PredicateSLSAProvenance:
-		s.s1smt = &in_toto.ProvenanceStatementSLSA1{}
-		if err := json.Unmarshal(p, s.s1smt); err != nil {
+	case PredicateSLSAProvenancev1:
+		s.pred1 = &slsa1.Provenance{}
+		if err := protojson.Unmarshal(predBytes, s.pred1); err != nil {
 			return fmt.Errorf("Could not unmarshal v1.0 SLSA provenance statement : %w", err)
 		}
 	default:
-		return fmt.Errorf("Unknown SLSA PredicateType: %q", s.header.PredicateType)
+		return fmt.Errorf("Unknown SLSA PredicateType: %q", s.smt.PredicateType)
 	}
 	return nil
 }
