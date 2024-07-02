@@ -546,3 +546,17 @@ var P6out = []*model.Package{{
 		}},
 	}},
 }}
+
+var P7 = &model.PkgInputSpec{
+	Type:      P5.Type,
+	Namespace: P5.Namespace,
+	Name:      P5.Name,
+	Version:   P5.Version,
+	Qualifiers: []*model.PackageQualifierInputSpec{{
+		Key:   P5.Qualifiers[0].Key,
+		Value: P5.Qualifiers[0].Value,
+	}, {
+		Key:   "repository_url",
+		Value: "https://alternative.report.url/",
+	}},
+}
