@@ -49,6 +49,44 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// Delete node and all associated relationships. This functionality is only implemented for
+// certifyVuln, HasSBOM and HasSLSA.
+func (b *EntBackend) Delete(ctx context.Context, node string) (bool, error) {
+	foundGlobalID := fromGlobalID(node)
+	if foundGlobalID.nodeType == "" {
+		return false, fmt.Errorf("failed to parse globalID %s. Missing Node Type", node)
+	}
+	// return uuid if valid, else error
+	nodeID, err := uuid.Parse(foundGlobalID.id)
+	if err != nil {
+		return false, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+	}
+
+	switch foundGlobalID.nodeType {
+	case certifyvuln.Table:
+		deleted, err := b.deleteCertifyVuln(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete CertifyVuln via ID: %s, with error: %w", nodeID.String(), err)
+		}
+		return deleted, nil
+	case billofmaterials.Table:
+		deleted, err := b.deleteHasSbom(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete hasSBOM via ID: %s, with error: %w", nodeID.String(), err)
+		}
+		return deleted, nil
+	case slsaattestation.Table:
+		deleted, err := b.deleteSLSA(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete hasSLSA via ID: %s, with error: %w", nodeID.String(), err)
+		}
+		return deleted, nil
+	default:
+		log.Printf("Unknown node type: %s", foundGlobalID.nodeType)
+	}
+	return false, nil
+}
+
 func (b *EntBackend) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	return b.bfs(ctx, subject, target, maxPathLength, usingOnly)
 }

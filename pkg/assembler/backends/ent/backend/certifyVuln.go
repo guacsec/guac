@@ -40,6 +40,21 @@ func bulkCertifyVulnGlobalID(ids []string) []string {
 	return toGlobalIDs(certifyvuln.Table, ids)
 }
 
+func (b *EntBackend) deleteCertifyVuln(ctx context.Context, certifyVulnID uuid.UUID) (bool, error) {
+	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		tx := ent.TxFromContext(ctx)
+
+		if err := tx.CertifyVuln.DeleteOneID(certifyVulnID).Exec(ctx); err != nil {
+			return nil, errors.Wrap(err, "failed to delete certifyVuln with error")
+		}
+		return nil, nil
+	})
+	if txErr != nil {
+		return false, txErr
+	}
+	return true, nil
+}
+
 func certifyVulnConflictColumns() []string {
 	return []string{
 		certifyvuln.FieldPackageID,

@@ -357,3 +357,9 @@ func (c *arangoClient) Nodes(ctx context.Context, nodeIDs []string) ([]model.Nod
 	}
 	return rv, nil
 }
+
+// Delete node and all associated relationships. This functionality is only implemented for
+// certifyVuln, HasSBOM and HasSLSA.
+func (c *arangoClient) Delete(ctx context.Context, node string) (bool, error) {
+	panic(fmt.Errorf("not implemented: Delete"))
+}

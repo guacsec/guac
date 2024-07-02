@@ -56,13 +56,13 @@ var (
 				Symbol:     "bill_of_materials_package_versions_package",
 				Columns:    []*schema.Column{BillOfMaterialsColumns[13]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "bill_of_materials_artifacts_artifact",
 				Columns:    []*schema.Column{BillOfMaterialsColumns[14]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -354,13 +354,13 @@ var (
 				Symbol:     "certify_vulns_vulnerability_ids_vulnerability",
 				Columns:    []*schema.Column{CertifyVulnsColumns[9]},
 				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "certify_vulns_package_versions_package",
 				Columns:    []*schema.Column{CertifyVulnsColumns[10]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -394,19 +394,19 @@ var (
 				Symbol:     "dependencies_package_versions_package",
 				Columns:    []*schema.Column{DependenciesColumns[7]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "dependencies_package_names_dependent_package_name",
 				Columns:    []*schema.Column{DependenciesColumns[8]},
 				RefColumns: []*schema.Column{PackageNamesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "dependencies_package_versions_dependent_package_version",
 				Columns:    []*schema.Column{DependenciesColumns[9]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -644,19 +644,19 @@ var (
 				Symbol:     "occurrences_artifacts_artifact",
 				Columns:    []*schema.Column{OccurrencesColumns[5]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "occurrences_package_versions_package",
 				Columns:    []*schema.Column{OccurrencesColumns[6]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "occurrences_source_names_source",
 				Columns:    []*schema.Column{OccurrencesColumns[7]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -887,13 +887,13 @@ var (
 				Symbol:     "slsa_attestations_builders_built_by",
 				Columns:    []*schema.Column{SlsaAttestationsColumns[10]},
 				RefColumns: []*schema.Column{BuildersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "slsa_attestations_artifacts_subject",
 				Columns:    []*schema.Column{SlsaAttestationsColumns[11]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -1272,16 +1272,21 @@ func init() {
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	BillOfMaterialsIncludedSoftwarePackagesTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	BillOfMaterialsIncludedSoftwareArtifactsTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[1].RefTable = DependenciesTable
+	BillOfMaterialsIncludedDependenciesTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[1].RefTable = OccurrencesTable
+	BillOfMaterialsIncludedOccurrencesTable.Annotation = &entsql.Annotation{}
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
+	SlsaAttestationBuiltFromTable.Annotation = &entsql.Annotation{}
 }

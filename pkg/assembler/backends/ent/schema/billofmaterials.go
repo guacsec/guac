@@ -56,12 +56,12 @@ func (BillOfMaterials) Fields() []ent.Field {
 // Edges of the Material.
 func (BillOfMaterials) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("package", PackageVersion.Type).Field("package_id").Unique(),
-		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique(),
-		edge.To("included_software_packages", PackageVersion.Type),
-		edge.To("included_software_artifacts", Artifact.Type),
-		edge.To("included_dependencies", Dependency.Type),
-		edge.To("included_occurrences", Occurrence.Type),
+		edge.To("package", PackageVersion.Type).Field("package_id").Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_software_packages", PackageVersion.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_software_artifacts", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_dependencies", Dependency.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_occurrences", Occurrence.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

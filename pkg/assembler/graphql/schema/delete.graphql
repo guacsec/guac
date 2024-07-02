@@ -1,5 +1,5 @@
 #
-# Copyright 2024 The GUAC Authors.
+# Copyright 2023 The GUAC Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,13 @@
 
 # NOTE: This is experimental and might change in the future!
 
-directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
-enum FilterOperation {
-  CONTAINS
-  STARTSWITH
+extend type Mutation {
+  """
+  Delete node with ID and all associated relationships.
+  Deletion is only implemented for HasSBOM, HasSLSA and CertifyVuln
+  for the time being. Other may be added based on usecase but these
+  were chosen to ensure that users do not end up making breaking changes
+  to their database.
+  """
+  delete(node: ID!): Boolean!
 }

@@ -189,3 +189,9 @@ func (c *demoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, err
 	}
 	return rv, nil
 }
+
+// Delete node and all associated relationships. This functionality is only implemented for
+// certifyVuln, HasSBOM and HasSLSA.
+func (c *demoClient) Delete(ctx context.Context, node string) (bool, error) {
+	panic(fmt.Errorf("not implemented: Delete"))
+}

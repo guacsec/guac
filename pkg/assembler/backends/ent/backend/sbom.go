@@ -373,6 +373,31 @@ func getSBOMObjectWithIncludes(q *ent.BillOfMaterialsQuery) *ent.BillOfMaterials
 		})
 }
 
+func (b *EntBackend) deleteHasSbom(ctx context.Context, hasSBOMID uuid.UUID) (bool, error) {
+	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		tx := ent.TxFromContext(ctx)
+
+		// first delete isDependency and isOccurrence nodes that are part of the hasSBOM node
+		if err := b.deleteIsDependency(ctx, hasSBOMID.String()); err != nil {
+			return nil, fmt.Errorf("failed to delete isDependency with error: %w", err)
+		}
+
+		if err := b.deleteIsOccurrences(ctx, hasSBOMID.String()); err != nil {
+			return nil, fmt.Errorf("failed to delete isOccurrence with error: %w", err)
+		}
+
+		// delete hasSBOM node
+		if err := tx.BillOfMaterials.DeleteOneID(hasSBOMID).Exec(ctx); err != nil {
+			return nil, errors.Wrap(err, "failed to delete hasSBOM with error")
+		}
+		return nil, nil
+	})
+	if txErr != nil {
+		return false, txErr
+	}
+	return true, nil
+}
+
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 

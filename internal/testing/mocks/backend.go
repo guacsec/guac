@@ -250,6 +250,21 @@ func (mr *MockBackendMockRecorder) CertifyVulnList(ctx, certifyVulnSpec, after, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyVulnList", reflect.TypeOf((*MockBackend)(nil).CertifyVulnList), ctx, certifyVulnSpec, after, first)
 }
 
+// Delete mocks base method.
+func (m *MockBackend) Delete(ctx context.Context, node string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, node)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBackend)(nil).Delete), ctx, node)
+}
+
 // FindSoftware mocks base method.
 func (m *MockBackend) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	m.ctrl.T.Helper()
