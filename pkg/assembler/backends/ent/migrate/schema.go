@@ -369,6 +369,11 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[1], CertifyVulnsColumns[8], CertifyVulnsColumns[9], CertifyVulnsColumns[10]},
 			},
+			{
+				Name:    "certifyvuln_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyVulnsColumns[10]},
+			},
 		},
 	}
 	// DependenciesColumns holds the columns for the "dependencies" table.
@@ -980,6 +985,11 @@ var (
 				Name:    "vulnerabilityid_vulnerability_id_type",
 				Unique:  true,
 				Columns: []*schema.Column{VulnerabilityIdsColumns[1], VulnerabilityIdsColumns[2]},
+			},
+			{
+				Name:    "vulnerabilityid_type",
+				Unique:  false,
+				Columns: []*schema.Column{VulnerabilityIdsColumns[2]},
 			},
 		},
 	}
