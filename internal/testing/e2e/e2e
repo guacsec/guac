@@ -118,12 +118,6 @@ declare -a ingestion_commands=(
 
 queries="${GUAC_DIR}/demo/graphql/queries.gql"
 
-# Function to log the database schema
-#log_database_schema() {
-#  echo "Logging current database schema..." | tee -a "$LOG_FILE"
-#  psql -h localhost -p 5432 -U guac -d guac -c "\dt" | tee -a "$LOG_FILE"
-#}
-
 duplicate_schema
 
 # Loop through ingestion commands
