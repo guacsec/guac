@@ -11,6 +11,7 @@
 - [ ] If GraphQL schema is changed, `make generate` has been run
 - [ ] If GraphQL schema is changed, GraphQL client updates/additions have been made
 - [ ] If OpenAPI spec is changed, `make generate` has been run
+- [ ] If ent schema is changed, `make generate` has been run
 - [ ] If `collectsub` protobuf has been changed, `make proto` has been run
 - [ ] All CI checks are passing (tests and formatting)
 - [ ] All dependent PRs have already been merged
