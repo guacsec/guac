@@ -489,7 +489,7 @@ func (b *EntBackend) getPkgNameSpace(ctx context.Context, nodeID string) (*model
 			Type: pn[0].Type,
 			Namespaces: []*model.PackageNamespace{
 				{
-					ID:        pkgNamespaceGlobalID(strings.Join([]string{pn[0].Type, pn[0].Namespace}, ":")),
+					ID:        pkgNamespaceGlobalID(strings.Join([]string{pn[0].Type, pn[0].Namespace}, guacIDSplit)),
 					Namespace: pn[0].Namespace,
 					Names:     []*model.PackageName{},
 				},
@@ -580,7 +580,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        pkgNamespaceGlobalID(strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, ":")),
+						ID:        pkgNamespaceGlobalID(strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names: []*model.PackageName{{
 							ID:       pkgNameGlobalID(foundPkgName.ID.String()),
