@@ -61,5 +61,6 @@ func (CertifyVuln) Edges() []ent.Edge {
 func (CertifyVuln) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector", "time_scanned", "document_ref").Edges("vulnerability", "package").Unique(),
+		index.Fields("package_id"), // speed up frequently run queries to check when CV nodes affect certain package IDs
 	}
 }
