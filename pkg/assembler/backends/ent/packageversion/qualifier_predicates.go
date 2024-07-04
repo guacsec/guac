@@ -44,6 +44,13 @@ func QualifiersContains(key, value string) func(*sql.Selector) {
 	}
 }
 
+// QualifiersSizeMatch checks the size of the qualifiers array is the expected one
+func QualifiersSizeMatch(size int) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		s.Where(sqljson.LenEQ(FieldQualifiers, size))
+	}
+}
+
 // QualifiersMatch constructs a JSON field query for the given qualifiers.
 // If the value is nil, it will query for the key only.
 // If the value is not nil, it will query for the key/value pair.
@@ -66,5 +73,6 @@ func QualifiersMatch(spec []*model.PackageQualifierSpec, matchOnlyEmptyQualifier
 				QualifiersContains(q.Key, *q.Value)(s)
 			}
 		}
+		QualifiersSizeMatch(len(spec))(s)
 	}
 }
