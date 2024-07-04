@@ -28,6 +28,7 @@
 // - IsVulnerabilities are created between any found vulnerability in the
 // scanner results (OSV) and either a CVE or GHSA vulnerability that is created
 // by parsing the OSV ID.
+
 package clearlydefined
 
 import (
