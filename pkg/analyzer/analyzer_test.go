@@ -154,33 +154,3 @@ func TestEquivalence(t *testing.T){
 
 	
 }
-
-func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error opening test file")
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error reading test file")
-	}
-	var sboms []model.HasSBOMsHasSBOM
-
-	err = json.Unmarshal(data, &sboms)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error unmarshaling JSON")
-	}
-
-	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
-
-	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
-
-	if errOne != nil || errTwo != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error making graph %v %v", errOne.Error(), errTwo.Error())
-	}
-
-	return []graph.Graph[string, *analyzer.Node]{graphOne, graphTwo}, nil
-
-}

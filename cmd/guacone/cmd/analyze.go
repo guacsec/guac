@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
@@ -28,7 +27,6 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -121,7 +119,7 @@ var analyzeCmd = &cobra.Command {
 				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
 
-			if err = printDiffedPathTable(diffs); err != nil {
+			if err = analyzer.PrintDiffedPathTable(diffs); err != nil {
 				logger.Fatalf("unable to print diff analysis: %v", err)
 			}
 
@@ -130,7 +128,7 @@ var analyzeCmd = &cobra.Command {
 			if err != nil {
 				logger.Fatalf("Unable to generate intersect analysis: %v", err)
 			}
-			if err = printPathTable("Common Paths", analysisOne, analysisTwo); err != nil {
+			if err = analyzer.PrintPathTable("Common Paths", analysisOne, analysisTwo); err != nil {
 				logger.Fatalf("unable to print intersect analysis: %v", err)
 			}
 		} else if args[0] == "union" {
@@ -138,185 +136,13 @@ var analyzeCmd = &cobra.Command {
 			if err != nil {
 				logger.Fatalf("unable to generate union analysis: %v", err)
 			}
-			if err = printPathTable("All Paths", analysisOne, analysisTwo); err != nil {
+			if err = analyzer.PrintPathTable("All Paths", analysisOne, analysisTwo); err != nil {
 				logger.Fatalf("unable to print union analysis: %v", err)
 			}
 		}
 	},
 }
 
-func printDiffedPathTable(diffs []analyzer.DiffedPath) error {
-
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetAutoWrapText(false)
-
-	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
-
-	table.SetNoWhiteSpace(true)
-
-	table.SetColumnSeparator("\t\t")
-	table.SetAutoMergeCells(false)
-
-	table.SetHeader([]string{"Path Differences"})
-
-	for _, diff := range diffs {
-		var row []string
-
-		for i, nodeOne := range diff.PathOne {
-
-			if len(row) != 0 {
-				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 90)
-			} else {
-				table.SetColMinWidth(i, 90)
-			}
-
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-			}
-		}
-
-		table.Append(row)
-		row = []string{}
-
-		for i, nodeOne := range diff.PathTwo {
-
-			if len(row) != 0 {
-				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 50)
-			} else {
-				table.SetColMinWidth(i, 50)
-			}
-
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-			}
-		}
-		table.Append(row)
-
-		table.Append([]string{"================================="})
-
-		row  = []string{}
-		for i, diff := range diff.Diffs {
-			
-			if len(row) != 0 {
-				row = append(row, "    ")
-				table.SetColMinWidth(i+1, 50)
-			}else{
-				table.SetColMinWidth(i, 50)
-			}
-			
-			row = append(row, strings.Join(diff, "\n"))
-		}
-		table.Append(row)
-
-
-		table.Append([]string{"================================="})
-	}
-
-	
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.Render()
-	return nil
-
-}
-
-func printPathTable(header string, analysisOne, analysisTwo [][]*analyzer.Node) error {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetAutoWrapText(false)
-
-	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
-
-	table.SetNoWhiteSpace(true)
-
-	table.SetColumnSeparator("\t\t")
-	table.SetAutoMergeCells(false)
-
-	table.SetHeader([]string{header})
-
-	for _, pathOne := range analysisOne {
-		var row []string
-		for i, nodeOne := range pathOne {
-
-			if len(row) != 0 {
-				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 50)
-			} else {
-				table.SetColMinWidth(i, 50)
-			}
-
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-
-				row = append(row, s)
-
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-			}
-		}
-		table.Append(row)
-
-	}
-
-	for _, pathTwo := range analysisTwo {
-		var row []string
-		for i, nodeOne := range pathTwo {
-			if len(row) != 0 {
-				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 50)
-			} else {
-				table.SetColMinWidth(i, 50)
-			}
-
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-			}
-		}
-		table.Append(row)
-	}
-
-	table.Render()
-	return nil
-}
 
 func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []string, opts AnalyzeOpts) ([]graph.Graph[string, *analyzer.Node], error) {
 
