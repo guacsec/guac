@@ -17,10 +17,10 @@ package analyzer_test
 
 import (
 	"encoding/json"
-	"fmt"
+
 	"io"
 	"net/http"
-	"os"
+
 
 	"testing"
 
