@@ -9,6 +9,11 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
+const (
+	colMinWidth = 50
+	trimLength  = 20
+)
+
 func GetNodeString(node Node) (string, error) {
 	switch node.NodeType {
 
@@ -45,25 +50,25 @@ func GetNodeString(node Node) (string, error) {
 	case "DependencyPackage":
 		depPkg := node.DepPkg
 
-		message := "Type:" + CheckEmpty(depPkg.Type) + "\n"
+		message := "Type:" + CheckEmptyTrim(depPkg.Type) + "\n"
 		for _, namespace := range depPkg.Namespaces {
-			message += "Namespace: " + CheckEmpty(namespace.Namespace) + "\n"
+			message += "Namespace: " + CheckEmptyTrim(namespace.Namespace) + "\n"
 
 			for _, name := range namespace.Names {
 				message += "\t"
-				message += "Name: " + CheckEmpty(name.Name)
+				message += "Name: " + CheckEmptyTrim(name.Name)
 				message += "\n"
 
 				for _, version := range name.Versions {
 					message += "\t\t"
-					message += "Version: " + CheckEmpty(version.Version) + "\n"
+					message += "Version: " + CheckEmptyTrim(version.Version) + "\n"
 					message += "\t\t"
-					message += "Subpath: " + CheckEmpty(version.Subpath) + "\n"
+					message += "Subpath: " + CheckEmptyTrim(version.Subpath) + "\n"
 					message += "\t\tQualifiers: {\n"
 
 					for _, outlier := range version.Qualifiers {
 						message += "\t\t\t"
-						message += CheckEmpty(outlier.Key) + ": " + CheckEmpty(outlier.Value) + "\n"
+						message += CheckEmptyTrim(outlier.Key) + ": " + CheckEmptyTrim(outlier.Value) + "\n"
 					}
 					message += "\t\t}\n"
 				}
@@ -77,9 +82,9 @@ func GetNodeString(node Node) (string, error) {
 	return "", nil
 }
 
-func CheckEmpty(value string) string {
-	if len(value) > 20 {
-		return value[:20] + "..."
+func CheckEmptyTrim(value string) string {
+	if len(value) > trimLength {
+		return value[:trimLength] + "..."
 	}
 	if value == "" {
 		return "\"\""
@@ -106,9 +111,9 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 
 			if len(row) != 0 {
 				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 50)
+				table.SetColMinWidth(i+1, colMinWidth)
 			} else {
-				table.SetColMinWidth(i, 50)
+				table.SetColMinWidth(i, colMinWidth)
 			}
 
 			s, err := GetNodeString(*nodeOne)
@@ -128,9 +133,9 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 		for i, nodeOne := range pathTwo {
 			if len(row) != 0 {
 				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 50)
+				table.SetColMinWidth(i+1, colMinWidth)
 			} else {
-				table.SetColMinWidth(i, 50)
+				table.SetColMinWidth(i, colMinWidth)
 			}
 
 			s, err := GetNodeString(*nodeOne)
@@ -168,9 +173,9 @@ func PrintDiffedPathTable(diffs []DiffedPath) error {
 
 			if len(row) != 0 {
 				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 90)
+				table.SetColMinWidth(i+1, colMinWidth)
 			} else {
-				table.SetColMinWidth(i, 90)
+				table.SetColMinWidth(i, colMinWidth)
 			}
 
 			s, err := GetNodeString(*nodeOne)
@@ -188,9 +193,9 @@ func PrintDiffedPathTable(diffs []DiffedPath) error {
 
 			if len(row) != 0 {
 				row = append(row, "--->")
-				table.SetColMinWidth(i+1, 50)
+				table.SetColMinWidth(i+1, colMinWidth)
 			} else {
-				table.SetColMinWidth(i, 50)
+				table.SetColMinWidth(i, colMinWidth)
 			}
 
 			s, err := GetNodeString(*nodeOne)
@@ -209,9 +214,9 @@ func PrintDiffedPathTable(diffs []DiffedPath) error {
 
 			if len(row) != 0 {
 				row = append(row, "    ")
-				table.SetColMinWidth(i+1, 50)
+				table.SetColMinWidth(i+1, colMinWidth)
 			} else {
-				table.SetColMinWidth(i, 50)
+				table.SetColMinWidth(i, colMinWidth)
 			}
 
 			row = append(row, strings.Join(diff, "\n"))
