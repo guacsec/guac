@@ -152,7 +152,7 @@ container: check-docker-tool-check check-docker-buildx-tool-check check-goreleas
 	$(LOCAL_IMAGE_NAME)
 	@echo "\nThe guac container image is tagged locally as $(LOCAL_IMAGE_NAME)"
 
-# To run the service, run `make container` and then `make service`
+# To run the service, run `make container` and then `make start-service`
 # making the container is a longer process and thus not a dependency of service.
 .PHONY: start-service
 start-service: check-docker-compose-tool-check
