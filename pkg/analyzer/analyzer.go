@@ -49,14 +49,16 @@ const (
 )
 
 func (a Action) String() string {
-	return [...]string{"Difference", "Intersectino", "Union"}[a]
+	return [...]string{"Difference", "Intersection", "Union"}[a]
 }
 
 type Node struct {
-	ID         string
-	Message    string
-	Attributes map[string]interface{}
-	Color      string
+	ID      string
+	Attributes map[string]string
+	Pkg model.AllIsDependencyTreePackage
+	NodeType string
+	DepPkg model.AllIsDependencyTreeDependencyPackage
+	Color    string
 }
 
 type DiffedPath struct {
@@ -91,29 +93,6 @@ func (a packageNameSpacesNamesVersionsQualifiers) Swap(i, j int)      { a[i], a[
 
 func NodeHash(n *Node) string {
 	return n.ID
-}
-
-func SetNodeAttribute(g graph.Graph[string, *Node], ID, key string, value interface{}) bool {
-	node, err := g.Vertex(ID)
-	if err != nil {
-		return false
-	}
-
-	node.Attributes[key] = value
-	return true
-}
-
-func GetNodeAttribute(g graph.Graph[string, *Node], ID, key string) (interface{}, error) {
-	node, err := g.Vertex(ID)
-	if err != nil {
-		return nil, err
-	}
-	val, ok := node.Attributes[key]
-
-	if !ok {
-		return ID, nil
-	}
-	return val, nil
 }
 
 func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
@@ -213,15 +192,14 @@ func FindPathsFromHasSBOMNode(g graph.Graph[string, *Node]) ([][]string, error) 
 		if nodeID == "HasSBOM" {
 			continue
 		}
-		val, err := GetNodeAttribute(g, nodeID, "nodeType")
+
+		node, err := g.Vertex(nodeID)
+
 		if err != nil {
 			return paths, fmt.Errorf("error getting node type")
 		}
-		value, ok := val.(string)
-		if !ok {
-			return paths, fmt.Errorf("error casting node type to string")
-		}
-		if value == "Package" {
+
+		if node.NodeType == "Package" {
 			//now start dfs
 			dfsFindPaths(nodeID, allNodeEdges, currentPath, &paths)
 		}
@@ -322,11 +300,14 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 	if metadata || compareAll {
 		//add metadata
-		if !(SetNodeAttribute(g, "HasSBOM", "Algorithm", hasSBOM.Algorithm) &&
-			SetNodeAttribute(g, "HasSBOM", "Digest", hasSBOM.Digest) &&
-			SetNodeAttribute(g, "HasSBOM", "Uri", hasSBOM.Uri)) {
-			return g, fmt.Errorf("error setting metadata attribute(s)")
+		node, err := g.Vertex("HasSBOM");
+		if err != nil {
+			return g, fmt.Errorf("hasSBOM node not found")
 		}
+		node.Attributes = map[string]string{}
+		node.Attributes["Algorithm"] = hasSBOM.Algorithm
+		node.Attributes["Digest"] = hasSBOM.Digest
+		node.Attributes["Uri"] = hasSBOM.Uri
 	}
 	//TODO: inclSoft and inclOccur
 
@@ -367,10 +348,12 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 				AddGraphNode(g, hashValPackage, "black") // so, create a node
 				AddGraphEdge(g, "HasSBOM", hashValPackage, "black")
 				//set attributes here
-				if !(SetNodeAttribute(g, hashValPackage, "nodeType", "Package") &&
-					SetNodeAttribute(g, hashValPackage, "data", dependency.Package)) {
-					return g, fmt.Errorf("error setting package node attribute(s)")
+				node, err := g.Vertex(hashValPackage);
+				if err !=  nil {
+					return g, fmt.Errorf("newly created node not found in graph")
 				}
+				node.NodeType = "Package"
+				node.Pkg = dependency.Package
 			}
 
 			//dependencyPackage node
@@ -399,10 +382,12 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 			if err != nil { //node does not exist
 				AddGraphNode(g, hashValDependencyPackage, "black")
-				if !(SetNodeAttribute(g, hashValDependencyPackage, "nodeType", "DependencyPackage") &&
-					SetNodeAttribute(g, hashValDependencyPackage, "data", dependency.DependencyPackage)) {
-					return g, fmt.Errorf("error setting dependency package node attribute(s)")
+				node, err := g.Vertex(hashValDependencyPackage);
+				if err !=  nil {
+					return g, fmt.Errorf("newly created node not found in graph")
 				}
+				node.NodeType = "DependencyPackage"
+				node.DepPkg = dependency.DependencyPackage
 			}
 
 			AddGraphEdge(g, hashValPackage, hashValDependencyPackage, "black")
@@ -424,7 +409,6 @@ func AddGraphNode(g graph.Graph[string, *Node], id, color string) {
 	newNode := &Node{
 		ID:         id,
 		Color:      color,
-		Attributes: make(map[string]interface{}),
 	}
 
 	err = g.AddVertex(newNode, graph.VertexAttribute("color", color))
@@ -535,37 +519,24 @@ func nodeIDListToNodeList(g graph.Graph[string, *Node], list []string) ([]*Node,
 	return nodeList, nil
 }
 
-func compareNodes(nodeOne, nodeTwo Node, nodeType string) ([]string, error) {
+func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 	var diffs []string
 	var namespaceBig, namespaceSmall []model.AllPkgTreeNamespacesPackageNamespace
 
 	var namesBig, namesSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName
 	var versionBig, versionSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion
 	var qualifierBig, qualifierSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
-	dataOne, ok := nodeOne.Attributes["data"]
 
-	if !ok {
-		return []string{}, fmt.Errorf("could not get data attributes")
-	}
-	dataTwo, ok := nodeTwo.Attributes["data"]
 
-	if !ok {
-		return []string{}, fmt.Errorf("could not get data attributes")
-	}
-
-	switch nodeType {
+	switch nodeOne.NodeType {
 
 	case "Package":
 
-		nOne, ok := dataOne.(model.AllIsDependencyTreePackage)
-		if !ok {
-			return []string{}, fmt.Errorf("could not cast node to tree pkg")
-		}
+		nOne := nodeOne.Pkg
 
-		nTwo, ok := dataTwo.(model.AllIsDependencyTreePackage)
-		if !ok {
-			return []string{}, fmt.Errorf("could not cast node to tree pkg")
-		}
+
+		nTwo := nodeTwo.Pkg
+
 
 		if nodeOne.ID == nodeTwo.ID {
 			return []string{}, nil
@@ -692,15 +663,11 @@ func compareNodes(nodeOne, nodeTwo Node, nodeType string) ([]string, error) {
 			}
 		}
 	case "DependencyPackage":
-		nOne, ok := dataOne.(model.AllIsDependencyTreeDependencyPackage)
-		if !ok {
-			return []string{}, fmt.Errorf("could not case node to tree dePkg")
-		}
+		nOne:= nodeOne.DepPkg
 
-		nTwo, ok := dataTwo.(model.AllIsDependencyTreeDependencyPackage)
-		if !ok {
-			return []string{}, fmt.Errorf("could not case node to tree depPkg")
-		}
+
+		nTwo:= nodeTwo.DepPkg
+
 
 		if nodeOne.ID == nodeTwo.ID {
 
@@ -851,19 +818,16 @@ func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int,
 	}
 
 	for i, node := range longerPath {
-		nodeType, ok := node.Attributes["nodeType"].(string)
-		if !ok {
-			return pathDiff, 0, fmt.Errorf("cannot case nodeType to string")
-		}
+		//node
 		if i >= len(shorterPath) {
-			dumnode := &Node{Attributes: make(map[string]interface{})}
-			if nodeType == "Package" {
-				dumnode.Attributes["data"] = model.AllIsDependencyTreePackage{}
-			} else if nodeType == "DependencyPackage" {
-				dumnode.Attributes["data"] = model.AllIsDependencyTreeDependencyPackage{}
+			dumnode := &Node{}
+			if node.NodeType == "Package" {
+				dumnode.Pkg = model.AllIsDependencyTreePackage{}
+			} else if node.NodeType == "DependencyPackage" {
+				dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
 			}
 
-			diff, err := compareNodes(*node, *dumnode, nodeType)
+			diff, err := compareNodes(*node, *dumnode)
 			if err != nil {
 				return pathDiff, 0, fmt.Errorf(err.Error())
 			}
@@ -872,7 +836,7 @@ func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int,
 			diffCount += len(diff)
 
 		} else {
-			diff, err := compareNodes(*node, *shorterPath[i], nodeType)
+			diff, err := compareNodes(*node, *shorterPath[i])
 			if err != nil {
 				return pathDiff, 0, fmt.Errorf(err.Error())
 			}
@@ -909,7 +873,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 		min := math.MaxInt32
 		var index int
 
-		for i, pathTwo := range big { 
+		for i, pathTwo := range big {
 			_, ok := used[i]
 			if ok {
 				continue

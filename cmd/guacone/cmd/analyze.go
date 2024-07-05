@@ -53,13 +53,13 @@ var analyzeCmd = &cobra.Command {
   $ guacone collect files guac-data-main/docs/spdx/spdx_vuln.json 
 
   Difference
-  $ guacone analyze diff --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
+  $ guacone analyze diff --analyze-uri-input --analyze-sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   
   Union
-  $ guacone analyze union --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
+  $ guacone analyze union --analyze-uri-input --analyze-sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   
   Intersection
-  $ guacone analyze intersect --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
+  $ guacone analyze intersect --analyze-uri-input --analyze-sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -180,7 +180,7 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 	}
 
 	if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
-		logger.Infof("Multiple sboms found for given purl, id or uri. Using first one")
+		logger.Infof("multiple sboms found for given purl, id or uri. Using first one")
 	}
 	hasSBOMOne := hasSBOMResponseOne.HasSBOM[0]
 	hasSBOMTwo := hasSBOMResponseTwo.HasSBOM[0]

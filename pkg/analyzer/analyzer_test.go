@@ -47,26 +47,6 @@ func readTestFileFromHub(fileUrl string) ([]byte, error){
     return body, nil
 }
 
-func TestSetGetNodeAttribute(t *testing.T) {
-	g := graph.New(analyzer.NodeHash, graph.Directed())
-	analyzer.AddGraphNode(g, "id", "black")
-	if !analyzer.SetNodeAttribute(g, "id", "key", "value") {
-		t.Errorf("(set)Expected no error, got error")
-	}
-	value, err := analyzer.GetNodeAttribute(g, "id", "key")
-	if err != nil {
-		t.Errorf("(get)Expected no error, got error %v", err)
-	}
-	value, ok := value.(string)
-	if !ok {
-		t.Errorf("Expected no error, got ")
-	}
-
-	if value != "value" {
-		t.Errorf("Expected value %s, got %s", "value", value)
-	}
-}
-
 func TestHighlightAnalysis(t *testing.T) {
 
 	data, err  := readTestFileFromHub(diffTestFile)

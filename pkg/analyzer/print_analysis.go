@@ -6,19 +6,14 @@ import (
 	"sort"
 	"strings"
 
-	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/olekukonko/tablewriter"
 )
 
+func GetNodeString(node Node) (string, error) {
+	switch node.NodeType {
 
-func GetNodeString(option NodeType, node interface{}) (string, error) {
-	switch option {
-
-	case Pkg:
-		pkg, ok := node.(model.AllIsDependencyTreePackage)
-		if !ok {
-			return "", fmt.Errorf("could not case node to tree Pkg")
-		}
+	case "Package":
+		pkg := node.Pkg
 
 		sort.Sort(packageNameSpaces(pkg.Namespaces))
 		message := "Type:" + pkg.Type + "\n"
@@ -47,11 +42,8 @@ func GetNodeString(option NodeType, node interface{}) (string, error) {
 			message += "\n"
 		}
 		return message, nil
-	case DepPkg:
-		depPkg, ok := node.(model.AllIsDependencyTreeDependencyPackage)
-		if !ok {
-			return "", fmt.Errorf("could not case node to tree depPkg")
-		}
+	case "DependencyPackage":
+		depPkg := node.DepPkg
 
 		message := "Type:" + CheckEmpty(depPkg.Type) + "\n"
 		for _, namespace := range depPkg.Namespaces {
@@ -95,7 +87,6 @@ func CheckEmpty(value string) string {
 	return value
 }
 
-
 func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
@@ -120,21 +111,13 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 				table.SetColMinWidth(i, 50)
 			}
 
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-
-				row = append(row, s)
-
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
+			s, err := GetNodeString(*nodeOne)
+			if err != nil {
+				return fmt.Errorf("unable to print diffs: %v", err)
 			}
+
+			row = append(row, s)
+
 		}
 		table.Append(row)
 
@@ -150,20 +133,12 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 				table.SetColMinWidth(i, 50)
 			}
 
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
+			s, err := GetNodeString(*nodeOne)
+			if err != nil {
+				return fmt.Errorf("unable to print diffs: %v", err)
 			}
+			row = append(row, s)
+
 		}
 		table.Append(row)
 	}
@@ -171,7 +146,6 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 	table.Render()
 	return nil
 }
-
 
 func PrintDiffedPathTable(diffs []DiffedPath) error {
 
@@ -199,20 +173,12 @@ func PrintDiffedPathTable(diffs []DiffedPath) error {
 				table.SetColMinWidth(i, 90)
 			}
 
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
+			s, err := GetNodeString(*nodeOne)
+			if err != nil {
+				return fmt.Errorf("unable to print diffs: %v", err)
 			}
+			row = append(row, s)
+
 		}
 
 		table.Append(row)
@@ -227,43 +193,34 @@ func PrintDiffedPathTable(diffs []DiffedPath) error {
 				table.SetColMinWidth(i, 50)
 			}
 
-			if nodeOne.Attributes["nodeType"] == "Package" {
-				s, err := GetNodeString(1, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
-			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
-				s, err := GetNodeString(2, nodeOne.Attributes["data"])
-				if err != nil {
-					return fmt.Errorf("unable to print diffs: %v", err)
-				}
-				row = append(row, s)
+			s, err := GetNodeString(*nodeOne)
+			if err != nil {
+				return fmt.Errorf("unable to print diffs: %v", err)
 			}
+			row = append(row, s)
+
 		}
 		table.Append(row)
 
 		table.Append([]string{"================================="})
 
-		row  = []string{}
+		row = []string{}
 		for i, diff := range diff.Diffs {
-			
+
 			if len(row) != 0 {
 				row = append(row, "    ")
 				table.SetColMinWidth(i+1, 50)
-			}else{
+			} else {
 				table.SetColMinWidth(i, 50)
 			}
-			
+
 			row = append(row, strings.Join(diff, "\n"))
 		}
 		table.Append(row)
 
-
 		table.Append([]string{"================================="})
 	}
 
-	
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Render()
 	return nil
