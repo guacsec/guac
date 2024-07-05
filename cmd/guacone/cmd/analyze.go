@@ -18,7 +18,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -27,6 +26,7 @@ import (
 	"github.com/dominikbraun/graph"
 	analyzer "github.com/guacsec/guac/pkg/analyzer"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -90,32 +90,25 @@ var analyzeCmd = &cobra.Command {
 		inclDeps, _ := cmd.Flags().GetBool("incl-deps")
 		inclOccur, _ := cmd.Flags().GetBool("incl-occur")
 		namespaces, _ := cmd.Flags().GetBool("namespaces")
-		test, _ := cmd.Flags().GetString("test")
 
 		var graphs []graph.Graph[string, *analyzer.Node]
 		var err error
 
-		if test == "" {
-			if err = validateAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl); err != nil {
-				fmt.Fprintf(os.Stderr, "error: %s", err)
-				_ = cmd.Help()
-				os.Exit(1)
-			}
-
-			graphs, err = hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
-				Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur,
-				Namespaces: namespaces, URI: uri, PURL: purl, })
-
-			if err != nil {
-				logger.Fatalf("Unable to generate graphs: %v", err)
-			}
-
-		} else {
-			graphs, err = readTwoSBOM(test)
-			if err != nil {
-				logger.Fatalf("Unable to generate graphs: %v", err)
-			}
+		if err = validateAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s", err)
+			_ = cmd.Help()
+			os.Exit(1)
 		}
+
+		graphs, err = hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
+			Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur,
+			Namespaces: namespaces, URI: uri, PURL: purl, })
+
+		if err != nil {
+			logger.Fatalf("Unable to generate graphs: %v", err)
+		}
+
+	
 
 		if args[0] == "diff" {
 			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
@@ -417,52 +410,33 @@ func validateAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, pu
 	return nil
 }
 
-func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error opening test file")
-	}
-	defer file.Close()
 
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error reading test file")
-	}
-	var sboms []model.HasSBOMsHasSBOM
-
-	err = json.Unmarshal(data, &sboms)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error unmarshaling JSON")
-	}
-
-	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
-
-	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
-
-	if errOne != nil || errTwo != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error making graph %v %v", errOne.Error(), errTwo.Error())
-	}
-
-	return []graph.Graph[string, *analyzer.Node]{graphOne, graphTwo}, nil
-
-}
 
 func init() {
-
-	// analyzeCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to analyze")
-	// analyzeCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to analyze")
-	// analyzeCmd.PersistentFlags().Bool("uri", false, "input is a URI")
-	// analyzeCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
-	// analyzeCmd.PersistentFlags().Bool("id", false, "input is an Id")
-	// analyzeCmd.PersistentFlags().Bool("metadata", false, "Compare SBOM metadata")
-	// analyzeCmd.PersistentFlags().Bool("incl-soft", false, "Compare Included Softwares")
-	// analyzeCmd.PersistentFlags().Bool("incl-deps", false, "Compare Included Dependencies")
-	// analyzeCmd.PersistentFlags().Bool("incl-occur", false, "Compare Included Occurrences")
-	// analyzeCmd.PersistentFlags().Bool("namespaces", false, "Compare Package Namespaces")
-	// analyzeCmd.PersistentFlags().Bool("dot", false, "create diff dot file")
-	// analyzeCmd.PersistentFlags().Bool("all", false, " lists all")
-	// analyzeCmd.PersistentFlags().Int("maxprint", 20, "max number of items to print")
-	// analyzeCmd.PersistentFlags().String("test", "", "test file with sbom")
+	set, err := cli.BuildFlags([]string{
+		"analyze-sboms",
+		"analyze-slsa",
+		"analyze-uri-input",
+		"analyze-purl-input",
+		"analyze-id-input",
+		"analyze-metadata",
+		"analyze-incl-soft",
+		"analyze-incl-deps",
+		"analyze-incl-occur",
+		"analyze-namespaces",
+		"analyze-output-dot",
+		"analyze-output-all",
+		"analyze-output-maxprint",
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	analyzeCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(analyzeCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 
 	rootCmd.AddCommand(analyzeCmd)
 	

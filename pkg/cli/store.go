@@ -139,6 +139,21 @@ func init() {
 
 	set.String("header-file", "", "a text file containing HTTP headers to send to the GQL server, in RFC 822 format")
 
+	// SBOM Analyzer flags
+	set.StringSlice("analyze-sboms", []string{}, "two sboms to analyze")
+	set.StringSlice("analyze-slsa", []string{}, "two slsa to analyze")
+	set.Bool("analyze-uri-input", false, "input is a URI")
+	set.Bool("analyze-purl-input", false, "input is a pURL")
+	set.Bool("analyze-id-input", false, "input is an Id")
+	set.Bool("analyze-metadata", false, "Compare SBOM metadata")
+	set.Bool("analyze-incl-soft", false, "Compare Included Softwares")
+	set.Bool("analyze-incl-deps", false, "Compare Included Dependencies")
+	set.Bool("analyze-incl-occur", false, "Compare Included Occurrences")
+	set.Bool("analyze-namespaces", false, "Compare Package Namespaces")
+	set.Bool("analyze-output-dot", false, "create diff dot file")
+	set.Bool("analyze-output-all", false, " lists all")
+	set.Int("analyze-output-maxprint", 20, "max number of items to print")
+
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})

@@ -909,7 +909,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 		min := math.MaxInt32
 		var index int
 
-		for i, pathTwo := range big {
+		for i, pathTwo := range big { 
 			_, ok := used[i]
 			if ok {
 				continue
