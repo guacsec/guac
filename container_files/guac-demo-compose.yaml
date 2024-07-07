@@ -69,7 +69,7 @@ services:
         [
           "CMD",
           "wget",
-          "--spider",
+          "-O-",
           "http://localhost:8081/healthz"
         ]
       interval: 10s
