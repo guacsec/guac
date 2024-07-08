@@ -69,20 +69,36 @@ var ignore = []string{
 // "Universal-FOSS-exception-1.0",
 // "WxWindows-exception-3.1",
 
-func ParseLicenses(exp string, lv string) []model.LicenseInputSpec {
+func ParseLicenses(exp string, lv *string, inLineMap map[string]string) []model.LicenseInputSpec {
 	if exp == "" {
 		return nil
 	}
 	var rv []model.LicenseInputSpec
+	unknown := "UNKNOWN"
 	for _, part := range strings.Split(exp, " ") {
 		p := strings.Trim(part, "()+")
 		if slices.Contains(ignore, p) {
 			continue
 		}
-		rv = append(rv, model.LicenseInputSpec{
-			Name:        p,
-			ListVersion: &lv,
-		})
+		var license model.LicenseInputSpec
+		if inline, ok := inLineMap[p]; ok {
+			license = model.LicenseInputSpec{
+				Name:        p,
+				Inline:      &inline,
+				ListVersion: lv,
+			}
+		} else if lv != nil {
+			license = model.LicenseInputSpec{
+				Name:        p,
+				ListVersion: lv,
+			}
+		} else {
+			license = model.LicenseInputSpec{
+				Name:        p,
+				ListVersion: &unknown,
+			}
+		}
+		rv = append(rv, license)
 	}
 	return rv
 }

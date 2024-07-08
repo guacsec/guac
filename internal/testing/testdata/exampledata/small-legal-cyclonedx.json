@@ -25,12 +25,12 @@
       "licenses": [
         {
           "license": {
-            "name": "GPL-2.0"
+            "id": "GPL-2.0"
           }
         },
         {
           "license": {
-            "name": "LGPL-3.0-or-later"
+            "id": "LGPL-3.0-or-later"
           }
         }
       ],
@@ -150,14 +150,14 @@
       "licenses" : [
         {
           "license": {
-            "name": "Apache-2.0"
+            "id": "Apache-2.0"
           }
         },
         {
           "license": {
-            "name": "LGPL-3.0-or-later",
+            "name": "Custom license",
             "text": {
-              "content": "LGPL-3.0-or-later"
+              "content": "This is the text of the custom license I wrote"
             }
           }
         }
@@ -171,6 +171,85 @@
       ],
       "type" : "library",
       "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar"
+    },
+    {
+      "publisher" : "JBoss by Red Hat",
+      "group" : "io.quarkus",
+      "name" : "netbase",
+      "version" : ".3",
+      "description" : "Common runtime parts of Quarkus RESTEasy Reactive",
+      "hashes" : [
+        {
+          "alg" : "SHA3-512",
+          "content" : "87gna51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1"
+        }
+      ],
+      "licenses" : [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        },
+        {
+          "license": {
+            "name": "Custom license",
+            "text": {
+              "content": "This is the text of the custom license I wrote"
+            }
+          }
+        }
+      ],
+      "purl" : "pkg:deb/debian/netbase@6.3?arch=all\u0026distro=debian-11",
+      "externalReferences" : [
+        {
+          "type" : "mailing-list",
+          "url" : "http://lists.jboss.org/pipermail/jboss-user/"
+        }
+      ],
+      "type" : "library",
+      "bom-ref" : "pkg:deb/debian/netbase@6.3?arch=all\u0026distro=debian-11\u0026package-id=913906225fd3778b"
+    },
+    {
+      "publisher" : "Eclipse Foundation",
+      "group" : "org.eclipse.microprofile.context-propagation",
+      "name" : "microprofile-context-propagation-api",
+      "version" : "1.2",
+      "description" : "MicroProfile Context Propagation :: API",
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "1576e21f3bf9cc3a3092e7cd40e9c9fef70532223af98a9218c1c9c885a71251"
+        }
+      ],
+      "licenses" : [
+        {
+          "license": {
+            "name": "Custom license",
+            "bom-ref" : "LicenseRef-a7fb6b15"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/org.eclipse.microprofile.context-propagation/microprofile-context-propagation-api@1.2?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "http://www.eclipse.org/"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/eclipse/microprofile-context-propagation/issues"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/eclipse/microprofile-context-propagation"
+        }
+      ],
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.eclipse.microprofile.context-propagation/microprofile-context-propagation-api@1.2?type=jar"
     }
   ],
   "dependencies" : [

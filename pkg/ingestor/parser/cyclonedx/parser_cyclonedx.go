@@ -55,6 +55,7 @@ type cyclonedxParser struct {
 	packagePackages   map[string][]*model.PkgInputSpec
 	packageArtifacts  map[string][]*model.ArtifactInputSpec
 	packageLegals     map[string][]*model.CertifyLegalInputSpec
+	licenseInLine     map[string]string
 	identifierStrings *common.IdentifierStrings
 	cdxBom            *cdx.BOM
 	vulnData          vulnData
@@ -72,6 +73,7 @@ func NewCycloneDXParser() common.DocumentParser {
 		packagePackages:   map[string][]*model.PkgInputSpec{},
 		packageArtifacts:  map[string][]*model.ArtifactInputSpec{},
 		packageLegals:     map[string][]*model.CertifyLegalInputSpec{},
+		licenseInLine:     map[string]string{},
 		identifierStrings: &common.IdentifierStrings{},
 	}
 }
@@ -253,20 +255,11 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 				}
 				c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
 			} else {
-				var license string
-				if compLicenses[0].License.Name != "" {
-					if compLicenses[0].License.Text != nil {
-						license = compLicenses[0].License.Text.Content
-					} else {
-						license = compLicenses[0].License.Name
-					}
-				} else {
-					license = compLicenses[0].License.ID
-				}
+				license := getLicenseFromName(c, compLicenses[0])
 				if license != "" {
 					cl := &model.CertifyLegalInputSpec{
 						Justification:     justification,
-						DeclaredLicense:   compLicenses[0].License.ID,
+						DeclaredLicense:   license,
 						DiscoveredLicense: "",
 						TimeScanned:       c.timestamp,
 						Attribution:       comp.Copyright,
@@ -277,15 +270,7 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 		} else {
 			var licenses []string
 			for _, compLicense := range compLicenses {
-				if compLicense.License.Name != "" && compLicense.License.Name != "UNKNOWN" {
-					if compLicense.License.Text != nil {
-						licenses = append(licenses, compLicense.License.Text.Content)
-					} else {
-						licenses = append(licenses, compLicense.License.Name)
-					}
-				} else {
-					licenses = append(licenses, compLicense.License.ID)
-				}
+				licenses = append(licenses, getLicenseFromName(c, compLicense))
 			}
 			if len(licenses) > 0 {
 				cl := &model.CertifyLegalInputSpec{
@@ -300,6 +285,23 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 		}
 	}
 	return nil
+}
+
+func getLicenseFromName(c *cyclonedxParser, compLicense cdx.LicenseChoice) string {
+	var license string
+	if compLicense.License.Name != "" && compLicense.License.Name != "UNKNOWN" {
+		if compLicense.License.Text != nil {
+			license = common.HashLicense(compLicense.License.Name)
+			c.licenseInLine[license] = compLicense.License.Text.Content
+		} else if compLicense.License.BOMRef != "" {
+			license = compLicense.License.BOMRef
+		} else {
+			license = common.HashLicense(compLicense.License.Name)
+		}
+	} else {
+		license = compLicense.License.ID
+	}
+	return license
 }
 
 func ParseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
@@ -375,8 +377,8 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	// license information
 	for id, cls := range c.packageLegals {
 		for _, cl := range cls {
-			dec := common.ParseLicenses(cl.DeclaredLicense, "UNKNOWN")
-			dis := common.ParseLicenses(cl.DiscoveredLicense, "UNKNOWN")
+			dec := common.ParseLicenses(cl.DeclaredLicense, nil, c.licenseInLine)
+			dis := common.ParseLicenses(cl.DiscoveredLicense, nil, c.licenseInLine)
 			for _, pkg := range c.packagePackages[id] {
 				cli := assembler.CertifyLegalIngest{
 					Pkg:          pkg,

@@ -1032,6 +1032,8 @@ var (
 
 	cdxReactiveCommonPack, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar")
 
+	cdxMicroprofilePack, _ = asmhelpers.PurlToPkg("pkg:maven/org.eclipse.microprofile.context-propagation/microprofile-context-propagation-api@1.2?type=jar")
+
 	cdxQuarkusDeps = []assembler.IsDependencyIngest{
 		{
 			Pkg:             cdxTopQuarkusPack,
@@ -1197,8 +1199,47 @@ var (
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
+		{
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxNetbasePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				VersionRange:   "6.3",
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxMicroprofilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				VersionRange:   "1.2",
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
 	}
+	customLincenseText   = "This is the text of the custom license I wrote"
 	cdxLegalCertifyLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxNetbasePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
 		{
 			Pkg: cdxResteasyPack,
 			Declared: []model.LicenseInputSpec{
@@ -1221,12 +1262,12 @@ var (
 					ListVersion: &lvUnknown,
 				},
 				{
-					Name:        "LGPL-3.0-or-later",
-					ListVersion: &lvUnknown,
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
 				},
 			},
 			CertifyLegal: &model.CertifyLegalInputSpec{
-				DeclaredLicense: "Apache-2.0 AND LGPL-3.0-or-later",
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15",
 				Justification:   "Found in CycloneDX document",
 				TimeScanned:     cdxQuarkusTime,
 			},
@@ -1267,6 +1308,20 @@ var (
 			},
 			CertifyLegal: &model.CertifyLegalInputSpec{
 				DeclaredLicense: "GPL-2.0 AND LGPL-3.0-or-later",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxMicroprofilePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "LicenseRef-a7fb6b15",
 				Justification:   "Found in CycloneDX document",
 				TimeScanned:     cdxQuarkusTime,
 			},
@@ -1314,6 +1369,22 @@ var (
 			},
 			IsOccurrence: isOccurrenceJustifyTopPkg,
 		},
+		{
+			Pkg: cdxNetbasePack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "87gna51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxMicroprofilePack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha-256",
+				Digest:    "1576e21f3bf9cc3a3092e7cd40e9c9fef70532223af98a9218c1c9c885a71251",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
 	}
 
 	cdxLegalHasSBOM = []assembler.HasSBOMIngest{
@@ -1325,7 +1396,7 @@ var (
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
 				Algorithm:        "sha256",
-				Digest:           "466af6d6649cac6cc0e12febeb1af8cb245dbbf1cd306970439e36253f89210f",
+				Digest:           "b9691aeacfe8adca01097f2e2af3484038df6e367524f9c38f6e1696f8971ed9",
 				DownloadLocation: "",
 				KnownSince:       cdxQuarkusTime,
 			},
