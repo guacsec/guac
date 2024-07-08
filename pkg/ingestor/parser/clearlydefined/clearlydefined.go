@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The GUAC Authors.
+// Copyright 2024 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package vuln attestation parser parses the attestation defined by by
-// the certifier using the predicate type
-// "https://in-toto.io/attestation/vuln/v0.1" Three different types of ingest
-// predicates are created.
-//
-// - IsOccurences are created mapping between any package
-// purls found in the subject, and any digests found under those.
-//
-// - CertifyVulnerabilies are created mapping any package purl found in the
-// subject and any vulnerabilites found in the scanner results. The
-// vulnerabilites are treated as OSV.
-//
-// - IsVulnerabilities are created between any found vulnerability in the
-// scanner results (OSV) and either a CVE or GHSA vulnerability that is created
-// by parsing the OSV ID.
-
 package clearlydefined
 
 import (
@@ -41,7 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	"github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
@@ -49,22 +33,18 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type parser struct {
-	packages   []*generated.PkgInputSpec
-	vulnData   *generated.ScanMetadataInput
-	vulns      []*generated.VulnerabilityInputSpec
-	vulnEquals []assembler.VulnEqualIngest
+	packages              []*generated.PkgInputSpec
+	collectedCertifyLegal []*generated.CertifyLegalInputSpec
 }
 
-var noVulnInput *generated.VulnerabilityInputSpec = &generated.VulnerabilityInputSpec{Type: "noVuln", VulnerabilityID: ""}
-
-// NewVulnCertificationParser initializes the parser
-func NewVulnCertificationParser() common.DocumentParser {
+// NewLegalCertificationParser initializes the parser
+func NewLegalCertificationParser() common.DocumentParser {
 	return &parser{}
 }
 
 // Parse breaks out the document into the graph components
 func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
-	statement, err := parseVulnCertifyPredicate(doc.Blob)
+	statement, err := parseLegalCertifyPredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
@@ -83,16 +63,17 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	return nil
 }
 
-func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStatement,
+func parseLegalCertifyPredicate(p []byte) (*attestation.ClearlyDefinedStatement,
 	error) {
-	predicate := attestation_vuln.VulnerabilityStatement{}
+
+	predicate := attestation.ClearlyDefinedStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
 		return nil, err
 	}
 	return &predicate, nil
 }
 
-func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgInputSpec, error) {
+func parseSubject(s *attestation.ClearlyDefinedStatement) ([]*generated.PkgInputSpec, error) {
 	var ps []*generated.PkgInputSpec
 	for _, sub := range s.StatementHeader.Subject {
 		p, err := helpers.PurlToPkg(sub.Name)
@@ -104,7 +85,7 @@ func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgI
 	return ps, nil
 }
 
-func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMetadataInput {
+func parseMetadata(s *attestation.ClearlyDefinedStatement) *generated.ScanMetadataInput {
 	return &generated.ScanMetadataInput{
 		TimeScanned:    *s.Predicate.Metadata.ScannedOn,
 		DbUri:          s.Predicate.Scanner.Database.Uri,
@@ -115,7 +96,7 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMe
 }
 
 // TODO (pxp928): Remove creation of osv node and just create the vulnerability nodes specified
-func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
+func parseVulns(_ context.Context, s *attestation.ClearlyDefinedStatement) ([]*generated.VulnerabilityInputSpec,
 	[]assembler.VulnEqualIngest, error) {
 	var vs []*generated.VulnerabilityInputSpec
 	var ivs []assembler.VulnEqualIngest
