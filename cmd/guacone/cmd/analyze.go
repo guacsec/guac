@@ -78,21 +78,21 @@ var analyzeCmd = &cobra.Command {
 		httpClient := http.Client{}
 		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 
-		slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
-		sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
-		uri, _ := cmd.Flags().GetBool("uri")
-		purl, _ := cmd.Flags().GetBool("purl")
+		slsas  := viper.GetStringSlice("analyze-slsa")
+		sboms :=    viper.GetStringSlice("analyze-sboms")
+		uri  :=  viper.GetBool("analyze-uri-input")
+		purl  :=  viper.GetBool("analyze-purl-input")
 
-		metadata, _ := cmd.Flags().GetBool("metadata")
-		inclSoft, _ := cmd.Flags().GetBool("incl-soft")
-		inclDeps, _ := cmd.Flags().GetBool("incl-deps")
-		inclOccur, _ := cmd.Flags().GetBool("incl-occur")
-		namespaces, _ := cmd.Flags().GetBool("namespaces")
+		metadata :=  viper.GetBool("analyze-metadata")
+		inclSoft :=  viper.GetBool("analyze-incl-soft")
+		inclDeps :=  viper.GetBool("analyze-incl-deps")
+		inclOccur  := viper.GetBool("analyze-incl-occur")
+		namespaces := viper.GetBool("analyze-namespaces")
 
 		var graphs []graph.Graph[string, *analyzer.Node]
 		var err error
 
-		if err = validateAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl); err != nil {
+		if err = validateAnalyzeFlags( slsas, sboms, uri, purl); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %s", err)
 			_ = cmd.Help()
 			os.Exit(1)
@@ -199,9 +199,9 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 	}, nil
 }
 
-func validateAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl bool) error {
+func validateAnalyzeFlags(slsas, sboms []string, uri, purl bool) error {
 
-	if (errSlsa != nil && errSbom != nil) || (len(slsas) == 0 && len(sboms) == 0) {
+	if  (len(slsas) == 0 && len(sboms) == 0) {
 		return fmt.Errorf("must specify slsa or sboms")
 	}
 
@@ -209,15 +209,15 @@ func validateAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, pu
 		return fmt.Errorf("must either specify slsa or sbom")
 	}
 
-	if errSlsa == nil && (len(slsas) <= 1 || len(slsas) > 2) && len(sboms) == 0 {
+	if  (len(slsas) <= 1 || len(slsas) > 2) && len(sboms) == 0 {
 		return fmt.Errorf("must specify exactly two slsas to analyze, specified %v", len(slsas))
 	}
 
-	if errSbom == nil && (len(sboms) <= 1 || len(sboms) > 2) && len(slsas) == 0 {
+	if (len(sboms) <= 1 || len(sboms) > 2) && len(slsas) == 0 {
 		return fmt.Errorf("must specify exactly two sboms to analyze, specified %v", len(sboms))
 	}
 
-	if errSlsa == nil && len(slsas) == 2 {
+	if  len(slsas) == 2 {
 		return fmt.Errorf("slsa diff to be implemented")
 	}
 
