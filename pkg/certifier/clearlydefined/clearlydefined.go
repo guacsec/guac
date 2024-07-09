@@ -54,9 +54,38 @@ func NewClearlyDefinedCertifier() certifier.Certifier {
 	return &cdCertifier{}
 }
 
-func getDefinition(defType, namespace, name, revision string) (*attestation.Definition, error) {
+func getPkgDefinition(defType, namespace, name, revision string) (*attestation.Definition, error) {
 	provider := map[string]string{"maven": "mavencentral"}
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider[defType], namespace, name, revision)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	resp, err := version.UATransport.RoundTrip(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+
+	var definition attestation.Definition
+	if err := json.Unmarshal(body, &definition); err != nil {
+		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
+	}
+
+	return &definition, nil
+}
+
+func getSrcDefinition(defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatalln(err)
@@ -99,14 +128,27 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 			if err != nil {
 				return fmt.Errorf("failed to parse purl with error: %w", err)
 			}
-			definition, err := getDefinition(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version)
+			definition, err := getPkgDefinition(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version)
 			if err != nil {
-				return fmt.Errorf("failed get definition from clearly defined with error: %w", err)
+				return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
 			}
 			if err := generateDocument(node.Purl, definition, docChannel); err != nil {
 				return fmt.Errorf("could not generate document from OSV results: %w", err)
 			}
+			if definition.Described.SourceLocation != nil {
+				srcDefinition, err := getSrcDefinition(*definition.Described.SourceLocation.Type, *definition.Described.SourceLocation.Provider,
+					*definition.Described.SourceLocation.Namespace, *definition.Described.SourceLocation.Name, *definition.Described.SourceLocation.Revision)
+				if err != nil {
+					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
+				}
 
+				srcInput := helpers.SourceToSourceInput(*definition.Described.SourceLocation.Type, *definition.Described.SourceLocation.Namespace,
+					*definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
+
+				if err := generateDocument(helpers.SrcClientKey(srcInput).NameId, srcDefinition, docChannel); err != nil {
+					return fmt.Errorf("could not generate document from OSV results: %w", err)
+				}
+			}
 		}
 		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}

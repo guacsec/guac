@@ -18,6 +18,7 @@ package helpers
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -82,6 +83,60 @@ func TestConcatenateSourceInput(t *testing.T) {
 				if got := GetKey[*model.SourceInputSpec, SrcIds](tt.sourceServer, SrcServerKey); got != tt.want {
 					t.Errorf("SourceKey() = %v, want %v", got, tt.want)
 				}
+			}
+		})
+	}
+}
+
+func TestSourceToSourceInput(t *testing.T) {
+	tests := []struct {
+		srcType   string
+		namespace string
+		name      string
+		revision  *string
+		want      *generated.SourceInputSpec
+	}{
+		{
+			name:      "kubernetes",
+			srcType:   "git",
+			namespace: "github.com/kubernetes",
+			revision:  ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+			want: &generated.SourceInputSpec{
+				Type:      "git",
+				Namespace: "github.com/kubernetes",
+				Name:      "kubernetes",
+				Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+			},
+		},
+		{
+			name:      "guac",
+			srcType:   "git",
+			namespace: "github.com/guacsec",
+			revision:  ptrfrom.String("v0.4.0"),
+			want: &generated.SourceInputSpec{
+				Type:      "git",
+				Namespace: "github.com/guacsec",
+				Name:      "guac",
+				Tag:       ptrfrom.String("v0.4.0"),
+			},
+		},
+		{
+			name:      "guac",
+			srcType:   "git",
+			namespace: "github.com/guacsec",
+			revision:  nil,
+			want: &generated.SourceInputSpec{
+				Type:      "git",
+				Namespace: "github.com/guacsec",
+				Name:      "guac",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := SourceToSourceInput(tt.srcType, tt.namespace, tt.name, tt.revision)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("Unexpected sourceInput results. (-want +got):\n%s", diff)
 			}
 		})
 	}

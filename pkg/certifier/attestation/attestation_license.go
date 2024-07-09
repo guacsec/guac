@@ -41,14 +41,14 @@ type ClearlyDefinedStatement struct {
 type Definition struct {
 	Described struct {
 		ReleaseDate    string `json:"releaseDate"`
-		SourceLocation struct {
-			Type      string `json:"type"`
-			Provider  string `json:"provider"`
-			Namespace string `json:"namespace"`
-			Name      string `json:"name"`
-			Revision  string `json:"revision"`
-			URL       string `json:"url"`
-		} `json:"sourceLocation"`
+		SourceLocation *struct {
+			Type      *string `json:"type,omitempty"`
+			Provider  *string `json:"provider,omitempty"`
+			Namespace *string `json:"namespace,omitempty"`
+			Name      *string `json:"name,omitempty"`
+			Revision  *string `json:"revision,omitempty"`
+			URL       *string `json:"url,omitempty"`
+		} `json:"sourceLocation,omitempty"`
 		Urls struct {
 			Registry string `json:"registry"`
 			Version  string `json:"version"`

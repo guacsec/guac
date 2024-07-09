@@ -87,7 +87,7 @@ func parseSubject(s *attestation.ClearlyDefinedStatement) ([]*generated.PkgInput
 
 func parseMetadata(s *attestation.ClearlyDefinedStatement) *generated.ScanMetadataInput {
 	return &generated.ScanMetadataInput{
-		TimeScanned:    *s.Predicate.Metadata.ScannedOn,
+		TimeScanned:    s.Predicate.Definition.Meta.Updated,
 		DbUri:          s.Predicate.Scanner.Database.Uri,
 		DbVersion:      s.Predicate.Scanner.Database.Version,
 		ScannerUri:     s.Predicate.Scanner.Uri,

@@ -70,3 +70,20 @@ func guacSrcId(srcType, namespace, name string, stcTag, srcCommit *string) SrcId
 	ids.NameId = fmt.Sprintf("%s::%s::%s::%s?", ids.NamespaceId, name, tag, commit)
 	return ids
 }
+
+func SourceToSourceInput(srcType, namespace, name string, revision *string) *generated.SourceInputSpec {
+	srcInput := &generated.SourceInputSpec{
+		Type:      srcType,
+		Namespace: namespace,
+		Name:      name,
+	}
+
+	if revision != nil {
+		if isCommit(*revision) {
+			srcInput.Commit = revision
+		} else {
+			srcInput.Tag = revision
+		}
+	}
+	return srcInput
+}
