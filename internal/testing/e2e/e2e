@@ -144,15 +144,16 @@ duplicate_schema
 for command in "${ingestion_commands[@]}"; do
   echo @@@@ Running ingestion command: "$command" | tee -a "$LOG_FILE"
   eval "$command"
+
+  echo @@@@ Waiting
+  sleep 60
+
   go run ${GUAC_DIR}"/cmd/guacone" certifier osv -p=false
 
   if [ $? -ne 0 ]; then
     echo "Error: Command '$command' failed" | tee -a "$LOG_FILE"
     exit 1
   fi
-
-  echo @@@@ Waiting
-  sleep 60
 
   echo @@@@ Running queries and validating output
 
