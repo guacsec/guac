@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/version"
+	"testing"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -129,6 +130,16 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 	return zap.NewNop().Sugar()
 }
 
-func SetLogger(l *zap.Logger) {
-	logger = l.Sugar()
+func replaceLogger(nl *zap.SugaredLogger) {
+	logger = nl
+}
+
+// SetLoggerForTest allows temporarily replacing the global logger for testing purposes.
+// It registers a cleanup function with the testing.T instance to revert the logger.
+func SetLogger(t *testing.T, testLogger *zap.SugaredLogger) {
+	oldLogger := logger
+	replaceLogger(testLogger)
+	t.Cleanup(func() {
+		replaceLogger(oldLogger)
+	})
 }

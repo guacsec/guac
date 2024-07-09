@@ -18,8 +18,13 @@
 package deps_dev
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"github.com/guacsec/guac/pkg/logging"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"strings"
 	"testing"
 	"time"
 
@@ -495,7 +500,7 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 		name         string
 		version      *string
 		pkgComponent *PackageComponent
-		wantErr      bool
+		wantLog      string
 	}{
 		{
 			testName:     "npm package with .git suffix",
@@ -504,7 +509,7 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			name:         "wasm-parser",
 			version:      ptrfrom.String("1.11.6"),
 			pkgComponent: &PackageComponent{},
-			wantErr:      false,
+			wantLog:      "",
 		},
 		{
 			testName:     "golang package without .git suffix",
@@ -513,20 +518,42 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			name:         "wire",
 			version:      ptrfrom.String("v0.5.0"),
 			pkgComponent: &PackageComponent{},
-			wantErr:      false,
+			wantLog:      "The project key was not found in the map: id:\"github.com/google/wire\"",
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.testName, func(t *testing.T) {
 			ctx := context.Background()
-			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second)
+
+			// Create a buffer to capture logs
+			var logBuffer bytes.Buffer
+			encoderConfig := zap.NewDevelopmentEncoderConfig()
+			core := zapcore.NewCore(
+				zapcore.NewConsoleEncoder(encoderConfig),
+				zapcore.AddSync(&logBuffer),
+				zapcore.DebugLevel,
+			)
+			zapLogger := zap.New(core)
+			logger := zapLogger.Sugar()
+
+			// Temporarily replace the global logger in the logging package
+			logging.SetLogger(t, logger)
+
+			// Set the logger in the context
+			ctx = logging.WithLogger(ctx)
+
+			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
 			}
-			if err := c.collectAdditionalMetadata(context.Background(), tt.pkgType, tt.namespace, tt.name, tt.version, tt.pkgComponent); (err != nil) != tt.wantErr {
-				t.Errorf("collectAdditionalMetadata() error = %v, wantErr %v", err, tt.wantErr)
+
+			_ = c.collectAdditionalMetadata(ctx, tt.pkgType, tt.namespace, tt.name, tt.version, tt.pkgComponent)
+
+			// Check if the log contains the expected log message
+			if !strings.Contains(logBuffer.String(), tt.wantLog) {
+				t.Errorf("Expected log to contain %q, but got %q", tt.wantLog, logBuffer.String())
 			}
 		})
 	}

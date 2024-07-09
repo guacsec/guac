@@ -65,10 +65,6 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 	} else {
 		m.Name = strings.TrimPrefix(u.Path, "/")
 	}
-	// Based on the issue https://github.com/guacsec/guac/issues/1413, we need to ensure
-	// that the .git suffix is removed from the repository name. This is because some
-	// repository URLs might include the .git suffix which is not expected by certain endpoints.
-	m.Name = strings.TrimSuffix(m.Name, ".git")
 
 	sp := strings.Split(m.Name, "@")
 	if len(sp) > 2 {
@@ -84,6 +80,11 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 			m.Tag = &tag
 		}
 	}
+
+	// Based on the issue https://github.com/guacsec/guac/issues/1413, we need to ensure
+	// that the .git suffix is removed from the repository name. This is because some
+	// repository URLs might include the .git suffix which is not expected by certain endpoints.
+	m.Name = strings.TrimSuffix(m.Name, ".git")
 
 	return m, nil
 }
