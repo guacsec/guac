@@ -271,7 +271,7 @@ require (
 	entgo.io/contrib v0.5.0
 	entgo.io/ent v0.13.0
 	github.com/99designs/gqlgen v0.17.48
-	github.com/CycloneDX/cyclonedx-go v0.8.0
+	github.com/CycloneDX/cyclonedx-go v0.9.0
 	github.com/Khan/genqlient v0.7.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/ProtonMail/gluon v0.17.0
