@@ -79,12 +79,10 @@ func (e SLSAAttestationEdges) BuiltFromOrErr() ([]*Artifact, error) {
 // BuiltByOrErr returns the BuiltBy value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e SLSAAttestationEdges) BuiltByOrErr() (*Builder, error) {
-	if e.loadedTypes[1] {
-		if e.BuiltBy == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: builder.Label}
-		}
+	if e.BuiltBy != nil {
 		return e.BuiltBy, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: builder.Label}
 	}
 	return nil, &NotLoadedError{edge: "built_by"}
 }
@@ -92,12 +90,10 @@ func (e SLSAAttestationEdges) BuiltByOrErr() (*Builder, error) {
 // SubjectOrErr returns the Subject value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e SLSAAttestationEdges) SubjectOrErr() (*Artifact, error) {
-	if e.loadedTypes[2] {
-		if e.Subject == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: artifact.Label}
-		}
+	if e.Subject != nil {
 		return e.Subject, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: artifact.Label}
 	}
 	return nil, &NotLoadedError{edge: "subject"}
 }

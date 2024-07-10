@@ -65,12 +65,10 @@ type DependencyEdges struct {
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e DependencyEdges) PackageOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[0] {
-		if e.Package == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.Package != nil {
 		return e.Package, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package"}
 }
@@ -78,12 +76,10 @@ func (e DependencyEdges) PackageOrErr() (*PackageVersion, error) {
 // DependentPackageNameOrErr returns the DependentPackageName value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e DependencyEdges) DependentPackageNameOrErr() (*PackageName, error) {
-	if e.loadedTypes[1] {
-		if e.DependentPackageName == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packagename.Label}
-		}
+	if e.DependentPackageName != nil {
 		return e.DependentPackageName, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packagename.Label}
 	}
 	return nil, &NotLoadedError{edge: "dependent_package_name"}
 }
@@ -91,12 +87,10 @@ func (e DependencyEdges) DependentPackageNameOrErr() (*PackageName, error) {
 // DependentPackageVersionOrErr returns the DependentPackageVersion value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e DependencyEdges) DependentPackageVersionOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[2] {
-		if e.DependentPackageVersion == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.DependentPackageVersion != nil {
 		return e.DependentPackageVersion, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "dependent_package_version"}
 }

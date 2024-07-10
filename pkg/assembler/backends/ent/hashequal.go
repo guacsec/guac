@@ -54,12 +54,10 @@ type HashEqualEdges struct {
 // ArtifactAOrErr returns the ArtifactA value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e HashEqualEdges) ArtifactAOrErr() (*Artifact, error) {
-	if e.loadedTypes[0] {
-		if e.ArtifactA == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: artifact.Label}
-		}
+	if e.ArtifactA != nil {
 		return e.ArtifactA, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: artifact.Label}
 	}
 	return nil, &NotLoadedError{edge: "artifact_a"}
 }
@@ -67,12 +65,10 @@ func (e HashEqualEdges) ArtifactAOrErr() (*Artifact, error) {
 // ArtifactBOrErr returns the ArtifactB value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e HashEqualEdges) ArtifactBOrErr() (*Artifact, error) {
-	if e.loadedTypes[1] {
-		if e.ArtifactB == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: artifact.Label}
-		}
+	if e.ArtifactB != nil {
 		return e.ArtifactB, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: artifact.Label}
 	}
 	return nil, &NotLoadedError{edge: "artifact_b"}
 }
