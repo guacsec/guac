@@ -391,6 +391,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
 				if collectedDoc == nil {
 					t.Fatalf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
+					return // Do this so that linter passes
 				}
 
 				tt.want[i].SourceInformation.DocumentRef = actualDocRef(collectedDoc.Blob)
