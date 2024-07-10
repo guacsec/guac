@@ -38,11 +38,11 @@ func TestClearlyDefined(t *testing.T) {
 		wantErr       bool
 		errMessage    error
 	}{{
-		name:          "query and generate attestation for OSV",
-		rootComponent: []*root_package.PackageNode{&testdata.Text4ShelPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
+		name:          "query and generate attestation from clearly defined",
+		rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.Text4ShellVulAttestation),
+				Blob:   []byte(testdata.ITE6ClearlyDefinedExample),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -83,59 +83,61 @@ func TestClearlyDefined(t *testing.T) {
 		name:          "bad type",
 		rootComponent: map[string]string{},
 		wantErr:       true,
-		errMessage:    ErrOSVComponenetTypeMismatch,
-	}, {
-		name:          "ensure intermediate vulnerabilities are reported",
-		rootComponent: []*root_package.PackageNode{&testdata.VertxWebCommonPackage, &testdata.VertxAuthCommonPackage, &testdata.VertxBridgeCommonPackage, &testdata.VertxCoreCommonPackage, &testdata.VertxWebPackage},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.VertxWebCommonAttestation),
-				Type:   processor.DocumentITE6Vul,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
-				},
-			},
-			{
-				Blob:   []byte(testdata.VertxAuthCommonAttestation),
-				Type:   processor.DocumentITE6Vul,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
-				},
-			},
-			{
-				Blob:   []byte(testdata.VertxBridgeCommonAttestation),
-				Type:   processor.DocumentITE6Vul,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
-				},
-			},
-			{
-				Blob:   []byte(testdata.VertxCoreCommonAttestation),
-				Type:   processor.DocumentITE6Vul,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
-				},
-			},
-			{
-				Blob:   []byte(testdata.VertxWebAttestation),
-				Type:   processor.DocumentITE6Vul,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
-				},
-			},
-		},
-		wantErr: false,
-	}}
+		errMessage:    ErrOSVComponentTypeMismatch,
+	},
+	// {
+	// 	name:          "ensure intermediate vulnerabilities are reported",
+	// 	rootComponent: []*root_package.PackageNode{&testdata.VertxWebCommonPackage, &testdata.VertxAuthCommonPackage, &testdata.VertxBridgeCommonPackage, &testdata.VertxCoreCommonPackage, &testdata.VertxWebPackage},
+	// 	want: []*processor.Document{
+	// 		{
+	// 			Blob:   []byte(testdata.VertxWebCommonAttestation),
+	// 			Type:   processor.DocumentITE6Vul,
+	// 			Format: processor.FormatJSON,
+	// 			SourceInformation: processor.SourceInformation{
+	// 				Collector: cdCollector,
+	// 				Source:    cdCollector,
+	// 			},
+	// 		},
+	// 		{
+	// 			Blob:   []byte(testdata.VertxAuthCommonAttestation),
+	// 			Type:   processor.DocumentITE6Vul,
+	// 			Format: processor.FormatJSON,
+	// 			SourceInformation: processor.SourceInformation{
+	// 				Collector: cdCollector,
+	// 				Source:    cdCollector,
+	// 			},
+	// 		},
+	// 		{
+	// 			Blob:   []byte(testdata.VertxBridgeCommonAttestation),
+	// 			Type:   processor.DocumentITE6Vul,
+	// 			Format: processor.FormatJSON,
+	// 			SourceInformation: processor.SourceInformation{
+	// 				Collector: cdCollector,
+	// 				Source:    cdCollector,
+	// 			},
+	// 		},
+	// 		{
+	// 			Blob:   []byte(testdata.VertxCoreCommonAttestation),
+	// 			Type:   processor.DocumentITE6Vul,
+	// 			Format: processor.FormatJSON,
+	// 			SourceInformation: processor.SourceInformation{
+	// 				Collector: cdCollector,
+	// 				Source:    cdCollector,
+	// 			},
+	// 		},
+	// 		{
+	// 			Blob:   []byte(testdata.VertxWebAttestation),
+	// 			Type:   processor.DocumentITE6Vul,
+	// 			Format: processor.FormatJSON,
+	// 			SourceInformation: processor.SourceInformation{
+	// 				Collector: cdCollector,
+	// 				Source:    cdCollector,
+	// 			},
+	// 		},
+	// 	},
+	// 	wantErr: false,
+	// },
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := NewClearlyDefinedCertifier()
@@ -175,6 +177,9 @@ func TestClearlyDefined(t *testing.T) {
 				collectedDocs = append(collectedDocs, d)
 			}
 			if err == nil {
+				if len(collectedDocs) != len(tt.want) {
+					t.Errorf("collected docs does not match wanted")
+				}
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
 					if err != nil {

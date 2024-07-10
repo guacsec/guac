@@ -1688,7 +1688,7 @@ var (
 		Purl: "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
 	}
 
-	Text4ShelPackage = root_package.PackageNode{
+	Text4ShellPackage = root_package.PackageNode{
 		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
 	}
 

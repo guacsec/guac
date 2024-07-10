@@ -34,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
 )
 
@@ -44,7 +45,7 @@ const (
 	cdCollector string = "clearlydefined"
 )
 
-var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
+var ErrOSVComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type cdCertifier struct {
 }
@@ -54,12 +55,14 @@ func NewClearlyDefinedCertifier() certifier.Certifier {
 	return &cdCertifier{}
 }
 
-func getPkgDefinition(defType, namespace, name, revision string) (*attestation.Definition, error) {
+func getPkgDefinition(ctx context.Context, defType, namespace, name, revision string) (*attestation.Definition, error) {
+	logger := logging.FromContext(ctx)
+
 	provider := map[string]string{"maven": "mavencentral"}
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider[defType], namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, fmt.Errorf("failed to generate new request with error: %w", err)
 	}
 	resp, err := version.UATransport.RoundTrip(req)
 	if err != nil {
@@ -68,7 +71,9 @@ func getPkgDefinition(defType, namespace, name, revision string) (*attestation.D
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		// log the error but don't return the error to continue the loop
+		logger.Infof("unexpected status code: %d", resp.StatusCode)
+		return nil, nil
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -84,7 +89,7 @@ func getPkgDefinition(defType, namespace, name, revision string) (*attestation.D
 	return &definition, nil
 }
 
-func getSrcDefinition(defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+func getSrcDefinition(ctx context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -118,7 +123,7 @@ func getSrcDefinition(defType, provider, namespace, name, revision string) (*att
 func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
 	packageNodes, ok := rootComponent.([]*root_package.PackageNode)
 	if !ok {
-		return ErrOSVComponenetTypeMismatch
+		return ErrOSVComponentTypeMismatch
 	}
 
 	packMap := map[string][]*root_package.PackageNode{}
@@ -131,6 +136,10 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 			definition, err := getPkgDefinition(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version)
 			if err != nil {
 				return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
+			}
+			// if definition for the package is not found, continue to the next package
+			if definition == nil {
+				continue
 			}
 			if err := generateDocument(node.Purl, definition, docChannel); err != nil {
 				return fmt.Errorf("could not generate document from OSV results: %w", err)

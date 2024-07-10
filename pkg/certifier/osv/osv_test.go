@@ -44,7 +44,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		errMessage    error
 	}{{
 		name:          "query and generate attestation for OSV",
-		rootComponent: []*root_package.PackageNode{&testdata.Text4ShelPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
+		rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.Text4ShellVulAttestation),
