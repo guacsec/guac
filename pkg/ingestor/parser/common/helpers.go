@@ -35,7 +35,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 			return &assembler.IsDependencyIngest{
 				Pkg:             foundNode,
 				DepPkg:          rfileNode,
-				DepPkgMatchFlag: GetMatchFlagsFromPkgInput(rfileNode),
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: dependency,
 					Justification:  justification,
@@ -48,7 +48,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 			return &assembler.IsDependencyIngest{
 				Pkg:             foundNode,
 				DepPkg:          rpackNode,
-				DepPkgMatchFlag: GetMatchFlagsFromPkgInput(rpackNode),
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: dependency,
 					Justification:  justification,
@@ -70,7 +70,7 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 				p := assembler.IsDependencyIngest{
 					Pkg:             topLevel,
 					DepPkg:          packNode,
-					DepPkgMatchFlag: GetMatchFlagsFromPkgInput(packNode),
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeUnknown,
 						Justification:  justification,
@@ -87,7 +87,7 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 			p := assembler.IsDependencyIngest{
 				Pkg:             topLevel,
 				DepPkg:          fileNode,
-				DepPkgMatchFlag: GetMatchFlagsFromPkgInput(fileNode),
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
@@ -124,12 +124,4 @@ func createTopLevelHasSBOM(blob []byte, uri string, source string, timestamp tim
 			KnownSince:       timestamp,
 		},
 	}
-}
-
-func GetMatchFlagsFromPkgInput(p *model.PkgInputSpec) model.MatchFlags {
-	matchFlags := model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
-	if p.Version != nil && *p.Version != "" {
-		matchFlags = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
-	}
-	return matchFlags
 }
