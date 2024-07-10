@@ -67,12 +67,10 @@ type CertifyVexEdges struct {
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertifyVexEdges) PackageOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[0] {
-		if e.Package == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.Package != nil {
 		return e.Package, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package"}
 }
@@ -80,12 +78,10 @@ func (e CertifyVexEdges) PackageOrErr() (*PackageVersion, error) {
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertifyVexEdges) ArtifactOrErr() (*Artifact, error) {
-	if e.loadedTypes[1] {
-		if e.Artifact == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: artifact.Label}
-		}
+	if e.Artifact != nil {
 		return e.Artifact, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: artifact.Label}
 	}
 	return nil, &NotLoadedError{edge: "artifact"}
 }
@@ -93,12 +89,10 @@ func (e CertifyVexEdges) ArtifactOrErr() (*Artifact, error) {
 // VulnerabilityOrErr returns the Vulnerability value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertifyVexEdges) VulnerabilityOrErr() (*VulnerabilityID, error) {
-	if e.loadedTypes[2] {
-		if e.Vulnerability == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: vulnerabilityid.Label}
-		}
+	if e.Vulnerability != nil {
 		return e.Vulnerability, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: vulnerabilityid.Label}
 	}
 	return nil, &NotLoadedError{edge: "vulnerability"}
 }

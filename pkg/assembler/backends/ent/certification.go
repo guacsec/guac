@@ -68,12 +68,10 @@ type CertificationEdges struct {
 // SourceOrErr returns the Source value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertificationEdges) SourceOrErr() (*SourceName, error) {
-	if e.loadedTypes[0] {
-		if e.Source == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: sourcename.Label}
-		}
+	if e.Source != nil {
 		return e.Source, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: sourcename.Label}
 	}
 	return nil, &NotLoadedError{edge: "source"}
 }
@@ -81,12 +79,10 @@ func (e CertificationEdges) SourceOrErr() (*SourceName, error) {
 // PackageVersionOrErr returns the PackageVersion value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertificationEdges) PackageVersionOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[1] {
-		if e.PackageVersion == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.PackageVersion != nil {
 		return e.PackageVersion, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package_version"}
 }
@@ -94,12 +90,10 @@ func (e CertificationEdges) PackageVersionOrErr() (*PackageVersion, error) {
 // AllVersionsOrErr returns the AllVersions value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertificationEdges) AllVersionsOrErr() (*PackageName, error) {
-	if e.loadedTypes[2] {
-		if e.AllVersions == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packagename.Label}
-		}
+	if e.AllVersions != nil {
 		return e.AllVersions, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: packagename.Label}
 	}
 	return nil, &NotLoadedError{edge: "all_versions"}
 }
@@ -107,12 +101,10 @@ func (e CertificationEdges) AllVersionsOrErr() (*PackageName, error) {
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertificationEdges) ArtifactOrErr() (*Artifact, error) {
-	if e.loadedTypes[3] {
-		if e.Artifact == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: artifact.Label}
-		}
+	if e.Artifact != nil {
 		return e.Artifact, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: artifact.Label}
 	}
 	return nil, &NotLoadedError{edge: "artifact"}
 }
