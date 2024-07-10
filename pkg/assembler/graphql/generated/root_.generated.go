@@ -6412,7 +6412,7 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion "
+  "Package for the dependency; MUST be PackageVersion "
   dependencyPackage: Package!
   "Type of dependency"
   dependencyType: DependencyType!

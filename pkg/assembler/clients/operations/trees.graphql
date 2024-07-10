@@ -149,7 +149,6 @@ fragment AllIsDependencyTree on IsDependency {
     ...AllPkgTree
   }
   dependencyType
-  versionRange
   origin
   collector
 }

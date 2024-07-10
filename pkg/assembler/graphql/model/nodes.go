@@ -1011,7 +1011,7 @@ type IsDependency struct {
 	ID string `json:"id"`
 	// Package that has the dependency
 	Package *Package `json:"package"`
-	// Package for the dependency; MUST be PackageName or PackageVersion
+	// Package for the dependency; MUST be PackageVersion
 	DependencyPackage *Package `json:"dependencyPackage"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`

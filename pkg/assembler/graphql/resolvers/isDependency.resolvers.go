@@ -18,7 +18,7 @@ func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.IDorP
 		return "", gqlerror.Errorf("%v :: dependency type was not valid", funcName)
 	}
 
-	return r.Backend.IngestDependency(ctx, pkg, depPkg, depPkgMatchType, dependency)
+	return r.Backend.IngestDependency(ctx, pkg, depPkg, dependency)
 }
 
 // IngestDependencies is the resolver for the ingestDependencies field.
@@ -37,7 +37,7 @@ func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model
 		}
 	}
 
-	return r.Backend.IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+	return r.Backend.IngestDependencies(ctx, pkgs, depPkgs, dependencies)
 }
 
 // IsDependency is the resolver for the IsDependency field.

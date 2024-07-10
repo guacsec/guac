@@ -67,11 +67,11 @@ func TestIngestDependency(t *testing.T) {
 			depPkg := model.IDorPkgInput{PackageInput: testdata.P4}
 
 			b.EXPECT().
-				IngestDependency(ctx, pkg, depPkg, testdata.MAll, dep).
+				IngestDependency(ctx, pkg, depPkg, dep).
 				Return("", nil).
 				Times(times)
 
-			_, err := r.Mutation().IngestDependency(ctx, pkg, depPkg, testdata.MAll, dep)
+			_, err := r.Mutation().IngestDependency(ctx, pkg, depPkg, dep)
 
 			checkErr(t, err, test.ExpErr != "", "IngestDependency", test.ExpErr)
 		})
@@ -82,7 +82,6 @@ func TestIngestDependencies(t *testing.T) {
 	type call struct {
 		P1s []*model.IDorPkgInput
 		P2s []*model.IDorPkgInput
-		MF  model.MatchFlags
 		IDs []*model.IsDependencyInputSpec
 	}
 	tests := []struct {
@@ -96,7 +95,6 @@ func TestIngestDependencies(t *testing.T) {
 				{
 					P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					P2s: []*model.IDorPkgInput{{PackageInput: testdata.P4}},
-					MF:  testdata.MAll,
 					IDs: []*model.IsDependencyInputSpec{
 						{
 							Justification: "test justification",
@@ -115,7 +113,6 @@ func TestIngestDependencies(t *testing.T) {
 				{
 					P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
 					P2s: []*model.IDorPkgInput{{PackageInput: testdata.P4}},
-					MF:  testdata.MAll,
 					IDs: []*model.IsDependencyInputSpec{
 						{
 							Justification:  "test justification",
@@ -136,7 +133,6 @@ func TestIngestDependencies(t *testing.T) {
 				{
 					P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					P2s: []*model.IDorPkgInput{{PackageInput: testdata.P4}, {PackageInput: testdata.P5}},
-					MF:  testdata.MAll,
 					IDs: []*model.IsDependencyInputSpec{{DependencyType: "DIRECT"}, {DependencyType: "bad value"}},
 				},
 			},
@@ -147,7 +143,6 @@ func TestIngestDependencies(t *testing.T) {
 			Calls: []call{{
 				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}},
-				MF:  testdata.MAll,
 				IDs: []*model.IsDependencyInputSpec{
 					{
 						Justification:  "test justification",
@@ -175,10 +170,10 @@ func TestIngestDependencies(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs).
+					IngestDependencies(ctx, o.P1s, o.P2s, o.IDs).
 					Return(nil, nil).
 					Times(times)
-				_, err := r.Mutation().IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
+				_, err := r.Mutation().IngestDependencies(ctx, o.P1s, o.P2s, o.IDs)
 
 				checkErr(t, err, test.ExpErr != "", "IngestDependencies", test.ExpErr)
 			}
@@ -323,11 +318,11 @@ func TestIngestDependenciesDependencyTypeValidity(t *testing.T) {
 
 			b.
 				EXPECT().
-				IngestDependencies(ctx, pkgs, depPkgs, testdata.MAll, dependencies).
+				IngestDependencies(ctx, pkgs, depPkgs, dependencies).
 				Return(nil, nil).
 				Times(times)
 
-			_, err := r.Mutation().IngestDependencies(ctx, pkgs, depPkgs, testdata.MAll, dependencies)
+			_, err := r.Mutation().IngestDependencies(ctx, pkgs, depPkgs, dependencies)
 
 			checkErr(t, err, !test.ExpAllValid, "IngestDependencies", "not all dependencies had valid types")
 		})

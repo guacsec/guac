@@ -44,7 +44,6 @@ fragment allIsDependencyTree on IsDependency {
     }
   }
   dependencyType
-  versionRange
   origin
   collector
   documentRef
