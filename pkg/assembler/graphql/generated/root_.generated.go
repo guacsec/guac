@@ -317,7 +317,6 @@ type ComplexityRoot struct {
 		Justification     func(childComplexity int) int
 		Origin            func(childComplexity int) int
 		Package           func(childComplexity int) int
-		VersionRange      func(childComplexity int) int
 	}
 
 	IsDependencyConnection struct {
@@ -386,8 +385,8 @@ type ComplexityRoot struct {
 		IngestCertifyLegals             func(childComplexity int, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) int
 		IngestCertifyVuln               func(childComplexity int, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) int
 		IngestCertifyVulns              func(childComplexity int, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) int
-		IngestDependencies              func(childComplexity int, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
-		IngestDependency                func(childComplexity int, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) int
+		IngestDependencies              func(childComplexity int, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) int
+		IngestDependency                func(childComplexity int, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) int
 		IngestHasMetadata               func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) int
 		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) int
@@ -1884,13 +1883,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependency.Package(childComplexity), true
 
-	case "IsDependency.versionRange":
-		if e.complexity.IsDependency.VersionRange == nil {
-			break
-		}
-
-		return e.complexity.IsDependency.VersionRange(childComplexity), true
-
 	case "IsDependencyConnection.edges":
 		if e.complexity.IsDependencyConnection.Edges == nil {
 			break
@@ -2263,7 +2255,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["depPkgs"].([]*model.IDorPkgInput), args["depPkgMatchType"].(model.MatchFlags), args["dependencies"].([]*model.IsDependencyInputSpec)), true
+		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["depPkgs"].([]*model.IDorPkgInput), args["dependencies"].([]*model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestDependency":
 		if e.complexity.Mutation.IngestDependency == nil {
@@ -2275,7 +2267,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["depPkgMatchType"].(model.MatchFlags), args["dependency"].(model.IsDependencyInputSpec)), true
+		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["dependency"].(model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestHasMetadata":
 		if e.complexity.Mutation.IngestHasMetadata == nil {
@@ -6422,8 +6414,6 @@ type IsDependency {
   package: Package!
   "Package for the dependency; MUST be PackageName or PackageVersion "
   dependencyPackage: Package!
-  "Version range for the dependency link, required if depedentPackage points to PackageName"
-  versionRange: String!
   "Type of dependency"
   dependencyType: DependencyType!
   "Justification for the attested relationship"
@@ -6506,14 +6496,12 @@ extend type Mutation {
   ingestDependency(
     pkg: IDorPkgInput!
     depPkg: IDorPkgInput!
-    depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
   "Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM."
   ingestDependencies(
     pkgs: [IDorPkgInput!]!
     depPkgs: [IDorPkgInput!]!
-    depPkgMatchType: MatchFlags!
     dependencies: [IsDependencyInputSpec!]!
   ): [ID!]!
 }

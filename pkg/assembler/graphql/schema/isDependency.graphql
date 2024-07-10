@@ -32,10 +32,8 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion "
+  "Package for the dependency; MUST be PackageVersion "
   dependencyPackage: Package!
-  "Version range for the dependency link, required if depedentPackage points to PackageName"
-  versionRange: String!
   "Type of dependency"
   dependencyType: DependencyType!
   "Justification for the attested relationship"
@@ -118,14 +116,12 @@ extend type Mutation {
   ingestDependency(
     pkg: IDorPkgInput!
     depPkg: IDorPkgInput!
-    depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
   "Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM."
   ingestDependencies(
     pkgs: [IDorPkgInput!]!
     depPkgs: [IDorPkgInput!]!
-    depPkgMatchType: MatchFlags!
     dependencies: [IsDependencyInputSpec!]!
   ): [ID!]!
 }

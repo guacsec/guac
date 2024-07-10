@@ -54,7 +54,6 @@ var (
 					Name:      "openssl",
 					Version:   ptrfrom.String("3.0.3"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -76,7 +75,6 @@ var (
 					Name:      "dpkg",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -98,7 +96,6 @@ var (
 					Name:      "bottompkg",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeIndirect,
@@ -248,7 +245,6 @@ var (
 					Name:      "pkgName3",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -332,7 +328,6 @@ var (
 					Name:      "extraName",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "=3.0.3",
 					DependencyType: model.DependencyTypeDirect,
@@ -429,7 +424,6 @@ var (
 					Name:      "pkgNameB",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -563,7 +557,6 @@ var (
 					Name:      "pkgNameE",
 					Version:   ptrfrom.String("3.0.3"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "=>2.0.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -664,7 +657,6 @@ var (
 					Name:      "pkgNameI",
 					Version:   ptrfrom.String("3.0.3"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=2.0.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -725,7 +717,6 @@ var (
 					Name:      "bName",
 					Version:   ptrfrom.String("1.19.1"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				Pkg: &model.PkgInputSpec{
 					Type:      "dType",
 					Namespace: ptrfrom.String("dNamespace"),
@@ -863,7 +854,6 @@ var (
 					Name:      "pkgNameM",
 					Version:   ptrfrom.String("3.0.3"),
 				},
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "=>1.0.0",
 					DependencyType: model.DependencyTypeDirect,

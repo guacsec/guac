@@ -1013,8 +1013,6 @@ type IsDependency struct {
 	Package *Package `json:"package"`
 	// Package for the dependency; MUST be PackageName or PackageVersion
 	DependencyPackage *Package `json:"dependencyPackage"`
-	// Version range for the dependency link, required if depedentPackage points to PackageName
-	VersionRange string `json:"versionRange"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
 	// Justification for the attested relationship
