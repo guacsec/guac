@@ -333,7 +333,7 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, d assembler.
 		return nil, fmt.Errorf("failed to find ingested Source ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](d.DepPkg, helpers.PkgClientKey).VersionId)
 	}
 
-	if response, err := model.IngestIsDependency(ctx, client, *pkgID, *depPkgID, d.DepPkgMatchFlag, *d.IsDependency); err != nil {
+	if response, err := model.IngestIsDependency(ctx, client, *pkgID, *depPkgID, *d.IsDependency); err != nil {
 		return nil, err
 	} else {
 		return &response.IngestDependency, nil

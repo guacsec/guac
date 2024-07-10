@@ -625,59 +625,32 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, cs []as
 
 func ingestIsDependencies(ctx context.Context, client graphql.Client, deps []assembler.IsDependencyIngest, packageInputMap map[string]*model.IDorPkgInput) ([]string, error) {
 
-	var depToSpecificVersion, depToAllVersions struct {
-		pkgs            []model.IDorPkgInput
-		depPkgs         []model.IDorPkgInput
-		depPkgMatchFlag model.MatchFlags
-		dependencies    []model.IsDependencyInputSpec
+	var depToSpecificVersion struct {
+		pkgs         []model.IDorPkgInput
+		depPkgs      []model.IDorPkgInput
+		dependencies []model.IsDependencyInputSpec
 	}
 
-	depToSpecificVersion.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
-	depToAllVersions.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
-
 	for _, ingest := range deps {
-		if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
-			if pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId]; found {
-				depToSpecificVersion.pkgs = append(depToSpecificVersion.pkgs, *pkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
-			}
-			if depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId]; found {
-				depToSpecificVersion.depPkgs = append(depToSpecificVersion.depPkgs, *depPkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId)
-			}
-			depToSpecificVersion.dependencies = append(depToSpecificVersion.dependencies, *ingest.IsDependency)
-		} else if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeAllVersions {
-			if pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId]; found {
-				depToAllVersions.pkgs = append(depToAllVersions.pkgs, *pkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
-			}
-			if depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId]; found {
-				depToAllVersions.depPkgs = append(depToAllVersions.depPkgs, *depPkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId)
-			}
-			depToAllVersions.dependencies = append(depToAllVersions.dependencies, *ingest.IsDependency)
+		if pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId]; found {
+			depToSpecificVersion.pkgs = append(depToSpecificVersion.pkgs, *pkgID)
+		} else {
+			return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
 		}
+		if depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId]; found {
+			depToSpecificVersion.depPkgs = append(depToSpecificVersion.depPkgs, *depPkgID)
+		} else {
+			return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId)
+		}
+		depToSpecificVersion.dependencies = append(depToSpecificVersion.dependencies, *ingest.IsDependency)
 	}
 
 	var isDependenciesIDs []string
-	if len(depToSpecificVersion.pkgs) > 0 {
-		isDependencies, err := model.IngestIsDependencies(ctx, client, depToSpecificVersion.pkgs, depToSpecificVersion.depPkgs, depToSpecificVersion.depPkgMatchFlag, depToSpecificVersion.dependencies)
-		if err != nil {
-			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
-		}
-		isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
+	isDependencies, err := model.IngestIsDependencies(ctx, client, depToSpecificVersion.pkgs, depToSpecificVersion.depPkgs, depToSpecificVersion.dependencies)
+	if err != nil {
+		return nil, fmt.Errorf("isDependencies failed with error: %w", err)
 	}
-	if len(depToAllVersions.pkgs) > 0 {
-		isDependencies, err := model.IngestIsDependencies(ctx, client, depToAllVersions.pkgs, depToAllVersions.depPkgs, depToAllVersions.depPkgMatchFlag, depToAllVersions.dependencies)
-		if err != nil {
-			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
-		}
-		isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
-	}
+	isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
 
 	return isDependenciesIDs, nil
 }

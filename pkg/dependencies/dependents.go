@@ -18,8 +18,9 @@ package dependencies
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"sort"
+
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
