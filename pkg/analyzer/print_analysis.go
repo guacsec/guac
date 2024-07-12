@@ -152,7 +152,53 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 	return nil
 }
 
-func PrintDiffedPathTable(diffs []DiffedPath) error {
+func PrintDiffedNodeTable(diffs DiffResult) error {
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
+
+	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
+
+	table.SetNoWhiteSpace(true)
+
+	table.SetColumnSeparator("\t\t")
+	table.SetAutoMergeCells(false)
+
+	table.SetHeader([]string{"Node Differences"})
+	var row []string
+
+	table.SetColMinWidth(0, colMinWidth)
+	table.SetColMinWidth(2, colMinWidth)
+
+	for _, diff := range diffs.Nodes {
+
+		s, err := GetNodeString(*diff.NodeOne)
+		if err != nil {
+			return fmt.Errorf("unable to print diffs: %v", err)
+		}
+		row = append(row, s)
+
+		row = append(row, "<--->")
+
+		s, err = GetNodeString(*diff.NodeTwo)
+		if err != nil {
+			return fmt.Errorf("unable to print diffs: %v", err)
+		}
+		row = append(row, s)
+		table.Append(row)
+
+		table.Append([]string{"================================="})
+		table.Append([]string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
+		table.Append([]string{"================================="})
+	}
+
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.Render()
+	return nil
+
+}
+
+func PrintDiffedPathTable(diffs DiffResult) error {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
@@ -166,7 +212,7 @@ func PrintDiffedPathTable(diffs []DiffedPath) error {
 
 	table.SetHeader([]string{"Path Differences"})
 
-	for _, diff := range diffs {
+	for _, diff := range diffs.Paths {
 		var row []string
 
 		for i, nodeOne := range diff.PathOne {

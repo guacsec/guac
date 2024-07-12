@@ -41,7 +41,7 @@ type AnalyzeOpts struct {
 	PURL       bool
 }
 
-var analyzeCmd = &cobra.Command {
+var analyzeCmd = &cobra.Command{
 	Use:   "analyze <operation> <sboms> [flags] ",
 	Short: "analyze is a CLI tool tailored for comparing, intersecting, and merging Software Bill of Materials (SBOMs) within GUAC",
 	Long: `Diff Analysis: Compare two SBOMs to identify differences in their software components, versions, and dependencies.
@@ -78,21 +78,21 @@ var analyzeCmd = &cobra.Command {
 		httpClient := http.Client{}
 		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 
-		slsas  := viper.GetStringSlice("analyze-slsa")
-		sboms :=    viper.GetStringSlice("analyze-sboms")
-		uri  :=  viper.GetBool("analyze-uri-input")
-		purl  :=  viper.GetBool("analyze-purl-input")
+		slsas := viper.GetStringSlice("analyze-slsa")
+		sboms := viper.GetStringSlice("analyze-sboms")
+		uri := viper.GetBool("analyze-uri-input")
+		purl := viper.GetBool("analyze-purl-input")
 
-		metadata :=  viper.GetBool("analyze-metadata")
-		inclSoft :=  viper.GetBool("analyze-incl-soft")
-		inclDeps :=  viper.GetBool("analyze-incl-deps")
-		inclOccur  := viper.GetBool("analyze-incl-occur")
+		metadata := viper.GetBool("analyze-metadata")
+		inclSoft := viper.GetBool("analyze-incl-soft")
+		inclDeps := viper.GetBool("analyze-incl-deps")
+		inclOccur := viper.GetBool("analyze-incl-occur")
 		namespaces := viper.GetBool("analyze-namespaces")
 
 		var graphs []graph.Graph[string, *analyzer.Node]
 		var err error
 
-		if err = validateAnalyzeFlags( slsas, sboms, uri, purl); err != nil {
+		if err = validateAnalyzeFlags(slsas, sboms, uri, purl); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %s", err)
 			_ = cmd.Help()
 			os.Exit(1)
@@ -100,13 +100,11 @@ var analyzeCmd = &cobra.Command {
 
 		graphs, err = hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
 			Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur,
-			Namespaces: namespaces, URI: uri, PURL: purl, })
+			Namespaces: namespaces, URI: uri, PURL: purl})
 
 		if err != nil {
 			logger.Fatalf("Unable to generate graphs: %v", err)
 		}
-
-	
 
 		if args[0] == "diff" {
 			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
@@ -117,6 +115,10 @@ var analyzeCmd = &cobra.Command {
 			diffs, err := analyzer.CompareAllPaths(analysisOne, analysisTwo)
 			if err != nil {
 				logger.Fatalf("unable to generate diff analysis: %v", err)
+			}
+
+			if err = analyzer.PrintDiffedNodeTable(diffs); err != nil {
+				logger.Fatalf("unable to print diff analysis: %v", err)
 			}
 
 			if err = analyzer.PrintDiffedPathTable(diffs); err != nil {
@@ -142,7 +144,6 @@ var analyzeCmd = &cobra.Command {
 		}
 	},
 }
-
 
 func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []string, opts AnalyzeOpts) ([]graph.Graph[string, *analyzer.Node], error) {
 
@@ -201,7 +202,7 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 
 func validateAnalyzeFlags(slsas, sboms []string, uri, purl bool) error {
 
-	if  (len(slsas) == 0 && len(sboms) == 0) {
+	if len(slsas) == 0 && len(sboms) == 0 {
 		return fmt.Errorf("must specify slsa or sboms")
 	}
 
@@ -209,7 +210,7 @@ func validateAnalyzeFlags(slsas, sboms []string, uri, purl bool) error {
 		return fmt.Errorf("must either specify slsa or sbom")
 	}
 
-	if  (len(slsas) <= 1 || len(slsas) > 2) && len(sboms) == 0 {
+	if (len(slsas) <= 1 || len(slsas) > 2) && len(sboms) == 0 {
 		return fmt.Errorf("must specify exactly two slsas to analyze, specified %v", len(slsas))
 	}
 
@@ -217,11 +218,11 @@ func validateAnalyzeFlags(slsas, sboms []string, uri, purl bool) error {
 		return fmt.Errorf("must specify exactly two sboms to analyze, specified %v", len(sboms))
 	}
 
-	if  len(slsas) == 2 {
+	if len(slsas) == 2 {
 		return fmt.Errorf("slsa diff to be implemented")
 	}
 
-	if sboms[0] ==  "" || sboms[1] == "" {
+	if sboms[0] == "" || sboms[1] == "" {
 		return fmt.Errorf("expected sbom received \"\"")
 	}
 
@@ -235,8 +236,6 @@ func validateAnalyzeFlags(slsas, sboms []string, uri, purl bool) error {
 
 	return nil
 }
-
-
 
 func init() {
 	set, err := cli.BuildFlags([]string{
@@ -265,5 +264,5 @@ func init() {
 	}
 
 	rootCmd.AddCommand(analyzeCmd)
-	
+
 }

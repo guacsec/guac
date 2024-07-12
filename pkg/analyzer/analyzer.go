@@ -53,12 +53,23 @@ func (a Action) String() string {
 }
 
 type Node struct {
-	ID      string
+	ID         string
 	Attributes map[string]string
-	Pkg model.AllIsDependencyTreePackage
-	NodeType string
-	DepPkg model.AllIsDependencyTreeDependencyPackage
-	Color    string
+	Pkg        model.AllIsDependencyTreePackage
+	NodeType   string
+	DepPkg     model.AllIsDependencyTreeDependencyPackage
+	Color      string
+}
+
+type DiffResult struct {
+	Paths []DiffedPath
+	Nodes map[string]DiffedNodePair
+}
+
+type DiffedNodePair struct {
+	NodeOne *Node
+	NodeTwo *Node
+	Count   int
 }
 
 type DiffedPath struct {
@@ -300,7 +311,7 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 	if metadata || compareAll {
 		//add metadata
-		node, err := g.Vertex("HasSBOM");
+		node, err := g.Vertex("HasSBOM")
 		if err != nil {
 			return g, fmt.Errorf("hasSBOM node not found")
 		}
@@ -348,8 +359,8 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 				AddGraphNode(g, hashValPackage, "black") // so, create a node
 				AddGraphEdge(g, "HasSBOM", hashValPackage, "black")
 				//set attributes here
-				node, err := g.Vertex(hashValPackage);
-				if err !=  nil {
+				node, err := g.Vertex(hashValPackage)
+				if err != nil {
 					return g, fmt.Errorf("newly created node not found in graph")
 				}
 				node.NodeType = "Package"
@@ -382,8 +393,8 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 			if err != nil { //node does not exist
 				AddGraphNode(g, hashValDependencyPackage, "black")
-				node, err := g.Vertex(hashValDependencyPackage);
-				if err !=  nil {
+				node, err := g.Vertex(hashValDependencyPackage)
+				if err != nil {
 					return g, fmt.Errorf("newly created node not found in graph")
 				}
 				node.NodeType = "DependencyPackage"
@@ -407,8 +418,8 @@ func AddGraphNode(g graph.Graph[string, *Node], id, color string) {
 	}
 
 	newNode := &Node{
-		ID:         id,
-		Color:      color,
+		ID:    id,
+		Color: color,
 	}
 
 	err = g.AddVertex(newNode, graph.VertexAttribute("color", color))
@@ -527,16 +538,13 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 	var versionBig, versionSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion
 	var qualifierBig, qualifierSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
 
-
 	switch nodeOne.NodeType {
 
 	case "Package":
 
 		nOne := nodeOne.Pkg
 
-
 		nTwo := nodeTwo.Pkg
-
 
 		if nodeOne.ID == nodeTwo.ID {
 			return []string{}, nil
@@ -663,11 +671,9 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 			}
 		}
 	case "DependencyPackage":
-		nOne:= nodeOne.DepPkg
+		nOne := nodeOne.DepPkg
 
-
-		nTwo:= nodeTwo.DepPkg
-
+		nTwo := nodeTwo.DepPkg
 
 		if nodeOne.ID == nodeTwo.ID {
 
@@ -761,7 +767,6 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 
 					if version1.Version != version2.Version {
 						diffs = append(diffs, fmt.Sprintf("Version %s != %s for name %s in namespace %s", version1.Version, version2.Version, name1.Name, namespace1.Namespace))
-
 					}
 
 					if version1.Subpath != version2.Subpath {
@@ -849,7 +854,7 @@ func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int,
 
 }
 
-func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
+func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 
 	var small, big [][]*Node
 	if len(listOne) > len(listTwo) {
@@ -863,13 +868,16 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 		big = listOne
 	}
 
-	var results []DiffedPath
+	var pathResults []DiffedPath
+	nodeResults := make(map[string]DiffedNodePair)
+
 	used := make(map[int]bool)
 
 	for _, pathOne := range small {
 
-		var diff DiffedPath
-		diff.PathOne = pathOne
+		var pathDiff DiffedPath
+
+		pathDiff.PathOne = pathOne
 		min := math.MaxInt32
 		var index int
 
@@ -882,26 +890,58 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 			diffs, diffNum, err := CompareTwoPaths(pathOne, pathTwo)
 
 			if err != nil {
-				return results, fmt.Errorf(err.Error())
+				return DiffResult{}, fmt.Errorf(err.Error())
 			}
 
 			if diffNum < min {
-				diff.PathTwo = pathTwo
+				pathDiff.PathTwo = pathTwo
 				min = diffNum
-				diff.Diffs = diffs
+				pathDiff.Diffs = diffs
 				index = i
 			}
 		}
+
 		used[index] = true
-		results = append(results, diff)
+
+		count := 0
+		seenNodeIndex := -1
+
+		//find if there is only one node causing the paths to differ. If yes, then mark it in the seen map.
+		for k, list := range pathDiff.Diffs {
+			if len(list) > 0 {
+				count++
+				seenNodeIndex = k
+			}
+		}
+
+		if count == 1 {
+
+			key := ""
+			if _, exists := nodeResults[pathDiff.PathOne[seenNodeIndex].ID+pathDiff.PathTwo[seenNodeIndex].ID]; exists {
+				key = pathDiff.PathOne[seenNodeIndex].ID + pathDiff.PathTwo[seenNodeIndex].ID
+				nodeResults[key] = DiffedNodePair{NodeOne: pathDiff.PathOne[seenNodeIndex], NodeTwo: pathDiff.PathTwo[seenNodeIndex], Count: nodeResults[key].Count + 1}
+
+			} else if _, exists := nodeResults[pathDiff.PathTwo[seenNodeIndex].ID+pathDiff.PathOne[seenNodeIndex].ID]; exists {
+				key = pathDiff.PathTwo[seenNodeIndex].ID + pathDiff.PathOne[seenNodeIndex].ID
+				nodeResults[key] = DiffedNodePair{NodeOne: pathDiff.PathOne[seenNodeIndex], NodeTwo: pathDiff.PathTwo[seenNodeIndex], Count: nodeResults[key].Count + 1}
+
+			} else {
+				key = pathDiff.PathTwo[seenNodeIndex].ID + pathDiff.PathOne[seenNodeIndex].ID
+				nodeResults[key] = DiffedNodePair{NodeOne: pathDiff.PathOne[seenNodeIndex], NodeTwo: pathDiff.PathTwo[seenNodeIndex], Count: 1}
+
+			}
+			continue
+		}
+
+		pathResults = append(pathResults, pathDiff)
 	}
 
 	for i, val := range big {
 		_, ok := used[i]
 		if !ok {
-			results = append(results, DiffedPath{PathOne: val})
+			pathResults = append(pathResults, DiffedPath{PathOne: val})
 		}
 	}
 
-	return results, nil
+	return DiffResult{Paths: pathResults, Nodes: nodeResults}, nil
 }
