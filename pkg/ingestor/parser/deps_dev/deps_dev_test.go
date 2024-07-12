@@ -89,7 +89,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^3.0.0 || ^4.0.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -111,7 +110,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^1.1.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -133,7 +131,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^4.1.1",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -324,7 +321,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^0.1",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -432,7 +428,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^3.0.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",

@@ -132,7 +132,6 @@ func Test_spdxParser(t *testing.T) {
 							Subpath:    &packageOfEmptyString,
 						},
 						IsDependency: &generated.IsDependencyInputSpec{
-							VersionRange:   "sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 							DependencyType: "UNKNOWN",
 							Justification:  "top-level package GUAC heuristic connecting to each file/package",
 						},
@@ -429,7 +428,6 @@ func Test_spdxParser(t *testing.T) {
 						DepPkg: pUrlToPkgDiscardError("pkg:rpm/redhat/python3-libcomps@0.1.18-1.el9?arch=x86_64"),
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
-							VersionRange:   "0.1.18-1.el9",
 							Justification:  "Derived from SPDX CONTAINED_BY relationship",
 						},
 					},

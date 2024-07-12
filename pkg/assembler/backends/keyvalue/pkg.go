@@ -19,17 +19,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"reflect"
 	"slices"
 	"sort"
 	"strings"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal data: Packages
