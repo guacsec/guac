@@ -621,20 +621,13 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionRange", "dependencyType", "justification", "origin", "collector", "documentRef"}
+	fieldsInOrder := [...]string{"dependencyType", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "versionRange":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.VersionRange = data
 		case "dependencyType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyType"))
 			data, err := ec.unmarshalNDependencyType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx, v)
@@ -683,7 +676,7 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "package", "dependencyPackage", "versionRange", "dependencyType", "justification", "origin", "collector", "documentRef"}
+	fieldsInOrder := [...]string{"id", "package", "dependencyPackage", "dependencyType", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -711,13 +704,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 				return it, err
 			}
 			it.DependencyPackage = data
-		case "versionRange":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.VersionRange = data
 		case "dependencyType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyType"))
 			data, err := ec.unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx, v)

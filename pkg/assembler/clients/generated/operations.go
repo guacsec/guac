@@ -12928,17 +12928,12 @@ func (v *IngestVulnerabilityResponse) GetIngestVulnerability() IngestVulnerabili
 
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
-	// versionRange should be specified for depedentPackages that point to PackageName
-	VersionRange   string         `json:"versionRange"`
 	DependencyType DependencyType `json:"dependencyType"`
 	Justification  string         `json:"justification"`
 	Origin         string         `json:"origin"`
 	Collector      string         `json:"collector"`
 	DocumentRef    string         `json:"documentRef"`
 }
-
-// GetVersionRange returns IsDependencyInputSpec.VersionRange, and is useful for accessing the field via an interface.
-func (v *IsDependencyInputSpec) GetVersionRange() string { return v.VersionRange }
 
 // GetDependencyType returns IsDependencyInputSpec.DependencyType, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetDependencyType() DependencyType { return v.DependencyType }
@@ -12960,12 +12955,11 @@ func (v *IsDependencyInputSpec) GetDocumentRef() string { return v.DocumentRef }
 // To obtain the list of dependency packages, caller must fill in the package
 // field.
 //
-// Dependency packages must be defined at PackageName, not PackageVersion.
+// Dependency packages must be defined at PackageVersion.
 type IsDependencySpec struct {
 	Id                *string         `json:"id"`
 	Package           *PkgSpec        `json:"package"`
 	DependencyPackage *PkgSpec        `json:"dependencyPackage"`
-	VersionRange      *string         `json:"versionRange"`
 	DependencyType    *DependencyType `json:"dependencyType"`
 	Justification     *string         `json:"justification"`
 	Origin            *string         `json:"origin"`
@@ -12981,9 +12975,6 @@ func (v *IsDependencySpec) GetPackage() *PkgSpec { return v.Package }
 
 // GetDependencyPackage returns IsDependencySpec.DependencyPackage, and is useful for accessing the field via an interface.
 func (v *IsDependencySpec) GetDependencyPackage() *PkgSpec { return v.DependencyPackage }
-
-// GetVersionRange returns IsDependencySpec.VersionRange, and is useful for accessing the field via an interface.
-func (v *IsDependencySpec) GetVersionRange() *string { return v.VersionRange }
 
 // GetDependencyType returns IsDependencySpec.DependencyType, and is useful for accessing the field via an interface.
 func (v *IsDependencySpec) GetDependencyType() *DependencyType { return v.DependencyType }

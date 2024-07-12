@@ -39,19 +39,6 @@ var dependencyTypeToEnum = map[string]model.DependencyType{
 	"":                                    "",
 }
 
-func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
-	if isDependencySpec.DependencyPackage != nil {
-		if isDependencySpec.DependencyPackage.ID != nil ||
-			isDependencySpec.DependencyPackage.Version != nil ||
-			isDependencySpec.DependencyPackage.Subpath != nil ||
-			isDependencySpec.DependencyPackage.Qualifiers != nil ||
-			isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers != nil {
-			return false
-		}
-	}
-	return true
-}
-
 // Query IsDependency
 
 func (c *arangoClient) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
@@ -78,30 +65,15 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 		// dep pkgVersion isDependency
 		arangoQueryBuilder = setPkgVersionMatchValues(isDependencySpec.Package, values)
 		arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
-		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, true)
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
 
-		depPkgVersionIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, true)
+		depPkgVersionIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve dependent package version isDependency with error: %w", err)
 		}
 
 		combinedIsDependency = append(combinedIsDependency, depPkgVersionIsDependency...)
 
-		if checkPkgNameDependency(isDependencySpec) {
-			// dep pkgName isDependency
-			values = map[string]any{}
-			arangoQueryBuilder = setPkgVersionMatchValues(isDependencySpec.Package, values)
-			arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
-			setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
-
-			depPkgNameIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, false)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve dependent package name isDependency with error: %w", err)
-			}
-
-			combinedIsDependency = append(combinedIsDependency, depPkgNameIsDependency...)
-
-		}
 		return combinedIsDependency, nil
 	} else {
 		var combinedIsDependency []*model.IsDependency
@@ -112,40 +84,22 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
-		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, true)
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
 
-		depPkgVersionIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, true)
+		depPkgVersionIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve dependent package version isDependency with error: %w", err)
 		}
 
 		combinedIsDependency = append(combinedIsDependency, depPkgVersionIsDependency...)
 
-		if checkPkgNameDependency(isDependencySpec) {
-			// dep pkgName isDependency
-			values = map[string]any{}
-			arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
-			arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
-			arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
-			arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
-			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
-			setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
-
-			depPkgNameIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, false)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve dependent package name isDependency with error: %w", err)
-			}
-
-			combinedIsDependency = append(combinedIsDependency, depPkgNameIsDependency...)
-		}
 		return combinedIsDependency, nil
 	}
 }
 
-func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any, includeDepPkgVersion bool) ([]*model.IsDependency, error) {
-	if includeDepPkgVersion {
-		arangoQueryBuilder.query.WriteString("\n")
-		arangoQueryBuilder.query.WriteString(`RETURN {
+func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.IsDependency, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
 			'pkgVersion': {
 				'type_id': pType._id,
 				'type': pType.type,
@@ -178,38 +132,6 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 			'origin': isDependency.origin,
 			'documentRef': isDependency.documentRef
 		}`)
-	} else {
-		arangoQueryBuilder.query.WriteString("\n")
-		arangoQueryBuilder.query.WriteString(`RETURN {
-			'pkgVersion': {
-				'type_id': pType._id,
-				'type': pType.type,
-				'namespace_id': pNs._id,
-				'namespace': pNs.namespace,
-				'name_id': pName._id,
-				'name': pName.name,
-				'version_id': pVersion._id,
-				'version': pVersion.version,
-				'subpath': pVersion.subpath,
-				'qualifier_list': pVersion.qualifier_list
-			},
-			'depPkg': {
-				'type_id': depType._id,
-				'type': depType.type,
-				'namespace_id': depNamespace._id,
-				'namespace': depNamespace.namespace,
-				'name_id': depName._id,
-				'name': depName.name
-			},
-			'isDependency_id': isDependency._id,
-			'versionRange': isDependency.versionRange,
-			'dependencyType': isDependency.dependencyType,
-			'justification': isDependency.justification,
-			'collector': isDependency.collector,
-			'origin': isDependency.origin,
-			'documentRef': isDependency.documentRef
-		}`)
-	}
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsDependency")
 	if err != nil {
@@ -224,10 +146,6 @@ func queryIsDependencyBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, isDe
 	if isDependencySpec.ID != nil {
 		arangoQueryBuilder.filter("isDependency", "_id", "==", "@id")
 		queryValues["id"] = *isDependencySpec.ID
-	}
-	if isDependencySpec.VersionRange != nil {
-		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
-		queryValues[versionRangeStr] = *isDependencySpec.VersionRange
 	}
 	if isDependencySpec.DependencyType != nil {
 		arangoQueryBuilder.filter("isDependency", dependencyTypeStr, "==", "@"+dependencyTypeStr)
@@ -251,103 +169,73 @@ func queryIsDependencyBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, isDe
 	}
 }
 
-func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any, queryDepPkgVersion bool) {
+func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
 	queryIsDependencyBasedOnFilter(arangoQueryBuilder, isDependencySpec, queryValues)
 	if isDependencySpec.DependencyPackage != nil {
-		if !queryDepPkgVersion {
-			arangoQueryBuilder.forOutBound(isDependencyDepPkgNameEdgesStr, "depName", "isDependency")
-			if isDependencySpec.DependencyPackage.Name != nil {
-				arangoQueryBuilder.filter("depName", "name", "==", "@depName")
-				queryValues["depName"] = *isDependencySpec.DependencyPackage.Name
-			}
-			arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
-			if isDependencySpec.DependencyPackage.Namespace != nil {
-				arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@depNamespace")
-				queryValues["depNamespace"] = *isDependencySpec.DependencyPackage.Namespace
-			}
-			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
-			if isDependencySpec.DependencyPackage.Type != nil {
-				arangoQueryBuilder.filter("depType", "type", "==", "@depType")
-				queryValues["depType"] = *isDependencySpec.DependencyPackage.Type
-			}
-		} else {
-			arangoQueryBuilder.forOutBound(isDependencyDepPkgVersionEdgesStr, "depVersion", "isDependency")
-			if isDependencySpec.DependencyPackage.ID != nil {
-				arangoQueryBuilder.filter("depVersion", "_id", "==", "@depVersionID")
-				queryValues["depVersionID"] = *isDependencySpec.DependencyPackage.ID
-			}
-			if isDependencySpec.DependencyPackage.Version != nil {
-				arangoQueryBuilder.filter("depVersion", "version", "==", "@depVersionValue")
-				queryValues["depVersionValue"] = *isDependencySpec.DependencyPackage.Version
-			}
-			if isDependencySpec.DependencyPackage.Subpath != nil {
-				arangoQueryBuilder.filter("depVersion", "subpath", "==", "@depSubpath")
-				queryValues["depSubpath"] = *isDependencySpec.DependencyPackage.Subpath
-			}
-			if isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers != nil {
-				if !*isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers {
-					if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
-						arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
-						queryValues["depQualifier"] = getFilterQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
-					}
-				} else {
-					arangoQueryBuilder.filterLength("depVersion", "qualifier_list", "==", 0)
-				}
-			} else {
+		arangoQueryBuilder.forOutBound(isDependencyDepPkgVersionEdgesStr, "depVersion", "isDependency")
+		if isDependencySpec.DependencyPackage.ID != nil {
+			arangoQueryBuilder.filter("depVersion", "_id", "==", "@depVersionID")
+			queryValues["depVersionID"] = *isDependencySpec.DependencyPackage.ID
+		}
+		if isDependencySpec.DependencyPackage.Version != nil {
+			arangoQueryBuilder.filter("depVersion", "version", "==", "@depVersionValue")
+			queryValues["depVersionValue"] = *isDependencySpec.DependencyPackage.Version
+		}
+		if isDependencySpec.DependencyPackage.Subpath != nil {
+			arangoQueryBuilder.filter("depVersion", "subpath", "==", "@depSubpath")
+			queryValues["depSubpath"] = *isDependencySpec.DependencyPackage.Subpath
+		}
+		if isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers != nil {
+			if !*isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers {
 				if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
 					queryValues["depQualifier"] = getFilterQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
 				}
+			} else {
+				arangoQueryBuilder.filterLength("depVersion", "qualifier_list", "==", 0)
 			}
-			arangoQueryBuilder.forInBound(pkgHasVersionStr, "depName", "depVersion")
-			if isDependencySpec.DependencyPackage.Name != nil {
-				arangoQueryBuilder.filter("depName", "name", "==", "@depName")
-				queryValues["depName"] = *isDependencySpec.DependencyPackage.Name
+		} else {
+			if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
+				arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
+				queryValues["depQualifier"] = getFilterQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
 			}
-			arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
-			if isDependencySpec.DependencyPackage.Namespace != nil {
-				arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@depNamespace")
-				queryValues["depNamespace"] = *isDependencySpec.DependencyPackage.Namespace
-			}
-			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
-			if isDependencySpec.DependencyPackage.Type != nil {
-				arangoQueryBuilder.filter("depType", "type", "==", "@depType")
-				queryValues["depType"] = *isDependencySpec.DependencyPackage.Type
-			}
+		}
+		arangoQueryBuilder.forInBound(pkgHasVersionStr, "depName", "depVersion")
+		if isDependencySpec.DependencyPackage.Name != nil {
+			arangoQueryBuilder.filter("depName", "name", "==", "@depName")
+			queryValues["depName"] = *isDependencySpec.DependencyPackage.Name
+		}
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
+		if isDependencySpec.DependencyPackage.Namespace != nil {
+			arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@depNamespace")
+			queryValues["depNamespace"] = *isDependencySpec.DependencyPackage.Namespace
+		}
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+		if isDependencySpec.DependencyPackage.Type != nil {
+			arangoQueryBuilder.filter("depType", "type", "==", "@depType")
+			queryValues["depType"] = *isDependencySpec.DependencyPackage.Type
 		}
 	} else {
-		if !queryDepPkgVersion {
-			arangoQueryBuilder.forOutBound(isDependencyDepPkgNameEdgesStr, "depName", "isDependency")
-			arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
-			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
-		} else {
-			arangoQueryBuilder.forOutBound(isDependencyDepPkgVersionEdgesStr, "depVersion", "isDependency")
-			arangoQueryBuilder.forInBound(pkgHasVersionStr, "depName", "depVersion")
-			arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
-			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
-		}
-
+		arangoQueryBuilder.forOutBound(isDependencyDepPkgVersionEdgesStr, "depVersion", "isDependency")
+		arangoQueryBuilder.forInBound(pkgHasVersionStr, "depName", "depVersion")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
 	}
 }
 
 // Ingest IsDependency
 
-func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency *model.IsDependencyInputSpec) map[string]any {
+func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpec, dependency *model.IsDependencyInputSpec) map[string]any {
 	values := map[string]any{}
 
 	// add guac keys
 	pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 	depPkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](depPkg, helpers.PkgServerKey)
 	values["pkgVersionGuacKey"] = pkgId.VersionId
-	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		values["secondPkgGuacKey"] = depPkgId.NameId
-	} else {
-		values["secondPkgGuacKey"] = depPkgId.VersionId
-	}
+	values["secondPkgGuacKey"] = depPkgId.VersionId
 
 	// isDependency
 
-	values[versionRangeStr] = dependency.VersionRange
 	values[dependencyTypeStr] = dependency.DependencyType.String()
 	values[justification] = dependency.Justification
 	values[origin] = dependency.Origin
@@ -357,13 +245,13 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): handle pkgmatchtype
 
 	var listOfValues []map[string]any
 
 	for i := range pkgs {
-		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i].PackageInput, depPkgs[i].PackageInput, depPkgMatchType, dependencies[i]))
+		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i].PackageInput, depPkgs[i].PackageInput, dependencies[i]))
 	}
 
 	var documents []string
@@ -388,45 +276,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDo
 	}
 	sb.WriteString("]")
 
-	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-
-		query := `
-	LET firstPkg = FIRST(
-		FOR pVersion in pkgVersions
-		FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-		RETURN {
-			'version_id': pVersion._id,
-			'version_key': pVersion._key
-		}
-	)
-
-    LET secondPkg = FIRST(
-        FOR pName in pkgNames
-        FILTER pName.guacKey == doc.secondPkgGuacKey
-		RETURN {
-		   'name_id': pName._id,
-		   'name_key': pName._key,
-		}
-    )
-		
-	LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
-			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef }
-			UPDATE {} IN isDependencies
-			RETURN {
-			   '_id': NEW._id,
-			   '_key': NEW._key
-			}
-	)
-	
-	INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.version_key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("isDependencyDepPkgNameEdges", isDependency._key, secondPkg.name_key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyDepPkgNameEdges OPTIONS { overwriteMode: "ignore" }
-
-	RETURN { 'isDependency_id': isDependency._id }`
-
-		sb.WriteString(query)
-	} else {
-		query := `
+	query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
@@ -460,8 +310,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDo
 
 	RETURN { 'isDependency_id': isDependency._id }`
 
-		sb.WriteString(query)
-	}
+	sb.WriteString(query)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependencies")
 	if err != nil {
@@ -481,47 +330,9 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDo
 	return isDepIDList, nil
 }
 
-func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
-
-	var query string
-	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		query = `
-	LET firstPkg = FIRST(
-		FOR pVersion in pkgVersions
-		FILTER pVersion.guacKey == @pkgVersionGuacKey
-		RETURN {
-			'version_id': pVersion._id,
-			'version_key': pVersion._key
-		}
-	)
-
-    LET secondPkg = FIRST(
-        FOR pName in pkgNames
-          FILTER pName.guacKey == @secondPkgGuacKey
-		RETURN {
-		   'name_id': pName._id,
-		   'name_key': pName._key
-		}
-    )
-	  
-	  LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
-			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
-			  UPDATE {} IN isDependencies
-			  RETURN {
-				'_id': NEW._id,
-				'_key': NEW._key
-			  }
-	  )
-	  
-	  INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.version_key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
-	  INSERT { _key: CONCAT("isDependencyDepPkgNameEdges", isDependency._key, secondPkg.name_key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyDepPkgNameEdges OPTIONS { overwriteMode: "ignore" }
-	  
-	  RETURN { 'isDependency_id': isDependency._id }`
-	} else {
-
-		// Specific version
-		query = `
+func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error) {
+	// Specific version
+	query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
 		FILTER pVersion.guacKey == @pkgVersionGuacKey
@@ -555,8 +366,8 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.IDorPkgIn
 	  INSERT { _key: CONCAT("isDependencyDepPkgVersionEdges", isDependency._key, secondPkg.version_key), _from: isDependency._id, _to: secondPkg.version_id} INTO isDependencyDepPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 	  
 	  RETURN { 'isDependency_id': isDependency._id }`
-	}
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(pkg.PackageInput, depPkg.PackageInput, depPkgMatchType, &dependency), "IngestDependency")
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(pkg.PackageInput, depPkg.PackageInput, &dependency), "IngestDependency")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest isDependency: %w", err)
 	}
@@ -616,7 +427,6 @@ func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor, ingest
 				ID:                createdValue.IsDependencyID,
 				Package:           pkg,
 				DependencyPackage: depPkg,
-				VersionRange:      createdValue.VersionRange,
 				Justification:     createdValue.Justification,
 				Origin:            createdValue.Origin,
 				Collector:         createdValue.Collector,
@@ -728,7 +538,6 @@ func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *mo
 		ID:                collectedValues[0].IsDependencyID,
 		Package:           builtPackage,
 		DependencyPackage: builtDepPackage,
-		VersionRange:      collectedValues[0].VersionRange,
 		DependencyType:    depType,
 		Justification:     collectedValues[0].Justification,
 		Origin:            collectedValues[0].Origin,
@@ -787,7 +596,6 @@ func noMatchIsDep(filter *model.IsDependencySpec, link *model.IsDependency) bool
 		return noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Origin, link.Origin) ||
 			noMatch(filter.Collector, link.Collector) ||
-			noMatch(filter.VersionRange, link.VersionRange) ||
 			(filter.DependencyType != nil && *filter.DependencyType != link.DependencyType)
 	} else {
 		return false

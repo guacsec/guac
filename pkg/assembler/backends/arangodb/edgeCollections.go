@@ -54,7 +54,6 @@ const (
 
 	// isDependency collections
 	isDependencyDepPkgVersionEdgesStr string = "isDependencyDepPkgVersionEdges"
-	isDependencyDepPkgNameEdgesStr    string = "isDependencyDepPkgNameEdges"
 	isDependencySubjectPkgEdgesStr    string = "isDependencySubjectPkgEdges"
 	isDependenciesStr                 string = "isDependencies"
 
@@ -229,7 +228,7 @@ var mapEdgeToArangoEdgeCollection = map[model.Edge][]string{
 	model.EdgeHasSlsaSubject:                   {hasSLSASubjectArtEdgesStr},
 	model.EdgeHasSourceAtPackage:               {hasSourceAtPkgVersionEdgesStr, hasSourceAtPkgNameEdgesStr},
 	model.EdgeHasSourceAtSource:                {hasSourceAtEdgesStr},
-	model.EdgeIsDependencyPackage:              {isDependencyDepPkgVersionEdgesStr, isDependencyDepPkgNameEdgesStr},
+	model.EdgeIsDependencyPackage:              {isDependencyDepPkgVersionEdgesStr},
 	model.EdgeIsOccurrenceArtifact:             {isOccurrenceArtEdgesStr},
 	model.EdgeIsOccurrencePackage:              {isOccurrenceSubjectPkgEdgesStr},
 	model.EdgeIsOccurrenceSource:               {isOccurrenceSubjectSrcEdgesStr},
@@ -260,7 +259,6 @@ var edgeDefinitions = []driver.EdgeDefinition{
 	// setup isDependency collections
 	{Collection: isDependencySubjectPkgEdgesStr, From: []string{pkgVersionsStr}, To: []string{isDependenciesStr}},
 	{Collection: isDependencyDepPkgVersionEdgesStr, From: []string{isDependenciesStr}, To: []string{pkgVersionsStr}},
-	{Collection: isDependencyDepPkgNameEdgesStr, From: []string{isDependenciesStr}, To: []string{pkgNamesStr}},
 
 	// setup isOccurrence collections
 	{Collection: isOccurrenceArtEdgesStr, From: []string{isOccurrencesStr}, To: []string{artifactsStr}},

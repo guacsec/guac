@@ -52,13 +52,12 @@ IsDependencySpec allows filtering the list of dependencies to return.
 To obtain the list of dependency packages, caller must fill in the package
 field.
 
-Dependency packages must be defined at PackageName, not PackageVersion.
+Dependency packages must be defined at PackageVersion.
 """
 input IsDependencySpec {
   id: ID
   package: PkgSpec
   dependencyPackage: PkgSpec
-  versionRange: String
   dependencyType: DependencyType
   justification: String
   origin: String
@@ -68,8 +67,6 @@ input IsDependencySpec {
 
 "IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
-  "versionRange should be specified for depedentPackages that point to PackageName"
-  versionRange: String!
   dependencyType: DependencyType!
   justification: String!
   origin: String!
