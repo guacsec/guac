@@ -107,6 +107,29 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
+						Name:      "js-tokens",
+						Version:   ptrfrom.String("4.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					IsDependency: &model.IsDependencyInputSpec{
+						DependencyType: model.DependencyTypeIndirect,
+						VersionRange:   "^3.0.0 || ^4.0.0",
+						Justification:  "dependency data collected via deps.dev",
+						Origin:         "",
+						Collector:      "",
+					},
+				}, {
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "react",
+						Version:   ptrfrom.String("17.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+					DepPkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
 						Name:      "loose-envify",
 						Version:   ptrfrom.String("1.4.0"),
 						Subpath:   ptrfrom.String(""),

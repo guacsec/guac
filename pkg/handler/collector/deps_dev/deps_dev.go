@@ -499,17 +499,34 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	component.DepPackages = append(component.DepPackages, dependencyNodes[1:]...)
 
 	for _, edge := range deps.Edges {
-		isDep := &model.IsDependencyInputSpec{
-			VersionRange:   edge.Requirement,
-			DependencyType: model.DependencyTypeDirect,
-			Justification:  "dependency data collected via deps.dev",
-		}
 		foundDepPackage := &IsDepPackage{
 			CurrentPackageInput: dependencyNodes[edge.FromNode].CurrentPackage,
 			DepPackageInput:     dependencyNodes[edge.ToNode].CurrentPackage,
-			IsDependency:        isDep,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange: edge.Requirement,
+				// direct dependency from to the to node. See issue: https://github.com/google/deps.dev/issues/12#issuecomment-1517103380
+				// for more details and example
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  "dependency data collected via deps.dev",
+			},
 		}
 		component.IsDepPackages = append(component.IsDepPackages, foundDepPackage)
+
+		// if its not from the root node, it is an indirect dependency. See issue: https://github.com/google/deps.dev/issues/12#issuecomment-1517103380
+		// for more details and example
+		if edge.FromNode != 0 {
+			rootDepPackage := &IsDepPackage{
+				CurrentPackageInput: dependencyNodes[0].CurrentPackage,
+				DepPackageInput:     dependencyNodes[edge.ToNode].CurrentPackage,
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange: edge.Requirement,
+					// note: this is marked as indirect
+					DependencyType: model.DependencyTypeIndirect,
+					Justification:  "dependency data collected via deps.dev",
+				},
+			}
+			component.IsDepPackages = append(component.IsDepPackages, rootDepPackage)
+		}
 	}
 
 	logger.Infof("obtained additional metadata for package: %s", purl)

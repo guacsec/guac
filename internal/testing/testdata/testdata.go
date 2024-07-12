@@ -1771,6 +1771,31 @@ var (
 				 "origin":"",
 				 "versionRange":"^3.0.0 || ^4.0.0"
 			  }
+		   },
+		   {
+			  "CurrentPackageInput":{
+				 "name":"react",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"17.0.0"
+			  },
+			  "DepPackageInput":{
+				 "name":"js-tokens",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"4.0.0"
+			  },
+			  "IsDependency":{
+				 "collector":"",
+				 "dependencyType":"INDIRECT",
+				 "justification":"dependency data collected via deps.dev",
+				 "origin":"",
+				 "versionRange":"^3.0.0 || ^4.0.0"
+			  }
 		   }
 		],
 		"Scorecard":null,
