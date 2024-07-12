@@ -379,14 +379,12 @@ var (
 	// DependenciesColumns holds the columns for the "dependencies" table.
 	DependenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "version_range", Type: field.TypeString},
 		{Name: "dependency_type", Type: field.TypeEnum, Enums: []string{"DIRECT", "INDIRECT", "UNKNOWN"}},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "document_ref", Type: field.TypeString},
 		{Name: "package_id", Type: field.TypeUUID},
-		{Name: "dependent_package_name_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "dependent_package_version_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// DependenciesTable holds the schema information for the "dependencies" table.
@@ -397,39 +395,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "dependencies_package_versions_package",
-				Columns:    []*schema.Column{DependenciesColumns[7]},
+				Columns:    []*schema.Column{DependenciesColumns[6]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "dependencies_package_names_dependent_package_name",
-				Columns:    []*schema.Column{DependenciesColumns[8]},
-				RefColumns: []*schema.Column{PackageNamesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
 				Symbol:     "dependencies_package_versions_dependent_package_version",
-				Columns:    []*schema.Column{DependenciesColumns[9]},
+				Columns:    []*schema.Column{DependenciesColumns[7]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "dep_package_name_id",
+				Name:    "dependency_dependency_type_justification_origin_collector_document_ref_package_id_dependent_package_version_id",
 				Unique:  true,
-				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7], DependenciesColumns[8]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL",
-				},
-			},
-			{
-				Name:    "dep_package_version_id",
-				Unique:  true,
-				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7], DependenciesColumns[9]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL",
-				},
+				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7]},
 			},
 			{
 				Name:    "dependency_package_id",
@@ -1256,8 +1237,7 @@ func init() {
 	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
-	DependenciesTable.ForeignKeys[2].RefTable = PackageVersionsTable
+	DependenciesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	HasMetadataTable.ForeignKeys[0].RefTable = SourceNamesTable
 	HasMetadataTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	HasMetadataTable.ForeignKeys[2].RefTable = PackageNamesTable

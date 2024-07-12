@@ -200,43 +200,15 @@ func toModelIsOccurrence(o *ent.Occurrence, backrefs bool) *model.IsOccurrence {
 }
 
 func toModelIsDependencyWithBackrefs(id *ent.Dependency) *model.IsDependency {
-	return toModelIsDependency(id, true)
-}
-
-func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency {
-
-	if backrefs {
-		var pkg *model.Package
-		var depPkg *model.Package
-		pkg = toModelPackage(backReferencePackageVersion(id.Edges.Package))
-		if id.Edges.DependentPackageName != nil {
-			depPkg = toModelPackage(backReferencePackageName(id.Edges.DependentPackageName))
-			// in this case, the expected response is package name with an empty package version array
-			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
-		} else {
-			depPkg = toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion))
-		}
-		return &model.IsDependency{
-			ID:                dependencyGlobalID(id.ID.String()),
-			Package:           pkg,
-			DependencyPackage: depPkg,
-			VersionRange:      id.VersionRange,
-			DependencyType:    dependencyTypeFromEnum(id.DependencyType),
-			Justification:     id.Justification,
-			Origin:            id.Origin,
-			Collector:         id.Collector,
-			DocumentRef:       id.DocumentRef,
-		}
-	} else {
-		return &model.IsDependency{
-			ID:             dependencyGlobalID(id.ID.String()),
-			VersionRange:   id.VersionRange,
-			DependencyType: dependencyTypeFromEnum(id.DependencyType),
-			Justification:  id.Justification,
-			Origin:         id.Origin,
-			Collector:      id.Collector,
-			DocumentRef:    id.DocumentRef,
-		}
+	return &model.IsDependency{
+		ID:                dependencyGlobalID(id.ID.String()),
+		Package:           toModelPackage(backReferencePackageVersion(id.Edges.Package)),
+		DependencyPackage: toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion)),
+		DependencyType:    dependencyTypeFromEnum(id.DependencyType),
+		Justification:     id.Justification,
+		Origin:            id.Origin,
+		Collector:         id.Collector,
+		DocumentRef:       id.DocumentRef,
 	}
 }
 

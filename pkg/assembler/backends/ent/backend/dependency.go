@@ -111,7 +111,6 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 func getIsDepObject(q *ent.DependencyQuery) *ent.DependencyQuery {
 	return q.
 		WithPackage(withPackageVersionTree()).
-		WithDependentPackageName(withPackageNameTree()).
 		WithDependentPackageVersion(withPackageVersionTree()).
 		Order(ent.Asc(dependency.FieldID))
 }
@@ -133,11 +132,11 @@ func (b *EntBackend) deleteIsDependency(ctx context.Context, hasSBOMID string) e
 	return nil
 }
 
-func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	funcName := "IngestDependencies"
 	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
-		slc, err := upsertBulkDependencies(ctx, client, pkgs, depPkgs, depPkgMatchType, dependencies)
+		slc, err := upsertBulkDependencies(ctx, client, pkgs, depPkgs, dependencies)
 		if err != nil {
 			return nil, err
 		}
@@ -153,7 +152,7 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 func dependencyConflictColumns() []string {
 	return []string{
 		dependency.FieldPackageID,
-		dependency.FieldVersionRange,
+		dependency.FieldDependentPackageVersionID,
 		dependency.FieldDependencyType,
 		dependency.FieldJustification,
 		dependency.FieldOrigin,
@@ -162,26 +161,10 @@ func dependencyConflictColumns() []string {
 	}
 }
 
-func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
+func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := dependencyConflictColumns()
-
-	var conflictWhere *sql.Predicate
-
-	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		conflictColumns = append(conflictColumns, dependency.FieldDependentPackageNameID)
-		conflictWhere = sql.And(
-			sql.NotNull(dependency.FieldDependentPackageNameID),
-			sql.IsNull(dependency.FieldDependentPackageVersionID),
-		)
-	} else {
-		conflictColumns = append(conflictColumns, dependency.FieldDependentPackageVersionID)
-		conflictWhere = sql.And(
-			sql.IsNull(dependency.FieldDependentPackageNameID),
-			sql.NotNull(dependency.FieldDependentPackageVersionID),
-		)
-	}
 
 	batches := chunk(dependencies, MaxBatchSize)
 
@@ -192,7 +175,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 			dep := dep
 			var err error
 			var isDependencyID *uuid.UUID
-			creates[i], isDependencyID, err = generateDependencyCreate(ctx, tx, pkgs[index], depPkgs[index], depPkgMatchType, dep)
+			creates[i], isDependencyID, err = generateDependencyCreate(ctx, tx, pkgs[index], depPkgs[index], dep)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 			}
@@ -204,7 +187,6 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 		err := tx.Dependency.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
-				sql.ConflictWhere(conflictWhere),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -216,7 +198,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 	return &ids, nil
 }
 
-func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, depPkg *model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep *model.IsDependencyInputSpec) (*ent.DependencyCreate, *uuid.UUID, error) {
+func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, depPkg *model.IDorPkgInput, dep *model.IsDependencyInputSpec) (*ent.DependencyCreate, *uuid.UUID, error) {
 
 	dependencyCreate := tx.Dependency.Create()
 
@@ -245,68 +227,39 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 
 	dependencyCreate.
 		SetPackageID(pkgVersionID).
-		SetVersionRange(dep.VersionRange).
 		SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
 		SetJustification(dep.Justification).
 		SetOrigin(dep.Origin).
 		SetCollector(dep.Collector).
 		SetDocumentRef(dep.DocumentRef)
 
-	var isDependencyID *uuid.UUID
-	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		var depPkgNameID uuid.UUID
-		if depPkg.PackageNameID != nil {
-			var err error
-			pkgNameGlobalID := fromGlobalID(*depPkg.PackageNameID)
-			depPkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
-			if err != nil {
-				return nil, nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
-			}
-		} else {
-			pn, err := getPkgName(ctx, tx.Client(), *depPkg.PackageInput)
-			if err != nil {
-				return nil, nil, fmt.Errorf("failed to query for pkgName")
-			}
-			depPkgNameID = pn.ID
-		}
-		dependencyCreate.SetDependentPackageNameID(depPkgNameID)
-
+	var depPkgVersionID uuid.UUID
+	if depPkg.PackageVersionID != nil {
 		var err error
-		isDependencyID, err = guacDependencyKey(ptrfrom.String(pkgVersionID.String()), ptrfrom.String(depPkgNameID.String()), nil, depPkgMatchType, *dep)
+		pkgVersionGlobalID := fromGlobalID(*depPkg.PackageVersionID)
+		depPkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
-		dependencyCreate.SetID(*isDependencyID)
 	} else {
-		var depPkgVersionID uuid.UUID
-		if depPkg.PackageVersionID != nil {
-			var err error
-			pkgVersionGlobalID := fromGlobalID(*depPkg.PackageVersionID)
-			depPkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
-			if err != nil {
-				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-			}
-		} else {
-			pv, err := getPkgVersion(ctx, tx.Client(), *depPkg.PackageInput)
-			if err != nil {
-				return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
-			}
-			depPkgVersionID = pv.ID
-		}
-		dependencyCreate.SetDependentPackageVersionID(depPkgVersionID)
-
-		var err error
-		isDependencyID, err = guacDependencyKey(ptrfrom.String(pkgVersionID.String()), nil, ptrfrom.String(depPkgVersionID.String()), depPkgMatchType, *dep)
+		pv, err := getPkgVersion(ctx, tx.Client(), *depPkg.PackageInput)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+			return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
 		}
-		dependencyCreate.SetID(*isDependencyID)
+		depPkgVersionID = pv.ID
 	}
+	dependencyCreate.SetDependentPackageVersionID(depPkgVersionID)
+
+	isDependencyID, err := guacDependencyKey(ptrfrom.String(pkgVersionID.String()), nil, ptrfrom.String(depPkgVersionID.String()), *dep)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+	}
+	dependencyCreate.SetID(*isDependencyID)
 
 	return dependencyCreate, isDependencyID, nil
 }
 
-func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
+func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dep model.IsDependencyInputSpec) (string, error) {
 	funcName := "IngestDependency"
 
 	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
@@ -314,23 +267,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 
 		conflictColumns := dependencyConflictColumns()
 
-		var conflictWhere *sql.Predicate
-
-		if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			conflictColumns = append(conflictColumns, dependency.FieldDependentPackageNameID)
-			conflictWhere = sql.And(
-				sql.NotNull(dependency.FieldDependentPackageNameID),
-				sql.IsNull(dependency.FieldDependentPackageVersionID),
-			)
-		} else {
-			conflictColumns = append(conflictColumns, dependency.FieldDependentPackageVersionID)
-			conflictWhere = sql.And(
-				sql.IsNull(dependency.FieldDependentPackageNameID),
-				sql.NotNull(dependency.FieldDependentPackageVersionID),
-			)
-		}
-
-		insert, _, err := generateDependencyCreate(ctx, tx, &pkg, &depPkg, depPkgMatchType, &dep)
+		insert, _, err := generateDependencyCreate(ctx, tx, &pkg, &depPkg, &dep)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 		}
@@ -338,7 +275,6 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 		if id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
-				sql.ConflictWhere(conflictWhere),
 			).
 			Ignore().
 			ID(ctx); err != nil {
@@ -372,24 +308,13 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 
 	predicates := []predicate.Dependency{
 		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.VersionRange, dependency.VersionRange),
 		optionalPredicate(filter.Justification, dependency.Justification),
 		optionalPredicate(filter.Origin, dependency.Origin),
 		optionalPredicate(filter.Collector, dependency.Collector),
 		optionalPredicate(filter.DocumentRef, dependency.DocumentRef),
 	}
 	if filter.DependencyPackage != nil {
-		if filter.DependencyPackage.Version == nil && filter.DependencyPackage.Subpath == nil &&
-			filter.DependencyPackage.Qualifiers == nil && filter.DependencyPackage.MatchOnlyEmptyQualifiers == nil {
-			predicates = append(predicates,
-				dependency.Or(
-					dependency.HasDependentPackageNameWith(packageNameQuery(filter.DependencyPackage)),
-					dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)),
-				),
-			)
-		} else {
-			predicates = append(predicates, dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)))
-		}
+		predicates = append(predicates, dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)))
 	}
 	if filter.Package != nil {
 		predicates = append(predicates, dependency.HasPackageWith(packageVersionQuery(filter.Package)))
@@ -403,29 +328,19 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 }
 
 func canonicalDependencyString(dep model.IsDependencyInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s:%s", dep.VersionRange, dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector, dep.DocumentRef)
+	return fmt.Sprintf("%s::%s::%s::%s:%s", dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector, dep.DocumentRef)
 }
 
-func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersionID *string, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
-	var depPkgID string
-
-	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		if depPkgNameID == nil {
-			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-		}
-		depPkgID = *depPkgNameID
-	} else {
-		if depPkgVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		depPkgID = *depPkgVersionID
+func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersionID *string, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
+	if depPkgVersionID == nil {
+		return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 	}
 
 	if pkgVersionID == nil {
 		return nil, fmt.Errorf("need to specify package ID for isDependency")
 	}
 
-	depIDString := fmt.Sprintf("%s::%s::%s?", *pkgVersionID, depPkgID, canonicalDependencyString(dep))
+	depIDString := fmt.Sprintf("%s::%s::%s?", *pkgVersionID, *depPkgVersionID, canonicalDependencyString(dep))
 
 	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
@@ -440,8 +355,7 @@ func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, a
 	if allowedEdges[model.EdgeIsDependencyPackage] {
 		query.
 			WithPackage(withPackageVersionTree()).
-			WithDependentPackageVersion(withPackageVersionTree()).
-			WithDependentPackageName()
+			WithDependentPackageVersion(withPackageVersionTree())
 	}
 
 	deps, err := query.All(ctx)
@@ -454,9 +368,6 @@ func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, a
 		}
 		if foundDep.Edges.DependentPackageVersion != nil {
 			out = append(out, toModelPackage(backReferencePackageVersion(foundDep.Edges.DependentPackageVersion)))
-		}
-		if foundDep.Edges.DependentPackageName != nil {
-			out = append(out, toModelPackage(foundDep.Edges.DependentPackageName))
 		}
 	}
 

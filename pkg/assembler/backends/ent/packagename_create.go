@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -89,21 +88,6 @@ func (pnc *PackageNameCreate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameCrea
 		ids[i] = h[i].ID
 	}
 	return pnc.AddHasSourceAtIDs(ids...)
-}
-
-// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
-func (pnc *PackageNameCreate) AddDependencyIDs(ids ...uuid.UUID) *PackageNameCreate {
-	pnc.mutation.AddDependencyIDs(ids...)
-	return pnc
-}
-
-// AddDependency adds the "dependency" edges to the Dependency entity.
-func (pnc *PackageNameCreate) AddDependency(d ...*Dependency) *PackageNameCreate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pnc.AddDependencyIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
@@ -286,22 +270,6 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pnc.mutation.DependencyIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
