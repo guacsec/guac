@@ -500,7 +500,6 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	for _, edge := range deps.Edges {
 		isDep := &model.IsDependencyInputSpec{
-			VersionRange:   edge.Requirement,
 			DependencyType: model.DependencyTypeDirect,
 			Justification:  "dependency data collected via deps.dev",
 		}
