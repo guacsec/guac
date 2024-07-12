@@ -61,6 +61,67 @@ func (n *certifyVulnerabilityLink) Key() string {
 	}, ":"))
 }
 
+// Helper function to delete a key-value pair from the store
+func (c *demoClient) delkv(ctx context.Context, col string, key string) error {
+	return c.kv.Remove(ctx, col, key)
+}
+
+// Helper function to remove vulnerability links. This works by setting all the links expect the specified linkID.
+func (c *demoClient) removeVulnerabilityLinks(ctx context.Context, linkID string, links []string, col string, id string) error {
+	newLinks := []string{}
+	for _, id := range links {
+		if id != linkID {
+			newLinks = append(newLinks, id)
+		}
+	}
+
+	// Update the entity in the KeyValue store
+	return c.kv.Set(ctx, col, id, newLinks)
+}
+
+// DeleteCertifyVuln deletes a specified certifyVuln node along with all associated relationships.
+func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, error) {
+	funcName := "DeleteCertifyVuln"
+
+	// Retrieve the certifyVulnerabilityLink by ID
+	link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil // Not found, nothing to delete
+		}
+		return false, gqlerror.Errorf("%v :: %s", funcName, err) // TODO: Improve error messages
+	}
+
+	// Remove the link from the index
+	if err := c.delkv(ctx, cVulnCol, link.Key()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated package and vulnerability
+	foundPackage, err := c.returnFoundPkgVersion(ctx, &model.IDorPkgInput{PackageVersionID: &link.PackageID})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	if err := c.removeVulnerabilityLinks(ctx, link.ThisID, foundPackage.CertifyVulnLinks, "packages", foundPackage.ID()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	foundVulnNode, err := c.returnFoundVulnerability(ctx, &model.IDorVulnerabilityInput{VulnerabilityInput: &model.VulnerabilityInputSpec{VulnerabilityID: link.VulnerabilityID}})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	if err := c.removeVulnerabilityLinks(ctx, link.ThisID, foundVulnNode.CertifyVulnLinks, "vulnerabilities", foundVulnNode.ID()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Delete the link from the KeyValue store
+	if err := c.delkv(ctx, cVulnCol, link.Key()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return true, nil
+}
+
 func (n *certifyVulnerabilityLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2)
 	if allowedEdges[model.EdgeCertifyVulnPackage] {

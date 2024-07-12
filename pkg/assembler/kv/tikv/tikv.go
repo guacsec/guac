@@ -70,6 +70,15 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	return s.c.Put(ctx, []byte(ck), bts)
 }
 
+func (s *store) Remove(ctx context.Context, c, k string) error {
+	ck := strings.Join([]string{c, k}, ":")
+	err := s.c.Delete(ctx, []byte(ck))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *store) Keys(c string) kv.Scanner {
 	return &scanner{
 		c:      s.c,
