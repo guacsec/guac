@@ -67,6 +67,17 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	return s.c.HSet(ctx, c, k, string(b)).Err()
 }
 
+func (s *store) Remove(ctx context.Context, c, k string) error {
+	res, err := s.c.HDel(ctx, c, k).Result()
+	if err != nil {
+		return err
+	}
+	if res == 0 {
+		return kv.NotFoundError
+	}
+	return nil
+}
+
 func (s *store) Keys(c string) kv.Scanner {
 	return &scanner{
 		collection: c,

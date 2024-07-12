@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -192,6 +193,41 @@ func (c *demoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, err
 
 // Delete node and all associated relationships. This functionality is only implemented for
 // certifyVuln, HasSBOM and HasSLSA.
-func (c *demoClient) Delete(ctx context.Context, node string) (bool, error) {
-	panic(fmt.Errorf("not implemented: Delete"))
+func (c *demoClient) Delete(ctx context.Context, nodeID string) (bool, error) {
+	// Retrieve the node type based on the node ID
+	var k string
+	if err := c.kv.Get(ctx, indexCol, nodeID, &k); err != nil {
+		return false, fmt.Errorf("%w : id not found in index %q", err, nodeID)
+	}
+
+	sub := strings.SplitN(k, ":", 2)
+	if len(sub) != 2 {
+		return false, fmt.Errorf("Bad value was stored in index map: %v", k)
+	}
+
+	nodeType := sub[0]
+
+	switch nodeType {
+	case "certifyVuln":
+		deleted, err := c.DeleteCertifyVuln(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete CertifyVuln via ID: %s, with error: %w", nodeID, err)
+		}
+		return deleted, nil
+	//case "hasSBOM":
+	//	deleted, err := c.DeleteHasSBOM(ctx, nodeID)
+	//	if err != nil {
+	//		return false, fmt.Errorf("failed to delete HasSBOM via ID: %s, with error: %w", nodeID, err)
+	//	}
+	//	return deleted, nil
+	//case "hasSLSA":
+	//	deleted, err := c.DeleteHasSLSA(ctx, nodeID)
+	//	if err != nil {
+	//		return false, fmt.Errorf("failed to delete HasSLSA via ID: %s, with error: %w", nodeID, err)
+	//	}
+	//	return deleted, nil
+	default:
+		log.Printf("Unknown node type: %s", nodeType)
+	}
+	return false, nil
 }
