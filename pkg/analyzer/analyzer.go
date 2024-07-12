@@ -66,6 +66,12 @@ type DiffResult struct {
 	Nodes map[string]DiffedNodePair
 }
 
+type EqualDifferencesPaths struct {
+	Diffs [][]string
+	Path []*Node
+	Index int
+}
+
 type DiffedNodePair struct {
 	NodeOne *Node
 	NodeTwo *Node
@@ -880,6 +886,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 		pathDiff.PathOne = pathOne
 		min := math.MaxInt32
 		var index int
+		diffIndices := []EqualDifferencesPaths{}
 
 		for i, pathTwo := range big {
 			_, ok := used[i]
@@ -893,15 +900,26 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 				return DiffResult{}, fmt.Errorf(err.Error())
 			}
 
+
+		
 			if diffNum < min {
 				pathDiff.PathTwo = pathTwo
 				min = diffNum
 				pathDiff.Diffs = diffs
 				index = i
+				diffIndices = []EqualDifferencesPaths{{Diffs: diffs, Path: pathTwo, Index: i}}
+			} else if diffNum == min {
+				diffIndices = append(diffIndices, EqualDifferencesPaths{Diffs: diffs, Path: pathTwo, Index: i})
 			}
 		}
 
-		used[index] = true
+		if len(diffIndices) == 1 {
+			used[index] = true
+		}else{
+			//TODO: how to fix problem where there are multiple paths to compare with only 1 difference?
+			used[index] = true //remove this when TODO is resolved
+		}
+		
 
 		count := 0
 		seenNodeIndex := -1
