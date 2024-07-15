@@ -55,7 +55,6 @@ var (
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -76,7 +75,6 @@ var (
 					Version:   ptrfrom.String("1.19.0"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -97,7 +95,6 @@ var (
 					Version:   ptrfrom.String("1.19.0"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeIndirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -246,7 +243,6 @@ var (
 					Version:   ptrfrom.String("1.19.0"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -329,7 +325,6 @@ var (
 					Version:   ptrfrom.String("1.19.0"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=3.0.3",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -425,7 +420,6 @@ var (
 					Version:   ptrfrom.String("1.19.0"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -558,7 +552,6 @@ var (
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>2.0.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -658,7 +651,6 @@ var (
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=2.0.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -724,7 +716,6 @@ var (
 					Version:   ptrfrom.String("1.19.1"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.0.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -855,7 +846,6 @@ var (
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>1.0.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -945,7 +935,7 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 		if err != nil {
 			return fmt.Errorf("error in ingesting dependent package: %s\n", err)
 		}
-		_, err = model.IngestIsDependency(ctx, client, model.IDorPkgInput{PackageInput: ingest.Pkg}, model.IDorPkgInput{PackageInput: ingest.DepPkg}, ingest.DepPkgMatchFlag, *ingest.IsDependency)
+		_, err = model.IngestIsDependency(ctx, client, model.IDorPkgInput{PackageInput: ingest.Pkg}, model.IDorPkgInput{PackageInput: ingest.DepPkg}, *ingest.IsDependency)
 		if err != nil {
 			return fmt.Errorf("error in ingesting isDependency: %s\n", err)
 		}

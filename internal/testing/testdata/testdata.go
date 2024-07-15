@@ -645,112 +645,90 @@ var (
 
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          baselayoutPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: baselayoutPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "3.2.0-r22",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          baselayoutdataPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: baselayoutdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "3.2.0-r22",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          keysPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2.4-r1",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          worldFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: worldFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          rootFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          triggersFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: triggersFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             baselayoutPack,
-			DepPkg:          keysPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    baselayoutPack,
+			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2.4-r1",
 				Justification:  isDepJustifyDependencyOfJustification,
 			},
 		},
 		{
-			Pkg:             rootFilePack,
-			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    rootFilePack,
+			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyDependsOnJustification,
 			},
 		},
 		{
-			Pkg:             baselayoutPack,
-			DepPkg:          rootFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    baselayoutPack,
+			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyContainsJustification,
 			},
 		},
 		{
-			Pkg:             keysPack,
-			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    keysPack,
+			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyContainedByJustification,
 			},
 		},
@@ -970,32 +948,26 @@ var (
 
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxTopLevelPack,
-			DepPkg:          cdxBasefilesPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxBasefilesPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "11.1+deb11u5",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopLevelPack,
-			DepPkg:          cdxNetbasePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxNetbasePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "6.3",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopLevelPack,
-			DepPkg:          cdxTzdataPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxTzdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2021a-1+deb11u6",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -1029,32 +1001,26 @@ var (
 
 	CdxQuarkusDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxResteasyPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxResteasyPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeDirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeIndirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxResteasyPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxResteasyPack,
+			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeDirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
@@ -1125,12 +1091,10 @@ var (
 
 	CdxNpmDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxWebAppPackage,
-			DepPkg:          cdxBootstrapPackage,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxWebAppPackage,
+			DepPkg: cdxBootstrapPackage,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "4.0.0-beta.2",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -2439,22 +2403,18 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 		IsDependency: []assembler.IsDependencyIngest{
 			{
-				Pkg:             topLevelPack,
-				DepPkg:          baselayoutPack,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    topLevelPack,
+				DepPkg: baselayoutPack,
 				IsDependency: &generated.IsDependencyInputSpec{
 					DependencyType: generated.DependencyTypeUnknown,
-					VersionRange:   "3.2.0-r22",
 					Justification:  "top level package dependency",
 				},
 			},
 			{
-				Pkg:             topLevelPack,
-				DepPkg:          baselayoutdataPack,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    topLevelPack,
+				DepPkg: baselayoutdataPack,
 				IsDependency: &generated.IsDependencyInputSpec{
 					DependencyType: generated.DependencyTypeUnknown,
-					VersionRange:   "3.2.0-r22",
 					Justification:  "top level package dependency",
 				},
 			},

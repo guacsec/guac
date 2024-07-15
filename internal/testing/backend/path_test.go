@@ -38,7 +38,6 @@ func TestPath(t *testing.T) {
 	type isDepCall struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
-		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
@@ -149,16 +148,15 @@ func TestPath(t *testing.T) {
 			isDepCall: &isDepCall{
 				P1: testdata.P1,
 				P2: testdata.P2,
-				MF: mAll,
 				ID: &model.IsDependencyInputSpec{},
 			},
 			want: []model.Node{
 				testdata.P1out,
 				&model.IsDependency{
 					Package:           testdata.P1out,
-					DependencyPackage: testdata.P2outName,
+					DependencyPackage: testdata.P2out,
 				},
-				testdata.P2outName,
+				testdata.P2out,
 			},
 		},
 	}
@@ -214,7 +212,7 @@ func TestPath(t *testing.T) {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
-				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, *tt.isDepCall.ID)
 				if err != nil {
 					t.Fatalf("did not get expected ingest error, got: %v", err)
 				}
@@ -226,7 +224,7 @@ func TestPath(t *testing.T) {
 					t.Fatal()
 				}
 				startID = found[0].Package.Namespaces[0].Names[0].Versions[0].ID
-				stopID = found[0].DependencyPackage.Namespaces[0].Names[0].ID
+				stopID = found[0].DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
 			}
 			got, err := b.Path(ctx, startID, stopID, 5, tt.edges)
 			if (err != nil) != tt.wantPathErr {
@@ -302,7 +300,6 @@ func TestNodes(t *testing.T) {
 	type isDepCall struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
-		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	type isOcurCall struct {
@@ -665,12 +662,11 @@ func TestNodes(t *testing.T) {
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		want: []model.Node{&model.IsDependency{
 			Package:           testdata.P1out,
-			DependencyPackage: testdata.P2outName,
+			DependencyPackage: testdata.P2out,
 		}},
 	}, {
 		name:  "isOccurrence",
@@ -1007,7 +1003,7 @@ func TestNodes(t *testing.T) {
 				nodeID = hsID
 			}
 			if tt.isDepCall != nil {
-				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -1144,7 +1140,6 @@ func TestNeighbors(t *testing.T) {
 	type isDepCall struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
-		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	type isOcurCall struct {
@@ -2387,7 +2382,6 @@ func TestNeighbors(t *testing.T) {
 			&model.IsDependency{
 				Package:           includedTestExpectedPackage1,
 				DependencyPackage: includedTestExpectedPackage2,
-				VersionRange:      "dep1_range",
 				DependencyType:    model.DependencyTypeDirect,
 				Justification:     "dep1_justification",
 				Origin:            "dep1_origin",
@@ -2396,7 +2390,6 @@ func TestNeighbors(t *testing.T) {
 			&model.IsDependency{
 				Package:           includedTestExpectedPackage1,
 				DependencyPackage: includedTestExpectedPackage3,
-				VersionRange:      "dep2_range",
 				DependencyType:    model.DependencyTypeIndirect,
 				Justification:     "dep2_justification",
 				Origin:            "dep2_origin",
@@ -2652,7 +2645,6 @@ func TestNeighbors(t *testing.T) {
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryPkgNameID: true,
@@ -2664,17 +2656,13 @@ func TestNeighbors(t *testing.T) {
 				Namespaces: []*model.PackageNamespace{{
 					Names: []*model.PackageName{},
 				}}},
-			&model.IsDependency{
-				Package:           testdata.P1out,
-				DependencyPackage: testdata.P2outName,
-			}},
+		},
 	}, {
 		name:  "isDependency - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mSpecific,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryPkgVersionID: true,
@@ -2697,19 +2685,17 @@ func TestNeighbors(t *testing.T) {
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryIsDependencyID: true,
 		usingOnly:           []model.Edge{model.EdgeIsDependencyPackage},
-		want:                []model.Node{testdata.P1out, testdata.P2outName},
+		want:                []model.Node{testdata.P1out, testdata.P2out},
 	}, {
 		name:  "isDependency - isDependencyID - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mSpecific,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryIsDependencyID: true,
@@ -3547,7 +3533,7 @@ func TestNeighbors(t *testing.T) {
 				}
 
 				for _, dep := range tt.hasSBOMCall.IsDeps {
-					if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
+					if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, *dep.isDep); err != nil {
 						t.Fatalf("Could not ingest dependency: %v", err)
 					} else {
 						includes.Dependencies = append(includes.Dependencies, isDep)
@@ -3637,7 +3623,7 @@ func TestNeighbors(t *testing.T) {
 				}
 			}
 			if tt.isDepCall != nil {
-				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}

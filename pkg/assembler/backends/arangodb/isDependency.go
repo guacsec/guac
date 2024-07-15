@@ -28,7 +28,6 @@ import (
 )
 
 const (
-	versionRangeStr   string = "versionRange"
 	dependencyTypeStr string = "dependencyType"
 )
 
@@ -125,7 +124,6 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 				'qualifier_list': depVersion.qualifier_list
 			},
 			'isDependency_id': isDependency._id,
-			'versionRange': isDependency.versionRange,
 			'dependencyType': isDependency.dependencyType,
 			'justification': isDependency.justification,
 			'collector': isDependency.collector,
@@ -296,8 +294,8 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDo
     )
 		
 	LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
-			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef }
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef }
 			UPDATE {} IN isDependencies
 			RETURN {
 				'_id': NEW._id,
@@ -353,8 +351,8 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.IDorPkgIn
 
 	  
 	  LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
-			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			  UPDATE {} IN isDependencies
 			  RETURN {
 				'_id': NEW._id,
@@ -390,7 +388,6 @@ func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor, ingest
 		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
 		DepPkg         *dbPkgVersion `json:"depPkg"`
 		IsDependencyID string        `json:"isDependency_id"`
-		VersionRange   string        `json:"versionRange"`
 		DependencyType string        `json:"dependencyType"`
 		Justification  string        `json:"justification"`
 		Collector      string        `json:"collector"`
@@ -490,7 +487,6 @@ func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *mo
 		IsDependencyID string `json:"_id"`
 		PackageID      string `json:"packageID"`
 		DepPackageID   string `json:"depPackageID"`
-		VersionRange   string `json:"versionRange"`
 		DependencyType string `json:"dependencyType"`
 		Justification  string `json:"justification"`
 		Collector      string `json:"collector"`

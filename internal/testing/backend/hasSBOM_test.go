@@ -29,10 +29,9 @@ import (
 )
 
 type testDependency struct {
-	pkg       *model.PkgInputSpec
-	depPkg    *model.PkgInputSpec
-	matchType model.MatchFlags
-	isDep     *model.IsDependencyInputSpec
+	pkg    *model.PkgInputSpec
+	depPkg *model.PkgInputSpec
+	isDep  *model.IsDependencyInputSpec
 }
 
 type testOccurrence struct {
@@ -106,7 +105,6 @@ var includedPackageArtifacts = &model.PackageOrArtifactInputs{
 }
 
 var includedDependency1 = &model.IsDependencyInputSpec{
-	VersionRange:   "dep1_range",
 	DependencyType: model.DependencyTypeDirect,
 	Justification:  "dep1_justification",
 	Origin:         "dep1_origin",
@@ -114,7 +112,6 @@ var includedDependency1 = &model.IsDependencyInputSpec{
 }
 
 var includedDependency2 = &model.IsDependencyInputSpec{
-	VersionRange:   "dep2_range",
 	DependencyType: model.DependencyTypeIndirect,
 	Justification:  "dep2_justification",
 	Origin:         "dep2_origin",
@@ -122,17 +119,15 @@ var includedDependency2 = &model.IsDependencyInputSpec{
 }
 
 var includedTestDependency1 = &testDependency{
-	pkg:       includedPackage1,
-	depPkg:    includedPackage2,
-	matchType: mSpecific,
-	isDep:     includedDependency1,
+	pkg:    includedPackage1,
+	depPkg: includedPackage2,
+	isDep:  includedDependency1,
 }
 
 var includedTestDependency2 = &testDependency{
-	pkg:       includedPackage1,
-	depPkg:    includedPackage3,
-	matchType: mSpecific,
-	isDep:     includedDependency2,
+	pkg:    includedPackage1,
+	depPkg: includedPackage3,
+	isDep:  includedDependency2,
 }
 
 var includedTestDependencies = []testDependency{*includedTestDependency1, *includedTestDependency2}
@@ -263,7 +258,6 @@ var includedTestExpectedSBOM = &model.HasSbom{
 	IncludedDependencies: []*model.IsDependency{{
 		Package:           includedTestExpectedPackage1,
 		DependencyPackage: includedTestExpectedPackage2,
-		VersionRange:      "dep1_range",
 		DependencyType:    model.DependencyTypeDirect,
 		Justification:     "dep1_justification",
 		Origin:            "dep1_origin",
@@ -271,7 +265,6 @@ var includedTestExpectedSBOM = &model.HasSbom{
 	}, {
 		Package:           includedTestExpectedPackage1,
 		DependencyPackage: includedTestExpectedPackage3,
-		VersionRange:      "dep2_range",
 		DependencyType:    model.DependencyTypeIndirect,
 		Justification:     "dep2_justification",
 		Origin:            "dep2_origin",
@@ -486,9 +479,8 @@ func TestHasSBOM(t *testing.T) {
 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
-				pkg:       testdata.P2,
-				depPkg:    testdata.P4,
-				matchType: mSpecific,
+				pkg:    testdata.P2,
+				depPkg: testdata.P4,
 				isDep: &model.IsDependencyInputSpec{
 					Justification: "test justification",
 				},
@@ -739,9 +731,8 @@ func TestHasSBOM(t *testing.T) {
 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
-				pkg:       testdata.P2,
-				depPkg:    testdata.P4,
-				matchType: mSpecific,
+				pkg:    testdata.P2,
+				depPkg: testdata.P4,
 				isDep: &model.IsDependencyInputSpec{
 					Justification: "test justification",
 				},
@@ -1842,40 +1833,6 @@ func TestHasSBOM(t *testing.T) {
 			ExpHS: nil,
 		},
 		{
-			Name:   "IncludedDependencies - Valid Included VersionRange",
-			InPkg:  includedPackages,
-			InArt:  includedArtifacts,
-			InSrc:  includedSources,
-			PkgArt: includedPackageArtifacts,
-			IsDeps: includedTestDependencies,
-			IsOccs: includedTestOccurrences,
-			Calls: []call{{
-				Sub: model.PackageOrArtifactInput{
-					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
-				},
-				HS: includedHasSBOM,
-			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{VersionRange: &includedDependency1.VersionRange}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
-		},
-		{
-			Name:   "IncludedDependencies - Invalid Included VersionRange",
-			InPkg:  includedPackages,
-			InArt:  includedArtifacts,
-			InSrc:  includedSources,
-			PkgArt: includedPackageArtifacts,
-			IsDeps: includedTestDependencies,
-			IsOccs: includedTestOccurrences,
-			Calls: []call{{
-				Sub: model.PackageOrArtifactInput{
-					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
-				},
-				HS: includedHasSBOM,
-			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{VersionRange: ptrfrom.String("invalid_range")}}},
-			ExpHS: nil,
-		},
-		{
 			Name:   "IncludedDependencies - Valid Included DependencyType",
 			InPkg:  includedPackages,
 			InArt:  includedArtifacts,
@@ -1913,7 +1870,6 @@ func TestHasSBOM(t *testing.T) {
 			Query: &model.HasSBOMSpec{
 				IncludedDependencies: []*model.IsDependencySpec{{
 					DependencyType: &includedDependency2.DependencyType,
-					VersionRange:   &includedDependency1.VersionRange,
 					Justification:  &includedDependency1.Justification,
 				}},
 			},
@@ -2768,7 +2724,7 @@ func TestHasSBOM(t *testing.T) {
 			}
 
 			for _, dep := range test.IsDeps {
-				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
+				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)
@@ -2946,9 +2902,8 @@ func TestIngestHasSBOMs(t *testing.T) {
 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
-				pkg:       testdata.P2,
-				depPkg:    testdata.P4,
-				matchType: mSpecific,
+				pkg:    testdata.P2,
+				depPkg: testdata.P4,
 				isDep: &model.IsDependencyInputSpec{
 					Justification: "test justification",
 				},
@@ -3124,7 +3079,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			}
 
 			for _, dep := range test.IsDeps {
-				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
+				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)
@@ -3201,9 +3156,8 @@ func TestDeleteHasSBOM(t *testing.T) {
 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
-				pkg:       testdata.P2,
-				depPkg:    testdata.P4,
-				matchType: mSpecific,
+				pkg:    testdata.P2,
+				depPkg: testdata.P4,
 				isDep: &model.IsDependencyInputSpec{
 					Justification: "test justification",
 				},
@@ -3351,7 +3305,7 @@ func TestDeleteHasSBOM(t *testing.T) {
 			}
 
 			for _, dep := range test.IsDeps {
-				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
+				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)

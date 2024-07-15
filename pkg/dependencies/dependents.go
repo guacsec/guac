@@ -24,7 +24,6 @@ import (
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
-	"github.com/guacsec/guac/pkg/misc/depversion"
 
 	"github.com/Khan/genqlient/graphql"
 )
@@ -105,34 +104,20 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 			depPkgName := helpers.PkgToPurl(isDependency.DependencyPackage.Type, isDependency.DependencyPackage.Namespaces[0].Namespace, isDependency.DependencyPackage.Namespaces[0].Names[0].Name, "", "", []string{})
 			pkgName := helpers.PkgToPurl(isDependency.Package.Type, isDependency.Package.Namespaces[0].Namespace, isDependency.Package.Namespaces[0].Names[0].Name, "", "", []string{})
 
-			var depPkgIds []string
 			pkgId := isDependency.Package.Namespaces[0].Names[0].Versions[0].Id
+			depPkgId := isDependency.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id
 
-			if len(isDependency.DependencyPackage.Namespaces[0].Names[0].Versions) == 0 {
-				findMatchingDepPkgVersionIDs, err := FindDepPkgVersionIDs(ctx, gqlClient, isDependency.DependencyPackage.Type,
-					isDependency.DependencyPackage.Namespaces[0].Namespace,
-					isDependency.DependencyPackage.Namespaces[0].Names[0].Name, isDependency.VersionRange)
-				if err != nil {
-					return nil, fmt.Errorf("error from FindMatchingDepPkgVersionIDs:%w", err)
-				}
-				depPkgIds = append(depPkgIds, findMatchingDepPkgVersionIDs...)
-			} else {
-				depPkgIds = append(depPkgIds, isDependency.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id)
+			// Skip "guac" files.
+			if isDependency.DependencyPackage.Type == "guac" && isDependency.DependencyPackage.Namespaces[0].Namespace == "files" {
+				continue
 			}
 
-			for _, depPkgId := range depPkgIds {
-				// Skip "guac" files.
-				if isDependency.DependencyPackage.Type == "guac" && isDependency.DependencyPackage.Namespaces[0].Namespace == "files" {
-					continue
-				}
+			// Inside the loop where you iterate through dependencies
+			updatePackagesAndNames(idToName, packages, depPkgId, pkgId, depPkgName, pkgName, dependencyEdges, dependentEdges)
 
-				// Inside the loop where you iterate through dependencies
-				updatePackagesAndNames(idToName, packages, depPkgId, pkgId, depPkgName, pkgName, dependencyEdges, dependentEdges)
-
-				// Update the edges with pkgId and depPkgId.
-				dependentEdges[depPkgId] = append(dependentEdges[depPkgId], pkgId) // pkgId is dependent on depPkgId
-				dependencyEdges[pkgId] = append(dependencyEdges[pkgId], depPkgId)  // depPkgId is a dependency of pkgId
-			}
+			// Update the edges with pkgId and depPkgId.
+			dependentEdges[depPkgId] = append(dependentEdges[depPkgId], pkgId) // pkgId is dependent on depPkgId
+			dependencyEdges[pkgId] = append(dependencyEdges[pkgId], depPkgId)  // depPkgId is a dependency of pkgId
 		}
 	}
 
@@ -199,45 +184,4 @@ func traverseGraph(startNode string, edges map[string][]string) map[string]bool 
 	}
 
 	return visited
-}
-
-// FindDepPkgVersionIDs queries for packages matching the specified filters (type, namespace, name) and version range.
-// It returns a slice of version IDs that match the given version range criteria.
-// This function returns:
-// - A slice of matching dependent package version IDs.
-// - An error
-func FindDepPkgVersionIDs(ctx context.Context, gqlclient graphql.Client, depPkgType string, depPkgNameSpace string, depPkgName string, versionRange string) ([]string, error) {
-	var matchingDepPkgVersionIDs []string
-
-	depPkgFilter := &model.PkgSpec{
-		Type:      &depPkgType,
-		Namespace: &depPkgNameSpace,
-		Name:      &depPkgName,
-	}
-
-	depPkgResponse, err := model.Packages(ctx, gqlclient, *depPkgFilter)
-	if err != nil {
-		return nil, fmt.Errorf("error querying for dependent package: %w", err)
-	}
-
-	depPkgVersionsMap := make(map[string]string)
-	var depPkgVersions []string
-	for _, depPkgVersion := range depPkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-		depPkgVersions = append(depPkgVersions, depPkgVersion.Version)
-		depPkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
-	}
-
-	matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, versionRange)
-	if err != nil {
-		// TODO(jeffmendoza): depversion is not handling all/new possible
-		// version ranges from deps.dev. Continue here to report possible
-		// vulns even if some paths cannot be followed.
-		matchingDepPkgVersions = nil
-		//return nil, nil, fmt.Errorf("error determining dependent version matches: %w", err)
-	}
-
-	for matchingDepPkgVersion := range matchingDepPkgVersions {
-		matchingDepPkgVersionIDs = append(matchingDepPkgVersionIDs, depPkgVersionsMap[matchingDepPkgVersion])
-	}
-	return matchingDepPkgVersionIDs, nil
 }
