@@ -128,7 +128,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.2 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
@@ -142,7 +142,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.1.2 // indirect
-	github.com/google/go-containerregistry v0.19.2 // indirect
+	github.com/google/go-containerregistry v0.20.0 // indirect
 	github.com/google/go-github/v53 v53.2.0 // indirect
 	github.com/google/go-github/v56 v56.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -322,7 +322,7 @@ require (
 	github.com/regclient/regclient v0.6.1
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sigstore/sigstore v1.8.6
+	github.com/sigstore/sigstore v1.8.7
 	github.com/spdx/tools-golang v0.5.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
