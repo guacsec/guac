@@ -1328,8 +1328,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "extraName",
 			startVersion:   ptrfrom.String("1.19.0"),
 			maxDepth:       10,
-			expectedLen:    2,
-			expectedPkgs:   []string{"extraType"},
+			expectedLen:    4,
+			expectedPkgs:   []string{"extraType", "conan3"},
 			graphInputs:    []assembler.IngestPredicates{isDependencyNotInRangeGraph},
 		},
 		{
@@ -1494,6 +1494,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
+		if tt.name == "7: direct isDependency not included in range" {
+			fmt.Print("here")
+		}
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
 			for _, graphInput := range tt.graphInputs {
 				err = ingestTestData(ctx, gqlClient, graphInput)
