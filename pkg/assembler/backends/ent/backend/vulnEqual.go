@@ -69,6 +69,11 @@ func (b *EntBackend) VulnEqualList(ctx context.Context, spec model.VulnEqualSpec
 		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
 	}
 
+	// if not found return nil
+	if veConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.VulnEqualEdge
 	for _, edge := range veConn.Edges {
 		edges = append(edges, &model.VulnEqualEdge{

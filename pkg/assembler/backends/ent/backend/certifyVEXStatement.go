@@ -287,9 +287,13 @@ func (b *EntBackend) CertifyVEXStatementList(ctx context.Context, spec model.Cer
 
 	certVEXConn, err := getVEXObject(vexQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed CertifyVEXStatement query with error: %w", err)
+	}
+
+	// if not found return nil
+	if certVEXConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.VEXEdge

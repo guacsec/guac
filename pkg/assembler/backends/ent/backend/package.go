@@ -86,6 +86,11 @@ func (b *EntBackend) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 		return nil, fmt.Errorf("failed package query with error: %w", err)
 	}
 
+	// if not found return nil
+	if pkgConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.PackageEdge
 	for _, edge := range pkgConn.Edges {
 		edges = append(edges, &model.PackageEdge{

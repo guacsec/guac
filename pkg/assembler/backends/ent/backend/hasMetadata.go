@@ -65,6 +65,11 @@ func (b *EntBackend) HasMetadataList(ctx context.Context, spec model.HasMetadata
 		return nil, fmt.Errorf("failed hasMetadata query with error: %w", err)
 	}
 
+	// if not found return nil
+	if hmConnect == nil {
+		return nil, nil
+	}
+
 	var edges []*model.HasMetadataEdge
 	for _, edge := range hmConnect.Edges {
 		edges = append(edges, &model.HasMetadataEdge{

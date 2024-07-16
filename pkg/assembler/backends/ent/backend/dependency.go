@@ -61,9 +61,13 @@ func (b *EntBackend) IsDependencyList(ctx context.Context, spec model.IsDependen
 
 	depConn, err := getIsDepObject(isDepQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed isDependency query with error: %w", err)
+	}
+
+	// if not found return nil
+	if depConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.IsDependencyEdge
