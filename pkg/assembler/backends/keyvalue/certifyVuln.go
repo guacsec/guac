@@ -67,7 +67,7 @@ func (c *demoClient) delkv(ctx context.Context, col string, key string) error {
 }
 
 // Helper function to remove vulnerability links. This works by setting all the links expect the specified linkID.
-func (c *demoClient) removeVulnerabilityLinks(ctx context.Context, linkID string, links []string, col string, id string) error {
+func (c *demoClient) removeLinks(ctx context.Context, linkID string, links []string, col string, id string) error {
 	newLinks := []string{}
 	for _, id := range links {
 		if id != linkID {
@@ -97,7 +97,7 @@ func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, er
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := c.removeVulnerabilityLinks(ctx, link.ThisID, foundPackage.CertifyVulnLinks, "packages", foundPackage.ID()); err != nil {
+	if err := c.removeLinks(ctx, link.ThisID, foundPackage.CertifyVulnLinks, "packages", foundPackage.ID()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
@@ -105,12 +105,12 @@ func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, er
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := c.removeVulnerabilityLinks(ctx, link.ThisID, foundVulnNode.CertifyVulnLinks, "vulnerabilities", foundVulnNode.ID()); err != nil {
+	if err := c.removeLinks(ctx, link.ThisID, foundVulnNode.CertifyVulnLinks, "vulnerabilities", foundVulnNode.ID()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
 	// Delete the link from the KeyValue store
-	if err := c.delkv(ctx, cVulnCol, link.Key()); err != nil {
+	if err := c.kv.Remove(ctx, cVulnCol, link.Key()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 

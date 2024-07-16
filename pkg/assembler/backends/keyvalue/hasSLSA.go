@@ -72,6 +72,56 @@ func (n *hasSLSAStruct) Key() string {
 	}, ":"))
 }
 
+// DeleteHasSLSA deletes a specified SLSA node along with all associated relationships.
+func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error) {
+	funcName := "DeleteSLSA"
+
+	// Retrieve the SLSA link by ID
+	link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil // Not found, nothing to delete
+		}
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated subject
+	foundSubject, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &link.Subject})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	if err := c.removeLinks(ctx, link.ThisID, foundSubject.HasSLSAs, "artifacts", foundSubject.ID()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated builtBy
+	foundBuiltBy, err := c.returnFoundBuilder(ctx, &model.IDorBuilderInput{BuilderID: &link.BuiltBy})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	if err := c.removeLinks(ctx, link.ThisID, foundBuiltBy.HasSLSAs, "builders", foundBuiltBy.ID()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated builtFrom
+	for _, builtFromID := range link.BuiltFrom {
+		foundBuiltFrom, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &builtFromID})
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+		if err := c.removeLinks(ctx, link.ThisID, foundBuiltFrom.HasSLSAs, "artifacts", foundBuiltFrom.ID()); err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+	}
+
+	// Delete the link from the KeyValue store
+	if err := c.kv.Remove(ctx, cVulnCol, link.Key()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return true, nil
+}
+
 func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2+len(n.BuiltFrom))
 	if allowedEdges[model.EdgeHasSlsaSubject] {
