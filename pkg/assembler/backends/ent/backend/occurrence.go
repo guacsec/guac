@@ -65,6 +65,11 @@ func (b *EntBackend) IsOccurrenceList(ctx context.Context, spec model.IsOccurren
 		return nil, fmt.Errorf("failed isOccurrence query with error: %w", err)
 	}
 
+	// if not found return nil
+	if occurConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.IsOccurrenceEdge
 	for _, edge := range occurConn.Edges {
 		edges = append(edges, &model.IsOccurrenceEdge{

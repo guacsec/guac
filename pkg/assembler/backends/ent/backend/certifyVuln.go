@@ -237,9 +237,13 @@ func (b *EntBackend) CertifyVulnList(ctx context.Context, spec model.CertifyVuln
 
 	certVulnConn, err := getCertVulnObject(certVulnQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyVuln query with error: %w", err)
+	}
+
+	// if not found return nil
+	if certVulnConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.CertifyVulnEdge

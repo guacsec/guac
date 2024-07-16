@@ -68,6 +68,11 @@ func (b *EntBackend) PkgEqualList(ctx context.Context, spec model.PkgEqualSpec, 
 		return nil, fmt.Errorf("failed pkgEqual query with error: %w", err)
 	}
 
+	// if not found return nil
+	if peConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.PkgEqualEdge
 	for _, edge := range peConn.Edges {
 		edges = append(edges, &model.PkgEqualEdge{

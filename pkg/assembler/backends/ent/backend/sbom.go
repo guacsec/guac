@@ -68,6 +68,11 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		return nil, fmt.Errorf("failed hasSBOM query with error: %w", err)
 	}
 
+	// if not found return nil
+	if hasSBOMConnection == nil {
+		return nil, nil
+	}
+
 	// Large SBOMs (50MB+) hit the postgres parameter issue (HasSBOM: pq: got 97137 parameters but PostgreSQL only supports 65535 parameters).
 	// To overcome this, we can breakout the "included" pieces of the hasSBOM node into individual queries and reconstruct the node at the end.
 
@@ -123,8 +128,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						pkgVerErr: fmt.Errorf("failed included package query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedPkgs []*ent.PackageVersion
+				// if not found break
+				if pkgConn == nil {
+					break
+				}
 
+				var paginatedPkgs []*ent.PackageVersion
 				for _, edge := range pkgConn.Edges {
 					paginatedPkgs = append(paginatedPkgs, edge.Node)
 				}
@@ -152,8 +161,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						artErr: fmt.Errorf("failed included artifacts query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedArts []*ent.Artifact
+				// if not found break
+				if artConn == nil {
+					break
+				}
 
+				var paginatedArts []*ent.Artifact
 				for _, edge := range artConn.Edges {
 					paginatedArts = append(paginatedArts, edge.Node)
 				}
@@ -185,8 +198,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						depErr: fmt.Errorf("failed included dependency query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedDeps []*ent.Dependency
+				// if not found break
+				if depConnect == nil {
+					break
+				}
 
+				var paginatedDeps []*ent.Dependency
 				for _, edge := range depConnect.Edges {
 					paginatedDeps = append(paginatedDeps, edge.Node)
 				}
@@ -217,8 +234,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						occurErr: fmt.Errorf("failed included occurrence query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedOccurs []*ent.Occurrence
+				// if not found break
+				if occurConnect == nil {
+					break
+				}
 
+				var paginatedOccurs []*ent.Occurrence
 				for _, edge := range occurConnect.Edges {
 					paginatedOccurs = append(paginatedOccurs, edge.Node)
 				}

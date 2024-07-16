@@ -62,9 +62,13 @@ func (b *EntBackend) CertifyLegalList(ctx context.Context, spec model.CertifyLeg
 
 	certLegalConn, err := getCertifyLegalObject(certLegalQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyLegal query with error: %w", err)
+	}
+
+	// if not found return nil
+	if certLegalConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.CertifyLegalEdge

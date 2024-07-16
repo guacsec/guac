@@ -62,13 +62,18 @@ func (b *EntBackend) VulnerabilityMetadataList(ctx context.Context, spec model.V
 		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)
 	}
 
-	veQuery := b.client.VulnerabilityMetadata.Query().
+	vmQuery := b.client.VulnerabilityMetadata.Query().
 		Where(vulnMetadataPred)
 
-	vmConn, err := getVulnMetadataObject(veQuery).
+	vmConn, err := getVulnMetadataObject(vmQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed vulnMetadata query with error: %w", err)
+	}
+
+	// if not found return nil
+	if vmConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.VulnerabilityMetadataEdge
