@@ -99,6 +99,11 @@ func (b *EntBackend) LicenseList(ctx context.Context, spec model.LicenseSpec, af
 		return nil, fmt.Errorf("failed license query with error: %w", err)
 	}
 
+	// if not found return nil
+	if licenseConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.LicenseEdge
 	for _, edge := range licenseConn.Edges {
 		edges = append(edges, &model.LicenseEdge{

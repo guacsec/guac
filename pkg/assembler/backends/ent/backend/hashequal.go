@@ -64,9 +64,13 @@ func (b *EntBackend) HashEqualList(ctx context.Context, spec model.HashEqualSpec
 
 	haConn, err := getHashEqualObject(heQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed hashEqual query with error: %w", err)
+	}
+
+	// if not found return nil
+	if haConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.HashEqualEdge

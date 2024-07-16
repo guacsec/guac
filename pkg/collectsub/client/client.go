@@ -69,7 +69,7 @@ func NewClient(opts CsubClientOptions) (Client, error) {
 		creds = credentials.NewTLS(&tls.Config{RootCAs: sysPool, InsecureSkipVerify: opts.TlsSkipVerify})
 	}
 
-	conn, err := grpc.Dial(opts.Addr, grpc.WithTransportCredentials(creds))
+	conn, err := grpc.NewClient(opts.Addr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return nil, err
 	}

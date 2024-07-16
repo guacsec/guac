@@ -69,6 +69,11 @@ func (b *EntBackend) ScorecardsList(ctx context.Context, spec model.CertifyScore
 		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
 	}
 
+	// if not found return nil
+	if scorecardConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.CertifyScorecardEdge
 	for _, edge := range scorecardConn.Edges {
 		edges = append(edges, &model.CertifyScorecardEdge{

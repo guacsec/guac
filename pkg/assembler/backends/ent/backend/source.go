@@ -87,6 +87,11 @@ func (b *EntBackend) HasSourceAtList(ctx context.Context, spec model.HasSourceAt
 		return nil, fmt.Errorf("failed hasSourceAt query with error: %w", err)
 	}
 
+	// if not found return nil
+	if hsaConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.HasSourceAtEdge
 	for _, edge := range hsaConn.Edges {
 		edges = append(edges, &model.HasSourceAtEdge{
@@ -407,6 +412,11 @@ func (b *EntBackend) SourcesList(ctx context.Context, spec model.SourceSpec, aft
 		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed sources query with error: %w", err)
+	}
+
+	// if not found return nil
+	if sourceConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.SourceEdge

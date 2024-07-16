@@ -78,9 +78,13 @@ func (b *EntBackend) CertifyBadList(ctx context.Context, filter model.CertifyBad
 
 	certBadConn, err := getCertificationObject(certQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyBad query with error: %w", err)
+	}
+
+	// if not found return nil
+	if certBadConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.CertifyBadEdge
@@ -146,9 +150,13 @@ func (b *EntBackend) CertifyGoodList(ctx context.Context, filter model.CertifyGo
 
 	certGoodConn, err := getCertificationObject(certQuery).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyGood query with error: %w", err)
+	}
+
+	// if not found return nil
+	if certGoodConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.CertifyGoodEdge

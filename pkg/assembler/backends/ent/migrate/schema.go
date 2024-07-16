@@ -431,6 +431,11 @@ var (
 					Where: "dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL",
 				},
 			},
+			{
+				Name:    "dependency_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{DependenciesColumns[7]},
+			},
 		},
 	}
 	// HasMetadataColumns holds the columns for the "has_metadata" table.
