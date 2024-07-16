@@ -87,9 +87,6 @@
         ],
         "subpath": ""
       },
-      "depPkgMatchFlag" : {
-        "pkg": "SPECIFIC_VERSION"
-      },
       "isDependency": {
         "dependencyType": "UNKNOWN",
         "justification": "top level package dependency",
@@ -126,9 +123,6 @@
           }
         ],
         "subpath": ""
-      },
-      "depPkgMatchFlag" : {
-        "pkg": "SPECIFIC_VERSION"
       },
       "isDependency": {
         "dependencyType": "UNKNOWN",
