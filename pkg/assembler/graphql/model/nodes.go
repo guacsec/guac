@@ -321,7 +321,7 @@ type CertifyLegal struct {
 	ID string `json:"id"`
 	// The package version or source that is attested
 	Subject PackageOrSource `json:"subject"`
-	// The license expression as delcared
+	// The license expression as declared
 	DeclaredLicense string `json:"declaredLicense"`
 	// A list of license objects found in the declared license expression
 	DeclaredLicenses []*License `json:"declaredLicenses"`

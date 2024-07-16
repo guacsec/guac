@@ -127,6 +127,15 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: noAnalysisVexPredicates(),
 		wantErr:        false,
+	}, {
+		name: "valid CycloneDX VEX document with license information",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXLegalExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
