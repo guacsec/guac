@@ -168,47 +168,6 @@ func (ec *executionContext) fieldContext_IsDependency_dependencyPackage(_ contex
 	return fc, nil
 }
 
-func (ec *executionContext) _IsDependency_versionRange(ctx context.Context, field graphql.CollectedField, obj *model.IsDependency) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsDependency_versionRange(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.VersionRange, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_IsDependency_versionRange(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "IsDependency",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _IsDependency_dependencyType(ctx context.Context, field graphql.CollectedField, obj *model.IsDependency) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_IsDependency_dependencyType(ctx, field)
 	if err != nil {
@@ -634,8 +593,6 @@ func (ec *executionContext) fieldContext_IsDependencyEdge_node(_ context.Context
 				return ec.fieldContext_IsDependency_package(ctx, field)
 			case "dependencyPackage":
 				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
-			case "versionRange":
-				return ec.fieldContext_IsDependency_versionRange(ctx, field)
 			case "dependencyType":
 				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
 			case "justification":
@@ -664,20 +621,13 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionRange", "dependencyType", "justification", "origin", "collector", "documentRef"}
+	fieldsInOrder := [...]string{"dependencyType", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "versionRange":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.VersionRange = data
 		case "dependencyType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyType"))
 			data, err := ec.unmarshalNDependencyType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx, v)
@@ -726,7 +676,7 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "package", "dependencyPackage", "versionRange", "dependencyType", "justification", "origin", "collector", "documentRef"}
+	fieldsInOrder := [...]string{"id", "package", "dependencyPackage", "dependencyType", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -754,13 +704,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 				return it, err
 			}
 			it.DependencyPackage = data
-		case "versionRange":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.VersionRange = data
 		case "dependencyType":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyType"))
 			data, err := ec.unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx, v)
@@ -833,11 +776,6 @@ func (ec *executionContext) _IsDependency(ctx context.Context, sel ast.Selection
 			}
 		case "dependencyPackage":
 			out.Values[i] = ec._IsDependency_dependencyPackage(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "versionRange":
-			out.Values[i] = ec._IsDependency_versionRange(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

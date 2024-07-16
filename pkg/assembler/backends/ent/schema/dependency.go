@@ -46,9 +46,7 @@ func (Dependency) Fields() []ent.Field {
 			Unique().
 			Immutable(),
 		field.UUID("package_id", getUUIDv7()),
-		field.UUID("dependent_package_name_id", getUUIDv7()).Optional(),
 		field.UUID("dependent_package_version_id", getUUIDv7()).Optional(),
-		field.String("version_range"),
 		field.Enum("dependency_type").Values(model.DependencyTypeDirect.String(), model.DependencyTypeIndirect.String(), model.DependencyTypeUnknown.String()),
 		field.String("justification"),
 		field.String("origin"),
@@ -64,9 +62,6 @@ func (Dependency) Edges() []ent.Edge {
 			Required().
 			Field("package_id").
 			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To("dependent_package_name", PackageName.Type).
-			Field("dependent_package_name_id").
-			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("dependent_package_version", PackageVersion.Type).
 			Field("dependent_package_version_id").
 			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
@@ -77,16 +72,7 @@ func (Dependency) Edges() []ent.Edge {
 // Indexes of the Dependency.
 func (Dependency) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("version_range", "dependency_type", "justification", "origin", "collector", "document_ref").
-			Edges("package", "dependent_package_name").
-			Unique().
-			Annotations(entsql.IndexWhere("dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL")).
-			StorageKey("dep_package_name_id"),
-		index.Fields("version_range", "dependency_type", "justification", "origin", "collector", "document_ref").
-			Edges("package", "dependent_package_version").
-			Unique().
-			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).
-			StorageKey("dep_package_version_id"),
+		index.Fields("dependency_type", "justification", "origin", "collector", "document_ref", "package_id", "dependent_package_version_id").Unique(),
 		index.Fields("package_id"), // speed up frequently run queries to check for deps with a certain package ID
 	}
 }

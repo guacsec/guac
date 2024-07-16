@@ -80,7 +80,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("1.4.0"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -90,7 +89,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^3.0.0 || ^4.0.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -103,7 +101,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("17.0.0"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -113,7 +110,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^1.1.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -133,10 +129,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("4.1.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^4.1.1",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -325,10 +319,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("0.1.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^0.1",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -427,7 +419,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("4.2.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -437,7 +428,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "^3.0.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",

@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
@@ -21,12 +20,8 @@ type Dependency struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
 	PackageID uuid.UUID `json:"package_id,omitempty"`
-	// DependentPackageNameID holds the value of the "dependent_package_name_id" field.
-	DependentPackageNameID uuid.UUID `json:"dependent_package_name_id,omitempty"`
 	// DependentPackageVersionID holds the value of the "dependent_package_version_id" field.
 	DependentPackageVersionID uuid.UUID `json:"dependent_package_version_id,omitempty"`
-	// VersionRange holds the value of the "version_range" field.
-	VersionRange string `json:"version_range,omitempty"`
 	// DependencyType holds the value of the "dependency_type" field.
 	DependencyType dependency.DependencyType `json:"dependency_type,omitempty"`
 	// Justification holds the value of the "justification" field.
@@ -47,17 +42,15 @@ type Dependency struct {
 type DependencyEdges struct {
 	// Package holds the value of the package edge.
 	Package *PackageVersion `json:"package,omitempty"`
-	// DependentPackageName holds the value of the dependent_package_name edge.
-	DependentPackageName *PackageName `json:"dependent_package_name,omitempty"`
 	// DependentPackageVersion holds the value of the dependent_package_version edge.
 	DependentPackageVersion *PackageVersion `json:"dependent_package_version,omitempty"`
 	// IncludedInSboms holds the value of the included_in_sboms edge.
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
-	totalCount [4]map[string]int
+	totalCount [3]map[string]int
 
 	namedIncludedInSboms map[string][]*BillOfMaterials
 }
@@ -73,23 +66,12 @@ func (e DependencyEdges) PackageOrErr() (*PackageVersion, error) {
 	return nil, &NotLoadedError{edge: "package"}
 }
 
-// DependentPackageNameOrErr returns the DependentPackageName value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e DependencyEdges) DependentPackageNameOrErr() (*PackageName, error) {
-	if e.DependentPackageName != nil {
-		return e.DependentPackageName, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: packagename.Label}
-	}
-	return nil, &NotLoadedError{edge: "dependent_package_name"}
-}
-
 // DependentPackageVersionOrErr returns the DependentPackageVersion value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e DependencyEdges) DependentPackageVersionOrErr() (*PackageVersion, error) {
 	if e.DependentPackageVersion != nil {
 		return e.DependentPackageVersion, nil
-	} else if e.loadedTypes[2] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "dependent_package_version"}
@@ -98,7 +80,7 @@ func (e DependencyEdges) DependentPackageVersionOrErr() (*PackageVersion, error)
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e DependencyEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
@@ -109,9 +91,9 @@ func (*Dependency) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dependency.FieldVersionRange, dependency.FieldDependencyType, dependency.FieldJustification, dependency.FieldOrigin, dependency.FieldCollector, dependency.FieldDocumentRef:
+		case dependency.FieldDependencyType, dependency.FieldJustification, dependency.FieldOrigin, dependency.FieldCollector, dependency.FieldDocumentRef:
 			values[i] = new(sql.NullString)
-		case dependency.FieldID, dependency.FieldPackageID, dependency.FieldDependentPackageNameID, dependency.FieldDependentPackageVersionID:
+		case dependency.FieldID, dependency.FieldPackageID, dependency.FieldDependentPackageVersionID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -140,23 +122,11 @@ func (d *Dependency) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				d.PackageID = *value
 			}
-		case dependency.FieldDependentPackageNameID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field dependent_package_name_id", values[i])
-			} else if value != nil {
-				d.DependentPackageNameID = *value
-			}
 		case dependency.FieldDependentPackageVersionID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field dependent_package_version_id", values[i])
 			} else if value != nil {
 				d.DependentPackageVersionID = *value
-			}
-		case dependency.FieldVersionRange:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field version_range", values[i])
-			} else if value.Valid {
-				d.VersionRange = value.String
 			}
 		case dependency.FieldDependencyType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -206,11 +176,6 @@ func (d *Dependency) QueryPackage() *PackageVersionQuery {
 	return NewDependencyClient(d.config).QueryPackage(d)
 }
 
-// QueryDependentPackageName queries the "dependent_package_name" edge of the Dependency entity.
-func (d *Dependency) QueryDependentPackageName() *PackageNameQuery {
-	return NewDependencyClient(d.config).QueryDependentPackageName(d)
-}
-
 // QueryDependentPackageVersion queries the "dependent_package_version" edge of the Dependency entity.
 func (d *Dependency) QueryDependentPackageVersion() *PackageVersionQuery {
 	return NewDependencyClient(d.config).QueryDependentPackageVersion(d)
@@ -247,14 +212,8 @@ func (d *Dependency) String() string {
 	builder.WriteString("package_id=")
 	builder.WriteString(fmt.Sprintf("%v", d.PackageID))
 	builder.WriteString(", ")
-	builder.WriteString("dependent_package_name_id=")
-	builder.WriteString(fmt.Sprintf("%v", d.DependentPackageNameID))
-	builder.WriteString(", ")
 	builder.WriteString("dependent_package_version_id=")
 	builder.WriteString(fmt.Sprintf("%v", d.DependentPackageVersionID))
-	builder.WriteString(", ")
-	builder.WriteString("version_range=")
-	builder.WriteString(d.VersionRange)
 	builder.WriteString(", ")
 	builder.WriteString("dependency_type=")
 	builder.WriteString(fmt.Sprintf("%v", d.DependencyType))

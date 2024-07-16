@@ -33,26 +33,22 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 
 			// TODO: Check is this always just expected to be one?
 			return &assembler.IsDependencyIngest{
-				Pkg:             foundNode,
-				DepPkg:          rfileNode,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    foundNode,
+				DepPkg: rfileNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: dependency,
 					Justification:  justification,
-					VersionRange:   *rfileNode.Version,
 				},
 			}, nil
 		}
 	} else if len(relatedPackNodes) > 0 {
 		for _, rpackNode := range relatedPackNodes {
 			return &assembler.IsDependencyIngest{
-				Pkg:             foundNode,
-				DepPkg:          rpackNode,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    foundNode,
+				DepPkg: rpackNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: dependency,
 					Justification:  justification,
-					VersionRange:   *rpackNode.Version,
 				},
 			}, nil
 
@@ -68,13 +64,11 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 		for _, packNode := range packNodes {
 			if !reflect.DeepEqual(packNode, topLevel) {
 				p := assembler.IsDependencyIngest{
-					Pkg:             topLevel,
-					DepPkg:          packNode,
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+					Pkg:    topLevel,
+					DepPkg: packNode,
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeUnknown,
 						Justification:  justification,
-						VersionRange:   *packNode.Version,
 					},
 				}
 				isDeps = append(isDeps, p)
@@ -85,13 +79,11 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 	for _, fileNodes := range files {
 		for _, fileNode := range fileNodes {
 			p := assembler.IsDependencyIngest{
-				Pkg:             topLevel,
-				DepPkg:          fileNode,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    topLevel,
+				DepPkg: fileNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
-					VersionRange:   *fileNode.Version,
 				},
 			}
 			isDeps = append(isDeps, p)

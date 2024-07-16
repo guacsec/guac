@@ -34,8 +34,6 @@ var (
 	testTime2          = time.Unix(1e9, 0)
 	startTime          = time.Now()
 	finishTime         = time.Now().Add(10 * time.Second)
-	mAll               = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
-	mSpecific          = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
 )
 
 var ignoreID = cmp.FilterPath(func(p cmp.Path) bool {
@@ -438,9 +436,6 @@ func lessIsDep(a, b *model.IsDependency) bool {
 		return d < 0
 	}
 	if d := cmpPkg(a.DependencyPackage, b.DependencyPackage); d != 0 {
-		return d < 0
-	}
-	if d := strings.Compare(a.VersionRange, b.VersionRange); d != 0 {
 		return d < 0
 	}
 	if d := strings.Compare(a.Justification, b.Justification); d != 0 {

@@ -3309,11 +3309,6 @@ func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetDependencyType() Dep
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns AllHasSBOMTreeIncludedDependenciesIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetVersionRange() string {
-	return v.AllIsDependencyTree.VersionRange
-}
-
 // GetOrigin returns AllHasSBOMTreeIncludedDependenciesIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetOrigin() string {
 	return v.AllIsDependencyTree.Origin
@@ -3360,8 +3355,6 @@ type __premarshalAllHasSBOMTreeIncludedDependenciesIsDependency struct {
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -3383,7 +3376,6 @@ func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) __premarshalJSON() (*__
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -4662,12 +4654,10 @@ type AllIsDependencyTree struct {
 	Justification string `json:"justification"`
 	// Package that has the dependency
 	Package AllIsDependencyTreePackage `json:"package"`
-	// Package for the dependency; MUST be PackageName or PackageVersion
+	// Package for the dependency; MUST be PackageVersion
 	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
-	// Version range for the dependency link, required if depedentPackage points to PackageName
-	VersionRange string `json:"versionRange"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
@@ -4690,9 +4680,6 @@ func (v *AllIsDependencyTree) GetDependencyPackage() AllIsDependencyTreeDependen
 
 // GetDependencyType returns AllIsDependencyTree.DependencyType, and is useful for accessing the field via an interface.
 func (v *AllIsDependencyTree) GetDependencyType() DependencyType { return v.DependencyType }
-
-// GetVersionRange returns AllIsDependencyTree.VersionRange, and is useful for accessing the field via an interface.
-func (v *AllIsDependencyTree) GetVersionRange() string { return v.VersionRange }
 
 // GetOrigin returns AllIsDependencyTree.Origin, and is useful for accessing the field via an interface.
 func (v *AllIsDependencyTree) GetOrigin() string { return v.Origin }
@@ -9185,11 +9172,6 @@ func (v *DependenciesIsDependency) GetDependencyType() DependencyType {
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns DependenciesIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *DependenciesIsDependency) GetVersionRange() string {
-	return v.AllIsDependencyTree.VersionRange
-}
-
 // GetOrigin returns DependenciesIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *DependenciesIsDependency) GetOrigin() string { return v.AllIsDependencyTree.Origin }
 
@@ -9232,8 +9214,6 @@ type __premarshalDependenciesIsDependency struct {
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -9255,7 +9235,6 @@ func (v *DependenciesIsDependency) __premarshalJSON() (*__premarshalDependencies
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -9357,11 +9336,6 @@ func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEd
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetVersionRange() string {
-	return v.AllIsDependencyTree.VersionRange
-}
-
 // GetOrigin returns DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetOrigin() string {
 	return v.AllIsDependencyTree.Origin
@@ -9408,8 +9382,6 @@ type __premarshalDependencyListIsDependencyListIsDependencyConnectionEdgesIsDepe
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -9431,7 +9403,6 @@ func (v *DependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEd
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -12957,17 +12928,12 @@ func (v *IngestVulnerabilityResponse) GetIngestVulnerability() IngestVulnerabili
 
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
-	// versionRange should be specified for depedentPackages that point to PackageName
-	VersionRange   string         `json:"versionRange"`
 	DependencyType DependencyType `json:"dependencyType"`
 	Justification  string         `json:"justification"`
 	Origin         string         `json:"origin"`
 	Collector      string         `json:"collector"`
 	DocumentRef    string         `json:"documentRef"`
 }
-
-// GetVersionRange returns IsDependencyInputSpec.VersionRange, and is useful for accessing the field via an interface.
-func (v *IsDependencyInputSpec) GetVersionRange() string { return v.VersionRange }
 
 // GetDependencyType returns IsDependencyInputSpec.DependencyType, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetDependencyType() DependencyType { return v.DependencyType }
@@ -12989,12 +12955,11 @@ func (v *IsDependencyInputSpec) GetDocumentRef() string { return v.DocumentRef }
 // To obtain the list of dependency packages, caller must fill in the package
 // field.
 //
-// Dependency packages must be defined at PackageName, not PackageVersion.
+// Dependency packages must be defined at PackageVersion.
 type IsDependencySpec struct {
 	Id                *string         `json:"id"`
 	Package           *PkgSpec        `json:"package"`
 	DependencyPackage *PkgSpec        `json:"dependencyPackage"`
-	VersionRange      *string         `json:"versionRange"`
 	DependencyType    *DependencyType `json:"dependencyType"`
 	Justification     *string         `json:"justification"`
 	Origin            *string         `json:"origin"`
@@ -13010,9 +12975,6 @@ func (v *IsDependencySpec) GetPackage() *PkgSpec { return v.Package }
 
 // GetDependencyPackage returns IsDependencySpec.DependencyPackage, and is useful for accessing the field via an interface.
 func (v *IsDependencySpec) GetDependencyPackage() *PkgSpec { return v.DependencyPackage }
-
-// GetVersionRange returns IsDependencySpec.VersionRange, and is useful for accessing the field via an interface.
-func (v *IsDependencySpec) GetVersionRange() *string { return v.VersionRange }
 
 // GetDependencyType returns IsDependencySpec.DependencyType, and is useful for accessing the field via an interface.
 func (v *IsDependencySpec) GetDependencyType() *DependencyType { return v.DependencyType }
@@ -14891,11 +14853,6 @@ func (v *NeighborsNeighborsIsDependency) GetDependencyType() DependencyType {
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns NeighborsNeighborsIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsIsDependency) GetVersionRange() string {
-	return v.AllIsDependencyTree.VersionRange
-}
-
 // GetOrigin returns NeighborsNeighborsIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsIsDependency) GetOrigin() string { return v.AllIsDependencyTree.Origin }
 
@@ -14942,8 +14899,6 @@ type __premarshalNeighborsNeighborsIsDependency struct {
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -14966,7 +14921,6 @@ func (v *NeighborsNeighborsIsDependency) __premarshalJSON() (*__premarshalNeighb
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -18318,9 +18272,6 @@ func (v *NodeNodeIsDependency) GetDependencyType() DependencyType {
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns NodeNodeIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *NodeNodeIsDependency) GetVersionRange() string { return v.AllIsDependencyTree.VersionRange }
-
 // GetOrigin returns NodeNodeIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *NodeNodeIsDependency) GetOrigin() string { return v.AllIsDependencyTree.Origin }
 
@@ -18365,8 +18316,6 @@ type __premarshalNodeNodeIsDependency struct {
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -18389,7 +18338,6 @@ func (v *NodeNodeIsDependency) __premarshalJSON() (*__premarshalNodeNodeIsDepend
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -20829,9 +20777,6 @@ func (v *NodesNodesIsDependency) GetDependencyType() DependencyType {
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns NodesNodesIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *NodesNodesIsDependency) GetVersionRange() string { return v.AllIsDependencyTree.VersionRange }
-
 // GetOrigin returns NodesNodesIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *NodesNodesIsDependency) GetOrigin() string { return v.AllIsDependencyTree.Origin }
 
@@ -20876,8 +20821,6 @@ type __premarshalNodesNodesIsDependency struct {
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -20900,7 +20843,6 @@ func (v *NodesNodesIsDependency) __premarshalJSON() (*__premarshalNodesNodesIsDe
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -24856,9 +24798,6 @@ func (v *PathPathIsDependency) GetDependencyType() DependencyType {
 	return v.AllIsDependencyTree.DependencyType
 }
 
-// GetVersionRange returns PathPathIsDependency.VersionRange, and is useful for accessing the field via an interface.
-func (v *PathPathIsDependency) GetVersionRange() string { return v.AllIsDependencyTree.VersionRange }
-
 // GetOrigin returns PathPathIsDependency.Origin, and is useful for accessing the field via an interface.
 func (v *PathPathIsDependency) GetOrigin() string { return v.AllIsDependencyTree.Origin }
 
@@ -24903,8 +24842,6 @@ type __premarshalPathPathIsDependency struct {
 
 	DependencyType DependencyType `json:"dependencyType"`
 
-	VersionRange string `json:"versionRange"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -24927,7 +24864,6 @@ func (v *PathPathIsDependency) __premarshalJSON() (*__premarshalPathPathIsDepend
 	retval.Package = v.AllIsDependencyTree.Package
 	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
-	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
 	retval.Collector = v.AllIsDependencyTree.Collector
 	return &retval, nil
@@ -30562,10 +30498,9 @@ func (v *__IngestHashEqualsInput) GetHashEquals() []HashEqualInputSpec { return 
 
 // __IngestIsDependenciesInput is used internally by genqlient
 type __IngestIsDependenciesInput struct {
-	Pkgs            []IDorPkgInput          `json:"pkgs"`
-	DepPkgs         []IDorPkgInput          `json:"depPkgs"`
-	DepPkgMatchType MatchFlags              `json:"depPkgMatchType"`
-	Dependencies    []IsDependencyInputSpec `json:"dependencies"`
+	Pkgs         []IDorPkgInput          `json:"pkgs"`
+	DepPkgs      []IDorPkgInput          `json:"depPkgs"`
+	Dependencies []IsDependencyInputSpec `json:"dependencies"`
 }
 
 // GetPkgs returns __IngestIsDependenciesInput.Pkgs, and is useful for accessing the field via an interface.
@@ -30574,9 +30509,6 @@ func (v *__IngestIsDependenciesInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 // GetDepPkgs returns __IngestIsDependenciesInput.DepPkgs, and is useful for accessing the field via an interface.
 func (v *__IngestIsDependenciesInput) GetDepPkgs() []IDorPkgInput { return v.DepPkgs }
 
-// GetDepPkgMatchType returns __IngestIsDependenciesInput.DepPkgMatchType, and is useful for accessing the field via an interface.
-func (v *__IngestIsDependenciesInput) GetDepPkgMatchType() MatchFlags { return v.DepPkgMatchType }
-
 // GetDependencies returns __IngestIsDependenciesInput.Dependencies, and is useful for accessing the field via an interface.
 func (v *__IngestIsDependenciesInput) GetDependencies() []IsDependencyInputSpec {
 	return v.Dependencies
@@ -30584,10 +30516,9 @@ func (v *__IngestIsDependenciesInput) GetDependencies() []IsDependencyInputSpec 
 
 // __IngestIsDependencyInput is used internally by genqlient
 type __IngestIsDependencyInput struct {
-	Pkg             IDorPkgInput          `json:"pkg"`
-	DepPkg          IDorPkgInput          `json:"depPkg"`
-	DepPkgMatchType MatchFlags            `json:"depPkgMatchType"`
-	Dependency      IsDependencyInputSpec `json:"dependency"`
+	Pkg        IDorPkgInput          `json:"pkg"`
+	DepPkg     IDorPkgInput          `json:"depPkg"`
+	Dependency IsDependencyInputSpec `json:"dependency"`
 }
 
 // GetPkg returns __IngestIsDependencyInput.Pkg, and is useful for accessing the field via an interface.
@@ -30595,9 +30526,6 @@ func (v *__IngestIsDependencyInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetDepPkg returns __IngestIsDependencyInput.DepPkg, and is useful for accessing the field via an interface.
 func (v *__IngestIsDependencyInput) GetDepPkg() IDorPkgInput { return v.DepPkg }
-
-// GetDepPkgMatchType returns __IngestIsDependencyInput.DepPkgMatchType, and is useful for accessing the field via an interface.
-func (v *__IngestIsDependencyInput) GetDepPkgMatchType() MatchFlags { return v.DepPkgMatchType }
 
 // GetDependency returns __IngestIsDependencyInput.Dependency, and is useful for accessing the field via an interface.
 func (v *__IngestIsDependencyInput) GetDependency() IsDependencyInputSpec { return v.Dependency }
@@ -32346,7 +32274,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -32428,7 +32355,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -32869,7 +32795,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -33015,7 +32940,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -35087,8 +35011,8 @@ func IngestHashEquals(
 
 // The query or mutation executed by IngestIsDependencies.
 const IngestIsDependencies_Operation = `
-mutation IngestIsDependencies ($pkgs: [IDorPkgInput!]!, $depPkgs: [IDorPkgInput!]!, $depPkgMatchType: MatchFlags!, $dependencies: [IsDependencyInputSpec!]!) {
-	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, depPkgMatchType: $depPkgMatchType, dependencies: $dependencies)
+mutation IngestIsDependencies ($pkgs: [IDorPkgInput!]!, $depPkgs: [IDorPkgInput!]!, $dependencies: [IsDependencyInputSpec!]!) {
+	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, dependencies: $dependencies)
 }
 `
 
@@ -35097,17 +35021,15 @@ func IngestIsDependencies(
 	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	depPkgs []IDorPkgInput,
-	depPkgMatchType MatchFlags,
 	dependencies []IsDependencyInputSpec,
 ) (*IngestIsDependenciesResponse, error) {
 	req_ := &graphql.Request{
 		OpName: "IngestIsDependencies",
 		Query:  IngestIsDependencies_Operation,
 		Variables: &__IngestIsDependenciesInput{
-			Pkgs:            pkgs,
-			DepPkgs:         depPkgs,
-			DepPkgMatchType: depPkgMatchType,
-			Dependencies:    dependencies,
+			Pkgs:         pkgs,
+			DepPkgs:      depPkgs,
+			Dependencies: dependencies,
 		},
 	}
 	var err_ error
@@ -35126,8 +35048,8 @@ func IngestIsDependencies(
 
 // The query or mutation executed by IngestIsDependency.
 const IngestIsDependency_Operation = `
-mutation IngestIsDependency ($pkg: IDorPkgInput!, $depPkg: IDorPkgInput!, $depPkgMatchType: MatchFlags!, $dependency: IsDependencyInputSpec!) {
-	ingestDependency(pkg: $pkg, depPkg: $depPkg, depPkgMatchType: $depPkgMatchType, dependency: $dependency)
+mutation IngestIsDependency ($pkg: IDorPkgInput!, $depPkg: IDorPkgInput!, $dependency: IsDependencyInputSpec!) {
+	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency)
 }
 `
 
@@ -35136,17 +35058,15 @@ func IngestIsDependency(
 	client_ graphql.Client,
 	pkg IDorPkgInput,
 	depPkg IDorPkgInput,
-	depPkgMatchType MatchFlags,
 	dependency IsDependencyInputSpec,
 ) (*IngestIsDependencyResponse, error) {
 	req_ := &graphql.Request{
 		OpName: "IngestIsDependency",
 		Query:  IngestIsDependency_Operation,
 		Variables: &__IngestIsDependencyInput{
-			Pkg:             pkg,
-			DepPkg:          depPkg,
-			DepPkgMatchType: depPkgMatchType,
-			Dependency:      dependency,
+			Pkg:        pkg,
+			DepPkg:     depPkg,
+			Dependency: dependency,
 		},
 	}
 	var err_ error
@@ -36364,7 +36284,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -36842,7 +36761,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -37318,7 +37236,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }
@@ -38299,7 +38216,6 @@ fragment AllIsDependencyTree on IsDependency {
 		... AllPkgTree
 	}
 	dependencyType
-	versionRange
 	origin
 	collector
 }

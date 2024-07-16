@@ -32,10 +32,8 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion "
+  "Package for the dependency; MUST be PackageVersion "
   dependencyPackage: Package!
-  "Version range for the dependency link, required if depedentPackage points to PackageName"
-  versionRange: String!
   "Type of dependency"
   dependencyType: DependencyType!
   "Justification for the attested relationship"
@@ -54,13 +52,12 @@ IsDependencySpec allows filtering the list of dependencies to return.
 To obtain the list of dependency packages, caller must fill in the package
 field.
 
-Dependency packages must be defined at PackageName, not PackageVersion.
+Dependency packages must be defined at PackageVersion.
 """
 input IsDependencySpec {
   id: ID
   package: PkgSpec
   dependencyPackage: PkgSpec
-  versionRange: String
   dependencyType: DependencyType
   justification: String
   origin: String
@@ -70,8 +67,6 @@ input IsDependencySpec {
 
 "IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
-  "versionRange should be specified for depedentPackages that point to PackageName"
-  versionRange: String!
   dependencyType: DependencyType!
   justification: String!
   origin: String!
@@ -118,14 +113,12 @@ extend type Mutation {
   ingestDependency(
     pkg: IDorPkgInput!
     depPkg: IDorPkgInput!
-    depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
   "Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM."
   ingestDependencies(
     pkgs: [IDorPkgInput!]!
     depPkgs: [IDorPkgInput!]!
-    depPkgMatchType: MatchFlags!
     dependencies: [IsDependencyInputSpec!]!
   ): [ID!]!
 }

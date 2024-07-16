@@ -47,7 +47,6 @@ func (PackageName) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("versions", PackageVersion.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("has_source_at", HasSourceAt.Type).Ref("all_versions"),
-		edge.From("dependency", Dependency.Type).Ref("dependent_package_name"),
 		edge.From("certification", Certification.Type).Ref("all_versions"),
 		edge.From("metadata", HasMetadata.Type).Ref("all_versions"),
 		edge.From("poc", PointOfContact.Type).Ref("all_versions"),

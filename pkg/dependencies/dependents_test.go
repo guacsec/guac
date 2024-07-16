@@ -20,9 +20,10 @@ package dependencies
 import (
 	"context"
 	"fmt"
-	clients "github.com/guacsec/guac/internal/testing/graphqlClients"
 	"testing"
 	"time"
+
+	clients "github.com/guacsec/guac/internal/testing/graphqlClients"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 
@@ -403,13 +404,11 @@ func createDependencyNodes(ctx context.Context, gqlClient graphql.Client, packag
 			gqlClient,
 			pkSpec,
 			depPkgSpec,
-			model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			model.IsDependencyInputSpec{
 				Justification:  "test",
 				Origin:         "test",
 				Collector:      "test",
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "test",
 			})
 
 		if err != nil {

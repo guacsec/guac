@@ -91,7 +91,6 @@
         "pkg": "SPECIFIC_VERSION"
       },
       "isDependency": {
-        "versionRange": "3.2.0-r22",
         "dependencyType": "UNKNOWN",
         "justification": "top level package dependency",
         "origin": "",
@@ -132,7 +131,6 @@
         "pkg": "SPECIFIC_VERSION"
       },
       "isDependency": {
-        "versionRange": "3.2.0-r22",
         "dependencyType": "UNKNOWN",
         "justification": "top level package dependency",
         "origin": "",

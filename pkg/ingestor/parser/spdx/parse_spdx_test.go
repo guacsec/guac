@@ -131,9 +131,7 @@ func Test_spdxParser(t *testing.T) {
 							Qualifiers: []generated.PackageQualifierInputSpec{{Key: "mediatype", Value: "application/vnd.oci.image.manifest.v1+json"}},
 							Subpath:    &packageOfEmptyString,
 						},
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
 						IsDependency: &generated.IsDependencyInputSpec{
-							VersionRange:   "sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 							DependencyType: "UNKNOWN",
 							Justification:  "top-level package GUAC heuristic connecting to each file/package",
 						},
@@ -426,12 +424,10 @@ func Test_spdxParser(t *testing.T) {
 			wantPredicates: &assembler.IngestPredicates{
 				IsDependency: []assembler.IsDependencyIngest{
 					{
-						Pkg:             pUrlToPkgDiscardError("pkg:oci/redhat/ubi9-container@sha256:4227a4b5013999a412196237c62e40d778d09cdc751720a66ff3701fbe5a4a9d?repository_url=registry.redhat.io/ubi9&tag=9.1.0-1750"),
-						DepPkg:          pUrlToPkgDiscardError("pkg:rpm/redhat/python3-libcomps@0.1.18-1.el9?arch=x86_64"),
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						Pkg:    pUrlToPkgDiscardError("pkg:oci/redhat/ubi9-container@sha256:4227a4b5013999a412196237c62e40d778d09cdc751720a66ff3701fbe5a4a9d?repository_url=registry.redhat.io/ubi9&tag=9.1.0-1750"),
+						DepPkg: pUrlToPkgDiscardError("pkg:rpm/redhat/python3-libcomps@0.1.18-1.el9?arch=x86_64"),
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
-							VersionRange:   "0.1.18-1.el9",
 							Justification:  "Derived from SPDX CONTAINED_BY relationship",
 						},
 					},
@@ -515,9 +511,8 @@ func Test_spdxParser(t *testing.T) {
 			wantPredicates: &assembler.IngestPredicates{
 				IsDependency: []assembler.IsDependencyIngest{
 					{
-						Pkg:             pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
-						DepPkg:          pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63?filename=./include-file"),
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						Pkg:    pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
+						DepPkg: pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63?filename=./include-file"),
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
 							Justification:  "top-level package GUAC heuristic connecting to each file/package",
@@ -778,9 +773,8 @@ func Test_spdxParser(t *testing.T) {
 			wantPredicates: &assembler.IngestPredicates{
 				IsDependency: []assembler.IsDependencyIngest{
 					{
-						Pkg:             pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
-						DepPkg:          pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63?filename=./include-file"),
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						Pkg:    pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
+						DepPkg: pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63?filename=./include-file"),
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
 							Justification:  "top-level package GUAC heuristic connecting to each file/package",

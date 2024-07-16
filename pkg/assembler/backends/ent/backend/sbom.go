@@ -384,7 +384,6 @@ func getSBOMObjectWithIncludes(q *ent.BillOfMaterialsQuery) *ent.BillOfMaterials
 		WithIncludedSoftwarePackages(withPackageVersionTree()).
 		WithIncludedDependencies(func(q *ent.DependencyQuery) {
 			q.WithPackage(withPackageVersionTree()).
-				WithDependentPackageName(withPackageNameTree()).
 				WithDependentPackageVersion(withPackageVersionTree())
 		}).
 		WithIncludedOccurrences(func(q *ent.OccurrenceQuery) {

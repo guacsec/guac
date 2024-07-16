@@ -46,8 +46,8 @@ type MutationResolver interface {
 	IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error)
 	IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, otherArtifact model.IDorArtifactInput, hashEqual model.HashEqualInputSpec) (string, error)
 	IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error)
-	IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error)
-	IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error)
+	IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error)
+	IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) ([]string, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error)
 	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error)
 	IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error)
@@ -562,24 +562,15 @@ func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.C
 		}
 	}
 	args["depPkgs"] = arg1
-	var arg2 model.MatchFlags
-	if tmp, ok := rawArgs["depPkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkgMatchType"))
-		arg2, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["depPkgMatchType"] = arg2
-	var arg3 []*model.IsDependencyInputSpec
+	var arg2 []*model.IsDependencyInputSpec
 	if tmp, ok := rawArgs["dependencies"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencies"))
-		arg3, err = ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["dependencies"] = arg3
+	args["dependencies"] = arg2
 	return args, nil
 }
 
@@ -604,24 +595,15 @@ func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Con
 		}
 	}
 	args["depPkg"] = arg1
-	var arg2 model.MatchFlags
-	if tmp, ok := rawArgs["depPkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkgMatchType"))
-		arg2, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["depPkgMatchType"] = arg2
-	var arg3 model.IsDependencyInputSpec
+	var arg2 model.IsDependencyInputSpec
 	if tmp, ok := rawArgs["dependency"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependency"))
-		arg3, err = ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx, tmp)
+		arg2, err = ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["dependency"] = arg3
+	args["dependency"] = arg2
 	return args, nil
 }
 
@@ -4561,7 +4543,7 @@ func (ec *executionContext) _Mutation_ingestDependency(ctx context.Context, fiel
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestDependency(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["depPkg"].(model.IDorPkgInput), fc.Args["depPkgMatchType"].(model.MatchFlags), fc.Args["dependency"].(model.IsDependencyInputSpec))
+		return ec.resolvers.Mutation().IngestDependency(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["depPkg"].(model.IDorPkgInput), fc.Args["dependency"].(model.IsDependencyInputSpec))
 	})
 
 	if resTmp == nil {
@@ -4613,7 +4595,7 @@ func (ec *executionContext) _Mutation_ingestDependencies(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestDependencies(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["depPkgs"].([]*model.IDorPkgInput), fc.Args["depPkgMatchType"].(model.MatchFlags), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
+		return ec.resolvers.Mutation().IngestDependencies(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["depPkgs"].([]*model.IDorPkgInput), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
 	})
 
 	if resTmp == nil {
@@ -7296,8 +7278,6 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 				return ec.fieldContext_IsDependency_package(ctx, field)
 			case "dependencyPackage":
 				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
-			case "versionRange":
-				return ec.fieldContext_IsDependency_versionRange(ctx, field)
 			case "dependencyType":
 				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
 			case "justification":

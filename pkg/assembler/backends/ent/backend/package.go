@@ -628,12 +628,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 				getHasSourceAtObject(q)
 			})
 	}
-	if allowedEdges[model.EdgePackageIsDependency] {
-		query.
-			WithDependency(func(q *ent.DependencyQuery) {
-				getIsDepObject(q)
-			})
-	}
 	if allowedEdges[model.EdgePackageCertifyBad] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
@@ -695,9 +689,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 		}
 		for _, hasAt := range foundPkgName.Edges.HasSourceAt {
 			out = append(out, toModelHasSourceAt(hasAt))
-		}
-		for _, dep := range foundPkgName.Edges.Dependency {
-			out = append(out, toModelIsDependencyWithBackrefs(dep))
 		}
 		for _, cert := range foundPkgName.Edges.Certification {
 			if cert.Type == certification.TypeBAD {

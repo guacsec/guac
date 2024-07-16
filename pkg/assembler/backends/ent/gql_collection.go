@@ -1334,21 +1334,6 @@ func (d *DependencyQuery) collectField(ctx context.Context, oneNode bool, opCtx 
 				fieldSeen[dependency.FieldPackageID] = struct{}{}
 			}
 
-		case "dependentPackageName":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = (&PackageNameClient{config: d.config}).Query()
-			)
-			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
-				return err
-			}
-			d.withDependentPackageName = query
-			if _, ok := fieldSeen[dependency.FieldDependentPackageNameID]; !ok {
-				selectedFields = append(selectedFields, dependency.FieldDependentPackageNameID)
-				fieldSeen[dependency.FieldDependentPackageNameID] = struct{}{}
-			}
-
 		case "dependentPackageVersion":
 			var (
 				alias = field.Alias
@@ -1381,20 +1366,10 @@ func (d *DependencyQuery) collectField(ctx context.Context, oneNode bool, opCtx 
 				selectedFields = append(selectedFields, dependency.FieldPackageID)
 				fieldSeen[dependency.FieldPackageID] = struct{}{}
 			}
-		case "dependentPackageNameID":
-			if _, ok := fieldSeen[dependency.FieldDependentPackageNameID]; !ok {
-				selectedFields = append(selectedFields, dependency.FieldDependentPackageNameID)
-				fieldSeen[dependency.FieldDependentPackageNameID] = struct{}{}
-			}
 		case "dependentPackageVersionID":
 			if _, ok := fieldSeen[dependency.FieldDependentPackageVersionID]; !ok {
 				selectedFields = append(selectedFields, dependency.FieldDependentPackageVersionID)
 				fieldSeen[dependency.FieldDependentPackageVersionID] = struct{}{}
-			}
-		case "versionRange":
-			if _, ok := fieldSeen[dependency.FieldVersionRange]; !ok {
-				selectedFields = append(selectedFields, dependency.FieldVersionRange)
-				fieldSeen[dependency.FieldVersionRange] = struct{}{}
 			}
 		case "dependencyType":
 			if _, ok := fieldSeen[dependency.FieldDependencyType]; !ok {
@@ -2198,19 +2173,6 @@ func (pn *PackageNameQuery) collectField(ctx context.Context, oneNode bool, opCt
 				return err
 			}
 			pn.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
-				*wq = *query
-			})
-
-		case "dependency":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = (&DependencyClient{config: pn.config}).Query()
-			)
-			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, dependencyImplementors)...); err != nil {
-				return err
-			}
-			pn.WithNamedDependency(alias, func(wq *DependencyQuery) {
 				*wq = *query
 			})
 

@@ -119,7 +119,6 @@ func TestIngestPredicates(t *testing.T) {
 					DepPkg: baselayoutPack,
 					IsDependency: &generated.IsDependencyInputSpec{
 						DependencyType: generated.DependencyTypeUnknown,
-						VersionRange:   "3.2.0-r22",
 						Justification:  "top level package dependency",
 					},
 				},
@@ -128,7 +127,6 @@ func TestIngestPredicates(t *testing.T) {
 					DepPkg: baselayoutdataPack,
 					IsDependency: &generated.IsDependencyInputSpec{
 						DependencyType: generated.DependencyTypeUnknown,
-						VersionRange:   "3.2.0-r22",
 						Justification:  "top level package dependency",
 					},
 				},

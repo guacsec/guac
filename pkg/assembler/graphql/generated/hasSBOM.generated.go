@@ -523,8 +523,6 @@ func (ec *executionContext) fieldContext_HasSBOM_includedDependencies(_ context.
 				return ec.fieldContext_IsDependency_package(ctx, field)
 			case "dependencyPackage":
 				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
-			case "versionRange":
-				return ec.fieldContext_IsDependency_versionRange(ctx, field)
 			case "dependencyType":
 				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
 			case "justification":
