@@ -208,7 +208,7 @@ func (c *demoClient) Delete(ctx context.Context, nodeID string) (bool, error) {
 	nodeType := sub[0]
 
 	switch nodeType {
-	case "certifyVuln":
+	case "certifyVulns":
 		deleted, err := c.DeleteCertifyVuln(ctx, nodeID)
 		if err != nil {
 			return false, fmt.Errorf("failed to delete CertifyVuln via ID: %s, with error: %w", nodeID, err)
