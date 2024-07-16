@@ -92,11 +92,6 @@ func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, er
 		return false, gqlerror.Errorf("%v :: %s", funcName, err) // TODO: Improve error messages
 	}
 
-	// Remove the link from the index
-	if err := c.delkv(ctx, cVulnCol, link.Key()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
-	}
-
 	// Remove backlinks from associated package and vulnerability
 	foundPackage, err := c.returnFoundPkgVersion(ctx, &model.IDorPkgInput{PackageVersionID: &link.PackageID})
 	if err != nil {
@@ -106,7 +101,7 @@ func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, er
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	foundVulnNode, err := c.returnFoundVulnerability(ctx, &model.IDorVulnerabilityInput{VulnerabilityInput: &model.VulnerabilityInputSpec{VulnerabilityID: link.VulnerabilityID}})
+	foundVulnNode, err := c.returnFoundVulnerability(ctx, &model.IDorVulnerabilityInput{VulnerabilityNodeID: &link.VulnerabilityID})
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
