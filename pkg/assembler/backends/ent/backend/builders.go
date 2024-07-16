@@ -64,6 +64,11 @@ func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.Builder
 		return nil, fmt.Errorf("failed builder query with error: %w", err)
 	}
 
+	// if not found return nil
+	if buildConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.BuilderEdge
 	for _, edge := range buildConn.Edges {
 		edges = append(edges, &model.BuilderEdge{

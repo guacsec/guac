@@ -63,9 +63,13 @@ func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 	artConn, err := b.client.Artifact.Query().
 		Where(artifactQueryPredicates(&artifactSpec)).
 		Paginate(ctx, afterCursor, first, nil, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed artifact query with error: %w", err)
+	}
+
+	// if not found return nil
+	if artConn == nil {
+		return nil, nil
 	}
 
 	var edges []*model.ArtifactEdge

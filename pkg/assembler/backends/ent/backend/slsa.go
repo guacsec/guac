@@ -70,6 +70,11 @@ func (b *EntBackend) HasSLSAList(ctx context.Context, spec model.HasSLSASpec, af
 		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
 	}
 
+	// if not found return nil
+	if slsaConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.HasSLSAEdge
 	for _, edge := range slsaConn.Edges {
 		edges = append(edges, &model.HasSLSAEdge{
