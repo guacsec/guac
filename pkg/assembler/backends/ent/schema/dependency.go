@@ -87,5 +87,6 @@ func (Dependency) Indexes() []ent.Index {
 			Unique().
 			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).
 			StorageKey("dep_package_version_id"),
+		index.Fields("package_id"), // speed up frequently run queries to check for deps with a certain package ID
 	}
 }
