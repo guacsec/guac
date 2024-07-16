@@ -646,11 +646,13 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, deps []ass
 	}
 
 	var isDependenciesIDs []string
-	isDependencies, err := model.IngestIsDependencies(ctx, client, depToSpecificVersion.pkgs, depToSpecificVersion.depPkgs, depToSpecificVersion.dependencies)
-	if err != nil {
-		return nil, fmt.Errorf("isDependencies failed with error: %w", err)
+	if len(depToSpecificVersion.pkgs) > 0 {
+		isDependencies, err := model.IngestIsDependencies(ctx, client, depToSpecificVersion.pkgs, depToSpecificVersion.depPkgs, depToSpecificVersion.dependencies)
+		if err != nil {
+			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
+		}
+		isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
 	}
-	isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
 
 	return isDependenciesIDs, nil
 }
