@@ -69,5 +69,7 @@ func (Occurrence) Indexes() []ent.Index {
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("occurrence_package_id"),
 		index.Fields("justification", "origin", "collector", "document_ref").Edges("artifact", "source").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("occurrence_source_id"),
+		index.Fields("package_id").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("query_occurrence_package_id"), //querying subject - package ID
+		index.Fields("artifact_id"), //querying object - artifact ID
 	}
 }

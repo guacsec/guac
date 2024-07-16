@@ -1126,62 +1126,50 @@ var (
 
 	cdxLegalDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxResteasyPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxResteasyPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeDirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeIndirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxResteasyPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxResteasyPack,
+			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeDirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxSmallRye,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxSmallRye,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2.27.0",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxNetbasePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxNetbasePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "6.3",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxMicroprofilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxMicroprofilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "1.2",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},

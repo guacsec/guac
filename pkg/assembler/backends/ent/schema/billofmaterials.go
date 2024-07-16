@@ -74,5 +74,7 @@ func (BillOfMaterials) Indexes() []ent.Index {
 		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
 			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector", "document_ref").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_artifact_id"),
+		index.Fields("package_id").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")),  // query when subject is package ID
+		index.Fields("artifact_id").Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")), // query when subject is artifact ID
 	}
 }
