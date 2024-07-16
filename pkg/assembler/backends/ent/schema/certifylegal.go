@@ -71,5 +71,6 @@ func (CertifyLegal) Indexes() []ent.Index {
 			"origin", "collector", "document_ref", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")),
+		index.Fields("package_id").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")), // query when subject is package ID
 	}
 }

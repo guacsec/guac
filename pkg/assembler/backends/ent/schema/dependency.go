@@ -73,6 +73,7 @@ func (Dependency) Edges() []ent.Edge {
 func (Dependency) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("dependency_type", "justification", "origin", "collector", "document_ref", "package_id", "dependent_package_version_id").Unique(),
-		index.Fields("package_id"), // speed up frequently run queries to check for deps with a certain package ID
+		index.Fields("package_id"),                   // speed up frequently run queries to check for deps with a certain package ID
+		index.Fields("dependent_package_version_id"), // query via the dependent package ID
 	}
 }
