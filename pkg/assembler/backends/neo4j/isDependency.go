@@ -28,7 +28,6 @@ import (
 )
 
 const (
-	versionRange   string = "versionRange"
 	dependencyType string = "dependencyType"
 )
 

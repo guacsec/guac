@@ -1493,8 +1493,7 @@ var (
             "collector":"",
             "dependencyType":"DIRECT",
             "justification":"dependency data collected via deps.dev",
-            "origin":"",
-            "versionRange":""
+            "origin":""
          }
       }
    ],
@@ -1682,8 +1681,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^1.1.0"
+				 "origin":""
 			  }
 		   },
 		   {
@@ -1707,8 +1705,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^4.1.1"
+				 "origin":""
 			  }
 		   },
 		   {
@@ -1732,8 +1729,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^3.0.0 || ^4.0.0"
+				 "origin":""
 			  }
 		   }
 		],
@@ -2026,8 +2022,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^0.1"
+				 "origin":""
 			  }
 		   }
 		],
@@ -2156,8 +2151,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^3.0.0"
+				 "origin":""
 			  }
 		   }
 		],

@@ -415,7 +415,7 @@ var (
 			{
 				Name:    "dependency_package_id",
 				Unique:  false,
-				Columns: []*schema.Column{DependenciesColumns[7]},
+				Columns: []*schema.Column{DependenciesColumns[6]},
 			},
 		},
 	}
