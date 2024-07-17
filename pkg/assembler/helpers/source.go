@@ -17,6 +17,7 @@ package helpers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -69,6 +70,34 @@ func guacSrcId(srcType, namespace, name string, stcTag, srcCommit *string) SrcId
 
 	ids.NameId = fmt.Sprintf("%s::%s::%s::%s?", ids.NamespaceId, name, tag, commit)
 	return ids
+}
+
+// convert src ID to source input that will be used by the clearly defined parser
+// example:  "uri": "sourcearchive::org.apache.commons::commons-text::1.9::?"
+func GuacSrcIdToSourceInput(srcID string) (*generated.SourceInputSpec, error) {
+
+	srcIDSplit := strings.Split(srcID, "::")
+
+	if len(srcIDSplit) != 5 {
+		return nil, fmt.Errorf("srcID does not have required length")
+	}
+
+	srcInput := &generated.SourceInputSpec{
+		Type:      srcIDSplit[0],
+		Namespace: srcIDSplit[1],
+		Name:      srcIDSplit[2],
+	}
+
+	if srcIDSplit[3] != "" {
+		srcInput.Tag = &srcIDSplit[3]
+	}
+
+	trimmedCommit := strings.TrimRight(srcIDSplit[4], "?")
+	if trimmedCommit != "" {
+		srcInput.Commit = &trimmedCommit
+	}
+
+	return srcInput, nil
 }
 
 func SourceToSourceInput(srcType, namespace, name string, revision *string) *generated.SourceInputSpec {

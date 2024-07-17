@@ -134,4 +134,5 @@ type Definition struct {
 // ClearlyDefinedPredicate defines predicate definition of the license attestation
 type ClearlyDefinedPredicate struct {
 	Definition Definition `json:"definition,omitempty"`
+	Metadata   Metadata   `json:"metadata,omitempty"`
 }

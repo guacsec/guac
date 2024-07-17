@@ -141,3 +141,66 @@ func TestSourceToSourceInput(t *testing.T) {
 		})
 	}
 }
+
+func TestGuacSrcIdToSourceInput(t *testing.T) {
+	tests := []struct {
+		srcID string
+		want  *generated.SourceInputSpec
+	}{
+		{
+			srcID: "git::github.com/kubernetes::kubernetes::::5835544ca568b757a8ecae5c153f317e5736700e?",
+			want: &generated.SourceInputSpec{
+				Type:      "git",
+				Namespace: "github.com/kubernetes",
+				Name:      "kubernetes",
+				Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+			},
+		},
+		{
+			srcID: "git::github.com/guacsec::guac::v0.4.0::?",
+			want: &generated.SourceInputSpec{
+				Type:      "git",
+				Namespace: "github.com/guacsec",
+				Name:      "guac",
+				Tag:       ptrfrom.String("v0.4.0"),
+			},
+		},
+		{
+			srcID: "git::github.com/guacsec::guac::::?",
+			want: &generated.SourceInputSpec{
+				Type:      "git",
+				Namespace: "github.com/guacsec",
+				Name:      "guac",
+			},
+		},
+		{
+			srcID: "sourcearchive::org.apache.commons::commons-text::1.9::?",
+			want: &generated.SourceInputSpec{
+				Type:      "sourcearchive",
+				Namespace: "org.apache.commons",
+				Name:      "commons-text",
+				Tag:       ptrfrom.String("1.9"),
+			},
+		},
+		{
+			srcID: "sourcearchive::org.apache.logging.log4j::log4j-core::2.8.1::?",
+			want: &generated.SourceInputSpec{
+				Type:      "sourcearchive",
+				Namespace: "org.apache.logging.log4j",
+				Name:      "log4j-core",
+				Tag:       ptrfrom.String("2.8.1"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.srcID, func(t *testing.T) {
+			got, err := GuacSrcIdToSourceInput(tt.srcID)
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("Unexpected sourceInput results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

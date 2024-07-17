@@ -196,6 +196,9 @@ func CreateAttestation(purl string, definition *attestation.Definition, currentT
 		},
 		Predicate: attestation.ClearlyDefinedPredicate{
 			Definition: *definition,
+			Metadata: attestation.Metadata{
+				ScannedOn: &currentTime,
+			},
 		},
 	}
 

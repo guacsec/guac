@@ -34,6 +34,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type parser struct {
 	packages              []*generated.PkgInputSpec
+	sources               []*generated.SourceInputSpec
 	collectedCertifyLegal []*generated.CertifyLegalInputSpec
 }
 
@@ -48,11 +49,9 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
-	ps, err := parseSubject(statement)
-	if err != nil {
+	if err := c.parseSubject(statement); err != nil {
 		return fmt.Errorf("unable to parse subject of statement: %w", err)
 	}
-	c.packages = ps
 	c.vulnData = parseMetadata(statement)
 	vs, ivs, err := parseVulns(ctx, statement)
 	if err != nil {
@@ -63,8 +62,7 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	return nil
 }
 
-func parseLegalCertifyPredicate(p []byte) (*attestation.ClearlyDefinedStatement,
-	error) {
+func parseLegalCertifyPredicate(p []byte) (*attestation.ClearlyDefinedStatement, error) {
 
 	predicate := attestation.ClearlyDefinedStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
@@ -73,16 +71,19 @@ func parseLegalCertifyPredicate(p []byte) (*attestation.ClearlyDefinedStatement,
 	return &predicate, nil
 }
 
-func parseSubject(s *attestation.ClearlyDefinedStatement) ([]*generated.PkgInputSpec, error) {
-	var ps []*generated.PkgInputSpec
-	for _, sub := range s.StatementHeader.Subject {
-		p, err := helpers.PurlToPkg(sub.Name)
+func (c *parser) parseSubject(s *attestation.ClearlyDefinedStatement) error {
+	for _, sub := range s.Statement.Subject {
+		p, err := helpers.PurlToPkg(sub.Uri)
 		if err != nil {
-			return nil, fmt.Errorf("bad purl in statement header: %w", err)
+			src, err := helpers.GuacSrcIdToSourceInput(sub.Uri)
+			if err != nil {
+				return fmt.Errorf("failed to parse uri: %s to a package or source with error: %w", sub.Uri, err)
+			}
+			c.sources = append(c.sources, src)
 		}
-		ps = append(ps, p)
+		c.packages = append(c.packages, p)
 	}
-	return ps, nil
+	return nil
 }
 
 func parseMetadata(s *attestation.ClearlyDefinedStatement) *generated.ScanMetadataInput {
