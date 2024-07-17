@@ -431,9 +431,9 @@ var (
 		},
 	}
 
-	Ite6SLSA1Doc_2	= processor.Document{
-		Blob: []byte(ite6SLSA1_2),
-		Type: processor.DocumentITE6SLSA,
+	Ite6SLSA1Doc_2 = processor.Document{
+		Blob:   []byte(ite6SLSA1_2),
+		Type:   processor.DocumentITE6SLSA,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
@@ -622,8 +622,8 @@ var (
 		},
 	}
 
-	slsa1_2time, _ = time.Parse(time.RFC3339, "2022-05-24T12:13:35.054695403Z")
-	SlsaPreds1_2 = assembler.IngestPredicates{
+	slsa1time_2, _ = time.Parse(time.RFC3339, "2022-05-24T12:13:35.054695403Z")
+	SlsaPreds1_2   = assembler.IngestPredicates{
 		IsOccurrence: []assembler.IsOccurrenceIngest{
 			{
 				Pkg: &model.PkgInputSpec{
@@ -670,21 +670,20 @@ var (
 				HasSlsa: &model.SLSAInputSpec{
 					BuildType:   "https://github.com/npm/cli/gha/v2",
 					SlsaVersion: "https://slsa.dev/provenance/v1",
-					StartedOn:   &slsa1_2time,
+					StartedOn:   &slsa1time_2,
 					SlsaPredicate: []model.SLSAPredicateInputSpec{
-						{Key: "slsa.buildDefinition.buildType",Value: "https://github.com/npm/cli/gha/v2"},
-						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.sha1",Value: "5b8c0801d1f5d105351a403f58c38269de93f680"},
-						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri",Value: "pkg:npm/sigstore/segs@1.2.0"},
-						{Key: "slsa.runDetails.builder.id",Value: "https://github.com/actions/runner"},
-						{Key: "slsa.runDetails.metadata.invocationId",Value: "b6186090-c8ff-4f91-97cf-7a3b47699e57"},
-						{Key: "slsa.runDetails.metadata.startedOn",Value: "2022-05-24T12:13:35.054695403Z"},
+						{Key: "slsa.buildDefinition.buildType", Value: "https://github.com/npm/cli/gha/v2"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.sha1", Value: "5b8c0801d1f5d105351a403f58c38269de93f680"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "pkg:npm/sigstore/segs@1.2.0"},
+						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/actions/runner"},
+						{Key: "slsa.runDetails.metadata.invocationId", Value: "b6186090-c8ff-4f91-97cf-7a3b47699e57"},
+						{Key: "slsa.runDetails.metadata.startedOn", Value: "2022-05-24T12:13:35.054695403Z"},
 					},
 				},
 			},
 		},
 	}
 
-	
 	// TODO: needs to be resolved by https://github.com/guacsec/guac/issues/75
 	Ident = []common.TrustInformation{}
 	// Ident = assembler.IdentityNode{

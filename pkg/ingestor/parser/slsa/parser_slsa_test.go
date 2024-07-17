@@ -158,10 +158,10 @@ func Test_getSlsaEntity(t *testing.T) {
 		digest   scommon.DigestSet
 		expected *slsaEntity
 		wantErr  bool
-	} {
+	}{
 		{
 			testname: "with uri and digest",
-			uri: "pkg:npm/sigstore/sigstore-js@4.2.0",
+			uri:      "pkg:npm/sigstore/sigstore-js@4.2.0",
 			digest: scommon.DigestSet{
 				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
 			},
@@ -169,17 +169,17 @@ func Test_getSlsaEntity(t *testing.T) {
 				artifacts: []*model.ArtifactInputSpec{
 					{
 						Algorithm: "sha1",
-						Digest: "428601801d1f5d105351a403f58c38269de93f680",
+						Digest:    "428601801d1f5d105351a403f58c38269de93f680",
 					},
 				},
 				pkg: &model.PkgInputSpec{
-					Type: "npm",
+					Type:      "npm",
 					Namespace: &namespace,
-					Name: "sigstore-js",
-					Version: &version,
-					Subpath: &emptyString,
+					Name:      "sigstore-js",
+					Version:   &version,
+					Subpath:   &emptyString,
 				},
-				occurence:  &model.IsOccurrenceInputSpec{
+				occurence: &model.IsOccurrenceInputSpec{
 					Justification: "from SLSA definition of checksums for subject/materials",
 				},
 			},
@@ -187,7 +187,7 @@ func Test_getSlsaEntity(t *testing.T) {
 		},
 		{
 			testname: "with name and digest",
-			name: "sigstore",
+			name:     "sigstore",
 			digest: scommon.DigestSet{
 				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
 			},
@@ -195,17 +195,17 @@ func Test_getSlsaEntity(t *testing.T) {
 				artifacts: []*model.ArtifactInputSpec{
 					{
 						Algorithm: "sha1",
-						Digest: "428601801d1f5d105351a403f58c38269de93f680",
+						Digest:    "428601801d1f5d105351a403f58c38269de93f680",
 					},
 				},
 				pkg: &model.PkgInputSpec{
-					Type: "guac",
+					Type:      "guac",
 					Namespace: &genericNamespace,
-					Name: "sigstore",
-					Subpath: &emptyString,
-					Version: &emptyString,
+					Name:      "sigstore",
+					Subpath:   &emptyString,
+					Version:   &emptyString,
 				},
-				occurence:  &model.IsOccurrenceInputSpec{
+				occurence: &model.IsOccurrenceInputSpec{
 					Justification: "from SLSA definition of checksums for subject/materials",
 				},
 			},
