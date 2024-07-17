@@ -24,10 +24,6 @@ import (
 	"net/http"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
-
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/attestation"
@@ -35,7 +31,10 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/misc/coordinates"
 	"github.com/guacsec/guac/pkg/version"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -55,11 +54,12 @@ func NewClearlyDefinedCertifier() certifier.Certifier {
 	return &cdCertifier{}
 }
 
-func getPkgDefinition(ctx context.Context, defType, namespace, name, revision string) (*attestation.Definition, error) {
+func getPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
 	logger := logging.FromContext(ctx)
 
-	provider := map[string]string{"maven": "mavencentral"}
-	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider[defType], namespace, name, revision)
+	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
+		coordinate.Namespace, coordinate.Name, coordinate.Revision)
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new request with error: %w", err)
@@ -89,7 +89,7 @@ func getPkgDefinition(ctx context.Context, defType, namespace, name, revision st
 	return &definition, nil
 }
 
-func getSrcDefinition(ctx context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+func getSrcDefinition(_ context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -129,11 +129,11 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 	packMap := map[string][]*root_package.PackageNode{}
 	for _, node := range packageNodes {
 		if _, ok := packMap[node.Purl]; !ok {
-			pkg, err := helpers.PurlToPkg(node.Purl)
+			coordinate, err := coordinates.ConvertPurlToCoordinate(node.Purl)
 			if err != nil {
-				return fmt.Errorf("failed to parse purl with error: %w", err)
+				return fmt.Errorf("failed to parse purl into coordinate with error: %w", err)
 			}
-			definition, err := getPkgDefinition(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version)
+			definition, err := getPkgDefinition(ctx, coordinate)
 			if err != nil {
 				return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
 			}
@@ -145,7 +145,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 				return fmt.Errorf("could not generate document from OSV results: %w", err)
 			}
 			if definition.Described.SourceLocation != nil {
-				srcDefinition, err := getSrcDefinition(*definition.Described.SourceLocation.Type, *definition.Described.SourceLocation.Provider,
+				srcDefinition, err := getSrcDefinition(ctx, *definition.Described.SourceLocation.Type, *definition.Described.SourceLocation.Provider,
 					*definition.Described.SourceLocation.Namespace, *definition.Described.SourceLocation.Name, *definition.Described.SourceLocation.Revision)
 				if err != nil {
 					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
