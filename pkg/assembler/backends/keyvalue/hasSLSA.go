@@ -115,7 +115,7 @@ func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error)
 	}
 
 	// Delete the link from the KeyValue store
-	if err := c.kv.Remove(ctx, cVulnCol, link.Key()); err != nil {
+	if err := c.kv.Remove(ctx, slsaCol, link.Key()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
