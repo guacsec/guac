@@ -54,6 +54,7 @@ func NewClearlyDefinedCertifier() certifier.Certifier {
 	return &cdCertifier{}
 }
 
+// getPkgDefinition uses the coordinates to query clearly defined for license definition
 func getPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
 	logger := logging.FromContext(ctx)
 
@@ -89,6 +90,7 @@ func getPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 	return &definition, nil
 }
 
+// getSrcDefinition uses the source coordinates found from the package definition to query clearly defined for license definition
 func getSrcDefinition(_ context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
@@ -119,7 +121,7 @@ func getSrcDefinition(_ context.Context, defType, provider, namespace, name, rev
 }
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
-// to generate vulnerability attestations
+// to generate clearly defined attestations
 func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 
@@ -168,6 +170,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 	return nil
 }
 
+// generateDocument generates the actual clearly defined attestation
 func generateDocument(purl string, definition *attestation.Definition, docChannel chan<- *processor.Document) error {
 	currentTime := time.Now()
 	payload, err := json.Marshal(CreateAttestation(purl, definition, currentTime))

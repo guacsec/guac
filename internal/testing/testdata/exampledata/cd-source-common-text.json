@@ -7,6 +7,9 @@
     ],
     "predicate_type": "https://in-toto.io/attestation/clearlydefined/v0.1",
     "predicate": {
+        "metadata": {
+            "scannedOn": "2022-11-21T17:45:50.52Z"
+        },
         "definition": {
             "described": {
                 "releaseDate": "2020-07-21",
