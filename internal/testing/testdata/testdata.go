@@ -386,8 +386,56 @@ var (
     ]
 }
 `
+
+	ite6SLSA1_2 = `
+{
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "name": "sigstore",
+            "uri": "pkg:npm/sigstore/sigstore-js@4.2.0",
+            "digest": {
+                "sha1": "428601801d1f5d105351a403f58c38269de93f680"
+            }
+        }
+    ],
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "predicate": {
+        "buildDefinition": {
+            "buildType": "https://github.com/npm/cli/gha/v2",
+            "resolved_dependencies": [
+                {
+                    "uri": "pkg:npm/sigstore/segs@1.2.0",
+                    "digest": {
+                        "sha1": "5b8c0801d1f5d105351a403f58c38269de93f680"
+                    }
+                }
+            ]
+        },
+        "runDetails": {
+            "builder": {
+                "id": "https://github.com/actions/runner"
+            },
+            "metadata": {
+                "invocationId": "b6186090-c8ff-4f91-97cf-7a3b47699e57",
+                "startedOn": "2022-05-24T12:13:35.054695403Z"
+            }
+        }
+    }
+}`
+
 	Ite6SLSA1Doc = processor.Document{
 		Blob:   []byte(ite6SLSA1),
+		Type:   processor.DocumentITE6SLSA,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
+
+	Ite6SLSA1Doc_2 = processor.Document{
+		Blob:   []byte(ite6SLSA1_2),
 		Type:   processor.DocumentITE6SLSA,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
@@ -571,6 +619,68 @@ var (
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
 						{Key: "slsa.runDetails.metadata.invocationId", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
 						{Key: "slsa.runDetails.metadata.startedOn", Value: "2023-01-01T12:34:56Z"},
+					},
+				},
+			},
+		},
+	}
+
+	slsa1time_2, _ = time.Parse(time.RFC3339, "2022-05-24T12:13:35.054695403Z")
+	SlsaPreds1_2   = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "npm",
+					Namespace: ptrfrom.String("sigstore"),
+					Name:      "segs",
+					Version:   ptrfrom.String("1.2.0"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha1",
+					Digest:    "5b8c0801d1f5d105351a403f58c38269de93f680",
+				},
+				IsOccurrence: &slsaIsOccurrence,
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "npm",
+					Namespace: ptrfrom.String("sigstore"),
+					Name:      "sigstore-js",
+					Version:   ptrfrom.String("4.2.0"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha1",
+					Digest:    "428601801d1f5d105351a403f58c38269de93f680",
+				},
+				IsOccurrence: &slsaIsOccurrence,
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha1",
+					Digest:    "428601801d1f5d105351a403f58c38269de93f680",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "https://github.com/actions/runner",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "sha1",
+					Digest:    "5b8c0801d1f5d105351a403f58c38269de93f680",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "https://github.com/npm/cli/gha/v2",
+					SlsaVersion: "https://slsa.dev/provenance/v1",
+					StartedOn:   &slsa1time_2,
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.buildDefinition.buildType", Value: "https://github.com/npm/cli/gha/v2"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.sha1", Value: "5b8c0801d1f5d105351a403f58c38269de93f680"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "pkg:npm/sigstore/segs@1.2.0"},
+						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/actions/runner"},
+						{Key: "slsa.runDetails.metadata.invocationId", Value: "b6186090-c8ff-4f91-97cf-7a3b47699e57"},
+						{Key: "slsa.runDetails.metadata.startedOn", Value: "2022-05-24T12:13:35.054695403Z"},
 					},
 				},
 			},

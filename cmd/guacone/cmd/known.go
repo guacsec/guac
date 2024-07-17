@@ -361,8 +361,24 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 			tableRows = append(tableRows, table.Row{vexLinkStr, vex.Id, "Vex Status: " + vex.Status})
 		}
 	case hasSBOMStr:
-		for _, sbom := range collectedNeighbors.hasSBOMs {
-			tableRows = append(tableRows, table.Row{hasSBOMStr, sbom.Id, "SBOM Download Location: " + sbom.DownloadLocation})
+		if len(collectedNeighbors.hasSBOMs) > 0 {
+			for _, sbom := range collectedNeighbors.hasSBOMs {
+				tableRows = append(tableRows, table.Row{hasSBOMStr, sbom.Id, "SBOM Download Location: " + sbom.DownloadLocation})
+			}
+		} else {
+			// if there is an isOccurrence, check to see if there are sbom associated with it
+			for _, occurrence := range collectedNeighbors.occurrences {
+				neighborResponseHasSBOM, err := getAssociatedArtifact(ctx, gqlclient, occurrence, model.EdgeArtifactHasSbom)
+				if err != nil {
+					logger.Debugf("error querying neighbors: %v", err)
+				} else {
+					for _, neighborHasSBOM := range neighborResponseHasSBOM.Neighbors {
+						if hasSBOM, ok := neighborHasSBOM.(*model.NeighborsNeighborsHasSBOM); ok {
+							tableRows = append(tableRows, table.Row{hasSBOMStr, hasSBOM.Id, "SBOM Download Location: " + hasSBOM.DownloadLocation})
+						}
+					}
+				}
+			}
 		}
 	case hasSLSAStr:
 		if len(collectedNeighbors.hasSLSAs) > 0 {
@@ -372,18 +388,7 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 		} else {
 			// if there is an isOccurrence, check to see if there are slsa attestation associated with it
 			for _, occurrence := range collectedNeighbors.occurrences {
-				artifactFilter := &model.ArtifactSpec{
-					Algorithm: &occurrence.Artifact.Algorithm,
-					Digest:    &occurrence.Artifact.Digest,
-				}
-				artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
-				if err != nil {
-					logger.Debugf("error querying for artifacts: %v", err)
-				}
-				if len(artifactResponse.Artifacts) != 1 {
-					logger.Debugf("failed to located artifacts based on (algorithm:digest)")
-				}
-				neighborResponseHasSLSA, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHasSlsa})
+				neighborResponseHasSLSA, err := getAssociatedArtifact(ctx, gqlclient, occurrence, model.EdgeArtifactHasSlsa)
 				if err != nil {
 					logger.Debugf("error querying neighbors: %v", err)
 				} else {
@@ -447,6 +452,22 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	}
 
 	return tableRows
+}
+
+func getAssociatedArtifact(ctx context.Context, gqlclient graphql.Client, occurrence *model.NeighborsNeighborsIsOccurrence, edge model.Edge) (*model.NeighborsResponse, error) {
+	logger := logging.FromContext(ctx)
+	artifactFilter := &model.ArtifactSpec{
+		Algorithm: &occurrence.Artifact.Algorithm,
+		Digest:    &occurrence.Artifact.Digest,
+	}
+	artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
+	if err != nil {
+		logger.Debugf("error querying for artifacts: %v", err)
+	}
+	if len(artifactResponse.Artifacts) != 1 {
+		logger.Debugf("failed to located artifacts based on (algorithm:digest)")
+	}
+	return model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{edge})
 }
 
 func validateQueryKnownFlags(graphqlEndpoint, headerFile string, args []string) (queryKnownOptions, error) {
