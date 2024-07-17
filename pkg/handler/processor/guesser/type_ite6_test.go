@@ -57,7 +57,7 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 		expected: processor.DocumentITE6Vul,
 	}, {
 		name:     "valid clearly defined ITE6 Document",
-		blob:     testdata.ITE6ClearlyDefinedExample,
+		blob:     testdata.ITE6CDLog4j,
 		expected: processor.DocumentITE6ClearlyDefined,
 	}}
 	for _, tt := range testCases {

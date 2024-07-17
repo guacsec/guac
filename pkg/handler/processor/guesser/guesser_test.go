@@ -192,7 +192,7 @@ func Test_GuessDocument(t *testing.T) {
 	}, {
 		name: "valid clearly defined ITE6 Document",
 		document: &processor.Document{
-			Blob:              testdata.ITE6ClearlyDefinedExample,
+			Blob:              testdata.ITE6CDLog4j,
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},

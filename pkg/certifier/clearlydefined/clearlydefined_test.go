@@ -38,11 +38,12 @@ func TestClearlyDefined(t *testing.T) {
 		wantErr       bool
 		errMessage    error
 	}{{
-		name:          "query and generate attestation from clearly defined",
+		name: "query and generate attestation from clearly defined",
+		//
 		rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.Log4JPackage, &testdata.RootPackage},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.ITE6ClearlyDefinedExample),
+				Blob:   []byte(testdata.ITE6CDCommonText),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -51,7 +52,7 @@ func TestClearlyDefined(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.Log4JVulAttestation),
+				Blob:   []byte(testdata.ITE6CDSourceCommonText),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -60,7 +61,16 @@ func TestClearlyDefined(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.RootVulAttestation),
+				Blob:   []byte(testdata.ITE6CDLog4j),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: cdCollector,
+					Source:    cdCollector,
+				},
+			},
+			{
+				Blob:   []byte(testdata.ITE6CDSourceLog4j),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -131,69 +141,3 @@ func TestClearlyDefined(t *testing.T) {
 		})
 	}
 }
-
-// func Test_createAttestation(t *testing.T) {
-// 	currentTime := time.Now()
-// 	type args struct {
-// 		packageNode root_package.PackageNode
-// 		vulns       []osv_scanner.MinimalVulnerability
-// 	}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want *attestation_vuln.VulnerabilityStatement
-// 	}{{
-// 		name: "default",
-// 		args: args{
-// 			packageNode: root_package.PackageNode{
-// 				Purl: "",
-// 			},
-// 			vulns: []osv_scanner.MinimalVulnerability{
-// 				{
-// 					ID: "testId",
-// 				},
-// 			},
-// 		},
-// 		want: &attestation_vuln.VulnerabilityStatement{
-// 			StatementHeader: intoto.StatementHeader{
-// 				Type:          intoto.StatementInTotoV01,
-// 				PredicateType: attestation_vuln.PredicateVuln,
-// 				Subject:       []intoto.Subject{{Name: ""}},
-// 			},
-// 			Predicate: attestation_vuln.VulnerabilityPredicate{
-// 				Invocation: attestation_vuln.Invocation{
-// 					Uri:        cdCollector,
-// 					ProducerID: PRODUCER_ID,
-// 				},
-// 				Scanner: attestation_vuln.Scanner{
-// 					Uri:     URI,
-// 					Version: VERSION,
-// 					Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
-// 				},
-// 				Metadata: attestation_vuln.Metadata{
-// 					ScannedOn: &currentTime,
-// 				},
-// 			},
-// 		},
-// 	}}
-// 	for _, test := range tests {
-// 		t.Run(test.name, func(t *testing.T) {
-// 			currentTime := time.Now()
-// 			got := CreateAttestation(&test.args.packageNode, test.args.vulns, currentTime)
-// 			if !deepEqualIgnoreTimestamp(got, test.want) {
-// 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
-// 			}
-// 		})
-// 	}
-// }
-
-// func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) bool {
-// 	// create a copy of a and b, and set the ScannedOn field to nil because the timestamps will be different
-// 	aCopy := a
-// 	bCopy := b
-// 	aCopy.Predicate.Metadata.ScannedOn = nil
-// 	bCopy.Predicate.Metadata.ScannedOn = nil
-
-// 	// use DeepEqual to compare the copies
-// 	return reflect.DeepEqual(aCopy, bCopy)
-// }

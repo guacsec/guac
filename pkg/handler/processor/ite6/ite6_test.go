@@ -128,7 +128,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 	}, {
 		name: "ITE6 Clearly Defined with valid payload",
 		args: &processor.Document{
-			Blob:   []byte(testdata.ITE6ClearlyDefinedExample),
+			Blob:   []byte(testdata.ITE6CDLog4j),
 			Type:   processor.DocumentITE6ClearlyDefined,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{

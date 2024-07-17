@@ -1,0 +1,940 @@
+{
+    "type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "uri": "sourcearchive::org.apache.commons::commons-text::1.9::?"
+        }
+    ],
+    "predicate_type": "https://in-toto.io/attestation/clearlydefined/v0.1",
+    "predicate": {
+        "definition": {
+            "described": {
+                "releaseDate": "2020-07-21",
+                "urls": {
+                    "registry": "https://repo1.maven.org/maven2/org/apache/commons/commons-text",
+                    "version": "https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9",
+                    "download": "https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9.jar"
+                },
+                "hashes": {
+                    "sha1": "ae5c56310246339ac93e96c576243689173142d4",
+                    "sha256": "86e6fae70b9bf61d6dccd8bfecdfa8c893b44cac78afac9ca9c584e9169de44d"
+                },
+                "files": 105,
+                "tools": [
+                    "clearlydefined/1.3.0",
+                    "licensee/9.13.0",
+                    "scancode/30.3.0"
+                ],
+                "toolScore": {
+                    "total": 30,
+                    "date": 30,
+                    "source": 0
+                },
+                "score": {
+                    "total": 30,
+                    "date": 30,
+                    "source": 0
+                }
+            },
+            "files": [
+                {
+                    "path": "META-INF/LICENSE.txt",
+                    "license": "Apache-2.0",
+                    "natures": [
+                        "license"
+                    ],
+                    "hashes": {
+                        "sha1": "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
+                        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+                    },
+                    "token": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+                },
+                {
+                    "path": "META-INF/MANIFEST.MF",
+                    "hashes": {
+                        "sha1": "9e09b896614970f65b24b86b77bb52518adbe04a",
+                        "sha256": "67595cee2f3e421e44b584db9d62fbd6fec0d8f83540a75f6260614c82178fa4"
+                    }
+                },
+                {
+                    "path": "META-INF/NOTICE.txt",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "269264bca038f81194aa7a5dfa7304d8e141c5a4",
+                        "sha256": "9ad4ec6b60a0d6ffa269c116fd117ce41d67c31fc301c8a2cba309f1d72cfde3"
+                    },
+                    "token": "9ad4ec6b60a0d6ffa269c116fd117ce41d67c31fc301c8a2cba309f1d72cfde3",
+                    "attributions": [
+                        "Copyright 2014-2020 The Apache Software Foundation"
+                    ]
+                },
+                {
+                    "path": "META-INF/maven/org.apache.commons/commons-text/pom.properties",
+                    "hashes": {
+                        "sha1": "dfbd7251f164a999aece50a1c38f151d40ad0ea2",
+                        "sha256": "8e8e9c7dc088e721a9f0d9918dd0e4ece949cc9432e2688f8f63cc852f914f57"
+                    }
+                },
+                {
+                    "path": "META-INF/maven/org.apache.commons/commons-text/pom.xml",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "9897c850c17b6919b0bb53d6e7d345c59f975b37",
+                        "sha256": "9f9216cfc944dca782e6311d62757fd77164fe67da29b58f015687fa09f44050"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/AlphabetConverter.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "471722bf6c8e71184394537b4cf33d713e03627f",
+                        "sha256": "d2eeff02eda880e548ff7e87a24285910d1a088cf01395a4f54cffe5b755b4d5"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/Builder.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "5c8578cefdd899e4e4531cea2544aeb583a06000",
+                        "sha256": "948bdf58752c51ebf0f04613f9b42b30ed53723e6c208c8e54befe211a5cafd8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/CaseUtils.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "fb120cb4045e2c810a26099acc5c30d4d8a817ac",
+                        "sha256": "88877890f1aa4caada63e9a06fa2111fa93450e3126e8809915dbb9fee13a52d"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/CharacterPredicate.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "2ae3180a744fa025043d1013850e6c848b1b8eda",
+                        "sha256": "675b937c1a0ce7d41978b625687b50ac5f707de460c9ac9356f2b873e9dde8c6"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/CharacterPredicates.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "300184cced0d2c6a987c4b3a92b898d146106aea",
+                        "sha256": "321eaffeae8958798e7175172e0e216986eb09895beec12aa116fd799d1bf0b9"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/CompositeFormat.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "a26f3c3131bdc6a9ae7e105535424a7ea632d8b3",
+                        "sha256": "24487b243efd7f5d4f2f54941c78a6890528f449cb2e2fc20f4f1649f86b17ec"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/ExtendedMessageFormat.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "66936d05f3c05cddf793da6d362bc7c982c0dfbc",
+                        "sha256": "f2de63682d2eea31408179040150362b26a5f653547c128a7e6ef615d6c4a616"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/FormatFactory.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "19a274300bc655023cd0e4a5f5f7a10b6606cc1f",
+                        "sha256": "2076b97b8ce0486c6839534a52bdff710f266ca64d521937bc809fcdb0d2b70c"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/FormattableUtils.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "ed8b463627efcd8cebf7193b3daf936ff1f82239",
+                        "sha256": "09fa673b2dd66a7e29a4bde4cbe8536b58cf36ccdd5c0adb70b4cb12734c0258"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "e707395a82b1433d218d7328b5000537ceecd54f",
+                        "sha256": "913cf7b15d1b0aae33dc7274b3e103b761fe834a916d79ca3b1db9c170101785"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/RandomStringGenerator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "da00543b3c5e676a6e364d056acdaa54c8ed87a2",
+                        "sha256": "42e33e1e5890092ec4487a0d1c3ff01bf97f51750b0bccafd0cbeee8cbc328d7"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StrBuilder.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "a043ed555a1e01fc3ebf106dd06c1a2bb246134f",
+                        "sha256": "6a7374fa9cd086a728ef70ceebe7bd89f6c844f6705b27615f1c61dda5a49663"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StringEscapeUtils.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "e4f2cd17931b65f014b9dfafd9618c0ffbc16988",
+                        "sha256": "6d47576ea74218389ea73e347f00ca5c3142d16d1958fa1bb2490a98cd933266"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StringSubstitutor.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "223475e49f8062314d193e1f22d1659fe5d68584",
+                        "sha256": "46993a615632b585dc781a4ca0023dc4f419320e90e71897b4bed6a994ec9fc5"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StringTokenizer.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "92d307de0d625879bd11af4fa1bf189ef3dda9d6",
+                        "sha256": "b69f072dafb2334b288ca4d24f25e88871290270cd1d5263bc0928a860785ec7"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StrLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "f5b7ed7fe00326527f08a9504d322fb226a3f7b5",
+                        "sha256": "3078d671d8d01729054f41ccb0fa4354655494ed2a53e77159f6f022ceedbea4"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StrMatcher.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "30238755b8a7436dcf49a9a4d6284a16257bef3d",
+                        "sha256": "d99d598f2fda1b786618505655b2b3ff7f5bef6b3d73c6977b6b9aae843a6945"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StrSubstitutor.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "c3569fdc60ffa34419f772aad26e233d5fecc597",
+                        "sha256": "6c37dac562c0ad4ad3905a41a41f7554e42deb359cd7678be3634d9cd792d1e8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/StrTokenizer.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "3f85beba51369cc760bedd3526cb9bcb06ab4297",
+                        "sha256": "5de803de8872d0ffdaa2324aa5e46b55f997bc91cd4622ac76c1a92d04789ce3"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/TextRandomProvider.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "9fc58bad1b930cf5e820e75b86779e1c71a9efe3",
+                        "sha256": "02a0b5e8b49bc0d67f805992f4a2a205e3b399e32439a3eff06504d28344561c"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/TextStringBuilder.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "593561f253d0d2e007a7c776ba138903ac7964fa",
+                        "sha256": "63e0fa079c810d2214879389402271eedb015d47378bd606680eb6d535e2f474"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/WordUtils.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "2bb1fd187cd6a84f971c1deb66f0777d76dd64ba",
+                        "sha256": "7bcfaac2549fc152c47b451d41687dbd3fc1c8e0e472c41e2e1426c01ed91c47"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/CommandVisitor.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "18654cb3a35a5c6313562af1f1013857dec2be10",
+                        "sha256": "f6de084d41ba3db0966103b8296f667dd622c2ffdf47de0491b3fcf035fa82d0"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/DeleteCommand.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "0b6965c172123c54f556f73c3923e963fb39fd8f",
+                        "sha256": "467d3c161d8c3cf85a6ffc38d531f208d6946e0f4aa48976ad50357d5ce05753"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/EditCommand.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "4b48809d0bff60311d42a55d1077132f523fc0f9",
+                        "sha256": "e566ce722e95a23ffa0ad69828b36029589c0be8b5e231f5aa10b4d541b24aa0"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/EditScript.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "251b00651a0bec6461a5fdbb1c6ba0bb0899b588",
+                        "sha256": "e3a9e8707ad35bc4edc4d031a5fc50a44e68c79484fcb299381e322f2ec466f9"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/InsertCommand.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "57598a7c353c3155bff366464efb60bd93973d28",
+                        "sha256": "59e50c2d8c8cb811c746b7751a42b16a36b9850930137dd0c353d9de81a62cbb"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/KeepCommand.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "7f92ddcc07f76cd12ef422d7bbcd79ea1984769d",
+                        "sha256": "02ffc2c1d32a2c0c614f44ca820c7d7f395805449bebca5a579cfcbdfd4d2c33"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "8e3229ebed58ab6b92d78e9e48ecd102c2950a51",
+                        "sha256": "d23980af5293acb8230154800d437a2fec9ebadb46da14563163b162c974a0f4"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/ReplacementsFinder.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "4e9ef328f1e0fbe6692ec1d04870206585f1c66e",
+                        "sha256": "668d082d22f2b6ec680219cfedf22d4eb5c7c703d6f5c0953d0caae97bc170ca"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/ReplacementsHandler.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "a71dc73187f226e9f7e00b3ee9b4cbb6466aca33",
+                        "sha256": "6f935c39b807c80c7bc618ced243a8e4b540ed258e5ec3b0ab4caeaf38659fbf"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/diff/StringsComparator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "385902b46408b17da44f08a2e19c107ac83e8962",
+                        "sha256": "d4198c6daf26d8a843a9946a3cb8bcf49c91e776cd1c5399ed4531db310ac2af"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/io/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "22174f62cd849f4ce78f3d15fe305cbcb158646a",
+                        "sha256": "87deff07cd53300f4c6737b5ebbdbc02241228965a586e297e5ea8198e78357e"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/io/StringSubstitutorReader.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "bcdcb907b6f60ee03ddfbb3d073a86e0b7b56a9d",
+                        "sha256": "fef3a6afe62f231fd2099e931e5ce31d51b032c9a428d759d44996cd2bbc49e3"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/AbstractStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "8898e7a110d7efd3858a947bae8cdaf177933183",
+                        "sha256": "8584bf2174c28411e92ef7d51e633c94201d2f13fcb65ab97c1b9df5b72e6b8f"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/BiFunctionStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "da3c96d065dc28c83c67c06aad1f0e4c0088a1a8",
+                        "sha256": "6e8c9500de9030cb633d6a7446441d6cc3bff00e0fb8bdc57ec27f703825c207"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/BiStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "7f1d7e55d7dc1daab9b9b87a51bb10fc7675ba00",
+                        "sha256": "640303cc327c8a0d38f910e66bc03fd94685b58e8a6ceb698b3e166491d65aba"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/ConstantStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "9e60f31ecce2e472f52bc2511a3560f6b90d9dda",
+                        "sha256": "7f790c10a02c987b69624933a451c348f7fb4a247a3dd3fe3aad462ebb03bda7"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/DateStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "a4a9261b3d0ea68aeb0f37d0aa38263ba45c35c6",
+                        "sha256": "d97d41d21c88320d4816f3a2505eb5f26c54d93f2e29d70e662d52d854921903"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/DefaultStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "0fd38c3f81e54a842789323b42b19b0291afa6c4",
+                        "sha256": "9fafcaf7d9d56f0c9ef262ad83b3c05c6f1ffdee7b3decc31097adbfa527d43a"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/DnsStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "5b1f165d3197b86a9023d133c3b8381a256a883e",
+                        "sha256": "67ec17a0093a4612483ec92488f6750ca92b99e0e9718a9536c8fcf3b8f5977b"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/FileStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "f146d083de4104565cc598ae2b1d49f0a76a37cc",
+                        "sha256": "ef71d0d701010554afe096f72cc934add10c71601f58409ed7545932b79eb35e"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/FunctionStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "fe09014c974a9a60856da4c0e25bf669f82356cf",
+                        "sha256": "9a2d0abb7e214692bc51008bc7e867b0b2d07595adebda22e5255a5907e5baa4"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/IllegalArgumentExceptions.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "345ff5f0b86fe5be054668bd20f1a60068ed76ac",
+                        "sha256": "d810088ee97db2f8991a9402d6f11d17a47c2198d642c07bf01f2c0b2339887c"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/InetAddressKeys.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "06c1374e020e7d9fa965768e6655b4433db9e6c5",
+                        "sha256": "f57445e51b8335964995c4996f389d1b0e93f02b281890be8c8098fd4eb555fb"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/InterpolatorStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "9254c25d19899a7bea2beb929ba0350301ae0c42",
+                        "sha256": "5f1cf3859c4eceb9d8acc6a86349725f02712e0d521c5ac9b495da15c4f66856"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/JavaPlatformStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "c3159dd4a1395c162985b4c276cf01cf0b12fe6f",
+                        "sha256": "e1d2573b8ecbcee5ca6955ef0f1c36ee4be3aacc74c92c267623707ea1c569d8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/LocalHostStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "c0d6d31e3badd8fc180c46466abd1a740ef97c19",
+                        "sha256": "9fb49cabc62fe4df34232baa24ce3dfe041371f6a1869931b21730debef960a3"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "6a3a6beb6ce5d8085c7ae2311a994a4ee9bb9a26",
+                        "sha256": "03d469043b609996fdb3507bda77ec9fef8169e15f37c2c5a40d5c1f3db1495a"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/PropertiesStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "b11856de4f6de119dec307ab3b00d45119222430",
+                        "sha256": "b687da71afbf5c176d1d869430b25fdaa72dd25437bc3e58bd18d3cb11c8554d"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/ResourceBundleStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "02a26f36ef4c35d798ee3f61814854653e169423",
+                        "sha256": "fdf0abd4690d1436824a58ed6bdc2e46d5b24cd5f9ac574eb9eeae0c60bdedb3"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/ScriptStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "9f6fbf86c9039490ac38f2e4461011996bf37f56",
+                        "sha256": "d98302e9e76422b3c5813a0a1da4ed285895cd3dac38602d563061ef4d603de3"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/StringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "ec1b42325933dbb454c6028f19678fe49f3a42f1",
+                        "sha256": "18bf77d20cc409cbc56c2c6eb76a81c5014baa5ce486154244c7bada207822eb"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/StringLookupFactory.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "fafd80787467e94e7bde439b5a5541e080abdeac",
+                        "sha256": "13e3247fb33ca5a795c5f1673218ab3ff808864c51d66a2835d6e083b652a079"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/UrlDecoderStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "6da21851b1578785031fab5d7bae0151d260743d",
+                        "sha256": "209ae8f979c8a26f37c50e3da643ceeb29e68f5609cd18485de260f67c5df347"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/UrlEncoderStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "0247a6d7229e0a8faacd8b8db7e0092f99172485",
+                        "sha256": "bf4181874db421f490cfb4295989e532a829d3fb971362d0f58b678bf5b67eb9"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/UrlStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "2c36775a3786da24b4f302a3ba57a4a8b5186eb8",
+                        "sha256": "47f88161b68de6f64bbe258d1f9a47b9151da1c5c45ccd2a2b48ce434e4604b5"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/lookup/XmlStringLookup.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "dbb4f03d6d1d40314c4c03f604026f2ed85211e7",
+                        "sha256": "f881d46113e056f195a79e42c2b62923fbd7f20ff6119cda58480190031f0974"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/matcher/AbstractStringMatcher.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "18b20f58f9e3215a05b0cd7aa022d27b20f4c927",
+                        "sha256": "44829f8e379c3f0755f7584b3e6cd9855f929eb82d6819644077bb881a3763cc"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/matcher/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "6288534f15e1849d432f7f43fc12d14b0a3f4531",
+                        "sha256": "9a5bd7f509e350f7dbff0684b170e2777a7219b1ef8ac1c81d938d5aab779413"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/matcher/StringMatcher.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "59f5f7e58301ef68277fd5d6431310b7b0663c2d",
+                        "sha256": "514c762ce3acc0be36de8d65fb0d3b75608a9a8eff3fe001f248db30b8c4b5f8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/matcher/StringMatcherFactory.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "f6a9fd25c5c570590ac24a0b5065d97cd8d14582",
+                        "sha256": "3e0c54bdda5cf5cb0670d35cccee20f12d197ebaad8fcc68bbf7c9ea84014a76"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/CosineDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "973a953e8ef22150e568863457977c2169a57e39",
+                        "sha256": "66aa106c58c4fc7cfa686f0baea045e76a660efea8bf7d9295f71fa1eb39d76e"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/CosineSimilarity.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "1566f2e29423f6a1608d3796523be5cfc4c0cc99",
+                        "sha256": "da55816e156276a7b13e1ad89ea404720b4521644d5d9853876d63e5b3f5f33e"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/Counter.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "b30ff46c9d31182378469d2d9ffdbb48c0f9755f",
+                        "sha256": "b651413829251cc540384eb44a31bf9376ff1c06c7ada6b76fcd11e836542767"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/EditDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "14ed459c433a62a6cb5a9d79a7d7c82899d19e60",
+                        "sha256": "456c3752924a66abbdb62a3fd6034e7ac38676e2a596450b9061999f93c5d1a0"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/EditDistanceFrom.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "91ee9635b58ad25a42336c0ad17bafc909044d6e",
+                        "sha256": "6ace3a80db8e6d418e10feedfcc7bdc6aa0209db50463ffdf92a183a053b2941"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/FuzzyScore.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "0713aef5438d2aaa5371b22630770d1b185ec60f",
+                        "sha256": "e59ea86de5500c7c74ca74d609669674b9dc6515fae891652cbb8b2af72b5395"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/HammingDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "19730ffeb0e8befb6dd436b523151ff22bf7aef3",
+                        "sha256": "3141205c92054ada7ed0b45a7f65402ca3252aa9498178fbe3c439e8b4bbe58a"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/IntersectionResult.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "5920b6f21d3810364b20a0797d9961993c516573",
+                        "sha256": "4e74ee395364224c97a1b19d8e3fb4af5020d89c8394b467490f8f2ab5c982f9"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/IntersectionSimilarity.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "6ffcffda76e42b9f7880661dba93c05636b49745",
+                        "sha256": "5f9b40b52cdf994435b10be8e77f9a2f69562153b74470f08409fa7aacdc4747"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/JaccardDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "5dff1b42ee313f832f56136e435224003ac87d4f",
+                        "sha256": "d589230007376b038e29a725a0fe61fe822ca89b66238e3d192ca64482802a02"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/JaccardSimilarity.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "2c126fbf2b233a347b78d73a2594e3ba8b951cc6",
+                        "sha256": "cd4acabf18adf11a95d0435e3ab799fa22257c2f41597170367adbdc00b1639d"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/JaroWinklerDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "b1eba9c4eb78d41b45930d822df063a3d85090b8",
+                        "sha256": "9145fc7b16b5abddd5ace77bf338e2faf081573b2d936bc69df66daa1ebdd0e8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/JaroWinklerSimilarity.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "d2061416a078702238ffe54709dea61513fbcd9b",
+                        "sha256": "1bbb33909dcef4c03d6c801dec69d5204798d86f5980b9baafa0429aa7676e26"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/LevenshteinDetailedDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "9ad0ab8e6c49b2dafc2fa724d845c842a7e7b6b0",
+                        "sha256": "121b613d5c9d599ee5b20c25f0941b95acbaf23d374df16b6e69bdfcc7df4b4e"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/LevenshteinDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "829979e5e6d98b14fd384307fbc895357247468a",
+                        "sha256": "072d35df5eb4f00ffc082fe9848677b7716c233767f5a83bff0af24401c5bc3f"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/LevenshteinResults.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "f7fd3b73a02928dee242e3745e58d928473460c7",
+                        "sha256": "e2aebb4b7dd1f2c7f99e96dbb3d3a416bed9773b0e455e87c53139e27600cabe"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/LongestCommonSubsequence.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "3b3ff4413b1bc705f951fd09212de2b39c2c9128",
+                        "sha256": "f240ab6401d6d8ffa55a6c2c2515779360a1759072272ff3360e2b077638d8c2"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/LongestCommonSubsequenceDistance.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "ee46be692dcb665af7354a5f23cc5e8122c204b0",
+                        "sha256": "f2fcaa440b83376864e851fd099d355b7018b36cee979070aed7e50cb87567db"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "38833b344f72f754b4dd2ea64c791edbfe398a54",
+                        "sha256": "70131d25039546f99e3c3ad445b32e2026f41a54707fd18cf57dbf88af91aff7"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/RegexTokenizer.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "95637465293327f76be17b7cf8aaa0439ca06bb1",
+                        "sha256": "d4b5bab2b0a480cbfe29d5f54dfc7f760581679f400c21df851006209147a740"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/SimilarityScore.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "abecbf7c521934426e40d4b12dfb8c7491c6cf02",
+                        "sha256": "9fc67b1e9e96ca174dd21c4c609be5277df062e9b21f34c92e02183a9af1a190"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/SimilarityScoreFrom.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "c8c692808e53138e79e3a1b4cd0af60f55128357",
+                        "sha256": "01667b7cce0d911cf09c40bb31d6e798bbe3886bd10acc6d07abb6ce1b4a77ca"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/similarity/Tokenizer.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "ac579cfafa5c8c41a90c48f12a9648a54768a356",
+                        "sha256": "ec9114dcce0271ef09d5e7d88e9445b998a058eaecd420d094ce70a510becfc2"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/AggregateTranslator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "c171ef0e3947f491286f8ce931cf48ca664d566b",
+                        "sha256": "8ba34ad188e6cf5408addd98b6d720eb3114be8e1e2a118897d9da3b81b11f42"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/CharSequenceTranslator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "f5725dfecd1da10ec9b5ba4e7484bd5fab1c0df9",
+                        "sha256": "6130f2df1c708a4277125744828bc71c856b86c8a699f557169d4deae2d5a0d8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/CodePointTranslator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "934986b72043b5e1c72d95eea27a186f92232368",
+                        "sha256": "6b0f598fd89a799fc3deafea19ee9579be4c073881cf8c03480c9324e83e7c47"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/CsvTranslators.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "4576fd59e873a35d5eca827cb611a2c26756642b",
+                        "sha256": "70375e4b53542b0bcab6787a9184aefe7cdb8067af4e500837eb633c546d4cca"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/EntityArrays.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "d94784974033fb4ed1324a75767e683f2e161440",
+                        "sha256": "a8a5fa7a304983690d8e464e34e41e45352c84a08edd4c1e5022afc4072170de"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/JavaUnicodeEscaper.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "5b06cbc50a94ba79dc2a62041b5d6543c4a5b76a",
+                        "sha256": "fd72992c4a4775e1db4d22b891e35e2f18e2901e1286783bf4db11d012f5a289"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/LookupTranslator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "b4eb8be6ba06e7686fe3ec8968165dd2be10b17d",
+                        "sha256": "5e3b148a5a2537b750358719f8377713a244aec00cf5533463ad4822a693fe12"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/NumericEntityEscaper.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "3169e79aaaa3364c3ad6b315fcb452141e939c82",
+                        "sha256": "0cda04410eca29bd93ecb74aeba5fc8098bec0f73c929df79f3a30b4ada9d3df"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/NumericEntityUnescaper.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "a708e8b684c39c6eeaa8d973032b0af6845c098b",
+                        "sha256": "c51eb620e0c4089e7dbb6748c1ac59c6ccb8f60a638f16bf3526f7ebf2f2d0e8"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/OctalUnescaper.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "6a200a8afe7c8a801105b415b5826baec876e779",
+                        "sha256": "131836f64417173be6788623916ee1d113e50db87dfc8f356c9e449fe5e91459"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/package-info.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "3942fa5ae8606f0ea2991800e57f11a6cb0be398",
+                        "sha256": "cc25848a732c8b9e47ca664b434b40a51f8c0b12cc63785ea8955193e7f2f16f"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/SinglePassTranslator.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "eae75363a235abc49e1d3af3367f1fd104ccf3b1",
+                        "sha256": "45e46106a673b612264efdf7cafea872d825ef27aeed40ebcdb26e15d9f102f2"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/UnicodeEscaper.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "607ddae09423587c84647c7740a843a7f09c3642",
+                        "sha256": "011299033a553f0a1df62c2d314a4d54af232e11de3bdd0ddabb02825b33877b"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/UnicodeUnescaper.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "c1e38dd8cc1418b5fee460762cf1300b1cfbe7f2",
+                        "sha256": "b43a56710fbe0814458e9744c2c29a3afe6fa4656ae5960a3efcc97f77e81afd"
+                    }
+                },
+                {
+                    "path": "org/apache/commons/text/translate/UnicodeUnpairedSurrogateRemover.java",
+                    "license": "Apache-2.0",
+                    "hashes": {
+                        "sha1": "39aae058042d93ea0abb0c6c8ad6345d3fe64817",
+                        "sha256": "afedaed5c795b040735c2defa3512b0dcaeb16f7e2df64725e320dfe0a66ca19"
+                    }
+                }
+            ],
+            "licensed": {
+                "declared": "",
+                "toolScore": {
+                    "total": 15,
+                    "declared": 0,
+                    "discovered": 0,
+                    "consistency": 0,
+                    "spdx": 0,
+                    "texts": 15
+                },
+                "facets": {
+                    "core": {
+                        "attribution": {
+                            "unknown": 104,
+                            "parties": [
+                                "Copyright 2014-2020 The Apache Software Foundation"
+                            ]
+                        },
+                        "discovered": {
+                            "unknown": 2,
+                            "expressions": [
+                                "Apache-2.0"
+                            ]
+                        },
+                        "files": 105
+                    }
+                },
+                "score": {
+                    "total": 15,
+                    "declared": 0,
+                    "discovered": 0,
+                    "consistency": 0,
+                    "spdx": 0,
+                    "texts": 15
+                }
+            },
+            "coordinates": {
+                "type": "sourcearchive",
+                "provider": "mavencentral",
+                "namespace": "org.apache.commons",
+                "name": "commons-text",
+                "revision": "1.9"
+            },
+            "_meta": {
+                "schemaVersion": "1.6.1",
+                "updated": "2022-04-25T12:21:40.19Z"
+            },
+            "scores": {
+                "effective": 22,
+                "tool": 22
+            }
+        }
+    }
+}

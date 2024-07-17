@@ -121,6 +121,8 @@ func getSrcDefinition(_ context.Context, defType, provider, namespace, name, rev
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
 func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+
 	packageNodes, ok := rootComponent.([]*root_package.PackageNode)
 	if !ok {
 		return ErrOSVComponentTypeMismatch
@@ -131,7 +133,8 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 		if _, ok := packMap[node.Purl]; !ok {
 			coordinate, err := coordinates.ConvertPurlToCoordinate(node.Purl)
 			if err != nil {
-				return fmt.Errorf("failed to parse purl into coordinate with error: %w", err)
+				logger.Errorf("failed to parse purl into coordinate with error: %v", err)
+				continue
 			}
 			definition, err := getPkgDefinition(ctx, coordinate)
 			if err != nil {
