@@ -114,7 +114,7 @@ func (c *demoClient) DeleteHasSBOM(ctx context.Context, id string) (bool, error)
 	}
 
 	// Delete the hasSBOM link from the KeyValue store
-	if err := c.kv.Remove(ctx, "hasSBOMs", link.Key()); err != nil {
+	if err := c.kv.Remove(ctx, hasSBOMCol, link.Key()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 

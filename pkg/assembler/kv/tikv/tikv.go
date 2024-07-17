@@ -72,7 +72,16 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 
 func (s *store) Remove(ctx context.Context, c, k string) error {
 	ck := strings.Join([]string{c, k}, ":")
-	err := s.c.Delete(ctx, []byte(ck))
+	// Check if the key exists
+	bts, err := s.c.Get(ctx, []byte(ck))
+	if err != nil {
+		return err
+	}
+	if len(bts) == 0 {
+		return kv.NotFoundError
+	}
+	// Proceed to delete the key
+	err = s.c.Delete(ctx, []byte(ck))
 	if err != nil {
 		return err
 	}
