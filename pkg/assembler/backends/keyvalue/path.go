@@ -214,12 +214,12 @@ func (c *demoClient) Delete(ctx context.Context, nodeID string) (bool, error) {
 			return false, fmt.Errorf("failed to delete CertifyVuln via ID: %s, with error: %w", nodeID, err)
 		}
 		return deleted, nil
-	//case "hasSBOMs":
-	//	deleted, err := c.DeleteHasSBOM(ctx, nodeID)
-	//	if err != nil {
-	//		return false, fmt.Errorf("failed to delete HasSBOM via ID: %s, with error: %w", nodeID, err)
-	//	}
-	//	return deleted, nil
+	case "hasSBOMs":
+		deleted, err := c.DeleteHasSBOM(ctx, nodeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete HasSBOM via ID: %s, with error: %w", nodeID, err)
+		}
+		return deleted, nil
 	case "hasSLSAs":
 		deleted, err := c.DeleteHasSLSA(ctx, nodeID)
 		if err != nil {
