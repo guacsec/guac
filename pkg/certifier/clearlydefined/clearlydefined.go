@@ -148,14 +148,14 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 				return fmt.Errorf("could not generate document from OSV results: %w", err)
 			}
 			if definition.Described.SourceLocation != nil {
-				srcDefinition, err := getSrcDefinition(ctx, *definition.Described.SourceLocation.Type, *definition.Described.SourceLocation.Provider,
-					*definition.Described.SourceLocation.Namespace, *definition.Described.SourceLocation.Name, *definition.Described.SourceLocation.Revision)
+				srcDefinition, err := getSrcDefinition(ctx, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
+					definition.Described.SourceLocation.Namespace, definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
 				if err != nil {
 					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
 				}
 
-				srcInput := helpers.SourceToSourceInput(*definition.Described.SourceLocation.Type, *definition.Described.SourceLocation.Namespace,
-					*definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
+				srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
+					definition.Described.SourceLocation.Name, &definition.Described.SourceLocation.Revision)
 
 				if err := generateDocument(helpers.SrcClientKey(srcInput).NameId, srcDefinition, docChannel); err != nil {
 					return fmt.Errorf("could not generate document from OSV results: %w", err)

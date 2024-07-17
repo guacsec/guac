@@ -32,10 +32,15 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+const (
+	justification = "Retrieved from ClearlyDefined"
+)
+
 type parser struct {
-	packages              []*generated.PkgInputSpec
-	sources               []*generated.SourceInputSpec
-	collectedCertifyLegal []*generated.CertifyLegalInputSpec
+	pkg                   *generated.PkgInputSpec
+	src                   *generated.SourceInputSpec
+	collectedCertifyLegal []assembler.CertifyLegalIngest
+	hasSourceAt           []assembler.HasSourceAtIngest
 }
 
 // NewLegalCertificationParser initializes the parser
@@ -52,18 +57,13 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	if err := c.parseSubject(statement); err != nil {
 		return fmt.Errorf("unable to parse subject of statement: %w", err)
 	}
-	c.vulnData = parseMetadata(statement)
-	vs, ivs, err := parseVulns(ctx, statement)
-	if err != nil {
-		return fmt.Errorf("unable to parse vulns of statement: %w", err)
+	if err := c.parseClearlyDefined(ctx, statement); err != nil {
+		return fmt.Errorf("unable to parse clearly defined statement: %w", err)
 	}
-	c.vulns = vs
-	c.vulnEquals = ivs
 	return nil
 }
 
 func parseLegalCertifyPredicate(p []byte) (*attestation.ClearlyDefinedStatement, error) {
-
 	predicate := attestation.ClearlyDefinedStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
 		return nil, err
@@ -79,73 +79,91 @@ func (c *parser) parseSubject(s *attestation.ClearlyDefinedStatement) error {
 			if err != nil {
 				return fmt.Errorf("failed to parse uri: %s to a package or source with error: %w", sub.Uri, err)
 			}
-			c.sources = append(c.sources, src)
+			c.src = src
 		}
-		c.packages = append(c.packages, p)
+		c.pkg = p
 	}
 	return nil
 }
 
-func parseMetadata(s *attestation.ClearlyDefinedStatement) *generated.ScanMetadataInput {
-	return &generated.ScanMetadataInput{
-		TimeScanned:    s.Predicate.Definition.Meta.Updated,
-		DbUri:          s.Predicate.Scanner.Database.Uri,
-		DbVersion:      s.Predicate.Scanner.Database.Version,
-		ScannerUri:     s.Predicate.Scanner.Uri,
-		ScannerVersion: s.Predicate.Scanner.Version,
-	}
-}
+/* A CertifyLegal node will be created using the “licensed” -> “declared” field from the definition.
+The expression will be copied and any license identifiers found will result in linked License noun nodes, created if needed.
+Type will be “declared”. Justification will be “Retrieved from ClearlyDefined”. Time will be the current time the information was retrieved from the API.
 
-// TODO (pxp928): Remove creation of osv node and just create the vulnerability nodes specified
-func parseVulns(_ context.Context, s *attestation.ClearlyDefinedStatement) ([]*generated.VulnerabilityInputSpec,
-	[]assembler.VulnEqualIngest, error) {
-	var vs []*generated.VulnerabilityInputSpec
-	var ivs []assembler.VulnEqualIngest
-	for _, id := range s.Predicate.Scanner.Result {
-		v := &generated.VulnerabilityInputSpec{
-			Type:            "osv",
-			VulnerabilityID: strings.ToLower(id.VulnerabilityId),
-		}
-		vs = append(vs, v)
-		vuln, err := helpers.CreateVulnInput(id.VulnerabilityId)
-		if err != nil {
-			return nil, nil, fmt.Errorf("createVulnInput failed with error: %w", err)
-		}
-		iv := assembler.VulnEqualIngest{
-			Vulnerability:      v,
-			EqualVulnerability: vuln,
-			VulnEqual: &generated.VulnEqualInputSpec{
-				Justification: "Decoded OSV data",
+Similarly a node will be created using the “licensed” -> “facets” -> “core” -> “discovered” -> “expressions” field.
+Multiple expressions will be “AND”ed together. Type will be “discovered”, and other fields the same (Time, Justification, License links, etc.).
+The “licensed” -> “facets” -> “core” -> “attribution” -> “parties” array will be concatenated and stored in the Attribution field on CertifyLegal.
+
+“described” -> “sourceLocation” can be used to create a HasSourceAt GUAC node. */
+
+// parseClearlyDefined parses the attestation to collect the license information
+func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDefinedStatement) error {
+	if s.Predicate.Definition.Licensed.Declared != "" {
+		declared := assembler.CertifyLegalIngest{
+			Declared:   common.ParseLicenses(s.Predicate.Definition.Licensed.Declared, nil, nil),
+			Discovered: []generated.LicenseInputSpec{},
+			CertifyLegal: &generated.CertifyLegalInputSpec{
+				DeclaredLicense: s.Predicate.Definition.Licensed.Declared,
+				Justification:   justification,
+				TimeScanned:     s.Predicate.Metadata.ScannedOn.UTC(),
 			},
 		}
-		ivs = append(ivs, iv)
-	}
-	return vs, ivs, nil
-}
-
-func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
-	rv := &assembler.IngestPredicates{
-		VulnEqual: c.vulnEquals,
-	}
-	for _, p := range c.packages {
-		if len(c.vulns) > 0 {
-			for _, v := range c.vulns {
-				cv := assembler.CertifyVulnIngest{
-					Pkg:           p,
-					Vulnerability: v,
-					VulnData:      c.vulnData,
-				}
-				rv.CertifyVuln = append(rv.CertifyVuln, cv)
-			}
+		if c.pkg != nil {
+			declared.Pkg = c.pkg
+		} else if c.src != nil {
+			declared.Src = c.src
 		} else {
-			rv.CertifyVuln = append(rv.CertifyVuln, assembler.CertifyVulnIngest{
-				Pkg:           p,
-				Vulnerability: noVulnInput,
-				VulnData:      c.vulnData,
+			return fmt.Errorf("package nor source specified for certifyLegal")
+		}
+		c.collectedCertifyLegal = append(c.collectedCertifyLegal, declared)
+	}
+	if len(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions) > 0 {
+		discoveredLicense := common.CombineLicense(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions)
+
+		discovered := assembler.CertifyLegalIngest{
+			Declared:   []generated.LicenseInputSpec{},
+			Discovered: common.ParseLicenses(discoveredLicense, nil, nil),
+			CertifyLegal: &generated.CertifyLegalInputSpec{
+				DiscoveredLicense: discoveredLicense,
+				Attribution:       strings.Join(s.Predicate.Definition.Licensed.Facets.Core.Attribution.Parties, ","),
+				Justification:     justification,
+				TimeScanned:       s.Predicate.Metadata.ScannedOn.UTC(),
+			},
+		}
+		if c.pkg != nil {
+			discovered.Pkg = c.pkg
+		} else if c.src != nil {
+			discovered.Src = c.src
+		} else {
+			return fmt.Errorf("package nor source specified for certifyLegal")
+		}
+		c.collectedCertifyLegal = append(c.collectedCertifyLegal, discovered)
+	}
+
+	if s.Predicate.Definition.Described.SourceLocation != nil {
+		sourceLocation := s.Predicate.Definition.Described.SourceLocation
+		srcInput := helpers.SourceToSourceInput(sourceLocation.Type, sourceLocation.Namespace,
+			sourceLocation.Name, &sourceLocation.Revision)
+		if c.pkg != nil {
+			c.hasSourceAt = append(c.hasSourceAt, assembler.HasSourceAtIngest{
+				Pkg:          c.pkg,
+				PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+				Src:          srcInput,
+				HasSourceAt: &generated.HasSourceAtInputSpec{
+					KnownSince:    s.Predicate.Definition.Meta.Updated.UTC(),
+					Justification: justification,
+				},
 			})
 		}
 	}
-	return rv
+	return nil
+}
+
+func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
+	return &assembler.IngestPredicates{
+		CertifyLegal: c.collectedCertifyLegal,
+		HasSourceAt:  c.hasSourceAt,
+	}
 }
 
 // GetIdentities gets the identity node from the document if they exist
