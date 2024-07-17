@@ -368,7 +368,7 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 		} else {
 			// if there is an isOccurrence, check to see if there are sbom associated with it
 			for _, occurrence := range collectedNeighbors.occurrences {
-				neighborResponseHasSBOM, err := getAssociatedPackage(ctx, gqlclient, occurrence, model.EdgeArtifactHasSbom)
+				neighborResponseHasSBOM, err := getAssociatedArtifact(ctx, gqlclient, occurrence, model.EdgeArtifactHasSbom)
 				if err != nil {
 					logger.Debugf("error querying neighbors: %v", err)
 				} else {
@@ -388,7 +388,7 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 		} else {
 			// if there is an isOccurrence, check to see if there are slsa attestation associated with it
 			for _, occurrence := range collectedNeighbors.occurrences {
-				neighborResponseHasSLSA, err := getAssociatedPackage(ctx, gqlclient, occurrence, model.EdgeArtifactHasSlsa)
+				neighborResponseHasSLSA, err := getAssociatedArtifact(ctx, gqlclient, occurrence, model.EdgeArtifactHasSlsa)
 				if err != nil {
 					logger.Debugf("error querying neighbors: %v", err)
 				} else {
@@ -454,7 +454,7 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	return tableRows
 }
 
-func getAssociatedPackage(ctx context.Context, gqlclient graphql.Client, occurrence *model.NeighborsNeighborsIsOccurrence, edge model.Edge) (*model.NeighborsResponse, error) {
+func getAssociatedArtifact(ctx context.Context, gqlclient graphql.Client, occurrence *model.NeighborsNeighborsIsOccurrence, edge model.Edge) (*model.NeighborsResponse, error) {
 	logger := logging.FromContext(ctx)
 	artifactFilter := &model.ArtifactSpec{
 		Algorithm: &occurrence.Artifact.Algorithm,
