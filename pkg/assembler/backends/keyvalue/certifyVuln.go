@@ -61,14 +61,9 @@ func (n *certifyVulnerabilityLink) Key() string {
 	}, ":"))
 }
 
-// Helper function to delete a key-value pair from the store
-func (c *demoClient) delkv(ctx context.Context, col string, key string) error {
-	return c.kv.Remove(ctx, col, key)
-}
-
 // Helper function to remove vulnerability links. This works by setting all the links expect the specified linkID.
 func (c *demoClient) removeLinks(ctx context.Context, linkID string, links []string, col string, id string) error {
-	newLinks := []string{}
+	var newLinks []string
 	for _, id := range links {
 		if id != linkID {
 			newLinks = append(newLinks, id)
