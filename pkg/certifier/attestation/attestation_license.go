@@ -18,7 +18,7 @@ package attestation
 import (
 	"time"
 
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
 )
 
 // PredicateVuln This is a new predicate type for vulnerabilities based off
@@ -32,7 +32,7 @@ const (
 
 // ClearlyDefinedStatement defines the statement header and the license predicate
 type ClearlyDefinedStatement struct {
-	intoto.StatementHeader
+	attestationv1.Statement
 	// Predicate contains type specific metadata.
 	Predicate ClearlyDefinedPredicate `json:"predicate"`
 }

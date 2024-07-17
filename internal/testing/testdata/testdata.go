@@ -1553,14 +1553,13 @@ var (
 	// ceritifer testdata
 
 	Text4ShellVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:maven/org.apache.commons/commons-text@1.9",
-			  "digest":null
+			  "uri":"pkg:maven/org.apache.commons/commons-text@1.9"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1583,14 +1582,13 @@ var (
 		}
 	 }`
 	SecondLevelVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io",
-			  "digest":null
+			  "uri":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1607,14 +1605,13 @@ var (
 		}
 	 }`
 	RootVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:oci/vul-image-latest?repository_url=gcr.io",
-			  "digest":null
+			  "uri":"pkg:oci/vul-image-latest?repository_url=gcr.io"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1631,14 +1628,13 @@ var (
 		}
 	 }`
 	Log4JVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
-			  "digest":null
+			  "uri":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1693,14 +1689,13 @@ var (
 	}
 
 	VertxWebCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1718,14 +1713,13 @@ var (
 	}`
 
 	VertxAuthCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1743,14 +1737,13 @@ var (
 	}`
 
 	VertxBridgeCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1768,14 +1761,13 @@ var (
 	}`
 
 	VertxCoreCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1798,14 +1790,13 @@ var (
 	}`
 
 	VertxWebAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",

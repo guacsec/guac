@@ -33,7 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/misc/coordinates"
 	"github.com/guacsec/guac/pkg/version"
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -187,8 +187,8 @@ func generateDocument(purl string, definition *attestation.Definition, docChanne
 
 func CreateAttestation(purl string, definition *attestation.Definition, currentTime time.Time) *attestation.ClearlyDefinedStatement {
 	attestation := &attestation.ClearlyDefinedStatement{
-		StatementHeader: intoto.StatementHeader{
-			Type:          intoto.StatementInTotoV01,
+		Statement: attestationv1.Statement{
+			Type:          attestationv1.StatementTypeUri,
 			PredicateType: attestation.PredicateClearlyDefined,
 		},
 		Predicate: attestation.ClearlyDefinedPredicate{
@@ -196,9 +196,8 @@ func CreateAttestation(purl string, definition *attestation.Definition, currentT
 		},
 	}
 
-	subject := intoto.Subject{Name: purl}
-
-	attestation.StatementHeader.Subject = []intoto.Subject{subject}
+	subject := &attestationv1.ResourceDescriptor{Uri: purl}
+	attestation.Statement.Subject = append(attestation.Statement.Subject, subject)
 
 	return attestation
 }

@@ -22,17 +22,15 @@ import (
 	"net/http"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
-
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -116,8 +114,8 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 
 func CreateAttestation(packageNode *root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
 	attestation := &attestation_vuln.VulnerabilityStatement{
-		StatementHeader: intoto.StatementHeader{
-			Type:          intoto.StatementInTotoV01,
+		Statement: attestationv1.Statement{
+			Type:          attestationv1.StatementTypeUri,
 			PredicateType: attestation_vuln.PredicateVuln,
 		},
 		Predicate: attestation_vuln.VulnerabilityPredicate{
@@ -135,9 +133,8 @@ func CreateAttestation(packageNode *root_package.PackageNode, vulns []osv_scanne
 		},
 	}
 
-	subject := intoto.Subject{Name: packageNode.Purl}
-
-	attestation.StatementHeader.Subject = []intoto.Subject{subject}
+	subject := &attestationv1.ResourceDescriptor{Uri: packageNode.Purl}
+	attestation.Statement.Subject = append(attestation.Statement.Subject, subject)
 
 	for _, vuln := range vulns {
 		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_vuln.Result{
