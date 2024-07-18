@@ -126,7 +126,7 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
-		wantHSA: nil,
+		wantHSA: []assembler.HasSourceAtIngest{},
 		wantErr: false,
 	}}
 
