@@ -20,28 +20,19 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"os/signal"
-	"strings"
-	"sync"
-	"syscall"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
-	"github.com/guacsec/guac/pkg/certifier/osv"
+	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/emitter"
-	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-type osvOptions struct {
+type cdOptions struct {
 	graphqlEndpoint string
 	headerFile      string
 	// address for pubsub connection
@@ -63,12 +54,12 @@ type osvOptions struct {
 	batchSize int
 }
 
-var osvCmd = &cobra.Command{
-	Use:   "osv [flags]",
-	Short: "runs the osv certifier",
+var cdCmd = &cobra.Command{
+	Use:   "cd [flags]",
+	Short: "runs the clearly defined certifier",
 	Long: `
-guaccollect osv runs the osv certifier queries osv.dev for the packages that are collected in guac.
-Ingestion to GUAC happens via an event stream (NATS)
+guaccollect cd runs the clearly defined certifier queries clearly defined for the package and source license information
+that are collected in guac. Ingestion to GUAC happens via an event stream (NATS)
 to allow for decoupling of the collectors from the ingestion into GUAC. 
 
 Each collector collects the "document" and stores it in the blob store for further
@@ -82,7 +73,7 @@ For example: "s3://my-bucket?region=us-west-1"
 Specific authentication method vary per cloud provider. Please follow the documentation per implementation to ensure
 you have access to read and write to the respective blob store.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		opts, err := validateOSVFlags(
+		opts, err := validateCDFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("header-file"),
 			viper.GetString("pubsub-addr"),
@@ -103,7 +94,7 @@ you have access to read and write to the respective blob store.`,
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -121,7 +112,7 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateOSVFlags(
+func validateCDFlags(
 	graphqlEndpoint,
 	headerFile,
 	pubsubAddr,
@@ -131,9 +122,9 @@ func validateOSVFlags(
 	pubToQueue bool,
 	daysSince int,
 	certifierLatencyStr string,
-	batchSize int) (osvOptions, error) {
+	batchSize int) (cdOptions, error) {
 
-	var opts osvOptions
+	var opts cdOptions
 
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -164,95 +155,6 @@ func validateOSVFlags(
 	return opts, nil
 }
 
-func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, pubToQueue bool) (func(*processor.Document) error, error) {
-	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d, blobStore, pubsub, pubToQueue)
-	}, nil
-}
-
-func getPackageQuery(client graphql.Client, daysSinceLastScan int, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
-	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, daysSinceLastScan, batchSize, addedLatency)
-		return packageQuery
-	}, nil
-}
-
-func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string,
-	poll, publishToQueue bool, interval time.Duration, query certifier.QueryComponents) {
-
-	logger := logging.FromContext(ctx)
-
-	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
-	if err != nil {
-		logger.Fatalf("unable to connect to blob store: %v", err)
-	}
-
-	var pubsub *emitter.EmitterPubSub
-	if publishToQueue {
-		if strings.HasPrefix(pubsubAddr, "nats://") {
-			// initialize jetstream
-			// TODO: pass in credentials file for NATS secure login
-			jetStream := emitter.NewJetStream(pubsubAddr, "", "")
-			if err := jetStream.JetStreamInit(ctx); err != nil {
-				logger.Fatalf("jetStream initialization failed with error: %v", err)
-			}
-			defer jetStream.Close()
-		}
-		// initialize pubsub
-		pubsub = emitter.NewEmitterPubSub(ctx, pubsubAddr)
-	}
-
-	certifierPubFunc, err := getCertifierPublish(ctx, blobStore, pubsub, publishToQueue)
-	if err != nil {
-		logger.Errorf("error: %v", err)
-		os.Exit(1)
-	}
-
-	// Set emit function to go through the entire pipeline
-	emit := func(d *processor.Document) error {
-		err = certifierPubFunc(d)
-		// updating the logger to the child logger so that if there is an error we which document has it
-		logger = d.ChildLogger
-		if err != nil {
-			logger.Fatalf("error publishing document from osv certifier: %v", err)
-		}
-		return nil
-	}
-
-	// Collect
-	errHandler := func(err error) bool {
-		if err == nil {
-			logger.Info("certifier ended gracefully")
-			return true
-		}
-		logger.Errorf("certifier ended with error: %v", err)
-		// Continue to emit any documents still in the docChan
-		return true
-	}
-
-	ctx, cf := context.WithCancel(ctx)
-	var wg sync.WaitGroup
-	done := make(chan bool, 1)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := certify.Certify(ctx, query, emit, errHandler, poll, interval); err != nil {
-			logger.Fatal(err)
-		}
-		done <- true
-	}()
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	select {
-	case s := <-sigs:
-		logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
-	case <-done:
-		logger.Infof("All Collectors completed")
-	}
-	cf()
-	wg.Wait()
-}
-
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
 		"last-scan", "header-file", "certifier-latency",
@@ -261,10 +163,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
-	osvCmd.PersistentFlags().AddFlagSet(set)
-	if err := viper.BindPFlags(osvCmd.PersistentFlags()); err != nil {
+	cdCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(cdCmd.PersistentFlags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
-	rootCmd.AddCommand(osvCmd)
+	rootCmd.AddCommand(cdCmd)
 }
