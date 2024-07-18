@@ -40,6 +40,9 @@ deps-dev-latency: ""
 # query vulnerability during ingestion
 add-vuln-on-ingest: false
 
+# query licenses during ingestion
+add-license-on-ingest: false
+
 # CSub setup
 csub-addr: localhost:2782
 csub-listen-port: 2782

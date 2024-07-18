@@ -42,12 +42,13 @@ import (
 )
 
 type scorecardOptions struct {
-	graphqlEndpoint      string
-	headerFile           string
-	poll                 bool
-	interval             time.Duration
-	csubClientOptions    csub_client.CsubClientOptions
-	queryVulnOnIngestion bool
+	graphqlEndpoint         string
+	headerFile              string
+	poll                    bool
+	interval                time.Duration
+	csubClientOptions       csub_client.CsubClientOptions
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
@@ -67,6 +68,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
 			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 		)
@@ -131,7 +133,7 @@ var scorecardCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
@@ -189,6 +191,7 @@ func validateScorecardFlags(
 	csubTlsSkipVerify,
 	poll bool,
 	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
 	certifierLatencyStr string,
 	batchSize int,
 ) (scorecardOptions, error) {
@@ -221,6 +224,7 @@ func validateScorecardFlags(
 	}
 	opts.interval = i
 	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	return opts, nil
 }
 

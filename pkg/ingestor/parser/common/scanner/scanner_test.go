@@ -324,7 +324,7 @@ func TestPurlsToScan(t *testing.T) {
 	})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotVEs, gotCVs, err := PurlsToScan(ctx, tt.purls)
+			gotVEs, gotCVs, err := PurlsVulnScan(ctx, tt.purls)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PurlsToScan() error = %v, wantErr %v", err, tt.wantErr)
 				return

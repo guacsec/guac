@@ -47,8 +47,8 @@ func TestClearlyDefined(t *testing.T) {
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
+					Collector: CDCollector,
+					Source:    CDCollector,
 				},
 			},
 			{
@@ -56,8 +56,8 @@ func TestClearlyDefined(t *testing.T) {
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
+					Collector: CDCollector,
+					Source:    CDCollector,
 				},
 			},
 			{
@@ -65,8 +65,8 @@ func TestClearlyDefined(t *testing.T) {
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
+					Collector: CDCollector,
+					Source:    CDCollector,
 				},
 			},
 			{
@@ -74,8 +74,8 @@ func TestClearlyDefined(t *testing.T) {
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: cdCollector,
-					Source:    cdCollector,
+					Collector: CDCollector,
+					Source:    CDCollector,
 				},
 			},
 		},

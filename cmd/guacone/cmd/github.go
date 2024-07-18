@@ -65,9 +65,10 @@ type githubOptions struct {
 	// csub client options for identifier strings
 	csubClientOptions csub_client.CsubClientOptions
 	// graphql endpoint
-	graphqlEndpoint      string
-	headerFile           string
-	queryVulnOnIngestion bool
+	graphqlEndpoint         string
+	headerFile              string
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 var githubCmd = &cobra.Command{
@@ -89,6 +90,7 @@ var githubCmd = &cobra.Command{
 			viper.GetBool("use-csub"),
 			viper.GetBool("poll"),
 			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -153,7 +155,7 @@ var githubCmd = &cobra.Command{
 		var errFound bool
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				errFound = true
@@ -206,7 +208,8 @@ var githubCmd = &cobra.Command{
 	},
 }
 
-func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, queryVulnIngestion bool, args []string) (githubOptions, error) {
+func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls,
+	csubTlsSkipVerify, useCsub, poll bool, queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -215,6 +218,7 @@ func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, work
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
 	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 
 	if useCsub {
 		csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
