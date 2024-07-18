@@ -6,7 +6,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/dependencies"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"strings"
 )
@@ -117,36 +116,41 @@ func SearchForSBOMViaPkg(ctx context.Context, gqlclient graphql.Client, searchSt
 				if isDep.DependencyPackage.Type == guacType {
 					continue
 				}
-				var matchingDepPkgVersionIDs []string
-				if len(isDep.DependencyPackage.Namespaces[0].Names[0].Versions) == 0 {
-					findMatchingDepPkgVersionIDs, err := dependencies.FindDepPkgVersionIDs(ctx, gqlclient, isDep.DependencyPackage.Type, isDep.DependencyPackage.Namespaces[0].Namespace,
-						isDep.DependencyPackage.Namespaces[0].Names[0].Name, isDep.VersionRange)
-					if err != nil {
-						return nil, nil, fmt.Errorf("error from FindMatchingDepPkgVersionIDs:%w", err)
+				depPkgID := isDep.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id
+				dfsN, seen := nodeMap[depPkgID]
+				if !seen {
+					dfsN = dfsNode{
+						parent: now,
+						pkgID:  depPkgID,
+						depth:  nowNode.depth + 1,
 					}
-					matchingDepPkgVersionIDs = append(matchingDepPkgVersionIDs, findMatchingDepPkgVersionIDs...)
-				} else {
-					matchingDepPkgVersionIDs = append(matchingDepPkgVersionIDs, isDep.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id)
+					nodeMap[depPkgID] = dfsN
 				}
-				for _, pkgID := range matchingDepPkgVersionIDs {
-					dfsN, seen := nodeMap[pkgID]
-					if !seen {
-						dfsN = dfsNode{
-							parent: now,
-							pkgID:  pkgID,
-							depth:  nowNode.depth + 1,
-						}
-						nodeMap[pkgID] = dfsN
+				if !dfsN.expanded {
+					queue = append(queue, depPkgID)
+				}
+				pkgVersionNeighbors, err := getVulnAndVexNeighborsForPackage(ctx, gqlclient, depPkgID, isDep)
+				if err != nil {
+					return nil, nil, fmt.Errorf("getVulnAndVexNeighbors failed with error: %w", err)
+				}
+				collectedPkgVersionResults = append(collectedPkgVersionResults, pkgVersionNeighbors)
+				checkedPkgIDs[depPkgID] = true
+
+			}
+
+			for _, isDep := range hasSBOM.IncludedDependencies {
+				if isDep.DependencyPackage.Type == guacType {
+					continue
+				}
+
+				depPkgID := isDep.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id
+				if _, seen := nodeMap[depPkgID]; !seen {
+					dfsN := dfsNode{
+						parent: now,
+						pkgID:  depPkgID,
+						depth:  nowNode.depth + 1,
 					}
-					if !dfsN.expanded {
-						queue = append(queue, pkgID)
-					}
-					pkgVersionNeighbors, err := getVulnAndVexNeighborsForPackage(ctx, gqlclient, pkgID, isDep)
-					if err != nil {
-						return nil, nil, fmt.Errorf("getVulnAndVexNeighborsForPackage failed with error: %w", err)
-					}
-					collectedPkgVersionResults = append(collectedPkgVersionResults, pkgVersionNeighbors)
-					checkedPkgIDs[pkgID] = true
+					nodeMap[depPkgID] = dfsN
 				}
 			}
 		}
@@ -220,7 +224,7 @@ func SearchForSBOMViaArtifact(ctx context.Context, gqlclient graphql.Client, sea
 		if nowNode.depth == 0 && primaryCall {
 			split := strings.Split(now, ":")
 			if len(split) != 2 {
-				return nil, nil, fmt.Errorf("error splitting search string %s, search string should have two sections algorithm and digest: %w", now, split)
+				return nil, nil, fmt.Errorf("error splitting search string %s, search string should have two sections algorithm and digest: %v", now, split)
 			}
 			algorithm := strings.ToLower(split[0])
 			digest := strings.ToLower(split[1])
