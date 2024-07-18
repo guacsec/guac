@@ -41,7 +41,14 @@ func NewDepsDevParser() common.DocumentParser {
 	return &depsDevParser{}
 }
 
+// initializeDepsDevParser clears out all values for the next iteration
+func (d *depsDevParser) initializeDepsDevParser() {
+	d.doc = nil
+	d.packComponent = nil
+}
+
 func (d *depsDevParser) Parse(ctx context.Context, doc *processor.Document) error {
+	d.initializeDepsDevParser()
 	d.doc = doc
 	packComponent, err := parseDepsDevBlob(doc.Blob)
 	if err != nil {

@@ -62,26 +62,10 @@ func TestParser(t *testing.T) {
 					Subpath:   ptrfrom.String(""),
 				},
 				Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
-				Discovered: []generated.LicenseInputSpec{},
-				CertifyLegal: &generated.CertifyLegalInputSpec{
-					DeclaredLicense: "Apache-2.0",
-					Justification:   "Retrieved from ClearlyDefined",
-					TimeScanned:     tm,
-				},
-			},
-			{
-				Pkg: &generated.PkgInputSpec{
-					Type:      "maven",
-					Namespace: ptrfrom.String("org.apache.logging.log4j"),
-					Name:      "log4j-core",
-					Version:   ptrfrom.String("2.8.1"),
-					Subpath:   ptrfrom.String(""),
-				},
-				Declared:   []generated.LicenseInputSpec{},
 				Discovered: []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
 				CertifyLegal: &generated.CertifyLegalInputSpec{
 					DiscoveredLicense: "Apache-2.0",
-					Attribution:       "Copyright 2005-2006 Tim Fennell,Copyright 1999-2012 Apache Software Foundation,Copyright 1999-2005 The Apache Software Foundation",
+					DeclaredLicense:   "Apache-2.0",
 					Justification:     "Retrieved from ClearlyDefined",
 					TimeScanned:       tm,
 				},

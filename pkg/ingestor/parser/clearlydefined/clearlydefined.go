@@ -48,8 +48,17 @@ func NewLegalCertificationParser() common.DocumentParser {
 	return &parser{}
 }
 
+// initializeCDParser clears out all values for the next iteration
+func (c *parser) initializeCDParser() {
+	c.pkg = nil
+	c.src = nil
+	c.collectedCertifyLegal = make([]assembler.CertifyLegalIngest, 0)
+	c.hasSourceAt = make([]assembler.HasSourceAtIngest, 0)
+}
+
 // Parse breaks out the document into the graph components
 func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
+	c.initializeCDParser()
 	statement, err := parseLegalCertifyPredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
@@ -80,6 +89,7 @@ func (c *parser) parseSubject(s *attestation.ClearlyDefinedStatement) error {
 				return fmt.Errorf("failed to parse uri: %s to a package or source with error: %w", sub.Uri, err)
 			}
 			c.src = src
+			return nil
 		}
 		c.pkg = p
 	}
@@ -99,12 +109,19 @@ The “licensed” -> “facets” -> “core” -> “attribution” -> “part
 // parseClearlyDefined parses the attestation to collect the license information
 func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDefinedStatement) error {
 	if s.Predicate.Definition.Licensed.Declared != "" {
+		discoveredLicenses := make([]generated.LicenseInputSpec, 0)
+		var discoveredLicenseStr string = ""
+		if len(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions) > 0 {
+			discoveredLicenseStr = common.CombineLicense(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions)
+			discoveredLicenses = append(discoveredLicenses, common.ParseLicenses(discoveredLicenseStr, nil, nil)...)
+		}
+
 		declared := assembler.CertifyLegalIngest{
 			Declared:   common.ParseLicenses(s.Predicate.Definition.Licensed.Declared, nil, nil),
-			Discovered: []generated.LicenseInputSpec{},
+			Discovered: discoveredLicenses,
 			CertifyLegal: &generated.CertifyLegalInputSpec{
 				DeclaredLicense:   s.Predicate.Definition.Licensed.Declared,
-				DiscoveredLicense: "",
+				DiscoveredLicense: discoveredLicenseStr,
 				Justification:     justification,
 				TimeScanned:       s.Predicate.Metadata.ScannedOn.UTC(),
 			},
@@ -117,29 +134,30 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDe
 			return fmt.Errorf("package nor source specified for certifyLegal")
 		}
 		c.collectedCertifyLegal = append(c.collectedCertifyLegal, declared)
-	}
-	if len(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions) > 0 {
-		discoveredLicense := common.CombineLicense(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions)
+	} else {
+		if len(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions) > 0 {
+			discoveredLicense := common.CombineLicense(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions)
 
-		discovered := assembler.CertifyLegalIngest{
-			Declared:   []generated.LicenseInputSpec{},
-			Discovered: common.ParseLicenses(discoveredLicense, nil, nil),
-			CertifyLegal: &generated.CertifyLegalInputSpec{
-				DiscoveredLicense: discoveredLicense,
-				DeclaredLicense:   "",
-				Attribution:       strings.Join(s.Predicate.Definition.Licensed.Facets.Core.Attribution.Parties, ","),
-				Justification:     justification,
-				TimeScanned:       s.Predicate.Metadata.ScannedOn.UTC(),
-			},
+			discovered := assembler.CertifyLegalIngest{
+				Declared:   []generated.LicenseInputSpec{},
+				Discovered: common.ParseLicenses(discoveredLicense, nil, nil),
+				CertifyLegal: &generated.CertifyLegalInputSpec{
+					DiscoveredLicense: discoveredLicense,
+					DeclaredLicense:   "",
+					Attribution:       strings.Join(s.Predicate.Definition.Licensed.Facets.Core.Attribution.Parties, ","),
+					Justification:     justification,
+					TimeScanned:       s.Predicate.Metadata.ScannedOn.UTC(),
+				},
+			}
+			if c.pkg != nil {
+				discovered.Pkg = c.pkg
+			} else if c.src != nil {
+				discovered.Src = c.src
+			} else {
+				return fmt.Errorf("package nor source specified for certifyLegal")
+			}
+			c.collectedCertifyLegal = append(c.collectedCertifyLegal, discovered)
 		}
-		if c.pkg != nil {
-			discovered.Pkg = c.pkg
-		} else if c.src != nil {
-			discovered.Src = c.src
-		} else {
-			return fmt.Errorf("package nor source specified for certifyLegal")
-		}
-		c.collectedCertifyLegal = append(c.collectedCertifyLegal, discovered)
 	}
 
 	if s.Predicate.Definition.Described.SourceLocation != nil {

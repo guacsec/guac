@@ -191,14 +191,14 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 					srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
 						definition.Described.SourceLocation.Name, &definition.Described.SourceLocation.Revision)
 
-					doc, err := generateClearlyDefinedAttestationDoc(helpers.SrcClientKey(srcInput).NameId, srcDefinition)
+					srcdoc, err := generateClearlyDefinedAttestationDoc(helpers.SrcClientKey(srcInput).NameId, srcDefinition)
 					if err != nil {
 						docChan <- docResult{doc: nil,
 							docErr: fmt.Errorf("failed to generate cd attestation with error: %w", err)}
 						return
 					}
 
-					docChan <- docResult{doc: doc,
+					docChan <- docResult{doc: srcdoc,
 						docErr: nil}
 
 				}

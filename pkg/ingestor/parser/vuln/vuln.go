@@ -61,8 +61,17 @@ func NewVulnCertificationParser() common.DocumentParser {
 	return &parser{}
 }
 
+// initializeVulnParser clears out all values for the next iteration
+func (c *parser) initializeVulnParser() {
+	c.packages = make([]*generated.PkgInputSpec, 0)
+	c.vulnData = nil
+	c.vulns = make([]*generated.VulnerabilityInputSpec, 0)
+	c.vulnEquals = make([]assembler.VulnEqualIngest, 0)
+}
+
 // Parse breaks out the document into the graph components
 func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
+	c.initializeVulnParser()
 	statement, err := parseVulnCertifyPredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)

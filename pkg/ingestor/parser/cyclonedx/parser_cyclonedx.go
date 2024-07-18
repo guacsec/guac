@@ -78,8 +78,22 @@ func NewCycloneDXParser() common.DocumentParser {
 	}
 }
 
+// initializeCDXParser clears out all values for the next iteration
+func (c *cyclonedxParser) initializeCDXParser() {
+	c.doc = nil
+	c.packagePackages = map[string][]*model.PkgInputSpec{}
+	c.packageArtifacts = map[string][]*model.ArtifactInputSpec{}
+	c.packageLegals = map[string][]*model.CertifyLegalInputSpec{}
+	c.licenseInLine = map[string]string{}
+	c.identifierStrings = &common.IdentifierStrings{}
+	c.cdxBom = nil
+	c.vulnData = vulnData{}
+	c.timestamp = time.Now()
+}
+
 // Parse breaks out the document into the graph components
 func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) error {
+	c.initializeCDXParser()
 	c.doc = doc
 	cdxBom, err := ParseCycloneDXBOM(doc)
 	if err != nil {

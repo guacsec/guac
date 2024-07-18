@@ -2,7 +2,7 @@
   "_type": "https://in-toto.io/Statement/v0.1",
   "subject": [
       {
-        "name": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+        "uri": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
       }
   ],
   "predicateType": "https://in-toto.io/attestation/vuln/v0.1",
