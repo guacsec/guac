@@ -21,6 +21,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/clearlydefined"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common/scanner"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
@@ -38,6 +39,7 @@ func init() {
 	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)
 	_ = RegisterDocumentParser(slsa.NewSLSAParser, processor.DocumentITE6SLSA)
 	_ = RegisterDocumentParser(vuln.NewVulnCertificationParser, processor.DocumentITE6Vul)
+	_ = RegisterDocumentParser(clearlydefined.NewLegalCertificationParser, processor.DocumentITE6ClearlyDefined)
 	_ = RegisterDocumentParser(spdx.NewSpdxParser, processor.DocumentSPDX)
 	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser, processor.DocumentCycloneDX)
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)

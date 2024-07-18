@@ -72,9 +72,14 @@ func getPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		// log the error but don't return the error to continue the loop
-		logger.Infof("unexpected status code: %d", resp.StatusCode)
-		return nil, nil
+		if resp.StatusCode == http.StatusNotFound {
+			// log the error when not found but don't return the error to continue the loop
+			logger.Infof("source definition not found for: %s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
+				coordinate.Namespace, coordinate.Name, coordinate.Revision)
+			return nil, nil
+		}
+		// otherwise return an error
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -87,11 +92,16 @@ func getPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
 	}
 
+	if definition.Described.ReleaseDate == "" {
+		return nil, nil
+	}
+
 	return &definition, nil
 }
 
 // getSrcDefinition uses the source coordinates found from the package definition to query clearly defined for license definition
-func getSrcDefinition(_ context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+func getSrcDefinition(ctx context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+	logger := logging.FromContext(ctx)
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -104,6 +114,12 @@ func getSrcDefinition(_ context.Context, defType, provider, namespace, name, rev
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			// log the error when not found but don't return the error to continue the loop
+			logger.Infof("source definition not found for: %s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
+			return nil, nil
+		}
+		// otherwise return an error
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -115,6 +131,10 @@ func getSrcDefinition(_ context.Context, defType, provider, namespace, name, rev
 	var definition attestation.Definition
 	if err := json.Unmarshal(body, &definition); err != nil {
 		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
+	}
+
+	if definition.Described.ReleaseDate == "" {
+		return nil, nil
 	}
 
 	return &definition, nil
@@ -149,11 +169,17 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 			if err := generateDocument(node.Purl, definition, docChannel); err != nil {
 				return fmt.Errorf("could not generate document from OSV results: %w", err)
 			}
+			packMap[node.Purl] = append(packMap[node.Purl], node)
 			if definition.Described.SourceLocation != nil {
 				srcDefinition, err := getSrcDefinition(ctx, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
 					definition.Described.SourceLocation.Namespace, definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
 				if err != nil {
 					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
+				}
+
+				// if definition for the source is not found, continue to the next package
+				if srcDefinition == nil {
+					continue
 				}
 
 				srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
@@ -164,9 +190,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 				}
 			}
 		}
-		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}
-
 	return nil
 }
 

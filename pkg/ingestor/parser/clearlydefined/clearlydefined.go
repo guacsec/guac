@@ -103,9 +103,10 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDe
 			Declared:   common.ParseLicenses(s.Predicate.Definition.Licensed.Declared, nil, nil),
 			Discovered: []generated.LicenseInputSpec{},
 			CertifyLegal: &generated.CertifyLegalInputSpec{
-				DeclaredLicense: s.Predicate.Definition.Licensed.Declared,
-				Justification:   justification,
-				TimeScanned:     s.Predicate.Metadata.ScannedOn.UTC(),
+				DeclaredLicense:   s.Predicate.Definition.Licensed.Declared,
+				DiscoveredLicense: "",
+				Justification:     justification,
+				TimeScanned:       s.Predicate.Metadata.ScannedOn.UTC(),
 			},
 		}
 		if c.pkg != nil {
@@ -125,6 +126,7 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDe
 			Discovered: common.ParseLicenses(discoveredLicense, nil, nil),
 			CertifyLegal: &generated.CertifyLegalInputSpec{
 				DiscoveredLicense: discoveredLicense,
+				DeclaredLicense:   "",
 				Attribution:       strings.Join(s.Predicate.Definition.Licensed.Facets.Core.Attribution.Parties, ","),
 				Justification:     justification,
 				TimeScanned:       s.Predicate.Metadata.ScannedOn.UTC(),

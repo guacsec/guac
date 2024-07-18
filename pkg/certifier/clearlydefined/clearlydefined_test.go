@@ -44,7 +44,7 @@ func TestClearlyDefined(t *testing.T) {
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.ITE6CDCommonText),
-				Type:   processor.DocumentITE6Vul,
+				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: cdCollector,
@@ -53,7 +53,7 @@ func TestClearlyDefined(t *testing.T) {
 			},
 			{
 				Blob:   []byte(testdata.ITE6CDSourceCommonText),
-				Type:   processor.DocumentITE6Vul,
+				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: cdCollector,
@@ -62,7 +62,7 @@ func TestClearlyDefined(t *testing.T) {
 			},
 			{
 				Blob:   []byte(testdata.ITE6CDLog4j),
-				Type:   processor.DocumentITE6Vul,
+				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: cdCollector,
@@ -71,7 +71,7 @@ func TestClearlyDefined(t *testing.T) {
 			},
 			{
 				Blob:   []byte(testdata.ITE6CDSourceLog4j),
-				Type:   processor.DocumentITE6Vul,
+				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: cdCollector,
@@ -80,6 +80,10 @@ func TestClearlyDefined(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name:          "unknown purl",
+		rootComponent: []*root_package.PackageNode{{Purl: "pkg:maven/commons/commons12text@1.9"}},
+		wantErr:       false,
 	}, {
 		name:          "bad type",
 		rootComponent: map[string]string{},

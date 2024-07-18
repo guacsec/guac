@@ -47,6 +47,7 @@ type ErrHandler func(error) bool
 type CertifierType string
 
 const (
-	CertifierOSV       CertifierType = "OSV"
-	CertifierScorecard CertifierType = "scorecard"
+	CertifierOSV            CertifierType = "OSV"
+	CertifierClearlyDefined CertifierType = "CD"
+	CertifierScorecard      CertifierType = "scorecard"
 )

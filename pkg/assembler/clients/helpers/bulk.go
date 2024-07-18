@@ -1144,8 +1144,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				return fmt.Errorf("failed to find ingested Package ID for certifyLegal: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
 			}
 
-			// Declared Licenses
-			var pkgDecList []model.IDorLicenseInput
+			// Declared Licenses - initialized as it cannot be nil
+			pkgDecList := make([]model.IDorLicenseInput, 0)
 			for _, dec := range ingest.Declared {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dec, helpers.LicenseClientKey)]; found {
 					pkgDecList = append(pkgDecList, *licID)
@@ -1155,8 +1155,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 			}
 			pkgDecIDs = append(pkgDecIDs, pkgDecList)
 
-			// Discovered Licenses
-			var pkgDisList []model.IDorLicenseInput
+			// Discovered Licenses - initialized as it cannot be nil
+			pkgDisList := make([]model.IDorLicenseInput, 0)
 			for _, dis := range ingest.Discovered {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dis, helpers.LicenseClientKey)]; found {
 					pkgDisList = append(pkgDisList, *licID)
@@ -1173,8 +1173,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				return fmt.Errorf("failed to find ingested Source ID for certifyLegal: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](ingest.Src, helpers.SrcClientKey).NameId)
 			}
 
-			// Declared Licenses
-			var srcDecList []model.IDorLicenseInput
+			// Declared Licenses - initialized as it cannot be nil
+			srcDecList := make([]model.IDorLicenseInput, 0)
 			for _, dec := range ingest.Declared {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dec, helpers.LicenseClientKey)]; found {
 					srcDecList = append(srcDecList, *licID)
@@ -1184,8 +1184,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 			}
 			srcDecIDs = append(srcDecIDs, srcDecList)
 
-			// Discovered Licenses
-			var srcDisList []model.IDorLicenseInput
+			// Discovered Licenses - initialized as it cannot be nil
+			srcDisList := make([]model.IDorLicenseInput, 0)
 			for _, dis := range ingest.Discovered {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dis, helpers.LicenseClientKey)]; found {
 					srcDisList = append(srcDisList, *licID)

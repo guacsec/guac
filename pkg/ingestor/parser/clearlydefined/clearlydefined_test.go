@@ -46,7 +46,7 @@ func TestParser(t *testing.T) {
 		doc: &processor.Document{
 			Blob:   testdata.ITE6CDLog4j,
 			Format: processor.FormatJSON,
-			Type:   processor.DocumentITE6Vul,
+			Type:   processor.DocumentITE6ClearlyDefined,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
 				Source:    "TestSource",
@@ -115,7 +115,7 @@ func TestParser(t *testing.T) {
 		doc: &processor.Document{
 			Blob:   testdata.ITE6CDSourceLog4j,
 			Format: processor.FormatJSON,
-			Type:   processor.DocumentITE6Vul,
+			Type:   processor.DocumentITE6ClearlyDefined,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
 				Source:    "TestSource",
