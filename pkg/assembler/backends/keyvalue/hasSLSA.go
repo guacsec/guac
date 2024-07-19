@@ -74,7 +74,6 @@ func (n *hasSLSAStruct) Key() string {
 
 // DeleteHasSLSA deletes a specified SLSA node along with all associated relationships.
 func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error) {
-	funcName := "DeleteSLSA"
 
 	// Retrieve the SLSA link by ID
 	link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
@@ -82,41 +81,41 @@ func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error)
 		if errors.Is(err, kv.NotFoundError) {
 			return false, nil // Not found, nothing to delete
 		}
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("Error retrieving SLSA link by ID: %v", err)
 	}
 
 	// Remove backlinks from associated subject
 	foundSubject, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &link.Subject})
 	if err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("Error retrieving associated subject: %v", err)
 	}
 	if err := c.removeLinks(ctx, link.ThisID, foundSubject.HasSLSAs, "artifacts", foundSubject.ID()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("Error removing backlinks from associated subject: %v", err)
 	}
 
 	// Remove backlinks from associated builtBy
 	foundBuiltBy, err := c.returnFoundBuilder(ctx, &model.IDorBuilderInput{BuilderID: &link.BuiltBy})
 	if err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("Error retrieving associated builtBy: %v", err)
 	}
 	if err := c.removeLinks(ctx, link.ThisID, foundBuiltBy.HasSLSAs, "builders", foundBuiltBy.ID()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("Error removing backlinks from associated builtBy: %v", err)
 	}
 
 	// Remove backlinks from associated builtFrom
 	for _, builtFromID := range link.BuiltFrom {
 		foundBuiltFrom, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &builtFromID})
 		if err != nil {
-			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+			return false, gqlerror.Errorf("Error retrieving associated builtFrom: %v", err)
 		}
 		if err := c.removeLinks(ctx, link.ThisID, foundBuiltFrom.HasSLSAs, "artifacts", foundBuiltFrom.ID()); err != nil {
-			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+			return false, gqlerror.Errorf("Error removing backlinks from associated builtFrom: %v", err)
 		}
 	}
 
 	// Delete the link from the KeyValue store
 	if err := c.kv.Remove(ctx, slsaCol, link.Key()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("failed to remove hasSLSA link from KeyValue store: %v", err)
 	}
 
 	return true, nil
