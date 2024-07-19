@@ -75,7 +75,7 @@ func GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
 			// log the error when not found but don't return the error to continue the loop
-			logger.Infof("package license definition not found for: %s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
+			logger.Debugf("package license definition not found for: %s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
 				coordinate.Namespace, coordinate.Name, coordinate.Revision)
 			return nil, nil
 		}
@@ -117,7 +117,7 @@ func GetSrcDefinition(ctx context.Context, defType, provider, namespace, name, r
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
 			// log the error when not found but don't return the error to continue the loop
-			logger.Infof("source license definition not found for: %s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
+			logger.Debugf("source license definition not found for: %s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
 			return nil, nil
 		}
 		// otherwise return an error
