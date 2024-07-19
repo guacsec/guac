@@ -76,37 +76,35 @@ func (c *demoClient) removeLinks(ctx context.Context, linkID string, links []str
 
 // DeleteCertifyVuln deletes a specified certifyVuln node along with all associated relationships.
 func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, error) {
-	funcName := "DeleteCertifyVuln"
-
 	// Retrieve the certifyVulnerabilityLink by ID
 	link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
 	if err != nil {
 		if errors.Is(err, kv.NotFoundError) {
 			return false, nil // Not found, nothing to delete
 		}
-		return false, gqlerror.Errorf("%v :: %s", funcName, err) // TODO: Improve error messages
+		return false, gqlerror.Errorf("failed to retrieve certifyVulnerabilityLink by ID: %v", err)
 	}
 
 	// Remove backlinks from associated package and vulnerability
 	foundPackage, err := c.returnFoundPkgVersion(ctx, &model.IDorPkgInput{PackageVersionID: &link.PackageID})
 	if err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("failed to retrieve package version: %v", err)
 	}
 	if err := c.removeLinks(ctx, link.ThisID, foundPackage.CertifyVulnLinks, "packages", foundPackage.ID()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("failed to remove package backlinks: %v", err)
 	}
 
 	foundVulnNode, err := c.returnFoundVulnerability(ctx, &model.IDorVulnerabilityInput{VulnerabilityNodeID: &link.VulnerabilityID})
 	if err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("failed to retrieve vulnerability node: %v", err)
 	}
 	if err := c.removeLinks(ctx, link.ThisID, foundVulnNode.CertifyVulnLinks, "vulnerabilities", foundVulnNode.ID()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("failed to remove vulnerability backlinks: %v", err)
 	}
 
 	// Delete the link from the KeyValue store
 	if err := c.kv.Remove(ctx, cVulnCol, link.Key()); err != nil {
-		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		return false, gqlerror.Errorf("failed to remove certifyVuln link from KeyValue store: %v", err)
 	}
 
 	return true, nil
