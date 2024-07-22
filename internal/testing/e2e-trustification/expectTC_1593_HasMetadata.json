@@ -1,0 +1,164 @@
+[
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "com.fasterxml.jackson.core",
+          "names": [
+            {
+              "name": "jackson-annotations",
+              "versions": [
+                {
+                  "version": "2.14.0",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "com.fasterxml.jackson.core",
+          "names": [
+            {
+              "name": "jackson-core",
+              "versions": [
+                {
+                  "version": "2.14.0",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "com.fasterxml.jackson.core",
+          "names": [
+            {
+              "name": "jackson-databind",
+              "versions": [
+                {
+                  "version": "2.14.0",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "log4j",
+          "names": [
+            {
+              "name": "log4j",
+              "versions": [
+                {
+                  "version": "1.2.17",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "org.projectlombok",
+          "names": [
+            {
+              "name": "lombok",
+              "versions": [
+                {
+                  "version": "1.16.6",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "pom-with-deps-no-ignore",
+          "names": [
+            {
+              "name": "pom-with-dependency-not-ignored-for-tests",
+              "versions": [
+                {
+                  "version": "0.0.1",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "HasSBOM": [
+    {
+      "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/quarkus-bom-d6ecbbd9-31bf-46fd-afda-8082120f5260"
+    },
+    {
+      "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi8-container-1e7fb966-cc2a-41e2-8e9d-ab6fb97d67d6"
+    },
+    {
+      "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi8-micro-container-0ca57f3b-b0e7-4251-b32b-d2929a52f05c"
+    },
+    {
+      "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi8-minimal-container-5b43ae22-cbf0-4626-8ec5-4ae0765a3d4b"
+    },
+    {
+      "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi9-container-f8098ef8-eee0-4ee6-b5d1-b00d992adef5"
+    },
+    {
+      "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi9-minimal-container-9b954617-943f-43ab-bd5b-3df62a706ed6"
+    }
+  ]
+}

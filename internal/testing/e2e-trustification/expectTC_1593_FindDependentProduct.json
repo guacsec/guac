@@ -1,0 +1,35 @@
+[
+  {
+    "subject": {
+      "__typename": "Package",
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "pom-with-deps-no-ignore",
+          "names": [
+            {
+              "name": "pom-with-dependency-not-ignored-for-tests",
+              "versions": [
+                {
+                  "version": "0.0.1",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "uri": "urn:uuid:a49d3c6d-abab-49f8-9ac6-e65ae73f3a1f",
+    "algorithm": "sha256",
+    "digest": "1508405522e8b917415ea6327fb8d22bab17e7a03cf97bd127ef2cb79db2f46e",
+    "origin": "",
+    "collector": ""
+  }
+]

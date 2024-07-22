@@ -1,0 +1,29 @@
+[
+  {
+    "subject": {
+      "type": "maven",
+      "namespaces": [
+        {
+          "namespace": "io.github.crac",
+          "names": [
+            {
+              "name": "org-crac",
+              "versions": [
+                {
+                  "version": "0.1.1.redhat-00002",
+                  "qualifiers": [
+                    {
+                      "key": "type",
+                      "value": "jar"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,93 @@
+{
+  "vulnerabilities": [
+    {
+      "type": "cve",
+      "vulnerabilityIDs": [
+        {
+          "vulnerabilityID": "cve-2023-0044"
+        },
+        {
+          "vulnerabilityID": "cve-2023-0481"
+        },
+        {
+          "vulnerabilityID": "cve-2023-0482"
+        },
+        {
+          "vulnerabilityID": "cve-2023-1108"
+        },
+        {
+          "vulnerabilityID": "cve-2023-1370"
+        },
+        {
+          "vulnerabilityID": "cve-2023-1436"
+        },
+        {
+          "vulnerabilityID": "cve-2023-1584"
+        },
+        {
+          "vulnerabilityID": "cve-2023-1664"
+        },
+        {
+          "vulnerabilityID": "cve-2023-20860"
+        },
+        {
+          "vulnerabilityID": "cve-2023-20861"
+        },
+        {
+          "vulnerabilityID": "cve-2023-20862"
+        },
+        {
+          "vulnerabilityID": "cve-2023-21971"
+        },
+        {
+          "vulnerabilityID": "cve-2023-2454"
+        },
+        {
+          "vulnerabilityID": "cve-2023-2455"
+        },
+        {
+          "vulnerabilityID": "cve-2023-24815"
+        },
+        {
+          "vulnerabilityID": "cve-2023-24998"
+        },
+        {
+          "vulnerabilityID": "cve-2023-26464"
+        },
+        {
+          "vulnerabilityID": "cve-2023-2798"
+        },
+        {
+          "vulnerabilityID": "cve-2023-28867"
+        },
+        {
+          "vulnerabilityID": "cve-2023-2974"
+        },
+        {
+          "vulnerabilityID": "cve-2023-2976"
+        },
+        {
+          "vulnerabilityID": "cve-2023-3223"
+        },
+        {
+          "vulnerabilityID": "cve-2023-33201"
+        },
+        {
+          "vulnerabilityID": "cve-2023-34453"
+        },
+        {
+          "vulnerabilityID": "cve-2023-34454"
+        },
+        {
+          "vulnerabilityID": "cve-2023-34455"
+        },
+        {
+          "vulnerabilityID": "cve-2023-44487"
+        },
+        {
+          "vulnerabilityID": "cve-2023-4853"
+        }
+      ]
+    }
+  ]
+}

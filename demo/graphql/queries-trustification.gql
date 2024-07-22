@@ -1,0 +1,382 @@
+fragment allPkgTree on Package {
+  id
+  type
+  namespaces {
+    id
+    namespace
+    names {
+      id
+      name
+      versions {
+        id
+        version
+        qualifiers {
+          key
+          value
+        }
+        subpath
+      }
+    }
+  }
+}
+
+query PkgQ1 {
+  packages(pkgSpec: {}) {
+    type
+  }
+}
+
+query PkgQ2 {
+  packages(pkgSpec: { type: "deb" }) {
+    type
+    namespaces {
+      namespace
+    }
+  }
+}
+
+query PkgQ3 {
+  packages(pkgSpec: { name: "libp11-kit0" }) {
+    ...allPkgTree
+  }
+}
+
+query PkgQ4 {
+  packages(pkgSpec: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }) {
+    ...allPkgTree
+  }
+}
+
+fragment allIsDependencyTree on IsDependency {
+  id
+  justification
+  versionRange
+  package {
+    ...allPkgTree
+  }
+  dependencyPackage {
+    ...allPkgTree
+  }
+  origin
+  collector
+}
+
+query IsDependencyQ1 {
+  IsDependency(isDependencySpec: { package: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }}) {
+    dependencyPackage {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+        }
+      }
+    }
+  }
+}
+
+query IsDependencyQ2 {
+  IsDependency(isDependencySpec: {
+    package: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }
+    dependencyPackage: { type: "golang", namespace: "github.com/sirupsen", name: "logrus" }
+  }) {
+    ...allIsDependencyTree
+  }
+}
+
+query PkgQ5 {
+  packages(pkgSpec: { type: "golang", namespace: "github.com/hashicorp/consul", name: "sdk" }) {
+    type
+    namespaces {
+      namespace
+      names {
+        id
+        name
+      }
+    }
+  }
+}
+
+query PkgQ6 {
+  packages(pkgSpec: { type: "golang", namespace: "github.com/hashicorp/consul", name: "api" }) {
+    type
+    namespaces {
+      namespace
+      names {
+        id
+        name
+      }
+    }
+  }
+}
+
+query PathQ1 ($subject: ID!, $target: ID!) {
+  path(subject: $subject, target: $target, maxPathLength: 10, usingOnly: []) {
+    __typename
+    ... on Package{
+        ...allPkgTree
+    }
+    ... on IsDependency {
+        ...allIsDependencyTree
+    }
+  }
+}
+
+query GetNeighbors ($nodeId: ID!) {
+  neighbors(node: $nodeId, usingOnly: []) {
+    __typename
+    ... on Package{
+      ...allPkgTree
+    }
+    ... on IsDependency {
+      ...allIsDependencyTree
+    }
+  }
+}
+
+query Node ($nodeId: ID!) {
+  node(node: $nodeId) {
+    __typename
+    ... on Package{
+      ...allPkgTree
+    }
+    ... on IsDependency {
+      ...allIsDependencyTree
+    }
+  }
+}
+
+fragment allCertifyVulnTree on CertifyVuln {
+  id
+  package {
+    id
+    type
+    namespaces {
+      id
+      namespace
+      names {
+        id
+        name
+        versions {
+          id
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+  vulnerability {
+    id
+    type
+    vulnerabilityIDs {
+      id
+      vulnerabilityID
+    }
+  }
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
+}
+
+fragment allCertifyVEXStatementTree on CertifyVEXStatement {
+  id
+  subject {
+    __typename
+    ... on Package {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    ... on Artifact {
+      id
+      algorithm
+      digest
+    }
+  }
+  vulnerability {
+    id
+    type
+    vulnerabilityIDs {
+      id
+      vulnerabilityID
+    }
+  }
+  status
+  vexJustification
+  statement
+  statusNotes
+  knownSince
+  origin
+  collector
+}
+
+fragment allHasSBOMTree on HasSBOM {
+  id
+  subject {
+    __typename
+    ... on Package {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    ... on Artifact {
+      id
+      algorithm
+      digest
+    }
+  }
+  uri
+  algorithm
+  digest
+  downloadLocation
+  origin
+  collector
+}
+
+query FindVulnerabilitySbomURI_quarkus {
+  findVulnerabilityBySbomURI (
+    sbomURI:"https://access.redhat.com/security/data/sbom/beta/spdx/quarkus-bom-d6ecbbd9-31bf-46fd-afda-8082120f5260", offset:0, limit:1000) {
+    ... on CertifyVuln {
+      ...allCertifyVulnTree
+    }
+    ... on CertifyVEXStatement {
+      ...allCertifyVEXStatementTree
+    }
+  }
+}
+
+query FindVulnerabilitySbomURI_ubi9 {
+  findVulnerabilityBySbomURI (
+    sbomURI:"https://access.redhat.com/security/data/sbom/beta/spdx/ubi9-minimal-container-9b954617-943f-43ab-bd5b-3df62a706ed6", offset:0, limit:1000) {
+    ... on CertifyVuln {
+      ...allCertifyVulnTree
+    }
+    ... on CertifyVEXStatement {
+      ...allCertifyVEXStatementTree
+    }
+  }
+}
+
+query FindVulnerabilitySbomURI_ubi8 {
+  findVulnerabilityBySbomURI (
+    sbomURI:"https://access.redhat.com/security/data/sbom/beta/spdx/ubi8-minimal-container-5b43ae22-cbf0-4626-8ec5-4ae0765a3d4b", offset:0, limit:1000) {
+    ... on CertifyVuln {
+      ...allCertifyVulnTree
+    }
+    ... on CertifyVEXStatement {
+      ...allCertifyVEXStatementTree
+    }
+  }
+}
+
+query FindRelatedProducts {
+  findTopLevelPackagesRelatedToVulnerability(vulnerabilityID: "cve-2023-44487") {
+    __typename
+    ... on CertifyVEXStatement {
+      ...allCertifyVEXStatementTree
+    }
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on IsDependency {
+      dependencyType
+    }
+  }
+}
+
+query FindDependentProduct {
+  findDependentProduct(
+    purl: "pkg:rpm/redhat/libuuid@2.32.1-42.el8_8?arch=x86_64", offset: 0, limit: 10
+  ) {
+    ...allHasSBOMTree
+  }
+}
+
+query HasSBOM {
+  HasSBOM (hasSBOMSpec: {}) {
+    uri
+  }
+}
+
+query Vulnerabilities {
+  vulnerabilities(vulnSpec: {}) {
+    type
+    vulnerabilityIDs {
+      vulnerabilityID
+    }
+  }
+}
+
+query TC_1593_FindDependentProduct {
+  findDependentProduct (
+    purl: "pkg:maven/log4j/log4j@1.2.17?type=jar"
+  ) {
+    ...allHasSBOMTree
+  }
+}
+
+query TC_1593_HasMetadata {
+  HasMetadata (hasMetadataSpec: {key: "topLevelPackage", value: "pkg:maven/pom-with-deps-no-ignore/pom-with-dependency-not-ignored-for-tests@0.0.1?type=jar"}) {
+    subject {
+      ... on Package {
+        ...allPkgTree
+      }
+    }
+  }
+}
+
+query TC_1609_HasMetadata {
+  HasMetadata (hasMetadataSpec: {
+    key: "topLevelPackage",
+    value: "pkg:maven/com.example/demo@0.0.1-SNAPSHOT?type=jar",
+    subject: {package: {name:"org-crac"}}
+  }) {
+    subject {
+      ... on Package {
+        ...allPkgTree
+      }
+    }
+  }
+}

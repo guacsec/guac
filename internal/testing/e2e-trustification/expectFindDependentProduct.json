@@ -1,0 +1,68 @@
+[
+  {
+    "subject": {
+      "__typename": "Package",
+      "type": "oci",
+      "namespaces": [
+        {
+          "namespace": "registry.redhat.io/ubi8",
+          "names": [
+            {
+              "name": "ubi8-container",
+              "versions": [
+                {
+                  "version": "sha256:269e9753043a4066af12649e921c6ad3201702fda5b2652f7a4aa010c2ed4c1a",
+                  "qualifiers": [
+                    {
+                      "key": "tag",
+                      "value": "8.8-1067"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi8-container-1e7fb966-cc2a-41e2-8e9d-ab6fb97d67d6",
+    "algorithm": "sha256",
+    "digest": "046d27ab116a37333847bc8648ce0af78d36caf719f8a8fa0a3ef2cd8d0fab89",
+    "origin": "",
+    "collector": ""
+  },
+  {
+    "subject": {
+      "__typename": "Package",
+      "type": "oci",
+      "namespaces": [
+        {
+          "namespace": "registry.redhat.io/ubi8-minimal",
+          "names": [
+            {
+              "name": "ubi8-minimal-container",
+              "versions": [
+                {
+                  "version": "sha256:b93deceb59a58588d5b16429fc47f98920f84740a1f2ed6454e33275f0701b59",
+                  "qualifiers": [
+                    {
+                      "key": "tag",
+                      "value": "8.8-1072.1697626218"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "uri": "https://access.redhat.com/security/data/sbom/beta/spdx/ubi8-minimal-container-5b43ae22-cbf0-4626-8ec5-4ae0765a3d4b",
+    "algorithm": "sha256",
+    "digest": "3d99f13040baaa0e682e6e3e1500907a78babe741ab3d3c2bacc13963e1d3646",
+    "origin": "",
+    "collector": ""
+  }
+]

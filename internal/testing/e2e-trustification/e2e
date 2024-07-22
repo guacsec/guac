@@ -1,0 +1,107 @@
+#!/bin/bash
+
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -euf -o pipefail
+
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+GUAC_DIR=$(cd ${SCRIPT_DIR}/../../..; pwd)
+
+guac_data_hash="f26c3fa0a1c1c46ac4ea21a4b17085db80bbfb46"
+
+echo @@@@ Installing gql Python package
+pip install gql[all]
+
+echo @@@@ Cloning trustification-data
+pushd "$GUAC_DIR"
+git clone https://github.com/trustification/trustification.git
+pushd trustification
+git checkout $guac_data_hash
+popd
+popd
+
+echo @@@@ Starting up guac server in background
+go run "${GUAC_DIR}/cmd/guacgql" --gql-backend=ent --db-address=postgresql://guac:guac@localhost/guac?sslmode=disable --db-driver=postgres &
+
+echo -n "Waiting for guac server to start"
+
+set +e
+for iteration in {1..36} ; do
+  sleep 5
+  curl -s http://localhost:8080/query >/dev/null 2>&1
+  if [ $? -ne 7 ] ; then
+    break
+  fi
+  echo -n "."
+done
+set -e
+echo
+
+curl -s http://localhost:8080/query >/dev/null 2>&1 || (echo "Guac server not running in time" && exit 1)
+echo "Guac server started"
+
+echo @@@@ Ingesting trustification-data SBOM into server
+time find "${GUAC_DIR}/trustification/data/ds1/sbom/" -name *.bz2 -exec go run ./cmd/guacone collect files {} \;
+
+echo @@@@ Ingesting trustification-data VEX into server
+time find "${GUAC_DIR}/trustification/data/ds1/csaf/" -name cve*.json -exec go run ./cmd/guacone collect files {} \;
+
+queries="${GUAC_DIR}/demo/graphql/queries-trustification.gql"
+
+echo @@@@ Running queries and validating output
+
+cat "$queries" | gql-cli http://localhost:8080/query -o FindVulnerabilitySbomURI_quarkus | jq --sort-keys 'del(.. | .id?) | del(.. | .origin?) | .findVulnerabilityBySbomURI |= sort | .findVulnerabilityBySbomURI[].subject.namespaces[]?.names[]?.versions[]?.qualifiers? |= sort' > "${GUAC_DIR}/gotFindVulnerabilitySbomURI_quarkus.json"
+diff -u "${SCRIPT_DIR}/expectFindVulnerabilitySbomURI_quarkus.json" "${GUAC_DIR}/gotFindVulnerabilitySbomURI_quarkus.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o FindVulnerabilitySbomURI_ubi9 | jq --sort-keys 'del(.. | .id?) | del(.. | .origin?) | .findVulnerabilityBySbomURI |= sort | .findVulnerabilityBySbomURI[].subject.namespaces[]?.names[]?.versions[]?.qualifiers? |= sort' > "${GUAC_DIR}/gotFindVulnerabilitySbomURI_ubi9.json"
+diff -u "${SCRIPT_DIR}/expectFindVulnerabilitySbomURI_ubi9.json" "${GUAC_DIR}/gotFindVulnerabilitySbomURI_ubi9.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o FindVulnerabilitySbomURI_ubi8 | jq --sort-keys 'del(.. | .id?) | del(.. | .origin?) | .findVulnerabilityBySbomURI |= sort | .findVulnerabilityBySbomURI[].subject.namespaces[]?.names[]?.versions[]?.qualifiers? |= sort' > "${GUAC_DIR}/gotFindVulnerabilitySbomURI_ubi8.json"
+diff -u "${SCRIPT_DIR}/expectFindVulnerabilitySbomURI_ubi8.json" "${GUAC_DIR}/gotFindVulnerabilitySbomURI_ubi8.json"
+
+cat ./demo/graphql/queries-trustification.gql | gql-cli http://localhost:8080/query -o FindRelatedProducts | jq 'del(.. | .id?) | del(.. | .origin?) | .findTopLevelPackagesRelatedToVulnerability[] | length' > "${GUAC_DIR}/gotFindRelatedProducts.json"
+diff -u "${SCRIPT_DIR}/expectFindRelatedProducts.json" "${GUAC_DIR}/gotFindRelatedProducts.json"
+
+cat ./demo/graphql/queries-trustification.gql | gql-cli http://localhost:8080/query -o FindDependentProduct | jq 'del(.. | .id?) | del(.. | .downloadLocation?) | .findDependentProduct | sort_by(.digest)' > "${GUAC_DIR}/gotFindDependentProduct.json"
+diff -u "${SCRIPT_DIR}/expectFindDependentProduct.json" "${GUAC_DIR}/gotFindDependentProduct.json"
+
+cat ./demo/graphql/queries-trustification.gql | gql-cli http://localhost:8080/query -o HasSBOM | jq ' .HasSBOM |= sort ' > "${GUAC_DIR}/gotHasSBOM.json"
+diff -u "${SCRIPT_DIR}/expectHasSBOM.json" "${GUAC_DIR}/gotHasSBOM.json"
+
+cat ./demo/graphql/queries-trustification.gql | gql-cli http://localhost:8080/query -o Vulnerabilities | jq ' .vulnerabilities[].vulnerabilityIDs |= sort_by(.vulnerabilityID) ' > "${GUAC_DIR}/gotVulnerabilities.json"
+diff -u "${SCRIPT_DIR}/expectVulnerabilities.json" "${GUAC_DIR}/gotVulnerabilities.json"
+
+echo @@@@ Ingesting TC_1593_sbom.json into server
+time go run ./cmd/guacone collect files ${GUAC_DIR}/internal/testing/testdata/exampledata/TC_1593_sbom.json;
+
+echo @@@@ Running TC_1593 queries and validating output
+
+cat "$queries" | gql-cli http://localhost:8080/query -o TC_1593_HasMetadata | jq 'del(.. | .id?) | .HasMetadata | sort ' > "${GUAC_DIR}/gotTC_1593_HasMetadata.json"
+diff -u "${SCRIPT_DIR}/expectTC_1593_HasMetadata.json" "${GUAC_DIR}/gotTC_1593_HasMetadata.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o TC_1593_FindDependentProduct | jq 'del(.. | .id?) | del(.. | .downloadLocation?) | .findDependentProduct' > "${GUAC_DIR}/gotTC_1593_FindDependentProduct.json"
+diff -u "${SCRIPT_DIR}/expectTC_1593_FindDependentProduct.json" "${GUAC_DIR}/gotTC_1593_FindDependentProduct.json"
+
+# IMPORTANT: this must happen after the above 'ds1/sbom' has been executed to reproduce the issue
+echo @@@@ Ingesting TC_1609_sbom.json into server
+time go run ./cmd/guacone collect files ${GUAC_DIR}/internal/testing/testdata/exampledata/TC_1609_sbom.json;
+
+echo @@@@ Running TC_1609 queries and validating output
+
+cat "$queries" | gql-cli http://localhost:8080/query -o TC_1609_HasMetadata | jq 'del(.. | .id?) | .HasMetadata | sort ' > "${GUAC_DIR}/gotTC_1609_HasMetadata.json"
+diff -u "${SCRIPT_DIR}/expectTC_1609_HasMetadata.json" "${GUAC_DIR}/gotTC_1609_HasMetadata.json"
+
+# Note: graphql_playground is left running, CI will clean it up
