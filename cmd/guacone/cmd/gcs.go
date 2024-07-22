@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/version"
 	"net/http"
 	"os"
 
@@ -29,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/api/option"

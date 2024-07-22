@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/version"
 	"os"
 
 	"cloud.google.com/go/storage"
@@ -11,7 +12,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/gcs"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/api/option"

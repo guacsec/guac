@@ -17,11 +17,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/guacsec/guac/pkg/version"
 	"os"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
