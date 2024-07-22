@@ -19,6 +19,9 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"github.com/guacsec/guac/pkg/clients"
+	"github.com/guacsec/guac/pkg/version"
+	"golang.org/x/time/rate"
 	"strings"
 	"sync"
 	"time"
@@ -31,7 +34,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
-	"github.com/guacsec/guac/pkg/version"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/exp/maps"
 	"google.golang.org/grpc"
@@ -84,21 +86,25 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, pb.InsightsClient, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get system cert: %w", err)
+		return nil, nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
-	// Connect to the service using TLS.
+	// Initialize the rate limiter
+	rl := rate.NewLimiter(rate.Every(time.Minute/10000), 10000) // 10000 requests per minute
+
+	// Connect to the service using TLS with rate-limited interceptor.
 	creds := credentials.NewClientTLSFromCert(sysPool, "")
-	conn, err := grpc.NewClient("api.deps.dev:443",
+	conn, err := grpc.Dial("api.deps.dev:443",
 		grpc.WithTransportCredentials(creds),
+		grpc.WithUnaryInterceptor(clients.RateLimiterInterceptor(rl)),
 		grpc.WithUserAgent(version.UserAgent))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}
 
 	// Create a new Insights Client.
@@ -107,8 +113,9 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
 	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
-		return nil, fmt.Errorf("unable to register Metrics: %w", err)
+		return nil, nil, fmt.Errorf("unable to register Metrics: %w", err)
 	}
+
 	return &depsCollector{
 		collectDataSource:    collectDataSource,
 		client:               client,
@@ -122,7 +129,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		versions:             map[string]*pb.Version{},
 		dependencies:         map[string]*pb.Dependencies{},
 		Metrics:              metricsCollector,
-	}, nil
+	}, client, nil
 }
 
 // RetrieveArtifacts get the metadata from deps.dev based on the purl provided

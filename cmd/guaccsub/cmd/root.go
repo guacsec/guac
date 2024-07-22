@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/version"
 	"os"
 	"os/signal"
 	"sync"
@@ -26,8 +27,6 @@ import (
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/server"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

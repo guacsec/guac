@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/pkg/clients"
 	"net/http"
 	"strings"
 	"time"
@@ -29,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -53,9 +53,7 @@ type osvCertifier struct {
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
 	return &osvCertifier{
-		osvHTTPClient: &http.Client{
-			Transport: version.UATransport,
-		},
+		osvHTTPClient: clients.NewOsvDevClient(context.Background()),
 	}
 }
 
