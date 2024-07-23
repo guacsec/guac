@@ -178,8 +178,8 @@ func getPackageQuery(client graphql.Client, daysSinceLastScan int, batchSize int
 }
 
 func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string,
-	poll, publishToQueue bool, interval time.Duration, query certifier.QueryComponents) {
-
+	poll, publishToQueue bool, interval time.Duration, query certifier.QueryComponents,
+) {
 	logger := logging.FromContext(ctx)
 
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
@@ -236,7 +236,7 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := certify.Certify(ctx, query, emit, errHandler, poll, interval); err != nil {
+		if err := certify.Certify(ctx, query, emit, errHandler, poll, time.Minute*time.Duration(interval), false); err != nil {
 			logger.Fatal(err)
 		}
 		done <- true

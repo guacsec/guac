@@ -22,17 +22,15 @@ import (
 	"net/http"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
-
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -62,7 +60,7 @@ func NewOSVCertificationParser() certifier.Certifier {
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
-func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document, _ bool) error {
 	packageNodes, ok := rootComponent.([]*root_package.PackageNode)
 	if !ok {
 		return ErrOSVComponenetTypeMismatch

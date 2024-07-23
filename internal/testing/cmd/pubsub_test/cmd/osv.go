@@ -56,7 +56,6 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -158,7 +157,7 @@ func initializeNATsandCertifier(ctx context.Context, opts options) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
+		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval), false); err != nil {
 			logger.Fatal(err)
 		}
 		done <- true
