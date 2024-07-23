@@ -41,6 +41,9 @@ type SoftwareEdge {
   node: PackageSourceOrArtifact!
 }
 
+"CertifyVulnOrCertifyVEXStatement is a union of CertifyVuln and CertifyVEXStatement."
+union CertifyVulnOrCertifyVEXStatement = CertifyVuln | CertifyVEXStatement
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -64,4 +67,32 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
+
+  """
+  findTopLevelPackagesRelatedToVulnerability takes in a vulnerabilityID string
+  and looks for top level packages (i.e. packages with an SBOM) related to the
+  corresponding vulnerability. findTopLevelPackagesRelatedToVulnerability
+  returns a list of Nodes, representing the path from the certify vulnerability
+  to a top level package.
+
+  All that is asked in the implementation of this API is that it follows
+  the spirit of helping to retrieve the right nodes with best effort.
+
+  Warning: This is an EXPERIMENTAL feature. This is subject to change.
+  Warning: This is an OPTIONAL feature. Backends are not required to
+  implement this API.
+  """
+  findTopLevelPackagesRelatedToVulnerability(vulnerabilityID: String!): [[Node!]!]!
+
+  "Returns all vulnerabilities related to a package."
+  findVulnerability(purl: String!, offset: Int, limit: Int): [CertifyVulnOrCertifyVEXStatement!]!
+
+  "Returns all vulnerabilities related to the package identified by the CPE"
+  findVulnerabilityByCPE(cpe: String!): [CertifyVulnOrCertifyVEXStatement!]!
+
+  "Returns all vulnerabilities related to the package identified by the SBOM URI"
+  findVulnerabilityBySbomURI(sbomURI: String!, offset: Int, limit: Int): [CertifyVulnOrCertifyVEXStatement!]!
+
+  "Returns all top level packages (i.e. products) dependent on the input PURL package"
+  findDependentProduct(purl: String!, offset: Int, limit: Int): [HasSBOM!]!
 }

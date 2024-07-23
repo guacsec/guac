@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -18,4 +19,29 @@ func (r *queryResolver) FindSoftware(ctx context.Context, searchText string) ([]
 // FindSoftwareList is the resolver for the findSoftwareList field.
 func (r *queryResolver) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return r.Backend.FindSoftwareList(ctx, searchText, after, first)
+}
+
+// FindTopLevelPackagesRelatedToVulnerability is the resolver for the findTopLevelPackagesRelatedToVulnerability field.
+func (r *queryResolver) FindTopLevelPackagesRelatedToVulnerability(ctx context.Context, vulnerabilityID string) ([][]model.Node, error) {
+	panic(fmt.Errorf("not implemented: FindTopLevelPackagesRelatedToVulnerability - findTopLevelPackagesRelatedToVulnerability"))
+}
+
+// FindVulnerability is the resolver for the findVulnerability field.
+func (r *queryResolver) FindVulnerability(ctx context.Context, purl string, offset *int, limit *int) ([]model.CertifyVulnOrCertifyVEXStatement, error) {
+	panic(fmt.Errorf("not implemented: FindVulnerability - findVulnerability"))
+}
+
+// FindVulnerabilityByCpe is the resolver for the findVulnerabilityByCPE field.
+func (r *queryResolver) FindVulnerabilityByCpe(ctx context.Context, cpe string) ([]model.CertifyVulnOrCertifyVEXStatement, error) {
+	panic(fmt.Errorf("not implemented: FindVulnerabilityByCpe - findVulnerabilityByCPE"))
+}
+
+// FindVulnerabilityBySbomURI is the resolver for the findVulnerabilityBySbomURI field.
+func (r *queryResolver) FindVulnerabilityBySbomURI(ctx context.Context, sbomURI string, offset *int, limit *int) ([]model.CertifyVulnOrCertifyVEXStatement, error) {
+	panic(fmt.Errorf("not implemented: FindVulnerabilityBySbomURI - findVulnerabilityBySbomURI"))
+}
+
+// FindDependentProduct is the resolver for the findDependentProduct field.
+func (r *queryResolver) FindDependentProduct(ctx context.Context, purl string, offset *int, limit *int) ([]*model.HasSbom, error) {
+	panic(fmt.Errorf("not implemented: FindDependentProduct - findDependentProduct"))
 }

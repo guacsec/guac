@@ -970,7 +970,7 @@ func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context,
 
 // region    **************************** object.gotpl ****************************
 
-var certifyVulnImplementors = []string{"CertifyVuln", "Node"}
+var certifyVulnImplementors = []string{"CertifyVuln", "Node", "CertifyVulnOrCertifyVEXStatement"}
 
 func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyVuln) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyVulnImplementors)

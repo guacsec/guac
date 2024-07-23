@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+// CertifyVulnOrCertifyVEXStatement is a union of CertifyVuln and CertifyVEXStatement.
+type CertifyVulnOrCertifyVEXStatement interface {
+	IsCertifyVulnOrCertifyVEXStatement()
+}
+
 // Node is a union type of all the possible nodes.
 //
 // It encapsulates the software tree nodes along with the evidence nodes. In a
@@ -478,6 +483,8 @@ type CertifyVEXStatement struct {
 
 func (CertifyVEXStatement) IsNode() {}
 
+func (CertifyVEXStatement) IsCertifyVulnOrCertifyVEXStatement() {}
+
 // CertifyVEXStatementSpec allows filtering the list of VEX statements to
 // return in a query.
 //
@@ -514,6 +521,8 @@ type CertifyVuln struct {
 }
 
 func (CertifyVuln) IsNode() {}
+
+func (CertifyVuln) IsCertifyVulnOrCertifyVEXStatement() {}
 
 // CertifyVulnConnection returns the paginated results for CertifyVuln.
 //
