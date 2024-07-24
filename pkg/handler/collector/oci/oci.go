@@ -18,7 +18,6 @@ package oci
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/version"
 	"slices"
 	"strings"
 	"sync"
@@ -28,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/types/descriptor"
