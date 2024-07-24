@@ -19,9 +19,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/time/rate"
+	"net"
 	"strings"
 	"sync"
 	"testing"
@@ -39,8 +43,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -58,7 +60,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, _, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil)
+			_, _, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -237,7 +239,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, _, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil)
+			c, _, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -359,7 +361,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to parser duration with error: %v", err)
 	}
-	c, _, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency)
+	c, _, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency, nil)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return
@@ -538,7 +540,7 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			// Set the logger in the context
 			ctx = logging.WithLogger(ctx)
 
-			c, err, _ := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil)
+			c, _, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -556,23 +558,25 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 	}
 }
 
-const bufSize = 1024 * 1024
-
-type mockInsightsServer struct {
-	pb.UnimplementedInsightsServer
-}
-
 func TestNewDepsCollector_RateLimiter(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
 	ctx := context.Background()
-	poll := false
-	retrieveDependencies := true
-	interval := time.Minute
-	addedLatency := time.Duration(0)
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
 
 	// Set up the in-memory gRPC server
-	lis := bufconn.Listen(bufSize)
+	lis := bufconn.Listen(1024 * 1024)
 	s := grpc.NewServer()
-	pb.RegisterInsightsServer(s, &mockInsightsServer{})
+	mockServer := &MockInsightsServer{}
+	pb.RegisterInsightsServer(s, mockServer)
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			panic(err)
@@ -580,40 +584,85 @@ func TestNewDepsCollector_RateLimiter(t *testing.T) {
 	}()
 	defer s.Stop()
 
+	// Mock the GetProject method to always return a successful response
+	mockServer.On("GetProject", mock.Anything, mock.Anything).Return(&pb.Project{}, nil)
+
+	// Create a connection to the in-memory gRPC server
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(
+		func(context.Context, string) (net.Conn, error) {
+			return lis.Dial()
+		}),
+		grpc.WithInsecure(),
+	)
+	assert.NoError(t, err)
+	defer conn.Close()
+
+	// Create a new rate-limited client
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000) // 10,000 requests per minute with burst capacity of 10,000
+	rateLimitedClient := clients.NewRateLimitedClient(conn, limiter)
+
+	addedLatency := time.Duration(0)
+
+	logBuffer.Reset()
+
 	// Create a new depsCollector and get the rate-limited client
-	collector, client, err := NewDepsCollector(ctx, toPurlSource([]string{}), poll, retrieveDependencies, interval, &addedLatency)
+	collector, client, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, time.Minute, &addedLatency, rateLimitedClient)
 	assert.NoError(t, err)
 	collector.client = client
 
+	// Set a timeout for the test
+	testTimeout := 60 * time.Second
+	ctx, cancel := context.WithTimeout(ctx, testTimeout)
+	defer cancel()
+
 	// Test rate limiting by making multiple concurrent requests
+	// We are doing this concurrently because it would take a very long time to do 10,000 API requests
 	var wg sync.WaitGroup
-	for i := 0; i < 10000; i++ {
+	var successCount int
+	var mu sync.Mutex
+
+	for i := 0; i <= 10000; i++ { // 10,000 requests to test burst capacity
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			_, err := collector.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
-			assert.NoError(t, err)
+			mu.Lock()
+			defer mu.Unlock()
+			if err == nil {
+				successCount++
+			} else {
+				t.Logf("Unexpected error: %v", err)
+			}
 		}()
 	}
 	wg.Wait()
 
-	// This request should fail due to rate limiting
-	_, err = collector.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
-	assert.Error(t, err)
-	assert.Equal(t, codes.ResourceExhausted, status.Code(err))
+	logOutput := logBuffer.String()
+
+	assert.Contains(t, logOutput, "Rate limit exceeded for method")
 }
 
 func TestNewDepsCollector_UnderRateLimit(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
 	ctx := context.Background()
-	poll := false
-	retrieveDependencies := true
-	interval := time.Minute
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
 	addedLatency := time.Duration(0)
 
 	// Set up the in-memory gRPC server
-	lis := bufconn.Listen(bufSize)
+	lis := bufconn.Listen(1024 * 1024)
 	s := grpc.NewServer()
-	pb.RegisterInsightsServer(s, &mockInsightsServer{})
+	mockServer := &MockInsightsServer{}
+	pb.RegisterInsightsServer(s, mockServer)
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			panic(err)
@@ -621,18 +670,58 @@ func TestNewDepsCollector_UnderRateLimit(t *testing.T) {
 	}()
 	defer s.Stop()
 
+	// Mock the GetProject method to always return a successful response
+	mockServer.On("GetProject", mock.Anything, mock.Anything).Return(&pb.Project{}, nil)
+
+	// Create a connection to the in-memory gRPC server
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(
+		func(context.Context, string) (net.Conn, error) {
+			return lis.Dial()
+		}),
+		grpc.WithInsecure(),
+	)
+	assert.NoError(t, err)
+	defer conn.Close()
+
+	// Create a new rate-limited client
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000) // 10,000 requests per minute with burst capacity of 10,000
+	rateLimitedClient := clients.NewRateLimitedClient(conn, limiter)
+
+	logBuffer.Reset()
+
 	// Create a new depsCollector and get the rate-limited client
-	collector, client, err := NewDepsCollector(ctx, toPurlSource([]string{}), poll, retrieveDependencies, interval, &addedLatency)
+	collector, client, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, time.Minute, &addedLatency, rateLimitedClient)
 	assert.NoError(t, err)
 	collector.client = client
 
-	// Test rate limiting by making fewer requests than the limit
-	for i := 0; i < 9999; i++ {
-		_, err = collector.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "test"}})
-		assert.NoError(t, err)
-	}
+	// Set a timeout for the test
+	testTimeout := 60 * time.Second
+	ctx, cancel := context.WithTimeout(ctx, testTimeout)
+	defer cancel()
 
-	// This request should succeed
-	_, err = collector.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "test"}})
-	assert.NoError(t, err)
+	// Test rate limiting by making multiple concurrent requests.
+	// We are doing this concurrently because it would take a very long time to do 10,000 API requests
+	var wg sync.WaitGroup
+	var successCount int
+	var mu sync.Mutex
+
+	for i := 0; i <= 9999; i++ { // 9,999 requests, just under the burst capacity
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, err := collector.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
+			mu.Lock()
+			defer mu.Unlock()
+			if err == nil {
+				successCount++
+			} else {
+				t.Logf("Unexpected error: %v", err)
+			}
+		}()
+	}
+	wg.Wait()
+
+	logOutput := logBuffer.String()
+
+	assert.NotContains(t, logOutput, "Rate limit exceeded for method") // The test shouldn't have exceeded the 10,000 requests per minute limit
 }

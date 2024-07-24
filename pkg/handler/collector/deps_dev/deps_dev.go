@@ -86,7 +86,7 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, pb.InsightsClient, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient *clients.RateLimitedClient) (*depsCollector, pb.InsightsClient, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -94,21 +94,21 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		return nil, nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
-	// Initialize the rate limiter
-	rl := rate.NewLimiter(rate.Every(time.Minute/10000), 10000) // 10000 requests per minute
-
-	// Connect to the service using TLS with rate-limited interceptor.
-	creds := credentials.NewClientTLSFromCert(sysPool, "")
-	conn, err := grpc.Dial("api.deps.dev:443",
-		grpc.WithTransportCredentials(creds),
-		grpc.WithUnaryInterceptor(clients.RateLimiterInterceptor(rl)),
-		grpc.WithUserAgent(version.UserAgent))
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
+	// If no rate-limited client is provided, create a new one
+	if rateLimitedClient == nil {
+		creds := credentials.NewClientTLSFromCert(sysPool, "")
+		conn, err := grpc.Dial("api.deps.dev:443",
+			grpc.WithTransportCredentials(creds),
+			grpc.WithUserAgent(version.UserAgent))
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
+		}
+		limiter := rate.NewLimiter(rate.Every(time.Minute), 10000) // 10,000 requests per minute with burst capacity of 10,000
+		rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
 	}
 
-	// Create a new Insights Client.
-	client := pb.NewInsightsClient(conn)
+	// Use the rate-limited client directly
+	client := pb.NewInsightsClient(rateLimitedClient)
 
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)

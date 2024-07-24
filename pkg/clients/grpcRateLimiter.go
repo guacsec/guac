@@ -17,24 +17,47 @@ package clients
 
 import (
 	"context"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/metadata"
 )
 
-// RateLimiterInterceptor is a gRPC client interceptor for rate limiting
-func RateLimiterInterceptor(limiter *rate.Limiter) grpc.UnaryClientInterceptor {
-	return func(
-		ctx context.Context,
-		method string,
-		req, reply interface{},
-		cc *grpc.ClientConn,
-		invoker grpc.UnaryInvoker,
-		opts ...grpc.CallOption,
-	) error {
-		if err := limiter.Wait(ctx); err != nil {
-			return status.Errorf(status.Code(err), "rate limit exceeded: %v", err)
+type RateLimitedClient struct {
+	ClientConn *grpc.ClientConn
+	Limiter    *rate.Limiter
+}
+
+func (c *RateLimitedClient) Invoke(ctx context.Context, method string, args interface{}, reply interface{}, opts ...grpc.CallOption) error {
+	logger := logging.FromContext(ctx)
+	if !c.Limiter.Allow() {
+		logger.Debugf("Rate limit exceeded for method: %s", method)
+		if err := c.Limiter.Wait(ctx); err != nil {
+			return err
 		}
-		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+	md := metadata.Pairs("user-agent", version.UserAgent)
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	return c.ClientConn.Invoke(ctx, method, args, reply, opts...)
+}
+
+func (c *RateLimitedClient) NewStream(ctx context.Context, desc *grpc.StreamDesc, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+	logger := logging.FromContext(ctx)
+	if !c.Limiter.Allow() {
+		logger.Debugf("Rate limit exceeded for method: %s", method)
+		if err := c.Limiter.Wait(ctx); err != nil {
+			return nil, err
+		}
+	}
+	md := metadata.Pairs("user-agent", version.UserAgent)
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	return c.ClientConn.NewStream(ctx, desc, method, opts...)
+}
+
+func NewRateLimitedClient(conn *grpc.ClientConn, limiter *rate.Limiter) *RateLimitedClient {
+	return &RateLimitedClient{
+		ClientConn: conn,
+		Limiter:    limiter,
 	}
 }
