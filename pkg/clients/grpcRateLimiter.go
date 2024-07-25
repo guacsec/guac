@@ -55,7 +55,7 @@ func (c *RateLimitedClient) NewStream(ctx context.Context, desc *grpc.StreamDesc
 	return c.ClientConn.NewStream(ctx, desc, method, opts...)
 }
 
-func NewRateLimitedClient(conn *grpc.ClientConn, limiter *rate.Limiter) *RateLimitedClient {
+func NewRateLimitedClient(conn *grpc.ClientConn, limiter *rate.Limiter) grpc.ClientConnInterface {
 	return &RateLimitedClient{
 		ClientConn: conn,
 		Limiter:    limiter,
