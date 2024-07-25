@@ -25,7 +25,7 @@ import (
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -44,7 +44,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		errMessage    error
 	}{{
 		name:          "query and generate attestation for OSV",
-		rootComponent: []*root_package.PackageNode{&testdata.Text4ShelPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
+		rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.Text4ShellVulAttestation),
@@ -217,10 +217,10 @@ func Test_createAttestation(t *testing.T) {
 			},
 		},
 		want: &attestation_vuln.VulnerabilityStatement{
-			StatementHeader: intoto.StatementHeader{
-				Type:          intoto.StatementInTotoV01,
+			Statement: attestationv1.Statement{
+				Type:          attestationv1.StatementTypeUri,
 				PredicateType: attestation_vuln.PredicateVuln,
-				Subject:       []intoto.Subject{{Name: ""}},
+				Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 			},
 			Predicate: attestation_vuln.VulnerabilityPredicate{
 				Invocation: attestation_vuln.Invocation{

@@ -50,8 +50,9 @@ type fileOptions struct {
 	graphqlEndpoint string
 	headerFile      string
 	// csub client options for identifier strings
-	csubClientOptions    csub_client.CsubClientOptions
-	queryVulnOnIngestion bool
+	csubClientOptions       csub_client.CsubClientOptions
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 var filesCmd = &cobra.Command{
@@ -67,6 +68,7 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -127,7 +129,7 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion); err != nil {
+			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
@@ -159,7 +161,8 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool, queryVulnIngestion bool, args []string) (fileOptions, error) {
+func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -186,6 +189,7 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 	opts.csubClientOptions = csubOpts
 	opts.path = args[0]
 	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	return opts, nil
 }
 

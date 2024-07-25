@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func TestPurlsToScan(t *testing.T) {
@@ -324,7 +325,7 @@ func TestPurlsToScan(t *testing.T) {
 	})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotVEs, gotCVs, err := PurlsToScan(ctx, tt.purls)
+			gotVEs, gotCVs, err := PurlsVulnScan(ctx, tt.purls)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PurlsToScan() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -333,6 +334,166 @@ func TestPurlsToScan(t *testing.T) {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 			if diff := cmp.Diff(tt.wantVEs, gotVEs, ivSortOpt, cmpopts.IgnoreFields(generated.VulnEqualInputSpec{}, "DocumentRef")); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestPurlsLicenseScan(t *testing.T) {
+	lvUnknown := "UNKNOWN"
+	ctx := logging.WithLogger(context.Background())
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	tests := []struct {
+		name     string
+		purls    []string
+		wantCLs  []assembler.CertifyLegalIngest
+		wantHSAs []assembler.HasSourceAtIngest
+		wantErr  bool
+	}{{
+		name:  "valid log4j",
+		purls: []string{"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"},
+		wantCLs: []assembler.CertifyLegalIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
+				Discovered: []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
+				CertifyLegal: &generated.CertifyLegalInputSpec{
+					DiscoveredLicense: "Apache-2.0",
+					DeclaredLicense:   "Apache-2.0",
+					Justification:     "Retrieved from ClearlyDefined",
+					TimeScanned:       tm,
+					Origin:            "clearlydefined",
+					Collector:         "clearlydefined",
+				},
+			},
+			{
+				Src: &generated.SourceInputSpec{
+					Type:      "sourcearchive",
+					Namespace: "org.apache.logging.log4j",
+					Name:      "log4j-core",
+					Tag:       ptrfrom.String("2.8.1"),
+				},
+				Declared: []generated.LicenseInputSpec{},
+				Discovered: []generated.LicenseInputSpec{
+					{Name: "Apache-2.0", ListVersion: &lvUnknown},
+					{Name: "NOASSERTION", ListVersion: &lvUnknown},
+				},
+				CertifyLegal: &generated.CertifyLegalInputSpec{
+					DiscoveredLicense: "Apache-2.0 AND NOASSERTION",
+					Attribution:       "Copyright 2005-2006 Tim Fennell,Copyright 1999-2012 Apache Software Foundation,Copyright 1999-2005 The Apache Software Foundation",
+					Justification:     "Retrieved from ClearlyDefined",
+					TimeScanned:       tm,
+					Origin:            "clearlydefined",
+					Collector:         "clearlydefined",
+				},
+			},
+		},
+		wantHSAs: []assembler.HasSourceAtIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
+				Src: &generated.SourceInputSpec{
+					Type:      "sourcearchive",
+					Namespace: "org.apache.logging.log4j",
+					Name:      "log4j-core",
+					Tag:       ptrfrom.String("2.8.1"),
+				},
+				HasSourceAt: &generated.HasSourceAtInputSpec{
+					KnownSince:    tm,
+					Justification: "Retrieved from ClearlyDefined",
+					Origin:        "clearlydefined",
+					Collector:     "clearlydefined",
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name:  "valid maven package",
+		purls: []string{"pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"},
+		wantCLs: []assembler.CertifyLegalIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:       "maven",
+					Namespace:  ptrfrom.String("io.vertx"),
+					Name:       "vertx-web-common",
+					Version:    ptrfrom.String("4.3.7"),
+					Subpath:    ptrfrom.String(""),
+					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "type", Value: "jar"}},
+				},
+				Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
+				Discovered: []generated.LicenseInputSpec{},
+				CertifyLegal: &generated.CertifyLegalInputSpec{
+					DeclaredLicense: "Apache-2.0",
+					Justification:   "Retrieved from ClearlyDefined",
+					TimeScanned:     tm,
+					Origin:          "clearlydefined",
+					Collector:       "clearlydefined",
+				},
+			},
+		},
+		wantHSAs: []assembler.HasSourceAtIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:       "maven",
+					Namespace:  ptrfrom.String("io.vertx"),
+					Name:       "vertx-web-common",
+					Version:    ptrfrom.String("4.3.7"),
+					Subpath:    ptrfrom.String(""),
+					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "type", Value: "jar"}},
+				},
+				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
+				Src: &generated.SourceInputSpec{
+					Type:      "sourcearchive",
+					Namespace: "io.vertx",
+					Name:      "vertx-web-common",
+					Tag:       ptrfrom.String("4.3.7"),
+				},
+				HasSourceAt: &generated.HasSourceAtInputSpec{
+					KnownSince:    tm,
+					Justification: "Retrieved from ClearlyDefined",
+					Origin:        "clearlydefined",
+					Collector:     "clearlydefined",
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name:     "no purl",
+		purls:    []string{""},
+		wantCLs:  nil,
+		wantHSAs: nil,
+		wantErr:  false,
+	}, {
+		name:     "skip guac purl",
+		purls:    []string{"pkg:guac/io.vertx/vertx-web-common@4.3.7?type=jar"},
+		wantCLs:  nil,
+		wantHSAs: nil,
+		wantErr:  false,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCLs, gotHSAs, err := PurlsLicenseScan(ctx, tt.purls)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PurlsToScan() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.wantCLs, gotCLs, cmpopts.IgnoreFields(generated.CertifyLegalInputSpec{}, "TimeScanned", "DocumentRef")); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+			if diff := cmp.Diff(tt.wantHSAs, gotHSAs, cmpopts.IgnoreFields(generated.HasSourceAtInputSpec{}, "KnownSince", "DocumentRef")); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

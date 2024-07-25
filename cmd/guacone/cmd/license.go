@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The GUAC Authors.
+// Copyright 2024 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
+	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
-	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -40,7 +40,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type osvOptions struct {
+type cdOptions struct {
 	graphqlEndpoint         string
 	headerFile              string
 	poll                    bool
@@ -54,11 +54,11 @@ type osvOptions struct {
 	batchSize int
 }
 
-var osvCmd = &cobra.Command{
-	Use:   "osv [flags]",
-	Short: "runs the osv certifier",
+var cdCmd = &cobra.Command{
+	Use:   "cd [flags]",
+	Short: "runs the clearly defined certifier",
 	Run: func(cmd *cobra.Command, args []string) {
-		opts, err := validateOSVFlags(
+		opts, err := validateCDFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("header-file"),
 			viper.GetString("interval"),
@@ -81,7 +81,7 @@ var osvCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -217,7 +217,7 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOSVFlags(
+func validateCDFlags(
 	graphqlEndpoint,
 	headerFile,
 	interval,
@@ -229,8 +229,8 @@ func validateOSVFlags(
 	queryLicenseIngestion bool,
 	certifierLatencyStr string,
 	batchSize int,
-) (osvOptions, error) {
-	var opts osvOptions
+) (cdOptions, error) {
+	var opts cdOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
 	opts.poll = poll
@@ -270,10 +270,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
-	osvCmd.PersistentFlags().AddFlagSet(set)
-	if err := viper.BindPFlags(osvCmd.PersistentFlags()); err != nil {
+	cdCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(cdCmd.PersistentFlags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
-	certifierCmd.AddCommand(osvCmd)
+	certifierCmd.AddCommand(cdCmd)
 }

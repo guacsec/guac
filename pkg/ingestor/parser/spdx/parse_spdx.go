@@ -63,7 +63,24 @@ func NewSpdxParser() common.DocumentParser {
 	}
 }
 
+// initializeSPDXParser clears out all values for the next iteration
+func (s *spdxParser) initializeSPDXParser() {
+	s.doc = nil
+	s.packagePackages = map[string][]*model.PkgInputSpec{}
+	s.packageArtifacts = map[string][]*model.ArtifactInputSpec{}
+	s.packageLegals = map[string][]*model.CertifyLegalInputSpec{}
+	s.filePackages = map[string][]*model.PkgInputSpec{}
+	s.fileArtifacts = map[string][]*model.ArtifactInputSpec{}
+	s.topLevelPackages = make([]*model.PkgInputSpec, 0)
+	s.topLevelArtifacts = map[string][]*model.ArtifactInputSpec{}
+	s.identifierStrings = &common.IdentifierStrings{}
+	s.spdxDoc = nil
+	s.topLevelIsHeuristic = false
+	s.timeScanned = time.Now()
+}
+
 func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
+	s.initializeSPDXParser()
 	s.doc = doc
 	spdxDoc, err := parseSpdxBlob(doc.Blob)
 	if err != nil {

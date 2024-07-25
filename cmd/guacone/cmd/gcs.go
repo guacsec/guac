@@ -36,11 +36,12 @@ import (
 )
 
 type gcsOptions struct {
-	graphqlEndpoint      string
-	headerFile           string
-	csubClientOptions    csub_client.CsubClientOptions
-	bucket               string
-	queryVulnOnIngestion bool
+	graphqlEndpoint         string
+	headerFile              string
+	csubClientOptions       csub_client.CsubClientOptions
+	bucket                  string
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -59,6 +60,7 @@ var gcsCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -110,7 +112,7 @@ var gcsCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				gotErr = true
@@ -140,7 +142,8 @@ var gcsCmd = &cobra.Command{
 	},
 }
 
-func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string, csubTls, csubTlsSkipVerify bool, queryVulnIngestion bool, args []string) (gcsOptions, error) {
+func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string, csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (gcsOptions, error) {
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.headerFile = headerFile
@@ -160,7 +163,7 @@ func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string,
 		return opts, fmt.Errorf("expected either --%s flag or GOOGLE_APPLICATION_CREDENTIALS environment variable", gcsCredentialsPathFlag)
 	}
 	opts.queryVulnOnIngestion = queryVulnIngestion
-
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	return opts, nil
 }
 

@@ -40,7 +40,7 @@ func newMockQuery() certifier.QueryComponents {
 
 // GetComponents returns components for test
 func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
-	compChan <- []*root_package.PackageNode{&testdata.Text4ShelPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage}
+	compChan <- []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage}
 	return nil
 }
 

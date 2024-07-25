@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package attestation_vuln
+package attestation
 
 import (
 	"time"
 
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
 )
 
 // PredicateVuln This is a new predicate type for vulnerabilities based off
@@ -32,7 +32,7 @@ const (
 
 // VulnerabilityStatement defines the statement header and the vulnerability predicate
 type VulnerabilityStatement struct {
-	intoto.StatementHeader
+	attestationv1.Statement
 	// Predicate contains type specific metadata.
 	Predicate VulnerabilityPredicate `json:"predicate"`
 }

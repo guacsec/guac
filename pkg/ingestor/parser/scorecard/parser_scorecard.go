@@ -43,9 +43,16 @@ func NewScorecardParser() common.DocumentParser {
 	return &scorecardParser{}
 }
 
+// initializeScorecardParser clears out all values for the next iteration
+func (p *scorecardParser) initializeScorecardParser() {
+	p.scorecardPredicates = make([]*model.ScorecardInputSpec, 0)
+	p.srcPredicates = make([]*model.SourceInputSpec, 0)
+	p.vcsStrings = make([]string, 0)
+}
+
 // Parse breaks out the document into the graph components
 func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) error {
-
+	p.initializeScorecardParser()
 	if doc.Type != processor.DocumentScorecard {
 		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentScorecard, doc.Type)
 	}

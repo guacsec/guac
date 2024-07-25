@@ -80,8 +80,24 @@ func NewSLSAParser() common.DocumentParser {
 	}
 }
 
+// initializeSLSAParser clears out all values for the next iteration
+func (s *slsaParser) initializeSLSAParser() {
+	s.pred01 = nil
+	s.pred02 = nil
+	s.pred1 = nil
+	s.smt = nil
+	s.subjects = make([]*slsaEntity, 0)
+	s.materials = make([]*slsaEntity, 0)
+	s.bareMaterials = make([]*model.ArtifactInputSpec, 0)
+	s.bareMaterials = make([]*model.ArtifactInputSpec, 0)
+	s.builder = nil
+	s.slsaAttestation = nil
+	s.identifierStrings = &common.IdentifierStrings{}
+}
+
 // Parse breaks out the document into the graph components
 func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
+	s.initializeSLSAParser()
 	if err := s.parseSlsaPredicate(doc.Blob); err != nil {
 		return err
 	}
