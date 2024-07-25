@@ -86,7 +86,7 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient *clients.RateLimitedClient) (*depsCollector, pb.InsightsClient, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, pb.InsightsClient, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
