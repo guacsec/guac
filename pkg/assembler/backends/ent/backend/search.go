@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -136,21 +137,19 @@ func (b *EntBackend) FindTopLevelPackagesRelatedToVulnerability(ctx context.Cont
 		if err != nil {
 			return nil, gqlerror.Errorf("FindTopLevelPackagesRelatedToVulnerability failed with err: %v", err)
 		}
-		packagesAlreadyInvestigated := make([]int, 0)
+		packagesAlreadyInvestigated := make([]uuid.UUID, 0)
+		paths := make([][]model.Node,0)
 		vexEdges := make([]model.Edge, 0)
-		vexOrder := CertifyVexOrder
+		vexEdges = append(vexEdges, model.EdgeCertifyVexStatementPackage)
 		for _, vexStatement := range vexStatements {
 			//paths, err := b.bfsFromVulnerablePackage(ctx, *vexStatement.PackageID, &productIDsCheckedVulnerable)
-			vexEdges = append(vexEdges, vexStatement)
-
-			paths, err := b.bfs(ctx, "", "", 0, vexEdges) //, &productIDsCheckedVulnerable)
+			//I think we need to get query results into this somehow
+			subpaths, err := b.bfs(ctx, "", "", 0, vexEdges) //, &productIDsCheckedVulnerable)
 			if err != nil {
 				return nil, err
 			}
-			if len(paths) > 0 {
-				for i := range paths {
-					paths[i] = append(paths[i], toModelCertifyVEXStatement(vexStatement))
-				}
+			if len(subpaths) > 0 {
+				paths = append([][]model.Node{{toModelCertifyVEXStatement(vexStatement)}}, subpaths)
 				result = append(result, paths...)
 				packagesAlreadyInvestigated = append(packagesAlreadyInvestigated, *vexStatement.PackageID)
 			}
