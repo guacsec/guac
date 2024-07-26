@@ -255,3 +255,7 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 
 	return pvs
 }
+
+func (c *demoClient) FindTopLevelPackagesRelatedToVulnerability(ctx context.Context, vulnerabilityID string) ([][]model.Node, error) {
+	return nil, fmt.Errorf("not implemented: FindTopLevelPackagesRelatedToVulnerability")
+}

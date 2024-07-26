@@ -18,6 +18,12 @@ package backend
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/exp/maps"
+	"slices"
+	"strconv"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -100,3 +106,85 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
+
+func (b *EntBackend) FindTopLevelPackagesRelatedToVulnerability(ctx context.Context, vulnerabilityID string) ([][]model.Node, error) {
+	// TODO use directly the query because the EntBackend.HasSBOM is limited to MaxPageSize
+	hasSBOMs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{})
+	if err != nil {
+		return nil, gqlerror.Errorf("FindTopLevelPackagesRelatedToVulnerability failed with err: %v", err)
+	}
+
+	result := [][]model.Node{}
+	productIDsCheckedVulnerable := make(map[string]bool, len(hasSBOMs))
+	for _, hasSBOM := range hasSBOMs {
+		switch v := hasSBOM.Subject.(type) {
+		case *model.Artifact:
+			productIDsCheckedVulnerable[v.ID] = false
+		case *model.Package:
+			productIDsCheckedVulnerable[v.Namespaces[0].Names[0].Versions[0].ID] = false
+		}
+	}
+
+	if len(productIDsCheckedVulnerable) != 0 {
+		vexStatements, err := b.client.CertifyVex.Query().
+			Where(
+				certifyvex.HasVulnerabilityWith(vulnerabilityid.VulnerabilityIDEqualFold(vulnerabilityID)),
+				certifyvex.StatusNEQ(model.VexStatusNotAffected.String()),
+				certifyvex.PackageIDNotNil(),
+			).
+			All(ctx)
+		if err != nil {
+			return nil, gqlerror.Errorf("FindTopLevelPackagesRelatedToVulnerability failed with err: %v", err)
+		}
+		packagesAlreadyInvestigated := make([]int, 0)
+		vexEdges := make([]model.Edge, 0)
+		vexOrder := CertifyVexOrder
+		for _, vexStatement := range vexStatements {
+			//paths, err := b.bfsFromVulnerablePackage(ctx, *vexStatement.PackageID, &productIDsCheckedVulnerable)
+			vexEdges = append(vexEdges, vexStatement)
+
+			paths, err := b.bfs(ctx, "", "", 0, vexEdges) //, &productIDsCheckedVulnerable)
+			if err != nil {
+				return nil, err
+			}
+			if len(paths) > 0 {
+				for i := range paths {
+					paths[i] = append(paths[i], toModelCertifyVEXStatement(vexStatement))
+				}
+				result = append(result, paths...)
+				packagesAlreadyInvestigated = append(packagesAlreadyInvestigated, *vexStatement.PackageID)
+			}
+		}
+
+		// if no VEX Statements have been found or no path from any VEX statement to product has been found
+		// then let's check also for CertifyVuln
+		if len(vexStatements) == 0 || slices.Contains(maps.Values(productIDsCheckedVulnerable), false) {
+			vulnStatements, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					VulnerabilityID: &vulnerabilityID,
+				},
+			})
+			if err != nil {
+				return nil, gqlerror.Errorf("FindTopLevelPackagesRelatedToVulnerability failed with err: %v", err)
+			}
+			for _, vuln := range vulnStatements {
+				pkg, err := strconv.Atoi(vuln.Package.Namespaces[0].Names[0].Versions[0].ID)
+				if err != nil {
+					return nil, err
+				}
+				if !slices.Contains(packagesAlreadyInvestigated, pkg) {
+					products, err := b.bfsFromVulnerablePackage(ctx, pkg, &productIDsCheckedVulnerable)
+					if err != nil {
+						return nil, err
+					}
+					for i := range products {
+						products[i] = append([]model.Node{vuln}, products[i]...)
+					}
+					result = append(result, products...)
+				}
+			}
+		}
+	}
+	return result, nil
+}
+

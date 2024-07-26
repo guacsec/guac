@@ -280,6 +280,21 @@ func (mr *MockBackendMockRecorder) FindSoftwareList(ctx, searchText, after, firs
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSoftwareList", reflect.TypeOf((*MockBackend)(nil).FindSoftwareList), ctx, searchText, after, first)
 }
 
+// FindTopLevelPackagesRelatedToVulnerability mocks base method.
+func (m *MockBackend) FindTopLevelPackagesRelatedToVulnerability(ctx context.Context, vulnerabilityID string) ([][]model.Node, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindTopLevelPackagesRelatedToVulnerability", ctx, vulnerabilityID)
+	ret0, _ := ret[0].([][]model.Node)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindTopLevelPackagesRelatedToVulnerability indicates an expected call of FindTopLevelPackagesRelatedToVulnerability.
+func (mr *MockBackendMockRecorder) FindTopLevelPackagesRelatedToVulnerability(ctx, vulnerabilityID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindTopLevelPackagesRelatedToVulnerability", reflect.TypeOf((*MockBackend)(nil).FindTopLevelPackagesRelatedToVulnerability), ctx, vulnerabilityID)
+}
+
 // HasMetadata mocks base method.
 func (m *MockBackend) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 	m.ctrl.T.Helper()
