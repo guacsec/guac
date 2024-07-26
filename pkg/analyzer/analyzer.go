@@ -28,10 +28,19 @@ import (
 	"github.com/dominikbraun/graph"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 type NodeType int
 type Action int
+
+
+const (
+	ColorReset  = "\033[0m"
+	ColorRed    = "\033[31m"
+	ColorGreen  = "\033[32m"
+	ColorWhite  = "\033[37m"
+)
 
 const (
 	Pkg NodeType = iota
@@ -68,7 +77,7 @@ type DiffResult struct {
 
 type EqualDifferencesPaths struct {
 	Diffs [][]string
-	Path []*Node
+	Path  []*Node
 	Index int
 }
 
@@ -330,7 +339,7 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 	if inclDeps || compareAll {
 		//add included dependencies
-		//TODO: sort dependencies as well here
+		//sort dependencies here
 		for _, dependency := range hasSBOM.IncludedDependencies {
 			//package node
 			//sort namespaces
@@ -536,6 +545,44 @@ func nodeIDListToNodeList(g graph.Graph[string, *Node], list []string) ([]*Node,
 	return nodeList, nil
 }
 
+func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string) string {
+	diffs := dmp.DiffMain(text1, text2, false)
+	return FormatDiffs(diffs)
+}
+
+func FormatDiffs(diffs []diffmatchpatch.Diff) string {
+	var result string
+
+	for _, diff := range diffs {
+		switch diff.Type {
+		case diffmatchpatch.DiffInsert:
+			result += fmt.Sprintf("%s+%s%s", ColorGreen, diff.Text, ColorReset)
+		case diffmatchpatch.DiffDelete:
+			result += fmt.Sprintf("%s-%s%s", ColorRed, diff.Text, ColorReset)
+		case diffmatchpatch.DiffEqual:
+			result += fmt.Sprintf("%s %s%s", ColorWhite, diff.Text, ColorReset)
+		}
+	}
+
+	return result
+}
+
+func DiffMissingNamespace( namespaces model.AllPkgTreeNamespacesPackageNamespace){
+
+}
+
+func DiffMissingName(name  model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName){
+
+}
+
+func DiffMissingVersion(version model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) {
+
+}
+
+func DiffMissingQualifier(qualifier model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) {
+	
+}
+
 func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 	var diffs []string
 	var namespaceBig, namespaceSmall []model.AllPkgTreeNamespacesPackageNamespace
@@ -544,6 +591,8 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 	var versionBig, versionSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion
 	var qualifierBig, qualifierSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
 
+	diffedNode := Node{}
+	dmp := diffmatchpatch.New()
 	switch nodeOne.NodeType {
 
 	case "Package":
@@ -555,10 +604,10 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 		if nodeOne.ID == nodeTwo.ID {
 			return []string{}, nil
 		}
-
+		
 		if nOne.Type != nTwo.Type {
 			diffs = append(diffs, "Type: "+nOne.Type+" != "+nTwo.Type)
-
+			diffedNode.Pkg.Type = ComputeStringDiffs(dmp, nOne.Type, nTwo.Type)
 		}
 		sort.Sort(packageNameSpaces(nOne.Namespaces))
 		sort.Sort(packageNameSpaces(nTwo.Namespaces))
@@ -616,7 +665,6 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 				// Compare name fields
 				if name1.Name != name2.Name {
 					diffs = append(diffs, fmt.Sprintf("Name %s != %s in Namespace %s", name1.Name, name2.Name, namespace1.Namespace))
-
 				}
 
 				if len(name1.Versions) > len(name2.Versions) {
@@ -808,7 +856,6 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 
 	}
 	return diffs, nil
-
 }
 
 func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int, error) {
@@ -900,8 +947,6 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 				return DiffResult{}, fmt.Errorf(err.Error())
 			}
 
-
-		
 			if diffNum < min {
 				pathDiff.PathTwo = pathTwo
 				min = diffNum
@@ -915,11 +960,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 
 		if len(diffIndices) == 1 {
 			used[index] = true
-		}else{
-			//TODO: how to fix problem where there are multiple paths to compare with only 1 difference?
-			used[index] = true //remove this when TODO is resolved
 		}
-		
 
 		count := 0
 		seenNodeIndex := -1
@@ -933,7 +974,6 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 		}
 
 		if count == 1 {
-
 			key := ""
 			if _, exists := nodeResults[pathDiff.PathOne[seenNodeIndex].ID+pathDiff.PathTwo[seenNodeIndex].ID]; exists {
 				key = pathDiff.PathOne[seenNodeIndex].ID + pathDiff.PathTwo[seenNodeIndex].ID
@@ -946,7 +986,6 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 			} else {
 				key = pathDiff.PathTwo[seenNodeIndex].ID + pathDiff.PathOne[seenNodeIndex].ID
 				nodeResults[key] = DiffedNodePair{NodeOne: pathDiff.PathOne[seenNodeIndex], NodeTwo: pathDiff.PathTwo[seenNodeIndex], Count: 1}
-
 			}
 			continue
 		}

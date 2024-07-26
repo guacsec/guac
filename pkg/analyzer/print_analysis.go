@@ -19,7 +19,6 @@ func GetNodeString(node Node) (string, error) {
 
 	case "Package":
 		pkg := node.Pkg
-
 		sort.Sort(packageNameSpaces(pkg.Namespaces))
 		message := "Type:" + pkg.Type + "\n"
 		for _, namespace := range pkg.Namespaces {
@@ -49,7 +48,6 @@ func GetNodeString(node Node) (string, error) {
 		return message, nil
 	case "DependencyPackage":
 		depPkg := node.DepPkg
-
 		message := "Type:" + CheckEmptyTrim(depPkg.Type) + "\n"
 		for _, namespace := range depPkg.Namespaces {
 			message += "Namespace: " + CheckEmptyTrim(namespace.Namespace) + "\n"
