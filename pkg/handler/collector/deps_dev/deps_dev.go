@@ -86,12 +86,12 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, pb.InsightsClient, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get system cert: %w", err)
+		return nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
 	// If no rate-limited client is provided, create a new one
@@ -101,7 +101,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 			grpc.WithTransportCredentials(creds),
 			grpc.WithUserAgent(version.UserAgent))
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
+			return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 		}
 		limiter := rate.NewLimiter(rate.Every(time.Minute), 10000) // 10,000 requests per minute with burst capacity of 10,000
 		rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
@@ -113,7 +113,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
 	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
-		return nil, nil, fmt.Errorf("unable to register Metrics: %w", err)
+		return nil, fmt.Errorf("unable to register Metrics: %w", err)
 	}
 
 	return &depsCollector{
@@ -129,7 +129,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		versions:             map[string]*pb.Version{},
 		dependencies:         map[string]*pb.Dependencies{},
 		Metrics:              metricsCollector,
-	}, client, nil
+	}, nil
 }
 
 // RetrieveArtifacts get the metadata from deps.dev based on the purl provided

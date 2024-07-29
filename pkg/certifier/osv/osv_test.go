@@ -16,8 +16,16 @@
 package osv
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"github.com/guacsec/guac/pkg/clients"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
@@ -258,4 +266,138 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 
 	// use DeepEqual to compare the copies
 	return reflect.DeepEqual(aCopy, bCopy)
+}
+
+// MockOSVServer is a mock implementation of the OSV server
+type MockOSVServer struct {
+	mock.Mock
+}
+
+func (m *MockOSVServer) MakeRequestWithClient(request osv_scanner.BatchedQuery, client *http.Client) (*osv_scanner.BatchedResponse, error) {
+	args := m.Called(request, client)
+	return args.Get(0).(*osv_scanner.BatchedResponse), args.Error(1)
+}
+
+func TestOSVCertifier_RateLimiter(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
+	// Mock the OSV server
+	mockServer := &MockOSVServer{}
+	mockResponse := &osv_scanner.BatchedResponse{}
+	mockServer.On("MakeRequestWithClient", mock.Anything, mock.Anything).Return(mockResponse, nil)
+
+	// Create a test server
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := mockServer.MakeRequestWithClient(osv_scanner.BatchedQuery{}, &http.Client{})
+		if err != nil {
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer testServer.Close()
+
+	// Override the HTTP client to use the actual rate-limited transport
+	certifier := &osvCertifier{
+		osvHTTPClient: clients.NewOsvDevClient(),
+	}
+
+	// Set a timeout for the test
+	testTimeout := 2 * time.Minute
+	ctx, cancel := context.WithTimeout(ctx, testTimeout)
+	defer cancel()
+
+	// Test rate limiting by making multiple sequential requests
+	var successCount int
+
+	for i := 0; i <= 10000; i++ { // 10,000 requests to test burst capacity
+		req, err := http.NewRequestWithContext(ctx, "POST", testServer.URL, nil)
+		if err != nil {
+			t.Errorf("Failed to create request: %v", err)
+			return
+		}
+		resp, err := certifier.osvHTTPClient.Do(req)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			successCount++
+		} else {
+			t.Logf("Unexpected error: %v", err)
+		}
+	}
+
+	logOutput := logBuffer.String()
+
+	// Check if the log statement "testing the rate limit" is present
+	assert.Contains(t, logOutput, "Rate limit exceeded", "Rate limit should have been exceeded")
+}
+
+func TestOSVCertifier_UnderRateLimit(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
+	// Mock the OSV server
+	mockServer := &MockOSVServer{}
+	mockResponse := &osv_scanner.BatchedResponse{}
+	mockServer.On("MakeRequestWithClient", mock.Anything, mock.Anything).Return(mockResponse, nil)
+
+	// Create a test server
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := mockServer.MakeRequestWithClient(osv_scanner.BatchedQuery{}, &http.Client{})
+		if err != nil {
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer testServer.Close()
+
+	// Override the HTTP client to use the actual rate-limited transport
+	certifier := &osvCertifier{
+		osvHTTPClient: clients.NewOsvDevClient(),
+	}
+
+	// Set a timeout for the test
+	testTimeout := 2 * time.Minute
+	ctx, cancel := context.WithTimeout(ctx, testTimeout)
+	defer cancel()
+
+	// Test rate limiting by making multiple sequential requests
+	var successCount int
+
+	for i := 0; i <= 9999; i++ { // 10,000 requests to test burst capacity
+		req, err := http.NewRequestWithContext(ctx, "POST", testServer.URL, nil)
+		if err != nil {
+			t.Errorf("Failed to create request: %v", err)
+			return
+		}
+		resp, err := certifier.osvHTTPClient.Do(req)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			successCount++
+		} else {
+			t.Logf("Unexpected error: %v", err)
+		}
+	}
+
+	logOutput := logBuffer.String()
+
+	// Check if the log statement "testing the rate limit" is present
+	assert.NotContains(t, logOutput, "Rate limit exceeded", "Rate limit should have been exceeded")
 }

@@ -16,7 +16,7 @@
 package clients
 
 import (
-	"context"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/time/rate"
 	"net/http"
@@ -24,8 +24,8 @@ import (
 )
 
 var (
-	osvDevLimiter         = rate.NewLimiter(rate.Every(time.Minute/10000), 10000)
-	clearlyDefinedLimiter = rate.NewLimiter(rate.Every(time.Minute/2000), 2000)
+	osvDevLimiter         = rate.NewLimiter(rate.Every(time.Minute), 10000)
+	clearlyDefinedLimiter = rate.NewLimiter(rate.Every(time.Minute), 2000)
 )
 
 type RateLimitedTransport struct {
@@ -34,15 +34,18 @@ type RateLimitedTransport struct {
 }
 
 func (t *RateLimitedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	err := t.Limiter.Wait(req.Context())
-	if err != nil {
-		return nil, err
+	logger := logging.FromContext(req.Context())
+	if !t.Limiter.Allow() {
+		logger.Debugf("Rate limit exceeded")
+		if err := t.Limiter.Wait(req.Context()); err != nil {
+			return nil, err
+		}
 	}
 	req.Header.Set("User-Agent", version.UserAgent)
 	return t.Transport.RoundTrip(req)
 }
 
-func NewOsvDevClient(ctx context.Context) *http.Client {
+func NewOsvDevClient() *http.Client {
 	return &http.Client{
 		Transport: &RateLimitedTransport{
 			Transport: http.DefaultTransport,
