@@ -1,21 +1,7 @@
-//
-// Copyright 2022 The GUAC Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package osv
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -53,7 +39,7 @@ type osvCertifier struct {
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
 	return &osvCertifier{
-		osvHTTPClient: clients.NewOsvDevClient(context.Background()),
+		osvHTTPClient: clients.NewOsvDevClient(),
 	}
 }
 
@@ -79,12 +65,36 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}
 
-	resp, err := osv_scanner.MakeRequestWithClient(query, o.osvHTTPClient)
+	// Marshal the query into JSON
+	queryBytes, err := json.Marshal(query)
+	if err != nil {
+		return fmt.Errorf("failed to marshal query: %w", err)
+	}
+
+	// Use the osvHTTPClient to make the request
+	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.osv.dev/v1/querybatch", bytes.NewReader(queryBytes))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := o.osvHTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("osv.dev batched request failed with status: %s", resp.Status)
+	}
+
+	var osvResponse osv_scanner.BatchedResponse
+	if err := json.NewDecoder(resp.Body).Decode(&osvResponse); err != nil {
+		return fmt.Errorf("failed to decode osv.dev response: %w", err)
+	}
+
 	for i, query := range query.Queries {
-		response := resp.Results[i]
+		response := osvResponse.Results[i]
 		purl := query.Package.PURL
 		if err := generateDocument(packMap[purl], response.Vulns, docChannel); err != nil {
 			return fmt.Errorf("could not generate document from OSV results: %w", err)
