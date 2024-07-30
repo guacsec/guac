@@ -192,7 +192,10 @@ func TestCDCertifier_RateLimiter(t *testing.T) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{}")) // Mock response body
+		_, err = w.Write([]byte("{}"))
+		if err != nil {
+			return
+		}
 	}))
 	defer testServer.Close()
 
@@ -256,7 +259,10 @@ func TestCDCertifier_UnderRateLimit(t *testing.T) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{}")) // Mock response body
+		_, err = w.Write([]byte("{}"))
+		if err != nil {
+			return
+		}
 	}))
 	defer testServer.Close()
 
