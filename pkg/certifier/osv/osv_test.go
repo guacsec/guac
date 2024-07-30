@@ -320,7 +320,7 @@ func TestOSVCertifier_RateLimiter(t *testing.T) {
 	// Test rate limiting by making multiple sequential requests
 	var successCount int
 
-	for i := 0; i <= 10000; i++ { // 10,000 requests to test burst capacity
+	for i := 0; i < 10001; i++ { // 10,001 requests to test burst capacity
 		req, err := http.NewRequestWithContext(ctx, "POST", testServer.URL, nil)
 		if err != nil {
 			t.Errorf("Failed to create request: %v", err)
@@ -382,7 +382,7 @@ func TestOSVCertifier_UnderRateLimit(t *testing.T) {
 	// Test rate limiting by making multiple sequential requests
 	var successCount int
 
-	for i := 0; i <= 9999; i++ { // 10,000 requests to test burst capacity
+	for i := 0; i < 10000; i++ { // 10,000 requests to test burst capacity
 		req, err := http.NewRequestWithContext(ctx, "POST", testServer.URL, nil)
 		if err != nil {
 			t.Errorf("Failed to create request: %v", err)
