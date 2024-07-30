@@ -97,7 +97,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	// If no rate-limited client is provided, create a new one
 	if rateLimitedClient == nil {
 		creds := credentials.NewClientTLSFromCert(sysPool, "")
-		conn, err := grpc.Dial("api.deps.dev:443",
+		conn, err := grpc.NewClient("api.deps.dev:443",
 			grpc.WithTransportCredentials(creds),
 			grpc.WithUserAgent(version.UserAgent))
 		if err != nil {

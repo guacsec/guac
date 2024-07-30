@@ -25,6 +25,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/time/rate"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"strings"
 	"testing"
@@ -597,11 +598,11 @@ func TestNewDepsCollector_RateLimiter(t *testing.T) {
 	mockServer.On("GetProject", mock.Anything, mock.Anything).Return(&pb.Project{}, nil)
 
 	// Create a connection to the in-memory gRPC server
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(
+	conn, err := grpc.NewClient("bufnet", grpc.WithContextDialer(
 		func(context.Context, string) (net.Conn, error) {
 			return lis.Dial()
 		}),
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	assert.NoError(t, err)
 	defer conn.Close()
@@ -672,11 +673,11 @@ func TestNewDepsCollector_UnderRateLimit(t *testing.T) {
 	mockServer.On("GetProject", mock.Anything, mock.Anything).Return(&pb.Project{}, nil)
 
 	// Create a connection to the in-memory gRPC server
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(
+	conn, err := grpc.NewClient("bufnet", grpc.WithContextDialer(
 		func(context.Context, string) (net.Conn, error) {
 			return lis.Dial()
 		}),
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	assert.NoError(t, err)
 	defer conn.Close()
