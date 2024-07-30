@@ -1,18 +1,3 @@
-//
-// Copyright 2024 The GUAC Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package clearlydefined
 
 import (
@@ -29,11 +14,11 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/clients" // Import the clients package for rate limiter
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/misc/coordinates"
-	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -48,25 +33,28 @@ const (
 var ErrOSVComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type cdCertifier struct {
+	cdHTTPClient *http.Client
 }
 
-// NewClearlyDefinedCertifier initializes the the cdCertifier
+// NewClearlyDefinedCertifier initializes the cdCertifier
 func NewClearlyDefinedCertifier() certifier.Certifier {
-	return &cdCertifier{}
+	return &cdCertifier{
+		cdHTTPClient: clients.NewClearlyDefinedClient(),
+	}
 }
 
 // GetPkgDefinition uses the coordinates to query clearly defined for license definition
-func GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
+func (c *cdCertifier) GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
 	logger := logging.FromContext(ctx)
 
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
 		coordinate.Namespace, coordinate.Name, coordinate.Revision)
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new request with error: %w", err)
 	}
-	resp, err := version.UATransport.RoundTrip(req)
+	resp, err := c.cdHTTPClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
 	}
@@ -101,14 +89,14 @@ func GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 }
 
 // GetSrcDefinition uses the source coordinates found from the package definition to query clearly defined for license definition
-func GetSrcDefinition(ctx context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+func (c *cdCertifier) GetSrcDefinition(ctx context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
 	logger := logging.FromContext(ctx)
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	resp, err := version.UATransport.RoundTrip(req)
+	resp, err := c.cdHTTPClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
 	}
@@ -163,7 +151,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 				logger.Errorf("failed to parse purl into coordinate with error: %v", err)
 				continue
 			}
-			definition, err := GetPkgDefinition(ctx, coordinate)
+			definition, err := c.GetPkgDefinition(ctx, coordinate) // Use the method with rate-limited client
 			if err != nil {
 				return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
 			}
@@ -176,7 +164,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 			}
 			packMap[node.Purl] = append(packMap[node.Purl], node)
 			if definition.Described.SourceLocation != nil {
-				srcDefinition, err := GetSrcDefinition(ctx, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
+				srcDefinition, err := c.GetSrcDefinition(ctx, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
 					definition.Described.SourceLocation.Namespace, definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
 				if err != nil {
 					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)

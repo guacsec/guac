@@ -626,7 +626,7 @@ func TestNewDepsCollector_RateLimiter(t *testing.T) {
 	// Test rate limiting by making multiple concurrent requests
 	var successCount int
 
-	for i := 0; i <= 10000; i++ { // 10,001 requests to test burst capacity
+	for i := 0; i < 10001; i++ { // 10,001 requests to test burst capacity
 		_, err := c.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
 		if err == nil {
 			successCount++
@@ -699,7 +699,7 @@ func TestNewDepsCollector_UnderRateLimit(t *testing.T) {
 	// Test rate limiting by making multiple concurrent requests.
 	var successCount int
 
-	for i := 0; i <= 9999; i++ { // 9,999 requests, just under the burst capacity
+	for i := 0; i < 10000; i++ { // 9,999 requests, just under the burst capacity
 		_, err := c.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
 		if err == nil {
 			successCount++

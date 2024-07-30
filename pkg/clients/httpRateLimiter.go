@@ -54,12 +54,11 @@ func NewOsvDevClient() *http.Client {
 	}
 }
 
-// This will be implemented once ClearlyDefined is implemented
-//func NewClearlyDefinedClient(ctx context.Context) *http.Client {
-//	return &http.Client{
-//		Transport: &RateLimitedTransport{
-//			Transport: http.DefaultTransport,
-//			Limiter:   clearlyDefinedLimiter,
-//		},
-//	}
-//}
+func NewClearlyDefinedClient() *http.Client {
+	return &http.Client{
+		Transport: &RateLimitedTransport{
+			Transport: http.DefaultTransport,
+			Limiter:   clearlyDefinedLimiter,
+		},
+	}
+}
