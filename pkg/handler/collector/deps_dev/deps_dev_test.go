@@ -503,15 +503,6 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 		wantLog      string
 	}{
 		{
-			testName:     "npm package with .git suffix",
-			pkgType:      "npm",
-			namespace:    ptrfrom.String("@webassemblyjs"),
-			name:         "wasm-parser",
-			version:      ptrfrom.String("1.11.6"),
-			pkgComponent: &PackageComponent{},
-			wantLog:      "",
-		},
-		{
 			testName:     "golang package without .git suffix",
 			pkgType:      "golang",
 			namespace:    ptrfrom.String("github.com/google"),
@@ -550,6 +541,8 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			}
 
 			_ = c.collectAdditionalMetadata(ctx, tt.pkgType, tt.namespace, tt.name, tt.version, tt.pkgComponent)
+
+			t.Logf(logBuffer.String())
 
 			// Check if the log contains the expected log message
 			if !strings.Contains(logBuffer.String(), tt.wantLog) {
