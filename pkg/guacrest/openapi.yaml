@@ -99,7 +99,30 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
-
+  "/query/latest-sbom":
+    get:
+      summary: Retrieve the latest SBOM for a given package
+      operationId: findLatestSBOM
+      parameters:
+        - name: pkgID
+          description: The ID of the package.
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The latest SBOM for the given package
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HasSBOM"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
 
 components:
   parameters:
@@ -148,6 +171,35 @@ components:
           $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
+    HasSBOM:
+      type: object
+      required:
+        - ID
+        - URI
+        - Algorithm
+        - Digest
+        - DownloadLocation
+        - Origin
+        - Collector
+        - KnownSince
+      properties:
+        ID:
+          type: string
+        URI:
+          type: string
+        Algorithm:
+          type: string
+        Digest:
+          type: string
+        DownloadLocation:
+          type: string
+        Origin:
+          type: string
+        Collector:
+          type: string
+        KnownSince:
+          type: string
+          format: date-time
   responses:
     # for code 200
     PurlList:
