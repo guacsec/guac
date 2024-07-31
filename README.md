@@ -8,7 +8,9 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/guacsec/guac/badge)](https://api.securityscorecards.dev/projects/github.com/guacsec/guac)
 
 **Note:** GUAC is under active development - if you are interested in
-contributing, please look at [contributor guide](CONTRIBUTING.md).
+contributing, please look at [contributor guide](CONTRIBUTING.md). GUAC is an
+[OpenSSF](https://openssf.org) incubating project under the
+[Supply Chain Integrity WG](https://github.com/ossf/wg-supply-chain-integrity).
 
 [Graph for Understanding Artifact Composition (GUAC)](https://guac.sh/)
 aggregates software security metadata into a high fidelity graph
