@@ -1455,7 +1455,8 @@ func Test_spdxParser(t *testing.T) {
 			logging.InitLogger(logging.Debug)
 			if tt.wantWarning != "" {
 				logger, logs = observer.New(zap.DebugLevel)
-				logging.SetLogger(zap.New(logger))
+				l := zap.New(logger).Sugar()
+				logging.SetLogger(t, l)
 			}
 			ctx := logging.WithLogger(context.Background())
 

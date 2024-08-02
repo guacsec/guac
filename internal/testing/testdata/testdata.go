@@ -2025,7 +2025,7 @@ var (
 			  "Scorecard":null,
 			  "Source":{
 				 "commit":null,
-				 "name":"js-tokens.git",
+				 "name":"js-tokens",
 				 "namespace":"github.com/lydell",
 				 "tag":null,
 				 "type":"git"
@@ -2061,7 +2061,7 @@ var (
 			  "Scorecard":null,
 			  "Source":{
 				 "commit":null,
-				 "name":"object-assign.git",
+				 "name":"object-assign",
 				 "namespace":"github.com/sindresorhus",
 				 "tag":null,
 				 "type":"git"
@@ -2146,7 +2146,7 @@ var (
 		"Scorecard":null,
 		"Source":{
 		   "commit":null,
-		   "name":"react.git",
+		   "name":"react",
 		   "namespace":"github.com/facebook",
 		   "tag":null,
 		   "type":"git"
@@ -2531,7 +2531,7 @@ var (
 			  "Scorecard":null,
 			  "Source":{
 				 "commit":null,
-				 "name":"camelcase.git",
+				 "name":"camelcase",
 				 "namespace":"github.com/sindresorhus",
 				 "tag":null,
 				 "type":"git"
@@ -2568,7 +2568,7 @@ var (
 		"Scorecard":null,
 		"Source":{
 		   "commit":null,
-		   "name":"yargs-parser.git",
+		   "name":"yargs-parser",
 		   "namespace":"github.com/yargs",
 		   "tag":null,
 		   "type":"git"

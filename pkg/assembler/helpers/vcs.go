@@ -48,7 +48,6 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 		} else {
 			return nil, fmt.Errorf("scheme has unknown source type: %s", u.Host)
 		}
-
 	} else {
 		// Should be <vcs_tool>+<transport>
 		schemeSp := strings.Split(u.Scheme, "+")
@@ -81,6 +80,11 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 			m.Tag = &tag
 		}
 	}
+
+	// Based on the issue https://github.com/guacsec/guac/issues/1413, we need to ensure
+	// that the .git suffix is removed from the repository name. This is because some
+	// repository URLs might include the .git suffix which is not expected by certain endpoints.
+	m.Name = strings.TrimSuffix(m.Name, ".git")
 
 	return m, nil
 }
