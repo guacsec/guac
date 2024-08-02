@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -136,7 +137,7 @@ func (saq *SLSAAttestationQuery) QuerySubject() *ArtifactQuery {
 // First returns the first SLSAAttestation entity from the query.
 // Returns a *NotFoundError when no SLSAAttestation was found.
 func (saq *SLSAAttestationQuery) First(ctx context.Context) (*SLSAAttestation, error) {
-	nodes, err := saq.Limit(1).All(setContextOp(ctx, saq.ctx, "First"))
+	nodes, err := saq.Limit(1).All(setContextOp(ctx, saq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +160,7 @@ func (saq *SLSAAttestationQuery) FirstX(ctx context.Context) *SLSAAttestation {
 // Returns a *NotFoundError when no SLSAAttestation ID was found.
 func (saq *SLSAAttestationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = saq.Limit(1).IDs(setContextOp(ctx, saq.ctx, "FirstID")); err != nil {
+	if ids, err = saq.Limit(1).IDs(setContextOp(ctx, saq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -182,7 +183,7 @@ func (saq *SLSAAttestationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one SLSAAttestation entity is found.
 // Returns a *NotFoundError when no SLSAAttestation entities are found.
 func (saq *SLSAAttestationQuery) Only(ctx context.Context) (*SLSAAttestation, error) {
-	nodes, err := saq.Limit(2).All(setContextOp(ctx, saq.ctx, "Only"))
+	nodes, err := saq.Limit(2).All(setContextOp(ctx, saq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +211,7 @@ func (saq *SLSAAttestationQuery) OnlyX(ctx context.Context) *SLSAAttestation {
 // Returns a *NotFoundError when no entities are found.
 func (saq *SLSAAttestationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = saq.Limit(2).IDs(setContextOp(ctx, saq.ctx, "OnlyID")); err != nil {
+	if ids, err = saq.Limit(2).IDs(setContextOp(ctx, saq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -235,7 +236,7 @@ func (saq *SLSAAttestationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of SLSAAttestations.
 func (saq *SLSAAttestationQuery) All(ctx context.Context) ([]*SLSAAttestation, error) {
-	ctx = setContextOp(ctx, saq.ctx, "All")
+	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryAll)
 	if err := saq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -257,7 +258,7 @@ func (saq *SLSAAttestationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err 
 	if saq.ctx.Unique == nil && saq.path != nil {
 		saq.Unique(true)
 	}
-	ctx = setContextOp(ctx, saq.ctx, "IDs")
+	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryIDs)
 	if err = saq.Select(slsaattestation.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -275,7 +276,7 @@ func (saq *SLSAAttestationQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (saq *SLSAAttestationQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, saq.ctx, "Count")
+	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryCount)
 	if err := saq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -293,7 +294,7 @@ func (saq *SLSAAttestationQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (saq *SLSAAttestationQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, saq.ctx, "Exist")
+	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryExist)
 	switch _, err := saq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -744,7 +745,7 @@ func (sagb *SLSAAttestationGroupBy) Aggregate(fns ...AggregateFunc) *SLSAAttesta
 
 // Scan applies the selector query and scans the result into the given value.
 func (sagb *SLSAAttestationGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sagb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, sagb.build.ctx, ent.OpQueryGroupBy)
 	if err := sagb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -792,7 +793,7 @@ func (sas *SLSAAttestationSelect) Aggregate(fns ...AggregateFunc) *SLSAAttestati
 
 // Scan applies the selector query and scans the result into the given value.
 func (sas *SLSAAttestationSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sas.ctx, "Select")
+	ctx = setContextOp(ctx, sas.ctx, ent.OpQuerySelect)
 	if err := sas.prepareQuery(ctx); err != nil {
 		return err
 	}

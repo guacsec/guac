@@ -231,7 +231,7 @@ func (du *DependencyUpdate) check() error {
 			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
 		}
 	}
-	if _, ok := du.mutation.PackageID(); du.mutation.PackageCleared() && !ok {
+	if du.mutation.PackageCleared() && len(du.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
 	}
 	return nil
@@ -601,7 +601,7 @@ func (duo *DependencyUpdateOne) check() error {
 			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
 		}
 	}
-	if _, ok := duo.mutation.PackageID(); duo.mutation.PackageCleared() && !ok {
+	if duo.mutation.PackageCleared() && len(duo.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
 	}
 	return nil

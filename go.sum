@@ -31,8 +31,8 @@ deps.dev/util/semver v0.0.0-20240701054435-542fb1833d6b h1:5Jdj8VFE7qdAKVaDDXb68
 deps.dev/util/semver v0.0.0-20240701054435-542fb1833d6b/go.mod h1:jkcH+k02gWHBiZ7G4OnUOkSZ6WDq54Pt5DrOA8FN8Uo=
 entgo.io/contrib v0.5.0 h1:M4IqodImfUm327RDwNAITLNz3PsxVeC3rD4DPeVA8Gs=
 entgo.io/contrib v0.5.0/go.mod h1:q8dXQCmzqpSlVdT2bWDydjgznGcy3y4zmsYmVFC9V/U=
-entgo.io/ent v0.13.1 h1:uD8QwN1h6SNphdCCzmkMN3feSUzNnVvV/WIkHKMbzOE=
-entgo.io/ent v0.13.1/go.mod h1:qCEmo+biw3ccBn9OyL4ZK5dfpwg++l1Gxwac5B1206A=
+entgo.io/ent v0.14.0 h1:EO3Z9aZ5bXJatJeGqu/EVdnNr6K4mRq3rWe5owt0MC4=
+entgo.io/ent v0.14.0/go.mod h1:qCEmo+biw3ccBn9OyL4ZK5dfpwg++l1Gxwac5B1206A=
 github.com/99designs/gqlgen v0.17.48 h1:Wgk7n9PIdnmpsC1aJJV4eiZCGkAkoamKOtXAp/crpzQ=
 github.com/99designs/gqlgen v0.17.48/go.mod h1:hYeQ+ygPbcapbaHtHMbZ1DHMVNT+1tGU+fI+Hy4kqIo=
 github.com/Azure/azure-amqp-common-go/v3 v3.2.3 h1:uDF62mbd9bypXWi19V1bN5NZEO84JqgmI5G73ibAmrk=

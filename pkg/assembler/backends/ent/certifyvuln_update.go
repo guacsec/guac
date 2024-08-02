@@ -227,10 +227,10 @@ func (cvu *CertifyVulnUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cvu *CertifyVulnUpdate) check() error {
-	if _, ok := cvu.mutation.VulnerabilityID(); cvu.mutation.VulnerabilityCleared() && !ok {
+	if cvu.mutation.VulnerabilityCleared() && len(cvu.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.vulnerability"`)
 	}
-	if _, ok := cvu.mutation.PackageID(); cvu.mutation.PackageCleared() && !ok {
+	if cvu.mutation.PackageCleared() && len(cvu.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.package"`)
 	}
 	return nil
@@ -559,10 +559,10 @@ func (cvuo *CertifyVulnUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cvuo *CertifyVulnUpdateOne) check() error {
-	if _, ok := cvuo.mutation.VulnerabilityID(); cvuo.mutation.VulnerabilityCleared() && !ok {
+	if cvuo.mutation.VulnerabilityCleared() && len(cvuo.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.vulnerability"`)
 	}
-	if _, ok := cvuo.mutation.PackageID(); cvuo.mutation.PackageCleared() && !ok {
+	if cvuo.mutation.PackageCleared() && len(cvuo.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.package"`)
 	}
 	return nil

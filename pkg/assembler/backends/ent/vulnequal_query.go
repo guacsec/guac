@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -110,7 +111,7 @@ func (veq *VulnEqualQuery) QueryVulnerabilityB() *VulnerabilityIDQuery {
 // First returns the first VulnEqual entity from the query.
 // Returns a *NotFoundError when no VulnEqual was found.
 func (veq *VulnEqualQuery) First(ctx context.Context) (*VulnEqual, error) {
-	nodes, err := veq.Limit(1).All(setContextOp(ctx, veq.ctx, "First"))
+	nodes, err := veq.Limit(1).All(setContextOp(ctx, veq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (veq *VulnEqualQuery) FirstX(ctx context.Context) *VulnEqual {
 // Returns a *NotFoundError when no VulnEqual ID was found.
 func (veq *VulnEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = veq.Limit(1).IDs(setContextOp(ctx, veq.ctx, "FirstID")); err != nil {
+	if ids, err = veq.Limit(1).IDs(setContextOp(ctx, veq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -156,7 +157,7 @@ func (veq *VulnEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one VulnEqual entity is found.
 // Returns a *NotFoundError when no VulnEqual entities are found.
 func (veq *VulnEqualQuery) Only(ctx context.Context) (*VulnEqual, error) {
-	nodes, err := veq.Limit(2).All(setContextOp(ctx, veq.ctx, "Only"))
+	nodes, err := veq.Limit(2).All(setContextOp(ctx, veq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (veq *VulnEqualQuery) OnlyX(ctx context.Context) *VulnEqual {
 // Returns a *NotFoundError when no entities are found.
 func (veq *VulnEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = veq.Limit(2).IDs(setContextOp(ctx, veq.ctx, "OnlyID")); err != nil {
+	if ids, err = veq.Limit(2).IDs(setContextOp(ctx, veq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -209,7 +210,7 @@ func (veq *VulnEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of VulnEquals.
 func (veq *VulnEqualQuery) All(ctx context.Context) ([]*VulnEqual, error) {
-	ctx = setContextOp(ctx, veq.ctx, "All")
+	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryAll)
 	if err := veq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -231,7 +232,7 @@ func (veq *VulnEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error)
 	if veq.ctx.Unique == nil && veq.path != nil {
 		veq.Unique(true)
 	}
-	ctx = setContextOp(ctx, veq.ctx, "IDs")
+	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryIDs)
 	if err = veq.Select(vulnequal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -249,7 +250,7 @@ func (veq *VulnEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (veq *VulnEqualQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, veq.ctx, "Count")
+	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryCount)
 	if err := veq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -267,7 +268,7 @@ func (veq *VulnEqualQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (veq *VulnEqualQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, veq.ctx, "Exist")
+	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryExist)
 	switch _, err := veq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -616,7 +617,7 @@ func (vegb *VulnEqualGroupBy) Aggregate(fns ...AggregateFunc) *VulnEqualGroupBy 
 
 // Scan applies the selector query and scans the result into the given value.
 func (vegb *VulnEqualGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, vegb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, vegb.build.ctx, ent.OpQueryGroupBy)
 	if err := vegb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -664,7 +665,7 @@ func (ves *VulnEqualSelect) Aggregate(fns ...AggregateFunc) *VulnEqualSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ves *VulnEqualSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ves.ctx, "Select")
+	ctx = setContextOp(ctx, ves.ctx, ent.OpQuerySelect)
 	if err := ves.prepareQuery(ctx); err != nil {
 		return err
 	}

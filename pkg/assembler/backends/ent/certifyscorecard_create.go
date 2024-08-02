@@ -202,7 +202,7 @@ func (csc *CertifyScorecardCreate) check() error {
 	if _, ok := csc.mutation.ChecksHash(); !ok {
 		return &ValidationError{Name: "checks_hash", err: errors.New(`ent: missing required field "CertifyScorecard.checks_hash"`)}
 	}
-	if _, ok := csc.mutation.SourceID(); !ok {
+	if len(csc.mutation.SourceIDs()) == 0 {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "CertifyScorecard.source"`)}
 	}
 	return nil

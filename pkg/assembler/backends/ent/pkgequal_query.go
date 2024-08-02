@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -110,7 +111,7 @@ func (peq *PkgEqualQuery) QueryPackageB() *PackageVersionQuery {
 // First returns the first PkgEqual entity from the query.
 // Returns a *NotFoundError when no PkgEqual was found.
 func (peq *PkgEqualQuery) First(ctx context.Context) (*PkgEqual, error) {
-	nodes, err := peq.Limit(1).All(setContextOp(ctx, peq.ctx, "First"))
+	nodes, err := peq.Limit(1).All(setContextOp(ctx, peq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (peq *PkgEqualQuery) FirstX(ctx context.Context) *PkgEqual {
 // Returns a *NotFoundError when no PkgEqual ID was found.
 func (peq *PkgEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = peq.Limit(1).IDs(setContextOp(ctx, peq.ctx, "FirstID")); err != nil {
+	if ids, err = peq.Limit(1).IDs(setContextOp(ctx, peq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -156,7 +157,7 @@ func (peq *PkgEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one PkgEqual entity is found.
 // Returns a *NotFoundError when no PkgEqual entities are found.
 func (peq *PkgEqualQuery) Only(ctx context.Context) (*PkgEqual, error) {
-	nodes, err := peq.Limit(2).All(setContextOp(ctx, peq.ctx, "Only"))
+	nodes, err := peq.Limit(2).All(setContextOp(ctx, peq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (peq *PkgEqualQuery) OnlyX(ctx context.Context) *PkgEqual {
 // Returns a *NotFoundError when no entities are found.
 func (peq *PkgEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = peq.Limit(2).IDs(setContextOp(ctx, peq.ctx, "OnlyID")); err != nil {
+	if ids, err = peq.Limit(2).IDs(setContextOp(ctx, peq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -209,7 +210,7 @@ func (peq *PkgEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of PkgEquals.
 func (peq *PkgEqualQuery) All(ctx context.Context) ([]*PkgEqual, error) {
-	ctx = setContextOp(ctx, peq.ctx, "All")
+	ctx = setContextOp(ctx, peq.ctx, ent.OpQueryAll)
 	if err := peq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -231,7 +232,7 @@ func (peq *PkgEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) 
 	if peq.ctx.Unique == nil && peq.path != nil {
 		peq.Unique(true)
 	}
-	ctx = setContextOp(ctx, peq.ctx, "IDs")
+	ctx = setContextOp(ctx, peq.ctx, ent.OpQueryIDs)
 	if err = peq.Select(pkgequal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -249,7 +250,7 @@ func (peq *PkgEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (peq *PkgEqualQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, peq.ctx, "Count")
+	ctx = setContextOp(ctx, peq.ctx, ent.OpQueryCount)
 	if err := peq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -267,7 +268,7 @@ func (peq *PkgEqualQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (peq *PkgEqualQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, peq.ctx, "Exist")
+	ctx = setContextOp(ctx, peq.ctx, ent.OpQueryExist)
 	switch _, err := peq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -616,7 +617,7 @@ func (pegb *PkgEqualGroupBy) Aggregate(fns ...AggregateFunc) *PkgEqualGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (pegb *PkgEqualGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pegb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, pegb.build.ctx, ent.OpQueryGroupBy)
 	if err := pegb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -664,7 +665,7 @@ func (pes *PkgEqualSelect) Aggregate(fns ...AggregateFunc) *PkgEqualSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (pes *PkgEqualSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pes.ctx, "Select")
+	ctx = setContextOp(ctx, pes.ctx, ent.OpQuerySelect)
 	if err := pes.prepareQuery(ctx); err != nil {
 		return err
 	}

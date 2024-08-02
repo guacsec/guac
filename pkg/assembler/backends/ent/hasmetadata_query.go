@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -159,7 +160,7 @@ func (hmq *HasMetadataQuery) QueryArtifact() *ArtifactQuery {
 // First returns the first HasMetadata entity from the query.
 // Returns a *NotFoundError when no HasMetadata was found.
 func (hmq *HasMetadataQuery) First(ctx context.Context) (*HasMetadata, error) {
-	nodes, err := hmq.Limit(1).All(setContextOp(ctx, hmq.ctx, "First"))
+	nodes, err := hmq.Limit(1).All(setContextOp(ctx, hmq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +183,7 @@ func (hmq *HasMetadataQuery) FirstX(ctx context.Context) *HasMetadata {
 // Returns a *NotFoundError when no HasMetadata ID was found.
 func (hmq *HasMetadataQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = hmq.Limit(1).IDs(setContextOp(ctx, hmq.ctx, "FirstID")); err != nil {
+	if ids, err = hmq.Limit(1).IDs(setContextOp(ctx, hmq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -205,7 +206,7 @@ func (hmq *HasMetadataQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one HasMetadata entity is found.
 // Returns a *NotFoundError when no HasMetadata entities are found.
 func (hmq *HasMetadataQuery) Only(ctx context.Context) (*HasMetadata, error) {
-	nodes, err := hmq.Limit(2).All(setContextOp(ctx, hmq.ctx, "Only"))
+	nodes, err := hmq.Limit(2).All(setContextOp(ctx, hmq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (hmq *HasMetadataQuery) OnlyX(ctx context.Context) *HasMetadata {
 // Returns a *NotFoundError when no entities are found.
 func (hmq *HasMetadataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = hmq.Limit(2).IDs(setContextOp(ctx, hmq.ctx, "OnlyID")); err != nil {
+	if ids, err = hmq.Limit(2).IDs(setContextOp(ctx, hmq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -258,7 +259,7 @@ func (hmq *HasMetadataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of HasMetadataSlice.
 func (hmq *HasMetadataQuery) All(ctx context.Context) ([]*HasMetadata, error) {
-	ctx = setContextOp(ctx, hmq.ctx, "All")
+	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryAll)
 	if err := hmq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -280,7 +281,7 @@ func (hmq *HasMetadataQuery) IDs(ctx context.Context) (ids []uuid.UUID, err erro
 	if hmq.ctx.Unique == nil && hmq.path != nil {
 		hmq.Unique(true)
 	}
-	ctx = setContextOp(ctx, hmq.ctx, "IDs")
+	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryIDs)
 	if err = hmq.Select(hasmetadata.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -298,7 +299,7 @@ func (hmq *HasMetadataQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (hmq *HasMetadataQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, hmq.ctx, "Count")
+	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryCount)
 	if err := hmq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -316,7 +317,7 @@ func (hmq *HasMetadataQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (hmq *HasMetadataQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, hmq.ctx, "Exist")
+	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryExist)
 	switch _, err := hmq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -779,7 +780,7 @@ func (hmgb *HasMetadataGroupBy) Aggregate(fns ...AggregateFunc) *HasMetadataGrou
 
 // Scan applies the selector query and scans the result into the given value.
 func (hmgb *HasMetadataGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hmgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, hmgb.build.ctx, ent.OpQueryGroupBy)
 	if err := hmgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -827,7 +828,7 @@ func (hms *HasMetadataSelect) Aggregate(fns ...AggregateFunc) *HasMetadataSelect
 
 // Scan applies the selector query and scans the result into the given value.
 func (hms *HasMetadataSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hms.ctx, "Select")
+	ctx = setContextOp(ctx, hms.ctx, ent.OpQuerySelect)
 	if err := hms.prepareQuery(ctx); err != nil {
 		return err
 	}

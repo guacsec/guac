@@ -166,10 +166,10 @@ func (hec *HashEqualCreate) check() error {
 	if _, ok := hec.mutation.ArtifactsHash(); !ok {
 		return &ValidationError{Name: "artifacts_hash", err: errors.New(`ent: missing required field "HashEqual.artifacts_hash"`)}
 	}
-	if _, ok := hec.mutation.ArtifactAID(); !ok {
+	if len(hec.mutation.ArtifactAIDs()) == 0 {
 		return &ValidationError{Name: "artifact_a", err: errors.New(`ent: missing required edge "HashEqual.artifact_a"`)}
 	}
-	if _, ok := hec.mutation.ArtifactBID(); !ok {
+	if len(hec.mutation.ArtifactBIDs()) == 0 {
 		return &ValidationError{Name: "artifact_b", err: errors.New(`ent: missing required edge "HashEqual.artifact_b"`)}
 	}
 	return nil

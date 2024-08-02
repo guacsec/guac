@@ -180,7 +180,7 @@ func (dc *DependencyCreate) check() error {
 	if _, ok := dc.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Dependency.document_ref"`)}
 	}
-	if _, ok := dc.mutation.PackageID(); !ok {
+	if len(dc.mutation.PackageIDs()) == 0 {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "Dependency.package"`)}
 	}
 	return nil

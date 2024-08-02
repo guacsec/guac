@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -210,7 +211,7 @@ func (bomq *BillOfMaterialsQuery) QueryIncludedOccurrences() *OccurrenceQuery {
 // First returns the first BillOfMaterials entity from the query.
 // Returns a *NotFoundError when no BillOfMaterials was found.
 func (bomq *BillOfMaterialsQuery) First(ctx context.Context) (*BillOfMaterials, error) {
-	nodes, err := bomq.Limit(1).All(setContextOp(ctx, bomq.ctx, "First"))
+	nodes, err := bomq.Limit(1).All(setContextOp(ctx, bomq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (bomq *BillOfMaterialsQuery) FirstX(ctx context.Context) *BillOfMaterials {
 // Returns a *NotFoundError when no BillOfMaterials ID was found.
 func (bomq *BillOfMaterialsQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = bomq.Limit(1).IDs(setContextOp(ctx, bomq.ctx, "FirstID")); err != nil {
+	if ids, err = bomq.Limit(1).IDs(setContextOp(ctx, bomq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -256,7 +257,7 @@ func (bomq *BillOfMaterialsQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one BillOfMaterials entity is found.
 // Returns a *NotFoundError when no BillOfMaterials entities are found.
 func (bomq *BillOfMaterialsQuery) Only(ctx context.Context) (*BillOfMaterials, error) {
-	nodes, err := bomq.Limit(2).All(setContextOp(ctx, bomq.ctx, "Only"))
+	nodes, err := bomq.Limit(2).All(setContextOp(ctx, bomq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +285,7 @@ func (bomq *BillOfMaterialsQuery) OnlyX(ctx context.Context) *BillOfMaterials {
 // Returns a *NotFoundError when no entities are found.
 func (bomq *BillOfMaterialsQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = bomq.Limit(2).IDs(setContextOp(ctx, bomq.ctx, "OnlyID")); err != nil {
+	if ids, err = bomq.Limit(2).IDs(setContextOp(ctx, bomq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -309,7 +310,7 @@ func (bomq *BillOfMaterialsQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of BillOfMaterialsSlice.
 func (bomq *BillOfMaterialsQuery) All(ctx context.Context) ([]*BillOfMaterials, error) {
-	ctx = setContextOp(ctx, bomq.ctx, "All")
+	ctx = setContextOp(ctx, bomq.ctx, ent.OpQueryAll)
 	if err := bomq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -331,7 +332,7 @@ func (bomq *BillOfMaterialsQuery) IDs(ctx context.Context) (ids []uuid.UUID, err
 	if bomq.ctx.Unique == nil && bomq.path != nil {
 		bomq.Unique(true)
 	}
-	ctx = setContextOp(ctx, bomq.ctx, "IDs")
+	ctx = setContextOp(ctx, bomq.ctx, ent.OpQueryIDs)
 	if err = bomq.Select(billofmaterials.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -349,7 +350,7 @@ func (bomq *BillOfMaterialsQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (bomq *BillOfMaterialsQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, bomq.ctx, "Count")
+	ctx = setContextOp(ctx, bomq.ctx, ent.OpQueryCount)
 	if err := bomq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -367,7 +368,7 @@ func (bomq *BillOfMaterialsQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bomq *BillOfMaterialsQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, bomq.ctx, "Exist")
+	ctx = setContextOp(ctx, bomq.ctx, ent.OpQueryExist)
 	switch _, err := bomq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -1138,7 +1139,7 @@ func (bomgb *BillOfMaterialsGroupBy) Aggregate(fns ...AggregateFunc) *BillOfMate
 
 // Scan applies the selector query and scans the result into the given value.
 func (bomgb *BillOfMaterialsGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bomgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, bomgb.build.ctx, ent.OpQueryGroupBy)
 	if err := bomgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1186,7 +1187,7 @@ func (boms *BillOfMaterialsSelect) Aggregate(fns ...AggregateFunc) *BillOfMateri
 
 // Scan applies the selector query and scans the result into the given value.
 func (boms *BillOfMaterialsSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, boms.ctx, "Select")
+	ctx = setContextOp(ctx, boms.ctx, ent.OpQuerySelect)
 	if err := boms.prepareQuery(ctx); err != nil {
 		return err
 	}

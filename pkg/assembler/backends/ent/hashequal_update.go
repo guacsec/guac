@@ -195,10 +195,10 @@ func (heu *HashEqualUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (heu *HashEqualUpdate) check() error {
-	if _, ok := heu.mutation.ArtifactAID(); heu.mutation.ArtifactACleared() && !ok {
+	if heu.mutation.ArtifactACleared() && len(heu.mutation.ArtifactAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_a"`)
 	}
-	if _, ok := heu.mutation.ArtifactBID(); heu.mutation.ArtifactBCleared() && !ok {
+	if heu.mutation.ArtifactBCleared() && len(heu.mutation.ArtifactBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_b"`)
 	}
 	return nil
@@ -488,10 +488,10 @@ func (heuo *HashEqualUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (heuo *HashEqualUpdateOne) check() error {
-	if _, ok := heuo.mutation.ArtifactAID(); heuo.mutation.ArtifactACleared() && !ok {
+	if heuo.mutation.ArtifactACleared() && len(heuo.mutation.ArtifactAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_a"`)
 	}
-	if _, ok := heuo.mutation.ArtifactBID(); heuo.mutation.ArtifactBCleared() && !ok {
+	if heuo.mutation.ArtifactBCleared() && len(heuo.mutation.ArtifactBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_b"`)
 	}
 	return nil

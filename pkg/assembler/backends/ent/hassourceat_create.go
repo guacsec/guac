@@ -195,7 +195,7 @@ func (hsac *HasSourceAtCreate) check() error {
 	if _, ok := hsac.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HasSourceAt.document_ref"`)}
 	}
-	if _, ok := hsac.mutation.SourceID(); !ok {
+	if len(hsac.mutation.SourceIDs()) == 0 {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "HasSourceAt.source"`)}
 	}
 	return nil

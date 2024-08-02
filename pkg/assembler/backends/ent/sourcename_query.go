@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -239,7 +240,7 @@ func (snq *SourceNameQuery) QueryCertifyLegal() *CertifyLegalQuery {
 // First returns the first SourceName entity from the query.
 // Returns a *NotFoundError when no SourceName was found.
 func (snq *SourceNameQuery) First(ctx context.Context) (*SourceName, error) {
-	nodes, err := snq.Limit(1).All(setContextOp(ctx, snq.ctx, "First"))
+	nodes, err := snq.Limit(1).All(setContextOp(ctx, snq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +263,7 @@ func (snq *SourceNameQuery) FirstX(ctx context.Context) *SourceName {
 // Returns a *NotFoundError when no SourceName ID was found.
 func (snq *SourceNameQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = snq.Limit(1).IDs(setContextOp(ctx, snq.ctx, "FirstID")); err != nil {
+	if ids, err = snq.Limit(1).IDs(setContextOp(ctx, snq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -285,7 +286,7 @@ func (snq *SourceNameQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one SourceName entity is found.
 // Returns a *NotFoundError when no SourceName entities are found.
 func (snq *SourceNameQuery) Only(ctx context.Context) (*SourceName, error) {
-	nodes, err := snq.Limit(2).All(setContextOp(ctx, snq.ctx, "Only"))
+	nodes, err := snq.Limit(2).All(setContextOp(ctx, snq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +314,7 @@ func (snq *SourceNameQuery) OnlyX(ctx context.Context) *SourceName {
 // Returns a *NotFoundError when no entities are found.
 func (snq *SourceNameQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = snq.Limit(2).IDs(setContextOp(ctx, snq.ctx, "OnlyID")); err != nil {
+	if ids, err = snq.Limit(2).IDs(setContextOp(ctx, snq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -338,7 +339,7 @@ func (snq *SourceNameQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of SourceNames.
 func (snq *SourceNameQuery) All(ctx context.Context) ([]*SourceName, error) {
-	ctx = setContextOp(ctx, snq.ctx, "All")
+	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryAll)
 	if err := snq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -360,7 +361,7 @@ func (snq *SourceNameQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error
 	if snq.ctx.Unique == nil && snq.path != nil {
 		snq.Unique(true)
 	}
-	ctx = setContextOp(ctx, snq.ctx, "IDs")
+	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryIDs)
 	if err = snq.Select(sourcename.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -378,7 +379,7 @@ func (snq *SourceNameQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (snq *SourceNameQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, snq.ctx, "Count")
+	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryCount)
 	if err := snq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -396,7 +397,7 @@ func (snq *SourceNameQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (snq *SourceNameQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, snq.ctx, "Exist")
+	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryExist)
 	switch _, err := snq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -1155,7 +1156,7 @@ func (sngb *SourceNameGroupBy) Aggregate(fns ...AggregateFunc) *SourceNameGroupB
 
 // Scan applies the selector query and scans the result into the given value.
 func (sngb *SourceNameGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sngb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, sngb.build.ctx, ent.OpQueryGroupBy)
 	if err := sngb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1203,7 +1204,7 @@ func (sns *SourceNameSelect) Aggregate(fns ...AggregateFunc) *SourceNameSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sns *SourceNameSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sns.ctx, "Select")
+	ctx = setContextOp(ctx, sns.ctx, ent.OpQuerySelect)
 	if err := sns.prepareQuery(ctx); err != nil {
 		return err
 	}

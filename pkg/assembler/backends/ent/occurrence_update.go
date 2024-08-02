@@ -245,7 +245,7 @@ func (ou *OccurrenceUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ou *OccurrenceUpdate) check() error {
-	if _, ok := ou.mutation.ArtifactID(); ou.mutation.ArtifactCleared() && !ok {
+	if ou.mutation.ArtifactCleared() && len(ou.mutation.ArtifactIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Occurrence.artifact"`)
 	}
 	return nil
@@ -653,7 +653,7 @@ func (ouo *OccurrenceUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ouo *OccurrenceUpdateOne) check() error {
-	if _, ok := ouo.mutation.ArtifactID(); ouo.mutation.ArtifactCleared() && !ok {
+	if ouo.mutation.ArtifactCleared() && len(ouo.mutation.ArtifactIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Occurrence.artifact"`)
 	}
 	return nil
