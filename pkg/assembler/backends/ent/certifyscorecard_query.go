@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -87,7 +88,7 @@ func (csq *CertifyScorecardQuery) QuerySource() *SourceNameQuery {
 // First returns the first CertifyScorecard entity from the query.
 // Returns a *NotFoundError when no CertifyScorecard was found.
 func (csq *CertifyScorecardQuery) First(ctx context.Context) (*CertifyScorecard, error) {
-	nodes, err := csq.Limit(1).All(setContextOp(ctx, csq.ctx, "First"))
+	nodes, err := csq.Limit(1).All(setContextOp(ctx, csq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func (csq *CertifyScorecardQuery) FirstX(ctx context.Context) *CertifyScorecard 
 // Returns a *NotFoundError when no CertifyScorecard ID was found.
 func (csq *CertifyScorecardQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = csq.Limit(1).IDs(setContextOp(ctx, csq.ctx, "FirstID")); err != nil {
+	if ids, err = csq.Limit(1).IDs(setContextOp(ctx, csq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -133,7 +134,7 @@ func (csq *CertifyScorecardQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one CertifyScorecard entity is found.
 // Returns a *NotFoundError when no CertifyScorecard entities are found.
 func (csq *CertifyScorecardQuery) Only(ctx context.Context) (*CertifyScorecard, error) {
-	nodes, err := csq.Limit(2).All(setContextOp(ctx, csq.ctx, "Only"))
+	nodes, err := csq.Limit(2).All(setContextOp(ctx, csq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +162,7 @@ func (csq *CertifyScorecardQuery) OnlyX(ctx context.Context) *CertifyScorecard {
 // Returns a *NotFoundError when no entities are found.
 func (csq *CertifyScorecardQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = csq.Limit(2).IDs(setContextOp(ctx, csq.ctx, "OnlyID")); err != nil {
+	if ids, err = csq.Limit(2).IDs(setContextOp(ctx, csq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -186,7 +187,7 @@ func (csq *CertifyScorecardQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of CertifyScorecards.
 func (csq *CertifyScorecardQuery) All(ctx context.Context) ([]*CertifyScorecard, error) {
-	ctx = setContextOp(ctx, csq.ctx, "All")
+	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryAll)
 	if err := csq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -208,7 +209,7 @@ func (csq *CertifyScorecardQuery) IDs(ctx context.Context) (ids []uuid.UUID, err
 	if csq.ctx.Unique == nil && csq.path != nil {
 		csq.Unique(true)
 	}
-	ctx = setContextOp(ctx, csq.ctx, "IDs")
+	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryIDs)
 	if err = csq.Select(certifyscorecard.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -226,7 +227,7 @@ func (csq *CertifyScorecardQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (csq *CertifyScorecardQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, csq.ctx, "Count")
+	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryCount)
 	if err := csq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -244,7 +245,7 @@ func (csq *CertifyScorecardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (csq *CertifyScorecardQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, csq.ctx, "Exist")
+	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryExist)
 	switch _, err := csq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -542,7 +543,7 @@ func (csgb *CertifyScorecardGroupBy) Aggregate(fns ...AggregateFunc) *CertifySco
 
 // Scan applies the selector query and scans the result into the given value.
 func (csgb *CertifyScorecardGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, csgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, csgb.build.ctx, ent.OpQueryGroupBy)
 	if err := csgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -590,7 +591,7 @@ func (css *CertifyScorecardSelect) Aggregate(fns ...AggregateFunc) *CertifyScore
 
 // Scan applies the selector query and scans the result into the given value.
 func (css *CertifyScorecardSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, css.ctx, "Select")
+	ctx = setContextOp(ctx, css.ctx, ent.OpQuerySelect)
 	if err := css.prepareQuery(ctx); err != nil {
 		return err
 	}

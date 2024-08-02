@@ -265,7 +265,7 @@ func (cvu *CertifyVexUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cvu *CertifyVexUpdate) check() error {
-	if _, ok := cvu.mutation.VulnerabilityID(); cvu.mutation.VulnerabilityCleared() && !ok {
+	if cvu.mutation.VulnerabilityCleared() && len(cvu.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVex.vulnerability"`)
 	}
 	return nil
@@ -660,7 +660,7 @@ func (cvuo *CertifyVexUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cvuo *CertifyVexUpdateOne) check() error {
-	if _, ok := cvuo.mutation.VulnerabilityID(); cvuo.mutation.VulnerabilityCleared() && !ok {
+	if cvuo.mutation.VulnerabilityCleared() && len(cvuo.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVex.vulnerability"`)
 	}
 	return nil

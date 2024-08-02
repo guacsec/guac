@@ -195,10 +195,10 @@ func (peu *PkgEqualUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (peu *PkgEqualUpdate) check() error {
-	if _, ok := peu.mutation.PackageAID(); peu.mutation.PackageACleared() && !ok {
+	if peu.mutation.PackageACleared() && len(peu.mutation.PackageAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_a"`)
 	}
-	if _, ok := peu.mutation.PackageBID(); peu.mutation.PackageBCleared() && !ok {
+	if peu.mutation.PackageBCleared() && len(peu.mutation.PackageBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_b"`)
 	}
 	return nil
@@ -488,10 +488,10 @@ func (peuo *PkgEqualUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (peuo *PkgEqualUpdateOne) check() error {
-	if _, ok := peuo.mutation.PackageAID(); peuo.mutation.PackageACleared() && !ok {
+	if peuo.mutation.PackageACleared() && len(peuo.mutation.PackageAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_a"`)
 	}
-	if _, ok := peuo.mutation.PackageBID(); peuo.mutation.PackageBCleared() && !ok {
+	if peuo.mutation.PackageBCleared() && len(peuo.mutation.PackageBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_b"`)
 	}
 	return nil

@@ -187,7 +187,7 @@ func (oc *OccurrenceCreate) check() error {
 	if _, ok := oc.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Occurrence.document_ref"`)}
 	}
-	if _, ok := oc.mutation.ArtifactID(); !ok {
+	if len(oc.mutation.ArtifactIDs()) == 0 {
 		return &ValidationError{Name: "artifact", err: errors.New(`ent: missing required edge "Occurrence.artifact"`)}
 	}
 	return nil

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -159,7 +160,7 @@ func (cq *CertificationQuery) QueryArtifact() *ArtifactQuery {
 // First returns the first Certification entity from the query.
 // Returns a *NotFoundError when no Certification was found.
 func (cq *CertificationQuery) First(ctx context.Context) (*Certification, error) {
-	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +183,7 @@ func (cq *CertificationQuery) FirstX(ctx context.Context) *Certification {
 // Returns a *NotFoundError when no Certification ID was found.
 func (cq *CertificationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -205,7 +206,7 @@ func (cq *CertificationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Certification entity is found.
 // Returns a *NotFoundError when no Certification entities are found.
 func (cq *CertificationQuery) Only(ctx context.Context) (*Certification, error) {
-	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (cq *CertificationQuery) OnlyX(ctx context.Context) *Certification {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CertificationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -258,7 +259,7 @@ func (cq *CertificationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Certifications.
 func (cq *CertificationQuery) All(ctx context.Context) ([]*Certification, error) {
-	ctx = setContextOp(ctx, cq.ctx, "All")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryAll)
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -280,7 +281,7 @@ func (cq *CertificationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err err
 	if cq.ctx.Unique == nil && cq.path != nil {
 		cq.Unique(true)
 	}
-	ctx = setContextOp(ctx, cq.ctx, "IDs")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryIDs)
 	if err = cq.Select(certification.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -298,7 +299,7 @@ func (cq *CertificationQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (cq *CertificationQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cq.ctx, "Count")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryCount)
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -316,7 +317,7 @@ func (cq *CertificationQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CertificationQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cq.ctx, "Exist")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryExist)
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -779,7 +780,7 @@ func (cgb *CertificationGroupBy) Aggregate(fns ...AggregateFunc) *CertificationG
 
 // Scan applies the selector query and scans the result into the given value.
 func (cgb *CertificationGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, cgb.build.ctx, ent.OpQueryGroupBy)
 	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -827,7 +828,7 @@ func (cs *CertificationSelect) Aggregate(fns ...AggregateFunc) *CertificationSel
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CertificationSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cs.ctx, "Select")
+	ctx = setContextOp(ctx, cs.ctx, ent.OpQuerySelect)
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}

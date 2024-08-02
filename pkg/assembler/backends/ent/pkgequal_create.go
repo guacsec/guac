@@ -166,10 +166,10 @@ func (pec *PkgEqualCreate) check() error {
 	if _, ok := pec.mutation.PackagesHash(); !ok {
 		return &ValidationError{Name: "packages_hash", err: errors.New(`ent: missing required field "PkgEqual.packages_hash"`)}
 	}
-	if _, ok := pec.mutation.PackageAID(); !ok {
+	if len(pec.mutation.PackageAIDs()) == 0 {
 		return &ValidationError{Name: "package_a", err: errors.New(`ent: missing required edge "PkgEqual.package_a"`)}
 	}
-	if _, ok := pec.mutation.PackageBID(); !ok {
+	if len(pec.mutation.PackageBIDs()) == 0 {
 		return &ValidationError{Name: "package_b", err: errors.New(`ent: missing required edge "PkgEqual.package_b"`)}
 	}
 	return nil

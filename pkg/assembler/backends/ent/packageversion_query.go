@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -435,7 +436,7 @@ func (pvq *PackageVersionQuery) QueryCertifyLegal() *CertifyLegalQuery {
 // First returns the first PackageVersion entity from the query.
 // Returns a *NotFoundError when no PackageVersion was found.
 func (pvq *PackageVersionQuery) First(ctx context.Context) (*PackageVersion, error) {
-	nodes, err := pvq.Limit(1).All(setContextOp(ctx, pvq.ctx, "First"))
+	nodes, err := pvq.Limit(1).All(setContextOp(ctx, pvq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -458,7 +459,7 @@ func (pvq *PackageVersionQuery) FirstX(ctx context.Context) *PackageVersion {
 // Returns a *NotFoundError when no PackageVersion ID was found.
 func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = pvq.Limit(1).IDs(setContextOp(ctx, pvq.ctx, "FirstID")); err != nil {
+	if ids, err = pvq.Limit(1).IDs(setContextOp(ctx, pvq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -481,7 +482,7 @@ func (pvq *PackageVersionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one PackageVersion entity is found.
 // Returns a *NotFoundError when no PackageVersion entities are found.
 func (pvq *PackageVersionQuery) Only(ctx context.Context) (*PackageVersion, error) {
-	nodes, err := pvq.Limit(2).All(setContextOp(ctx, pvq.ctx, "Only"))
+	nodes, err := pvq.Limit(2).All(setContextOp(ctx, pvq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -509,7 +510,7 @@ func (pvq *PackageVersionQuery) OnlyX(ctx context.Context) *PackageVersion {
 // Returns a *NotFoundError when no entities are found.
 func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = pvq.Limit(2).IDs(setContextOp(ctx, pvq.ctx, "OnlyID")); err != nil {
+	if ids, err = pvq.Limit(2).IDs(setContextOp(ctx, pvq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -534,7 +535,7 @@ func (pvq *PackageVersionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of PackageVersions.
 func (pvq *PackageVersionQuery) All(ctx context.Context) ([]*PackageVersion, error) {
-	ctx = setContextOp(ctx, pvq.ctx, "All")
+	ctx = setContextOp(ctx, pvq.ctx, ent.OpQueryAll)
 	if err := pvq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -556,7 +557,7 @@ func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err e
 	if pvq.ctx.Unique == nil && pvq.path != nil {
 		pvq.Unique(true)
 	}
-	ctx = setContextOp(ctx, pvq.ctx, "IDs")
+	ctx = setContextOp(ctx, pvq.ctx, ent.OpQueryIDs)
 	if err = pvq.Select(packageversion.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -574,7 +575,7 @@ func (pvq *PackageVersionQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (pvq *PackageVersionQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pvq.ctx, "Count")
+	ctx = setContextOp(ctx, pvq.ctx, ent.OpQueryCount)
 	if err := pvq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -592,7 +593,7 @@ func (pvq *PackageVersionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pvq *PackageVersionQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pvq.ctx, "Exist")
+	ctx = setContextOp(ctx, pvq.ctx, ent.OpQueryExist)
 	switch _, err := pvq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -1943,7 +1944,7 @@ func (pvgb *PackageVersionGroupBy) Aggregate(fns ...AggregateFunc) *PackageVersi
 
 // Scan applies the selector query and scans the result into the given value.
 func (pvgb *PackageVersionGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pvgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, pvgb.build.ctx, ent.OpQueryGroupBy)
 	if err := pvgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1991,7 +1992,7 @@ func (pvs *PackageVersionSelect) Aggregate(fns ...AggregateFunc) *PackageVersion
 
 // Scan applies the selector query and scans the result into the given value.
 func (pvs *PackageVersionSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pvs.ctx, "Select")
+	ctx = setContextOp(ctx, pvs.ctx, ent.OpQuerySelect)
 	if err := pvs.prepareQuery(ctx); err != nil {
 		return err
 	}

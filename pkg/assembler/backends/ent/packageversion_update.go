@@ -665,7 +665,7 @@ func (pvu *PackageVersionUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pvu *PackageVersionUpdate) check() error {
-	if _, ok := pvu.mutation.NameID(); pvu.mutation.NameCleared() && !ok {
+	if pvu.mutation.NameCleared() && len(pvu.mutation.NameIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PackageVersion.name"`)
 	}
 	return nil
@@ -2018,7 +2018,7 @@ func (pvuo *PackageVersionUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pvuo *PackageVersionUpdateOne) check() error {
-	if _, ok := pvuo.mutation.NameID(); pvuo.mutation.NameCleared() && !ok {
+	if pvuo.mutation.NameCleared() && len(pvuo.mutation.NameIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PackageVersion.name"`)
 	}
 	return nil

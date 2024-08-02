@@ -205,10 +205,10 @@ func (sac *SLSAAttestationCreate) check() error {
 	if _, ok := sac.mutation.BuiltFromHash(); !ok {
 		return &ValidationError{Name: "built_from_hash", err: errors.New(`ent: missing required field "SLSAAttestation.built_from_hash"`)}
 	}
-	if _, ok := sac.mutation.BuiltByID(); !ok {
+	if len(sac.mutation.BuiltByIDs()) == 0 {
 		return &ValidationError{Name: "built_by", err: errors.New(`ent: missing required edge "SLSAAttestation.built_by"`)}
 	}
-	if _, ok := sac.mutation.SubjectID(); !ok {
+	if len(sac.mutation.SubjectIDs()) == 0 {
 		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required edge "SLSAAttestation.subject"`)}
 	}
 	return nil

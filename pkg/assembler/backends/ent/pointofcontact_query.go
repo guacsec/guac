@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -159,7 +160,7 @@ func (pocq *PointOfContactQuery) QueryArtifact() *ArtifactQuery {
 // First returns the first PointOfContact entity from the query.
 // Returns a *NotFoundError when no PointOfContact was found.
 func (pocq *PointOfContactQuery) First(ctx context.Context) (*PointOfContact, error) {
-	nodes, err := pocq.Limit(1).All(setContextOp(ctx, pocq.ctx, "First"))
+	nodes, err := pocq.Limit(1).All(setContextOp(ctx, pocq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +183,7 @@ func (pocq *PointOfContactQuery) FirstX(ctx context.Context) *PointOfContact {
 // Returns a *NotFoundError when no PointOfContact ID was found.
 func (pocq *PointOfContactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = pocq.Limit(1).IDs(setContextOp(ctx, pocq.ctx, "FirstID")); err != nil {
+	if ids, err = pocq.Limit(1).IDs(setContextOp(ctx, pocq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -205,7 +206,7 @@ func (pocq *PointOfContactQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one PointOfContact entity is found.
 // Returns a *NotFoundError when no PointOfContact entities are found.
 func (pocq *PointOfContactQuery) Only(ctx context.Context) (*PointOfContact, error) {
-	nodes, err := pocq.Limit(2).All(setContextOp(ctx, pocq.ctx, "Only"))
+	nodes, err := pocq.Limit(2).All(setContextOp(ctx, pocq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (pocq *PointOfContactQuery) OnlyX(ctx context.Context) *PointOfContact {
 // Returns a *NotFoundError when no entities are found.
 func (pocq *PointOfContactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = pocq.Limit(2).IDs(setContextOp(ctx, pocq.ctx, "OnlyID")); err != nil {
+	if ids, err = pocq.Limit(2).IDs(setContextOp(ctx, pocq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -258,7 +259,7 @@ func (pocq *PointOfContactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of PointOfContacts.
 func (pocq *PointOfContactQuery) All(ctx context.Context) ([]*PointOfContact, error) {
-	ctx = setContextOp(ctx, pocq.ctx, "All")
+	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryAll)
 	if err := pocq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -280,7 +281,7 @@ func (pocq *PointOfContactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err 
 	if pocq.ctx.Unique == nil && pocq.path != nil {
 		pocq.Unique(true)
 	}
-	ctx = setContextOp(ctx, pocq.ctx, "IDs")
+	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryIDs)
 	if err = pocq.Select(pointofcontact.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -298,7 +299,7 @@ func (pocq *PointOfContactQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (pocq *PointOfContactQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pocq.ctx, "Count")
+	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryCount)
 	if err := pocq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -316,7 +317,7 @@ func (pocq *PointOfContactQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pocq *PointOfContactQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pocq.ctx, "Exist")
+	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryExist)
 	switch _, err := pocq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -779,7 +780,7 @@ func (pocgb *PointOfContactGroupBy) Aggregate(fns ...AggregateFunc) *PointOfCont
 
 // Scan applies the selector query and scans the result into the given value.
 func (pocgb *PointOfContactGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pocgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, pocgb.build.ctx, ent.OpQueryGroupBy)
 	if err := pocgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -827,7 +828,7 @@ func (pocs *PointOfContactSelect) Aggregate(fns ...AggregateFunc) *PointOfContac
 
 // Scan applies the selector query and scans the result into the given value.
 func (pocs *PointOfContactSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pocs.ctx, "Select")
+	ctx = setContextOp(ctx, pocs.ctx, ent.OpQuerySelect)
 	if err := pocs.prepareQuery(ctx); err != nil {
 		return err
 	}

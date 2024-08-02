@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -161,7 +162,7 @@ func (clq *CertifyLegalQuery) QueryDiscoveredLicenses() *LicenseQuery {
 // First returns the first CertifyLegal entity from the query.
 // Returns a *NotFoundError when no CertifyLegal was found.
 func (clq *CertifyLegalQuery) First(ctx context.Context) (*CertifyLegal, error) {
-	nodes, err := clq.Limit(1).All(setContextOp(ctx, clq.ctx, "First"))
+	nodes, err := clq.Limit(1).All(setContextOp(ctx, clq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (clq *CertifyLegalQuery) FirstX(ctx context.Context) *CertifyLegal {
 // Returns a *NotFoundError when no CertifyLegal ID was found.
 func (clq *CertifyLegalQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = clq.Limit(1).IDs(setContextOp(ctx, clq.ctx, "FirstID")); err != nil {
+	if ids, err = clq.Limit(1).IDs(setContextOp(ctx, clq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -207,7 +208,7 @@ func (clq *CertifyLegalQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one CertifyLegal entity is found.
 // Returns a *NotFoundError when no CertifyLegal entities are found.
 func (clq *CertifyLegalQuery) Only(ctx context.Context) (*CertifyLegal, error) {
-	nodes, err := clq.Limit(2).All(setContextOp(ctx, clq.ctx, "Only"))
+	nodes, err := clq.Limit(2).All(setContextOp(ctx, clq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +236,7 @@ func (clq *CertifyLegalQuery) OnlyX(ctx context.Context) *CertifyLegal {
 // Returns a *NotFoundError when no entities are found.
 func (clq *CertifyLegalQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = clq.Limit(2).IDs(setContextOp(ctx, clq.ctx, "OnlyID")); err != nil {
+	if ids, err = clq.Limit(2).IDs(setContextOp(ctx, clq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -260,7 +261,7 @@ func (clq *CertifyLegalQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of CertifyLegals.
 func (clq *CertifyLegalQuery) All(ctx context.Context) ([]*CertifyLegal, error) {
-	ctx = setContextOp(ctx, clq.ctx, "All")
+	ctx = setContextOp(ctx, clq.ctx, ent.OpQueryAll)
 	if err := clq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -282,7 +283,7 @@ func (clq *CertifyLegalQuery) IDs(ctx context.Context) (ids []uuid.UUID, err err
 	if clq.ctx.Unique == nil && clq.path != nil {
 		clq.Unique(true)
 	}
-	ctx = setContextOp(ctx, clq.ctx, "IDs")
+	ctx = setContextOp(ctx, clq.ctx, ent.OpQueryIDs)
 	if err = clq.Select(certifylegal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -300,7 +301,7 @@ func (clq *CertifyLegalQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (clq *CertifyLegalQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, clq.ctx, "Count")
+	ctx = setContextOp(ctx, clq.ctx, ent.OpQueryCount)
 	if err := clq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -318,7 +319,7 @@ func (clq *CertifyLegalQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (clq *CertifyLegalQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, clq.ctx, "Exist")
+	ctx = setContextOp(ctx, clq.ctx, ent.OpQueryExist)
 	switch _, err := clq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -877,7 +878,7 @@ func (clgb *CertifyLegalGroupBy) Aggregate(fns ...AggregateFunc) *CertifyLegalGr
 
 // Scan applies the selector query and scans the result into the given value.
 func (clgb *CertifyLegalGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, clgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, clgb.build.ctx, ent.OpQueryGroupBy)
 	if err := clgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -925,7 +926,7 @@ func (cls *CertifyLegalSelect) Aggregate(fns ...AggregateFunc) *CertifyLegalSele
 
 // Scan applies the selector query and scans the result into the given value.
 func (cls *CertifyLegalSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cls.ctx, "Select")
+	ctx = setContextOp(ctx, cls.ctx, ent.OpQuerySelect)
 	if err := cls.prepareQuery(ctx); err != nil {
 		return err
 	}

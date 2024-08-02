@@ -195,10 +195,10 @@ func (veu *VulnEqualUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (veu *VulnEqualUpdate) check() error {
-	if _, ok := veu.mutation.VulnerabilityAID(); veu.mutation.VulnerabilityACleared() && !ok {
+	if veu.mutation.VulnerabilityACleared() && len(veu.mutation.VulnerabilityAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_a"`)
 	}
-	if _, ok := veu.mutation.VulnerabilityBID(); veu.mutation.VulnerabilityBCleared() && !ok {
+	if veu.mutation.VulnerabilityBCleared() && len(veu.mutation.VulnerabilityBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_b"`)
 	}
 	return nil
@@ -488,10 +488,10 @@ func (veuo *VulnEqualUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (veuo *VulnEqualUpdateOne) check() error {
-	if _, ok := veuo.mutation.VulnerabilityAID(); veuo.mutation.VulnerabilityACleared() && !ok {
+	if veuo.mutation.VulnerabilityACleared() && len(veuo.mutation.VulnerabilityAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_a"`)
 	}
-	if _, ok := veuo.mutation.VulnerabilityBID(); veuo.mutation.VulnerabilityBCleared() && !ok {
+	if veuo.mutation.VulnerabilityBCleared() && len(veuo.mutation.VulnerabilityBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_b"`)
 	}
 	return nil

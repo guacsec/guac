@@ -283,10 +283,10 @@ func (sau *SLSAAttestationUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (sau *SLSAAttestationUpdate) check() error {
-	if _, ok := sau.mutation.BuiltByID(); sau.mutation.BuiltByCleared() && !ok {
+	if sau.mutation.BuiltByCleared() && len(sau.mutation.BuiltByIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.built_by"`)
 	}
-	if _, ok := sau.mutation.SubjectID(); sau.mutation.SubjectCleared() && !ok {
+	if sau.mutation.SubjectCleared() && len(sau.mutation.SubjectIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.subject"`)
 	}
 	return nil
@@ -725,10 +725,10 @@ func (sauo *SLSAAttestationUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (sauo *SLSAAttestationUpdateOne) check() error {
-	if _, ok := sauo.mutation.BuiltByID(); sauo.mutation.BuiltByCleared() && !ok {
+	if sauo.mutation.BuiltByCleared() && len(sauo.mutation.BuiltByIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.built_by"`)
 	}
-	if _, ok := sauo.mutation.SubjectID(); sauo.mutation.SubjectCleared() && !ok {
+	if sauo.mutation.SubjectCleared() && len(sauo.mutation.SubjectIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.subject"`)
 	}
 	return nil

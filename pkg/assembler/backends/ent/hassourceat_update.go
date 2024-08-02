@@ -237,7 +237,7 @@ func (hsau *HasSourceAtUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (hsau *HasSourceAtUpdate) check() error {
-	if _, ok := hsau.mutation.SourceID(); hsau.mutation.SourceCleared() && !ok {
+	if hsau.mutation.SourceCleared() && len(hsau.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HasSourceAt.source"`)
 	}
 	return nil
@@ -595,7 +595,7 @@ func (hsauo *HasSourceAtUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (hsauo *HasSourceAtUpdateOne) check() error {
-	if _, ok := hsauo.mutation.SourceID(); hsauo.mutation.SourceCleared() && !ok {
+	if hsauo.mutation.SourceCleared() && len(hsauo.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HasSourceAt.source"`)
 	}
 	return nil
