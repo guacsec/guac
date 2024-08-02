@@ -6,7 +6,7 @@ Run all the backend containers using the compose yaml and then run the tests:
 
 ```shell
 cd internal/testing/backend
-docker-compose up -d
+docker compose up -d
 go test -v --tags=integration .
 ```
 

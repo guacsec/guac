@@ -54,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           cd internal/testing/backend
-          docker-compose up -d
+          docker compose up -d
           sleep 10
           echo "backends started"
       - name: Run integration tests
