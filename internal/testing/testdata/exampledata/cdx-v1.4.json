@@ -1,0 +1,94 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2022-09-18T19:48:00Z",
+        "component": {
+            "type": "application",
+            "author": "Thomas Jensen and the boxes contributors",
+            "name": "boxes",
+            "version": "2.2.0",
+            "description": "Command Line ASCII Boxes Unlimited!",
+            "licenses": [
+                {
+                    "expression": "GPL-3.0-only"
+                }
+            ],
+            "copyright": "Copyright (c) 1999-2021 Thomas Jensen and the boxes contributors",
+            "externalReferences": [
+                {
+                    "type": "website",
+                    "url": "https://boxes.thomasjensen.com/"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/ascii-boxes/boxes/"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/ascii-boxes/boxes/issues"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "primaryLanguage",
+                    "value": "C"
+                }
+            ]
+        }
+    },
+    "components": [
+        {
+            "type": "library",
+            "author": "Ben Pfaff, Bruno Haible, and Daiki Ueno",
+            "name": "libunistring",
+            "version": "0.9.10-4",
+            "description": "Functions for manipulating Unicode strings and for manipulating C strings according to the Unicode standard",
+            "licenses": [
+                {
+                    "expression": "GPL-3.0-or-later"
+                },
+                {
+                    "expression": "GPL-2.0-only"
+                }
+            ],
+            "externalReferences": [
+                {
+                    "type": "website",
+                    "url": "https://www.gnu.org/software/libunistring/"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "primaryLanguage",
+                    "value": "C"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "author": "Philip Hazel",
+            "name": "PCRE2",
+            "version": "10.40",
+            "description": "PCRE2 - Perl-compatible regular expressions (revised API)",
+            "licenses": [
+                {
+                    "expression": "BSD-3-Clause"
+                }
+            ],
+            "externalReferences": [
+                {
+                    "type": "website",
+                    "url": "https://www.pcre.org/"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "primaryLanguage",
+                    "value": "C"
+                }
+            ]
+        }
+    ]
+}

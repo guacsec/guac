@@ -89,6 +89,9 @@ var (
 	//go:embed exampledata/big-mongo-cyclonedx.json
 	CycloneDXBigExample []byte
 
+	//go:embed exampledata/cdx-v1.4.json
+	CycloneDXVersion1_4 []byte
+
 	//go:embed exampledata/npm-cyclonedx-dependencies-missing-depends-on.json
 	CycloneDXDependenciesMissingDependsOn []byte
 

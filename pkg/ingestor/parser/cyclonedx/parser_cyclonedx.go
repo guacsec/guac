@@ -18,6 +18,7 @@ package cyclonedx
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -67,6 +68,8 @@ type vulnData struct {
 	certifyVuln  []assembler.CertifyVulnIngest
 	vex          []assembler.VexIngest
 }
+
+var unsupportedLicenseVersionError error = errors.New("GUAC CycloneDX license ingestion currently only support CycloneDX v1.5")
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
@@ -269,6 +272,10 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 				}
 				c.packageLegals[comp.BOMRef] = append(c.packageLegals[comp.BOMRef], cl)
 			} else {
+				// skip if the license is not set or the SPDX expression is not set
+				if compLicenses[0].License == nil {
+					return nil
+				}
 				license := getLicenseFromName(c, compLicenses[0])
 				if license != "" {
 					cl := &model.CertifyLegalInputSpec{
@@ -284,6 +291,15 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 		} else {
 			var licenses []string
 			for _, compLicense := range compLicenses {
+				// having multiple expressions is not valid per v1.5 so we currently do not support any
+				// version below it.
+				if compLicense.Expression != "" {
+					return unsupportedLicenseVersionError
+				}
+				// skip if the license is not set or the SPDX expression is not set
+				if compLicense.License == nil {
+					continue
+				}
 				licenses = append(licenses, getLicenseFromName(c, compLicense))
 			}
 			if len(licenses) > 0 {
