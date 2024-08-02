@@ -8749,22 +8749,9 @@ func (m *DependencyMutation) OldDependentPackageVersionID(ctx context.Context) (
 	return oldValue.DependentPackageVersionID, nil
 }
 
-// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
-func (m *DependencyMutation) ClearDependentPackageVersionID() {
-	m.dependent_package_version = nil
-	m.clearedFields[dependency.FieldDependentPackageVersionID] = struct{}{}
-}
-
-// DependentPackageVersionIDCleared returns if the "dependent_package_version_id" field was cleared in this mutation.
-func (m *DependencyMutation) DependentPackageVersionIDCleared() bool {
-	_, ok := m.clearedFields[dependency.FieldDependentPackageVersionID]
-	return ok
-}
-
 // ResetDependentPackageVersionID resets all changes to the "dependent_package_version_id" field.
 func (m *DependencyMutation) ResetDependentPackageVersionID() {
 	m.dependent_package_version = nil
-	delete(m.clearedFields, dependency.FieldDependentPackageVersionID)
 }
 
 // SetDependencyType sets the "dependency_type" field.
@@ -8982,7 +8969,7 @@ func (m *DependencyMutation) ClearDependentPackageVersion() {
 
 // DependentPackageVersionCleared reports if the "dependent_package_version" edge to the PackageVersion entity was cleared.
 func (m *DependencyMutation) DependentPackageVersionCleared() bool {
-	return m.DependentPackageVersionIDCleared() || m.cleareddependent_package_version
+	return m.cleareddependent_package_version
 }
 
 // DependentPackageVersionIDs returns the "dependent_package_version" edge IDs in the mutation.
@@ -9243,11 +9230,7 @@ func (m *DependencyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DependencyMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(dependency.FieldDependentPackageVersionID) {
-		fields = append(fields, dependency.FieldDependentPackageVersionID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -9260,11 +9243,6 @@ func (m *DependencyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DependencyMutation) ClearField(name string) error {
-	switch name {
-	case dependency.FieldDependentPackageVersionID:
-		m.ClearDependentPackageVersionID()
-		return nil
-	}
 	return fmt.Errorf("unknown Dependency nullable field %s", name)
 }
 

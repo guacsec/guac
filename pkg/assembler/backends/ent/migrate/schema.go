@@ -409,7 +409,7 @@ var (
 		{Name: "collector", Type: field.TypeString},
 		{Name: "document_ref", Type: field.TypeString},
 		{Name: "package_id", Type: field.TypeUUID},
-		{Name: "dependent_package_version_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "dependent_package_version_id", Type: field.TypeUUID},
 	}
 	// DependenciesTable holds the schema information for the "dependencies" table.
 	DependenciesTable = &schema.Table{

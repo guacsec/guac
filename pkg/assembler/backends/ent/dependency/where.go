@@ -124,16 +124,6 @@ func DependentPackageVersionIDNotIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldDependentPackageVersionID, vs...))
 }
 
-// DependentPackageVersionIDIsNil applies the IsNil predicate on the "dependent_package_version_id" field.
-func DependentPackageVersionIDIsNil() predicate.Dependency {
-	return predicate.Dependency(sql.FieldIsNull(FieldDependentPackageVersionID))
-}
-
-// DependentPackageVersionIDNotNil applies the NotNil predicate on the "dependent_package_version_id" field.
-func DependentPackageVersionIDNotNil() predicate.Dependency {
-	return predicate.Dependency(sql.FieldNotNull(FieldDependentPackageVersionID))
-}
-
 // DependencyTypeEQ applies the EQ predicate on the "dependency_type" field.
 func DependencyTypeEQ(v DependencyType) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldDependencyType, v))
