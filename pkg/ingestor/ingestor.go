@@ -44,7 +44,7 @@ func Ingest(
 	csubClient csub_client.Client,
 	scanForVulns bool,
 	scanForLicense bool,
-) error {
+) (*helpers.AssemblerIngestedIDs, error) {
 	logger := d.ChildLogger
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
@@ -56,26 +56,26 @@ func Ingest(
 
 	docTree, err := processorFunc(d)
 	if err != nil {
-		return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
+		return nil, fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
 	}
 
 	predicates, idstrings, err := ingestorFunc(docTree)
 	if err != nil {
-		return fmt.Errorf("unable to ingest doc tree: %v", err)
+		return nil, fmt.Errorf("unable to ingest doc tree: %v", err)
 	}
 
 	if err := collectSubEmitFunc(idstrings); err != nil {
 		logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 	}
 
-	if err := assemblerFunc(predicates); err != nil {
-		return fmt.Errorf("error assembling graphs for %q : %w", d.SourceInformation.Source, err)
+	if ingestedIDs, err := assemblerFunc(predicates); err != nil {
+		return nil, fmt.Errorf("error assembling graphs for %q : %w", d.SourceInformation.Source, err)
 	}
 
 	t := time.Now()
 	elapsed := t.Sub(start)
 	logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
-	return nil
+	return ingestedIDs, nil
 }
 
 func MergedIngest(
@@ -174,11 +174,11 @@ func GetAssembler(
 	childLogger *zap.SugaredLogger,
 	graphqlEndpoint string,
 	transport http.RoundTripper,
-) func([]assembler.IngestPredicates) error {
+) func([]assembler.IngestPredicates) (*helpers.AssemblerIngestedIDs, error) {
 	httpClient := http.Client{Transport: transport}
 	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
-	f := helpers.GetBulkAssembler(ctx, childLogger, gqlclient)
-	return f
+
+	return helpers.GetBulkAssembler(ctx, childLogger, gqlclient)
 }
 
 func GetCollectSubEmit(ctx context.Context, csubClient csub_client.Client) func([]*parser_common.IdentifierStrings) error {
