@@ -129,7 +129,7 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
+			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)

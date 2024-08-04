@@ -68,7 +68,8 @@ func Ingest(
 		logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 	}
 
-	if ingestedIDs, err := assemblerFunc(predicates); err != nil {
+	ingestedIDs, err := assemblerFunc(predicates)
+	if err != nil {
 		return nil, fmt.Errorf("error assembling graphs for %q : %w", d.SourceInformation.Source, err)
 	}
 
@@ -130,7 +131,7 @@ func MergedIngest(
 			totalPredicates += 1
 			// enough predicates have been collected, worth sending them to GraphQL server
 			if totalPredicates == 5000 {
-				err = assemblerFunc(predicates)
+				_, err = assemblerFunc(predicates)
 				if err != nil {
 					return fmt.Errorf("unable to assemble graphs: %v", err)
 				}
@@ -147,7 +148,7 @@ func MergedIngest(
 		logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 	}
 
-	err = assemblerFunc(predicates)
+	_, err = assemblerFunc(predicates)
 	if err != nil {
 		return fmt.Errorf("unable to assemble graphs: %v", err)
 	}
