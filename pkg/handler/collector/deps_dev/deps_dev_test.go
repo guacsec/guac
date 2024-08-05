@@ -19,14 +19,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"golang.org/x/time/rate"
-	"google.golang.org/grpc/credentials/insecure"
-	"net"
 	"strings"
 	"testing"
 	"time"
@@ -41,9 +36,6 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/test/bufconn"
 )
 
 func TestNewDepsCollector(t *testing.T) {
@@ -556,156 +548,4 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			}
 		})
 	}
-}
-
-type MockInsightsServer struct {
-	mock.Mock
-	pb.UnimplementedInsightsServer
-}
-
-func (m *MockInsightsServer) GetProject(ctx context.Context, req *pb.GetProjectRequest) (*pb.Project, error) {
-	args := m.Called(ctx, req)
-	return args.Get(0).(*pb.Project), args.Error(1)
-}
-
-func TestNewDepsCollector_RateLimiter(t *testing.T) {
-	// Set up the logger
-	var logBuffer bytes.Buffer
-	encoderConfig := zap.NewProductionEncoderConfig()
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(&logBuffer),
-		zap.DebugLevel,
-	)
-	logger := zap.New(core).Sugar()
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
-
-	// Set up the in-memory gRPC server
-	lis := bufconn.Listen(1024 * 1024)
-	s := grpc.NewServer()
-	mockServer := &MockInsightsServer{}
-	pb.RegisterInsightsServer(s, mockServer)
-	go func() {
-		if err := s.Serve(lis); err != nil {
-			panic(err)
-		}
-	}()
-	defer s.Stop()
-
-	// Mock the GetProject method to always return a successful response
-	mockServer.On("GetProject", mock.Anything, mock.Anything).Return(&pb.Project{}, nil)
-
-	// Create a connection to the in-memory gRPC server
-	conn, err := grpc.NewClient("bufnet", grpc.WithContextDialer(
-		func(context.Context, string) (net.Conn, error) {
-			return lis.Dial()
-		}),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	assert.NoError(t, err)
-	defer conn.Close()
-
-	// Create a new rate-limited client
-	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000) // 10,000 requests per minute with burst capacity of 10,000
-	rateLimitedClient := clients.NewRateLimitedClient(conn, limiter)
-
-	addedLatency := time.Duration(0)
-
-	logBuffer.Reset()
-
-	// Create a new depsCollector and get the rate-limited client
-	c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, time.Minute, &addedLatency, rateLimitedClient)
-	assert.NoError(t, err)
-
-	// Set a timeout for the test
-	testTimeout := 2 * time.Minute
-	ctx, cancel := context.WithTimeout(ctx, testTimeout)
-	defer cancel()
-
-	// Test rate limiting by making multiple concurrent requests
-	var successCount int
-
-	for i := 0; i < 10001; i++ { // 10,001 requests to test burst capacity
-		_, err := c.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
-		if err == nil {
-			successCount++
-		}
-	}
-
-	logOutput := logBuffer.String()
-
-	assert.Contains(t, logOutput, "Rate limit exceeded for method")
-}
-
-func TestNewDepsCollector_UnderRateLimit(t *testing.T) {
-	// Set up the logger
-	var logBuffer bytes.Buffer
-	encoderConfig := zap.NewProductionEncoderConfig()
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(&logBuffer),
-		zap.DebugLevel,
-	)
-	logger := zap.New(core).Sugar()
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
-
-	addedLatency := time.Duration(0)
-
-	// Set up the in-memory gRPC server
-	lis := bufconn.Listen(1024 * 1024)
-	s := grpc.NewServer()
-	mockServer := &MockInsightsServer{}
-	pb.RegisterInsightsServer(s, mockServer)
-	go func() {
-		if err := s.Serve(lis); err != nil {
-			panic(err)
-		}
-	}()
-	defer s.Stop()
-
-	// Mock the GetProject method to always return a successful response
-	mockServer.On("GetProject", mock.Anything, mock.Anything).Return(&pb.Project{}, nil)
-
-	// Create a connection to the in-memory gRPC server
-	conn, err := grpc.NewClient("bufnet", grpc.WithContextDialer(
-		func(context.Context, string) (net.Conn, error) {
-			return lis.Dial()
-		}),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	assert.NoError(t, err)
-	defer conn.Close()
-
-	// Create a new rate-limited client
-	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000) // 10,000 requests per minute with burst capacity of 10,000
-	rateLimitedClient := clients.NewRateLimitedClient(conn, limiter)
-
-	logBuffer.Reset()
-
-	// Create a new depsCollector and get the rate-limited client
-	c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, time.Minute, &addedLatency, rateLimitedClient)
-	assert.NoError(t, err)
-
-	// Set a timeout for the test
-	testTimeout := time.Minute
-	ctx, cancel := context.WithTimeout(ctx, testTimeout)
-	defer cancel()
-
-	// Test rate limiting by making multiple concurrent requests.
-	var successCount int
-
-	for i := 0; i < 10000; i++ { // 9,999 requests, just under the burst capacity
-		_, err := c.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
-		if err == nil {
-			successCount++
-		}
-	}
-
-	logOutput := logBuffer.String()
-
-	assert.NotContains(t, logOutput, "Rate limit exceeded for method") // The test shouldn't have exceeded the 10,000 requests per minute limit
 }

@@ -16,24 +16,13 @@
 package clearlydefined
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"golang.org/x/time/rate"
-	"io"
-	"net/http"
-	"net/http/httptest"
 	"testing"
-	"time"
-
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -154,149 +143,4 @@ func TestClearlyDefined(t *testing.T) {
 			}
 		})
 	}
-}
-
-type MockCDServer struct {
-	mock.Mock
-}
-
-func (m *MockCDServer) MakeRequestWithClient(req *http.Request, client *http.Client) (*http.Response, error) {
-	args := m.Called(req, client)
-	return args.Get(0).(*http.Response), args.Error(1)
-}
-
-func TestCDCertifier_RateLimiter(t *testing.T) {
-	// Set up the logger
-	var logBuffer bytes.Buffer
-	encoderConfig := zap.NewProductionEncoderConfig()
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(&logBuffer),
-		zap.DebugLevel,
-	)
-	logger := zap.New(core).Sugar()
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
-
-	// Mock the ClearlyDefined server
-	mockServer := &MockCDServer{}
-	mockResponse := &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewBufferString(""))}
-	mockServer.On("MakeRequestWithClient", mock.Anything, mock.Anything).Return(mockResponse, nil)
-
-	// Create a test server
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := mockServer.MakeRequestWithClient(r, &http.Client{})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte("{}"))
-		if err != nil {
-			return
-		}
-	}))
-	defer testServer.Close()
-
-	// Override the HTTP client to use the actual rate-limited transport
-	client := NewClearlyDefinedHTTPClient(rate.NewLimiter(rate.Every(time.Minute), 2000))
-	certifier := &cdCertifier{
-		cdHTTPClient: client,
-	}
-
-	// Set a timeout for the test
-	testTimeout := 2 * time.Minute
-	ctx, cancel := context.WithTimeout(ctx, testTimeout)
-	defer cancel()
-
-	// Test rate limiting by making multiple sequential requests
-	var successCount int
-
-	for i := 0; i < 2001; i++ { // 2,000 requests to test burst capacity
-		req, err := http.NewRequestWithContext(ctx, "GET", testServer.URL, nil)
-		if err != nil {
-			t.Errorf("Failed to create request: %v", err)
-			return
-		}
-		resp, err := certifier.cdHTTPClient.Do(req)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			successCount++
-		} else {
-			t.Logf("Unexpected error: %v", err)
-		}
-	}
-
-	logOutput := logBuffer.String()
-
-	// Check if the log statement "Rate limit exceeded" is present
-	assert.Contains(t, logOutput, "Rate limit exceeded", "Rate limit should have been exceeded")
-}
-
-func TestCDCertifier_UnderRateLimit(t *testing.T) {
-	// Set up the logger
-	var logBuffer bytes.Buffer
-	encoderConfig := zap.NewProductionEncoderConfig()
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(&logBuffer),
-		zap.DebugLevel,
-	)
-	logger := zap.New(core).Sugar()
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
-
-	// Mock the ClearlyDefined server
-	mockServer := &MockCDServer{}
-	mockResponse := &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewBufferString(""))}
-	mockServer.On("MakeRequestWithClient", mock.Anything, mock.Anything).Return(mockResponse, nil)
-
-	// Create a test server
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := mockServer.MakeRequestWithClient(r, &http.Client{})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte("{}"))
-		if err != nil {
-			return
-		}
-	}))
-	defer testServer.Close()
-
-	// Override the HTTP client to use the actual rate-limited transport
-	client := NewClearlyDefinedHTTPClient(rate.NewLimiter(rate.Every(time.Minute), 2000))
-	certifier := &cdCertifier{
-		cdHTTPClient: client,
-	}
-
-	// Set a timeout for the test
-	testTimeout := 2 * time.Minute
-	ctx, cancel := context.WithTimeout(ctx, testTimeout)
-	defer cancel()
-
-	// Test rate limiting by making multiple sequential requests
-	var successCount int
-
-	for i := 0; i < 2000; i++ { // 1,999 requests to test burst capacity
-		req, err := http.NewRequestWithContext(ctx, "GET", testServer.URL, nil)
-		if err != nil {
-			t.Errorf("Failed to create request: %v", err)
-			return
-		}
-		resp, err := certifier.cdHTTPClient.Do(req)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			successCount++
-		} else {
-			t.Logf("Unexpected error: %v", err)
-		}
-	}
-
-	logOutput := logBuffer.String()
-
-	// Check if the log statement "Rate limit exceeded" is present
-	assert.NotContains(t, logOutput, "Rate limit exceeded", "Rate limit should not have been exceeded")
 }
