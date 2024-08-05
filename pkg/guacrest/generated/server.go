@@ -25,6 +25,9 @@ type ServerInterface interface {
 	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams)
+	// Retrieve the latest SBOM for a given package
+	// (GET /query/latest-sbom)
+	FindLatestSBOM(w http.ResponseWriter, r *http.Request, params FindLatestSBOMParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -46,6 +49,12 @@ func (_ Unimplemented) HealthCheck(w http.ResponseWriter, r *http.Request) {
 // Retrieve transitive dependencies
 // (GET /query/dependencies)
 func (_ Unimplemented) RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Retrieve the latest SBOM for a given package
+// (GET /query/latest-sbom)
+func (_ Unimplemented) FindLatestSBOM(w http.ResponseWriter, r *http.Request, params FindLatestSBOMParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -159,6 +168,41 @@ func (siw *ServerInterfaceWrapper) RetrieveDependencies(w http.ResponseWriter, r
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RetrieveDependencies(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// FindLatestSBOM operation middleware
+func (siw *ServerInterfaceWrapper) FindLatestSBOM(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params FindLatestSBOMParams
+
+	// ------------- Required query parameter "pkgID" -------------
+
+	if paramValue := r.URL.Query().Get("pkgID"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "pkgID"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "pkgID", r.URL.Query(), &params.PkgID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pkgID", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.FindLatestSBOM(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -290,6 +334,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/query/dependencies", wrapper.RetrieveDependencies)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/query/latest-sbom", wrapper.FindLatestSBOM)
+	})
 
 	return r
 }
@@ -416,6 +463,52 @@ func (response RetrieveDependencies502JSONResponse) VisitRetrieveDependenciesRes
 	return json.NewEncoder(w).Encode(response)
 }
 
+type FindLatestSBOMRequestObject struct {
+	Params FindLatestSBOMParams
+}
+
+type FindLatestSBOMResponseObject interface {
+	VisitFindLatestSBOMResponse(w http.ResponseWriter) error
+}
+
+type FindLatestSBOM200JSONResponse HasSBOM
+
+func (response FindLatestSBOM200JSONResponse) VisitFindLatestSBOMResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type FindLatestSBOM400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response FindLatestSBOM400JSONResponse) VisitFindLatestSBOMResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type FindLatestSBOM500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response FindLatestSBOM500JSONResponse) VisitFindLatestSBOMResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type FindLatestSBOM502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response FindLatestSBOM502JSONResponse) VisitFindLatestSBOMResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Identify the most important dependencies
@@ -427,6 +520,9 @@ type StrictServerInterface interface {
 	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(ctx context.Context, request RetrieveDependenciesRequestObject) (RetrieveDependenciesResponseObject, error)
+	// Retrieve the latest SBOM for a given package
+	// (GET /query/latest-sbom)
+	FindLatestSBOM(ctx context.Context, request FindLatestSBOMRequestObject) (FindLatestSBOMResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -527,6 +623,32 @@ func (sh *strictHandler) RetrieveDependencies(w http.ResponseWriter, r *http.Req
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(RetrieveDependenciesResponseObject); ok {
 		if err := validResponse.VisitRetrieveDependenciesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// FindLatestSBOM operation middleware
+func (sh *strictHandler) FindLatestSBOM(w http.ResponseWriter, r *http.Request, params FindLatestSBOMParams) {
+	var request FindLatestSBOMRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.FindLatestSBOM(ctx, request.(FindLatestSBOMRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "FindLatestSBOM")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(FindLatestSBOMResponseObject); ok {
+		if err := validResponse.VisitFindLatestSBOMResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

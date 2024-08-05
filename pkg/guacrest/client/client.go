@@ -96,6 +96,9 @@ type ClientInterface interface {
 
 	// RetrieveDependencies request
 	RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// FindLatestSBOM request
+	FindLatestSBOM(ctx context.Context, params *FindLatestSBOMParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -124,6 +127,18 @@ func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn)
 
 func (c *Client) RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRetrieveDependenciesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) FindLatestSBOM(ctx context.Context, params *FindLatestSBOMParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFindLatestSBOMRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -319,6 +334,51 @@ func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesP
 	return req, nil
 }
 
+// NewFindLatestSBOMRequest generates requests for FindLatestSBOM
+func NewFindLatestSBOMRequest(server string, params *FindLatestSBOMParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/query/latest-sbom")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pkgID", runtime.ParamLocationQuery, params.PkgID); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -370,6 +430,9 @@ type ClientWithResponsesInterface interface {
 
 	// RetrieveDependenciesWithResponse request
 	RetrieveDependenciesWithResponse(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*RetrieveDependenciesResponse, error)
+
+	// FindLatestSBOMWithResponse request
+	FindLatestSBOMWithResponse(ctx context.Context, params *FindLatestSBOMParams, reqEditors ...RequestEditorFn) (*FindLatestSBOMResponse, error)
 }
 
 type AnalyzeDependenciesResponse struct {
@@ -444,6 +507,31 @@ func (r RetrieveDependenciesResponse) StatusCode() int {
 	return 0
 }
 
+type FindLatestSBOMResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *HasSBOM
+	JSON400      *BadRequest
+	JSON500      *InternalServerError
+	JSON502      *BadGateway
+}
+
+// Status returns HTTPResponse.Status
+func (r FindLatestSBOMResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r FindLatestSBOMResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // AnalyzeDependenciesWithResponse request returning *AnalyzeDependenciesResponse
 func (c *ClientWithResponses) AnalyzeDependenciesWithResponse(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*AnalyzeDependenciesResponse, error) {
 	rsp, err := c.AnalyzeDependencies(ctx, params, reqEditors...)
@@ -469,6 +557,15 @@ func (c *ClientWithResponses) RetrieveDependenciesWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseRetrieveDependenciesResponse(rsp)
+}
+
+// FindLatestSBOMWithResponse request returning *FindLatestSBOMResponse
+func (c *ClientWithResponses) FindLatestSBOMWithResponse(ctx context.Context, params *FindLatestSBOMParams, reqEditors ...RequestEditorFn) (*FindLatestSBOMResponse, error) {
+	rsp, err := c.FindLatestSBOM(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFindLatestSBOMResponse(rsp)
 }
 
 // ParseAnalyzeDependenciesResponse parses an HTTP response from a AnalyzeDependenciesWithResponse call
@@ -560,6 +657,53 @@ func ParseRetrieveDependenciesResponse(rsp *http.Response) (*RetrieveDependencie
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest PurlList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseFindLatestSBOMResponse parses an HTTP response from a FindLatestSBOMWithResponse call
+func ParseFindLatestSBOMResponse(rsp *http.Response) (*FindLatestSBOMResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &FindLatestSBOMResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest HasSBOM
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -105,7 +105,7 @@ paths:
       operationId: findLatestSBOM
       parameters:
         - name: pkgID
-          description: The ID of the package.
+          description: The package-version level id.
           in: query
           required: true
           schema:
@@ -174,7 +174,7 @@ components:
     HasSBOM:
       type: object
       required:
-        - ID
+        - Id
         - URI
         - Algorithm
         - Digest
@@ -183,7 +183,7 @@ components:
         - Collector
         - KnownSince
       properties:
-        ID:
+        Id:
           type: string
         URI:
           type: string
