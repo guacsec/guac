@@ -16,23 +16,24 @@
 package clients
 
 import (
-	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/time/rate"
 	"net/http"
-	"time"
+
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 )
 
-var (
-	osvDevLimiter         = rate.NewLimiter(rate.Every(time.Minute), 10000)
-	clearlyDefinedLimiter = rate.NewLimiter(rate.Every(time.Minute), 2000)
-)
-
+// RateLimitedTransport is a wrapper around http.RoundTripper that adds rate
+// limiting functionality to HTTP requests. It uses a rate.Limiter to control
+// the rate of outgoing requests.
 type RateLimitedTransport struct {
 	Transport http.RoundTripper
 	Limiter   *rate.Limiter
 }
 
+// RoundTrip executes a single HTTP transaction on the wrapped http.RoundTripper,
+// applying rate limiting before making the request. If the rate limit is exceeded,
+// it waits until the limiter allows the request.
 func (t *RateLimitedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	logger := logging.FromContext(req.Context())
 	if !t.Limiter.Allow() {
@@ -45,20 +46,18 @@ func (t *RateLimitedTransport) RoundTrip(req *http.Request) (*http.Response, err
 	return t.Transport.RoundTrip(req)
 }
 
-func NewOsvDevClient() *http.Client {
-	return &http.Client{
-		Transport: &RateLimitedTransport{
-			Transport: http.DefaultTransport,
-			Limiter:   osvDevLimiter,
-		},
-	}
-}
-
-func NewClearlyDefinedClient() *http.Client {
-	return &http.Client{
-		Transport: &RateLimitedTransport{
-			Transport: http.DefaultTransport,
-			Limiter:   clearlyDefinedLimiter,
-		},
+// NewRateLimitedTransport creates a new RateLimitedTransport that wraps the provided
+// http.RoundTripper and uses the provided rate.Limiter to control the rate of
+// outgoing requests. It returns an http.RoundTripper that can be used wherever
+// an http.RoundTripper is expected.
+//
+// Parameters:
+//   - transport: The underlying http.RoundTripper to wrap. This is typically an
+//     instance of http.Transport or any custom implementation of http.RoundTripper.
+//   - limiter: The rate.Limiter to use for controlling the rate of outgoing requests.
+func NewRateLimitedTransport(transport http.RoundTripper, limiter *rate.Limiter) http.RoundTripper {
+	return &RateLimitedTransport{
+		Transport: transport,
+		Limiter:   limiter,
 	}
 }

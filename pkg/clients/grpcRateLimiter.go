@@ -17,18 +17,24 @@ package clients
 
 import (
 	"context"
+
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
+
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 )
 
+// RateLimitedClient is a wrapper around grpc.ClientConn that adds rate limiting
+// functionality to gRPC calls. It uses a rate.Limiter to control the rate of
+// outgoing requests.
 type RateLimitedClient struct {
 	ClientConn *grpc.ClientConn
 	Limiter    *rate.Limiter
 }
 
+// Invoke performs a gRPC call on the wrapped grpc.ClientConn, applying
+// rate limiting before making the call. If the rate limit is exceeded, it waits
+// until the limiter allows the request.
 func (c *RateLimitedClient) Invoke(ctx context.Context, method string, args interface{}, reply interface{}, opts ...grpc.CallOption) error {
 	logger := logging.FromContext(ctx)
 	if !c.Limiter.Allow() {
@@ -37,11 +43,12 @@ func (c *RateLimitedClient) Invoke(ctx context.Context, method string, args inte
 			return err
 		}
 	}
-	md := metadata.Pairs("user-agent", version.UserAgent)
-	ctx = metadata.NewOutgoingContext(ctx, md)
 	return c.ClientConn.Invoke(ctx, method, args, reply, opts...)
 }
 
+// NewStream creates a new stream on the wrapped grpc.ClientConn, applying rate
+// limiting before creating the stream. If the rate limit is exceeded, it waits
+// until the limiter allows the request.
 func (c *RateLimitedClient) NewStream(ctx context.Context, desc *grpc.StreamDesc, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 	logger := logging.FromContext(ctx)
 	if !c.Limiter.Allow() {
@@ -50,11 +57,19 @@ func (c *RateLimitedClient) NewStream(ctx context.Context, desc *grpc.StreamDesc
 			return nil, err
 		}
 	}
-	md := metadata.Pairs("user-agent", version.UserAgent)
-	ctx = metadata.NewOutgoingContext(ctx, md)
 	return c.ClientConn.NewStream(ctx, desc, method, opts...)
 }
 
+// NewRateLimitedClient creates a new RateLimitedClient that wraps the provided
+// grpc.ClientConn and uses the provided rate.Limiter to control the rate of
+// outgoing requests. It returns a grpc.ClientConnInterface that can be used
+// wherever a grpc.ClientConn is expected.
+//
+// Parameters:
+//   - conn: The underlying grpc.ClientConn to wrap. This is typically an instance
+//     of grpc.ClientConn created using grpc.NewClient or any custom implementation of
+//     grpc.ClientConnInterface.
+//   - limiter: The rate.Limiter to use for controlling the rate of outgoing requests.
 func NewRateLimitedClient(conn *grpc.ClientConn, limiter *rate.Limiter) grpc.ClientConnInterface {
 	return &RateLimitedClient{
 		ClientConn: conn,
