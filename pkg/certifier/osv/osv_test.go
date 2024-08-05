@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/time/rate"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -308,8 +309,12 @@ func TestOSVCertifier_RateLimiter(t *testing.T) {
 	defer testServer.Close()
 
 	// Override the HTTP client to use the actual rate-limited transport
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000)
+	transport := clients.NewRateLimitedTransport(http.DefaultTransport, limiter)
+	client := &http.Client{Transport: transport}
+
 	certifier := &osvCertifier{
-		osvHTTPClient: clients.NewOsvDevClient(),
+		osvHTTPClient: client,
 	}
 
 	// Set a timeout for the test
@@ -370,8 +375,12 @@ func TestOSVCertifier_UnderRateLimit(t *testing.T) {
 	defer testServer.Close()
 
 	// Override the HTTP client to use the actual rate-limited transport
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000)
+	transport := clients.NewRateLimitedTransport(http.DefaultTransport, limiter)
+	client := &http.Client{Transport: transport}
+
 	certifier := &osvCertifier{
-		osvHTTPClient: clients.NewOsvDevClient(),
+		osvHTTPClient: client,
 	}
 
 	// Set a timeout for the test

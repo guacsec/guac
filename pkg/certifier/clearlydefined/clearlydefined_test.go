@@ -19,11 +19,11 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/guacsec/guac/pkg/clients"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/time/rate"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -200,8 +200,9 @@ func TestCDCertifier_RateLimiter(t *testing.T) {
 	defer testServer.Close()
 
 	// Override the HTTP client to use the actual rate-limited transport
+	client := NewClearlyDefinedHTTPClient(rate.NewLimiter(rate.Every(time.Minute), 2000))
 	certifier := &cdCertifier{
-		cdHTTPClient: clients.NewClearlyDefinedClient(),
+		cdHTTPClient: client,
 	}
 
 	// Set a timeout for the test
@@ -267,8 +268,9 @@ func TestCDCertifier_UnderRateLimit(t *testing.T) {
 	defer testServer.Close()
 
 	// Override the HTTP client to use the actual rate-limited transport
+	client := NewClearlyDefinedHTTPClient(rate.NewLimiter(rate.Every(time.Minute), 2000))
 	certifier := &cdCertifier{
-		cdHTTPClient: clients.NewClearlyDefinedClient(),
+		cdHTTPClient: client,
 	}
 
 	// Set a timeout for the test

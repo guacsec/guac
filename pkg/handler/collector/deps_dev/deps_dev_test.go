@@ -631,8 +631,6 @@ func TestNewDepsCollector_RateLimiter(t *testing.T) {
 		_, err := c.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
 		if err == nil {
 			successCount++
-		} else {
-			t.Logf("Unexpected error: %v", err)
 		}
 	}
 
@@ -704,8 +702,6 @@ func TestNewDepsCollector_UnderRateLimit(t *testing.T) {
 		_, err := c.client.GetProject(ctx, &pb.GetProjectRequest{ProjectKey: &pb.ProjectKey{Id: "github.com/google/go-cmp"}})
 		if err == nil {
 			successCount++
-		} else {
-			t.Logf("Unexpected error: %v", err)
 		}
 	}
 

@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/time/rate"
 	"net/http"
 	"strings"
 	"time"
@@ -137,7 +138,8 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	docChan := make(chan docResult, 1)
 
 	// Initialize the rate-limited HTTP client
-	cdClient := cd_certifier.NewClearlyDefinedHTTPClient()
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 2000)
+	cdClient := cd_certifier.NewClearlyDefinedHTTPClient(limiter)
 
 	go func(ctx context.Context, purls []string, docChan chan<- docResult) {
 		defer close(docChan)
