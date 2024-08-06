@@ -18,6 +18,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/guacrest/helpers"
 	"net/http"
 	"time"
 
@@ -98,4 +99,26 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 	default:
 		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
 	}
+}
+
+func (s *DefaultServer) FindLatestSBOM(ctx context.Context, request gen.FindLatestSBOMRequestObject) (gen.FindLatestSBOMResponseObject, error) {
+	sbom, err := helpers.LatestSBOMForAGivenId(ctx, s.gqlClient, request.Params.PkgID)
+	if err != nil {
+		return gen.FindLatestSBOM500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: err.Error(),
+			},
+		}, err
+	}
+
+	return gen.FindLatestSBOM200JSONResponse{
+		Algorithm:        sbom.Algorithm,
+		Collector:        sbom.Collector,
+		Digest:           sbom.Digest,
+		DownloadLocation: sbom.DownloadLocation,
+		Id:               sbom.Id,
+		KnownSince:       sbom.KnownSince,
+		Origin:           sbom.Origin,
+		URI:              sbom.Uri,
+	}, nil
 }
