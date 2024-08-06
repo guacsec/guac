@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/time/rate"
 	"net/http"
 	"strings"
 	"time"
@@ -136,6 +137,10 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 
 	docChan := make(chan docResult, 1)
 
+	// Initialize the rate-limited HTTP client
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 2000)
+	cdClient := cd_certifier.NewClearlyDefinedHTTPClient(limiter)
+
 	go func(ctx context.Context, purls []string, docChan chan<- docResult) {
 		defer close(docChan)
 
@@ -151,7 +156,7 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 					logger.Debugf("failed to parse purl into coordinate with error: %v", err)
 					continue
 				}
-				definition, err := cd_certifier.GetPkgDefinition(ctx, coordinate)
+				definition, err := cd_certifier.GetPkgDefinition(ctx, cdClient, coordinate)
 				if err != nil {
 					docChan <- docResult{doc: nil,
 						docErr: fmt.Errorf("failed get package definition from clearly defined with error: %w", err)}
@@ -175,7 +180,7 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 					docErr: nil}
 
 				if definition.Described.SourceLocation != nil {
-					srcDefinition, err := cd_certifier.GetSrcDefinition(ctx, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
+					srcDefinition, err := cd_certifier.GetSrcDefinition(ctx, cdClient, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
 						definition.Described.SourceLocation.Namespace, definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
 					if err != nil {
 						docChan <- docResult{doc: nil,

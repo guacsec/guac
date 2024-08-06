@@ -16,9 +16,12 @@
 package osv
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/pkg/clients"
+	"golang.org/x/time/rate"
 	"net/http"
 	"strings"
 	"time"
@@ -29,7 +32,6 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -52,10 +54,11 @@ type osvCertifier struct {
 
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000)
+	transport := clients.NewRateLimitedTransport(http.DefaultTransport, limiter)
+	client := &http.Client{Transport: transport}
 	return &osvCertifier{
-		osvHTTPClient: &http.Client{
-			Transport: version.UATransport,
-		},
+		osvHTTPClient: client,
 	}
 }
 
@@ -81,12 +84,36 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}
 
-	resp, err := osv_scanner.MakeRequestWithClient(query, o.osvHTTPClient)
+	// Marshal the query into JSON
+	queryBytes, err := json.Marshal(query)
+	if err != nil {
+		return fmt.Errorf("failed to marshal query: %w", err)
+	}
+
+	// Use the osvHTTPClient to make the request
+	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.osv.dev/v1/querybatch", bytes.NewReader(queryBytes))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := o.osvHTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("osv.dev batched request failed with status: %s", resp.Status)
+	}
+
+	var osvResponse osv_scanner.BatchedResponse
+	if err := json.NewDecoder(resp.Body).Decode(&osvResponse); err != nil {
+		return fmt.Errorf("failed to decode osv.dev response: %w", err)
+	}
+
 	for i, query := range query.Queries {
-		response := resp.Results[i]
+		response := osvResponse.Results[i]
 		purl := query.Package.PURL
 		if err := generateDocument(packMap[purl], response.Vulns, docChannel); err != nil {
 			return fmt.Errorf("could not generate document from OSV results: %w", err)

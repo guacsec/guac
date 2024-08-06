@@ -20,10 +20,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
-
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )

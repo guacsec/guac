@@ -19,6 +19,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/pkg/certifier"
+	"golang.org/x/time/rate"
 	"io"
 	"log"
 	"net/http"
@@ -26,14 +28,13 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/clients" // Import the clients package for rate limiter
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/misc/coordinates"
-	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -48,25 +49,35 @@ const (
 var ErrOSVComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type cdCertifier struct {
+	cdHTTPClient *http.Client
 }
 
-// NewClearlyDefinedCertifier initializes the the cdCertifier
+// NewClearlyDefinedCertifier initializes the cdCertifier
 func NewClearlyDefinedCertifier() certifier.Certifier {
-	return &cdCertifier{}
+	limiter := rate.NewLimiter(rate.Every(time.Minute), 2000)
+	client := NewClearlyDefinedHTTPClient(limiter)
+	return &cdCertifier{
+		cdHTTPClient: client,
+	}
+}
+
+func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
+	transport := clients.NewRateLimitedTransport(http.DefaultTransport, limiter)
+	return &http.Client{Transport: transport}
 }
 
 // GetPkgDefinition uses the coordinates to query clearly defined for license definition
-func GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
+func GetPkgDefinition(ctx context.Context, client *http.Client, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
 	logger := logging.FromContext(ctx)
 
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
 		coordinate.Namespace, coordinate.Name, coordinate.Revision)
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new request with error: %w", err)
 	}
-	resp, err := version.UATransport.RoundTrip(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
 	}
@@ -74,12 +85,10 @@ func GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			// log the error when not found but don't return the error to continue the loop
 			logger.Debugf("package license definition not found for: %s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
 				coordinate.Namespace, coordinate.Name, coordinate.Revision)
 			return nil, nil
 		}
-		// otherwise return an error
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -101,14 +110,14 @@ func GetPkgDefinition(ctx context.Context, coordinate *coordinates.Coordinate) (
 }
 
 // GetSrcDefinition uses the source coordinates found from the package definition to query clearly defined for license definition
-func GetSrcDefinition(ctx context.Context, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
+func GetSrcDefinition(ctx context.Context, client *http.Client, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
 	logger := logging.FromContext(ctx)
 	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	resp, err := version.UATransport.RoundTrip(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
 	}
@@ -163,7 +172,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 				logger.Errorf("failed to parse purl into coordinate with error: %v", err)
 				continue
 			}
-			definition, err := GetPkgDefinition(ctx, coordinate)
+			definition, err := GetPkgDefinition(ctx, c.cdHTTPClient, coordinate)
 			if err != nil {
 				return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
 			}
@@ -176,13 +185,12 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 			}
 			packMap[node.Purl] = append(packMap[node.Purl], node)
 			if definition.Described.SourceLocation != nil {
-				srcDefinition, err := GetSrcDefinition(ctx, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
+				srcDefinition, err := GetSrcDefinition(ctx, c.cdHTTPClient, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
 					definition.Described.SourceLocation.Namespace, definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
 				if err != nil {
 					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
 				}
 
-				// if definition for the source is not found, continue to the next package
 				if srcDefinition == nil {
 					continue
 				}
