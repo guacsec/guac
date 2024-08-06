@@ -58,12 +58,6 @@ func (du *DependencyUpdate) SetNillableDependentPackageVersionID(u *uuid.UUID) *
 	return du
 }
 
-// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
-func (du *DependencyUpdate) ClearDependentPackageVersionID() *DependencyUpdate {
-	du.mutation.ClearDependentPackageVersionID()
-	return du
-}
-
 // SetDependencyType sets the "dependency_type" field.
 func (du *DependencyUpdate) SetDependencyType(dt dependency.DependencyType) *DependencyUpdate {
 	du.mutation.SetDependencyType(dt)
@@ -233,6 +227,9 @@ func (du *DependencyUpdate) check() error {
 	}
 	if du.mutation.PackageCleared() && len(du.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
+	}
+	if du.mutation.DependentPackageVersionCleared() && len(du.mutation.DependentPackageVersionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Dependency.dependent_package_version"`)
 	}
 	return nil
 }
@@ -412,12 +409,6 @@ func (duo *DependencyUpdateOne) SetNillableDependentPackageVersionID(u *uuid.UUI
 	if u != nil {
 		duo.SetDependentPackageVersionID(*u)
 	}
-	return duo
-}
-
-// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
-func (duo *DependencyUpdateOne) ClearDependentPackageVersionID() *DependencyUpdateOne {
-	duo.mutation.ClearDependentPackageVersionID()
 	return duo
 }
 
@@ -603,6 +594,9 @@ func (duo *DependencyUpdateOne) check() error {
 	}
 	if duo.mutation.PackageCleared() && len(duo.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
+	}
+	if duo.mutation.DependentPackageVersionCleared() && len(duo.mutation.DependentPackageVersionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Dependency.dependent_package_version"`)
 	}
 	return nil
 }

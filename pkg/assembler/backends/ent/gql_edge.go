@@ -349,7 +349,7 @@ func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersi
 	if IsNotLoaded(err) {
 		result, err = d.QueryDependentPackageVersion().Only(ctx)
 	}
-	return result, MaskNotFound(err)
+	return result, err
 }
 
 func (d *Dependency) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {

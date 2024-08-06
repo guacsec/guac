@@ -46,7 +46,7 @@ func (Dependency) Fields() []ent.Field {
 			Unique().
 			Immutable(),
 		field.UUID("package_id", getUUIDv7()),
-		field.UUID("dependent_package_version_id", getUUIDv7()).Optional(),
+		field.UUID("dependent_package_version_id", getUUIDv7()),
 		field.Enum("dependency_type").Values(model.DependencyTypeDirect.String(), model.DependencyTypeIndirect.String(), model.DependencyTypeUnknown.String()),
 		field.String("justification"),
 		field.String("origin"),
@@ -63,6 +63,7 @@ func (Dependency) Edges() []ent.Edge {
 			Field("package_id").
 			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("dependent_package_version", PackageVersion.Type).
+			Required().
 			Field("dependent_package_version_id").
 			Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_dependencies").Annotations(entsql.OnDelete(entsql.Cascade)),
