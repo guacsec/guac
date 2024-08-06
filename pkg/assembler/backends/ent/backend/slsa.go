@@ -219,10 +219,12 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 		for i, slsa := range css {
 			slsa := slsa
 			var err error
-			creates[i], err = generateSLSACreate(ctx, tx, subjects[index], builtFromList[index], builtByList[index], slsa)
+			var hasSBOMID *uuid.UUID
+			creates[i], hasSBOMID, err = generateSLSACreate(ctx, tx, subjects[index], builtFromList[index], builtByList[index], slsa)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
 			}
+			ids = append(ids, hasSBOMID.String())
 			index++
 		}
 
@@ -248,7 +250,7 @@ func setDefaultTime(inputTime *time.Time) time.Time {
 	}
 }
 
-func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*ent.SLSAAttestationCreate, error) {
+func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*ent.SLSAAttestationCreate, *uuid.UUID, error) {
 	slsaCreate := tx.SLSAAttestation.Create()
 
 	slsaCreate.
@@ -262,7 +264,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		SetFinishedOn(setDefaultTime(slsa.FinishedOn))
 
 	if builtBy == nil {
-		return nil, fmt.Errorf("builtBy not specified for SLSA")
+		return nil, nil, fmt.Errorf("builtBy not specified for SLSA")
 	}
 	var buildID uuid.UUID
 	if builtBy.BuilderID != nil {
@@ -270,12 +272,12 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		builtGlobalID := fromGlobalID(*builtBy.BuilderID)
 		buildID, err = uuid.Parse(builtGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from BuilderID failed with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from BuilderID failed with error: %w", err)
 		}
 	} else {
 		builder, err := tx.Builder.Query().Where(builderInputQueryPredicate(*builtBy.BuilderInput)).Only(ctx)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		buildID = builder.ID
 	}
@@ -287,12 +289,12 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		artGlobalID := fromGlobalID(*subject.ArtifactID)
 		subjectArtifactID, err = uuid.Parse(artGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
 	} else {
 		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*subject.ArtifactInput)).Only(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for artifact")
+			return nil, nil, fmt.Errorf("failed to query for artifact")
 		}
 		subjectArtifactID = foundArt.ID
 	}
@@ -309,7 +311,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 			} else {
 				foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*bf.ArtifactInput)).Only(ctx)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				builtFromIDs = append(builtFromIDs, foundArt.ID.String())
 			}
@@ -320,7 +322,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		for _, sbfID := range sortedBuildFromIDs {
 			sbfUUID, err := uuid.Parse(sbfID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
 			slsaCreate.AddBuiltFromIDs(sbfUUID)
 		}
@@ -334,17 +336,17 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 
 	slsaID, err := guacSLSAKey(ptrfrom.String(subjectArtifactID.String()), builtFromHash, ptrfrom.String(buildID.String()), slsa)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create slsa uuid with error: %w", err)
+		return nil, nil, fmt.Errorf("failed to create slsa uuid with error: %w", err)
 	}
 
 	slsaCreate.SetID(*slsaID)
 
-	return slsaCreate, nil
+	return slsaCreate, slsaID, nil
 }
 
 func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (*string, error) {
 
-	slsaCreate, err := generateSLSACreate(ctx, tx, &subject, builtFrom, &builtBy, &slsa)
+	slsaCreate, _, err := generateSLSACreate(ctx, tx, &subject, builtFrom, &builtBy, &slsa)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
 	}

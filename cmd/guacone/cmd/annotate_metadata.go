@@ -125,7 +125,7 @@ var annotateMetadata = &cobra.Command{
 		preds.HasMetadata = append(preds.HasMetadata, metadata)
 		assemblerInputs := []assembler.IngestPredicates{*preds}
 
-		err = assemblerFunc(assemblerInputs)
+		_, err = assemblerFunc(assemblerInputs)
 		if err != nil {
 			logger.Fatalf("unable to assemble graphs: %v", err)
 		}

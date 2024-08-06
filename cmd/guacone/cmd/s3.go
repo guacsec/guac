@@ -137,7 +137,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 		errFound := false
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, transport, csubClient, s3Opts.queryVulnOnIngestion, s3Opts.queryLicenseOnIngestion)
+			_, err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, transport, csubClient, s3Opts.queryVulnOnIngestion, s3Opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				errFound = true
