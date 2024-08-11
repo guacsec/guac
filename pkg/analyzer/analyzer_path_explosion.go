@@ -109,9 +109,7 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 	}
 
 
-	//REMOVE OUTGOING EDGES & REMOVE INCOMING EDGES &REMOVE NODES
-	//TODO: Check for repeated values in nodesToRemove. It can be a case even though all nodes are unique in the graph
-	//the structure of the graph may lead to new additions. This is required as RemoveVertex may throw a "vertex not found" error
+	//REMOVE OUTGOING EDGES & REMOVE INCOMING EDGES & REMOVE NODES
 	for _, val := range nodesToRemove {
 
 		nodeMapOne, ok := gOneAdjacencyMap[val]

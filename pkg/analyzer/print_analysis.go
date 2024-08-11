@@ -193,7 +193,6 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Render()
 	return nil
-
 }
 
 func PrintDiffedPathTable(diffs DiffResult) error {
