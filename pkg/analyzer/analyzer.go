@@ -21,6 +21,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
+	"sync"
+
+	"regexp"
 	"sort"
 	"strings"
 
@@ -34,13 +37,20 @@ import (
 type NodeType int
 type Action int
 
-
 const (
-	ColorReset  = "\033[0m"
-	ColorRed    = "\033[31m"
-	ColorGreen  = "\033[32m"
-	ColorWhite  = "\033[37m"
+	ColorReset = "\033[0m"
+	ColorRed   = "\033[31m"
+	ColorGreen = "\033[32m"
+	ColorWhite = "\033[37m"
 )
+
+var shaPatterns = []string{
+	`^[a-fA-F0-9]{40}$`,  // SHA-1
+	`^[a-fA-F0-9]{56}$`,  // SHA-224
+	`^[a-fA-F0-9]{64}$`,  // SHA-256
+	`^[a-fA-F0-9]{96}$`,  // SHA-384
+	`^[a-fA-F0-9]{128}$`, // SHA-512
+}
 
 const (
 	Pkg NodeType = iota
@@ -88,9 +98,12 @@ type DiffedNodePair struct {
 }
 
 type DiffedPath struct {
-	PathOne []*Node
-	PathTwo []*Node
-	Diffs   [][]string
+	PathOne   []*Node
+	PathTwo   []*Node
+	Diffs     [][]string
+	NodeDiffs []Node
+	Index     int
+	DiffNum   int
 }
 
 type packageNameSpaces []model.AllPkgTreeNamespacesPackageNamespace
@@ -252,12 +265,16 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action Action) ([]
 
 	var analysisOne, analysisTwo [][]*Node
 
+	//create a map so that we are only using unique paths.
 	for i := range pathsOne {
 		nodes, err := nodeIDListToNodeList(gOne, pathsOne[i])
 		if err != nil {
 			return analysisOne, analysisTwo, err
 		}
-		pathsOneMap[pathsOneStrings[i]] = nodes
+		_, ok := pathsOneMap[pathsOneStrings[i]]
+		if !ok {
+			pathsOneMap[pathsOneStrings[i]] = nodes
+		}
 	}
 
 	for i := range pathsTwo {
@@ -265,8 +282,10 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action Action) ([]
 		if err != nil {
 			return analysisOne, analysisTwo, err
 		}
-		pathsTwoMap[pathsTwoStrings[i]] = nodes
-
+		_, ok := pathsTwoMap[pathsTwoStrings[i]]
+		if !ok {
+			pathsTwoMap[pathsTwoStrings[i]] = nodes
+		}
 	}
 
 	switch action {
@@ -292,7 +311,6 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action Action) ([]
 		for key := range pathsOneMap {
 			val, ok := pathsTwoMap[key]
 			if ok {
-
 				analysisOne = append(analysisOne, val)
 			}
 		}
@@ -545,45 +563,92 @@ func nodeIDListToNodeList(g graph.Graph[string, *Node], list []string) ([]*Node,
 	return nodeList, nil
 }
 
+func DiffMissingName(dmp *diffmatchpatch.DiffMatchPatch, name model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName) model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName {
+	name.Name = ComputeStringDiffs(dmp, name.Name, "")
+	for k, version := range name.Versions {
+		name.Versions[k].Version = ComputeStringDiffs(dmp, version.Version, "")
+		for l, qualifier := range version.Qualifiers {
+			name.Versions[k].Qualifiers[l].Key = ComputeStringDiffs(dmp, qualifier.Key, "")
+			name.Versions[k].Qualifiers[l].Value = ComputeStringDiffs(dmp, qualifier.Value, "")
+		}
+	}
+	return name
+}
+
+func DiffMissingVersion(dmp *diffmatchpatch.DiffMatchPatch, version model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion {
+	version.Version = ComputeStringDiffs(dmp, version.Version, "")
+	for l, qualifier := range version.Qualifiers {
+		version.Qualifiers[l].Key = ComputeStringDiffs(dmp, qualifier.Key, "")
+		version.Qualifiers[l].Value = ComputeStringDiffs(dmp, qualifier.Value, "")
+	}
+	return version
+}
+
+func DiffMissingQualifier(dmp *diffmatchpatch.DiffMatchPatch, qualifier model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
+	qualifier.Key = ComputeStringDiffs(dmp, qualifier.Key, "")
+	qualifier.Value = ComputeStringDiffs(dmp, qualifier.Value, "")
+	return qualifier
+}
+
+func DiffMissingNamespace(dmp *diffmatchpatch.DiffMatchPatch, namespace model.AllPkgTreeNamespacesPackageNamespace) model.AllPkgTreeNamespacesPackageNamespace {
+	namespace.Namespace = ComputeStringDiffs(dmp, namespace.Namespace, "")
+	for j, name := range namespace.Names {
+		namespace.Names[j].Name = ComputeStringDiffs(dmp, name.Name, "")
+		for k, version := range name.Versions {
+			namespace.Names[j].Versions[k].Version = ComputeStringDiffs(dmp, version.Version, "")
+			for l, qualifier := range version.Qualifiers {
+				namespace.Names[j].Versions[k].Qualifiers[l].Key = ComputeStringDiffs(dmp, qualifier.Key, "")
+				namespace.Names[j].Versions[k].Qualifiers[l].Value = ComputeStringDiffs(dmp, qualifier.Value, "")
+			}
+		}
+	}
+	return namespace
+}
+
+func StartsWithSHA(text string) bool {
+	for _, pattern := range shaPatterns {
+		match, _ := regexp.MatchString(pattern, text)
+		if match {
+			return true
+		}
+	}
+	return false
+}
+
 func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string) string {
-	diffs := dmp.DiffMain(text1, text2, false)
+
+	// Enable line mode for faster processing on large texts
+	diffs := dmp.DiffMain(text1, text2, true)
+	diffs = dmp.DiffCleanupSemantic(diffs) // Optional: Clean up diff for better readability
 	return FormatDiffs(diffs)
 }
 
 func FormatDiffs(diffs []diffmatchpatch.Diff) string {
-	var result string
+
+	var parts []string
+	// Precompile color codes into variables
+	colorGreen := ColorGreen
+	colorRed := ColorRed
+	colorWhite := ColorWhite
+	colorReset := ColorReset
 
 	for _, diff := range diffs {
+		var prefix string
 		switch diff.Type {
 		case diffmatchpatch.DiffInsert:
-			result += fmt.Sprintf("%s+%s%s", ColorGreen, diff.Text, ColorReset)
+			prefix = colorGreen + "+" + diff.Text + colorReset
 		case diffmatchpatch.DiffDelete:
-			result += fmt.Sprintf("%s-%s%s", ColorRed, diff.Text, ColorReset)
+			prefix = colorRed + "-" + diff.Text + colorReset
 		case diffmatchpatch.DiffEqual:
-			result += fmt.Sprintf("%s %s%s", ColorWhite, diff.Text, ColorReset)
+			prefix = colorWhite + " " + diff.Text + colorReset
 		}
+		parts = append(parts, prefix)
 	}
-
-	return result
+	diffString := strings.Join(parts, "")
+	return diffString
 }
 
-func DiffMissingNamespace( namespaces model.AllPkgTreeNamespacesPackageNamespace){
-
-}
-
-func DiffMissingName(name  model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName){
-
-}
-
-func DiffMissingVersion(version model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) {
-
-}
-
-func DiffMissingQualifier(qualifier model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) {
-	
-}
-
-func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
+func compareNodes(dmp *diffmatchpatch.DiffMatchPatch, nodeOne, nodeTwo Node) (Node, []string, error) {
 	var diffs []string
 	var namespaceBig, namespaceSmall []model.AllPkgTreeNamespacesPackageNamespace
 
@@ -592,7 +657,7 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 	var qualifierBig, qualifierSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
 
 	diffedNode := Node{}
-	dmp := diffmatchpatch.New()
+
 	switch nodeOne.NodeType {
 
 	case "Package":
@@ -602,13 +667,14 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 		nTwo := nodeTwo.Pkg
 
 		if nodeOne.ID == nodeTwo.ID {
-			return []string{}, nil
+			return diffedNode, []string{}, nil
 		}
-		
+
 		if nOne.Type != nTwo.Type {
 			diffs = append(diffs, "Type: "+nOne.Type+" != "+nTwo.Type)
 			diffedNode.Pkg.Type = ComputeStringDiffs(dmp, nOne.Type, nTwo.Type)
 		}
+
 		sort.Sort(packageNameSpaces(nOne.Namespaces))
 		sort.Sort(packageNameSpaces(nTwo.Namespaces))
 
@@ -623,10 +689,14 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 			namespaceSmall = nOne.Namespaces
 		}
 
+		diffedNode.Pkg.Namespaces = namespaceSmall
+
 		// Compare namespaces
 		for i, namespace1 := range namespaceBig {
 			if i >= len(namespaceSmall) {
+
 				diffs = append(diffs, fmt.Sprintf("Namespace %s not present", namespace1.Namespace))
+				diffedNode.Pkg.Namespaces = append(diffedNode.Pkg.Namespaces, DiffMissingNamespace(dmp, namespace1))
 				continue
 			}
 			namespace2 := namespaceSmall[i]
@@ -637,6 +707,7 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 			// Compare namespace fields
 			if namespace1.Namespace != namespace2.Namespace {
 				diffs = append(diffs, fmt.Sprintf("Namespace %s != %s", namespace1.Namespace, namespace2.Namespace))
+				diffedNode.Pkg.Namespaces[i].Namespace = ComputeStringDiffs(dmp, namespace1.Namespace, namespace2.Namespace)
 			}
 
 			if len(namespace1.Names) > len(namespace2.Names) {
@@ -650,13 +721,17 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 				namesSmall = namespace2.Names
 			}
 
+			diffedNode.Pkg.Namespaces[i].Names = namesSmall
+
 			// Compare names
 			for j, name1 := range namesBig {
 
 				if j >= len(namesSmall) {
 					diffs = append(diffs, fmt.Sprintf("Name %s not present in namespace %s", name1.Name, namespace1.Namespace))
+					diffedNode.Pkg.Namespaces[i].Names = append(diffedNode.Pkg.Namespaces[i].Names, DiffMissingName(dmp, name1))
 					continue
 				}
+
 				name2 := namesSmall[j]
 
 				sort.Sort(packageNameSpacesNamesVersions(name1.Versions))
@@ -665,6 +740,7 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 				// Compare name fields
 				if name1.Name != name2.Name {
 					diffs = append(diffs, fmt.Sprintf("Name %s != %s in Namespace %s", name1.Name, name2.Name, namespace1.Namespace))
+					diffedNode.Pkg.Namespaces[i].Names[j].Name = ComputeStringDiffs(dmp, name1.Name, name2.Name)
 				}
 
 				if len(name1.Versions) > len(name2.Versions) {
@@ -678,10 +754,14 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 					versionSmall = name2.Versions
 				}
 
+				diffedNode.Pkg.Namespaces[i].Names[j].Versions = versionSmall
+
 				// Compare versions
 				for k, version1 := range versionBig {
+
 					if k >= len(versionSmall) {
 						diffs = append(diffs, fmt.Sprintf("Version %s not present for name %s in namespace %s,", version1.Version, name1.Name, namespace1.Namespace))
+						diffedNode.Pkg.Namespaces[i].Names[j].Versions = append(diffedNode.Pkg.Namespaces[i].Names[j].Versions, DiffMissingVersion(dmp, version1))
 						continue
 					}
 
@@ -691,10 +771,12 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 
 					if version1.Version != version2.Version {
 						diffs = append(diffs, fmt.Sprintf("Version %s != %s for name %s in namespace %s", version1.Version, version2.Version, name1.Name, namespace1.Namespace))
+						diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Version = ComputeStringDiffs(dmp, version1.Version, version2.Version)
 					}
 
 					if version1.Subpath != version2.Subpath {
 						diffs = append(diffs, fmt.Sprintf("Subpath %s != %s for version %s for name %s in namespace %s", version1.Subpath, version2.Subpath, version1.Version, name1.Name, namespace1.Namespace))
+						diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Subpath = ComputeStringDiffs(dmp, version1.Subpath, version2.Subpath)
 					}
 
 					if len(version1.Qualifiers) > len(version2.Qualifiers) {
@@ -708,17 +790,26 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 						qualifierSmall = version2.Qualifiers
 					}
 
+					diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Qualifiers = qualifierSmall
+
 					for l, qualifier1 := range qualifierBig {
+
 						if l >= len(qualifierSmall) {
 							diffs = append(diffs, fmt.Sprintf("Qualifier %s:%s not present for version %s in name %s in namespace %s,", qualifier1.Key, qualifier1.Value, version1.Version, name1.Name, namespace1.Namespace))
+							diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Qualifiers = append(diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Qualifiers, DiffMissingQualifier(dmp, qualifier1))
 							continue
 						}
 
 						qualifier2 := qualifierSmall[l]
-						if qualifier2.Key != qualifier1.Key || qualifier1.Value != qualifier2.Value {
 
-							diffs = append(diffs, fmt.Sprintf("Qualifier unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+						if qualifier2.Key != qualifier1.Key {
+							diffs = append(diffs, fmt.Sprintf("Qualifier key unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+							diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Qualifiers[l].Key = ComputeStringDiffs(dmp, qualifier1.Key, qualifier2.Key)
+						}
 
+						if qualifier1.Value != qualifier2.Value {
+							diffs = append(diffs, fmt.Sprintf("Qualifier value unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+							diffedNode.Pkg.Namespaces[i].Names[j].Versions[k].Qualifiers[l].Value = ComputeStringDiffs(dmp, qualifier1.Value, qualifier2.Value)
 						}
 					}
 				}
@@ -730,13 +821,14 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 		nTwo := nodeTwo.DepPkg
 
 		if nodeOne.ID == nodeTwo.ID {
-
-			return []string{}, nil
+			return diffedNode, []string{}, nil
 		}
 
 		if nOne.Type != nTwo.Type {
 			diffs = append(diffs, "Type: "+nOne.Type+" != "+nTwo.Type)
+			diffedNode.DepPkg.Type = ComputeStringDiffs(dmp, nOne.Type, nTwo.Type)
 		}
+
 		sort.Sort(packageNameSpaces(nOne.Namespaces))
 		sort.Sort(packageNameSpaces(nTwo.Namespaces))
 
@@ -751,10 +843,13 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 			namespaceSmall = nOne.Namespaces
 		}
 
+		diffedNode.DepPkg.Namespaces = namespaceSmall
+
 		// Compare namespaces
 		for i, namespace1 := range namespaceBig {
 			if i >= len(namespaceSmall) {
 				diffs = append(diffs, fmt.Sprintf("Namespace %s not present", namespace1.Namespace))
+				diffedNode.DepPkg.Namespaces = append(diffedNode.DepPkg.Namespaces, DiffMissingNamespace(dmp, namespace1))
 				continue
 			}
 			namespace2 := namespaceSmall[i]
@@ -765,7 +860,7 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 			// Compare namespace fields
 			if namespace1.Namespace != namespace2.Namespace {
 				diffs = append(diffs, fmt.Sprintf("Namespace %s != %s", namespace1.Namespace, namespace2.Namespace))
-
+				diffedNode.DepPkg.Namespaces[i].Namespace = ComputeStringDiffs(dmp, namespace1.Namespace, namespace2.Namespace)
 			}
 
 			if len(namespace1.Names) > len(namespace2.Names) {
@@ -779,11 +874,14 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 				namesSmall = namespace2.Names
 			}
 
+			diffedNode.DepPkg.Namespaces[i].Names = namesSmall
+
 			// Compare names
 			for j, name1 := range namesBig {
 
 				if j >= len(namesSmall) {
 					diffs = append(diffs, fmt.Sprintf("Name %s not present in namespace %s", name1.Name, namespace1.Namespace))
+					diffedNode.DepPkg.Namespaces[i].Names = append(diffedNode.DepPkg.Namespaces[i].Names, DiffMissingName(dmp, name1))
 					continue
 				}
 				name2 := namesSmall[j]
@@ -794,7 +892,7 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 				// Compare name fields
 				if name1.Name != name2.Name {
 					diffs = append(diffs, fmt.Sprintf("Name %s != %s in Namespace %s", name1.Name, name2.Name, namespace1.Namespace))
-
+					diffedNode.DepPkg.Namespaces[i].Names[j].Name = ComputeStringDiffs(dmp, name1.Name, name2.Name)
 				}
 
 				if len(name1.Versions) > len(name2.Versions) {
@@ -808,10 +906,13 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 					versionSmall = name2.Versions
 				}
 
+				diffedNode.DepPkg.Namespaces[i].Names[j].Versions = versionSmall
+
 				// Compare versions
 				for k, version1 := range versionBig {
 					if k >= len(versionSmall) {
 						diffs = append(diffs, fmt.Sprintf("Version %s not present for name %s in namespace %s,", version1.Version, name1.Name, namespace1.Namespace))
+						diffedNode.DepPkg.Namespaces[i].Names[j].Versions = append(diffedNode.DepPkg.Namespaces[i].Names[j].Versions, DiffMissingVersion(dmp, version1))
 						continue
 					}
 
@@ -821,11 +922,12 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 
 					if version1.Version != version2.Version {
 						diffs = append(diffs, fmt.Sprintf("Version %s != %s for name %s in namespace %s", version1.Version, version2.Version, name1.Name, namespace1.Namespace))
+						diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Version = ComputeStringDiffs(dmp, version1.Version, version2.Version)
 					}
 
 					if version1.Subpath != version2.Subpath {
-						diffs = append(diffs, fmt.Sprintf("Subpath %s != %s for version %s for name %s in namespace %s,", version1.Subpath, version2.Subpath, version1.Version, name1.Name, namespace1.Namespace))
-
+						diffs = append(diffs, fmt.Sprintf("Subpath %s != %s for version %s for name %s in namespace %s", version1.Subpath, version2.Subpath, version1.Version, name1.Name, namespace1.Namespace))
+						diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Subpath = ComputeStringDiffs(dmp, version1.Subpath, version2.Subpath)
 					}
 
 					if len(version1.Qualifiers) > len(version2.Qualifiers) {
@@ -839,73 +941,143 @@ func compareNodes(nodeOne, nodeTwo Node) ([]string, error) {
 						qualifierSmall = version2.Qualifiers
 					}
 
+					diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Qualifiers = qualifierSmall
+
 					for l, qualifier1 := range qualifierBig {
 						if l >= len(qualifierSmall) {
 							diffs = append(diffs, fmt.Sprintf("Qualifier %s:%s not present for version %s in name %s in namespace %s,", qualifier1.Key, qualifier1.Value, version1.Version, name1.Name, namespace1.Namespace))
+							diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Qualifiers = append(diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Qualifiers, DiffMissingQualifier(dmp, qualifier1))
 							continue
 						}
-						qualifier2 := qualifierSmall[l]
-						if qualifier2.Key != qualifier1.Key || qualifier1.Value != qualifier2.Value {
 
-							diffs = append(diffs, fmt.Sprintf("Qualifier unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+						qualifier2 := qualifierSmall[l]
+
+						if qualifier2.Key != qualifier1.Key {
+							diffs = append(diffs, fmt.Sprintf("Qualifier key unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+							diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Qualifiers[l].Key = ComputeStringDiffs(dmp, qualifier1.Key, qualifier2.Key)
+						}
+
+						if qualifier1.Value != qualifier2.Value {
+							diffs = append(diffs, fmt.Sprintf("Qualifier value unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+							diffedNode.DepPkg.Namespaces[i].Names[j].Versions[k].Qualifiers[l].Value = ComputeStringDiffs(dmp, qualifier1.Value, qualifier2.Value)
 						}
 					}
 				}
 			}
 		}
-
 	}
-	return diffs, nil
+	return diffedNode, diffs, nil
 }
-
-func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int, error) {
-
+func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analysisListTwo []*Node) ([]Node, [][]string, int, error) {
 	var longerPath, shorterPath []*Node
-	var pathDiff [][]string
-	var diffCount int
 
 	if len(analysisListOne) > len(analysisListTwo) {
 		longerPath = analysisListOne
 		shorterPath = analysisListTwo
-	} else if len(analysisListOne) < len(analysisListTwo) {
+	} else {
 		longerPath = analysisListTwo
 		shorterPath = analysisListOne
-	} else {
-		longerPath = analysisListOne
-		shorterPath = analysisListTwo
 	}
+
+	pathDiff := make([][]string, len(longerPath))
+	nodesDiff := make([]Node, len(longerPath))
+	var diffCount int
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	errChan := make(chan error, len(longerPath)) // Buffer channel to hold errors
 
 	for i, node := range longerPath {
-		//node
-		if i >= len(shorterPath) {
-			dumnode := &Node{}
-			if node.NodeType == "Package" {
-				dumnode.Pkg = model.AllIsDependencyTreePackage{}
-			} else if node.NodeType == "DependencyPackage" {
-				dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
+		wg.Add(1)
+		go func(i int, node *Node) {
+			defer wg.Done()
+
+			var diffs []string
+			var diffNode Node
+			var err error
+
+			if i >= len(shorterPath) {
+				dumnode := &Node{}
+				if node.NodeType == "Package" {
+					dumnode.Pkg = model.AllIsDependencyTreePackage{}
+				} else if node.NodeType == "DependencyPackage" {
+					dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
+				}
+
+				diffNode, diffs, err = compareNodes(dmp, *node, *dumnode)
+			} else {
+				diffNode, diffs, err = compareNodes(dmp, *node, *shorterPath[i])
 			}
 
-			diff, err := compareNodes(*node, *dumnode)
 			if err != nil {
-				return pathDiff, 0, fmt.Errorf(err.Error())
+				errChan <- err
+				return
 			}
 
-			pathDiff = append(pathDiff, diff)
-			diffCount += len(diff)
-
-		} else {
-			diff, err := compareNodes(*node, *shorterPath[i])
-			if err != nil {
-				return pathDiff, 0, fmt.Errorf(err.Error())
-			}
-			pathDiff = append(pathDiff, diff)
-			diffCount += len(diff)
-		}
+			mu.Lock()
+			pathDiff[i] = diffs
+			nodesDiff[i] = diffNode
+			diffCount += len(diffs)
+			mu.Unlock()
+		}(i, node)
 	}
 
-	return pathDiff, diffCount, nil
+	wg.Wait()
+	close(errChan) // Close the channel after all goroutines are done
 
+	// Check for errors
+	if len(errChan) != 0 {
+		return nodesDiff, pathDiff, 0, fmt.Errorf("could not diff node")
+	}
+
+	return nodesDiff, pathDiff, diffCount, nil
 }
+
+// func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analysisListTwo []*Node) ([]Node, [][]string, int, error) {
+// 	var longerPath, shorterPath []*Node
+
+// 	if len(analysisListOne) > len(analysisListTwo) {
+// 		longerPath = analysisListOne
+// 		shorterPath = analysisListTwo
+// 	} else {
+// 		longerPath = analysisListTwo
+// 		shorterPath = analysisListOne
+// 	}
+
+// 	pathDiff := make( [][]string, len(longerPath))
+// 	nodesDiff := make([]Node, len(longerPath))
+// 	var diffCount int
+
+// 	for i, node := range longerPath {
+// 		if i >= len(shorterPath) {
+// 			dumnode := &Node{}
+// 			if node.NodeType == "Package" {
+// 				dumnode.Pkg = model.AllIsDependencyTreePackage{}
+// 			} else if node.NodeType == "DependencyPackage" {
+// 				dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
+// 			}
+
+// 			diffNode, diffs, err := compareNodes(dmp, *node, *dumnode)
+// 			if err != nil {
+// 				return nodesDiff, pathDiff, 0, fmt.Errorf(err.Error())
+// 			}
+
+// 			pathDiff[i] = diffs
+// 			nodesDiff[i] = diffNode
+// 			diffCount += len(diffs)
+// 		} else {
+// 			diffNode, diffs, err := compareNodes(dmp, *node, *shorterPath[i])
+// 			if err != nil {
+// 				return nodesDiff, pathDiff, 0, fmt.Errorf(err.Error())
+// 			}
+// 			pathDiff[i] = diffs
+// 			nodesDiff[i] = diffNode
+// 			diffCount += len(diffs)
+// 		}
+// 	}
+
+// 	return nodesDiff, pathDiff, diffCount, nil
+// }
 
 func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 
@@ -940,8 +1112,9 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 			if ok {
 				continue
 			}
+			dmp := diffmatchpatch.New()
 
-			diffs, diffNum, err := CompareTwoPaths(pathOne, pathTwo)
+			nodeDiffs, diffs, diffNum, err := CompareTwoPaths(dmp, pathOne, pathTwo)
 
 			if err != nil {
 				return DiffResult{}, fmt.Errorf(err.Error())
@@ -951,6 +1124,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 				pathDiff.PathTwo = pathTwo
 				min = diffNum
 				pathDiff.Diffs = diffs
+				pathDiff.NodeDiffs = nodeDiffs
 				index = i
 				diffIndices = []EqualDifferencesPaths{{Diffs: diffs, Path: pathTwo, Index: i}}
 			} else if diffNum == min {

@@ -21,7 +21,6 @@ import (
 	"io"
 	"net/http"
 
-
 	"testing"
 
 	"github.com/dominikbraun/graph"
@@ -31,25 +30,25 @@ import (
 
 var diffTestFile = "https://raw.githubusercontent.com/guacsec/guac-test/main/hasSbom-pairs/hasSBOM-syft-spdx-k8s.gcr.io-kube-apiserver.v1.24.1.json"
 
-func readTestFileFromHub(fileUrl string) ([]byte, error){
+func readTestFileFromHub(fileUrl string) ([]byte, error) {
 
 	resp, err := http.Get(fileUrl)
-    if err != nil {
-        return nil, err
-    }
-    defer resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        return nil, err
-    }
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
-    return body, nil
+	return body, nil
 }
 
 func TestHighlightAnalysis(t *testing.T) {
 
-	data, err  := readTestFileFromHub(diffTestFile)
+	data, err := readTestFileFromHub(diffTestFile)
 	if err != nil {
 		t.Errorf("Error reading test JSON")
 	}
@@ -69,14 +68,14 @@ func TestHighlightAnalysis(t *testing.T) {
 		t.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
 	}
 
-	one, two,err := analyzer.HighlightAnalysis(graphOne, graphTwo, 0)
+	one, two, err := analyzer.HighlightAnalysis(graphOne, graphTwo, 0)
 
 	if err != nil {
 		t.Errorf("Error highlighting diff %v", err.Error())
 	}
 	if len(one) == 0 || len(two) == 0 {
 		t.Errorf("Error highlighting diff, wanted diffs got 0")
-}
+	}
 }
 
 func TestAddGraphNode(t *testing.T) {
@@ -98,8 +97,8 @@ func TestAddGraphEdge(t *testing.T) {
 	}
 }
 
-func TestEquivalence(t *testing.T){
-	data, err  := readTestFileFromHub(diffTestFile)
+func TestEquivalence(t *testing.T) {
+	data, err := readTestFileFromHub(diffTestFile)
 	if err != nil {
 		t.Errorf("Error reading test file %v", err.Error())
 	}
@@ -125,12 +124,10 @@ func TestEquivalence(t *testing.T){
 			t.Errorf("Reconstructed graph not equal " + err.Error())
 		}
 
-
 		ok, err = analyzer.GraphEdgesEqual(graphOne, graphTwo)
 		if !ok {
 			t.Errorf("Reconstructed graph edges not equal  " + err.Error())
 		}
 	}
 
-	
 }

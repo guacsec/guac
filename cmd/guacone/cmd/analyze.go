@@ -107,15 +107,23 @@ var analyzeCmd = &cobra.Command{
 		}
 
 		if args[0] == "diff" {
-			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+			gOne, gTwo, err := analyzer.CompressGraphs(graphs[0], graphs[1])
+			if err != nil {
+				logger.Fatalf("compress graphs fail: %v", err)
+			}
+		
+			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(gOne, gTwo, analyzer.Difference)
 			if err != nil {
 				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
 
-			diffs, err := analyzer.CompareAllPaths(analysisOne, analysisTwo)
+			diffs, err:= analyzer.CompareAllPaths(analysisOne, analysisTwo)
 			if err != nil {
 				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
+
+	
+			
 
 			if err = analyzer.PrintDiffedNodeTable(diffs); err != nil {
 				logger.Fatalf("unable to print diff analysis: %v", err)
@@ -126,7 +134,7 @@ var analyzeCmd = &cobra.Command{
 			}
 
 		} else if args[0] == "intersect" {
-			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 1)
+			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], analyzer.Intersection)
 			if err != nil {
 				logger.Fatalf("Unable to generate intersect analysis: %v", err)
 			}
@@ -134,7 +142,7 @@ var analyzeCmd = &cobra.Command{
 				logger.Fatalf("unable to print intersect analysis: %v", err)
 			}
 		} else if args[0] == "union" {
-			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 2)
+			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], analyzer.Union)
 			if err != nil {
 				logger.Fatalf("unable to generate union analysis: %v", err)
 			}
