@@ -39,8 +39,15 @@ func NewDSSEParser() common.DocumentParser {
 	}
 }
 
+// initializeDSSEParser clears out all values for the next iteration
+func (d *dsseParser) initializeDSSEParser() {
+	d.doc = nil
+	d.identities = make([]common.TrustInformation, 0)
+}
+
 // Parse breaks out the document into the graph components
 func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
+	d.initializeDSSEParser()
 	d.doc = doc
 
 	if err := d.getIdentity(ctx); err != nil {

@@ -68,6 +68,11 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		return nil, fmt.Errorf("failed hasSBOM query with error: %w", err)
 	}
 
+	// if not found return nil
+	if hasSBOMConnection == nil {
+		return nil, nil
+	}
+
 	// Large SBOMs (50MB+) hit the postgres parameter issue (HasSBOM: pq: got 97137 parameters but PostgreSQL only supports 65535 parameters).
 	// To overcome this, we can breakout the "included" pieces of the hasSBOM node into individual queries and reconstruct the node at the end.
 
@@ -123,8 +128,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						pkgVerErr: fmt.Errorf("failed included package query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedPkgs []*ent.PackageVersion
+				// if not found break
+				if pkgConn == nil {
+					break
+				}
 
+				var paginatedPkgs []*ent.PackageVersion
 				for _, edge := range pkgConn.Edges {
 					paginatedPkgs = append(paginatedPkgs, edge.Node)
 				}
@@ -152,8 +161,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						artErr: fmt.Errorf("failed included artifacts query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedArts []*ent.Artifact
+				// if not found break
+				if artConn == nil {
+					break
+				}
 
+				var paginatedArts []*ent.Artifact
 				for _, edge := range artConn.Edges {
 					paginatedArts = append(paginatedArts, edge.Node)
 				}
@@ -185,8 +198,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						depErr: fmt.Errorf("failed included dependency query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedDeps []*ent.Dependency
+				// if not found break
+				if depConnect == nil {
+					break
+				}
 
+				var paginatedDeps []*ent.Dependency
 				for _, edge := range depConnect.Edges {
 					paginatedDeps = append(paginatedDeps, edge.Node)
 				}
@@ -217,8 +234,12 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 						occurErr: fmt.Errorf("failed included occurrence query for hasSBOM with error: %w", err)}
 				}
 
-				var paginatedOccurs []*ent.Occurrence
+				// if not found break
+				if occurConnect == nil {
+					break
+				}
 
+				var paginatedOccurs []*ent.Occurrence
 				for _, edge := range occurConnect.Edges {
 					paginatedOccurs = append(paginatedOccurs, edge.Node)
 				}
@@ -363,7 +384,6 @@ func getSBOMObjectWithIncludes(q *ent.BillOfMaterialsQuery) *ent.BillOfMaterials
 		WithIncludedSoftwarePackages(withPackageVersionTree()).
 		WithIncludedDependencies(func(q *ent.DependencyQuery) {
 			q.WithPackage(withPackageVersionTree()).
-				WithDependentPackageName(withPackageNameTree()).
 				WithDependentPackageVersion(withPackageVersionTree())
 		}).
 		WithIncludedOccurrences(func(q *ent.OccurrenceQuery) {
@@ -371,6 +391,31 @@ func getSBOMObjectWithIncludes(q *ent.BillOfMaterialsQuery) *ent.BillOfMaterials
 				WithPackage(withPackageVersionTree()).
 				WithSource(withSourceNameTreeQuery())
 		})
+}
+
+func (b *EntBackend) deleteHasSbom(ctx context.Context, hasSBOMID uuid.UUID) (bool, error) {
+	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		tx := ent.TxFromContext(ctx)
+
+		// first delete isDependency and isOccurrence nodes that are part of the hasSBOM node
+		if err := b.deleteIsDependency(ctx, hasSBOMID.String()); err != nil {
+			return nil, fmt.Errorf("failed to delete isDependency with error: %w", err)
+		}
+
+		if err := b.deleteIsOccurrences(ctx, hasSBOMID.String()); err != nil {
+			return nil, fmt.Errorf("failed to delete isOccurrence with error: %w", err)
+		}
+
+		// delete hasSBOM node
+		if err := tx.BillOfMaterials.DeleteOneID(hasSBOMID).Exec(ctx); err != nil {
+			return nil, errors.Wrap(err, "failed to delete hasSBOM with error")
+		}
+		return nil, nil
+	})
+	if txErr != nil {
+		return false, txErr
+	}
+	return true, nil
 }
 
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {

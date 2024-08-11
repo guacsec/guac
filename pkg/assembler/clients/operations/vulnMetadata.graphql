@@ -38,3 +38,28 @@ mutation IngestBulkVulnHasMetadata(
     vulnerabilityMetadataList: $vulnerabilityMetadataList
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC VulnerabilityMetadata
+
+query VulnerabilityMetadata($filter: VulnerabilityMetadataSpec!) {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: $filter) {
+    ...AllVulnMetadataTree
+  }
+}
+
+query VulnerabilityMetadataList($filter: VulnerabilityMetadataSpec!, $after: ID, $first: Int) {
+  vulnerabilityMetadataList(vulnerabilityMetadataSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllVulnMetadataTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

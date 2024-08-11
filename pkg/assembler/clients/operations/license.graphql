@@ -34,3 +34,20 @@ query Licenses($filter: LicenseSpec!) {
     ...AllLicenseTree
   }
 }
+
+query LicenseList($filter: LicenseSpec!, $after: ID, $first: Int) {
+  licenseList(licenseSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllLicenseTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

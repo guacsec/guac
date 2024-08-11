@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/stretchr/testify/assert"
 )
 
 var vmd1 = &model.ScanMetadata{
@@ -1511,6 +1512,134 @@ func TestIngestCertifyVulns(t *testing.T) {
 			if diff := cmp.Diff(test.ExpVuln, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
+		})
+	}
+}
+
+func TestDeleteCertifyVuln(t *testing.T) {
+	ctx := context.Background()
+	b := setupTest(t)
+	type call struct {
+		Pkgs         []*model.IDorPkgInput
+		Vulns        []*model.IDorVulnerabilityInput
+		CertifyVulns []*model.ScanMetadataInput
+	}
+	tests := []struct {
+		InPkg        []*model.PkgInputSpec
+		Name         string
+		InVuln       []*model.VulnerabilityInputSpec
+		Calls        []call
+		ExpVuln      []*model.CertifyVuln
+		Query        *model.CertifyVulnSpec
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:   "HappyPath",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
+					CertifyVulns: []*model.ScanMetadataInput{
+						{
+							Collector:      "test collector",
+							Origin:         "test origin",
+							ScannerVersion: "v1.0.0",
+							ScannerURI:     "test scanner uri",
+							DbVersion:      "2023.01.01",
+							DbURI:          "test db uri",
+							TimeScanned:    testdata.T1,
+						},
+						{
+							Collector:      "test collector",
+							Origin:         "test origin",
+							ScannerVersion: "v1.0.0",
+							ScannerURI:     "test scanner uri",
+							DbVersion:      "2023.01.01",
+							DbURI:          "test db uri",
+							TimeScanned:    testdata.T1,
+						},
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Collector: ptrfrom.String("test collector"),
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					ID:      "1",
+					Package: testdata.P2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+					},
+					Metadata: vmd1,
+				},
+				{
+					ID:      "10",
+					Package: testdata.P1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, v := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: v}); err != nil {
+					t.Fatalf("Could not ingest vulnerabilities: %a", err)
+				}
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
+					t.Fatalf("Could not ingest packages: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestCertifyVulns(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+
+			}
+			got, err := b.CertifyVulnList(ctx, *test.Query, nil, nil)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			var returnedObjects []*model.CertifyVuln
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVuln, returnedObjects, commonOpts); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+			deleted, err := b.Delete(ctx, returnedObjects[0].ID)
+			if err != nil {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			assert.True(t, deleted)
+			secondGot, err := b.CertifyVulnList(ctx, *test.Query, nil, nil)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			assert.True(t, len(secondGot.Edges) == 1)
 		})
 	}
 }

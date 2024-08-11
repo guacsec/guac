@@ -19,12 +19,8 @@ const (
 	FieldID = "id"
 	// FieldPackageID holds the string denoting the package_id field in the database.
 	FieldPackageID = "package_id"
-	// FieldDependentPackageNameID holds the string denoting the dependent_package_name_id field in the database.
-	FieldDependentPackageNameID = "dependent_package_name_id"
 	// FieldDependentPackageVersionID holds the string denoting the dependent_package_version_id field in the database.
 	FieldDependentPackageVersionID = "dependent_package_version_id"
-	// FieldVersionRange holds the string denoting the version_range field in the database.
-	FieldVersionRange = "version_range"
 	// FieldDependencyType holds the string denoting the dependency_type field in the database.
 	FieldDependencyType = "dependency_type"
 	// FieldJustification holds the string denoting the justification field in the database.
@@ -37,8 +33,6 @@ const (
 	FieldDocumentRef = "document_ref"
 	// EdgePackage holds the string denoting the package edge name in mutations.
 	EdgePackage = "package"
-	// EdgeDependentPackageName holds the string denoting the dependent_package_name edge name in mutations.
-	EdgeDependentPackageName = "dependent_package_name"
 	// EdgeDependentPackageVersion holds the string denoting the dependent_package_version edge name in mutations.
 	EdgeDependentPackageVersion = "dependent_package_version"
 	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
@@ -52,13 +46,6 @@ const (
 	PackageInverseTable = "package_versions"
 	// PackageColumn is the table column denoting the package relation/edge.
 	PackageColumn = "package_id"
-	// DependentPackageNameTable is the table that holds the dependent_package_name relation/edge.
-	DependentPackageNameTable = "dependencies"
-	// DependentPackageNameInverseTable is the table name for the PackageName entity.
-	// It exists in this package in order to avoid circular dependency with the "packagename" package.
-	DependentPackageNameInverseTable = "package_names"
-	// DependentPackageNameColumn is the table column denoting the dependent_package_name relation/edge.
-	DependentPackageNameColumn = "dependent_package_name_id"
 	// DependentPackageVersionTable is the table that holds the dependent_package_version relation/edge.
 	DependentPackageVersionTable = "dependencies"
 	// DependentPackageVersionInverseTable is the table name for the PackageVersion entity.
@@ -77,9 +64,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldPackageID,
-	FieldDependentPackageNameID,
 	FieldDependentPackageVersionID,
-	FieldVersionRange,
 	FieldDependencyType,
 	FieldJustification,
 	FieldOrigin,
@@ -145,19 +130,9 @@ func ByPackageID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPackageID, opts...).ToFunc()
 }
 
-// ByDependentPackageNameID orders the results by the dependent_package_name_id field.
-func ByDependentPackageNameID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDependentPackageNameID, opts...).ToFunc()
-}
-
 // ByDependentPackageVersionID orders the results by the dependent_package_version_id field.
 func ByDependentPackageVersionID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDependentPackageVersionID, opts...).ToFunc()
-}
-
-// ByVersionRange orders the results by the version_range field.
-func ByVersionRange(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldVersionRange, opts...).ToFunc()
 }
 
 // ByDependencyType orders the results by the dependency_type field.
@@ -192,13 +167,6 @@ func ByPackageField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByDependentPackageNameField orders the results by dependent_package_name field.
-func ByDependentPackageNameField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDependentPackageNameStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByDependentPackageVersionField orders the results by dependent_package_version field.
 func ByDependentPackageVersionField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -224,13 +192,6 @@ func newPackageStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PackageInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, PackageTable, PackageColumn),
-	)
-}
-func newDependentPackageNameStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DependentPackageNameInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, DependentPackageNameTable, DependentPackageNameColumn),
 	)
 }
 func newDependentPackageVersionStep() *sqlgraph.Step {

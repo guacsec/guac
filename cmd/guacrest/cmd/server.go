@@ -27,6 +27,8 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/go-chi/chi"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 	"github.com/guacsec/guac/pkg/cli"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/server"
@@ -40,7 +42,7 @@ func startServer() {
 	httpClient := &http.Client{Transport: cli.HTTPHeaderTransport(ctx, flags.headerFile, http.DefaultTransport)}
 	gqlClient := getGraphqlServerClientOrExit(ctx, httpClient)
 
-	restApiHandler  := gen.Handler(gen.NewStrictHandler(server.NewDefaultServer(gqlClient), nil))
+	restApiHandler := gen.Handler(gen.NewStrictHandler(getRestApiHandlerOrExit(ctx, gqlClient), nil))
 
 	router := chi.NewRouter()
 	router.Use(server.AddLoggerToCtxMiddleware, server.LogRequestsMiddleware)
@@ -55,8 +57,8 @@ func startServer() {
 		proto = "https"
 	}
 
-	logger.Infof("Connect to the server at %s://0.0.0.0:%d/", proto, flags.restAPIServerPort)
-	logger.Info("Starting Server")
+	logger.Infof("connect to the server at %s://0.0.0.0:%d/", proto, flags.restAPIServerPort)
+	logger.Info("starting Server")
 	go func() {
 		var err error
 		if proto == "https" {
@@ -65,14 +67,14 @@ func startServer() {
 			err = server.ListenAndServe()
 		}
 		if err != nil && err != http.ErrServerClosed {
-			logger.Errorf("Server finished with error: %s", err)
+			logger.Errorf("server finished with error: %s", err)
 		}
 	}()
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	s := <-sigs
-	logger.Infof("Signal recieved: %s, shutting down gracefully\n", s.String())
+	logger.Infof("signal recieved: %s, shutting down gracefully\n", s.String())
 
 	done := make(chan bool, 1)
 	ctx, cf := context.WithCancel(ctx)
@@ -90,6 +92,36 @@ func startServer() {
 	cf()
 }
 
+// get the service handler
+// if an ent address is provided, get the handler backed by ent
+func getRestApiHandlerOrExit(ctx context.Context, gqlClient graphql.Client) gen.StrictServerInterface {
+	logger := logging.FromContext(ctx)
+	if flags.dbDirectConnection {
+		logger.Infof("directly connecting to the Ent backend for optimized endpoint" +
+			"implementation. This is an experimental feature")
+		ent := getEntClientOrExit(ctx)
+		handler := server.NewEntConnectedServer(ent, gqlClient)
+		return handler
+	}
+	return server.NewDefaultServer(gqlClient)
+}
+
+func getEntClientOrExit(ctx context.Context) *ent.Client {
+	logger := logging.FromContext(ctx)
+	client, err := backend.GetReadOnlyClient(ctx, &backend.BackendOptions{
+		DriverName: flags.dbDriver,
+		Address:    flags.dbAddress,
+		Debug:      false,
+		// starting up the REST API shouldn't lead to a database migration, restart
+		// the graphql server instead
+		AutoMigrate: false,
+	})
+	if err != nil {
+		logger.Fatalf("error getting the Ent client: %s", err)
+	}
+	return client
+}
+
 // get the graphql client and test the connection
 func getGraphqlServerClientOrExit(ctx context.Context, httpClient *http.Client) graphql.Client {
 	logger := logging.FromContext(ctx)
@@ -98,7 +130,7 @@ func getGraphqlServerClientOrExit(ctx context.Context, httpClient *http.Client) 
 	// expected here
 	gqlBaseAddr, ok := strings.CutSuffix(flags.gqlServerAddress, "query")
 	if !ok {
-		logger.Fatalf("Unexpected GraphQL server address. URL does not end in %q", "query")
+		logger.Fatalf("unexpected GraphQL server address. URL does not end in %q", "query")
 	}
 
 	gqlHealthzEndpoint := fmt.Sprintf("%s/healthz", gqlBaseAddr)
@@ -111,6 +143,6 @@ func getGraphqlServerClientOrExit(ctx context.Context, httpClient *http.Client) 
 			gqlHealthzEndpoint, code)
 	}
 
-	logger.Info("Successfully connected to Graphql Server")
+	logger.Info("successfully connected to Graphql Server")
 	return graphql.NewClient(flags.gqlServerAddress, httpClient)
 }

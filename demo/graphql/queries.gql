@@ -51,7 +51,6 @@ query PkgQ4 {
 fragment allIsDependencyTree on IsDependency {
   id
   justification
-  versionRange
   package {
     ...allPkgTree
   }

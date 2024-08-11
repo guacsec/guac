@@ -62,12 +62,10 @@ type CertifyVulnEdges struct {
 // VulnerabilityOrErr returns the Vulnerability value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertifyVulnEdges) VulnerabilityOrErr() (*VulnerabilityID, error) {
-	if e.loadedTypes[0] {
-		if e.Vulnerability == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: vulnerabilityid.Label}
-		}
+	if e.Vulnerability != nil {
 		return e.Vulnerability, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: vulnerabilityid.Label}
 	}
 	return nil, &NotLoadedError{edge: "vulnerability"}
 }
@@ -75,12 +73,10 @@ func (e CertifyVulnEdges) VulnerabilityOrErr() (*VulnerabilityID, error) {
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertifyVulnEdges) PackageOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[1] {
-		if e.Package == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.Package != nil {
 		return e.Package, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package"}
 }

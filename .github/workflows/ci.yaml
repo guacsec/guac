@@ -36,9 +36,9 @@ jobs:
     name: CI for integration tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # tag=v3.2.1
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
         with:
           go-version: '1.21'
       - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
@@ -54,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           cd internal/testing/backend
-          docker-compose up -d
+          docker compose up -d
           sleep 10
           echo "backends started"
       - name: Run integration tests
@@ -67,9 +67,9 @@ jobs:
     name: CI for unit tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # tag=v3.2.1
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
         with:
           go-version: '1.21'
       - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
@@ -88,9 +88,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # tag=v3.2.1
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
         with:
           go-version: '1.21'
       - name: Install atlas
@@ -106,15 +106,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # tag=v5.0.1
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v5.0.2
         with:
           go-version: '1.21'
       - name: Install atlas
         uses: ariga/setup-atlas@v0
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64 # tag=v3.2.0
+        uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86 # tag=v3.2.0
         with:
           only-new-issues: true
           skip-cache: true
@@ -128,15 +128,54 @@ jobs:
   end-to-end:
     name: E2E
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: guac
+          POSTGRES_PASSWORD: guac
+          POSTGRES_DB: guac
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U guac -d guac"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
-    - uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+    - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32
       with:
         go-version: '~1.21'
-    - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
+    - uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
       with:
         python-version: '3.10'
-    - run: ./internal/testing/e2e/e2e
+    - name: Install PostgreSQL client tools
+      run: |
+        sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client-15
+    - name: Set up NATS Server with JetStream
+      run: |
+        docker run -d --name nats-server -p 4222:4222 -p 8222:8222 nats:2.9.17 -js
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        until pg_isready -h localhost -p 5432 -U guac -d guac; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 5
+        done
+    - name: Run e2e tests
+      run: |
+        ./internal/testing/e2e/e2e
+      env:
+        POSTGRES_USER: guac
+        POSTGRES_PASSWORD: guac
+        POSTGRES_DB: guac
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        PGPASSWORD: guac
+        GUAC_DIR: /home/runner/work/guac/guac
 
   tilt-ci:
     name: Run 'tilt ci'
@@ -180,13 +219,13 @@ jobs:
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/kind
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 # v5.0.0
+        uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
         with:
           install-only: true
       - name: Checkout code
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # tag=v3.2.1
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
         with:
           go-version: '1.21'
       - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2

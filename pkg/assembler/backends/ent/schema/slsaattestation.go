@@ -62,9 +62,9 @@ func (SLSAAttestation) Fields() []ent.Field {
 // Edges of the SLSA.
 func (SLSAAttestation) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("built_from", Artifact.Type),
-		edge.To("built_by", Builder.Type).Unique().Field("built_by_id").Required(),
-		edge.To("subject", Artifact.Type).Unique().Field("subject_id").Required(),
+		edge.To("built_from", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("built_by", Builder.Type).Unique().Field("built_by_id").Required().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("subject", Artifact.Type).Unique().Field("subject_id").Required().Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

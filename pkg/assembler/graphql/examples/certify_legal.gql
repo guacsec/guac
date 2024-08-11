@@ -1,9 +1,81 @@
+fragment AllPkgTree on Package {
+  id
+  type
+  namespaces {
+    id
+    namespace
+    names {
+      id
+      name
+      versions {
+        id
+        purl
+        version
+        qualifiers {
+          key
+          value
+        }
+        subpath
+      }
+    }
+  }
+}
+
+fragment AllSourceTree on Source {
+  id
+  type
+  namespaces {
+    id
+    namespace
+    names {
+      id
+      name
+      tag
+      commit
+    }
+  }
+}
+
+fragment AllLicenseTree on License {
+  id
+  name
+  inline
+  listVersion
+}
+
+fragment AllCertifyLegalTree on CertifyLegal {
+  id
+  subject {
+    __typename
+    ... on Package {
+      ...AllPkgTree
+    }
+    ... on Source {
+      ...AllSourceTree
+    }
+  }
+  declaredLicense
+  declaredLicenses {
+    ...AllLicenseTree
+  }
+  discoveredLicense
+  discoveredLicenses {
+    ...AllLicenseTree
+  }
+  attribution
+  justification
+  timeScanned
+  origin
+  collector
+}
+
+
 fragment AllCertifyLegalPaginationTree on CertifyLegalConnection {
     totalCount
     edges {
         cursor
         node {
-            id
+            ...AllCertifyLegalTree
         }
     }
     pageInfo {

@@ -310,29 +310,6 @@ func HasHasSourceAtWith(preds ...predicate.HasSourceAt) predicate.PackageName {
 	})
 }
 
-// HasDependency applies the HasEdge predicate on the "dependency" edge.
-func HasDependency() predicate.PackageName {
-	return predicate.PackageName(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, DependencyTable, DependencyColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasDependencyWith applies the HasEdge predicate on the "dependency" edge with a given conditions (other predicates).
-func HasDependencyWith(preds ...predicate.Dependency) predicate.PackageName {
-	return predicate.PackageName(func(s *sql.Selector) {
-		step := newDependencyStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasCertification applies the HasEdge predicate on the "certification" edge.
 func HasCertification() predicate.PackageName {
 	return predicate.PackageName(func(s *sql.Selector) {

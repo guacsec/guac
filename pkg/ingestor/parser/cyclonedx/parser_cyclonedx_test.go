@@ -17,6 +17,7 @@ package cyclonedx
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -38,6 +39,7 @@ func Test_cyclonedxParser(t *testing.T) {
 		doc            *processor.Document
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
+		reportedErr    error
 	}{{
 		name: "valid small CycloneDX document",
 		doc: &processor.Document{
@@ -127,6 +129,25 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: noAnalysisVexPredicates(),
 		wantErr:        false,
+	}, {
+		name: "valid CycloneDX VEX document with license information",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXLegalExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
+		wantErr:        false,
+	}, {
+		name: "CycloneDX v1.4 with valid but unparsable license information",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXVersion1_4,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
+		wantErr:        true,
+		reportedErr:    unsupportedLicenseVersionError,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -137,6 +158,12 @@ func Test_cyclonedxParser(t *testing.T) {
 				return
 			}
 			if err != nil {
+				if tt.reportedErr != nil {
+					if !errors.Is(err, tt.reportedErr) {
+						t.Errorf("failed to get error specified = %v, wantErr %v", err, tt.reportedErr)
+						return
+					}
+				}
 				return
 			}
 

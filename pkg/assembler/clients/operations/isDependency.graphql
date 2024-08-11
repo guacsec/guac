@@ -20,13 +20,11 @@
 mutation IngestIsDependency(
   $pkg: IDorPkgInput!
   $depPkg: IDorPkgInput!
-  $depPkgMatchType: MatchFlags!
   $dependency: IsDependencyInputSpec!
 ) {
   ingestDependency(
     pkg: $pkg
     depPkg: $depPkg
-    depPkgMatchType: $depPkgMatchType
     dependency: $dependency
   )
 }
@@ -36,13 +34,11 @@ mutation IngestIsDependency(
 mutation IngestIsDependencies(
   $pkgs: [IDorPkgInput!]!
   $depPkgs: [IDorPkgInput!]!
-  $depPkgMatchType: MatchFlags!
   $dependencies: [IsDependencyInputSpec!]!
 ) {
   ingestDependencies(
     pkgs: $pkgs
     depPkgs: $depPkgs
-    depPkgMatchType: $depPkgMatchType
     dependencies: $dependencies
   )
 }
@@ -52,5 +48,22 @@ mutation IngestIsDependencies(
 query Dependencies($filter: IsDependencySpec!) {
   IsDependency(isDependencySpec: $filter) {
     ...AllIsDependencyTree
+  }
+}
+
+query DependencyList($filter: IsDependencySpec!, $after: ID, $first: Int) {
+  IsDependencyList(isDependencySpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllIsDependencyTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
   }
 }

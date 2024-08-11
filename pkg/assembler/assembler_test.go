@@ -119,7 +119,6 @@ func TestIngestPredicates(t *testing.T) {
 					DepPkg: baselayoutPack,
 					IsDependency: &generated.IsDependencyInputSpec{
 						DependencyType: generated.DependencyTypeUnknown,
-						VersionRange:   "3.2.0-r22",
 						Justification:  "top level package dependency",
 					},
 				},
@@ -128,7 +127,6 @@ func TestIngestPredicates(t *testing.T) {
 					DepPkg: baselayoutdataPack,
 					IsDependency: &generated.IsDependencyInputSpec{
 						DependencyType: generated.DependencyTypeUnknown,
-						VersionRange:   "3.2.0-r22",
 						Justification:  "top level package dependency",
 					},
 				},
@@ -208,7 +206,7 @@ func TestIngestPredicates(t *testing.T) {
 							{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
 							{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 							{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
-							{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
+							{Key: "slsa.runDetails.metadata.invocationId", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
 							{Key: "slsa.runDetails.metadata.startedOn", Value: "2023-01-01T12:34:56Z"},
 						},
 					},

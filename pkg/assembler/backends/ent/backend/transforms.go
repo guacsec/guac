@@ -173,79 +173,37 @@ func valueOrDefault[T any](v *T, def T) T {
 	return *v
 }
 
-func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
-	return &model.IsOccurrence{
-		ID:            occurrenceGlobalID(o.ID.String()),
-		Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
-		Artifact:      toModelArtifact(o.Edges.Artifact),
-		Justification: o.Justification,
-		Origin:        o.Origin,
-		Collector:     o.Collector,
-		DocumentRef:   o.DocumentRef,
-	}
+func toModelIsOccurrenceWithSubject(id *ent.Occurrence) *model.IsOccurrence {
+	return toModelIsOccurrence(id, true)
 }
 
-//func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.IsOccurrence {
-//	return &model.IsOccurrence{
-//		ID:            nodeID(o.ID),
-//		Subject:       sub,
-//		Artifact:      toModelArtifact(o.Edges.Artifact),
-//		Justification: o.Justification,
-//		Origin:        o.Origin,
-//		Collector:     o.Collector,
-//	}
-//}
-
-//func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
-//	if input == nil {
-//		return nil
-//	}
-//	out := make([]*model.PackageQualifierSpec, len(input))
-//	for i, in := range input {
-//		out[i] = &model.PackageQualifierSpec{
-//			Key:   in.Key,
-//			Value: &in.Value,
-//		}
-//	}
-//	return out
-//}
-
-func toModelIsDependencyWithBackrefs(id *ent.Dependency) *model.IsDependency {
-	return toModelIsDependency(id, true)
-}
-
-//func toModelIsDependencyWithoutBackrefs(id *ent.Dependency) *model.IsDependency {
-//	return toModelIsDependency(id, false)
-//}
-
-func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency {
-	var pkg *model.Package
-	var depPkg *model.Package
+func toModelIsOccurrence(o *ent.Occurrence, backrefs bool) *model.IsOccurrence {
 	if backrefs {
-		pkg = toModelPackage(backReferencePackageVersion(id.Edges.Package))
-		if id.Edges.DependentPackageName != nil {
-			depPkg = toModelPackage(backReferencePackageName(id.Edges.DependentPackageName))
-			// in this case, the expected response is package name with an empty package version array
-			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
-		} else {
-			depPkg = toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion))
+		return &model.IsOccurrence{
+			ID:            occurrenceGlobalID(o.ID.String()),
+			Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
+			Artifact:      toModelArtifact(o.Edges.Artifact),
+			Justification: o.Justification,
+			Origin:        o.Origin,
+			Collector:     o.Collector,
+			DocumentRef:   o.DocumentRef,
 		}
 	} else {
-		pkg = toModelPackage(id.Edges.Package.Edges.Name)
-		if id.Edges.DependentPackageName != nil {
-			depPkg = toModelPackage(id.Edges.DependentPackageName)
-			// in this case, the expected response is package name with an empty package version array
-			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
-		} else {
-			depPkg = toModelPackage(id.Edges.DependentPackageVersion.Edges.Name)
+		return &model.IsOccurrence{
+			ID:            occurrenceGlobalID(o.ID.String()),
+			Justification: o.Justification,
+			Origin:        o.Origin,
+			Collector:     o.Collector,
+			DocumentRef:   o.DocumentRef,
 		}
 	}
+}
 
+func toModelIsDependencyWithBackrefs(id *ent.Dependency) *model.IsDependency {
 	return &model.IsDependency{
 		ID:                dependencyGlobalID(id.ID.String()),
-		Package:           pkg,
-		DependencyPackage: depPkg,
-		VersionRange:      id.VersionRange,
+		Package:           toModelPackage(backReferencePackageVersion(id.Edges.Package)),
+		DependencyPackage: toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion)),
 		DependencyType:    dependencyTypeFromEnum(id.DependencyType),
 		Justification:     id.Justification,
 		Origin:            id.Origin,
@@ -284,6 +242,7 @@ func toModelHasSBOMWithIncluded(sbom *ent.BillOfMaterials, includedSoftwarePacka
 		IncludedOccurrences:  collect(includedOccurrences, toModelIsOccurrenceWithSubject),
 	}
 }
+
 func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
 		ID:                   hasSBOMGlobalID(sbom.ID.String()),

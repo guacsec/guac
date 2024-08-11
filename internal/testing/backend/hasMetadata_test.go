@@ -761,6 +761,40 @@ func TestHasMetadata(t *testing.T) {
 					DocumentRef: "test",
 				},
 			},
+		}, {
+			Name:  "Two packages with superset qualifiers",
+			InPkg: []*model.PkgInputSpec{testdata.P5, testdata.P7},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P5},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HM: &model.HasMetadataInputSpec{
+						Key:           "key1",
+						Value:         "value1",
+						Timestamp:     time.Unix(1e9, 0),
+						Justification: "another test justification",
+					},
+				},
+			},
+			Query: &model.HasMetadataSpec{
+				Key:           ptrfrom.String("key1"),
+				Value:         ptrfrom.String("value1"),
+				Since:         ptrfrom.Time(time.Unix(1e9, 0)),
+				Justification: ptrfrom.String("another test justification"),
+			},
+			ExpHM: []*model.HasMetadata{
+				{
+					Subject:       testdata.P5out,
+					Key:           "key1",
+					Value:         "value1",
+					Timestamp:     time.Unix(1e9, 0),
+					Justification: "another test justification",
+				},
+			},
 		},
 	}
 	for _, test := range tests {

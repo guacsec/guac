@@ -92,7 +92,7 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 
 func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, 0)
+		packageQuery := root_package.NewPackageQuery(client, 0, 60000, nil)
 		return packageQuery
 	}, nil
 }

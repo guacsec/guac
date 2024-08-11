@@ -86,3 +86,28 @@ mutation IngestPointOfContactArtifacts(
     pointOfContacts: $pointOfContacts
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC Point of Contact
+
+query PointOfContacts($filter: PointOfContactSpec!) {
+  PointOfContact(pointOfContactSpec: $filter) {
+    ...AllPointOfContact
+  }
+}
+
+query PointOfContactList($filter: PointOfContactSpec!, $after: ID, $first: Int) {
+  PointOfContactList(pointOfContactSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllPointOfContact
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

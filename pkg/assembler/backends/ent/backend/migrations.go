@@ -22,6 +22,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hook"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/migrate"
 	"github.com/guacsec/guac/pkg/logging"
 
@@ -33,6 +34,19 @@ type BackendOptions struct {
 	Address     string
 	Debug       bool
 	AutoMigrate bool
+}
+
+// GetReadOnlyClient sets up the ent backend and returns a read-only client.
+func GetReadOnlyClient(ctx context.Context, options *BackendOptions) (*ent.Client, error) {
+	client, err := SetupBackend(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	// https://entgo.io/docs/hooks/#mutation
+	client.Use(hook.Reject(
+		ent.OpCreate | ent.OpUpdate | ent.OpUpdateOne | ent.OpDelete | ent.OpDeleteOne,
+	))
+	return client, nil
 }
 
 // SetupBackend sets up the ent backend, preparing the database and returning a client

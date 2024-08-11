@@ -38,7 +38,6 @@ func TestPath(t *testing.T) {
 	type isDepCall struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
-		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
@@ -149,16 +148,15 @@ func TestPath(t *testing.T) {
 			isDepCall: &isDepCall{
 				P1: testdata.P1,
 				P2: testdata.P2,
-				MF: mAll,
 				ID: &model.IsDependencyInputSpec{},
 			},
 			want: []model.Node{
 				testdata.P1out,
 				&model.IsDependency{
 					Package:           testdata.P1out,
-					DependencyPackage: testdata.P2outName,
+					DependencyPackage: testdata.P2out,
 				},
-				testdata.P2outName,
+				testdata.P2out,
 			},
 		},
 	}
@@ -214,7 +212,7 @@ func TestPath(t *testing.T) {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
-				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, *tt.isDepCall.ID)
 				if err != nil {
 					t.Fatalf("did not get expected ingest error, got: %v", err)
 				}
@@ -226,7 +224,7 @@ func TestPath(t *testing.T) {
 					t.Fatal()
 				}
 				startID = found[0].Package.Namespaces[0].Names[0].Versions[0].ID
-				stopID = found[0].DependencyPackage.Namespaces[0].Names[0].ID
+				stopID = found[0].DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
 			}
 			got, err := b.Path(ctx, startID, stopID, 5, tt.edges)
 			if (err != nil) != tt.wantPathErr {
@@ -302,7 +300,6 @@ func TestNodes(t *testing.T) {
 	type isDepCall struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
-		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	type isOcurCall struct {
@@ -331,11 +328,17 @@ func TestNodes(t *testing.T) {
 	}
 	tests := []struct {
 		name               string
-		pkgInput           *model.PkgInputSpec
+		pkgVersionInput    *model.PkgInputSpec
+		pkgNameInput       *model.PkgInputSpec
+		pkgNamespaceInput  *model.PkgInputSpec
+		pkgTypeInput       *model.PkgInputSpec
 		artifactInput      *model.ArtifactInputSpec
 		builderInput       *model.BuilderInputSpec
-		srcInput           *model.SourceInputSpec
+		srcNameInput       *model.SourceInputSpec
+		srcNamespaceInput  *model.SourceInputSpec
+		srcTypeInput       *model.SourceInputSpec
 		vulnInput          *model.VulnerabilityInputSpec
+		vulnTypeInput      *model.VulnerabilityInputSpec
 		licenseInput       *model.LicenseInputSpec
 		inPkg              []*model.PkgInputSpec
 		inSrc              []*model.SourceInputSpec
@@ -363,10 +366,41 @@ func TestNodes(t *testing.T) {
 		want               []model.Node
 		wantErr            bool
 	}{{
-		name:     "package",
-		pkgInput: testdata.P1,
-		want:     []model.Node{testdata.P1out},
-		wantErr:  false,
+		name:            "package version",
+		pkgVersionInput: testdata.P1,
+		want:            []model.Node{testdata.P1out},
+		wantErr:         false,
+	}, {
+		name:         "package name",
+		pkgNameInput: testdata.P1,
+		want: []model.Node{&model.Package{
+			Type: "pypi",
+			Namespaces: []*model.PackageNamespace{{
+				Names: []*model.PackageName{{
+					Name:     "tensorflow",
+					Versions: []*model.PackageVersion{},
+				}},
+			}},
+		}},
+		wantErr: false,
+	}, {
+		name:              "package namespace",
+		pkgNamespaceInput: testdata.P1,
+		want: []model.Node{&model.Package{
+			Type: "pypi",
+			Namespaces: []*model.PackageNamespace{{
+				Names: []*model.PackageName{},
+			}},
+		}},
+		wantErr: false,
+	}, {
+		name:         "package type",
+		pkgTypeInput: testdata.P1,
+		want: []model.Node{&model.Package{
+			Type:       "pypi",
+			Namespaces: []*model.PackageNamespace{},
+		}},
+		wantErr: false,
 	}, {
 		name: "artifact",
 		artifactInput: &model.ArtifactInputSpec{
@@ -388,16 +422,42 @@ func TestNodes(t *testing.T) {
 		}},
 		wantErr: false,
 	}, {
-		name:     "source",
-		srcInput: testdata.S1,
-		want:     []model.Node{testdata.S1out},
-		wantErr:  false,
+		name:         "source name",
+		srcNameInput: testdata.S1,
+		want:         []model.Node{testdata.S1out},
+		wantErr:      false,
+	}, {
+		name:              "source namespace",
+		srcNamespaceInput: testdata.S1,
+		want: []model.Node{&model.Source{
+			Type: "git",
+			Namespaces: []*model.SourceNamespace{{
+				Namespace: "github.com/jeff",
+				Names:     []*model.SourceName{},
+			}},
+		}},
+		wantErr: false,
+	}, {
+		name:         "source type",
+		srcTypeInput: testdata.S1,
+		want: []model.Node{&model.Source{
+			Type:       "git",
+			Namespaces: []*model.SourceNamespace{},
+		}},
+		wantErr: false,
 	}, {
 		name:      "vulnerability",
 		vulnInput: testdata.C1,
 		want: []model.Node{&model.Vulnerability{
 			Type:             "cve",
 			VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+		}},
+	}, {
+		name:          "vulnerability type",
+		vulnTypeInput: testdata.C1,
+		want: []model.Node{&model.Vulnerability{
+			Type:             "cve",
+			VulnerabilityIDs: []*model.VulnerabilityID{},
 		}},
 	}, {
 		name:         "license",
@@ -602,12 +662,11 @@ func TestNodes(t *testing.T) {
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		want: []model.Node{&model.IsDependency{
 			Package:           testdata.P1out,
-			DependencyPackage: testdata.P2outName,
+			DependencyPackage: testdata.P2out,
 		}},
 	}, {
 		name:  "isOccurrence",
@@ -738,13 +797,37 @@ func TestNodes(t *testing.T) {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
-			if tt.pkgInput != nil {
-				ingestedPkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: tt.pkgInput})
+			if tt.pkgVersionInput != nil {
+				ingestedPkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: tt.pkgVersionInput})
 				if (err != nil) != tt.wantErr {
 					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedPkg.PackageVersionID
+			}
+			if tt.pkgNameInput != nil {
+				ingestedPkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: tt.pkgNameInput})
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedPkg.PackageNameID
+			}
+			if tt.pkgNamespaceInput != nil {
+				ingestedPkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: tt.pkgNamespaceInput})
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedPkg.PackageNamespaceID
+			}
+			if tt.pkgTypeInput != nil {
+				ingestedPkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: tt.pkgTypeInput})
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedPkg.PackageTypeID
 			}
 			if tt.artifactInput != nil {
 				ingestedArtID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: tt.artifactInput})
@@ -762,13 +845,29 @@ func TestNodes(t *testing.T) {
 				}
 				nodeID = ingestedBuilderID
 			}
-			if tt.srcInput != nil {
-				ingestedSrc, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: tt.srcInput})
+			if tt.srcNameInput != nil {
+				ingestedSrc, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: tt.srcNameInput})
 				if (err != nil) != tt.wantErr {
 					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedSrc.SourceNameID
+			}
+			if tt.srcNamespaceInput != nil {
+				ingestedSrc, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: tt.srcNamespaceInput})
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedSrc.SourceNamespaceID
+			}
+			if tt.srcTypeInput != nil {
+				ingestedSrc, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: tt.srcTypeInput})
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedSrc.SourceTypeID
 			}
 			if tt.vulnInput != nil {
 				ingestVuln, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: tt.vulnInput})
@@ -776,6 +875,13 @@ func TestNodes(t *testing.T) {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
 				nodeID = ingestVuln.VulnerabilityNodeID
+			}
+			if tt.vulnTypeInput != nil {
+				ingestVuln, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: tt.vulnTypeInput})
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
+				}
+				nodeID = ingestVuln.VulnerabilityTypeID
 			}
 			if tt.licenseInput != nil {
 				ingestedLicenseID, err := b.IngestLicense(ctx, &model.IDorLicenseInput{LicenseInput: tt.licenseInput})
@@ -897,7 +1003,7 @@ func TestNodes(t *testing.T) {
 				nodeID = hsID
 			}
 			if tt.isDepCall != nil {
-				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -1034,7 +1140,6 @@ func TestNeighbors(t *testing.T) {
 	type isDepCall struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
-		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	type isOcurCall struct {
@@ -2277,7 +2382,6 @@ func TestNeighbors(t *testing.T) {
 			&model.IsDependency{
 				Package:           includedTestExpectedPackage1,
 				DependencyPackage: includedTestExpectedPackage2,
-				VersionRange:      "dep1_range",
 				DependencyType:    model.DependencyTypeDirect,
 				Justification:     "dep1_justification",
 				Origin:            "dep1_origin",
@@ -2286,7 +2390,6 @@ func TestNeighbors(t *testing.T) {
 			&model.IsDependency{
 				Package:           includedTestExpectedPackage1,
 				DependencyPackage: includedTestExpectedPackage3,
-				VersionRange:      "dep2_range",
 				DependencyType:    model.DependencyTypeIndirect,
 				Justification:     "dep2_justification",
 				Origin:            "dep2_origin",
@@ -2542,7 +2645,6 @@ func TestNeighbors(t *testing.T) {
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryPkgNameID: true,
@@ -2554,17 +2656,13 @@ func TestNeighbors(t *testing.T) {
 				Namespaces: []*model.PackageNamespace{{
 					Names: []*model.PackageName{},
 				}}},
-			&model.IsDependency{
-				Package:           testdata.P1out,
-				DependencyPackage: testdata.P2outName,
-			}},
+		},
 	}, {
 		name:  "isDependency - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mSpecific,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryPkgVersionID: true,
@@ -2587,19 +2685,17 @@ func TestNeighbors(t *testing.T) {
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryIsDependencyID: true,
 		usingOnly:           []model.Edge{model.EdgeIsDependencyPackage},
-		want:                []model.Node{testdata.P1out, testdata.P2outName},
+		want:                []model.Node{testdata.P1out, testdata.P2out},
 	}, {
 		name:  "isDependency - isDependencyID - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
-			MF: mSpecific,
 			ID: &model.IsDependencyInputSpec{},
 		},
 		queryIsDependencyID: true,
@@ -3437,7 +3533,7 @@ func TestNeighbors(t *testing.T) {
 				}
 
 				for _, dep := range tt.hasSBOMCall.IsDeps {
-					if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
+					if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, *dep.isDep); err != nil {
 						t.Fatalf("Could not ingest dependency: %v", err)
 					} else {
 						includes.Dependencies = append(includes.Dependencies, isDep)
@@ -3527,7 +3623,7 @@ func TestNeighbors(t *testing.T) {
 				}
 			}
 			if tt.isDepCall != nil {
-				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}

@@ -275,11 +275,10 @@ func (i nounIds) ingestIsDependency(ctx context.Context, t *testing.T, gqlClient
 	}
 
 	// The IsDependency is attached to the package version node
-	flags := gql.MatchFlags{Pkg: gql.PkgMatchTypeSpecificVersion}
 	dependentSpec := gql.IDorPkgInput{PackageVersionID: &dependentId}
 	dependencySpec := gql.IDorPkgInput{PackageVersionID: &dependencyId}
 
-	res, err := gql.IngestIsDependency(ctx, gqlClient, dependentSpec, dependencySpec, flags, *spec)
+	res, err := gql.IngestIsDependency(ctx, gqlClient, dependentSpec, dependencySpec, *spec)
 	if err != nil {
 		t.Fatalf("Error ingesting IsDependency when setting up test: %s", err)
 	}

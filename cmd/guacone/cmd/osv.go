@@ -32,7 +32,6 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -42,11 +41,17 @@ import (
 )
 
 type osvOptions struct {
-	graphqlEndpoint   string
-	headerFile        string
-	poll              bool
-	csubClientOptions client.CsubClientOptions
-	interval          time.Duration
+	graphqlEndpoint         string
+	headerFile              string
+	poll                    bool
+	csubClientOptions       csub_client.CsubClientOptions
+	interval                time.Duration
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
+	// sets artificial latency on the certifier (default to nil)
+	addedLatency *time.Duration
+	// sets the batch size for pagination query for the certifier
+	batchSize int
 }
 
 var osvCmd = &cobra.Command{
@@ -61,6 +66,10 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
+			viper.GetString("certifier-latency"),
+			viper.GetInt("certifier-batch-size"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -87,7 +96,7 @@ var osvCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
+		packageQuery := root_package.NewPackageQuery(gqlclient, 0, opts.batchSize, opts.addedLatency)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)
@@ -106,7 +115,8 @@ var osvCmd = &cobra.Command{
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient,
+							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -119,7 +129,8 @@ var osvCmd = &cobra.Command{
 					totalNum += 1
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient,
+							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -138,7 +149,7 @@ var osvCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -147,7 +158,7 @@ var osvCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
@@ -214,6 +225,10 @@ func validateOSVFlags(
 	poll,
 	csubTls,
 	csubTlsSkipVerify bool,
+	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
+	certifierLatencyStr string,
+	batchSize int,
 ) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -225,15 +240,40 @@ func validateOSVFlags(
 	}
 	opts.interval = i
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if certifierLatencyStr != "" {
+		addedLatency, err := time.ParseDuration(certifierLatencyStr)
+		if err != nil {
+			return opts, fmt.Errorf("failed to parser duration with error: %w", err)
+		}
+		opts.addedLatency = &addedLatency
+	} else {
+		opts.addedLatency = nil
+	}
+
+	opts.batchSize = batchSize
+
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 	opts.csubClientOptions = csubOpts
+	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 
 	return opts, nil
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"certifier-latency",
+		"certifier-batch-size"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	osvCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(osvCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	certifierCmd.AddCommand(osvCmd)
 }

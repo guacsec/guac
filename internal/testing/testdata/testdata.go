@@ -89,6 +89,9 @@ var (
 	//go:embed exampledata/big-mongo-cyclonedx.json
 	CycloneDXBigExample []byte
 
+	//go:embed exampledata/cdx-v1.4.json
+	CycloneDXVersion1_4 []byte
+
 	//go:embed exampledata/npm-cyclonedx-dependencies-missing-depends-on.json
 	CycloneDXDependenciesMissingDependsOn []byte
 
@@ -124,6 +127,18 @@ var (
 
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
+
+	//go:embed exampledata/cd-log4j.json
+	ITE6CDLog4j []byte
+
+	//go:embed exampledata/cd-source-log4j.json
+	ITE6CDSourceLog4j []byte
+
+	//go:embed exampledata/cd-common-text.json
+	ITE6CDCommonText []byte
+
+	//go:embed exampledata/cd-source-common-text.json
+	ITE6CDSourceCommonText []byte
 
 	//go:embed exampledata/certify-novuln.json
 	ITE6NoVulnExample []byte
@@ -172,6 +187,9 @@ var (
 
 	//go:embed exampledata/ingest_predicates.json
 	IngestPredicatesExample []byte
+
+	//go:embed exampledata/small-legal-cyclonedx.json
+	CycloneDXLegalExample []byte
 
 	// json format
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -383,8 +401,56 @@ var (
     ]
 }
 `
+
+	ite6SLSA1_2 = `
+{
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "name": "sigstore",
+            "uri": "pkg:npm/sigstore/sigstore-js@4.2.0",
+            "digest": {
+                "sha1": "428601801d1f5d105351a403f58c38269de93f680"
+            }
+        }
+    ],
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "predicate": {
+        "buildDefinition": {
+            "buildType": "https://github.com/npm/cli/gha/v2",
+            "resolved_dependencies": [
+                {
+                    "uri": "pkg:npm/sigstore/segs@1.2.0",
+                    "digest": {
+                        "sha1": "5b8c0801d1f5d105351a403f58c38269de93f680"
+                    }
+                }
+            ]
+        },
+        "runDetails": {
+            "builder": {
+                "id": "https://github.com/actions/runner"
+            },
+            "metadata": {
+                "invocationId": "b6186090-c8ff-4f91-97cf-7a3b47699e57",
+                "startedOn": "2022-05-24T12:13:35.054695403Z"
+            }
+        }
+    }
+}`
+
 	Ite6SLSA1Doc = processor.Document{
 		Blob:   []byte(ite6SLSA1),
+		Type:   processor.DocumentITE6SLSA,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
+
+	Ite6SLSA1Doc_2 = processor.Document{
+		Blob:   []byte(ite6SLSA1_2),
 		Type:   processor.DocumentITE6SLSA,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
@@ -566,8 +632,70 @@ var (
 						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
-						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
+						{Key: "slsa.runDetails.metadata.invocationId", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
 						{Key: "slsa.runDetails.metadata.startedOn", Value: "2023-01-01T12:34:56Z"},
+					},
+				},
+			},
+		},
+	}
+
+	slsa1time_2, _ = time.Parse(time.RFC3339, "2022-05-24T12:13:35.054695403Z")
+	SlsaPreds1_2   = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "npm",
+					Namespace: ptrfrom.String("sigstore"),
+					Name:      "segs",
+					Version:   ptrfrom.String("1.2.0"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha1",
+					Digest:    "5b8c0801d1f5d105351a403f58c38269de93f680",
+				},
+				IsOccurrence: &slsaIsOccurrence,
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "npm",
+					Namespace: ptrfrom.String("sigstore"),
+					Name:      "sigstore-js",
+					Version:   ptrfrom.String("4.2.0"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha1",
+					Digest:    "428601801d1f5d105351a403f58c38269de93f680",
+				},
+				IsOccurrence: &slsaIsOccurrence,
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha1",
+					Digest:    "428601801d1f5d105351a403f58c38269de93f680",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "https://github.com/actions/runner",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "sha1",
+					Digest:    "5b8c0801d1f5d105351a403f58c38269de93f680",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "https://github.com/npm/cli/gha/v2",
+					SlsaVersion: "https://slsa.dev/provenance/v1",
+					StartedOn:   &slsa1time_2,
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.buildDefinition.buildType", Value: "https://github.com/npm/cli/gha/v2"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.sha1", Value: "5b8c0801d1f5d105351a403f58c38269de93f680"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "pkg:npm/sigstore/segs@1.2.0"},
+						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/actions/runner"},
+						{Key: "slsa.runDetails.metadata.invocationId", Value: "b6186090-c8ff-4f91-97cf-7a3b47699e57"},
+						{Key: "slsa.runDetails.metadata.startedOn", Value: "2022-05-24T12:13:35.054695403Z"},
 					},
 				},
 			},
@@ -645,112 +773,90 @@ var (
 
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          baselayoutPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: baselayoutPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "3.2.0-r22",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          baselayoutdataPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: baselayoutdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "3.2.0-r22",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          keysPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    topLevelPack,
+			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2.4-r1",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          worldFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    topLevelPack,
+			DepPkg: worldFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          rootFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    topLevelPack,
+			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          triggersFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    topLevelPack,
+			DepPkg: triggersFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             topLevelPack,
-			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    topLevelPack,
+			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             baselayoutPack,
-			DepPkg:          keysPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    baselayoutPack,
+			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2.4-r1",
 				Justification:  isDepJustifyDependencyOfJustification,
 			},
 		},
 		{
-			Pkg:             rootFilePack,
-			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    rootFilePack,
+			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyDependsOnJustification,
 			},
 		},
 		{
-			Pkg:             baselayoutPack,
-			DepPkg:          rootFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    baselayoutPack,
+			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyContainsJustification,
 			},
 		},
 		{
-			Pkg:             keysPack,
-			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			Pkg:    keysPack,
+			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "",
 				Justification:  isDepJustifyContainedByJustification,
 			},
 		},
@@ -968,34 +1074,30 @@ var (
 
 	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11")
 
+	cdxSmallRye, _ = asmhelpers.PurlToPkg("pkg:maven/io.smallrye.reactive/smallrye-mutiny-vertx-uri-template@2.27.0?type=jar")
+
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxTopLevelPack,
-			DepPkg:          cdxBasefilesPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxBasefilesPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "11.1+deb11u5",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopLevelPack,
-			DepPkg:          cdxNetbasePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxNetbasePack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "6.3",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopLevelPack,
-			DepPkg:          cdxTzdataPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxTzdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2021a-1+deb11u6",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -1027,40 +1129,67 @@ var (
 
 	cdxReactiveCommonPack, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar")
 
-	CdxQuarkusDeps = []assembler.IsDependencyIngest{
+	cdxMicroprofilePack, _ = asmhelpers.PurlToPkg("pkg:maven/org.eclipse.microprofile.context-propagation/microprofile-context-propagation-api@1.2?type=jar")
+
+	cdxQuarkusDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxResteasyPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxResteasyPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeDirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeIndirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
-			Pkg:             cdxResteasyPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxResteasyPack,
+			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeDirect,
-				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 	}
+	lvUnknown       = "UNKNOWN"
+	cdxQuarkusLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxResteasyPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+	}
 
-	CdxQuarkusOccurrence = []assembler.IsOccurrenceIngest{
+	cdxQuarkusOccurrence = []assembler.IsOccurrenceIngest{
 		{
 			Pkg: cdxTopQuarkusPack,
 			Artifact: &model.ArtifactInputSpec{
@@ -1097,7 +1226,7 @@ var (
 
 	cdxQuarkusTime, _ = time.Parse(time.RFC3339, "2022-11-09T11:14:31Z")
 
-	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
+	cdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Artifact: &model.ArtifactInputSpec{
 				Algorithm: "sha3-512",
@@ -1114,9 +1243,250 @@ var (
 	}
 
 	CdxQuarkusIngestionPredicates = assembler.IngestPredicates{
-		IsDependency: CdxQuarkusDeps,
-		IsOccurrence: CdxQuarkusOccurrence,
-		HasSBOM:      CdxQuarkusHasSBOM,
+		IsDependency: cdxQuarkusDeps,
+		IsOccurrence: cdxQuarkusOccurrence,
+		HasSBOM:      cdxQuarkusHasSBOM,
+		CertifyLegal: cdxQuarkusLegal,
+	}
+
+	cdxLegalDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxResteasyPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxReactiveCommonPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeIndirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    cdxResteasyPack,
+			DepPkg: cdxReactiveCommonPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxSmallRye,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxNetbasePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxMicroprofilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+	}
+	customLincenseText   = "This is the text of the custom license I wrote"
+	cdxLegalCertifyLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxNetbasePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxSmallRye,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "MIT",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND (MIT OR GPL-2.0-only)",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxTopQuarkusPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "LGPL-3.0-or-later",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "GPL-2.0 AND LGPL-3.0-or-later",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxMicroprofilePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "LicenseRef-a7fb6b15",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+	}
+
+	cdxLegalOccurrence = []assembler.IsOccurrenceIngest{
+		{
+			Pkg: cdxTopQuarkusPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "md5",
+				Digest:    "bf39044af8c6ba66fc3beb034bc82ae8",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "615e56bdfeb591af8b5fdeadf019f8fa729643232d7e0768674411a7d959bb00e12e114280a6949f871514e1a86e01e0033372a0a826d15720050d7cffb80e69",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "54ffa51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxSmallRye,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "md5",
+				Digest:    "8756663af131035a2090d83f5f1b4054",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxNetbasePack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "87gna51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxMicroprofilePack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha-256",
+				Digest:    "1576e21f3bf9cc3a3092e7cd40e9c9fef70532223af98a9218c1c9c885a71251",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+	}
+
+	cdxLegalHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
+				Algorithm:        "sha256",
+				Digest:           "b9691aeacfe8adca01097f2e2af3484038df6e367524f9c38f6e1696f8971ed9",
+				DownloadLocation: "",
+				KnownSince:       cdxQuarkusTime,
+			},
+		},
+	}
+
+	CdxQuarkusLegalPredicates = assembler.IngestPredicates{
+		IsDependency: cdxLegalDeps,
+		IsOccurrence: cdxLegalOccurrence,
+		HasSBOM:      cdxLegalHasSBOM,
+		CertifyLegal: cdxLegalCertifyLegal,
 	}
 
 	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")
@@ -1125,12 +1495,10 @@ var (
 
 	CdxNpmDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:             cdxWebAppPackage,
-			DepPkg:          cdxBootstrapPackage,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			Pkg:    cdxWebAppPackage,
+			DepPkg: cdxBootstrapPackage,
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "4.0.0-beta.2",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -1172,21 +1540,38 @@ var (
 		},
 	}
 
+	quarkusParentPackageLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: quarkusParentPackage,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     quarkusTime,
+			},
+		},
+	}
+
 	CdxEmptyIngestionPredicates = assembler.IngestPredicates{
-		HasSBOM: quarkusParentPackageHasSBOM,
+		HasSBOM:      quarkusParentPackageHasSBOM,
+		CertifyLegal: quarkusParentPackageLegal,
 	}
 
 	// ceritifer testdata
 
 	Text4ShellVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:maven/org.apache.commons/commons-text@1.9",
-			  "digest":null
+			  "uri":"pkg:maven/org.apache.commons/commons-text@1.9"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1209,14 +1594,13 @@ var (
 		}
 	 }`
 	SecondLevelVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
-			  "digest":null
+			  "uri":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1233,14 +1617,13 @@ var (
 		}
 	 }`
 	RootVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:oci/vul-image-latest?repository_url=grc.io",
-			  "digest":null
+			  "uri":"pkg:oci/vul-image-latest?repository_url=gcr.io"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1257,14 +1640,13 @@ var (
 		}
 	 }`
 	Log4JVulAttestation = `{
-		"_type":"https://in-toto.io/Statement/v0.1",
-		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"type":"https://in-toto.io/Statement/v1",
 		"subject":[
 		   {
-			  "name":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
-			  "digest":null
+			  "uri":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
 		   }
 		],
+		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1303,30 +1685,29 @@ var (
 	 }`
 
 	RootPackage = root_package.PackageNode{
-		Purl: "pkg:oci/vul-image-latest?repository_url=grc.io",
+		Purl: "pkg:oci/vul-image-latest?repository_url=gcr.io",
 	}
 
 	SecondLevelPackage = root_package.PackageNode{
-		Purl: "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+		Purl: "pkg:oci/vul-secondLevel-latest?repository_url=gcr.io",
 	}
 
 	Log4JPackage = root_package.PackageNode{
 		Purl: "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
 	}
 
-	Text4ShelPackage = root_package.PackageNode{
+	Text4ShellPackage = root_package.PackageNode{
 		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
 	}
 
 	VertxWebCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1344,14 +1725,13 @@ var (
 	}`
 
 	VertxAuthCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1369,14 +1749,13 @@ var (
 	}`
 
 	VertxBridgeCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1394,14 +1773,13 @@ var (
 	}`
 
 	VertxCoreCommonAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1424,14 +1802,13 @@ var (
 	}`
 
 	VertxWebAttestation = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
 		"subject": [
 			{
-				"name": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar",
-				"digest": null
+				"uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
 			}
 		],
+		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -1529,8 +1906,7 @@ var (
             "collector":"",
             "dependencyType":"DIRECT",
             "justification":"dependency data collected via deps.dev",
-            "origin":"",
-            "versionRange":""
+            "origin":""
          }
       }
    ],
@@ -1652,7 +2028,7 @@ var (
 			  "Scorecard":null,
 			  "Source":{
 				 "commit":null,
-				 "name":"js-tokens.git",
+				 "name":"js-tokens",
 				 "namespace":"github.com/lydell",
 				 "tag":null,
 				 "type":"git"
@@ -1688,7 +2064,7 @@ var (
 			  "Scorecard":null,
 			  "Source":{
 				 "commit":null,
-				 "name":"object-assign.git",
+				 "name":"object-assign",
 				 "namespace":"github.com/sindresorhus",
 				 "tag":null,
 				 "type":"git"
@@ -1718,8 +2094,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^1.1.0"
+				 "origin":""
 			  }
 		   },
 		   {
@@ -1743,8 +2118,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^4.1.1"
+				 "origin":""
 			  }
 		   },
 		   {
@@ -1768,15 +2142,14 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^3.0.0 || ^4.0.0"
+				 "origin":""
 			  }
 		   }
 		],
 		"Scorecard":null,
 		"Source":{
 		   "commit":null,
-		   "name":"react.git",
+		   "name":"react",
 		   "namespace":"github.com/facebook",
 		   "tag":null,
 		   "type":"git"
@@ -2062,8 +2435,7 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^0.1"
+				 "origin":""
 			  }
 		   }
 		],
@@ -2162,7 +2534,7 @@ var (
 			  "Scorecard":null,
 			  "Source":{
 				 "commit":null,
-				 "name":"camelcase.git",
+				 "name":"camelcase",
 				 "namespace":"github.com/sindresorhus",
 				 "tag":null,
 				 "type":"git"
@@ -2192,15 +2564,14 @@ var (
 				 "collector":"",
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
-				 "origin":"",
-				 "versionRange":"^3.0.0"
+				 "origin":""
 			  }
 		   }
 		],
 		"Scorecard":null,
 		"Source":{
 		   "commit":null,
-		   "name":"yargs-parser.git",
+		   "name":"yargs-parser",
 		   "namespace":"github.com/yargs",
 		   "tag":null,
 		   "type":"git"
@@ -2439,22 +2810,18 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 		IsDependency: []assembler.IsDependencyIngest{
 			{
-				Pkg:             topLevelPack,
-				DepPkg:          baselayoutPack,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    topLevelPack,
+				DepPkg: baselayoutPack,
 				IsDependency: &generated.IsDependencyInputSpec{
 					DependencyType: generated.DependencyTypeUnknown,
-					VersionRange:   "3.2.0-r22",
 					Justification:  "top level package dependency",
 				},
 			},
 			{
-				Pkg:             topLevelPack,
-				DepPkg:          baselayoutdataPack,
-				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+				Pkg:    topLevelPack,
+				DepPkg: baselayoutdataPack,
 				IsDependency: &generated.IsDependencyInputSpec{
 					DependencyType: generated.DependencyTypeUnknown,
-					VersionRange:   "3.2.0-r22",
 					Justification:  "top level package dependency",
 				},
 			},
@@ -2518,7 +2885,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
-						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
+						{Key: "slsa.runDetails.metadata.invocationId", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
 						{Key: "slsa.runDetails.metadata.startedOn", Value: "2023-01-01T12:34:56Z"},
 					},
 				},

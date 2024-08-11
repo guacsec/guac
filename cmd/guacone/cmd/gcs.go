@@ -23,7 +23,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/gcs"
@@ -37,10 +36,12 @@ import (
 )
 
 type gcsOptions struct {
-	graphqlEndpoint   string
-	headerFile        string
-	csubClientOptions client.CsubClientOptions
-	bucket            string
+	graphqlEndpoint         string
+	headerFile              string
+	csubClientOptions       csub_client.CsubClientOptions
+	bucket                  string
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -58,6 +59,8 @@ var gcsCmd = &cobra.Command{
 			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -109,7 +112,7 @@ var gcsCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
+			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				gotErr = true
@@ -139,12 +142,13 @@ var gcsCmd = &cobra.Command{
 	},
 }
 
-func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string, csubTls, csubTlsSkipVerify bool, args []string) (gcsOptions, error) {
+func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string, csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (gcsOptions, error) {
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.headerFile = headerFile
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
@@ -158,7 +162,8 @@ func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string,
 	if credentialsPath == "" && os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") == "" {
 		return opts, fmt.Errorf("expected either --%s flag or GOOGLE_APPLICATION_CREDENTIALS environment variable", gcsCredentialsPathFlag)
 	}
-
+	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	return opts, nil
 }
 

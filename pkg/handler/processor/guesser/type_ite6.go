@@ -21,6 +21,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
 	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
@@ -40,6 +41,17 @@ func (_ *ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.Format
 				return processor.DocumentITE6Generic
 			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/vuln/v0.1") {
 				return processor.DocumentITE6Vul
+			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
+				return processor.DocumentITE6ClearlyDefined
+			}
+			return processor.DocumentITE6Generic
+		}
+	}
+	var attV1Statement attestationv1.Statement
+	if json.Unmarshal(blob, &attV1Statement) == nil && format == processor.FormatJSON {
+		if strings.HasPrefix(attV1Statement.Type, "https://in-toto.io/Statement") {
+			if strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
+				return processor.DocumentITE6ClearlyDefined
 			}
 			return processor.DocumentITE6Generic
 		}

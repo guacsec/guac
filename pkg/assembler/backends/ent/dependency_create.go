@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
@@ -32,37 +31,9 @@ func (dc *DependencyCreate) SetPackageID(u uuid.UUID) *DependencyCreate {
 	return dc
 }
 
-// SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (dc *DependencyCreate) SetDependentPackageNameID(u uuid.UUID) *DependencyCreate {
-	dc.mutation.SetDependentPackageNameID(u)
-	return dc
-}
-
-// SetNillableDependentPackageNameID sets the "dependent_package_name_id" field if the given value is not nil.
-func (dc *DependencyCreate) SetNillableDependentPackageNameID(u *uuid.UUID) *DependencyCreate {
-	if u != nil {
-		dc.SetDependentPackageNameID(*u)
-	}
-	return dc
-}
-
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
 func (dc *DependencyCreate) SetDependentPackageVersionID(u uuid.UUID) *DependencyCreate {
 	dc.mutation.SetDependentPackageVersionID(u)
-	return dc
-}
-
-// SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
-func (dc *DependencyCreate) SetNillableDependentPackageVersionID(u *uuid.UUID) *DependencyCreate {
-	if u != nil {
-		dc.SetDependentPackageVersionID(*u)
-	}
-	return dc
-}
-
-// SetVersionRange sets the "version_range" field.
-func (dc *DependencyCreate) SetVersionRange(s string) *DependencyCreate {
-	dc.mutation.SetVersionRange(s)
 	return dc
 }
 
@@ -113,11 +84,6 @@ func (dc *DependencyCreate) SetNillableID(u *uuid.UUID) *DependencyCreate {
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (dc *DependencyCreate) SetPackage(p *PackageVersion) *DependencyCreate {
 	return dc.SetPackageID(p.ID)
-}
-
-// SetDependentPackageName sets the "dependent_package_name" edge to the PackageName entity.
-func (dc *DependencyCreate) SetDependentPackageName(p *PackageName) *DependencyCreate {
-	return dc.SetDependentPackageNameID(p.ID)
 }
 
 // SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
@@ -186,8 +152,8 @@ func (dc *DependencyCreate) check() error {
 	if _, ok := dc.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package_id", err: errors.New(`ent: missing required field "Dependency.package_id"`)}
 	}
-	if _, ok := dc.mutation.VersionRange(); !ok {
-		return &ValidationError{Name: "version_range", err: errors.New(`ent: missing required field "Dependency.version_range"`)}
+	if _, ok := dc.mutation.DependentPackageVersionID(); !ok {
+		return &ValidationError{Name: "dependent_package_version_id", err: errors.New(`ent: missing required field "Dependency.dependent_package_version_id"`)}
 	}
 	if _, ok := dc.mutation.DependencyType(); !ok {
 		return &ValidationError{Name: "dependency_type", err: errors.New(`ent: missing required field "Dependency.dependency_type"`)}
@@ -209,8 +175,11 @@ func (dc *DependencyCreate) check() error {
 	if _, ok := dc.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Dependency.document_ref"`)}
 	}
-	if _, ok := dc.mutation.PackageID(); !ok {
+	if len(dc.mutation.PackageIDs()) == 0 {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "Dependency.package"`)}
+	}
+	if len(dc.mutation.DependentPackageVersionIDs()) == 0 {
+		return &ValidationError{Name: "dependent_package_version", err: errors.New(`ent: missing required edge "Dependency.dependent_package_version"`)}
 	}
 	return nil
 }
@@ -248,10 +217,6 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := dc.mutation.VersionRange(); ok {
-		_spec.SetField(dependency.FieldVersionRange, field.TypeString, value)
-		_node.VersionRange = value
-	}
 	if value, ok := dc.mutation.DependencyType(); ok {
 		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 		_node.DependencyType = value
@@ -287,23 +252,6 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.PackageID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := dc.mutation.DependentPackageNameIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   dependency.DependentPackageNameTable,
-			Columns: []string{dependency.DependentPackageNameColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.DependentPackageNameID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := dc.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
@@ -403,24 +351,6 @@ func (u *DependencyUpsert) UpdatePackageID() *DependencyUpsert {
 	return u
 }
 
-// SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (u *DependencyUpsert) SetDependentPackageNameID(v uuid.UUID) *DependencyUpsert {
-	u.Set(dependency.FieldDependentPackageNameID, v)
-	return u
-}
-
-// UpdateDependentPackageNameID sets the "dependent_package_name_id" field to the value that was provided on create.
-func (u *DependencyUpsert) UpdateDependentPackageNameID() *DependencyUpsert {
-	u.SetExcluded(dependency.FieldDependentPackageNameID)
-	return u
-}
-
-// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
-func (u *DependencyUpsert) ClearDependentPackageNameID() *DependencyUpsert {
-	u.SetNull(dependency.FieldDependentPackageNameID)
-	return u
-}
-
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
 func (u *DependencyUpsert) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpsert {
 	u.Set(dependency.FieldDependentPackageVersionID, v)
@@ -430,24 +360,6 @@ func (u *DependencyUpsert) SetDependentPackageVersionID(v uuid.UUID) *Dependency
 // UpdateDependentPackageVersionID sets the "dependent_package_version_id" field to the value that was provided on create.
 func (u *DependencyUpsert) UpdateDependentPackageVersionID() *DependencyUpsert {
 	u.SetExcluded(dependency.FieldDependentPackageVersionID)
-	return u
-}
-
-// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
-func (u *DependencyUpsert) ClearDependentPackageVersionID() *DependencyUpsert {
-	u.SetNull(dependency.FieldDependentPackageVersionID)
-	return u
-}
-
-// SetVersionRange sets the "version_range" field.
-func (u *DependencyUpsert) SetVersionRange(v string) *DependencyUpsert {
-	u.Set(dependency.FieldVersionRange, v)
-	return u
-}
-
-// UpdateVersionRange sets the "version_range" field to the value that was provided on create.
-func (u *DependencyUpsert) UpdateVersionRange() *DependencyUpsert {
-	u.SetExcluded(dependency.FieldVersionRange)
 	return u
 }
 
@@ -573,27 +485,6 @@ func (u *DependencyUpsertOne) UpdatePackageID() *DependencyUpsertOne {
 	})
 }
 
-// SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (u *DependencyUpsertOne) SetDependentPackageNameID(v uuid.UUID) *DependencyUpsertOne {
-	return u.Update(func(s *DependencyUpsert) {
-		s.SetDependentPackageNameID(v)
-	})
-}
-
-// UpdateDependentPackageNameID sets the "dependent_package_name_id" field to the value that was provided on create.
-func (u *DependencyUpsertOne) UpdateDependentPackageNameID() *DependencyUpsertOne {
-	return u.Update(func(s *DependencyUpsert) {
-		s.UpdateDependentPackageNameID()
-	})
-}
-
-// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
-func (u *DependencyUpsertOne) ClearDependentPackageNameID() *DependencyUpsertOne {
-	return u.Update(func(s *DependencyUpsert) {
-		s.ClearDependentPackageNameID()
-	})
-}
-
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
 func (u *DependencyUpsertOne) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
@@ -605,27 +496,6 @@ func (u *DependencyUpsertOne) SetDependentPackageVersionID(v uuid.UUID) *Depende
 func (u *DependencyUpsertOne) UpdateDependentPackageVersionID() *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
 		s.UpdateDependentPackageVersionID()
-	})
-}
-
-// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
-func (u *DependencyUpsertOne) ClearDependentPackageVersionID() *DependencyUpsertOne {
-	return u.Update(func(s *DependencyUpsert) {
-		s.ClearDependentPackageVersionID()
-	})
-}
-
-// SetVersionRange sets the "version_range" field.
-func (u *DependencyUpsertOne) SetVersionRange(v string) *DependencyUpsertOne {
-	return u.Update(func(s *DependencyUpsert) {
-		s.SetVersionRange(v)
-	})
-}
-
-// UpdateVersionRange sets the "version_range" field to the value that was provided on create.
-func (u *DependencyUpsertOne) UpdateVersionRange() *DependencyUpsertOne {
-	return u.Update(func(s *DependencyUpsert) {
-		s.UpdateVersionRange()
 	})
 }
 
@@ -928,27 +798,6 @@ func (u *DependencyUpsertBulk) UpdatePackageID() *DependencyUpsertBulk {
 	})
 }
 
-// SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (u *DependencyUpsertBulk) SetDependentPackageNameID(v uuid.UUID) *DependencyUpsertBulk {
-	return u.Update(func(s *DependencyUpsert) {
-		s.SetDependentPackageNameID(v)
-	})
-}
-
-// UpdateDependentPackageNameID sets the "dependent_package_name_id" field to the value that was provided on create.
-func (u *DependencyUpsertBulk) UpdateDependentPackageNameID() *DependencyUpsertBulk {
-	return u.Update(func(s *DependencyUpsert) {
-		s.UpdateDependentPackageNameID()
-	})
-}
-
-// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
-func (u *DependencyUpsertBulk) ClearDependentPackageNameID() *DependencyUpsertBulk {
-	return u.Update(func(s *DependencyUpsert) {
-		s.ClearDependentPackageNameID()
-	})
-}
-
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
 func (u *DependencyUpsertBulk) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
@@ -960,27 +809,6 @@ func (u *DependencyUpsertBulk) SetDependentPackageVersionID(v uuid.UUID) *Depend
 func (u *DependencyUpsertBulk) UpdateDependentPackageVersionID() *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
 		s.UpdateDependentPackageVersionID()
-	})
-}
-
-// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
-func (u *DependencyUpsertBulk) ClearDependentPackageVersionID() *DependencyUpsertBulk {
-	return u.Update(func(s *DependencyUpsert) {
-		s.ClearDependentPackageVersionID()
-	})
-}
-
-// SetVersionRange sets the "version_range" field.
-func (u *DependencyUpsertBulk) SetVersionRange(v string) *DependencyUpsertBulk {
-	return u.Update(func(s *DependencyUpsert) {
-		s.SetVersionRange(v)
-	})
-}
-
-// UpdateVersionRange sets the "version_range" field to the value that was provided on create.
-func (u *DependencyUpsertBulk) UpdateVersionRange() *DependencyUpsertBulk {
-	return u.Update(func(s *DependencyUpsert) {
-		s.UpdateVersionRange()
 	})
 }
 

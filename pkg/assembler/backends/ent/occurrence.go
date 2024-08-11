@@ -62,12 +62,10 @@ type OccurrenceEdges struct {
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e OccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
-	if e.loadedTypes[0] {
-		if e.Artifact == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: artifact.Label}
-		}
+	if e.Artifact != nil {
 		return e.Artifact, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: artifact.Label}
 	}
 	return nil, &NotLoadedError{edge: "artifact"}
 }
@@ -75,12 +73,10 @@ func (e OccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e OccurrenceEdges) PackageOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[1] {
-		if e.Package == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.Package != nil {
 		return e.Package, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package"}
 }
@@ -88,12 +84,10 @@ func (e OccurrenceEdges) PackageOrErr() (*PackageVersion, error) {
 // SourceOrErr returns the Source value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e OccurrenceEdges) SourceOrErr() (*SourceName, error) {
-	if e.loadedTypes[2] {
-		if e.Source == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: sourcename.Label}
-		}
+	if e.Source != nil {
 		return e.Source, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: sourcename.Label}
 	}
 	return nil, &NotLoadedError{edge: "source"}
 }

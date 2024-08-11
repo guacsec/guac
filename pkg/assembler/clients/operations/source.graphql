@@ -37,6 +37,23 @@ mutation IngestSources($sources: [IDorSourceInput!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC sources
 
+query SourcesList($filter: SourceSpec!, $after: ID, $first: Int) {
+  sourcesList(sourceSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllSourceTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
 query Sources($filter: SourceSpec!) {
   sources(sourceSpec: $filter) {
     ...AllSourceTree

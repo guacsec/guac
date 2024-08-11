@@ -93,12 +93,10 @@ type PackageVersionEdges struct {
 // NameOrErr returns the Name value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e PackageVersionEdges) NameOrErr() (*PackageName, error) {
-	if e.loadedTypes[0] {
-		if e.Name == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packagename.Label}
-		}
+	if e.Name != nil {
 		return e.Name, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: packagename.Label}
 	}
 	return nil, &NotLoadedError{edge: "name"}
 }

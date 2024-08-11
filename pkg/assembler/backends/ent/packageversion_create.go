@@ -374,7 +374,7 @@ func (pvc *PackageVersionCreate) check() error {
 	if _, ok := pvc.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "PackageVersion.hash"`)}
 	}
-	if _, ok := pvc.mutation.NameID(); !ok {
+	if len(pvc.mutation.NameIDs()) == 0 {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required edge "PackageVersion.name"`)}
 	}
 	return nil

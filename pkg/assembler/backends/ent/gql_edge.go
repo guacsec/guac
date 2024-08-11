@@ -344,20 +344,12 @@ func (d *Dependency) Package(ctx context.Context) (*PackageVersion, error) {
 	return result, err
 }
 
-func (d *Dependency) DependentPackageName(ctx context.Context) (*PackageName, error) {
-	result, err := d.Edges.DependentPackageNameOrErr()
-	if IsNotLoaded(err) {
-		result, err = d.QueryDependentPackageName().Only(ctx)
-	}
-	return result, MaskNotFound(err)
-}
-
 func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersion, error) {
 	result, err := d.Edges.DependentPackageVersionOrErr()
 	if IsNotLoaded(err) {
 		result, err = d.QueryDependentPackageVersion().Only(ctx)
 	}
-	return result, MaskNotFound(err)
+	return result, err
 }
 
 func (d *Dependency) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
@@ -524,18 +516,6 @@ func (pn *PackageName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, 
 	}
 	if IsNotLoaded(err) {
 		result, err = pn.QueryHasSourceAt().All(ctx)
-	}
-	return result, err
-}
-
-func (pn *PackageName) Dependency(ctx context.Context) (result []*Dependency, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedDependency(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = pn.Edges.DependencyOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = pn.QueryDependency().All(ctx)
 	}
 	return result, err
 }

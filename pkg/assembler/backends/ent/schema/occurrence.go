@@ -55,10 +55,10 @@ func (Occurrence) Fields() []ent.Field {
 // Edges of the Occurrence.
 func (Occurrence) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Required(),
-		edge.To("package", PackageVersion.Type).Unique().Field("package_id"),
-		edge.To("source", SourceName.Type).Unique().Field("source_id"),
-		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_occurrences"),
+		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Required().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("source", SourceName.Type).Unique().Field("source_id").Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_occurrences").Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 
@@ -69,5 +69,7 @@ func (Occurrence) Indexes() []ent.Index {
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("occurrence_package_id"),
 		index.Fields("justification", "origin", "collector", "document_ref").Edges("artifact", "source").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("occurrence_source_id"),
+		index.Fields("package_id").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("query_occurrence_package_id"), //querying subject - package ID
+		index.Fields("artifact_id"), //querying object - artifact ID
 	}
 }

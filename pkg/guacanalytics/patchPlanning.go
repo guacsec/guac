@@ -21,7 +21,6 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/misc/depversion"
 )
 
 type NodeType int
@@ -241,18 +240,6 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client
 	}
 
 	path = append(path, isDependency.Id)
-	targetDepPkgVersion := len(isDependency.DependencyPackage.Namespaces[0].Names[0].Versions) > 0
-
-	if !targetDepPkgVersion {
-		doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)
-		if err != nil {
-			return err
-		}
-
-		if !doesRangeInclude {
-			return nil
-		}
-	}
 
 	q.addNodeToQueue(PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
 	q.addNodeToQueue(PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)

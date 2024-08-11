@@ -65,6 +65,11 @@ func (b *EntBackend) PointOfContactList(ctx context.Context, spec model.PointOfC
 		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
 	}
 
+	// if not found return nil
+	if pocConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.PointOfContactEdge
 	for _, edge := range pocConn.Edges {
 		edges = append(edges, &model.PointOfContactEdge{

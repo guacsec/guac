@@ -30,6 +30,7 @@ fragment AllPkgTree on Package {
       name
       versions {
         id
+        purl
         version
         qualifiers {
           key
@@ -148,7 +149,6 @@ fragment AllIsDependencyTree on IsDependency {
     ...AllPkgTree
   }
   dependencyType
-  versionRange
   origin
   collector
 }

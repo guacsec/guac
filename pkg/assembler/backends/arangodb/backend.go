@@ -570,7 +570,7 @@ func getCollectionIndexMap() map[string][]index {
 	}
 
 	collectionIndexMap[isDependenciesStr] = []index{
-		initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin", docRef}, false),
+		initIndex("byPkgIDDepPkgIDOrigin", []string{"packageID", "depPackageID", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[isOccurrencesStr] = []index{

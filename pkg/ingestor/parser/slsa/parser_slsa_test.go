@@ -17,9 +17,11 @@ package slsa
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
+	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
 
 	"github.com/in-toto/in-toto-golang/in_toto"
@@ -47,9 +49,15 @@ func Test_slsaParser(t *testing.T) {
 			wantErr:        false,
 		},
 		{
-			name:           "testing v0.1",
+			name:           "testing v1",
 			doc:            &testdata.Ite6SLSA1Doc,
 			wantPredicates: &testdata.SlsaPreds1,
+			wantErr:        false,
+		},
+		{
+			name:           "testing v1-2",
+			doc:            &testdata.Ite6SLSA1Doc_2,
+			wantPredicates: &testdata.SlsaPreds1_2,
 			wantErr:        false,
 		},
 	}
@@ -114,7 +122,7 @@ func Test_fillSLSA01(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := fillSLSA01(test.args.inp, test.args.stmt)
+			err := fillSLSA01(test.args.inp, &test.args.stmt.Predicate)
 			if err != test.err {
 				t.Fatalf("fillSLSA01() error = %v, expected error %v", err, test.err)
 			}
@@ -133,6 +141,106 @@ func Test_fillSLSA01(t *testing.T) {
 			}
 			if test.args.inp.FinishedOn != test.args.stmt.Predicate.Metadata.BuildFinishedOn {
 				t.Errorf("fillSLSA01() inp.BuildFinishedOn not equal to stmt.Predicate.Metadata.BuildFinishedOn")
+			}
+		})
+	}
+}
+
+func Test_getSlsaEntity(t *testing.T) {
+	namespace := "sigstore"
+	genericNamespace := "generic"
+	version := "4.2.0"
+	emptyString := ""
+	tests := []struct {
+		testname string
+		uri      string
+		name     string
+		digest   scommon.DigestSet
+		expected *slsaEntity
+		wantErr  bool
+	}{
+		{
+			testname: "with uri and digest",
+			uri:      "pkg:npm/sigstore/sigstore-js@4.2.0",
+			digest: scommon.DigestSet{
+				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
+			},
+			expected: &slsaEntity{
+				artifacts: []*model.ArtifactInputSpec{
+					{
+						Algorithm: "sha1",
+						Digest:    "428601801d1f5d105351a403f58c38269de93f680",
+					},
+				},
+				pkg: &model.PkgInputSpec{
+					Type:      "npm",
+					Namespace: &namespace,
+					Name:      "sigstore-js",
+					Version:   &version,
+					Subpath:   &emptyString,
+				},
+				occurence: &model.IsOccurrenceInputSpec{
+					Justification: "from SLSA definition of checksums for subject/materials",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			testname: "with name and digest",
+			name:     "sigstore",
+			digest: scommon.DigestSet{
+				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
+			},
+			expected: &slsaEntity{
+				artifacts: []*model.ArtifactInputSpec{
+					{
+						Algorithm: "sha1",
+						Digest:    "428601801d1f5d105351a403f58c38269de93f680",
+					},
+				},
+				pkg: &model.PkgInputSpec{
+					Type:      "guac",
+					Namespace: &genericNamespace,
+					Name:      "sigstore",
+					Subpath:   &emptyString,
+					Version:   &emptyString,
+				},
+				occurence: &model.IsOccurrenceInputSpec{
+					Justification: "from SLSA definition of checksums for subject/materials",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			testname: "without name and uri",
+			digest: scommon.DigestSet{
+				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.testname, func(t *testing.T) {
+			s, err := getSlsaEntity(test.name, test.uri, test.digest)
+			if (err != nil) != test.wantErr {
+				t.Errorf("slsa.Parse() error is not as expected. Expected: %v, Got: %v", err, test.wantErr)
+				return
+			}
+			if err != nil {
+				return
+			}
+			if !reflect.DeepEqual(s.pkg, test.expected.pkg) {
+				t.Errorf("getSlsaEntity() package is not as expected. Expected: %v, Got: %v", *s.pkg.Version, *test.expected.pkg.Version)
+			}
+			if !reflect.DeepEqual(s.source, test.expected.source) {
+				t.Errorf("getSlsaEntity() source is not as expected. Expected: %v, Got: %v", s.source, test.expected.source)
+			}
+			if !reflect.DeepEqual(s.occurence, test.expected.occurence) {
+				t.Errorf("getSlsaEntity() occurence is not as expected. Expected: %v, Got: %v", s.occurence, test.expected.occurence)
+			}
+			if !reflect.DeepEqual(s.artifacts, test.expected.artifacts) {
+				t.Errorf("getSlsaEntity() artifact is not as expected. Expected: %v, Got: %v", s.artifacts, test.expected.artifacts)
 			}
 		})
 	}

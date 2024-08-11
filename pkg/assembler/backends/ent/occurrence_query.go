@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -161,7 +162,7 @@ func (oq *OccurrenceQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
 // First returns the first Occurrence entity from the query.
 // Returns a *NotFoundError when no Occurrence was found.
 func (oq *OccurrenceQuery) First(ctx context.Context) (*Occurrence, error) {
-	nodes, err := oq.Limit(1).All(setContextOp(ctx, oq.ctx, "First"))
+	nodes, err := oq.Limit(1).All(setContextOp(ctx, oq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (oq *OccurrenceQuery) FirstX(ctx context.Context) *Occurrence {
 // Returns a *NotFoundError when no Occurrence ID was found.
 func (oq *OccurrenceQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = oq.Limit(1).IDs(setContextOp(ctx, oq.ctx, "FirstID")); err != nil {
+	if ids, err = oq.Limit(1).IDs(setContextOp(ctx, oq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -207,7 +208,7 @@ func (oq *OccurrenceQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Occurrence entity is found.
 // Returns a *NotFoundError when no Occurrence entities are found.
 func (oq *OccurrenceQuery) Only(ctx context.Context) (*Occurrence, error) {
-	nodes, err := oq.Limit(2).All(setContextOp(ctx, oq.ctx, "Only"))
+	nodes, err := oq.Limit(2).All(setContextOp(ctx, oq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +236,7 @@ func (oq *OccurrenceQuery) OnlyX(ctx context.Context) *Occurrence {
 // Returns a *NotFoundError when no entities are found.
 func (oq *OccurrenceQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = oq.Limit(2).IDs(setContextOp(ctx, oq.ctx, "OnlyID")); err != nil {
+	if ids, err = oq.Limit(2).IDs(setContextOp(ctx, oq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -260,7 +261,7 @@ func (oq *OccurrenceQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Occurrences.
 func (oq *OccurrenceQuery) All(ctx context.Context) ([]*Occurrence, error) {
-	ctx = setContextOp(ctx, oq.ctx, "All")
+	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryAll)
 	if err := oq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -282,7 +283,7 @@ func (oq *OccurrenceQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error)
 	if oq.ctx.Unique == nil && oq.path != nil {
 		oq.Unique(true)
 	}
-	ctx = setContextOp(ctx, oq.ctx, "IDs")
+	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryIDs)
 	if err = oq.Select(occurrence.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -300,7 +301,7 @@ func (oq *OccurrenceQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (oq *OccurrenceQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, oq.ctx, "Count")
+	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryCount)
 	if err := oq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -318,7 +319,7 @@ func (oq *OccurrenceQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (oq *OccurrenceQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, oq.ctx, "Exist")
+	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryExist)
 	switch _, err := oq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -826,7 +827,7 @@ func (ogb *OccurrenceGroupBy) Aggregate(fns ...AggregateFunc) *OccurrenceGroupBy
 
 // Scan applies the selector query and scans the result into the given value.
 func (ogb *OccurrenceGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ogb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, ogb.build.ctx, ent.OpQueryGroupBy)
 	if err := ogb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -874,7 +875,7 @@ func (os *OccurrenceSelect) Aggregate(fns ...AggregateFunc) *OccurrenceSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (os *OccurrenceSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, os.ctx, "Select")
+	ctx = setContextOp(ctx, os.ctx, ent.OpQuerySelect)
 	if err := os.prepareQuery(ctx); err != nil {
 		return err
 	}

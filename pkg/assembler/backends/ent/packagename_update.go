@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -106,21 +105,6 @@ func (pnu *PackageNameUpdate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpda
 	return pnu.AddHasSourceAtIDs(ids...)
 }
 
-// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
-func (pnu *PackageNameUpdate) AddDependencyIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.AddDependencyIDs(ids...)
-	return pnu
-}
-
-// AddDependency adds the "dependency" edges to the Dependency entity.
-func (pnu *PackageNameUpdate) AddDependency(d ...*Dependency) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pnu.AddDependencyIDs(ids...)
-}
-
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
 func (pnu *PackageNameUpdate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
 	pnu.mutation.AddCertificationIDs(ids...)
@@ -211,27 +195,6 @@ func (pnu *PackageNameUpdate) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameU
 		ids[i] = h[i].ID
 	}
 	return pnu.RemoveHasSourceAtIDs(ids...)
-}
-
-// ClearDependency clears all "dependency" edges to the Dependency entity.
-func (pnu *PackageNameUpdate) ClearDependency() *PackageNameUpdate {
-	pnu.mutation.ClearDependency()
-	return pnu
-}
-
-// RemoveDependencyIDs removes the "dependency" edge to Dependency entities by IDs.
-func (pnu *PackageNameUpdate) RemoveDependencyIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.RemoveDependencyIDs(ids...)
-	return pnu
-}
-
-// RemoveDependency removes "dependency" edges to Dependency entities.
-func (pnu *PackageNameUpdate) RemoveDependency(d ...*Dependency) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pnu.RemoveDependencyIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
@@ -443,51 +406,6 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if pnu.mutation.DependencyCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnu.mutation.RemovedDependencyIDs(); len(nodes) > 0 && !pnu.mutation.DependencyCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnu.mutation.DependencyIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -722,21 +640,6 @@ func (pnuo *PackageNameUpdateOne) AddHasSourceAt(h ...*HasSourceAt) *PackageName
 	return pnuo.AddHasSourceAtIDs(ids...)
 }
 
-// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
-func (pnuo *PackageNameUpdateOne) AddDependencyIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.AddDependencyIDs(ids...)
-	return pnuo
-}
-
-// AddDependency adds the "dependency" edges to the Dependency entity.
-func (pnuo *PackageNameUpdateOne) AddDependency(d ...*Dependency) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pnuo.AddDependencyIDs(ids...)
-}
-
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
 func (pnuo *PackageNameUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
 	pnuo.mutation.AddCertificationIDs(ids...)
@@ -827,27 +730,6 @@ func (pnuo *PackageNameUpdateOne) RemoveHasSourceAt(h ...*HasSourceAt) *PackageN
 		ids[i] = h[i].ID
 	}
 	return pnuo.RemoveHasSourceAtIDs(ids...)
-}
-
-// ClearDependency clears all "dependency" edges to the Dependency entity.
-func (pnuo *PackageNameUpdateOne) ClearDependency() *PackageNameUpdateOne {
-	pnuo.mutation.ClearDependency()
-	return pnuo
-}
-
-// RemoveDependencyIDs removes the "dependency" edge to Dependency entities by IDs.
-func (pnuo *PackageNameUpdateOne) RemoveDependencyIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.RemoveDependencyIDs(ids...)
-	return pnuo
-}
-
-// RemoveDependency removes "dependency" edges to Dependency entities.
-func (pnuo *PackageNameUpdateOne) RemoveDependency(d ...*Dependency) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pnuo.RemoveDependencyIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
@@ -1089,51 +971,6 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if pnuo.mutation.DependencyCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnuo.mutation.RemovedDependencyIDs(); len(nodes) > 0 && !pnuo.mutation.DependencyCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnuo.mutation.DependencyIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   packagename.DependencyTable,
-			Columns: []string{packagename.DependencyColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -135,7 +136,7 @@ func (cvq *CertifyVexQuery) QueryVulnerability() *VulnerabilityIDQuery {
 // First returns the first CertifyVex entity from the query.
 // Returns a *NotFoundError when no CertifyVex was found.
 func (cvq *CertifyVexQuery) First(ctx context.Context) (*CertifyVex, error) {
-	nodes, err := cvq.Limit(1).All(setContextOp(ctx, cvq.ctx, "First"))
+	nodes, err := cvq.Limit(1).All(setContextOp(ctx, cvq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +159,7 @@ func (cvq *CertifyVexQuery) FirstX(ctx context.Context) *CertifyVex {
 // Returns a *NotFoundError when no CertifyVex ID was found.
 func (cvq *CertifyVexQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, "FirstID")); err != nil {
+	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -181,7 +182,7 @@ func (cvq *CertifyVexQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one CertifyVex entity is found.
 // Returns a *NotFoundError when no CertifyVex entities are found.
 func (cvq *CertifyVexQuery) Only(ctx context.Context) (*CertifyVex, error) {
-	nodes, err := cvq.Limit(2).All(setContextOp(ctx, cvq.ctx, "Only"))
+	nodes, err := cvq.Limit(2).All(setContextOp(ctx, cvq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +210,7 @@ func (cvq *CertifyVexQuery) OnlyX(ctx context.Context) *CertifyVex {
 // Returns a *NotFoundError when no entities are found.
 func (cvq *CertifyVexQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, "OnlyID")); err != nil {
+	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -234,7 +235,7 @@ func (cvq *CertifyVexQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of CertifyVexes.
 func (cvq *CertifyVexQuery) All(ctx context.Context) ([]*CertifyVex, error) {
-	ctx = setContextOp(ctx, cvq.ctx, "All")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryAll)
 	if err := cvq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -256,7 +257,7 @@ func (cvq *CertifyVexQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error
 	if cvq.ctx.Unique == nil && cvq.path != nil {
 		cvq.Unique(true)
 	}
-	ctx = setContextOp(ctx, cvq.ctx, "IDs")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryIDs)
 	if err = cvq.Select(certifyvex.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -274,7 +275,7 @@ func (cvq *CertifyVexQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (cvq *CertifyVexQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cvq.ctx, "Count")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryCount)
 	if err := cvq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -292,7 +293,7 @@ func (cvq *CertifyVexQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cvq *CertifyVexQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cvq.ctx, "Exist")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryExist)
 	switch _, err := cvq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -698,7 +699,7 @@ func (cvgb *CertifyVexGroupBy) Aggregate(fns ...AggregateFunc) *CertifyVexGroupB
 
 // Scan applies the selector query and scans the result into the given value.
 func (cvgb *CertifyVexGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, cvgb.build.ctx, ent.OpQueryGroupBy)
 	if err := cvgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -746,7 +747,7 @@ func (cvs *CertifyVexSelect) Aggregate(fns ...AggregateFunc) *CertifyVexSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cvs *CertifyVexSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvs.ctx, "Select")
+	ctx = setContextOp(ctx, cvs.ctx, ent.OpQuerySelect)
 	if err := cvs.prepareQuery(ctx); err != nil {
 		return err
 	}

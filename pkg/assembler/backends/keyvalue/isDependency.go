@@ -18,9 +18,10 @@ package keyvalue
 import (
 	"context"
 	"errors"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"sort"
 	"strings"
+
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -34,7 +35,6 @@ type isDependencyLink struct {
 	ThisID         string
 	PackageID      string
 	DepPackageID   string
-	VersionRange   string
 	DependencyType model.DependencyType
 	Justification  string
 	Origin         string
@@ -47,7 +47,6 @@ func (n *isDependencyLink) Key() string {
 	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.DepPackageID,
-		n.VersionRange,
 		string(n.DependencyType),
 		n.Justification,
 		n.Origin,
@@ -69,12 +68,12 @@ func (n *isDependencyLink) BuildModelNode(ctx context.Context, c *demoClient) (m
 
 // Ingest IngestDependencies
 
-func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): match flags
 
 	var modelIsDependencies []string
 	for i := range dependencies {
-		isDependency, err := c.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
+		isDependency, err := c.IngestDependency(ctx, *pkgs[i], *depPkgs[i], *dependencies[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
 		}
@@ -84,15 +83,14 @@ func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 }
 
 // Ingest IsDependency
-func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
-	return c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
+func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error) {
+	return c.ingestDependency(ctx, packageArg, dependentPackageArg, dependency, true)
 }
 
-func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestDependency"
 
 	inLink := &isDependencyLink{
-		VersionRange:   dependency.VersionRange,
 		DependencyType: dependency.DependencyType,
 		Justification:  dependency.Justification,
 		Origin:         dependency.Origin,
@@ -104,12 +102,13 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var depPkg pkgNameOrVersion
+	var depPkg *pkgVersion
 	var err error
-	inLink.DepPackageID, depPkg, err = c.returnFoundPkgBasedOnMatchType(ctx, &dependentPackageArg, &depPkgMatchType)
+	depPkg, err = c.returnFoundPkgVersion(ctx, &dependentPackageArg)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	inLink.DepPackageID = depPkg.ID()
 
 	foundPkgVersion, err := c.returnFoundPkgVersion(ctx, &packageArg)
 	if err != nil {
@@ -127,7 +126,7 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 
 	if readOnly {
 		c.m.RUnlock()
-		d, err := c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, false)
+		d, err := c.ingestDependency(ctx, packageArg, dependentPackageArg, dependency, false)
 		c.m.RLock() // relock so that defer unlock does not panic
 		return d, err
 	}
@@ -346,7 +345,7 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			search = append(search, pkg.IsDependencyLinks...)
 		}
 	}
-	// Dont search on DependencyPackage as it can be either package-name or package-version
+	// todo: can add search on DependencyPackage as will be package-version
 
 	var out []*model.IsDependency
 	if foundOne {
@@ -434,7 +433,6 @@ func (c *demoClient) buildIsDependency(ctx context.Context, link *isDependencyLi
 		ID:                link.ThisID,
 		Package:           p,
 		DependencyPackage: dep,
-		VersionRange:      link.VersionRange,
 		DependencyType:    link.DependencyType,
 		Justification:     link.Justification,
 		Origin:            link.Origin,
@@ -466,7 +464,6 @@ func noMatchIsDep(filter *model.IsDependencySpec, link *isDependencyLink) bool {
 			noMatch(filter.Origin, link.Origin) ||
 			noMatch(filter.Collector, link.Collector) ||
 			noMatch(filter.DocumentRef, link.DocumentRef) ||
-			noMatch(filter.VersionRange, link.VersionRange) ||
 			(filter.DependencyType != nil && *filter.DependencyType != link.DependencyType)
 	} else {
 		return false

@@ -56,12 +56,12 @@ func (BillOfMaterials) Fields() []ent.Field {
 // Edges of the Material.
 func (BillOfMaterials) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("package", PackageVersion.Type).Field("package_id").Unique(),
-		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique(),
-		edge.To("included_software_packages", PackageVersion.Type),
-		edge.To("included_software_artifacts", Artifact.Type),
-		edge.To("included_dependencies", Dependency.Type),
-		edge.To("included_occurrences", Occurrence.Type),
+		edge.To("package", PackageVersion.Type).Field("package_id").Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_software_packages", PackageVersion.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_software_artifacts", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_dependencies", Dependency.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("included_occurrences", Occurrence.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 
@@ -74,5 +74,7 @@ func (BillOfMaterials) Indexes() []ent.Index {
 		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
 			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector", "document_ref").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_artifact_id"),
+		index.Fields("package_id").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")),  // query when subject is package ID
+		index.Fields("artifact_id").Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")), // query when subject is artifact ID
 	}
 }

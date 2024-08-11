@@ -28,7 +28,6 @@ import (
 )
 
 const (
-	versionRange   string = "versionRange"
 	dependencyType string = "dependencyType"
 )
 
@@ -38,6 +37,7 @@ func (c *neo4jClient) IsDependencyList(ctx context.Context, isDependencySpec mod
 	return nil, fmt.Errorf("not implemented: IsDependencyList")
 }
 
+// note this has not been optimized to remove pkgVersion -> pkgName
 func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
@@ -118,7 +118,6 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				isDependency := &model.IsDependency{
 					Package:           pkg,
 					DependencyPackage: depPkg,
-					VersionRange:      isDependencyNode.Props[versionRange].(string),
 					DependencyType:    dependencyTypeEnum,
 					Origin:            isDependencyNode.Props[origin].(string),
 					Collector:         isDependencyNode.Props[collector].(string),
@@ -139,11 +138,6 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 }
 
 func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch *bool, queryValues map[string]any) {
-	if isDependencySpec.VersionRange != nil {
-		matchProperties(sb, *firstMatch, "isDependency", versionRange, "$"+versionRange)
-		*firstMatch = false
-		queryValues[versionRange] = isDependencySpec.VersionRange
-	}
 	if isDependencySpec.DependencyType != nil {
 		matchProperties(sb, *firstMatch, "isDependency", dependencyType, "$"+dependencyType)
 		*firstMatch = false
@@ -163,13 +157,13 @@ func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDepend
 
 // Ingest IngestDependencies
 
-func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	return []string{}, fmt.Errorf("not implemented: IngestDependencies")
 }
 
 // Ingest IsDependency
-
-func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+// note this has not been optimized to remove pkgVersion -> pkgName
+func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 	// TODO: handle depPkgMatchType
@@ -194,7 +188,6 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInp
 		MatchOnlyEmptyQualifiers: &matchEmpty,
 	}
 
-	queryValues[versionRange] = dependency.VersionRange
 	queryValues[dependencyType] = dependency.DependencyType.String()
 	queryValues[justification] = dependency.Justification
 	queryValues[origin] = dependency.Origin
@@ -211,7 +204,7 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInp
 	setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 	setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
 
-	merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,dependencyType:$dependencyType,justification:$justification,origin:$origin,collector:$collector})" +
+	merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{dependencyType:$dependencyType,justification:$justification,origin:$origin,collector:$collector})" +
 		"-[:dependency]->(objPkgName)"
 	sb.WriteString(merge)
 	sb.WriteString(returnValue)
@@ -259,7 +252,6 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInp
 			isDependency := &model.IsDependency{
 				Package:           pkg,
 				DependencyPackage: depPkg,
-				VersionRange:      isDependencyNode.Props[versionRange].(string),
 				DependencyType:    dependencyTypeEnum,
 				Origin:            isDependencyNode.Props[origin].(string),
 				Collector:         isDependencyNode.Props[collector].(string),

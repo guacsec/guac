@@ -17,6 +17,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -51,8 +52,8 @@ func (CertifyVuln) Fields() []ent.Field {
 // Edges of the Vulnerability.
 func (CertifyVuln) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("vulnerability", VulnerabilityID.Type).Unique().Field("vulnerability_id").Required(),
-		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required(),
+		edge.To("vulnerability", VulnerabilityID.Type).Unique().Field("vulnerability_id").Required().Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required().Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 
@@ -60,5 +61,6 @@ func (CertifyVuln) Edges() []ent.Edge {
 func (CertifyVuln) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector", "time_scanned", "document_ref").Edges("vulnerability", "package").Unique(),
+		index.Fields("package_id"), // speed up frequently run queries to check when CV nodes affect certain package IDs
 	}
 }

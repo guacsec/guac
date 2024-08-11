@@ -56,13 +56,13 @@ var (
 				Symbol:     "bill_of_materials_package_versions_package",
 				Columns:    []*schema.Column{BillOfMaterialsColumns[13]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "bill_of_materials_artifacts_artifact",
 				Columns:    []*schema.Column{BillOfMaterialsColumns[14]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -78,6 +78,22 @@ var (
 				Name:    "sbom_artifact_id",
 				Unique:  true,
 				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[12], BillOfMaterialsColumns[5], BillOfMaterialsColumns[6], BillOfMaterialsColumns[7], BillOfMaterialsColumns[14]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
+				},
+			},
+			{
+				Name:    "billofmaterials_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{BillOfMaterialsColumns[13]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "billofmaterials_artifact_id",
+				Unique:  false,
+				Columns: []*schema.Column{BillOfMaterialsColumns[14]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
 				},
@@ -234,6 +250,14 @@ var (
 					Where: "package_id IS NOT NULL AND source_id IS NULL",
 				},
 			},
+			{
+				Name:    "certifylegal_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyLegalsColumns[11]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND source_id IS NULL",
+				},
+			},
 		},
 	}
 	// CertifyScorecardsColumns holds the columns for the "certify_scorecards" table.
@@ -354,13 +378,13 @@ var (
 				Symbol:     "certify_vulns_vulnerability_ids_vulnerability",
 				Columns:    []*schema.Column{CertifyVulnsColumns[9]},
 				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "certify_vulns_package_versions_package",
 				Columns:    []*schema.Column{CertifyVulnsColumns[10]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -369,20 +393,23 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[1], CertifyVulnsColumns[8], CertifyVulnsColumns[9], CertifyVulnsColumns[10]},
 			},
+			{
+				Name:    "certifyvuln_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyVulnsColumns[10]},
+			},
 		},
 	}
 	// DependenciesColumns holds the columns for the "dependencies" table.
 	DependenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "version_range", Type: field.TypeString},
 		{Name: "dependency_type", Type: field.TypeEnum, Enums: []string{"DIRECT", "INDIRECT", "UNKNOWN"}},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "document_ref", Type: field.TypeString},
 		{Name: "package_id", Type: field.TypeUUID},
-		{Name: "dependent_package_name_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "dependent_package_version_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "dependent_package_version_id", Type: field.TypeUUID},
 	}
 	// DependenciesTable holds the schema information for the "dependencies" table.
 	DependenciesTable = &schema.Table{
@@ -392,39 +419,32 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "dependencies_package_versions_package",
-				Columns:    []*schema.Column{DependenciesColumns[7]},
+				Columns:    []*schema.Column{DependenciesColumns[6]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "dependencies_package_names_dependent_package_name",
-				Columns:    []*schema.Column{DependenciesColumns[8]},
-				RefColumns: []*schema.Column{PackageNamesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "dependencies_package_versions_dependent_package_version",
-				Columns:    []*schema.Column{DependenciesColumns[9]},
+				Columns:    []*schema.Column{DependenciesColumns[7]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "dep_package_name_id",
+				Name:    "dependency_dependency_type_justification_origin_collector_document_ref_package_id_dependent_package_version_id",
 				Unique:  true,
-				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7], DependenciesColumns[8]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL",
-				},
+				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7]},
 			},
 			{
-				Name:    "dep_package_version_id",
-				Unique:  true,
-				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7], DependenciesColumns[9]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL",
-				},
+				Name:    "dependency_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{DependenciesColumns[6]},
+			},
+			{
+				Name:    "dependency_dependent_package_version_id",
+				Unique:  false,
+				Columns: []*schema.Column{DependenciesColumns[7]},
 			},
 		},
 	}
@@ -644,19 +664,19 @@ var (
 				Symbol:     "occurrences_artifacts_artifact",
 				Columns:    []*schema.Column{OccurrencesColumns[5]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "occurrences_package_versions_package",
 				Columns:    []*schema.Column{OccurrencesColumns[6]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "occurrences_source_names_source",
 				Columns:    []*schema.Column{OccurrencesColumns[7]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -675,6 +695,19 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND source_id IS NOT NULL",
 				},
+			},
+			{
+				Name:    "query_occurrence_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{OccurrencesColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND source_id IS NULL",
+				},
+			},
+			{
+				Name:    "occurrence_artifact_id",
+				Unique:  false,
+				Columns: []*schema.Column{OccurrencesColumns[5]},
 			},
 		},
 	}
@@ -887,13 +920,13 @@ var (
 				Symbol:     "slsa_attestations_builders_built_by",
 				Columns:    []*schema.Column{SlsaAttestationsColumns[10]},
 				RefColumns: []*schema.Column{BuildersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "slsa_attestations_artifacts_subject",
 				Columns:    []*schema.Column{SlsaAttestationsColumns[11]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -980,6 +1013,11 @@ var (
 				Name:    "vulnerabilityid_vulnerability_id_type",
 				Unique:  true,
 				Columns: []*schema.Column{VulnerabilityIdsColumns[1], VulnerabilityIdsColumns[2]},
+			},
+			{
+				Name:    "vulnerabilityid_type",
+				Unique:  false,
+				Columns: []*schema.Column{VulnerabilityIdsColumns[2]},
 			},
 		},
 	}
@@ -1241,8 +1279,7 @@ func init() {
 	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
-	DependenciesTable.ForeignKeys[2].RefTable = PackageVersionsTable
+	DependenciesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	HasMetadataTable.ForeignKeys[0].RefTable = SourceNamesTable
 	HasMetadataTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	HasMetadataTable.ForeignKeys[2].RefTable = PackageNamesTable
@@ -1272,16 +1309,21 @@ func init() {
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	BillOfMaterialsIncludedSoftwarePackagesTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	BillOfMaterialsIncludedSoftwareArtifactsTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[1].RefTable = DependenciesTable
+	BillOfMaterialsIncludedDependenciesTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[1].RefTable = OccurrencesTable
+	BillOfMaterialsIncludedOccurrencesTable.Annotation = &entsql.Annotation{}
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
+	SlsaAttestationBuiltFromTable.Annotation = &entsql.Annotation{}
 }

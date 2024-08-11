@@ -61,12 +61,10 @@ type HasSourceAtEdges struct {
 // PackageVersionOrErr returns the PackageVersion value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e HasSourceAtEdges) PackageVersionOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[0] {
-		if e.PackageVersion == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.PackageVersion != nil {
 		return e.PackageVersion, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package_version"}
 }
@@ -74,12 +72,10 @@ func (e HasSourceAtEdges) PackageVersionOrErr() (*PackageVersion, error) {
 // AllVersionsOrErr returns the AllVersions value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e HasSourceAtEdges) AllVersionsOrErr() (*PackageName, error) {
-	if e.loadedTypes[1] {
-		if e.AllVersions == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packagename.Label}
-		}
+	if e.AllVersions != nil {
 		return e.AllVersions, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packagename.Label}
 	}
 	return nil, &NotLoadedError{edge: "all_versions"}
 }
@@ -87,12 +83,10 @@ func (e HasSourceAtEdges) AllVersionsOrErr() (*PackageName, error) {
 // SourceOrErr returns the Source value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e HasSourceAtEdges) SourceOrErr() (*SourceName, error) {
-	if e.loadedTypes[2] {
-		if e.Source == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: sourcename.Label}
-		}
+	if e.Source != nil {
 		return e.Source, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: sourcename.Label}
 	}
 	return nil, &NotLoadedError{edge: "source"}
 }

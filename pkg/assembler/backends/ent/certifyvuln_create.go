@@ -183,10 +183,10 @@ func (cvc *CertifyVulnCreate) check() error {
 	if _, ok := cvc.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyVuln.document_ref"`)}
 	}
-	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
+	if len(cvc.mutation.VulnerabilityIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability", err: errors.New(`ent: missing required edge "CertifyVuln.vulnerability"`)}
 	}
-	if _, ok := cvc.mutation.PackageID(); !ok {
+	if len(cvc.mutation.PackageIDs()) == 0 {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "CertifyVuln.package"`)}
 	}
 	return nil

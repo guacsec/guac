@@ -41,7 +41,14 @@ func NewDepsDevParser() common.DocumentParser {
 	return &depsDevParser{}
 }
 
+// initializeDepsDevParser clears out all values for the next iteration
+func (d *depsDevParser) initializeDepsDevParser() {
+	d.doc = nil
+	d.packComponent = nil
+}
+
 func (d *depsDevParser) Parse(ctx context.Context, doc *processor.Document) error {
+	d.initializeDepsDevParser()
 	d.doc = doc
 	packComponent, err := parseDepsDevBlob(doc.Blob)
 	if err != nil {
@@ -70,10 +77,9 @@ func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 
 	for _, isDepComp := range d.packComponent.IsDepPackages {
 		preds.IsDependency = append(preds.IsDependency, assembler.IsDependencyIngest{
-			Pkg:             isDepComp.CurrentPackageInput,
-			DepPkg:          isDepComp.DepPackageInput,
-			DepPkgMatchFlag: common.GetMatchFlagsFromPkgInput(isDepComp.DepPackageInput),
-			IsDependency:    isDepComp.IsDependency,
+			Pkg:          isDepComp.CurrentPackageInput,
+			DepPkg:       isDepComp.DepPackageInput,
+			IsDependency: isDepComp.IsDependency,
 		})
 	}
 	preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(d.packComponent.CurrentPackage, d.doc, helpers.PkgInputSpecToPurl(d.packComponent.CurrentPackage), d.packComponent.UpdateTime))

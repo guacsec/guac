@@ -222,7 +222,7 @@ func (csu *CertifyScorecardUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (csu *CertifyScorecardUpdate) check() error {
-	if _, ok := csu.mutation.SourceID(); csu.mutation.SourceCleared() && !ok {
+	if csu.mutation.SourceCleared() && len(csu.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyScorecard.source"`)
 	}
 	return nil
@@ -527,7 +527,7 @@ func (csuo *CertifyScorecardUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (csuo *CertifyScorecardUpdateOne) check() error {
-	if _, ok := csuo.mutation.SourceID(); csuo.mutation.SourceCleared() && !ok {
+	if csuo.mutation.SourceCleared() && len(csuo.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyScorecard.source"`)
 	}
 	return nil

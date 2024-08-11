@@ -39,3 +39,28 @@ mutation IngestPkgEquals(
     pkgEquals: $pkgEquals
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC PkgEqual
+
+query PkgEquals($filter: PkgEqualSpec!) {
+  PkgEqual(pkgEqualSpec: $filter) {
+    ...AllPkgEqual
+  }
+}
+
+query PkgEqualList($filter: PkgEqualSpec!, $after: ID, $first: Int) {
+  PkgEqualList(pkgEqualSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllPkgEqual
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

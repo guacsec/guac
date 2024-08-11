@@ -40,11 +40,13 @@ import (
 )
 
 type options struct {
-	pubsubAddr        string
-	blobAddr          string
-	csubClientOptions csub_client.CsubClientOptions
-	graphqlEndpoint   string
-	headerFile        string
+	pubsubAddr              string
+	blobAddr                string
+	csubClientOptions       csub_client.CsubClientOptions
+	graphqlEndpoint         string
+	headerFile              string
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -56,6 +58,8 @@ func ingest(cmd *cobra.Command, args []string) {
 		viper.GetString("header-file"),
 		viper.GetBool("csub-tls"),
 		viper.GetBool("csub-tls-skip-verify"),
+		viper.GetBool("add-vuln-on-ingest"),
+		viper.GetBool("add-license-on-ingest"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
@@ -95,12 +99,12 @@ func ingest(cmd *cobra.Command, args []string) {
 	defer csubClient.Close()
 
 	emit := func(d *processor.Document) error {
-		if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient); err != nil {
+		if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
 			var urlErr *url.Error
 			if errors.As(err, &urlErr) {
 				return fmt.Errorf("unable to ingest document due to connection error with graphQL %q : %w", d.SourceInformation.Source, urlErr)
 			}
-			logger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
+			d.ChildLogger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
 		}
 		return nil
 	}
@@ -125,7 +129,8 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile string, csubTls, csubTlsSkipVerify bool, args []string) (options, error) {
+func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile string, csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (options, error) {
 	var opts options
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
@@ -136,6 +141,8 @@ func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile s
 	opts.csubClientOptions = csubOpts
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
+	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 
 	return opts, nil
 }

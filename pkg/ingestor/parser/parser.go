@@ -21,7 +21,9 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/clearlydefined"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common/scanner"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/deps_dev"
@@ -37,6 +39,7 @@ func init() {
 	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)
 	_ = RegisterDocumentParser(slsa.NewSLSAParser, processor.DocumentITE6SLSA)
 	_ = RegisterDocumentParser(vuln.NewVulnCertificationParser, processor.DocumentITE6Vul)
+	_ = RegisterDocumentParser(clearlydefined.NewLegalCertificationParser, processor.DocumentITE6ClearlyDefined)
 	_ = RegisterDocumentParser(spdx.NewSpdxParser, processor.DocumentSPDX)
 	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser, processor.DocumentCycloneDX)
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)
@@ -71,7 +74,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool, scanForLicense bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.IngestPredicates{}
 	identifierStrings := []*common.IdentifierStrings{}
 	logger := docTree.Document.ChildLogger
@@ -91,6 +94,42 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 			logger.Debugf("found ID strings: %+v", idStrings)
 		} else {
 			logger.Debugf("parser did not find ID strings with err: %v", err)
+		}
+	}
+
+	if scanForVulns {
+		// scan purls via OSV on initial ingestion to capture vulnerability information
+		var purls []string
+		for _, idString := range identifierStrings {
+			purls = append(purls, idString.PurlStrings...)
+		}
+
+		vulnEquals, certVulns, err := scanner.PurlsVulnScan(ctx, purls)
+		if err != nil {
+			logger.Errorf("error scanning purls for vulnerabilities %v", err)
+		} else {
+			if len(assemblerInputs) > 0 {
+				assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
+				assemblerInputs[0].CertifyVuln = append(assemblerInputs[0].CertifyVuln, certVulns...)
+			}
+		}
+	}
+
+	if scanForLicense {
+		// scan purls via clearly defined on initial ingestion to capture license information
+		var purls []string
+		for _, idString := range identifierStrings {
+			purls = append(purls, idString.PurlStrings...)
+		}
+
+		certLegal, hasSourceAt, err := scanner.PurlsLicenseScan(ctx, purls)
+		if err != nil {
+			logger.Errorf("error scanning purls for licenses %v", err)
+		} else {
+			if len(assemblerInputs) > 0 {
+				assemblerInputs[0].CertifyLegal = append(assemblerInputs[0].CertifyLegal, certLegal...)
+				assemblerInputs[0].HasSourceAt = append(assemblerInputs[0].HasSourceAt, hasSourceAt...)
+			}
 		}
 	}
 

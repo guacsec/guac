@@ -28,9 +28,16 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
-func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
-	return func(preds []assembler.IngestPredicates) error {
+type AssemblerIngestedIDs struct {
+	hasSBOMIDs []string
+	hasSLSAIDs []string
+}
+
+func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient graphql.Client) func([]assembler.AssemblerInput) (*AssemblerIngestedIDs, error) {
+	return func(preds []assembler.IngestPredicates) (*AssemblerIngestedIDs, error) {
 		var rvErr error
+		ingestedIDs := &AssemblerIngestedIDs{}
+
 		for _, p := range preds {
 
 			// Ingest Packages
@@ -41,7 +48,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorPkgInputs, err := ingestPackages(ctx, gqlclient, packages)
 			if err != nil {
-				return fmt.Errorf("ingestPackages failed with error: %w", err)
+				return nil, fmt.Errorf("ingestPackages failed with error: %w", err)
 			}
 
 			var pkgVersionIDs []string
@@ -57,7 +64,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorSrcInputs, err := ingestSources(ctx, gqlclient, sources)
 			if err != nil {
-				return fmt.Errorf("ingestSources failed with error: %w", err)
+				return nil, fmt.Errorf("ingestSources failed with error: %w", err)
 			}
 
 			// Ingest Artifacts
@@ -67,7 +74,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorArtInputs, err := ingestArtifacts(ctx, gqlclient, artifacts)
 			if err != nil {
-				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+				return nil, fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 			var artIDs []string
 			for _, artID := range collectedIDorArtInputs {
@@ -82,7 +89,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorMatInputs, err := ingestArtifacts(ctx, gqlclient, materials)
 			if err != nil {
-				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+				return nil, fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 
 			// Ingest Builders
@@ -91,7 +98,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorBuilderInputs, err := ingestBuilders(ctx, gqlclient, builders)
 			if err != nil {
-				return fmt.Errorf("ingestBuilders failed with error: %w", err)
+				return nil, fmt.Errorf("ingestBuilders failed with error: %w", err)
 			}
 
 			// Ingest Vulnerabilities
@@ -100,7 +107,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorVulnInputs, err := ingestVulnerabilities(ctx, gqlclient, vulns)
 			if err != nil {
-				return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
+				return nil, fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
 			}
 
 			// Ingest Licenses
@@ -109,7 +116,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorLicenseInputs, err := ingestLicenses(ctx, gqlclient, licenses)
 			if err != nil {
-				return fmt.Errorf("ingestLicenses failed with error: %w", err)
+				return nil, fmt.Errorf("ingestLicenses failed with error: %w", err)
 			}
 
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
@@ -137,7 +144,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 			}
 
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
-			if err := ingestHasSLSAs(ctx, gqlclient, p.HasSlsa, collectedIDorArtInputs, collectedIDorMatInputs, collectedIDorBuilderInputs); err != nil {
+			if err := ingestHasSLSAs(ctx, gqlclient, p.HasSlsa, collectedIDorArtInputs, collectedIDorMatInputs, collectedIDorBuilderInputs, ingestedIDs); err != nil {
 				logger.Errorf("ingestHasSLSAs failed with error: %v", err)
 				rvErr = err
 			}
@@ -196,7 +203,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 				Artifacts:    artifactIDs,
 				Dependencies: isDependenciesIDs,
 				Occurrences:  isOccurrencesIDs,
-			}, collectedIDorPkgInputs, collectedIDorArtInputs); err != nil {
+			}, collectedIDorPkgInputs, collectedIDorArtInputs, ingestedIDs); err != nil {
 				logger.Errorf("ingestHasSBOMs failed with error: %v", err)
 				rvErr = err
 			}
@@ -225,7 +232,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 				rvErr = err
 			}
 		}
-		return rvErr
+		return ingestedIDs, rvErr
 	}
 }
 
@@ -566,7 +573,7 @@ func ingestHasSourceAts(ctx context.Context, client graphql.Client, hs []assembl
 }
 
 func ingestHasSLSAs(ctx context.Context, client graphql.Client, hs []assembler.HasSlsaIngest, artInputMap map[string]*model.IDorArtifactInput,
-	matInputSpec map[string]*model.IDorArtifactInput, builderInputMap map[string]*model.IDorBuilderInput) error {
+	matInputSpec map[string]*model.IDorArtifactInput, builderInputMap map[string]*model.IDorBuilderInput, ingestedIDs *AssemblerIngestedIDs) error {
 
 	var subjectIDs []model.IDorArtifactInput
 	var slsaAttestations []model.SLSAInputSpec
@@ -595,10 +602,11 @@ func ingestHasSLSAs(ctx context.Context, client graphql.Client, hs []assembler.H
 		slsaAttestations = append(slsaAttestations, *ingest.HasSlsa)
 	}
 	if len(hs) > 0 {
-		_, err := model.IngestSLSAForArtifacts(ctx, client, subjectIDs, materialIDs, builderIDs, slsaAttestations)
+		hasSLSAArtResponse, err := model.IngestSLSAForArtifacts(ctx, client, subjectIDs, materialIDs, builderIDs, slsaAttestations)
 		if err != nil {
 			return fmt.Errorf("SLSAForArtifacts failed with error: %w", err)
 		}
+		ingestedIDs.hasSLSAIDs = append(ingestedIDs.hasSLSAIDs, hasSLSAArtResponse.IngestSLSAs...)
 	}
 	return nil
 }
@@ -625,54 +633,29 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, cs []as
 
 func ingestIsDependencies(ctx context.Context, client graphql.Client, deps []assembler.IsDependencyIngest, packageInputMap map[string]*model.IDorPkgInput) ([]string, error) {
 
-	var depToSpecificVersion, depToAllVersions struct {
-		pkgs            []model.IDorPkgInput
-		depPkgs         []model.IDorPkgInput
-		depPkgMatchFlag model.MatchFlags
-		dependencies    []model.IsDependencyInputSpec
+	var depToSpecificVersion struct {
+		pkgs         []model.IDorPkgInput
+		depPkgs      []model.IDorPkgInput
+		dependencies []model.IsDependencyInputSpec
 	}
 
-	depToSpecificVersion.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
-	depToAllVersions.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
-
 	for _, ingest := range deps {
-		if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
-			if pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId]; found {
-				depToSpecificVersion.pkgs = append(depToSpecificVersion.pkgs, *pkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
-			}
-			if depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId]; found {
-				depToSpecificVersion.depPkgs = append(depToSpecificVersion.depPkgs, *depPkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId)
-			}
-			depToSpecificVersion.dependencies = append(depToSpecificVersion.dependencies, *ingest.IsDependency)
-		} else if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeAllVersions {
-			if pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId]; found {
-				depToAllVersions.pkgs = append(depToAllVersions.pkgs, *pkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
-			}
-			if depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId]; found {
-				depToAllVersions.depPkgs = append(depToAllVersions.depPkgs, *depPkgID)
-			} else {
-				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId)
-			}
-			depToAllVersions.dependencies = append(depToAllVersions.dependencies, *ingest.IsDependency)
+		if pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId]; found {
+			depToSpecificVersion.pkgs = append(depToSpecificVersion.pkgs, *pkgID)
+		} else {
+			return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
 		}
+		if depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId]; found {
+			depToSpecificVersion.depPkgs = append(depToSpecificVersion.depPkgs, *depPkgID)
+		} else {
+			return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.DepPkg, helpers.PkgClientKey).VersionId)
+		}
+		depToSpecificVersion.dependencies = append(depToSpecificVersion.dependencies, *ingest.IsDependency)
 	}
 
 	var isDependenciesIDs []string
 	if len(depToSpecificVersion.pkgs) > 0 {
-		isDependencies, err := model.IngestIsDependencies(ctx, client, depToSpecificVersion.pkgs, depToSpecificVersion.depPkgs, depToSpecificVersion.depPkgMatchFlag, depToSpecificVersion.dependencies)
-		if err != nil {
-			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
-		}
-		isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
-	}
-	if len(depToAllVersions.pkgs) > 0 {
-		isDependencies, err := model.IngestIsDependencies(ctx, client, depToAllVersions.pkgs, depToAllVersions.depPkgs, depToAllVersions.depPkgMatchFlag, depToAllVersions.dependencies)
+		isDependencies, err := model.IngestIsDependencies(ctx, client, depToSpecificVersion.pkgs, depToSpecificVersion.depPkgs, depToSpecificVersion.dependencies)
 		if err != nil {
 			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
 		}
@@ -735,7 +718,7 @@ func ingestHashEquals(ctx context.Context, client graphql.Client, he []assembler
 }
 
 func ingestHasSBOMs(ctx context.Context, client graphql.Client, hs []assembler.HasSBOMIngest, includes model.HasSBOMIncludesInputSpec, packageInputMap map[string]*model.IDorPkgInput,
-	artInputMap map[string]*model.IDorArtifactInput) error {
+	artInputMap map[string]*model.IDorArtifactInput, ingestedIDs *AssemblerIngestedIDs) error {
 
 	var pkgIDs []model.IDorPkgInput
 	var artIDs []model.IDorArtifactInput
@@ -770,16 +753,18 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, hs []assembler.H
 		}
 	}
 	if len(artIDs) > 0 {
-		_, err := model.IngestHasSBOMArtifacts(ctx, client, artIDs, artSBOMs, artIncludes)
+		hasSBOMArtResponse, err := model.IngestHasSBOMArtifacts(ctx, client, artIDs, artSBOMs, artIncludes)
 		if err != nil {
 			return fmt.Errorf("hasSBOMArtifacts failed with error: %w", err)
 		}
+		ingestedIDs.hasSBOMIDs = append(ingestedIDs.hasSBOMIDs, hasSBOMArtResponse.IngestHasSBOMs...)
 	}
 	if len(pkgIDs) > 0 {
-		_, err := model.IngestHasSBOMPkgs(ctx, client, pkgIDs, pkgSBOMs, pkgIncludes)
+		hasSBOMPkgResponse, err := model.IngestHasSBOMPkgs(ctx, client, pkgIDs, pkgSBOMs, pkgIncludes)
 		if err != nil {
 			return fmt.Errorf("hasSBOMPkgs failed with error: %w", err)
 		}
+		ingestedIDs.hasSBOMIDs = append(ingestedIDs.hasSBOMIDs, hasSBOMPkgResponse.IngestHasSBOMs...)
 	}
 	return nil
 }
@@ -1169,8 +1154,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				return fmt.Errorf("failed to find ingested Package ID for certifyLegal: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](ingest.Pkg, helpers.PkgClientKey).VersionId)
 			}
 
-			// Declared Licenses
-			var pkgDecList []model.IDorLicenseInput
+			// Declared Licenses - initialized as it cannot be nil
+			pkgDecList := make([]model.IDorLicenseInput, 0)
 			for _, dec := range ingest.Declared {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dec, helpers.LicenseClientKey)]; found {
 					pkgDecList = append(pkgDecList, *licID)
@@ -1180,8 +1165,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 			}
 			pkgDecIDs = append(pkgDecIDs, pkgDecList)
 
-			// Discovered Licenses
-			var pkgDisList []model.IDorLicenseInput
+			// Discovered Licenses - initialized as it cannot be nil
+			pkgDisList := make([]model.IDorLicenseInput, 0)
 			for _, dis := range ingest.Discovered {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dis, helpers.LicenseClientKey)]; found {
 					pkgDisList = append(pkgDisList, *licID)
@@ -1198,8 +1183,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				return fmt.Errorf("failed to find ingested Source ID for certifyLegal: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](ingest.Src, helpers.SrcClientKey).NameId)
 			}
 
-			// Declared Licenses
-			var srcDecList []model.IDorLicenseInput
+			// Declared Licenses - initialized as it cannot be nil
+			srcDecList := make([]model.IDorLicenseInput, 0)
 			for _, dec := range ingest.Declared {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dec, helpers.LicenseClientKey)]; found {
 					srcDecList = append(srcDecList, *licID)
@@ -1209,8 +1194,8 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 			}
 			srcDecIDs = append(srcDecIDs, srcDecList)
 
-			// Discovered Licenses
-			var srcDisList []model.IDorLicenseInput
+			// Discovered Licenses - initialized as it cannot be nil
+			srcDisList := make([]model.IDorLicenseInput, 0)
 			for _, dis := range ingest.Discovered {
 				if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dis, helpers.LicenseClientKey)]; found {
 					srcDisList = append(srcDisList, *licID)

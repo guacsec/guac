@@ -166,10 +166,10 @@ func (vec *VulnEqualCreate) check() error {
 	if _, ok := vec.mutation.VulnerabilitiesHash(); !ok {
 		return &ValidationError{Name: "vulnerabilities_hash", err: errors.New(`ent: missing required field "VulnEqual.vulnerabilities_hash"`)}
 	}
-	if _, ok := vec.mutation.VulnerabilityAID(); !ok {
+	if len(vec.mutation.VulnerabilityAIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability_a", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_a"`)}
 	}
-	if _, ok := vec.mutation.VulnerabilityBID(); !ok {
+	if len(vec.mutation.VulnerabilityBIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability_b", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_b"`)}
 	}
 	return nil

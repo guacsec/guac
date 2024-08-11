@@ -130,7 +130,7 @@ build_bins:
 .PHONY: build
 build: check-goreleaser-tool-check build_bins
 	@mkdir -p bin
-	@echo "$(shell cat dist/artifacts.json | jq '.[]| { path: .path, name: .extra.ID } | join(" ")' -r)" | xargs -n 2 sh -c 'cp $$0 ./bin/$$1'
+	@echo "$(shell cat dist/artifacts.json | jq '.[] | select(.type == "Binary") | { path: .path, name: .extra.ID } | join(" ")' -r)" | xargs -n 2 sh -c 'cp $$0 ./bin/$$1'
 	@echo "\nThe guac bins are available in ./bin"
 
 .PHONY: build_local_container
@@ -152,7 +152,7 @@ container: check-docker-tool-check check-docker-buildx-tool-check check-goreleas
 	$(LOCAL_IMAGE_NAME)
 	@echo "\nThe guac container image is tagged locally as $(LOCAL_IMAGE_NAME)"
 
-# To run the service, run `make container` and then `make service`
+# To run the service, run `make container` and then `make start-service`
 # making the container is a longer process and thus not a dependency of service.
 .PHONY: start-service
 start-service: check-docker-compose-tool-check

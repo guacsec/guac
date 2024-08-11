@@ -46,7 +46,6 @@ query isDependency {
         }
       }
     }
-    versionRange
     origin
     collector
   }

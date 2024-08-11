@@ -65,6 +65,12 @@ func init() {
 	// enable/disable publish to queue
 	set.Bool("publish-to-queue", true, "enable/disable message publish to queue")
 
+	// the ingestor will query and ingest OSV for vulnerabilities
+	set.Bool("add-vuln-on-ingest", false, "if enabled, the ingestor will query and ingest OSV for vulnerabilities. Warning: This will increase ingestion times")
+
+	// the ingestor will query and ingest clearly defined for licenses
+	set.Bool("add-license-on-ingest", false, "if enabled, the ingestor will query and ingest clearly defined for licenses. Warning: This will increase ingestion times")
+
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")
 	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
@@ -85,12 +91,23 @@ func init() {
 	set.String("rest-api-server-port", "8081", "port to serve the REST API from")
 	set.String("rest-api-tls-cert-file", "", "path to the TLS certificate in PEM format for rest api server")
 	set.String("rest-api-tls-key-file", "", "path to the TLS key in PEM format for rest api server")
+	set.Bool("db-direct-connection", false, "[experimental] connect directly to the database that backs the gql API for optimized endpoint implementations")
 
 	set.String("verifier-key-path", "", "path to pem file to verify dsse")
 	set.String("verifier-key-id", "", "ID of the key to be stored")
 
+	// certifier
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
 	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
+
+	// set the batch size for the package pagination query
+	set.Int("certifier-batch-size", 60000, "sets the batch size for pagination query for the certifier")
+	// add artificial latency to throttle the certifier
+	set.String("certifier-latency", "", "sets artificial latency on the certifier. Defaults to empty string (not enabled) but can set m, h, s...etc")
+
+	// deps.dev
+	// add artificial latency to throttle deps.dev
+	set.String("deps-dev-latency", "", "sets artificial latency on the deps.dev collector. Defaults to empty string (not enabled) but can set m, h, s...etc")
 
 	set.Bool("retrieve-dependencies", true, "enable the deps.dev collector to retrieve package dependencies")
 
@@ -99,6 +116,8 @@ func init() {
 	set.Int("prometheus-port", 9091, "port to listen to on prometheus server")
 
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
+
+	set.IntP("last-scan", "l", 0, "days since the last vulnerability scan was run. Default 0 means only run once")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")

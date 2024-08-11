@@ -28,7 +28,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/ingestor"
 
@@ -43,11 +42,17 @@ import (
 )
 
 type scorecardOptions struct {
-	graphqlEndpoint   string
-	headerFile        string
-	poll              bool
-	interval          time.Duration
-	csubClientOptions client.CsubClientOptions
+	graphqlEndpoint         string
+	headerFile              string
+	poll                    bool
+	interval                time.Duration
+	csubClientOptions       csub_client.CsubClientOptions
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
+	// sets artificial latency on the certifier (default to nil)
+	addedLatency *time.Duration
+	// sets the batch size for pagination query for the certifier
+	batchSize int
 }
 
 var scorecardCmd = &cobra.Command{
@@ -62,6 +67,10 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
+			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
+			viper.GetString("certifier-latency"),
+			viper.GetInt("certifier-batch-size"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -104,7 +113,7 @@ var scorecardCmd = &cobra.Command{
 
 		// scorecard certifier is the certifier that gets the scorecard data graphQL
 		// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
-		query, err := sc.NewCertifier(gqlclient, 0)
+		query, err := sc.NewCertifier(gqlclient, 0, opts.batchSize, opts.addedLatency)
 
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
@@ -124,7 +133,7 @@ var scorecardCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
+			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
@@ -181,12 +190,28 @@ func validateScorecardFlags(
 	csubTls,
 	csubTlsSkipVerify,
 	poll bool,
+	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
+	certifierLatencyStr string,
+	batchSize int,
 ) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if certifierLatencyStr != "" {
+		addedLatency, err := time.ParseDuration(certifierLatencyStr)
+		if err != nil {
+			return opts, fmt.Errorf("failed to parser duration with error: %w", err)
+		}
+		opts.addedLatency = &addedLatency
+	} else {
+		opts.addedLatency = nil
+	}
+
+	opts.batchSize = batchSize
+
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
@@ -198,10 +223,22 @@ func validateScorecardFlags(
 		return opts, err
 	}
 	opts.interval = i
-
+	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	return opts, nil
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"certifier-latency",
+		"certifier-batch-size"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	scorecardCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(scorecardCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	certifierCmd.AddCommand(scorecardCmd)
 }

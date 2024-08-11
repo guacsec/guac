@@ -321,7 +321,7 @@ type CertifyLegal struct {
 	ID string `json:"id"`
 	// The package version or source that is attested
 	Subject PackageOrSource `json:"subject"`
-	// The license expression as delcared
+	// The license expression as declared
 	DeclaredLicense string `json:"declaredLicense"`
 	// A list of license objects found in the declared license expression
 	DeclaredLicenses []*License `json:"declaredLicenses"`
@@ -1011,10 +1011,8 @@ type IsDependency struct {
 	ID string `json:"id"`
 	// Package that has the dependency
 	Package *Package `json:"package"`
-	// Package for the dependency; MUST be PackageName or PackageVersion
+	// Package for the dependency; MUST be PackageVersion
 	DependencyPackage *Package `json:"dependencyPackage"`
-	// Version range for the dependency link, required if depedentPackage points to PackageName
-	VersionRange string `json:"versionRange"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
 	// Justification for the attested relationship
@@ -1054,8 +1052,6 @@ type IsDependencyEdge struct {
 
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
-	// versionRange should be specified for depedentPackages that point to PackageName
-	VersionRange   string         `json:"versionRange"`
 	DependencyType DependencyType `json:"dependencyType"`
 	Justification  string         `json:"justification"`
 	Origin         string         `json:"origin"`
@@ -1068,12 +1064,11 @@ type IsDependencyInputSpec struct {
 // To obtain the list of dependency packages, caller must fill in the package
 // field.
 //
-// Dependency packages must be defined at PackageName, not PackageVersion.
+// Dependency packages must be defined at PackageVersion.
 type IsDependencySpec struct {
 	ID                *string         `json:"id,omitempty"`
 	Package           *PkgSpec        `json:"package,omitempty"`
 	DependencyPackage *PkgSpec        `json:"dependencyPackage,omitempty"`
-	VersionRange      *string         `json:"versionRange,omitempty"`
 	DependencyType    *DependencyType `json:"dependencyType,omitempty"`
 	Justification     *string         `json:"justification,omitempty"`
 	Origin            *string         `json:"origin,omitempty"`

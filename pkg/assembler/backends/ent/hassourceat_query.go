@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -135,7 +136,7 @@ func (hsaq *HasSourceAtQuery) QuerySource() *SourceNameQuery {
 // First returns the first HasSourceAt entity from the query.
 // Returns a *NotFoundError when no HasSourceAt was found.
 func (hsaq *HasSourceAtQuery) First(ctx context.Context) (*HasSourceAt, error) {
-	nodes, err := hsaq.Limit(1).All(setContextOp(ctx, hsaq.ctx, "First"))
+	nodes, err := hsaq.Limit(1).All(setContextOp(ctx, hsaq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +159,7 @@ func (hsaq *HasSourceAtQuery) FirstX(ctx context.Context) *HasSourceAt {
 // Returns a *NotFoundError when no HasSourceAt ID was found.
 func (hsaq *HasSourceAtQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = hsaq.Limit(1).IDs(setContextOp(ctx, hsaq.ctx, "FirstID")); err != nil {
+	if ids, err = hsaq.Limit(1).IDs(setContextOp(ctx, hsaq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -181,7 +182,7 @@ func (hsaq *HasSourceAtQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one HasSourceAt entity is found.
 // Returns a *NotFoundError when no HasSourceAt entities are found.
 func (hsaq *HasSourceAtQuery) Only(ctx context.Context) (*HasSourceAt, error) {
-	nodes, err := hsaq.Limit(2).All(setContextOp(ctx, hsaq.ctx, "Only"))
+	nodes, err := hsaq.Limit(2).All(setContextOp(ctx, hsaq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +210,7 @@ func (hsaq *HasSourceAtQuery) OnlyX(ctx context.Context) *HasSourceAt {
 // Returns a *NotFoundError when no entities are found.
 func (hsaq *HasSourceAtQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = hsaq.Limit(2).IDs(setContextOp(ctx, hsaq.ctx, "OnlyID")); err != nil {
+	if ids, err = hsaq.Limit(2).IDs(setContextOp(ctx, hsaq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -234,7 +235,7 @@ func (hsaq *HasSourceAtQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of HasSourceAts.
 func (hsaq *HasSourceAtQuery) All(ctx context.Context) ([]*HasSourceAt, error) {
-	ctx = setContextOp(ctx, hsaq.ctx, "All")
+	ctx = setContextOp(ctx, hsaq.ctx, ent.OpQueryAll)
 	if err := hsaq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -256,7 +257,7 @@ func (hsaq *HasSourceAtQuery) IDs(ctx context.Context) (ids []uuid.UUID, err err
 	if hsaq.ctx.Unique == nil && hsaq.path != nil {
 		hsaq.Unique(true)
 	}
-	ctx = setContextOp(ctx, hsaq.ctx, "IDs")
+	ctx = setContextOp(ctx, hsaq.ctx, ent.OpQueryIDs)
 	if err = hsaq.Select(hassourceat.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -274,7 +275,7 @@ func (hsaq *HasSourceAtQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (hsaq *HasSourceAtQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, hsaq.ctx, "Count")
+	ctx = setContextOp(ctx, hsaq.ctx, ent.OpQueryCount)
 	if err := hsaq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -292,7 +293,7 @@ func (hsaq *HasSourceAtQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (hsaq *HasSourceAtQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, hsaq.ctx, "Exist")
+	ctx = setContextOp(ctx, hsaq.ctx, ent.OpQueryExist)
 	switch _, err := hsaq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -698,7 +699,7 @@ func (hsagb *HasSourceAtGroupBy) Aggregate(fns ...AggregateFunc) *HasSourceAtGro
 
 // Scan applies the selector query and scans the result into the given value.
 func (hsagb *HasSourceAtGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hsagb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, hsagb.build.ctx, ent.OpQueryGroupBy)
 	if err := hsagb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -746,7 +747,7 @@ func (hsas *HasSourceAtSelect) Aggregate(fns ...AggregateFunc) *HasSourceAtSelec
 
 // Scan applies the selector query and scans the result into the given value.
 func (hsas *HasSourceAtSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hsas.ctx, "Select")
+	ctx = setContextOp(ctx, hsas.ctx, ent.OpQuerySelect)
 	if err := hsas.prepareQuery(ctx); err != nil {
 		return err
 	}

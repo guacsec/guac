@@ -35,6 +35,8 @@ func TestNewCertifier(t *testing.T) {
 	type args struct {
 		client            graphql.Client
 		daysSinceLastScan int
+		batchSize         int
+		addedLatency      *time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -46,15 +48,19 @@ func TestNewCertifier(t *testing.T) {
 		args: args{
 			client:            gqlclient,
 			daysSinceLastScan: 0,
+			batchSize:         60000,
+			addedLatency:      nil,
 		},
 		want: &sourceQuery{
 			client:            gqlclient,
 			daysSinceLastScan: 0,
+			batchSize:         60000,
+			addedLatency:      nil,
 		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewCertifier(tt.args.client, tt.args.daysSinceLastScan)
+			got, err := NewCertifier(tt.args.client, tt.args.daysSinceLastScan, tt.args.batchSize, tt.args.addedLatency)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewCertifier() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -69,7 +75,7 @@ func TestNewCertifier(t *testing.T) {
 func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 
-	testSourceDjangoTag := generated.SourcesSourcesSource{}
+	testSourceDjangoTag := generated.SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource{}
 	testSourceDjangoTag.Type = "git"
 	testSourceDjangoTag.Namespaces = append(testSourceDjangoTag.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
@@ -83,7 +89,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		},
 	})
 
-	testSourceDjangoCommit := generated.SourcesSourcesSource{}
+	testSourceDjangoCommit := generated.SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource{}
 	testSourceDjangoCommit.Type = "git"
 	testSourceDjangoCommit.Namespaces = append(testSourceDjangoCommit.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
@@ -97,7 +103,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		},
 	})
 
-	testSourceDjangoCommitWithAlgo := generated.SourcesSourcesSource{}
+	testSourceDjangoCommitWithAlgo := generated.SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource{}
 	testSourceDjangoCommitWithAlgo.Type = "git"
 	testSourceDjangoCommitWithAlgo.Namespaces = append(testSourceDjangoCommitWithAlgo.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
@@ -111,7 +117,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		},
 	})
 
-	testSourceKubeTestTag := generated.SourcesSourcesSource{}
+	testSourceKubeTestTag := generated.SourcesListSourcesListSourceConnectionEdgesSourceEdgeNodeSource{}
 	testSourceKubeTestTag.Type = "git"
 	testSourceKubeTestTag.Namespaces = append(testSourceKubeTestTag.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
@@ -138,7 +144,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	tests := []struct {
 		name              string
 		daysSinceLastScan int
-		getSources        func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error)
+		getSources        func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error)
 		getNeighbors      func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 		wantSourceNode    []*SourceNode
 		wantErr           bool
@@ -146,9 +152,20 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		{
 			name:              "django: daysSinceLastScan=0, tag specified",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoTag,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -167,9 +184,20 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django: daysSinceLastScan=0, commit specified",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoCommit},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoCommit,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -188,9 +216,20 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django: daysSinceLastScan=0, commit with algorithm specified",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoCommitWithAlgo},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoCommitWithAlgo,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -209,9 +248,20 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with scorecard, daysSinceLastScan=0",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoTag,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -224,9 +274,20 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with scorecard, timestamp: time past, daysSinceLastScan=30",
 			daysSinceLastScan: 30,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoTag,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -245,9 +306,20 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with scorecard, timestamp: time now, daysSinceLastScan=30",
 			daysSinceLastScan: 30,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoTag,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -260,9 +332,28 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "multiple packages",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
-				return &generated.SourcesResponse{
-					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag, testSourceDjangoCommit, testSourceKubeTestTag},
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error) {
+				return &generated.SourcesListResponse{
+					SourcesList: &generated.SourcesListSourcesListSourceConnection{
+						TotalCount: 1,
+						Edges: []generated.SourcesListSourcesListSourceConnectionEdgesSourceEdge{
+							{
+								Node:   testSourceDjangoTag,
+								Cursor: "",
+							},
+							{
+								Node:   testSourceDjangoCommit,
+								Cursor: "",
+							},
+							{
+								Node:   testSourceKubeTestTag,
+								Cursor: "",
+							},
+						},
+						PageInfo: generated.SourcesListSourcesListSourceConnectionPageInfo{
+							HasNextPage: false,
+						},
+					},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
@@ -287,12 +378,18 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantErr: false,
 		}}
+
+	addedLatency, err := time.ParseDuration("3ms")
+	if err != nil {
+		t.Errorf("failed to parser duration with error: %v", err)
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			p := &sourceQuery{
 				client:            nil,
 				daysSinceLastScan: tt.daysSinceLastScan,
+				addedLatency:      &addedLatency,
 			}
 			getSources = tt.getSources
 			getNeighbors = tt.getNeighbors

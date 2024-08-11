@@ -42,10 +42,10 @@ func Test_FindArtifactWithDigest_ArtifactFound(t *testing.T) {
 		Algorithm: "sha256",
 		Digest:    "abc",
 	}}
-  _, err := gql.IngestArtifact(ctx, gqlClient, idOrArtifactSpec)
-  if err != nil {
-    t.Fatalf("Error ingesting test data")
-  } 
+	_, err := gql.IngestArtifact(ctx, gqlClient, idOrArtifactSpec)
+	if err != nil {
+		t.Fatalf("Error ingesting test data")
+	}
 
 	res, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "abc")
 	assert.NoError(t, err)

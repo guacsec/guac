@@ -23,8 +23,6 @@ const (
 	EdgeVersions = "versions"
 	// EdgeHasSourceAt holds the string denoting the has_source_at edge name in mutations.
 	EdgeHasSourceAt = "has_source_at"
-	// EdgeDependency holds the string denoting the dependency edge name in mutations.
-	EdgeDependency = "dependency"
 	// EdgeCertification holds the string denoting the certification edge name in mutations.
 	EdgeCertification = "certification"
 	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
@@ -47,13 +45,6 @@ const (
 	HasSourceAtInverseTable = "has_source_ats"
 	// HasSourceAtColumn is the table column denoting the has_source_at relation/edge.
 	HasSourceAtColumn = "package_name_id"
-	// DependencyTable is the table that holds the dependency relation/edge.
-	DependencyTable = "dependencies"
-	// DependencyInverseTable is the table name for the Dependency entity.
-	// It exists in this package in order to avoid circular dependency with the "dependency" package.
-	DependencyInverseTable = "dependencies"
-	// DependencyColumn is the table column denoting the dependency relation/edge.
-	DependencyColumn = "dependent_package_name_id"
 	// CertificationTable is the table that holds the certification relation/edge.
 	CertificationTable = "certifications"
 	// CertificationInverseTable is the table name for the Certification entity.
@@ -155,20 +146,6 @@ func ByHasSourceAt(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByDependencyCount orders the results by dependency count.
-func ByDependencyCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newDependencyStep(), opts...)
-	}
-}
-
-// ByDependency orders the results by dependency terms.
-func ByDependency(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDependencyStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByCertificationCount orders the results by certification count.
 func ByCertificationCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -222,13 +199,6 @@ func newHasSourceAtStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(HasSourceAtInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, HasSourceAtTable, HasSourceAtColumn),
-	)
-}
-func newDependencyStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DependencyInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, DependencyTable, DependencyColumn),
 	)
 }
 func newCertificationStep() *sqlgraph.Step {

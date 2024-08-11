@@ -33,10 +33,13 @@ func init() {
 		"pubsub-addr",
 		"blob-addr",
 		"csub-addr",
+		"csub-tls",
+		"csub-tls-skip-verify",
 		"use-csub",
 		"service-poll",
 		"enable-prometheus",
 		"publish-to-queue",
+		"gql-addr",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

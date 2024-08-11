@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -111,7 +112,7 @@ func (cvq *CertifyVulnQuery) QueryPackage() *PackageVersionQuery {
 // First returns the first CertifyVuln entity from the query.
 // Returns a *NotFoundError when no CertifyVuln was found.
 func (cvq *CertifyVulnQuery) First(ctx context.Context) (*CertifyVuln, error) {
-	nodes, err := cvq.Limit(1).All(setContextOp(ctx, cvq.ctx, "First"))
+	nodes, err := cvq.Limit(1).All(setContextOp(ctx, cvq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func (cvq *CertifyVulnQuery) FirstX(ctx context.Context) *CertifyVuln {
 // Returns a *NotFoundError when no CertifyVuln ID was found.
 func (cvq *CertifyVulnQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, "FirstID")); err != nil {
+	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -157,7 +158,7 @@ func (cvq *CertifyVulnQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one CertifyVuln entity is found.
 // Returns a *NotFoundError when no CertifyVuln entities are found.
 func (cvq *CertifyVulnQuery) Only(ctx context.Context) (*CertifyVuln, error) {
-	nodes, err := cvq.Limit(2).All(setContextOp(ctx, cvq.ctx, "Only"))
+	nodes, err := cvq.Limit(2).All(setContextOp(ctx, cvq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (cvq *CertifyVulnQuery) OnlyX(ctx context.Context) *CertifyVuln {
 // Returns a *NotFoundError when no entities are found.
 func (cvq *CertifyVulnQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, "OnlyID")); err != nil {
+	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -210,7 +211,7 @@ func (cvq *CertifyVulnQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of CertifyVulns.
 func (cvq *CertifyVulnQuery) All(ctx context.Context) ([]*CertifyVuln, error) {
-	ctx = setContextOp(ctx, cvq.ctx, "All")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryAll)
 	if err := cvq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -232,7 +233,7 @@ func (cvq *CertifyVulnQuery) IDs(ctx context.Context) (ids []uuid.UUID, err erro
 	if cvq.ctx.Unique == nil && cvq.path != nil {
 		cvq.Unique(true)
 	}
-	ctx = setContextOp(ctx, cvq.ctx, "IDs")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryIDs)
 	if err = cvq.Select(certifyvuln.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -250,7 +251,7 @@ func (cvq *CertifyVulnQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (cvq *CertifyVulnQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cvq.ctx, "Count")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryCount)
 	if err := cvq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -268,7 +269,7 @@ func (cvq *CertifyVulnQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cvq *CertifyVulnQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cvq.ctx, "Exist")
+	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryExist)
 	switch _, err := cvq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -617,7 +618,7 @@ func (cvgb *CertifyVulnGroupBy) Aggregate(fns ...AggregateFunc) *CertifyVulnGrou
 
 // Scan applies the selector query and scans the result into the given value.
 func (cvgb *CertifyVulnGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, cvgb.build.ctx, ent.OpQueryGroupBy)
 	if err := cvgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -665,7 +666,7 @@ func (cvs *CertifyVulnSelect) Aggregate(fns ...AggregateFunc) *CertifyVulnSelect
 
 // Scan applies the selector query and scans the result into the given value.
 func (cvs *CertifyVulnSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvs.ctx, "Select")
+	ctx = setContextOp(ctx, cvs.ctx, ent.OpQuerySelect)
 	if err := cvs.prepareQuery(ctx); err != nil {
 		return err
 	}

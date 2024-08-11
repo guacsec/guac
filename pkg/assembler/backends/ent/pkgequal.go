@@ -54,12 +54,10 @@ type PkgEqualEdges struct {
 // PackageAOrErr returns the PackageA value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e PkgEqualEdges) PackageAOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[0] {
-		if e.PackageA == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.PackageA != nil {
 		return e.PackageA, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package_a"}
 }
@@ -67,12 +65,10 @@ func (e PkgEqualEdges) PackageAOrErr() (*PackageVersion, error) {
 // PackageBOrErr returns the PackageB value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e PkgEqualEdges) PackageBOrErr() (*PackageVersion, error) {
-	if e.loadedTypes[1] {
-		if e.PackageB == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packageversion.Label}
-		}
+	if e.PackageB != nil {
 		return e.PackageB, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packageversion.Label}
 	}
 	return nil, &NotLoadedError{edge: "package_b"}
 }

@@ -48,8 +48,12 @@ type depsDevOptions struct {
 	// query for dependencies
 	retrieveDependencies bool
 	// gql endpoint
-	graphqlEndpoint string
-	headerFile      string
+	graphqlEndpoint         string
+	headerFile              string
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
+	// sets artificial latency on the deps.dev collector (default to nil)
+	addedLatency *time.Duration
 }
 
 var depsDevCmd = &cobra.Command{
@@ -68,7 +72,7 @@ var depsDevCmd = &cobra.Command{
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency)
 		if err != nil {
 			logger.Fatalf("unable to register depsdev collector: %v", err)
 		}
@@ -83,7 +87,7 @@ var depsDevCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc); err != nil {
+			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
@@ -135,11 +139,25 @@ var depsDevCmd = &cobra.Command{
 
 func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error) {
 	opts := &depsDevOptions{
-		poll:                 viper.GetBool("poll"),
-		retrieveDependencies: viper.GetBool("retrieve-dependencies"),
-		graphqlEndpoint:      viper.GetString("gql-addr"),
-		headerFile:           viper.GetString("header-file"),
+		poll:                    viper.GetBool("poll"),
+		retrieveDependencies:    viper.GetBool("retrieve-dependencies"),
+		graphqlEndpoint:         viper.GetString("gql-addr"),
+		headerFile:              viper.GetString("header-file"),
+		queryVulnOnIngestion:    viper.GetBool("add-vuln-on-ingest"),
+		queryLicenseOnIngestion: viper.GetBool("add-license-on-ingest"),
 	}
+
+	addedLatencyStr := viper.GetString("deps-dev-latency")
+	if addedLatencyStr != "" {
+		addedLatency, err := time.ParseDuration(addedLatencyStr)
+		if err != nil {
+			return opts, nil, fmt.Errorf("failed to parser duration with error: %w", err)
+		}
+		opts.addedLatency = &addedLatency
+	} else {
+		opts.addedLatency = nil
+	}
+
 	useCsub := viper.GetBool("use-csub")
 	if useCsub {
 		csubAddr := viper.GetString("csub-addr")
@@ -182,7 +200,7 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"poll", "retrieve-dependencies", "use-csub"})
+	set, err := cli.BuildFlags([]string{"poll", "retrieve-dependencies", "use-csub", "deps-dev-latency"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

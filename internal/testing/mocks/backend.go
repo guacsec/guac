@@ -250,6 +250,21 @@ func (mr *MockBackendMockRecorder) CertifyVulnList(ctx, certifyVulnSpec, after, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyVulnList", reflect.TypeOf((*MockBackend)(nil).CertifyVulnList), ctx, certifyVulnSpec, after, first)
 }
 
+// Delete mocks base method.
+func (m *MockBackend) Delete(ctx context.Context, node string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, node)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBackend)(nil).Delete), ctx, node)
+}
+
 // FindSoftware mocks base method.
 func (m *MockBackend) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	m.ctrl.T.Helper()
@@ -641,33 +656,33 @@ func (mr *MockBackendMockRecorder) IngestCertifyVulns(ctx, pkgs, vulnerabilities
 }
 
 // IngestDependencies mocks base method.
-func (m *MockBackend) IngestDependencies(ctx context.Context, pkgs, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (m *MockBackend) IngestDependencies(ctx context.Context, pkgs, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IngestDependencies", ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+	ret := m.ctrl.Call(m, "IngestDependencies", ctx, pkgs, depPkgs, dependencies)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // IngestDependencies indicates an expected call of IngestDependencies.
-func (mr *MockBackendMockRecorder) IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies any) *gomock.Call {
+func (mr *MockBackendMockRecorder) IngestDependencies(ctx, pkgs, depPkgs, dependencies any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestDependencies", reflect.TypeOf((*MockBackend)(nil).IngestDependencies), ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestDependencies", reflect.TypeOf((*MockBackend)(nil).IngestDependencies), ctx, pkgs, depPkgs, dependencies)
 }
 
 // IngestDependency mocks base method.
-func (m *MockBackend) IngestDependency(ctx context.Context, pkg, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (m *MockBackend) IngestDependency(ctx context.Context, pkg, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IngestDependency", ctx, pkg, depPkg, depPkgMatchType, dependency)
+	ret := m.ctrl.Call(m, "IngestDependency", ctx, pkg, depPkg, dependency)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // IngestDependency indicates an expected call of IngestDependency.
-func (mr *MockBackendMockRecorder) IngestDependency(ctx, pkg, depPkg, depPkgMatchType, dependency any) *gomock.Call {
+func (mr *MockBackendMockRecorder) IngestDependency(ctx, pkg, depPkg, dependency any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestDependency", reflect.TypeOf((*MockBackend)(nil).IngestDependency), ctx, pkg, depPkg, depPkgMatchType, dependency)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestDependency", reflect.TypeOf((*MockBackend)(nil).IngestDependency), ctx, pkg, depPkg, dependency)
 }
 
 // IngestHasMetadata mocks base method.

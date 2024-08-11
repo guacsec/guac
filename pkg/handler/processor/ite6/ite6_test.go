@@ -125,6 +125,18 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name: "ITE6 Clearly Defined with valid payload",
+		args: &processor.Document{
+			Blob:   []byte(testdata.ITE6CDLog4j),
+			Type:   processor.DocumentITE6ClearlyDefined,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

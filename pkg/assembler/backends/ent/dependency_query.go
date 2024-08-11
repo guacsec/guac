@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
@@ -27,7 +27,6 @@ type DependencyQuery struct {
 	inters                      []Interceptor
 	predicates                  []predicate.Dependency
 	withPackage                 *PackageVersionQuery
-	withDependentPackageName    *PackageNameQuery
 	withDependentPackageVersion *PackageVersionQuery
 	withIncludedInSboms         *BillOfMaterialsQuery
 	modifiers                   []func(*sql.Selector)
@@ -91,28 +90,6 @@ func (dq *DependencyQuery) QueryPackage() *PackageVersionQuery {
 	return query
 }
 
-// QueryDependentPackageName chains the current query on the "dependent_package_name" edge.
-func (dq *DependencyQuery) QueryDependentPackageName() *PackageNameQuery {
-	query := (&PackageNameClient{config: dq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := dq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := dq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(dependency.Table, dependency.FieldID, selector),
-			sqlgraph.To(packagename.Table, packagename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageNameTable, dependency.DependentPackageNameColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryDependentPackageVersion chains the current query on the "dependent_package_version" edge.
 func (dq *DependencyQuery) QueryDependentPackageVersion() *PackageVersionQuery {
 	query := (&PackageVersionClient{config: dq.config}).Query()
@@ -160,7 +137,7 @@ func (dq *DependencyQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
 // First returns the first Dependency entity from the query.
 // Returns a *NotFoundError when no Dependency was found.
 func (dq *DependencyQuery) First(ctx context.Context) (*Dependency, error) {
-	nodes, err := dq.Limit(1).All(setContextOp(ctx, dq.ctx, "First"))
+	nodes, err := dq.Limit(1).All(setContextOp(ctx, dq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +160,7 @@ func (dq *DependencyQuery) FirstX(ctx context.Context) *Dependency {
 // Returns a *NotFoundError when no Dependency ID was found.
 func (dq *DependencyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = dq.Limit(1).IDs(setContextOp(ctx, dq.ctx, "FirstID")); err != nil {
+	if ids, err = dq.Limit(1).IDs(setContextOp(ctx, dq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -206,7 +183,7 @@ func (dq *DependencyQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Dependency entity is found.
 // Returns a *NotFoundError when no Dependency entities are found.
 func (dq *DependencyQuery) Only(ctx context.Context) (*Dependency, error) {
-	nodes, err := dq.Limit(2).All(setContextOp(ctx, dq.ctx, "Only"))
+	nodes, err := dq.Limit(2).All(setContextOp(ctx, dq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +211,7 @@ func (dq *DependencyQuery) OnlyX(ctx context.Context) *Dependency {
 // Returns a *NotFoundError when no entities are found.
 func (dq *DependencyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = dq.Limit(2).IDs(setContextOp(ctx, dq.ctx, "OnlyID")); err != nil {
+	if ids, err = dq.Limit(2).IDs(setContextOp(ctx, dq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -259,7 +236,7 @@ func (dq *DependencyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Dependencies.
 func (dq *DependencyQuery) All(ctx context.Context) ([]*Dependency, error) {
-	ctx = setContextOp(ctx, dq.ctx, "All")
+	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryAll)
 	if err := dq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -281,7 +258,7 @@ func (dq *DependencyQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error)
 	if dq.ctx.Unique == nil && dq.path != nil {
 		dq.Unique(true)
 	}
-	ctx = setContextOp(ctx, dq.ctx, "IDs")
+	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryIDs)
 	if err = dq.Select(dependency.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -299,7 +276,7 @@ func (dq *DependencyQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (dq *DependencyQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, dq.ctx, "Count")
+	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryCount)
 	if err := dq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -317,7 +294,7 @@ func (dq *DependencyQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (dq *DependencyQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, dq.ctx, "Exist")
+	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryExist)
 	switch _, err := dq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -350,7 +327,6 @@ func (dq *DependencyQuery) Clone() *DependencyQuery {
 		inters:                      append([]Interceptor{}, dq.inters...),
 		predicates:                  append([]predicate.Dependency{}, dq.predicates...),
 		withPackage:                 dq.withPackage.Clone(),
-		withDependentPackageName:    dq.withDependentPackageName.Clone(),
 		withDependentPackageVersion: dq.withDependentPackageVersion.Clone(),
 		withIncludedInSboms:         dq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
@@ -367,17 +343,6 @@ func (dq *DependencyQuery) WithPackage(opts ...func(*PackageVersionQuery)) *Depe
 		opt(query)
 	}
 	dq.withPackage = query
-	return dq
-}
-
-// WithDependentPackageName tells the query-builder to eager-load the nodes that are connected to
-// the "dependent_package_name" edge. The optional arguments are used to configure the query builder of the edge.
-func (dq *DependencyQuery) WithDependentPackageName(opts ...func(*PackageNameQuery)) *DependencyQuery {
-	query := (&PackageNameClient{config: dq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	dq.withDependentPackageName = query
 	return dq
 }
 
@@ -481,9 +446,8 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 	var (
 		nodes       = []*Dependency{}
 		_spec       = dq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			dq.withPackage != nil,
-			dq.withDependentPackageName != nil,
 			dq.withDependentPackageVersion != nil,
 			dq.withIncludedInSboms != nil,
 		}
@@ -512,12 +476,6 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 	if query := dq.withPackage; query != nil {
 		if err := dq.loadPackage(ctx, query, nodes, nil,
 			func(n *Dependency, e *PackageVersion) { n.Edges.Package = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := dq.withDependentPackageName; query != nil {
-		if err := dq.loadDependentPackageName(ctx, query, nodes, nil,
-			func(n *Dependency, e *PackageName) { n.Edges.DependentPackageName = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -571,35 +529,6 @@ func (dq *DependencyQuery) loadPackage(ctx context.Context, query *PackageVersio
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "package_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (dq *DependencyQuery) loadDependentPackageName(ctx context.Context, query *PackageNameQuery, nodes []*Dependency, init func(*Dependency), assign func(*Dependency, *PackageName)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Dependency)
-	for i := range nodes {
-		fk := nodes[i].DependentPackageNameID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(packagename.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "dependent_package_name_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -729,9 +658,6 @@ func (dq *DependencyQuery) querySpec() *sqlgraph.QuerySpec {
 		if dq.withPackage != nil {
 			_spec.Node.AddColumnOnce(dependency.FieldPackageID)
 		}
-		if dq.withDependentPackageName != nil {
-			_spec.Node.AddColumnOnce(dependency.FieldDependentPackageNameID)
-		}
 		if dq.withDependentPackageVersion != nil {
 			_spec.Node.AddColumnOnce(dependency.FieldDependentPackageVersionID)
 		}
@@ -819,7 +745,7 @@ func (dgb *DependencyGroupBy) Aggregate(fns ...AggregateFunc) *DependencyGroupBy
 
 // Scan applies the selector query and scans the result into the given value.
 func (dgb *DependencyGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, dgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, dgb.build.ctx, ent.OpQueryGroupBy)
 	if err := dgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -867,7 +793,7 @@ func (ds *DependencySelect) Aggregate(fns ...AggregateFunc) *DependencySelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ds *DependencySelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ds.ctx, "Select")
+	ctx = setContextOp(ctx, ds.ctx, ent.OpQuerySelect)
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}

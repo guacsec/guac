@@ -34,3 +34,20 @@ query Artifacts($filter: ArtifactSpec!) {
     ...AllArtifactTree
   }
 }
+
+query ArtifactsList($filter: ArtifactSpec!, $after: ID, $first: Int) {
+  artifactsList(artifactSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllArtifactTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

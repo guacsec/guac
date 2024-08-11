@@ -74,8 +74,16 @@ func NewCsafParser() common.DocumentParser {
 	}
 }
 
+// initializeCSAFParser clears out all values for the next iteration
+func (c *csafParser) initializeCSAFParser() {
+	c.doc = nil
+	c.identifierStrings = &common.IdentifierStrings{}
+	c.csaf = nil
+}
+
 // Parse breaks out the document into the graph components
 func (c *csafParser) Parse(ctx context.Context, doc *processor.Document) error {
+	c.initializeCSAFParser()
 	c.doc = doc
 	err := json.Unmarshal(doc.Blob, &c.csaf)
 	if err != nil {

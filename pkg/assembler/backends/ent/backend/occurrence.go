@@ -65,6 +65,11 @@ func (b *EntBackend) IsOccurrenceList(ctx context.Context, spec model.IsOccurren
 		return nil, fmt.Errorf("failed isOccurrence query with error: %w", err)
 	}
 
+	// if not found return nil
+	if occurConn == nil {
+		return nil, nil
+	}
+
 	var edges []*model.IsOccurrenceEdge
 	for _, edge := range occurConn.Edges {
 		edges = append(edges, &model.IsOccurrenceEdge{
@@ -113,6 +118,25 @@ func getOccurrenceObject(q *ent.OccurrenceQuery) *ent.OccurrenceQuery {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
 		WithSource(func(q *ent.SourceNameQuery) {})
+}
+
+// deleteIsOccurrences is called by hasSBOM to delete the isOccurrence nodes that are part of the hasSBOM
+func (b *EntBackend) deleteIsOccurrences(ctx context.Context, sbomID string) error {
+	_, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		tx := ent.TxFromContext(ctx)
+
+		if _, err := tx.Occurrence.Delete().Where(occurrence.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
+			optionalPredicate(&sbomID, IDEQ)}...)).Exec(ctx); err != nil {
+
+			return nil, errors.Wrap(err, "failed to delete all occurrences based on the SBOM with error")
+		}
+
+		return nil, nil
+	})
+	if txErr != nil {
+		return txErr
+	}
+	return nil
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {

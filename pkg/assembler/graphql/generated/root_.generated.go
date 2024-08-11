@@ -317,7 +317,6 @@ type ComplexityRoot struct {
 		Justification     func(childComplexity int) int
 		Origin            func(childComplexity int) int
 		Package           func(childComplexity int) int
-		VersionRange      func(childComplexity int) int
 	}
 
 	IsDependencyConnection struct {
@@ -371,6 +370,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		Delete                          func(childComplexity int, node string) int
 		IngestArtifact                  func(childComplexity int, artifact *model.IDorArtifactInput) int
 		IngestArtifacts                 func(childComplexity int, artifacts []*model.IDorArtifactInput) int
 		IngestBuilder                   func(childComplexity int, builder *model.IDorBuilderInput) int
@@ -385,8 +385,8 @@ type ComplexityRoot struct {
 		IngestCertifyLegals             func(childComplexity int, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) int
 		IngestCertifyVuln               func(childComplexity int, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) int
 		IngestCertifyVulns              func(childComplexity int, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) int
-		IngestDependencies              func(childComplexity int, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
-		IngestDependency                func(childComplexity int, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) int
+		IngestDependencies              func(childComplexity int, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) int
+		IngestDependency                func(childComplexity int, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) int
 		IngestHasMetadata               func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) int
 		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) int
@@ -1883,13 +1883,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependency.Package(childComplexity), true
 
-	case "IsDependency.versionRange":
-		if e.complexity.IsDependency.VersionRange == nil {
-			break
-		}
-
-		return e.complexity.IsDependency.VersionRange(childComplexity), true
-
 	case "IsDependencyConnection.edges":
 		if e.complexity.IsDependencyConnection.Edges == nil {
 			break
@@ -2072,6 +2065,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LicenseEdge.Node(childComplexity), true
 
+	case "Mutation.delete":
+		if e.complexity.Mutation.Delete == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_delete_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Delete(childComplexity, args["node"].(string)), true
+
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
 			break
@@ -2250,7 +2255,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["depPkgs"].([]*model.IDorPkgInput), args["depPkgMatchType"].(model.MatchFlags), args["dependencies"].([]*model.IsDependencyInputSpec)), true
+		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["depPkgs"].([]*model.IDorPkgInput), args["dependencies"].([]*model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestDependency":
 		if e.complexity.Mutation.IngestDependency == nil {
@@ -2262,7 +2267,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["depPkgMatchType"].(model.MatchFlags), args["dependency"].(model.IsDependencyInputSpec)), true
+		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["dependency"].(model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestHasMetadata":
 		if e.complexity.Mutation.IngestHasMetadata == nil {
@@ -5035,7 +5040,7 @@ type CertifyLegal {
   id: ID!
   "The package version or source that is attested"
   subject: PackageOrSource!
-  "The license expression as delcared"
+  "The license expression as declared"
   declaredLicense: String!
   "A list of license objects found in the declared license expression"
   declaredLicenses: [License!]!
@@ -5783,7 +5788,52 @@ extend type Mutation {
   ): [ID!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/directive.graphql", Input: `directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
+	{Name: "../schema/delete.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+extend type Mutation {
+  """
+  Delete node with ID and all associated relationships.
+  Deletion is only implemented for HasSBOM, HasSLSA and CertifyVuln
+  for the time being. Other may be added based on usecase but these
+  were chosen to ensure that users do not end up making breaking changes
+  to their database.
+  """
+  delete(node: ID!): Boolean!
+}
+`, BuiltIn: false},
+	{Name: "../schema/directive.graphql", Input: `#
+# Copyright 2024 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
 enum FilterOperation {
   CONTAINS
   STARTSWITH
@@ -6362,10 +6412,8 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion "
+  "Package for the dependency; MUST be PackageVersion "
   dependencyPackage: Package!
-  "Version range for the dependency link, required if depedentPackage points to PackageName"
-  versionRange: String!
   "Type of dependency"
   dependencyType: DependencyType!
   "Justification for the attested relationship"
@@ -6384,13 +6432,12 @@ IsDependencySpec allows filtering the list of dependencies to return.
 To obtain the list of dependency packages, caller must fill in the package
 field.
 
-Dependency packages must be defined at PackageName, not PackageVersion.
+Dependency packages must be defined at PackageVersion.
 """
 input IsDependencySpec {
   id: ID
   package: PkgSpec
   dependencyPackage: PkgSpec
-  versionRange: String
   dependencyType: DependencyType
   justification: String
   origin: String
@@ -6400,8 +6447,6 @@ input IsDependencySpec {
 
 "IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
-  "versionRange should be specified for depedentPackages that point to PackageName"
-  versionRange: String!
   dependencyType: DependencyType!
   justification: String!
   origin: String!
@@ -6448,14 +6493,12 @@ extend type Mutation {
   ingestDependency(
     pkg: IDorPkgInput!
     depPkg: IDorPkgInput!
-    depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
   "Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM."
   ingestDependencies(
     pkgs: [IDorPkgInput!]!
     depPkgs: [IDorPkgInput!]!
-    depPkgMatchType: MatchFlags!
     dependencies: [IsDependencyInputSpec!]!
   ): [ID!]!
 }

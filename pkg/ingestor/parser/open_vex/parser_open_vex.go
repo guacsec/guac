@@ -58,8 +58,16 @@ func NewOpenVEXParser() common.DocumentParser {
 	}
 }
 
+// initializeOpenVEXParser clears out all values for the next iteration
+func (c *openVEXParser) initializeOpenVEXParser() {
+	c.vis = make([]assembler.VexIngest, 0)
+	c.cvs = make([]assembler.CertifyVulnIngest, 0)
+	c.identifierStrings = &common.IdentifierStrings{}
+}
+
 // Parse breaks out the document into the graph components
 func (c *openVEXParser) Parse(ctx context.Context, doc *processor.Document) error {
+	c.initializeOpenVEXParser()
 	var openVex *vex.VEX
 	err := json.Unmarshal(doc.Blob, &openVex)
 	if err != nil {

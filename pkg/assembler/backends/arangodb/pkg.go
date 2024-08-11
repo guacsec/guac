@@ -1201,20 +1201,6 @@ func (c *arangoClient) packageNameNeighbors(ctx context.Context, nodeID string, 
 		}
 		out = append(out, foundIDs...)
 	}
-	if allowedEdges[model.EdgePackageIsDependency] {
-		values := map[string]any{}
-		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
-		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
-		values["id"] = nodeID
-		arangoQueryBuilder.forInBound(isDependencyDepPkgNameEdgesStr, "isDependency", "pName")
-		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: isDependency._id }")
-
-		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
-		if err != nil {
-			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
-		}
-		out = append(out, foundIDs...)
-	}
 	if allowedEdges[model.EdgePackageCertifyBad] {
 		values := map[string]any{}
 		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
