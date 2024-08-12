@@ -18,7 +18,7 @@ package keyvalue
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/guacsec/guac/pkg/logging"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -194,6 +194,8 @@ func (c *demoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, err
 // Delete node and all associated relationships. This functionality is only implemented for
 // certifyVuln, HasSBOM and HasSLSA.
 func (c *demoClient) Delete(ctx context.Context, nodeID string) (bool, error) {
+	logger := logging.FromContext(ctx)
+
 	// Retrieve the node type based on the node ID
 	var k string
 	if err := c.kv.Get(ctx, indexCol, nodeID, &k); err != nil {
@@ -227,7 +229,7 @@ func (c *demoClient) Delete(ctx context.Context, nodeID string) (bool, error) {
 		}
 		return deleted, nil
 	default:
-		log.Printf("Unknown node type: %s", nodeType)
+		logger.Debugf("Delete attempted for node id %s which was of type %s, and that type not supported for delete", nodeID, nodeType)
 	}
 	return false, nil
 }

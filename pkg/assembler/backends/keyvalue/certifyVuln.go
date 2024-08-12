@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -28,6 +29,12 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
+)
+
+const (
+	certifyVulnLinkType = "certifyVuln"
+	hasSLSALinkType     = "hasSLSA"
+	hasSBOMLinkType     = "hasSBOM"
 )
 
 // Internal data: link between packages and vulnerabilities (certifyVulnerability)
@@ -62,16 +69,62 @@ func (n *certifyVulnerabilityLink) Key() string {
 }
 
 // Helper function to remove vulnerability links. This works by setting all the links expect the specified linkID.
-func (c *demoClient) removeLinks(ctx context.Context, linkID string, links []string, col string, id string) error {
+func (c *demoClient) removeLinks(ctx context.Context, linkID string, linkType string, links []string, col string, id string) error {
 	var newLinks []string
-	for _, id := range links {
-		if id != linkID {
-			newLinks = append(newLinks, id)
+	for _, link := range links {
+		if link != linkID {
+			newLinks = append(newLinks, link)
 		}
 	}
 
-	// Update the entity in the KeyValue store
-	return c.kv.Set(ctx, col, id, newLinks)
+	switch col {
+	case "packages":
+		var pkg pkgVersion
+		if err := c.kv.Get(ctx, col, id, &pkg); err != nil {
+			return fmt.Errorf("error getting package version from keyvalue: %w", err)
+		}
+		switch linkType {
+		case certifyVulnLinkType:
+			pkg.CertifyVulnLinks = newLinks
+		case hasSBOMLinkType:
+			pkg.HasSBOMs = newLinks
+		}
+		return setkv(ctx, col, &pkg, c)
+	case "vulnerabilities":
+		var vuln vulnTypeStruct
+		if err := c.kv.Get(ctx, col, id, &vuln); err != nil {
+			return fmt.Errorf("error getting vulnerability from keyvalue: %w", err)
+		}
+		switch linkType {
+		case certifyVulnLinkType:
+			vuln.VulnIDs = newLinks
+		}
+		return setkv(ctx, col, &vuln, c)
+	case "builders":
+		var builder builderStruct
+		if err := c.kv.Get(ctx, col, id, &builder); err != nil {
+			return fmt.Errorf("error getting builder from keyvalue: %w", err)
+		}
+		switch linkType {
+		case hasSLSALinkType:
+			builder.HasSLSAs = newLinks
+		}
+		return setkv(ctx, col, &builder, c)
+	case "artifacts":
+		var artifact artStruct
+		if err := c.kv.Get(ctx, col, id, &artifact); err != nil {
+			return fmt.Errorf("error getting artifact from keyvalue: %w", err)
+		}
+		switch linkType {
+		case hasSBOMLinkType:
+			artifact.HasSBOMs = newLinks
+		case hasSLSALinkType:
+			artifact.HasSLSAs = newLinks
+		}
+		return setkv(ctx, col, &artifact, c)
+	default:
+		return errors.New("unsupported entity type")
+	}
 }
 
 // DeleteCertifyVuln deletes a specified certifyVuln node along with all associated relationships.
@@ -92,7 +145,7 @@ func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, er
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := c.removeLinks(ctx, link.ThisID, foundPackage.CertifyVulnLinks, "packages", foundPackage.ID()); err != nil {
+	if err := c.removeLinks(ctx, link.ThisID, certifyVulnLinkType, foundPackage.CertifyVulnLinks, "packages", foundPackage.ID()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
@@ -100,7 +153,7 @@ func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, er
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := c.removeLinks(ctx, link.ThisID, foundVulnNode.CertifyVulnLinks, "vulnerabilities", foundVulnNode.ID()); err != nil {
+	if err := c.removeLinks(ctx, link.ThisID, certifyVulnLinkType, foundVulnNode.CertifyVulnLinks, "vulnerabilities", foundVulnNode.ID()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 

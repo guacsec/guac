@@ -90,7 +90,7 @@ func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error)
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := c.removeLinks(ctx, link.ThisID, foundSubject.HasSLSAs, "artifacts", foundSubject.ID()); err != nil {
+	if err := c.removeLinks(ctx, link.ThisID, hasSLSALinkType, foundSubject.HasSLSAs, "artifacts", foundSubject.ID()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
@@ -99,7 +99,7 @@ func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error)
 	if err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := c.removeLinks(ctx, link.ThisID, foundBuiltBy.HasSLSAs, "builders", foundBuiltBy.ID()); err != nil {
+	if err := c.removeLinks(ctx, link.ThisID, hasSLSALinkType, foundBuiltBy.HasSLSAs, "builders", foundBuiltBy.ID()); err != nil {
 		return false, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
@@ -109,7 +109,7 @@ func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error)
 		if err != nil {
 			return false, gqlerror.Errorf("%v :: %s", funcName, err)
 		}
-		if err := c.removeLinks(ctx, link.ThisID, foundBuiltFrom.HasSLSAs, "artifacts", foundBuiltFrom.ID()); err != nil {
+		if err := c.removeLinks(ctx, link.ThisID, hasSLSALinkType, foundBuiltFrom.HasSLSAs, "artifacts", foundBuiltFrom.ID()); err != nil {
 			return false, gqlerror.Errorf("%v :: %s", funcName, err)
 		}
 	}
