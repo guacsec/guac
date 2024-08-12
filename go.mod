@@ -5,27 +5,27 @@ go 1.22.0
 toolchain go1.22.4
 
 require (
-	cloud.google.com/go/storage v1.42.0
+	cloud.google.com/go/storage v1.43.0
 	github.com/fsouza/fake-gcs-server v1.49.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0
 	github.com/spf13/cobra v1.8.1
 	go.uber.org/zap v1.27.0
-	google.golang.org/api v0.183.0
+	google.golang.org/api v0.187.0
 )
 
 require (
-	cloud.google.com/go v0.114.0 // indirect
+	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
-	cloud.google.com/go/pubsub v1.38.0 // indirect
+	cloud.google.com/go/pubsub v1.39.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
-	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -41,14 +41,14 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
-	google.golang.org/genproto v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/genproto v0.0.0-20240624140628-dc46fd24d27d // indirect
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
 
 require (
 	ariga.io/atlas v0.19.1-0.20240203083654-5948b60a8e43 // indirect
-	cloud.google.com/go/auth v0.5.1 // indirect
+	cloud.google.com/go/auth v0.6.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
@@ -261,7 +261,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	golang.org/x/vuln v1.0.4 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240617180043-68d350f18fd4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240709173604-40e1e62336c5 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
