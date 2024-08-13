@@ -353,7 +353,6 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 		node.Attributes["Digest"] = hasSBOM.Digest
 		node.Attributes["Uri"] = hasSBOM.Uri
 	}
-	//TODO: inclSoft and inclOccur
 
 	if inclDeps || compareAll {
 		//add included dependencies
@@ -661,6 +660,7 @@ func compareNodes(dmp *diffmatchpatch.DiffMatchPatch, nodeOne, nodeTwo Node) (No
 	switch nodeOne.NodeType {
 
 	case "Package":
+		diffedNode.NodeType = "Package"
 
 		nOne := nodeOne.Pkg
 
@@ -816,6 +816,8 @@ func compareNodes(dmp *diffmatchpatch.DiffMatchPatch, nodeOne, nodeTwo Node) (No
 			}
 		}
 	case "DependencyPackage":
+
+		diffedNode.NodeType = "DependencyPackage"
 		nOne := nodeOne.DepPkg
 
 		nTwo := nodeTwo.DepPkg
@@ -965,7 +967,7 @@ func compareNodes(dmp *diffmatchpatch.DiffMatchPatch, nodeOne, nodeTwo Node) (No
 				}
 			}
 		}
-	}
+	} 
 	return diffedNode, diffs, nil
 }
 func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analysisListTwo []*Node) ([]Node, [][]string, int, error) {
@@ -999,11 +1001,13 @@ func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analys
 			if i >= len(shorterPath) {
 				dumnode := &Node{}
 				if node.NodeType == "Package" {
+					dumnode.NodeType = "Package"
 					dumnode.Pkg = model.AllIsDependencyTreePackage{}
 				} else if node.NodeType == "DependencyPackage" {
+					dumnode.NodeType = "DependencyPackage"
 					dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
 				}
-
+				
 				diffNode, diffs, err = compareNodes(dmp, *node, *dumnode)
 			} else {
 				diffNode, diffs, err = compareNodes(dmp, *node, *shorterPath[i])
@@ -1032,52 +1036,6 @@ func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analys
 
 	return nodesDiff, pathDiff, diffCount, nil
 }
-
-// func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analysisListTwo []*Node) ([]Node, [][]string, int, error) {
-// 	var longerPath, shorterPath []*Node
-
-// 	if len(analysisListOne) > len(analysisListTwo) {
-// 		longerPath = analysisListOne
-// 		shorterPath = analysisListTwo
-// 	} else {
-// 		longerPath = analysisListTwo
-// 		shorterPath = analysisListOne
-// 	}
-
-// 	pathDiff := make( [][]string, len(longerPath))
-// 	nodesDiff := make([]Node, len(longerPath))
-// 	var diffCount int
-
-// 	for i, node := range longerPath {
-// 		if i >= len(shorterPath) {
-// 			dumnode := &Node{}
-// 			if node.NodeType == "Package" {
-// 				dumnode.Pkg = model.AllIsDependencyTreePackage{}
-// 			} else if node.NodeType == "DependencyPackage" {
-// 				dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
-// 			}
-
-// 			diffNode, diffs, err := compareNodes(dmp, *node, *dumnode)
-// 			if err != nil {
-// 				return nodesDiff, pathDiff, 0, fmt.Errorf(err.Error())
-// 			}
-
-// 			pathDiff[i] = diffs
-// 			nodesDiff[i] = diffNode
-// 			diffCount += len(diffs)
-// 		} else {
-// 			diffNode, diffs, err := compareNodes(dmp, *node, *shorterPath[i])
-// 			if err != nil {
-// 				return nodesDiff, pathDiff, 0, fmt.Errorf(err.Error())
-// 			}
-// 			pathDiff[i] = diffs
-// 			nodesDiff[i] = diffNode
-// 			diffCount += len(diffs)
-// 		}
-// 	}
-
-// 	return nodesDiff, pathDiff, diffCount, nil
-// }
 
 func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 
@@ -1170,9 +1128,29 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 	for i, val := range big {
 		_, ok := used[i]
 		if !ok {
-			pathResults = append(pathResults, DiffedPath{PathOne: val})
+			
+
+			//diff each missing path and append to result
+			var missingPath []Node
+			for _, node := range val {
+				dumnode := &Node{}
+				if node.NodeType == "Package" {
+					dumnode.NodeType = "Package"
+					dumnode.Pkg = model.AllIsDependencyTreePackage{}
+				} else if node.NodeType == "DependencyPackage" {
+					dumnode.NodeType = "DependencyPackage"
+					dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
+				}
+				dmp := diffmatchpatch.New()
+				diffNode, _, err := compareNodes(dmp, *node, *dumnode)
+				if err 	!= nil {
+					return DiffResult{}, fmt.Errorf(err.Error())
+				}
+				missingPath = append(missingPath, diffNode)
+				
+			}
+			pathResults = append(pathResults, DiffedPath{PathOne: val, NodeDiffs: missingPath})
 		}
 	}
-
 	return DiffResult{Paths: pathResults, Nodes: nodeResults}, nil
 }

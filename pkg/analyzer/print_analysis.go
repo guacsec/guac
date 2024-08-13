@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -76,7 +75,6 @@ func GetNodeString(node Node) (string, error) {
 		return message, nil
 
 	}
-
 	return "", nil
 }
 
@@ -151,7 +149,9 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 }
 
 func PrintDiffedNodeTable(diffs DiffResult) error {
-
+	if len(diffs.Nodes) == 0 {
+		return nil
+	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
 
@@ -184,10 +184,8 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 		}
 		row = append(row, s)
 		table.Append(row)
-
-		table.Append([]string{"================================="})
 		table.Append([]string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
-		table.Append([]string{"================================="})
+		table.Append([]string{"+------------------------------------------------------------------+"})
 	}
 
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
@@ -196,6 +194,9 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 }
 
 func PrintDiffedPathTable(diffs DiffResult) error {
+	if len(diffs.Paths) == 0 {
+		return nil
+	}
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
@@ -211,9 +212,7 @@ func PrintDiffedPathTable(diffs DiffResult) error {
 
 	for _, diff := range diffs.Paths {
 		var row []string
-
-		for i, nodeOne := range diff.PathOne {
-
+		for i, node := range diff.NodeDiffs {
 			if len(row) != 0 {
 				row = append(row, "--->")
 				table.SetColMinWidth(i+1, colMinWidth)
@@ -221,52 +220,17 @@ func PrintDiffedPathTable(diffs DiffResult) error {
 				table.SetColMinWidth(i, colMinWidth)
 			}
 
-			s, err := GetNodeString(*nodeOne)
+			s, err := GetNodeString(node)
+
 			if err != nil {
 				return fmt.Errorf("unable to print diffs: %v", err)
 			}
 			row = append(row, s)
-
 		}
 
 		table.Append(row)
-		row = []string{}
 
-		for i, nodeOne := range diff.PathTwo {
-
-			if len(row) != 0 {
-				row = append(row, "--->")
-				table.SetColMinWidth(i+1, colMinWidth)
-			} else {
-				table.SetColMinWidth(i, colMinWidth)
-			}
-
-			s, err := GetNodeString(*nodeOne)
-			if err != nil {
-				return fmt.Errorf("unable to print diffs: %v", err)
-			}
-			row = append(row, s)
-
-		}
-		table.Append(row)
-
-		table.Append([]string{"================================="})
-
-		row = []string{}
-		for i, diff := range diff.Diffs {
-
-			if len(row) != 0 {
-				row = append(row, "    ")
-				table.SetColMinWidth(i+1, colMinWidth)
-			} else {
-				table.SetColMinWidth(i, colMinWidth)
-			}
-
-			row = append(row, strings.Join(diff, "\n"))
-		}
-		table.Append(row)
-
-		table.Append([]string{"================================="})
+		table.Append([]string{"+------------------------------------------------------------------+"})
 	}
 
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
