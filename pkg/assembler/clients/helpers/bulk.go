@@ -29,8 +29,8 @@ import (
 )
 
 type AssemblerIngestedIDs struct {
-	hasSBOMIDs []string
-	hasSLSAIDs []string
+	HasSBOMIDs []string
+	HasSLSAIDs []string
 }
 
 func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient graphql.Client) func([]assembler.AssemblerInput) (*AssemblerIngestedIDs, error) {
@@ -606,7 +606,7 @@ func ingestHasSLSAs(ctx context.Context, client graphql.Client, hs []assembler.H
 		if err != nil {
 			return fmt.Errorf("SLSAForArtifacts failed with error: %w", err)
 		}
-		ingestedIDs.hasSLSAIDs = append(ingestedIDs.hasSLSAIDs, hasSLSAArtResponse.IngestSLSAs...)
+		ingestedIDs.HasSLSAIDs = append(ingestedIDs.HasSLSAIDs, hasSLSAArtResponse.IngestSLSAs...)
 	}
 	return nil
 }
@@ -757,14 +757,14 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, hs []assembler.H
 		if err != nil {
 			return fmt.Errorf("hasSBOMArtifacts failed with error: %w", err)
 		}
-		ingestedIDs.hasSBOMIDs = append(ingestedIDs.hasSBOMIDs, hasSBOMArtResponse.IngestHasSBOMs...)
+		ingestedIDs.HasSBOMIDs = append(ingestedIDs.HasSBOMIDs, hasSBOMArtResponse.IngestHasSBOMs...)
 	}
 	if len(pkgIDs) > 0 {
 		hasSBOMPkgResponse, err := model.IngestHasSBOMPkgs(ctx, client, pkgIDs, pkgSBOMs, pkgIncludes)
 		if err != nil {
 			return fmt.Errorf("hasSBOMPkgs failed with error: %w", err)
 		}
-		ingestedIDs.hasSBOMIDs = append(ingestedIDs.hasSBOMIDs, hasSBOMPkgResponse.IngestHasSBOMs...)
+		ingestedIDs.HasSBOMIDs = append(ingestedIDs.HasSBOMIDs, hasSBOMPkgResponse.IngestHasSBOMs...)
 	}
 	return nil
 }
