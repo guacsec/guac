@@ -1,6 +1,9 @@
 module github.com/guacsec/guac
 
-go 1.22.0
+go 1.22.5
+
+toolchain go1.22.6
+
 require (
 	cloud.google.com/go/storage v1.42.0
 	github.com/fsouza/fake-gcs-server v1.49.2
