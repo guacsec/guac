@@ -100,7 +100,10 @@ func (c *demoClient) DeleteHasSBOM(ctx context.Context, id string) (bool, error)
 		if err != nil {
 			return false, gqlerror.Errorf("%v :: %s", funcName, err)
 		}
-		if err := c.removeLinks(ctx, link.ThisID, hasSBOMLinkType, foundPkg.HasSBOMs, "packages", foundPkg.ID()); err != nil {
+
+		foundPkg.CertifyVulnLinks = removeLinkFromList(link.ThisID, foundPkg.HasSBOMs)
+		err = setkv(ctx, pkgVerCol, foundPkg, c)
+		if err != nil {
 			return false, gqlerror.Errorf("%v :: %s", funcName, err)
 		}
 	} else if link.Artifact != "" {
@@ -108,7 +111,10 @@ func (c *demoClient) DeleteHasSBOM(ctx context.Context, id string) (bool, error)
 		if err != nil {
 			return false, gqlerror.Errorf("%v :: %s", funcName, err)
 		}
-		if err := c.removeLinks(ctx, link.ThisID, hasSBOMLinkType, foundArtifact.HasSBOMs, "artifacts", foundArtifact.ID()); err != nil {
+
+		foundArtifact.HasSBOMs = removeLinkFromList(link.ThisID, foundArtifact.HasSBOMs)
+		err = setkv(ctx, artCol, foundArtifact, c)
+		if err != nil {
 			return false, gqlerror.Errorf("%v :: %s", funcName, err)
 		}
 	}
