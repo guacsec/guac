@@ -96,6 +96,9 @@ type ClientInterface interface {
 
 	// RetrieveDependencies request
 	RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPackageInfo request
+	GetPackageInfo(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -124,6 +127,18 @@ func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn)
 
 func (c *Client) RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRetrieveDependenciesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPackageInfo(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPackageInfoRequest(c.Server, purl, params)
 	if err != nil {
 		return nil, err
 	}
@@ -319,6 +334,62 @@ func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesP
 	return req, nil
 }
 
+// NewGetPackageInfoRequest generates requests for GetPackageInfo
+func NewGetPackageInfoRequest(server string, purl string, params *GetPackageInfoParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "purl", runtime.ParamLocationPath, purl)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/purl/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Vulns != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vulns", runtime.ParamLocationQuery, *params.Vulns); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -370,6 +441,9 @@ type ClientWithResponsesInterface interface {
 
 	// RetrieveDependenciesWithResponse request
 	RetrieveDependenciesWithResponse(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*RetrieveDependenciesResponse, error)
+
+	// GetPackageInfoWithResponse request
+	GetPackageInfoWithResponse(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*GetPackageInfoResponse, error)
 }
 
 type AnalyzeDependenciesResponse struct {
@@ -444,6 +518,30 @@ func (r RetrieveDependenciesResponse) StatusCode() int {
 	return 0
 }
 
+type GetPackageInfoResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PackageInfoResponse
+	JSON400      *BadRequest
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPackageInfoResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPackageInfoResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // AnalyzeDependenciesWithResponse request returning *AnalyzeDependenciesResponse
 func (c *ClientWithResponses) AnalyzeDependenciesWithResponse(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*AnalyzeDependenciesResponse, error) {
 	rsp, err := c.AnalyzeDependencies(ctx, params, reqEditors...)
@@ -469,6 +567,15 @@ func (c *ClientWithResponses) RetrieveDependenciesWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseRetrieveDependenciesResponse(rsp)
+}
+
+// GetPackageInfoWithResponse request returning *GetPackageInfoResponse
+func (c *ClientWithResponses) GetPackageInfoWithResponse(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*GetPackageInfoResponse, error) {
+	rsp, err := c.GetPackageInfo(ctx, purl, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPackageInfoResponse(rsp)
 }
 
 // ParseAnalyzeDependenciesResponse parses an HTTP response from a AnalyzeDependenciesWithResponse call
@@ -585,6 +692,46 @@ func ParseRetrieveDependenciesResponse(rsp *http.Response) (*RetrieveDependencie
 			return nil, err
 		}
 		response.JSON502 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPackageInfoResponse parses an HTTP response from a GetPackageInfoWithResponse call
+func ParseGetPackageInfoResponse(rsp *http.Response) (*GetPackageInfoResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPackageInfoResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PackageInfoResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
 
 	}
 

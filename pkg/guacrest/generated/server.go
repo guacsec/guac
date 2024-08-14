@@ -25,6 +25,9 @@ type ServerInterface interface {
 	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams)
+	// Get package information
+	// (GET /v1/purl/{purl})
+	GetPackageInfo(w http.ResponseWriter, r *http.Request, purl string, params GetPackageInfoParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -46,6 +49,12 @@ func (_ Unimplemented) HealthCheck(w http.ResponseWriter, r *http.Request) {
 // Retrieve transitive dependencies
 // (GET /query/dependencies)
 func (_ Unimplemented) RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get package information
+// (GET /v1/purl/{purl})
+func (_ Unimplemented) GetPackageInfo(w http.ResponseWriter, r *http.Request, purl string, params GetPackageInfoParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -163,6 +172,43 @@ func (siw *ServerInterfaceWrapper) RetrieveDependencies(w http.ResponseWriter, r
 	}
 
 	handler.ServeHTTP(w, r)
+}
+
+// GetPackageInfo operation middleware
+func (siw *ServerInterfaceWrapper) GetPackageInfo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "purl" -------------
+	var purl string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "purl", chi.URLParam(r, "purl"), &purl, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purl", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPackageInfoParams
+
+	// ------------- Optional query parameter "vulns" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vulns", r.URL.Query(), &params.Vulns)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "vulns", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPackageInfo(w, r, purl, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 type UnescapedCookieParamError struct {
@@ -287,6 +333,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/query/dependencies", wrapper.RetrieveDependencies)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/purl/{purl}", wrapper.GetPackageInfo)
+	})
 
 	return r
 }
@@ -296,6 +345,12 @@ type BadGatewayJSONResponse Error
 type BadRequestJSONResponse Error
 
 type InternalServerErrorJSONResponse Error
+
+type PackageInfoResponseJSONResponse struct {
+	Packages             *[]PackageInfo         `json:"packages,omitempty"`
+	Vulnerabilities      *[]Vulnerability       `json:"vulnerabilities,omitempty"`
+	AdditionalProperties map[string]interface{} `json:"-"`
+}
 
 type PackageNameListJSONResponse []PackageName
 
@@ -413,6 +468,46 @@ func (response RetrieveDependencies502JSONResponse) VisitRetrieveDependenciesRes
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetPackageInfoRequestObject struct {
+	Purl   string `json:"purl"`
+	Params GetPackageInfoParams
+}
+
+type GetPackageInfoResponseObject interface {
+	VisitGetPackageInfoResponse(w http.ResponseWriter) error
+}
+
+type GetPackageInfo200JSONResponse struct {
+	PackageInfoResponseJSONResponse
+}
+
+func (response GetPackageInfo200JSONResponse) VisitGetPackageInfoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageInfo400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response GetPackageInfo400JSONResponse) VisitGetPackageInfoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageInfo500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetPackageInfo500JSONResponse) VisitGetPackageInfoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Identify the most important dependencies
@@ -424,6 +519,9 @@ type StrictServerInterface interface {
 	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(ctx context.Context, request RetrieveDependenciesRequestObject) (RetrieveDependenciesResponseObject, error)
+	// Get package information
+	// (GET /v1/purl/{purl})
+	GetPackageInfo(ctx context.Context, request GetPackageInfoRequestObject) (GetPackageInfoResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -524,6 +622,33 @@ func (sh *strictHandler) RetrieveDependencies(w http.ResponseWriter, r *http.Req
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(RetrieveDependenciesResponseObject); ok {
 		if err := validResponse.VisitRetrieveDependenciesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPackageInfo operation middleware
+func (sh *strictHandler) GetPackageInfo(w http.ResponseWriter, r *http.Request, purl string, params GetPackageInfoParams) {
+	var request GetPackageInfoRequestObject
+
+	request.Purl = purl
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPackageInfo(ctx, request.(GetPackageInfoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPackageInfo")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPackageInfoResponseObject); ok {
+		if err := validResponse.VisitGetPackageInfoResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

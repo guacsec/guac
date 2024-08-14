@@ -18,7 +18,11 @@ package server
 import (
 	"context"
 	"fmt"
+	helpers2 "github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/guacrest/helpers"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -98,4 +102,41 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 	default:
 		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
 	}
+}
+
+func (s *DefaultServer) GetPackageInfo(ctx context.Context, request gen.GetPackageInfoRequestObject) (gen.GetPackageInfoResponseObject, error) {
+	decodedPurl, err := url.QueryUnescape(request.Purl)
+	if err != nil {
+		return gen.GetPackageInfo400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Invalid PURL: %v", err),
+			},
+		}, nil
+	}
+
+	// Add the "pkg:" prefix if not present
+	if !strings.HasPrefix(decodedPurl, "pkg:") {
+		decodedPurl = "pkg:" + decodedPurl
+	}
+
+	pkgInput, err := helpers2.PurlToPkg(decodedPurl)
+	if err != nil {
+		return gen.GetPackageInfo400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to parse PURL: %v", err),
+			},
+		}, nil
+	}
+
+	packageResponse, err := helpers.GetInfoForPackage(ctx, s.gqlClient, pkgInput, request.Params.Vulns)
+	if err != nil {
+		return nil, err
+	}
+
+	response := gen.GetPackageInfo200JSONResponse{
+		PackageInfoResponseJSONResponse: *packageResponse,
+	}
+
+	// Create a custom pretty-printed response
+	return &helpers.PrettyJSONResponse{Data: response}, nil
 }

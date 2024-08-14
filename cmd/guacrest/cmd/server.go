@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 	"github.com/guacsec/guac/pkg/cli"
