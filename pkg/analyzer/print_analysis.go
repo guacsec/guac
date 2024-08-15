@@ -10,7 +10,7 @@ import (
 
 const (
 	colMinWidth = 50
-	trimLength  = 20
+	trimLength = 150
 )
 
 func GetNodeString(node Node) (string, error) {
@@ -47,29 +47,30 @@ func GetNodeString(node Node) (string, error) {
 		return message, nil
 	case "DependencyPackage":
 		depPkg := node.DepPkg
-		message := "Type:" + CheckEmptyTrim(depPkg.Type) + "\n"
+		message := "Type:" + depPkg.Type + "\n"
 		for _, namespace := range depPkg.Namespaces {
-			message += "Namespace: " + CheckEmptyTrim(namespace.Namespace) + "\n"
+			message += "Namespace: " + namespace.Namespace + "\n"
 
 			for _, name := range namespace.Names {
 				message += "\t"
-				message += "Name: " + CheckEmptyTrim(name.Name)
+				message += "Name: " + name.Name
 				message += "\n"
 
 				for _, version := range name.Versions {
 					message += "\t\t"
-					message += "Version: " + CheckEmptyTrim(version.Version) + "\n"
+					message += "Version: " + version.Version + "\n"
 					message += "\t\t"
-					message += "Subpath: " + CheckEmptyTrim(version.Subpath) + "\n"
+					message += "Subpath: " + version.Subpath + "\n"
 					message += "\t\tQualifiers: {\n"
 
 					for _, outlier := range version.Qualifiers {
 						message += "\t\t\t"
-						message += CheckEmptyTrim(outlier.Key) + ": " + CheckEmptyTrim(outlier.Value) + "\n"
+						message += outlier.Key + ": " + outlier.Value + "\n"
 					}
 					message += "\t\t}\n"
 				}
 			}
+	
 			message += "\n"
 		}
 		return message, nil
@@ -161,6 +162,8 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 
 	table.SetColumnSeparator("\t\t")
 	table.SetAutoMergeCells(false)
+	table.SetAutoWrapText(false)
+	table.SetRowLine(true) 
 
 	table.SetHeader([]string{"Node Differences"})
 	var row []string
@@ -185,7 +188,6 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 		row = append(row, s)
 		table.Append(row)
 		table.Append([]string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
-		table.Append([]string{"+------------------------------------------------------------------+"})
 	}
 
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
@@ -204,8 +206,9 @@ func PrintDiffedPathTable(diffs DiffResult) error {
 	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
 
 	table.SetNoWhiteSpace(true)
+	table.SetRowLine(true) 
 
-	table.SetColumnSeparator("\t\t")
+
 	table.SetAutoMergeCells(false)
 
 	table.SetHeader([]string{"Path Differences"})
@@ -227,10 +230,8 @@ func PrintDiffedPathTable(diffs DiffResult) error {
 			}
 			row = append(row, s)
 		}
-
+	
 		table.Append(row)
-
-		table.Append([]string{"+------------------------------------------------------------------+"})
 	}
 
 	table.SetAlignment(tablewriter.ALIGN_LEFT)

@@ -619,8 +619,11 @@ func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string)
 	// Enable line mode for faster processing on large texts
 	diffs := dmp.DiffMain(text1, text2, true)
 	diffs = dmp.DiffCleanupSemantic(diffs) // Optional: Clean up diff for better readability
-	return FormatDiffs(diffs)
+	diffString := FormatDiffs(diffs)
+	return diffString
 }
+
+
 
 func FormatDiffs(diffs []diffmatchpatch.Diff) string {
 
@@ -635,11 +638,11 @@ func FormatDiffs(diffs []diffmatchpatch.Diff) string {
 		var prefix string
 		switch diff.Type {
 		case diffmatchpatch.DiffInsert:
-			prefix = colorGreen + "+" + diff.Text + colorReset
+			prefix = colorGreen + "+" + CheckEmptyTrim(diff.Text) + colorReset
 		case diffmatchpatch.DiffDelete:
-			prefix = colorRed + "-" + diff.Text + colorReset
+			prefix = colorRed + "-" + CheckEmptyTrim(diff.Text) + colorReset
 		case diffmatchpatch.DiffEqual:
-			prefix = colorWhite + " " + diff.Text + colorReset
+			prefix = colorWhite + " " + CheckEmptyTrim(diff.Text) + colorReset
 		}
 		parts = append(parts, prefix)
 	}
@@ -967,7 +970,7 @@ func compareNodes(dmp *diffmatchpatch.DiffMatchPatch, nodeOne, nodeTwo Node) (No
 				}
 			}
 		}
-	} 
+	}
 	return diffedNode, diffs, nil
 }
 func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analysisListTwo []*Node) ([]Node, [][]string, int, error) {
@@ -1007,7 +1010,7 @@ func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analys
 					dumnode.NodeType = "DependencyPackage"
 					dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
 				}
-				
+
 				diffNode, diffs, err = compareNodes(dmp, *node, *dumnode)
 			} else {
 				diffNode, diffs, err = compareNodes(dmp, *node, *shorterPath[i])
@@ -1128,7 +1131,6 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 	for i, val := range big {
 		_, ok := used[i]
 		if !ok {
-			
 
 			//diff each missing path and append to result
 			var missingPath []Node
@@ -1143,11 +1145,11 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 				}
 				dmp := diffmatchpatch.New()
 				diffNode, _, err := compareNodes(dmp, *node, *dumnode)
-				if err 	!= nil {
+				if err != nil {
 					return DiffResult{}, fmt.Errorf(err.Error())
 				}
 				missingPath = append(missingPath, diffNode)
-				
+
 			}
 			pathResults = append(pathResults, DiffedPath{PathOne: val, NodeDiffs: missingPath})
 		}
