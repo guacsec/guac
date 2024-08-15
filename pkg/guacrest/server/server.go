@@ -82,11 +82,11 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 			}, nil
 		}
 
-		var packageNames []gen.PackageName
+		var packageNames []gen.WeightedNACDPackageName
 
 		for _, p := range packages {
 			pac := p // have to do this because we don't want packageNames to keep on appending a pointer of the same variable p.
-			packageNames = append(packageNames, gen.PackageName{
+			packageNames = append(packageNames, gen.WeightedNACDPackageName{
 				Name:           pac.Name,
 				DependentCount: pac.DependentCount,
 			})

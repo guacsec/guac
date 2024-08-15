@@ -6,6 +6,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Defines values for AnalyzeDependenciesParamsSort.
@@ -25,22 +26,8 @@ type Error struct {
 	Message string `json:"Message"`
 }
 
-// PackageInfo defines model for PackageInfo.
-type PackageInfo struct {
-	Name       *string            `json:"name,omitempty"`
-	Namespace  *string            `json:"namespace,omitempty"`
-	Purl       *string            `json:"purl,omitempty"`
-	Qualifiers *map[string]string `json:"qualifiers,omitempty"`
-	Subpath    *string            `json:"subpath,omitempty"`
-	Type       *string            `json:"type,omitempty"`
-	Version    *string            `json:"version,omitempty"`
-}
-
-// PackageName defines model for PackageName.
-type PackageName struct {
-	DependentCount int  `json:"DependentCount"`
-	Name           Purl `json:"Name"`
-}
+// PackageInfo The Package URL (PURL) of the package(s) being outputted
+type PackageInfo = string
 
 // PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
 type PaginationInfo struct {
@@ -51,13 +38,34 @@ type PaginationInfo struct {
 // Purl defines model for Purl.
 type Purl = string
 
+// ScanMetadata defines model for ScanMetadata.
+type ScanMetadata struct {
+	Collector      *string    `json:"collector,omitempty"`
+	DbUri          *string    `json:"dbUri,omitempty"`
+	DbVersion      *string    `json:"dbVersion,omitempty"`
+	Origin         *string    `json:"origin,omitempty"`
+	ScannerUri     *string    `json:"scannerUri,omitempty"`
+	ScannerVersion *string    `json:"scannerVersion,omitempty"`
+	TimeScanned    *time.Time `json:"timeScanned,omitempty"`
+}
+
 // Vulnerability defines model for Vulnerability.
 type Vulnerability struct {
-	Cvss        *float32  `json:"cvss,omitempty"`
-	Description *string   `json:"description,omitempty"`
-	FixedIn     *[]string `json:"fixedIn,omitempty"`
-	Id          *string   `json:"id,omitempty"`
-	Severity    *string   `json:"severity,omitempty"`
+	Metadata      ScanMetadata         `json:"metadata"`
+	Packages      []PackageInfo        `json:"packages"`
+	Vulnerability VulnerabilityDetails `json:"vulnerability"`
+}
+
+// VulnerabilityDetails defines model for VulnerabilityDetails.
+type VulnerabilityDetails struct {
+	Type             *string  `json:"type,omitempty"`
+	VulnerabilityIDs []string `json:"vulnerabilityIDs"`
+}
+
+// WeightedNACDPackageName defines model for WeightedNACDPackageName.
+type WeightedNACDPackageName struct {
+	DependentCount int  `json:"DependentCount"`
+	Name           Purl `json:"Name"`
 }
 
 // PaginationSpec defines model for PaginationSpec.
@@ -83,7 +91,7 @@ type PackageInfoResponse struct {
 }
 
 // PackageNameList defines model for PackageNameList.
-type PackageNameList = []PackageName
+type PackageNameList = []WeightedNACDPackageName
 
 // PurlList defines model for PurlList.
 type PurlList struct {

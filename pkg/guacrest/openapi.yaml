@@ -159,7 +159,7 @@ components:
       properties:
         Message:
           type: string
-    PackageName:
+    WeightedNACDPackageName:
       type: object
       required:
         - Name
@@ -170,39 +170,52 @@ components:
         DependentCount:
           type: integer
     PackageInfo:
-      type: object
-      properties:
-        purl:
-          type: string
-        type:
-          type: string
-        namespace:
-          type: string
-        name:
-          type: string
-        version:
-          type: string
-        subpath:
-          type: string
-        qualifiers:
-          type: object
-          additionalProperties:
-            type: string
+      type: string
+      description: The Package URL (PURL) of the package(s) being outputted
     Vulnerability:
       type: object
+      required:
+        - packages
+        - vulnerability
+        - metadata
       properties:
-        id:
+        packages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PackageInfo"
+        vulnerability:
+          $ref: '#/components/schemas/VulnerabilityDetails'
+        metadata:
+          $ref: '#/components/schemas/ScanMetadata'
+    VulnerabilityDetails:
+      type: object
+      required:
+        - vulnerabilityIDs
+      properties:
+        type:
           type: string
-        description:
-          type: string
-        severity:
-          type: string
-        cvss:
-          type: number
-        fixedIn:
+        vulnerabilityIDs:
           type: array
           items:
             type: string
+    ScanMetadata:
+      type: object
+      properties:
+        dbUri:
+          type: string
+        dbVersion:
+          type: string
+        scannerUri:
+          type: string
+        scannerVersion:
+          type: string
+        timeScanned:
+          type: string
+          format: date-time
+        origin:
+          type: string
+        collector:
+          type: string
   responses:
     # for code 200
     PurlList:
@@ -228,7 +241,7 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/PackageName"
+              $ref: "#/components/schemas/WeightedNACDPackageName"
     PackageInfoResponse:
       description: Package information and optional related data
       content:

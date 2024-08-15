@@ -352,7 +352,7 @@ type PackageInfoResponseJSONResponse struct {
 	AdditionalProperties map[string]interface{} `json:"-"`
 }
 
-type PackageNameListJSONResponse []PackageName
+type PackageNameListJSONResponse []WeightedNACDPackageName
 
 type PurlListJSONResponse struct {
 	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
