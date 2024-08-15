@@ -623,8 +623,6 @@ func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string)
 	return diffString
 }
 
-
-
 func FormatDiffs(diffs []diffmatchpatch.Diff) string {
 
 	var parts []string
@@ -1078,7 +1076,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 			nodeDiffs, diffs, diffNum, err := CompareTwoPaths(dmp, pathOne, pathTwo)
 
 			if err != nil {
-				return DiffResult{}, fmt.Errorf(err.Error())
+				return DiffResult{}, fmt.Errorf("error comparing paths %v", err.Error())
 			}
 
 			if diffNum < min {
@@ -1146,7 +1144,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 				dmp := diffmatchpatch.New()
 				diffNode, _, err := compareNodes(dmp, *node, *dumnode)
 				if err != nil {
-					return DiffResult{}, fmt.Errorf(err.Error())
+					return DiffResult{}, fmt.Errorf("error comparing nodes %v", fmt.Errorf(err.Error()))
 				}
 				missingPath = append(missingPath, diffNode)
 

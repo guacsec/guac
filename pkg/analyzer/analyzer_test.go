@@ -50,14 +50,14 @@ func TestHighlightAnalysis(t *testing.T) {
 
 	data, err := readTestFileFromHub(diffTestFile)
 	if err != nil {
-		t.Errorf("Error reading test JSON")
+		t.Errorf("error reading test JSON")
 	}
 
 	var sboms []model.HasSBOMsHasSBOM
 
 	err = json.Unmarshal(data, &sboms)
 	if err != nil {
-		t.Errorf("Error unmarshaling JSON")
+		t.Errorf("error unmarshaling JSON")
 	}
 
 	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
@@ -65,16 +65,16 @@ func TestHighlightAnalysis(t *testing.T) {
 	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
 
 	if errOne != nil || errTwo != nil {
-		t.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+		t.Errorf("error making graph %v %v", errOne.Error(), errTwo.Error())
 	}
 
 	one, two, err := analyzer.HighlightAnalysis(graphOne, graphTwo, 0)
 
 	if err != nil {
-		t.Errorf("Error highlighting diff %v", err.Error())
+		t.Errorf("error highlighting diff %v", err.Error())
 	}
 	if len(one) == 0 || len(two) == 0 {
-		t.Errorf("Error highlighting diff, wanted diffs got 0")
+		t.Errorf("error highlighting diff, wanted diffs got 0")
 	}
 }
 
@@ -83,7 +83,7 @@ func TestAddGraphNode(t *testing.T) {
 	analyzer.AddGraphNode(g, "id", "black")
 	_, err := g.Vertex("id")
 	if err != nil {
-		t.Errorf("Error adding node with id 'id': %v", err)
+		t.Errorf("error adding node with id 'id': %v", err)
 	}
 }
 
@@ -93,14 +93,14 @@ func TestAddGraphEdge(t *testing.T) {
 
 	_, err := g.Edge("from", "to")
 	if err != nil {
-		t.Errorf("Error getting edge from %s to %s: %v", "from", "to", err)
+		t.Errorf("error getting edge from %s to %s: %v", "from", "to", err)
 	}
 }
 
 func TestEquivalence(t *testing.T) {
 	data, err := readTestFileFromHub(diffTestFile)
 	if err != nil {
-		t.Errorf("Error reading test file %v", err.Error())
+		t.Errorf("error reading test file %v", err.Error())
 	}
 
 	var sboms []model.HasSBOMsHasSBOM
@@ -116,17 +116,17 @@ func TestEquivalence(t *testing.T) {
 		graphTwo, errTwo := analyzer.MakeGraph(val, false, false, false, false, false)
 
 		if errOne != nil || errTwo != nil {
-			t.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+			t.Errorf("error making graph %v %v", errOne.Error(), errTwo.Error())
 		}
 
 		ok, err := analyzer.GraphEqual(graphOne, graphTwo)
 		if !ok {
-			t.Errorf("Reconstructed graph not equal " + err.Error())
+			t.Errorf("reconstructed graph not equal %v", err.Error())
 		}
 
 		ok, err = analyzer.GraphEdgesEqual(graphOne, graphTwo)
 		if !ok {
-			t.Errorf("Reconstructed graph edges not equal  " + err.Error())
+			t.Errorf("reconstructed graph edges not equal %v", err.Error())
 		}
 	}
 
