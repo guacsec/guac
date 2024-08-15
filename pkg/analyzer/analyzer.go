@@ -1144,7 +1144,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 				dmp := diffmatchpatch.New()
 				diffNode, _, err := compareNodes(dmp, *node, *dumnode)
 				if err != nil {
-					return DiffResult{}, fmt.Errorf("error comparing nodes %v", fmt.Errorf(err.Error()))
+					return DiffResult{}, fmt.Errorf("error comparing nodes %v", err.Error())
 				}
 				missingPath = append(missingPath, diffNode)
 
