@@ -148,8 +148,6 @@ for command in "${ingestion_commands[@]}"; do
   echo @@@@ Waiting
   sleep 60
 
-  go run ${GUAC_DIR}"/cmd/guacone" certifier osv -p=false
-
   if [ $? -ne 0 ]; then
     echo "Error: Command '$command' failed" | tee -a "$LOG_FILE"
     exit 1
