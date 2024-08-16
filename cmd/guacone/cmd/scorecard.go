@@ -112,8 +112,7 @@ var scorecardCmd = &cobra.Command{
 		}
 
 		// scorecard certifier is the certifier that gets the scorecard data graphQL
-		// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
-		query, err := sc.NewCertifier(gqlclient, 0, opts.batchSize, opts.addedLatency)
+		query, err := sc.NewCertifier(gqlclient, opts.batchSize, opts.addedLatency)
 
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
