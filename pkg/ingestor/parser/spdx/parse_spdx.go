@@ -476,6 +476,8 @@ func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(s.identifierStrings)
 	return s.identifierStrings, nil
 }
 

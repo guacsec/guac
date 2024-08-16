@@ -135,5 +135,7 @@ func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierS
 		pkg := depComp.CurrentPackage
 		idstrings.PurlStrings = append(idstrings.PurlStrings, helpers.PkgInputSpecToPurl(pkg))
 	}
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(idstrings)
 	return idstrings, nil
 }

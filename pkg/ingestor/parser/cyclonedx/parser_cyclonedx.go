@@ -234,7 +234,7 @@ func (c *cyclonedxParser) getPackages() error {
 				return err
 			}
 			c.packagePackages[comp.BOMRef] = append(c.packagePackages[comp.BOMRef], pkg)
-			c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, comp.PackageURL)
+			c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
 
 			// if checksums exists create an artifact for each of them
 			if comp.Hashes != nil {
@@ -352,6 +352,8 @@ func ParseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 }
 
 func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(c.identifierStrings)
 	return c.identifierStrings, nil
 }
 
