@@ -117,3 +117,23 @@ func createTopLevelHasSBOM(blob []byte, uri string, source string, timestamp tim
 		},
 	}
 }
+
+func RemoveDuplicateIdentifiers(identifierStrings *IdentifierStrings) {
+	identifierStrings.PurlStrings = removeDuplicate(identifierStrings.PurlStrings)
+	identifierStrings.GithubReleaseStrings = removeDuplicate(identifierStrings.GithubReleaseStrings)
+	identifierStrings.OciStrings = removeDuplicate(identifierStrings.OciStrings)
+	identifierStrings.VcsStrings = removeDuplicate(identifierStrings.VcsStrings)
+	identifierStrings.UnclassifiedStrings = removeDuplicate(identifierStrings.UnclassifiedStrings)
+}
+
+func removeDuplicate[T comparable](sliceList []T) []T {
+	allKeys := make(map[T]bool)
+	list := []T{}
+	for _, item := range sliceList {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}

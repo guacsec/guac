@@ -89,9 +89,13 @@ func (p *scorecardParser) GetIdentities(ctx context.Context) []common.TrustInfor
 }
 
 func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return &common.IdentifierStrings{
+	identifierStrings := &common.IdentifierStrings{
 		VcsStrings: p.vcsStrings,
-	}, nil
+	}
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(identifierStrings)
+
+	return identifierStrings, nil
 }
 
 func (p *scorecardParser) getPredicates(s *sc.JSONScorecardResultV2) error {

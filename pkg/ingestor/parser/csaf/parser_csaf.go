@@ -99,6 +99,8 @@ func (c *csafParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (c *csafParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(c.identifierStrings)
 	return c.identifierStrings, nil
 }
 

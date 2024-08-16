@@ -438,5 +438,7 @@ func (s *slsaParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (s *slsaParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(s.identifierStrings)
 	return s.identifierStrings, nil
 }

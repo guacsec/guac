@@ -111,6 +111,8 @@ func (c *openVEXParser) GetIdentities(ctx context.Context) []common.TrustInforma
 }
 
 func (c *openVEXParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(c.identifierStrings)
 	return c.identifierStrings, nil
 }
 
