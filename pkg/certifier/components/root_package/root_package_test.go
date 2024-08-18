@@ -32,10 +32,9 @@ func TestNewPackageQuery(t *testing.T) {
 	gqlclient := graphql.NewClient("inmemeory", &httpClient)
 
 	type args struct {
-		client            graphql.Client
-		daysSinceLastScan int
-		batchSize         int
-		addedLatency      *time.Duration
+		client       graphql.Client
+		batchSize    int
+		addedLatency *time.Duration
 	}
 	tests := []struct {
 		name string
@@ -44,21 +43,19 @@ func TestNewPackageQuery(t *testing.T) {
 	}{{
 		name: "newPackageQuery",
 		args: args{
-			client:            gqlclient,
-			daysSinceLastScan: 0,
-			batchSize:         60000,
-			addedLatency:      nil,
+			client:       gqlclient,
+			batchSize:    60000,
+			addedLatency: nil,
 		},
 		want: &packageQuery{
-			client:            gqlclient,
-			daysSinceLastScan: 0,
-			batchSize:         60000,
-			addedLatency:      nil,
+			client:       gqlclient,
+			batchSize:    60000,
+			addedLatency: nil,
 		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewPackageQuery(tt.args.client, tt.args.daysSinceLastScan, tt.args.batchSize, tt.args.addedLatency); !reflect.DeepEqual(got, tt.want) {
+			if got := NewPackageQuery(tt.args.client, tt.args.batchSize, tt.args.addedLatency); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewPackageQuery() = %v, want %v", got, tt.want)
 			}
 		})
@@ -66,7 +63,6 @@ func TestNewPackageQuery(t *testing.T) {
 }
 
 func Test_packageQuery_GetComponents(t *testing.T) {
-	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	testPypiPackage := generated.PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage{}
 
 	testPypiPackage.Type = "pypi"
@@ -104,27 +100,14 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		},
 	})
 
-	neighborCertifyVulnTimeStamp := generated.NeighborsNeighborsCertifyVuln{}
-	neighborCertifyVulnTimeStamp.Metadata = generated.AllCertifyVulnMetadataScanMetadata{
-		TimeScanned: tm.UTC(),
-	}
-
-	neighborCertifyVulnTimeNow := generated.NeighborsNeighborsCertifyVuln{}
-	neighborCertifyVulnTimeNow.Metadata = generated.AllCertifyVulnMetadataScanMetadata{
-		TimeScanned: time.Now().UTC(),
-	}
-
 	tests := []struct {
-		name              string
-		daysSinceLastScan int
-		getPackages       func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
-		getNeighbors      func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
-		wantPackNode      []*PackageNode
-		wantErr           bool
+		name         string
+		getPackages  func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
+		wantPackNode []*PackageNode
+		wantErr      bool
 	}{
 		{
-			name:              "django: daysSinceLastScan=0",
-			daysSinceLastScan: 0,
+			name: "django:",
 			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
 				return &generated.PackagesListResponse{
 					PackagesList: &generated.PackagesListPackagesListPackageConnection{
@@ -139,11 +122,6 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 							HasNextPage: false,
 						},
 					},
-				}, nil
-			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
 			},
 			wantPackNode: []*PackageNode{
@@ -153,142 +131,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			},
 			wantErr: false,
 		}, {
-			name:              "django with certifyVuln",
-			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
-						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
-							{
-								Node:   testPypiPackage,
-								Cursor: "",
-							},
-						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
-							HasNextPage: false,
-						},
-					},
-				}, nil
-			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
-				}, nil
-			},
-			wantPackNode: []*PackageNode{},
-			wantErr:      false,
-		}, {
-			name:              "django with certifyVuln, daysSinceLastScan=30",
-			daysSinceLastScan: 30,
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
-						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
-							{
-								Node:   testPypiPackage,
-								Cursor: "",
-							},
-						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
-							HasNextPage: false,
-						},
-					},
-				}, nil
-			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
-				}, nil
-			},
-			wantPackNode: []*PackageNode{{
-				Purl: "pkg:pypi/django@1.11.1",
-			}},
-			wantErr: false,
-		}, {
-			name:              "django with certifyVuln, timestamp: time now, daysSinceLastScan=30",
-			daysSinceLastScan: 30,
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
-						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
-							{
-								Node:   testPypiPackage,
-								Cursor: "",
-							},
-						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
-							HasNextPage: false,
-						},
-					},
-				}, nil
-			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeNow},
-				}, nil
-			},
-			wantPackNode: []*PackageNode{},
-			wantErr:      false,
-		}, {
-			name:              "django with certifyVuln, daysSinceLastScan=0, IsOccurrence",
-			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
-						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
-							{
-								Node:   testPypiPackage,
-								Cursor: "",
-							},
-						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
-							HasNextPage: false,
-						},
-					},
-				}, nil
-			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
-				}, nil
-			},
-			wantPackNode: []*PackageNode{},
-			wantErr:      false,
-		}, {
-			name:              "django, daysSinceLastScan=0, IsOccurrence",
-			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
-						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
-							{
-								Node:   testPypiPackage,
-								Cursor: "",
-							},
-						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
-							HasNextPage: false,
-						},
-					},
-				}, nil
-			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{},
-				}, nil
-			},
-			wantPackNode: []*PackageNode{{
-				Purl: "pkg:pypi/django@1.11.1",
-			}},
-			wantErr: false,
-		}, {
-			name:              "multiple packages",
-			daysSinceLastScan: 0,
+			name: "multiple packages",
 			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
 				return &generated.PackagesListResponse{
 					PackagesList: &generated.PackagesListPackagesListPackageConnection{
@@ -309,11 +152,6 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
-				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{},
-				}, nil
-			},
 			wantPackNode: []*PackageNode{{
 				Purl: "pkg:pypi/django@1.11.1",
 			}, {
@@ -329,13 +167,11 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			p := &packageQuery{
-				client:            nil,
-				daysSinceLastScan: tt.daysSinceLastScan,
-				batchSize:         1,
-				addedLatency:      &addedLatency,
+				client:       nil,
+				batchSize:    1,
+				addedLatency: &addedLatency,
 			}
 			getPackages = tt.getPackages
-			getNeighbors = tt.getNeighbors
 
 			// compChan to collect query components
 			compChan := make(chan interface{}, 1)

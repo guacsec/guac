@@ -18,7 +18,6 @@ package root_package
 import (
 	"context"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -36,8 +35,6 @@ type PackageNode struct {
 
 type packageQuery struct {
 	client graphql.Client
-	// daysSinceLastScan sets the days since the last vulnerability scan was run
-	daysSinceLastScan int
 	// set the batch size for the package pagination query
 	batchSize int
 	// add artificial latency to throttle the pagination query
@@ -45,21 +42,18 @@ type packageQuery struct {
 }
 
 var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
-var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphql.Client, daysSinceLastScan, batchSize int, addedLatency *time.Duration) certifier.QueryComponents {
+func NewPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) certifier.QueryComponents {
 	getPackages = generated.PackagesList
-	getNeighbors = generated.Neighbors
 	return &packageQuery{
-		client:            client,
-		daysSinceLastScan: daysSinceLastScan,
-		batchSize:         batchSize,
-		addedLatency:      addedLatency,
+		client:       client,
+		batchSize:    batchSize,
+		addedLatency: addedLatency,
 	}
 }
 
-// GetComponents get all the packages that do not have a certify vulnerability attached or last scanned is more than daysSinceLastScan
+// GetComponents get all the packages
 func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
@@ -131,7 +125,6 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 	var afterCursor *string
 
 	first := p.batchSize
-	//first := 60000
 	for {
 		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, afterCursor, &first)
 		if err != nil {
@@ -149,37 +142,10 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 			for _, namespace := range pkgNode.Node.Namespaces {
 				for _, name := range namespace.Names {
 					for _, version := range name.Versions {
-						response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln})
-						if err != nil {
-							return fmt.Errorf("failed neighbors query: %w", err)
+						packNode := PackageNode{
+							Purl: version.Purl,
 						}
-						vulnList := []*generated.NeighborsNeighborsCertifyVuln{}
-						certifyVulnFound := false
-						for _, neighbor := range response.Neighbors {
-							if certifyVuln, ok := neighbor.(*generated.NeighborsNeighborsCertifyVuln); ok {
-								vulnList = append(vulnList, certifyVuln)
-							}
-						}
-						// collect all certifyVulnerability and then check timestamp else if not checking timestamp,
-						// if a certifyVulnerability is found break out
-						for _, vulns := range vulnList {
-							if p.daysSinceLastScan != 0 {
-								now := time.Now()
-								difference := vulns.Metadata.TimeScanned.Sub(now)
-								if math.Abs(difference.Hours()) < float64(p.daysSinceLastScan*24) {
-									certifyVulnFound = true
-								}
-							} else {
-								certifyVulnFound = true
-								break
-							}
-						}
-						if !certifyVulnFound {
-							packNode := PackageNode{
-								Purl: version.Purl,
-							}
-							nodeChan <- &packNode
-						}
+						nodeChan <- &packNode
 					}
 				}
 			}
