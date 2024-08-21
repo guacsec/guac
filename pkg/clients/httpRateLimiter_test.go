@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/logging"
+
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

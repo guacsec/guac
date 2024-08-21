@@ -13,21 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package deps_dev
 
 import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/guacsec/guac/pkg/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"strings"
 	"testing"
 	"time"
 
-	pb "deps.dev/api/v3"
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -36,6 +35,10 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+
+	pb "deps.dev/api/v3"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestNewDepsCollector(t *testing.T) {

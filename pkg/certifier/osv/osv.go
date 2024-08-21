@@ -16,24 +16,25 @@
 package osv
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/pkg/clients"
-	"golang.org/x/time/rate"
+	"github.com/guacsec/guac/pkg/version"
 	"net/http"
 	"strings"
 	"time"
 
-	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+
+	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/time/rate"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -55,7 +56,7 @@ type osvCertifier struct {
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
 	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000)
-	transport := clients.NewRateLimitedTransport(http.DefaultTransport, limiter)
+	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
 	client := &http.Client{Transport: transport}
 	return &osvCertifier{
 		osvHTTPClient: client,
@@ -84,36 +85,13 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}
 
-	// Marshal the query into JSON
-	queryBytes, err := json.Marshal(query)
-	if err != nil {
-		return fmt.Errorf("failed to marshal query: %w", err)
-	}
-
-	// Use the osvHTTPClient to make the request
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.osv.dev/v1/querybatch", bytes.NewReader(queryBytes))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := o.osvHTTPClient.Do(req)
+	resp, err := osv_scanner.MakeRequestWithClient(query, o.osvHTTPClient)
 	if err != nil {
 		return fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("osv.dev batched request failed with status: %s", resp.Status)
-	}
-
-	var osvResponse osv_scanner.BatchedResponse
-	if err := json.NewDecoder(resp.Body).Decode(&osvResponse); err != nil {
-		return fmt.Errorf("failed to decode osv.dev response: %w", err)
-	}
 
 	for i, query := range query.Queries {
-		response := osvResponse.Results[i]
+		response := resp.Results[i]
 		purl := query.Package.PURL
 		if err := generateDocument(packMap[purl], response.Vulns, docChannel); err != nil {
 			return fmt.Errorf("could not generate document from OSV results: %w", err)

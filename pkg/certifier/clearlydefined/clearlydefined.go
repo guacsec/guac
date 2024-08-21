@@ -19,7 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/time/rate"
 	"io"
 	"log"
@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/clients" // Import the clients package for rate limiter
@@ -35,6 +36,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/misc/coordinates"
+
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -62,7 +64,7 @@ func NewClearlyDefinedCertifier() certifier.Certifier {
 }
 
 func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
-	transport := clients.NewRateLimitedTransport(http.DefaultTransport, limiter)
+	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
 	return &http.Client{Transport: transport}
 }
 

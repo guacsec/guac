@@ -20,7 +20,6 @@ import (
 	"net/http"
 
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
 )
 
 // RateLimitedTransport is a wrapper around http.RoundTripper that adds rate
@@ -42,7 +41,6 @@ func (t *RateLimitedTransport) RoundTrip(req *http.Request) (*http.Response, err
 			return nil, err
 		}
 	}
-	req.Header.Set("User-Agent", version.UserAgent)
 	return t.Transport.RoundTrip(req)
 }
 
