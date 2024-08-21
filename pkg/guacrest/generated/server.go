@@ -200,6 +200,14 @@ func (siw *ServerInterfaceWrapper) GetPackageInfo(w http.ResponseWriter, r *http
 		return
 	}
 
+	// ------------- Optional query parameter "dependencies" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "dependencies", r.URL.Query(), &params.Dependencies)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "dependencies", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetPackageInfo(w, r, purl, params)
 	}))
@@ -347,7 +355,8 @@ type BadRequestJSONResponse Error
 type InternalServerErrorJSONResponse Error
 
 type PackageInfoResponseJSONResponse struct {
-	Packages             *[]PackageInfo         `json:"packages,omitempty"`
+	Dependencies         *[]PackageInfo         `json:"dependencies,omitempty"`
+	Packages             []PackageInfo          `json:"packages"`
 	Vulnerabilities      *[]Vulnerability       `json:"vulnerabilities,omitempty"`
 	AdditionalProperties map[string]interface{} `json:"-"`
 }

@@ -128,7 +128,13 @@ func (s *DefaultServer) GetPackageInfo(ctx context.Context, request gen.GetPacka
 		}, nil
 	}
 
-	packageResponse, err := helpers.GetInfoForPackage(ctx, s.gqlClient, pkgInput, request.Params.Vulns)
+	// whatToSearch states what type of query we want to run for the given package
+	whatToSearch := helpers.QueryType{
+		Vulns:        request.Params.Vulns,
+		Dependencies: request.Params.Dependencies,
+	}
+
+	packageResponse, err := helpers.GetInfoForPackage(ctx, s.gqlClient, pkgInput, whatToSearch)
 	if err != nil {
 		return nil, err
 	}

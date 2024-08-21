@@ -85,7 +85,8 @@ type InternalServerError = Error
 
 // PackageInfoResponse defines model for PackageInfoResponse.
 type PackageInfoResponse struct {
-	Packages             *[]PackageInfo         `json:"packages,omitempty"`
+	Dependencies         *[]PackageInfo         `json:"dependencies,omitempty"`
+	Packages             []PackageInfo          `json:"packages"`
 	Vulnerabilities      *[]Vulnerability       `json:"vulnerabilities,omitempty"`
 	AdditionalProperties map[string]interface{} `json:"-"`
 }
@@ -138,7 +139,8 @@ type RetrieveDependenciesParamsLinkCondition string
 
 // GetPackageInfoParams defines parameters for GetPackageInfo.
 type GetPackageInfoParams struct {
-	Vulns *bool `form:"vulns,omitempty" json:"vulns,omitempty"`
+	Vulns        *bool `form:"vulns,omitempty" json:"vulns,omitempty"`
+	Dependencies *bool `form:"dependencies,omitempty" json:"dependencies,omitempty"`
 }
 
 // Getter for additional properties for PackageInfoResponse. Returns the specified
@@ -164,6 +166,14 @@ func (a *PackageInfoResponse) UnmarshalJSON(b []byte) error {
 	err := json.Unmarshal(b, &object)
 	if err != nil {
 		return err
+	}
+
+	if raw, found := object["dependencies"]; found {
+		err = json.Unmarshal(raw, &a.Dependencies)
+		if err != nil {
+			return fmt.Errorf("error reading 'dependencies': %w", err)
+		}
+		delete(object, "dependencies")
 	}
 
 	if raw, found := object["packages"]; found {
@@ -201,11 +211,16 @@ func (a PackageInfoResponse) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
-	if a.Packages != nil {
-		object["packages"], err = json.Marshal(a.Packages)
+	if a.Dependencies != nil {
+		object["dependencies"], err = json.Marshal(a.Dependencies)
 		if err != nil {
-			return nil, fmt.Errorf("error marshaling 'packages': %w", err)
+			return nil, fmt.Errorf("error marshaling 'dependencies': %w", err)
 		}
+	}
+
+	object["packages"], err = json.Marshal(a.Packages)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'packages': %w", err)
 	}
 
 	if a.Vulnerabilities != nil {
