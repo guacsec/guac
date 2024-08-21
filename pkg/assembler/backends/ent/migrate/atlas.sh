@@ -6,4 +6,4 @@ if [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ] || [ -z "$PGHOST" ] || [ -z "$PGPORT
   exit 1
 fi
 
-atlas migrate apply --dir file:///app/migrations --url "postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE?sslmode=disable"
+atlas migrate apply --dir file:///app/migrations --url "postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE?search_path=public"

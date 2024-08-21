@@ -102,7 +102,7 @@ jobs:
 
   build-atlas:
     runs-on: ubuntu-latest
-
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Check out the code
         uses: actions/checkout@v3
