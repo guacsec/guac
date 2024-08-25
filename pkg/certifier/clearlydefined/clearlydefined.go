@@ -16,15 +16,17 @@
 package clearlydefined
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/time/rate"
 	"io"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"golang.org/x/time/rate"
 
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier"
@@ -50,7 +52,7 @@ const (
 	CDCollector string = "clearlydefined"
 )
 
-var ErrOSVComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
+var ErrComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type cdCertifier struct {
 	cdHTTPClient *http.Client
@@ -70,14 +72,18 @@ func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
 	return &http.Client{Transport: transport}
 }
 
-// GetPkgDefinition uses the coordinates to query clearly defined for license definition
-func GetPkgDefinition(ctx context.Context, client *http.Client, coordinate *coordinates.Coordinate) (*attestation.Definition, error) {
-	logger := logging.FromContext(ctx)
+// GetDefinitions uses the coordinates to query clearly defined for license definition
+func GetDefinitions(ctx context.Context, purls []string, coordinates []string) (map[string]*attestation.Definition, error) {
 
-	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
-		coordinate.Namespace, coordinate.Name, coordinate.Revision)
+	definitionMap := make(map[string]*attestation.Definition)
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	// Convert coordinates to JSON
+	jsonData, err := json.Marshal(coordinates)
+	if err != nil {
+		log.Fatalf("Error marshalling coordinates: %v", err)
+	}
+
+	req, err := http.NewRequest("POST", "https://api.clearlydefined.io/definitions", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new request with error: %w", err)
 	}
@@ -88,52 +94,6 @@ func GetPkgDefinition(ctx context.Context, client *http.Client, coordinate *coor
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			// log the error when not found but don't return the error to continue the loop
-			logger.Debugf("package license definition not found for: %s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
-				coordinate.Namespace, coordinate.Name, coordinate.Revision)
-			return nil, nil
-		}
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %v", err)
-	}
-
-	var definition attestation.Definition
-	if err := json.Unmarshal(body, &definition); err != nil {
-		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
-	}
-
-	if definition.Described.ReleaseDate == "" {
-		return nil, nil
-	}
-
-	return &definition, nil
-}
-
-// GetSrcDefinition uses the source coordinates found from the package definition to query clearly defined for license definition
-func GetSrcDefinition(ctx context.Context, client *http.Client, defType, provider, namespace, name, revision string) (*attestation.Definition, error) {
-	logger := logging.FromContext(ctx)
-	url := fmt.Sprintf("https://api.clearlydefined.io/definitions/%s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			// log the error when not found but don't return the error to continue the loop
-			logger.Debugf("source license definition not found for: %s/%s/%s/%s/%s", defType, provider, namespace, name, revision)
-			return nil, nil
-		}
 		// otherwise return an error
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
@@ -143,16 +103,20 @@ func GetSrcDefinition(ctx context.Context, client *http.Client, defType, provide
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	var definition attestation.Definition
-	if err := json.Unmarshal(body, &definition); err != nil {
+	var definitions []*attestation.Definition
+	if err := json.Unmarshal(body, &definitions); err != nil {
 		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
 	}
 
-	if definition.Described.ReleaseDate == "" {
-		return nil, nil
+	if len(purls) == len(definitions) {
+		return nil, fmt.Errorf("failed to get expected responses back! Purl count: %d, returned definition count %d", len(purls), len(definitions))
 	}
 
-	return &definition, nil
+	for i, definition := range definitions {
+		definitionMap[purls[i]] = definition
+	}
+
+	return definitionMap, nil
 }
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
@@ -162,10 +126,12 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 
 	packageNodes, ok := rootComponent.([]*root_package.PackageNode)
 	if !ok {
-		return ErrOSVComponentTypeMismatch
+		return ErrComponentTypeMismatch
 	}
 
-	packMap := map[string][]*root_package.PackageNode{}
+	var batchCoordinates []string
+	var purls []string
+	packMap := map[string]bool{}
 	for _, node := range packageNodes {
 		// skip any purls that are generated by GUAC as they will not be found in clearly defined
 		if strings.Contains(node.Purl, "pkg:guac") {
@@ -177,59 +143,89 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 				logger.Errorf("failed to parse purl into coordinate with error: %v", err)
 				continue
 			}
-			definition, err := GetPkgDefinition(ctx, c.cdHTTPClient, coordinate)
-			if err != nil {
-				return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
-			}
-			// if definition for the package is not found, continue to the next package
-			if definition == nil {
-				continue
-			}
-			if err := generateDocument(node.Purl, definition, docChannel); err != nil {
-				return fmt.Errorf("could not generate document from OSV results: %w", err)
-			}
-			packMap[node.Purl] = append(packMap[node.Purl], node)
-			if definition.Described.SourceLocation != nil {
-				srcDefinition, err := GetSrcDefinition(ctx, c.cdHTTPClient, definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Provider,
-					definition.Described.SourceLocation.Namespace, definition.Described.SourceLocation.Name, definition.Described.SourceLocation.Revision)
-				if err != nil {
-					return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
-				}
-
-				if srcDefinition == nil {
-					continue
-				}
-
-				srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
-					definition.Described.SourceLocation.Name, &definition.Described.SourceLocation.Revision)
-
-				if err := generateDocument(helpers.SrcClientKey(srcInput).NameId, srcDefinition, docChannel); err != nil {
-					return fmt.Errorf("could not generate document from OSV results: %w", err)
-				}
-			}
+			packMap[node.Purl] = true
+			purls = append(purls, node.Purl)
+			batchCoordinates = append(batchCoordinates, coordinate.ToString())
 		}
 	}
+
+	definitionMap, err := GetDefinitions(ctx, purls, batchCoordinates)
+	if err != nil {
+		return fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
+	}
+
+	if err := generateDocument(definitionMap, docChannel); err != nil {
+		return fmt.Errorf("could not generate document from Clearly Defined results: %w", err)
+	}
+
+	if err := evaluateDefinitionForSource(ctx, definitionMap, docChannel); err != nil {
+		return fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
+	}
+
 	return nil
 }
 
 // generateDocument generates the actual clearly defined attestation
-func generateDocument(purl string, definition *attestation.Definition, docChannel chan<- *processor.Document) error {
-	currentTime := time.Now()
-	payload, err := json.Marshal(CreateAttestation(purl, definition, currentTime))
-	if err != nil {
-		return fmt.Errorf("unable to marshal attestation: %w", err)
+func generateDocument(definitionMap map[string]*attestation.Definition, docChannel chan<- *processor.Document) error {
+	for purl, definition := range definitionMap {
+		if definition.Described.ReleaseDate == "" {
+			continue
+		}
+		currentTime := time.Now()
+		payload, err := json.Marshal(CreateAttestation(purl, definition, currentTime))
+		if err != nil {
+			return fmt.Errorf("unable to marshal attestation: %w", err)
+		}
+		doc := &processor.Document{
+			Blob:   payload,
+			Type:   processor.DocumentITE6ClearlyDefined,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector:   CDCollector,
+				Source:      CDCollector,
+				DocumentRef: events.GetDocRef(payload),
+			},
+		}
+		docChannel <- doc
 	}
-	doc := &processor.Document{
-		Blob:   payload,
-		Type:   processor.DocumentITE6ClearlyDefined,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector:   CDCollector,
-			Source:      CDCollector,
-			DocumentRef: events.GetDocRef(payload),
-		},
+	return nil
+}
+
+func evaluateDefinitionForSource(ctx context.Context, definitionMap map[string]*attestation.Definition, docChannel chan<- *processor.Document) error {
+	sourceMap := map[string]bool{}
+	var batchCoordinates []string
+	var sourceInputs []string
+	for _, definition := range definitionMap {
+		if definition.Described.SourceLocation != nil {
+
+			srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
+				definition.Described.SourceLocation.Name, &definition.Described.SourceLocation.Revision)
+
+			nameID := helpers.SrcClientKey(srcInput).NameId
+
+			if _, ok := sourceMap[nameID]; !ok {
+				coordinate := &coordinates.Coordinate{
+					CoordinateType: definition.Described.SourceLocation.Type,
+					Provider:       definition.Described.SourceLocation.Provider,
+					Namespace:      definition.Described.SourceLocation.Namespace,
+					Name:           definition.Described.SourceLocation.Name,
+					Revision:       definition.Described.SourceLocation.Revision,
+				}
+				sourceMap[nameID] = true
+				sourceInputs = append(sourceInputs, nameID)
+				batchCoordinates = append(batchCoordinates, coordinate.ToString())
+			}
+
+			definitionMap, err := GetDefinitions(ctx, sourceInputs, batchCoordinates)
+			if err != nil {
+				return fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
+			}
+
+			if err := generateDocument(definitionMap, docChannel); err != nil {
+				return fmt.Errorf("could not generate document from Clearly Defined results: %w", err)
+			}
+		}
 	}
-	docChannel <- doc
 	return nil
 }
 

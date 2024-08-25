@@ -291,3 +291,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 	}
 	return nil, fmt.Errorf("failed to get coordinates from purl: %s", purlUri)
 }
+
+func (c *Coordinate) ToString() string {
+	return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, c.Namespace, c.Name, c.Revision)
+}
