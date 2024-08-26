@@ -64,7 +64,9 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	var certLegalIngest []assembler.CertifyLegalIngest
 	var hasSourceAtIngest []assembler.HasSourceAtIngest
 
-	if cdProcessorDocs, err := cd_certifier.EvaluateClearlyDefinedDefinition(ctx, purls); err != nil {
+	if cdProcessorDocs, err := cd_certifier.EvaluateClearlyDefinedDefinition(ctx, &http.Client{
+		Transport: version.UATransport,
+	}, purls); err != nil {
 		return nil, nil, fmt.Errorf("failed get definition from clearly defined with error: %w", err)
 	} else {
 		for _, doc := range cdProcessorDocs {

@@ -59,7 +59,7 @@ func TestClearlyDefined(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.ITE6CDSourceCommonText),
+				Blob:   []byte(testdata.ITE6CDLog4j),
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -68,7 +68,7 @@ func TestClearlyDefined(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.ITE6CDLog4j),
+				Blob:   []byte(testdata.ITE6CDSourceCommonText),
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{

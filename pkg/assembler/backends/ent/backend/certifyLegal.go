@@ -143,7 +143,6 @@ func certifyLegalConflictColumns() []string {
 	return []string{
 		certifylegal.FieldDeclaredLicense,
 		certifylegal.FieldDiscoveredLicense,
-		certifylegal.FieldAttribution,
 		certifylegal.FieldJustification,
 		certifylegal.FieldTimeScanned,
 		certifylegal.FieldOrigin,

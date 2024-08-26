@@ -38,97 +38,112 @@ type ClearlyDefinedStatement struct {
 }
 
 // Definition represents the structure of the data returned by the API
+// Definition struct
 type Definition struct {
-	Described struct {
-		ReleaseDate    string `json:"releaseDate"`
-		SourceLocation *struct {
-			Type      string `json:"type"`
-			Provider  string `json:"provider"`
-			Namespace string `json:"namespace"`
-			Name      string `json:"name"`
-			Revision  string `json:"revision"`
-			URL       string `json:"url"`
-		} `json:"sourceLocation,omitempty"`
-		Urls struct {
-			Registry string `json:"registry"`
-			Version  string `json:"version"`
-			Download string `json:"download"`
-		} `json:"urls"`
-		Hashes struct {
-			Sha1   string `json:"sha1"`
-			Sha256 string `json:"sha256"`
-		} `json:"hashes"`
-		Files     int      `json:"files"`
-		Tools     []string `json:"tools"`
-		ToolScore struct {
-			Total  int `json:"total"`
-			Date   int `json:"date"`
-			Source int `json:"source"`
-		} `json:"toolScore"`
-		Score struct {
-			Total  int `json:"total"`
-			Date   int `json:"date"`
-			Source int `json:"source"`
-		} `json:"score"`
-	} `json:"described"`
-	Files []struct {
-		Path    string   `json:"path"`
-		License string   `json:"license,omitempty"`
-		Natures []string `json:"natures,omitempty"`
-		Hashes  struct {
-			Sha1   string `json:"sha1"`
-			Sha256 string `json:"sha256"`
-		} `json:"hashes"`
-		Token        string   `json:"token,omitempty"`
-		Attributions []string `json:"attributions,omitempty"`
-	} `json:"files"`
 	Licensed struct {
-		Declared  string `json:"declared"`
-		ToolScore struct {
-			Total       int `json:"total"`
-			Declared    int `json:"declared"`
-			Discovered  int `json:"discovered"`
-			Consistency int `json:"consistency"`
-			Spdx        int `json:"spdx"`
-			Texts       int `json:"texts"`
-		} `json:"toolScore"`
-		Facets struct {
-			Core struct {
-				Attribution struct {
-					Unknown int      `json:"unknown"`
-					Parties []string `json:"parties"`
-				} `json:"attribution"`
-				Discovered struct {
-					Unknown     int      `json:"unknown"`
-					Expressions []string `json:"expressions"`
-				} `json:"discovered"`
-				Files int `json:"files"`
-			} `json:"core"`
-		} `json:"facets"`
-		Score struct {
-			Total       int `json:"total"`
-			Declared    int `json:"declared"`
-			Discovered  int `json:"discovered"`
-			Consistency int `json:"consistency"`
-			Spdx        int `json:"spdx"`
-			Texts       int `json:"texts"`
-		} `json:"score"`
+		Declared  string    `json:"declared"`
+		ToolScore ToolScore `json:"toolScore"`
+		Facets    Facets    `json:"facets"`
+		Score     Score     `json:"score"`
 	} `json:"licensed"`
-	Coordinates struct {
-		Type      string `json:"type"`
-		Provider  string `json:"provider"`
-		Namespace string `json:"namespace"`
-		Name      string `json:"name"`
-		Revision  string `json:"revision"`
-	} `json:"coordinates"`
-	Meta struct {
-		SchemaVersion string    `json:"schemaVersion"`
-		Updated       time.Time `json:"updated"`
-	} `json:"_meta"`
-	Scores struct {
-		Effective int `json:"effective"`
-		Tool      int `json:"tool"`
-	} `json:"scores"`
+	Described   Described   `json:"described"`
+	Coordinates Coordinates `json:"coordinates"`
+	Meta        Meta        `json:"_meta"`
+	Scores      Scores      `json:"scores"`
+}
+
+// ToolScore struct
+type ToolScore struct {
+	Total       int `json:"total"`
+	Declared    int `json:"declared"`
+	Discovered  int `json:"discovered"`
+	Consistency int `json:"consistency"`
+	Spdx        int `json:"spdx"`
+	Texts       int `json:"texts"`
+}
+
+// Facets struct
+type Facets struct {
+	Core struct {
+		Attribution Attribution `json:"attribution"`
+		Discovered  Discovered  `json:"discovered"`
+		Files       int         `json:"files"`
+	} `json:"core"`
+}
+
+// Attribution struct
+type Attribution struct {
+	Unknown int      `json:"unknown"`
+	Parties []string `json:"parties"`
+}
+
+// Discovered struct
+type Discovered struct {
+	Unknown     int      `json:"unknown"`
+	Expressions []string `json:"expressions"`
+}
+
+// Hashes struct
+type Hashes struct {
+	Sha1   string `json:"sha1"`
+	Sha256 string `json:"sha256"`
+}
+
+// Described struct
+type Described struct {
+	ReleaseDate    string          `json:"releaseDate"`
+	Urls           Urls            `json:"urls"`
+	Hashes         Hashes          `json:"hashes"`
+	Files          int             `json:"files"`
+	Tools          []string        `json:"tools"`
+	ToolScore      ToolScore       `json:"toolScore"`
+	SourceLocation *SourceLocation `json:"sourceLocation"`
+	Score          Score           `json:"score"`
+}
+
+// Urls struct
+type Urls struct {
+	Registry string `json:"registry"`
+	Version  string `json:"version"`
+	Download string `json:"download"`
+}
+
+// SourceLocation struct
+type SourceLocation struct {
+	Type      string `json:"type"`
+	Provider  string `json:"provider"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Revision  string `json:"revision"`
+	URL       string `json:"url"`
+}
+
+// Score struct
+type Score struct {
+	Total  int `json:"total"`
+	Date   int `json:"date"`
+	Source int `json:"source"`
+}
+
+// Coordinates struct
+type Coordinates struct {
+	Type      string `json:"type"`
+	Provider  string `json:"provider"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Revision  string `json:"revision"`
+}
+
+// Meta struct
+type Meta struct {
+	SchemaVersion string    `json:"schemaVersion"`
+	Updated       time.Time `json:"updated"`
+}
+
+// Scores struct
+type Scores struct {
+	Effective int `json:"effective"`
+	Tool      int `json:"tool"`
 }
 
 // ClearlyDefinedPredicate defines predicate definition of the license attestation

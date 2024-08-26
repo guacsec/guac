@@ -73,7 +73,12 @@ func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
 }
 
 // getDefinitions uses the coordinates to query clearly defined for license definition
-func getDefinitions(_ context.Context, purls []string, coordinates []string) (map[string]*attestation.Definition, error) {
+func getDefinitions(_ context.Context, client *http.Client, purls []string, coordinates []string) (map[string]*attestation.Definition, error) {
+
+	coordinateToPurl := make(map[string]string)
+	for i, purl := range purls {
+		coordinateToPurl[coordinates[i]] = purl
+	}
 
 	definitionMap := make(map[string]*attestation.Definition)
 
@@ -83,13 +88,10 @@ func getDefinitions(_ context.Context, purls []string, coordinates []string) (ma
 		log.Fatalf("Error marshalling coordinates: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", "https://api.clearlydefined.io/definitions", bytes.NewBuffer(jsonData))
+	// Make the POST request
+	resp, err := client.Post("https://api.clearlydefined.io/definitions", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate new request with error: %w", err)
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get response from clearly defined API with error: %w", err)
+		log.Fatalf("Error making POST request: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -103,25 +105,26 @@ func getDefinitions(_ context.Context, purls []string, coordinates []string) (ma
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	var definitions []*attestation.Definition
+	var definitions map[string]*attestation.Definition
 	if err := json.Unmarshal(body, &definitions); err != nil {
 		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
 	}
 
-	if len(purls) == len(definitions) {
+	if len(purls) != len(definitions) {
 		return nil, fmt.Errorf("failed to get expected responses back! Purl count: %d, returned definition count %d", len(purls), len(definitions))
 	}
 
-	for i, definition := range definitions {
-		definitionMap[purls[i]] = definition
+	for coordinate, definition := range definitions {
+		definitionMap[coordinateToPurl[coordinate]] = definition
 	}
 
 	return definitionMap, nil
 }
 
-func EvaluateClearlyDefinedDefinition(ctx context.Context, purls []string) ([]*processor.Document, error) {
+func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, purls []string) ([]*processor.Document, error) {
 	logger := logging.FromContext(ctx)
 	var batchCoordinates []string
+	var queryPurls []string
 	packMap := map[string]bool{}
 	var generatedCDDocs []*processor.Document
 
@@ -137,27 +140,29 @@ func EvaluateClearlyDefinedDefinition(ctx context.Context, purls []string) ([]*p
 				continue
 			}
 			packMap[purl] = true
+			queryPurls = append(queryPurls, purl)
 			batchCoordinates = append(batchCoordinates, coordinate.ToString())
 		}
 	}
 
-	definitionMap, err := getDefinitions(ctx, purls, batchCoordinates)
-	if err != nil {
-		return nil, fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
-	}
+	if len(batchCoordinates) > 0 {
+		definitionMap, err := getDefinitions(ctx, client, queryPurls, batchCoordinates)
+		if err != nil {
+			return nil, fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
+		}
 
-	if genCDPkgDocs, err := generateDocument(definitionMap); err != nil {
-		return nil, fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
-	} else {
-		generatedCDDocs = append(generatedCDDocs, genCDPkgDocs...)
-	}
+		if genCDPkgDocs, err := generateDocument(definitionMap); err != nil {
+			return nil, fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
+		} else {
+			generatedCDDocs = append(generatedCDDocs, genCDPkgDocs...)
+		}
 
-	if genCDSrcDocs, err := evaluateDefinitionForSource(ctx, definitionMap); err != nil {
-		return nil, fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
-	} else {
-		generatedCDDocs = append(generatedCDDocs, genCDSrcDocs...)
+		if genCDSrcDocs, err := evaluateDefinitionForSource(ctx, client, definitionMap); err != nil {
+			return nil, fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
+		} else {
+			generatedCDDocs = append(generatedCDDocs, genCDSrcDocs...)
+		}
 	}
-
 	return generatedCDDocs, nil
 }
 
@@ -174,7 +179,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 		purls = append(purls, node.Purl)
 	}
 
-	if genCDDocs, err := EvaluateClearlyDefinedDefinition(ctx, purls); err != nil {
+	if genCDDocs, err := EvaluateClearlyDefinedDefinition(ctx, c.cdHTTPClient, purls); err != nil {
 		return fmt.Errorf("could not generate document from Clearly Defined results: %w", err)
 	} else {
 		for _, doc := range genCDDocs {
@@ -185,7 +190,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 	return nil
 }
 
-func evaluateDefinitionForSource(ctx context.Context, definitionMap map[string]*attestation.Definition) ([]*processor.Document, error) {
+func evaluateDefinitionForSource(ctx context.Context, client *http.Client, definitionMap map[string]*attestation.Definition) ([]*processor.Document, error) {
 	sourceMap := map[string]bool{}
 	var batchCoordinates []string
 	var sourceInputs []string
@@ -211,12 +216,14 @@ func evaluateDefinitionForSource(ctx context.Context, definitionMap map[string]*
 		}
 	}
 
-	definitionMap, err := getDefinitions(ctx, sourceInputs, batchCoordinates)
-	if err != nil {
-		return nil, fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
+	if len(batchCoordinates) > 0 {
+		definitionMap, err := getDefinitions(ctx, client, sourceInputs, batchCoordinates)
+		if err != nil {
+			return nil, fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
+		}
+		return generateDocument(definitionMap)
 	}
-
-	return generateDocument(definitionMap)
+	return nil, nil
 }
 
 // generateDocument generates the actual clearly defined attestation
