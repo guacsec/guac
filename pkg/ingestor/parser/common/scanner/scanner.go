@@ -64,9 +64,50 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	var certLegalIngest []assembler.CertifyLegalIngest
 	var hasSourceAtIngest []assembler.HasSourceAtIngest
 
+	if len(purls) > 249 {
+		i := 0
+		var batchPurls []string
+		for _, purl := range purls {
+			if i < 248 {
+				batchPurls = append(batchPurls, purl)
+				i++
+			} else {
+				batchPurls = append(batchPurls, purl)
+				batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, batchPurls)
+				if err != nil {
+					return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+				}
+				certLegalIngest = append(certLegalIngest, batchedCL...)
+				hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
+				batchPurls = make([]string, 0)
+			}
+		}
+		if len(batchPurls) > 0 {
+			batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, batchPurls)
+			if err != nil {
+				return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+			}
+			certLegalIngest = append(certLegalIngest, batchedCL...)
+			hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
+		}
+	} else {
+		batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, purls)
+		if err != nil {
+			return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+		}
+		certLegalIngest = append(certLegalIngest, batchedCL...)
+		hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
+	}
+
+	return certLegalIngest, hasSourceAtIngest, nil
+}
+
+func runQueryOnBatchedPurls(ctx context.Context, cdParser common.DocumentParser, batchPurls []string) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {
+	var certLegalIngest []assembler.CertifyLegalIngest
+	var hasSourceAtIngest []assembler.HasSourceAtIngest
 	if cdProcessorDocs, err := cd_certifier.EvaluateClearlyDefinedDefinition(ctx, &http.Client{
 		Transport: version.UATransport,
-	}, purls); err != nil {
+	}, batchPurls); err != nil {
 		return nil, nil, fmt.Errorf("failed get definition from clearly defined with error: %w", err)
 	} else {
 		for _, doc := range cdProcessorDocs {
