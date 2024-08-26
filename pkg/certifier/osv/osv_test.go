@@ -203,8 +203,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 func Test_createAttestation(t *testing.T) {
 	currentTime := time.Now()
 	type args struct {
-		packageNode root_package.PackageNode
-		vulns       []osv_scanner.MinimalVulnerability
+		purl  string
+		vulns []osv_scanner.MinimalVulnerability
 	}
 	tests := []struct {
 		name string
@@ -213,9 +213,7 @@ func Test_createAttestation(t *testing.T) {
 	}{{
 		name: "default",
 		args: args{
-			packageNode: root_package.PackageNode{
-				Purl: "",
-			},
+			purl: "",
 			vulns: []osv_scanner.MinimalVulnerability{
 				{
 					ID: "testId",
@@ -247,7 +245,7 @@ func Test_createAttestation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			currentTime := time.Now()
-			got := CreateAttestation(&test.args.packageNode, test.args.vulns, currentTime)
+			got := createAttestation(test.args.purl, test.args.vulns, currentTime)
 			if !deepEqualIgnoreTimestamp(got, test.want) {
 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
 			}
