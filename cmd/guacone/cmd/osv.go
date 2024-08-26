@@ -96,7 +96,7 @@ var osvCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
+		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, 999, opts.addedLatency)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)

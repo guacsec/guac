@@ -37,6 +37,8 @@ type packageQuery struct {
 	client graphql.Client
 	// set the batch size for the package pagination query
 	batchSize int
+	// set the batch size for the service query
+	queryBatchSize int
 	// add artificial latency to throttle the pagination query
 	addedLatency *time.Duration
 }
@@ -44,12 +46,13 @@ type packageQuery struct {
 var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) certifier.QueryComponents {
+func NewPackageQuery(client graphql.Client, batchSize, queryBatchSize int, addedLatency *time.Duration) certifier.QueryComponents {
 	getPackages = generated.PackagesList
 	return &packageQuery{
-		client:       client,
-		batchSize:    batchSize,
-		addedLatency: addedLatency,
+		client:         client,
+		batchSize:      batchSize,
+		queryBatchSize: queryBatchSize,
+		addedLatency:   addedLatency,
 	}
 }
 
@@ -85,7 +88,7 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 			}
 			ticker.Reset(tickInterval)
 		case d := <-nodeChan:
-			if len(packNodes) < 999 {
+			if len(packNodes) < p.queryBatchSize {
 				packNodes = append(packNodes, d)
 			} else {
 				packNodes = append(packNodes, d)
@@ -105,7 +108,7 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 
 	for len(nodeChan) > 0 {
 		d := <-nodeChan
-		if len(packNodes) < 999 {
+		if len(packNodes) < p.queryBatchSize {
 			packNodes = append(packNodes, d)
 		} else {
 			packNodes = append(packNodes, d)

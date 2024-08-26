@@ -279,7 +279,7 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 			}
 		}
 	}
-	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
+	logger.Debugf("Decoding document with encoding:  %v", i.Encoding)
 	switch i.Encoding {
 	case processor.EncodingBzip2:
 		reader = bzip2.NewReader(bytes.NewReader(i.Blob))

@@ -136,7 +136,7 @@ func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, 
 		if _, ok := packMap[purl]; !ok {
 			coordinate, err := coordinates.ConvertPurlToCoordinate(purl)
 			if err != nil {
-				logger.Errorf("failed to parse purl into coordinate with error: %v", err)
+				logger.Debugf("failed to parse purl into coordinate with error: %v", err)
 				continue
 			}
 			packMap[purl] = true
@@ -144,7 +144,17 @@ func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, 
 			batchCoordinates = append(batchCoordinates, coordinate.ToString())
 		}
 	}
+	if genCDDocs, err := generateDefinitions(ctx, client, batchCoordinates, queryPurls); err != nil {
+		return nil, fmt.Errorf("generateDefinitions failed with error: %w", err)
+	} else {
+		generatedCDDocs = append(generatedCDDocs, genCDDocs...)
+	}
 
+	return generatedCDDocs, nil
+}
+
+func generateDefinitions(ctx context.Context, client *http.Client, batchCoordinates, queryPurls []string) ([]*processor.Document, error) {
+	var generatedCDDocs []*processor.Document
 	if len(batchCoordinates) > 0 {
 		definitionMap, err := getDefinitions(ctx, client, queryPurls, batchCoordinates)
 		if err != nil {
