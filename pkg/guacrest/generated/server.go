@@ -25,9 +25,9 @@ type ServerInterface interface {
 	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams)
-	// Get package information
-	// (GET /v1/purl/{purl})
-	GetPackageInfo(w http.ResponseWriter, r *http.Request, purl string, params GetPackageInfoParams)
+	// Get package or artifact information
+	// (GET /v1/package/{purlOrArtifact})
+	GetPackageInfo(w http.ResponseWriter, r *http.Request, purlOrArtifact string, params GetPackageInfoParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -52,9 +52,9 @@ func (_ Unimplemented) RetrieveDependencies(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get package information
-// (GET /v1/purl/{purl})
-func (_ Unimplemented) GetPackageInfo(w http.ResponseWriter, r *http.Request, purl string, params GetPackageInfoParams) {
+// Get package or artifact information
+// (GET /v1/package/{purlOrArtifact})
+func (_ Unimplemented) GetPackageInfo(w http.ResponseWriter, r *http.Request, purlOrArtifact string, params GetPackageInfoParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -180,12 +180,12 @@ func (siw *ServerInterfaceWrapper) GetPackageInfo(w http.ResponseWriter, r *http
 
 	var err error
 
-	// ------------- Path parameter "purl" -------------
-	var purl string
+	// ------------- Path parameter "purlOrArtifact" -------------
+	var purlOrArtifact string
 
-	err = runtime.BindStyledParameterWithOptions("simple", "purl", chi.URLParam(r, "purl"), &purl, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "purlOrArtifact", chi.URLParam(r, "purlOrArtifact"), &purlOrArtifact, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purl", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purlOrArtifact", Err: err})
 		return
 	}
 
@@ -208,8 +208,16 @@ func (siw *ServerInterfaceWrapper) GetPackageInfo(w http.ResponseWriter, r *http
 		return
 	}
 
+	// ------------- Optional query parameter "latestSbom" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "latestSbom", r.URL.Query(), &params.LatestSbom)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "latestSbom", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetPackageInfo(w, r, purl, params)
+		siw.Handler.GetPackageInfo(w, r, purlOrArtifact, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -342,7 +350,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/query/dependencies", wrapper.RetrieveDependencies)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/v1/purl/{purl}", wrapper.GetPackageInfo)
+		r.Get(options.BaseURL+"/v1/package/{purlOrArtifact}", wrapper.GetPackageInfo)
 	})
 
 	return r
@@ -478,8 +486,8 @@ func (response RetrieveDependencies502JSONResponse) VisitRetrieveDependenciesRes
 }
 
 type GetPackageInfoRequestObject struct {
-	Purl   string `json:"purl"`
-	Params GetPackageInfoParams
+	PurlOrArtifact string `json:"purlOrArtifact"`
+	Params         GetPackageInfoParams
 }
 
 type GetPackageInfoResponseObject interface {
@@ -528,8 +536,8 @@ type StrictServerInterface interface {
 	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(ctx context.Context, request RetrieveDependenciesRequestObject) (RetrieveDependenciesResponseObject, error)
-	// Get package information
-	// (GET /v1/purl/{purl})
+	// Get package or artifact information
+	// (GET /v1/package/{purlOrArtifact})
 	GetPackageInfo(ctx context.Context, request GetPackageInfoRequestObject) (GetPackageInfoResponseObject, error)
 }
 
@@ -639,10 +647,10 @@ func (sh *strictHandler) RetrieveDependencies(w http.ResponseWriter, r *http.Req
 }
 
 // GetPackageInfo operation middleware
-func (sh *strictHandler) GetPackageInfo(w http.ResponseWriter, r *http.Request, purl string, params GetPackageInfoParams) {
+func (sh *strictHandler) GetPackageInfo(w http.ResponseWriter, r *http.Request, purlOrArtifact string, params GetPackageInfoParams) {
 	var request GetPackageInfoRequestObject
 
-	request.Purl = purl
+	request.PurlOrArtifact = purlOrArtifact
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {

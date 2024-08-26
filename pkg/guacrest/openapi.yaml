@@ -99,15 +99,15 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
-  "/v1/purl/{purl}":
+  "/v1/package/{purlOrArtifact}":
     get:
-      summary: Get package information
+      summary: Get package or artifact information
       operationId: getPackageInfo
       parameters:
-        - name: purl
+        - name: purlOrArtifact
           in: path
           required: true
-          description: URL-encoded Package URL (PURL)
+          description: URL-encoded Package URL (PURL) or artifact identifier
           schema:
             type: string
         - name: vulns
@@ -116,6 +116,11 @@ paths:
           schema:
             type: boolean
         - name: dependencies
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: latestSbom
           in: query
           required: false
           schema:

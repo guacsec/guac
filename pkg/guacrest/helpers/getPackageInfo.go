@@ -13,6 +13,7 @@ type QueryType struct {
 	Vulns        *bool
 	Dependencies *bool
 	Licenses     *bool
+	LatestSBOM   *bool
 }
 
 func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *model.PkgInputSpec, shouldQuery QueryType) (*gen.PackageInfoResponseJSONResponse, error) {
@@ -40,12 +41,14 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 	}
 
 	var purls []string
+	var packageIds []string
 
 	for _, pkg := range pkgs.Packages {
 		for _, namespace := range pkg.Namespaces {
 			for _, n := range namespace.Names {
 				for _, v := range n.Versions {
 					purls = append(purls, v.Purl)
+					packageIds = append(packageIds, v.Id)
 				}
 			}
 		}
@@ -53,9 +56,25 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 
 	response.Packages = purls
 
+	searchSoftware := false
+
+	latestSbom := &model.AllHasSBOMTree{}
+
+	// If the LatestSBOM query is specified then all other queries should be for the latest SBOM
+	if shouldQuery.LatestSBOM != nil && *shouldQuery.LatestSBOM {
+		if len(packageIds) > 1 {
+			return nil, fmt.Errorf("cant find latest SBOM when more than one package found for given purl")
+		}
+		latestSbom, err = LatestSBOMForAGivenId(ctx, gqlClient, packageIds[0])
+		if err != nil {
+			return nil, err
+		}
+		searchSoftware = true
+	}
+
 	if shouldQuery.Vulns != nil && *shouldQuery.Vulns {
 		logger.Infof("Searching for vulnerabilities in package %s", pkgInput.Name)
-		vulnerabilities, err := searchAttachedVulns(ctx, gqlClient, pkgSpec)
+		vulnerabilities, err := searchAttachedVulns(ctx, gqlClient, pkgSpec, searchSoftware, *latestSbom)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +85,7 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 
 		var dependencies []gen.PackageInfo
 
-		deps, err := searchDependencies(ctx, gqlClient, pkgSpec)
+		deps, err := searchDependencies(ctx, gqlClient, pkgSpec, searchSoftware, *latestSbom)
 		if err != nil {
 			return nil, err
 		}
@@ -93,11 +112,11 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 //
 // The function performs a breadth-first search starting from the given package,
 // collecting vulnerabilities for each package and its dependencies.
-func searchAttachedVulns(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec) ([]gen.Vulnerability, error) {
+func searchAttachedVulns(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec, searchSoftware bool, startSBOM model.AllHasSBOMTree) ([]gen.Vulnerability, error) {
 	logger := logging.FromContext(ctx)
 	var vulnerabilities []gen.Vulnerability
 
-	pkgs, err := searchDependencies(ctx, gqlClient, pkgSpec)
+	pkgs, err := searchDependencies(ctx, gqlClient, pkgSpec, searchSoftware, startSBOM)
 	if err != nil {
 		return nil, fmt.Errorf("error searching dependencies: %w", err)
 	}
@@ -151,7 +170,9 @@ func searchAttachedVulns(ctx context.Context, gqlClient graphql.Client, pkgSpec 
 	return vulnerabilities, nil
 }
 
-func searchDependencies(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec) (map[string]string, error) {
+func searchDependencies(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec, searchSoftware bool, startSBOM model.AllHasSBOMTree) (map[string]string, error) {
+	logger := logging.FromContext(ctx)
+
 	dependencies := make(map[string]string)
 
 	pkgs, err := model.Packages(ctx, gqlClient, pkgSpec)
@@ -162,6 +183,8 @@ func searchDependencies(ctx context.Context, gqlClient graphql.Client, pkgSpec m
 	for _, pkg := range pkgs.Packages {
 		dependencies[pkg.Namespaces[0].Names[0].Versions[0].Id] = pkg.Namespaces[0].Names[0].Versions[0].Purl
 	}
+
+	doneFirst := false
 
 	queue := []model.PkgSpec{pkgSpec}
 
@@ -175,21 +198,56 @@ func searchDependencies(ctx context.Context, gqlClient graphql.Client, pkgSpec m
 			},
 		})
 
-		//isDeps, err := model.Dependencies(ctx, gqlClient, model.IsDependencySpec{
-		//	DependencyPackage: &pop,
-		//})
+		if !doneFirst && searchSoftware {
+			hasSboms = &model.HasSBOMsResponse{
+				HasSBOM: []model.HasSBOMsHasSBOM{
+					{
+						startSBOM,
+					},
+				},
+			}
+		}
+
+		doneFirst = true
+
 		if err != nil {
 			return nil, fmt.Errorf("error fetching hasSboms from package spec %+v: %w", pop, err)
 		}
 
-		for _, hasSbom := range hasSboms.HasSBOM {
-			for _, dep := range hasSbom.IncludedDependencies {
-				dependencies[dep.Package.Namespaces[0].Names[0].Versions[0].Id] = dep.Package.Namespaces[0].Names[0].Versions[0].Purl
-				queue = append(queue, model.PkgSpec{
-					Id: &dep.Package.Namespaces[0].Names[0].Versions[0].Id,
-				})
+		if !searchSoftware {
+			for _, hasSbom := range hasSboms.HasSBOM {
+				for _, dep := range hasSbom.IncludedDependencies {
+					dependencies[dep.Package.Namespaces[0].Names[0].Versions[0].Id] = dep.Package.Namespaces[0].Names[0].Versions[0].Purl
+					queue = append(queue, model.PkgSpec{
+						Id: &dep.Package.Namespaces[0].Names[0].Versions[0].Id,
+					})
+				}
+			}
+		} else {
+			for _, hasSbom := range hasSboms.HasSBOM {
+				for _, software := range hasSbom.IncludedSoftware {
+					switch s := software.(type) {
+					case *model.AllHasSBOMTreeIncludedSoftwarePackage:
+						dependencies[s.Namespaces[0].Names[0].Versions[0].Id] = s.Namespaces[0].Names[0].Versions[0].Purl
+						queue = append(queue, model.PkgSpec{
+							Id: &s.Namespaces[0].Names[0].Versions[0].Id,
+						})
+					case *model.AllHasSBOMTreeIncludedSoftwareArtifact:
+						// convert artifact to pkg, then use the pkg id to get the vulnerability
+						pkg, err := getPkgFromArtifact(gqlClient, s.Id)
+						if err != nil {
+							return nil, fmt.Errorf("failed to get package attached to artifact %s: %w", s.Id, err)
+						}
+						dependencies[pkg.Namespaces[0].Names[0].Versions[0].Id] = pkg.Namespaces[0].Names[0].Versions[0].Purl
+						queue = append(queue, model.PkgSpec{
+							Id: &pkg.Namespaces[0].Names[0].Versions[0].Id,
+						})
+					}
+				}
 			}
 		}
+
+		logger.Infof("Dependencies: %+v", dependencies)
 	}
 
 	return dependencies, nil

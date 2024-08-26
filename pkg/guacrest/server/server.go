@@ -18,6 +18,7 @@ package server
 import (
 	"context"
 	"fmt"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	helpers2 "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/guacrest/helpers"
 	"net/http"
@@ -105,33 +106,71 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 }
 
 func (s *DefaultServer) GetPackageInfo(ctx context.Context, request gen.GetPackageInfoRequestObject) (gen.GetPackageInfoResponseObject, error) {
-	decodedPurl, err := url.QueryUnescape(request.Purl)
+	logger := logging.FromContext(ctx)
+
+	decodedPurlOrArtifact, err := url.QueryUnescape(request.PurlOrArtifact)
 	if err != nil {
+		logger.Infof("error decoding purl or artifact: %v", err)
 		return gen.GetPackageInfo400JSONResponse{
 			BadRequestJSONResponse: gen.BadRequestJSONResponse{
-				Message: fmt.Sprintf("Invalid PURL: %v", err),
+				Message: fmt.Sprintf("Invalid identifier: %v", err),
 			},
 		}, nil
 	}
 
-	// Add the "pkg:" prefix if not present
-	if !strings.HasPrefix(decodedPurl, "pkg:") {
-		decodedPurl = "pkg:" + decodedPurl
-	}
+	// Determine if the identifier is a PURL or an artifact
+	var pkgInput *model.PkgInputSpec
 
-	pkgInput, err := helpers2.PurlToPkg(decodedPurl)
-	if err != nil {
-		return gen.GetPackageInfo400JSONResponse{
-			BadRequestJSONResponse: gen.BadRequestJSONResponse{
-				Message: fmt.Sprintf("Failed to parse PURL: %v", err),
+	if strings.HasPrefix(decodedPurlOrArtifact, "pkg:") {
+		pkgInput, err = helpers2.PurlToPkg(decodedPurlOrArtifact)
+		if err != nil {
+			return gen.GetPackageInfo400JSONResponse{
+				BadRequestJSONResponse: gen.BadRequestJSONResponse{
+					Message: fmt.Sprintf("Failed to parse PURL: %v", err),
+				},
+			}, nil
+		}
+	} else {
+		splitString := strings.Split(decodedPurlOrArtifact, ":")
+
+		if len(splitString) != 2 {
+			return gen.GetPackageInfo400JSONResponse{
+				BadRequestJSONResponse: gen.BadRequestJSONResponse{
+					Message: fmt.Sprintf("Invalid identifier, artifact should be comprised of <algorithm>:<digest>: %v", decodedPurlOrArtifact),
+				},
+			}, nil
+		}
+
+		occurrence, err := model.Occurrences(ctx, s.gqlClient, model.IsOccurrenceSpec{
+			Artifact: &model.ArtifactSpec{
+				Algorithm: &splitString[0],
+				Digest:    &splitString[1],
 			},
-		}, nil
+		})
+		if err != nil {
+			return gen.GetPackageInfo400JSONResponse{
+				BadRequestJSONResponse: gen.BadRequestJSONResponse{
+					Message: fmt.Sprintf("Invalid identifier, artifact should be comprised of <algorithm>:<digest>: %v", decodedPurlOrArtifact),
+				},
+			}, nil
+		}
+
+		pkg := occurrence.IsOccurrence[0].Subject.(*model.AllIsOccurrencesTreeSubjectPackage).AllPkgTree
+
+		pkgInput = &model.PkgInputSpec{
+			Type:      pkg.Type,
+			Namespace: &pkg.Namespaces[0].Namespace,
+			Name:      pkg.Namespaces[0].Names[0].Name,
+			Version:   &pkg.Namespaces[0].Names[0].Versions[0].Version,
+			Subpath:   &pkg.Namespaces[0].Names[0].Versions[0].Subpath,
+		}
 	}
 
-	// whatToSearch states what type of query we want to run for the given package
+	// whatToSearch states what type of query we want to run for the given package or artifact
 	whatToSearch := helpers.QueryType{
 		Vulns:        request.Params.Vulns,
 		Dependencies: request.Params.Dependencies,
+		LatestSBOM:   request.Params.LatestSbom,
 	}
 
 	packageResponse, err := helpers.GetInfoForPackage(ctx, s.gqlClient, pkgInput, whatToSearch)

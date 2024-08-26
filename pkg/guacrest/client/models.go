@@ -141,6 +141,7 @@ type RetrieveDependenciesParamsLinkCondition string
 type GetPackageInfoParams struct {
 	Vulns        *bool `form:"vulns,omitempty" json:"vulns,omitempty"`
 	Dependencies *bool `form:"dependencies,omitempty" json:"dependencies,omitempty"`
+	LatestSbom   *bool `form:"latestSbom,omitempty" json:"latestSbom,omitempty"`
 }
 
 // Getter for additional properties for PackageInfoResponse. Returns the specified

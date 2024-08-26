@@ -98,7 +98,7 @@ type ClientInterface interface {
 	RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetPackageInfo request
-	GetPackageInfo(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetPackageInfo(ctx context.Context, purlOrArtifact string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -137,8 +137,8 @@ func (c *Client) RetrieveDependencies(ctx context.Context, params *RetrieveDepen
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetPackageInfo(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPackageInfoRequest(c.Server, purl, params)
+func (c *Client) GetPackageInfo(ctx context.Context, purlOrArtifact string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPackageInfoRequest(c.Server, purlOrArtifact, params)
 	if err != nil {
 		return nil, err
 	}
@@ -335,12 +335,12 @@ func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesP
 }
 
 // NewGetPackageInfoRequest generates requests for GetPackageInfo
-func NewGetPackageInfoRequest(server string, purl string, params *GetPackageInfoParams) (*http.Request, error) {
+func NewGetPackageInfoRequest(server string, purlOrArtifact string, params *GetPackageInfoParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "purl", runtime.ParamLocationPath, purl)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "purlOrArtifact", runtime.ParamLocationPath, purlOrArtifact)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +350,7 @@ func NewGetPackageInfoRequest(server string, purl string, params *GetPackageInfo
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/purl/%s", pathParam0)
+	operationPath := fmt.Sprintf("/v1/package/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -382,6 +382,22 @@ func NewGetPackageInfoRequest(server string, purl string, params *GetPackageInfo
 		if params.Dependencies != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "dependencies", runtime.ParamLocationQuery, *params.Dependencies); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LatestSbom != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "latestSbom", runtime.ParamLocationQuery, *params.LatestSbom); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -459,7 +475,7 @@ type ClientWithResponsesInterface interface {
 	RetrieveDependenciesWithResponse(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*RetrieveDependenciesResponse, error)
 
 	// GetPackageInfoWithResponse request
-	GetPackageInfoWithResponse(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*GetPackageInfoResponse, error)
+	GetPackageInfoWithResponse(ctx context.Context, purlOrArtifact string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*GetPackageInfoResponse, error)
 }
 
 type AnalyzeDependenciesResponse struct {
@@ -586,8 +602,8 @@ func (c *ClientWithResponses) RetrieveDependenciesWithResponse(ctx context.Conte
 }
 
 // GetPackageInfoWithResponse request returning *GetPackageInfoResponse
-func (c *ClientWithResponses) GetPackageInfoWithResponse(ctx context.Context, purl string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*GetPackageInfoResponse, error) {
-	rsp, err := c.GetPackageInfo(ctx, purl, params, reqEditors...)
+func (c *ClientWithResponses) GetPackageInfoWithResponse(ctx context.Context, purlOrArtifact string, params *GetPackageInfoParams, reqEditors ...RequestEditorFn) (*GetPackageInfoResponse, error) {
+	rsp, err := c.GetPackageInfo(ctx, purlOrArtifact, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
