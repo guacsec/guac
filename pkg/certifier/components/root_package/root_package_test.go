@@ -32,9 +32,10 @@ func TestNewPackageQuery(t *testing.T) {
 	gqlclient := graphql.NewClient("inmemeory", &httpClient)
 
 	type args struct {
-		client       graphql.Client
-		batchSize    int
-		addedLatency *time.Duration
+		client           graphql.Client
+		batchSize        int
+		serviceBatchSize int
+		addedLatency     *time.Duration
 	}
 	tests := []struct {
 		name string
@@ -43,19 +44,21 @@ func TestNewPackageQuery(t *testing.T) {
 	}{{
 		name: "newPackageQuery",
 		args: args{
-			client:       gqlclient,
-			batchSize:    60000,
-			addedLatency: nil,
+			client:           gqlclient,
+			batchSize:        60000,
+			serviceBatchSize: 1000,
+			addedLatency:     nil,
 		},
 		want: &packageQuery{
-			client:       gqlclient,
-			batchSize:    60000,
-			addedLatency: nil,
+			client:           gqlclient,
+			batchSize:        60000,
+			serviceBatchSize: 1000,
+			addedLatency:     nil,
 		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewPackageQuery(tt.args.client, tt.args.batchSize, 250, tt.args.addedLatency); !reflect.DeepEqual(got, tt.want) {
+			if got := NewPackageQuery(tt.args.client, tt.args.batchSize, tt.args.serviceBatchSize, tt.args.addedLatency); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewPackageQuery() = %v, want %v", got, tt.want)
 			}
 		})
@@ -167,9 +170,10 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			p := &packageQuery{
-				client:       nil,
-				batchSize:    1,
-				addedLatency: &addedLatency,
+				client:           nil,
+				batchSize:        1,
+				serviceBatchSize: 250,
+				addedLatency:     &addedLatency,
 			}
 			getPackages = tt.getPackages
 
