@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/time/rate"
 	"io"
 	"log"
@@ -36,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/misc/coordinates"
+	"github.com/guacsec/guac/pkg/version"
 
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
@@ -87,6 +87,7 @@ func GetPkgDefinition(ctx context.Context, client *http.Client, coordinate *coor
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
+			// log the error when not found but don't return the error to continue the loop
 			logger.Debugf("package license definition not found for: %s/%s/%s/%s/%s", coordinate.CoordinateType, coordinate.Provider,
 				coordinate.Namespace, coordinate.Name, coordinate.Revision)
 			return nil, nil

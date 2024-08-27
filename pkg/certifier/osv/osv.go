@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/pkg/version"
 	"net/http"
 	"strings"
 	"time"
@@ -30,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/version"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
