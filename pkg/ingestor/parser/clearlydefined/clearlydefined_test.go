@@ -130,8 +130,12 @@ func TestParser(t *testing.T) {
 		wantErr: false,
 	}}
 
-	var ignoreTimestamp = cmp.FilterPath(func(p cmp.Path) bool {
+	var ignoreHSATimestamp = cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".KnownSince", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+
+	var ignoreCLTimestamp = cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".TimeScanned", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 
 	for _, tt := range tests {
@@ -145,10 +149,10 @@ func TestParser(t *testing.T) {
 				return
 			}
 			ip := s.GetPredicates(ctx)
-			if diff := cmp.Diff(tt.wantCLs, ip.CertifyLegal); diff != "" {
+			if diff := cmp.Diff(tt.wantCLs, ip.CertifyLegal, ignoreCLTimestamp); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
-			if diff := cmp.Diff(tt.wantHSA, ip.HasSourceAt, ignoreTimestamp); diff != "" {
+			if diff := cmp.Diff(tt.wantHSA, ip.HasSourceAt, ignoreHSATimestamp); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

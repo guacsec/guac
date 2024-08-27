@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -186,6 +187,25 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				collectedDocs = append(collectedDocs, d)
 			}
 			if err == nil {
+				sort.Slice(collectedDocs, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(collectedDocs[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(collectedDocs[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				sort.Slice(tt.want, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(tt.want[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(tt.want[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				if len(collectedDocs) != len(tt.want) {
+					t.Errorf("collected docs does not match wanted")
+				}
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
 					if err != nil {
