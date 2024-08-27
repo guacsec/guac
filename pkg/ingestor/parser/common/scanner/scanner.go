@@ -102,6 +102,8 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	return certLegalIngest, hasSourceAtIngest, nil
 }
 
+// runQueryOnBatchedPurls runs EvaluateClearlyDefinedDefinition from the clearly defined
+// certifier to evaluate the batched purls for license information
 func runQueryOnBatchedPurls(ctx context.Context, cdParser common.DocumentParser, batchPurls []string) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {
 	var certLegalIngest []assembler.CertifyLegalIngest
 	var hasSourceAtIngest []assembler.HasSourceAtIngest

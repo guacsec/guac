@@ -37,7 +37,7 @@ type packageQuery struct {
 	client graphql.Client
 	// set the batch size for the package pagination query
 	batchSize int
-	// set the batch size for the service query
+	// set the batch size for the service query (for example: 250 for CD and 1000 for osv)
 	queryBatchSize int
 	// add artificial latency to throttle the pagination query
 	addedLatency *time.Duration

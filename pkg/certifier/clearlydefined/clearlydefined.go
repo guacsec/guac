@@ -121,6 +121,7 @@ func getDefinitions(_ context.Context, client *http.Client, purls []string, coor
 	return definitionMap, nil
 }
 
+// EvaluateClearlyDefinedDefinition converts the purls into coordinates to query clearly defined
 func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, purls []string) ([]*processor.Document, error) {
 	logger := logging.FromContext(ctx)
 	var batchCoordinates []string
@@ -153,6 +154,8 @@ func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, 
 	return generatedCDDocs, nil
 }
 
+// generateDefinitions takes in the batched coordinated to retrieve the definition. It uses the definition to check if source
+// information can be queried in clearly defined.
 func generateDefinitions(ctx context.Context, client *http.Client, batchCoordinates, queryPurls []string) ([]*processor.Document, error) {
 	var generatedCDDocs []*processor.Document
 	if len(batchCoordinates) > 0 {
@@ -200,6 +203,8 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 	return nil
 }
 
+// evaluateDefinitionForSource takes in the returned definitions from package coordinates to determine if
+// source information can be obtained to re-query clearly defined for source related license information
 func evaluateDefinitionForSource(ctx context.Context, client *http.Client, definitionMap map[string]*attestation.Definition) ([]*processor.Document, error) {
 	sourceMap := map[string]bool{}
 	var batchCoordinates []string
@@ -236,7 +241,7 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 	return nil, nil
 }
 
-// generateDocument generates the actual clearly defined attestation
+// generateDocument generates the processor document for ingestion
 func generateDocument(definitionMap map[string]*attestation.Definition) ([]*processor.Document, error) {
 	var generatedCDDocs []*processor.Document
 	for purl, definition := range definitionMap {
@@ -263,6 +268,7 @@ func generateDocument(definitionMap map[string]*attestation.Definition) ([]*proc
 	return generatedCDDocs, nil
 }
 
+// createAttestation generates the actual clearly defined attestation
 func createAttestation(purl string, definition *attestation.Definition, currentTime time.Time) *attestation.ClearlyDefinedStatement {
 	attestation := &attestation.ClearlyDefinedStatement{
 		Statement: attestationv1.Statement{

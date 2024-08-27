@@ -88,6 +88,7 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 	return nil
 }
 
+// EvaluateOSVResponse takes a list of purls and batch queries OSV for vulnerability information
 func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []string) ([]*processor.Document, error) {
 	var query osv_scanner.BatchedQuery
 	packMap := map[string]bool{}
@@ -119,6 +120,7 @@ func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []strin
 	return generateDocument(responseMap)
 }
 
+// generateDocument generated the processor document for ingestion
 func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse) ([]*processor.Document, error) {
 	var generatedOSVDocs []*processor.Document
 	for purl, response := range responseMap {
@@ -142,6 +144,7 @@ func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse) ([]*p
 	return generatedOSVDocs, nil
 }
 
+// createAttestation generated the in-toto vuln attestation
 func createAttestation(purl string, vulns []osv_scanner.MinimalVulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
 	attestation := &attestation_vuln.VulnerabilityStatement{
 		Statement: attestationv1.Statement{
