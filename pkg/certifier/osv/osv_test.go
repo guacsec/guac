@@ -16,8 +16,14 @@
 package osv
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
@@ -258,4 +264,63 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 
 	// use DeepEqual to compare the copies
 	return reflect.DeepEqual(aCopy, bCopy)
+}
+
+func TestOSVCertifierRateLimiter(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
+	// Set up a mock OSV server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response := osv_scanner.BatchedResponse{
+			Results: []osv_scanner.MinimalResponse{
+				{
+					Vulns: []osv_scanner.MinimalVulnerability{
+						{
+							ID: "TestID",
+						},
+					},
+				},
+			},
+		}
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}))
+	defer server.Close()
+
+	cert := NewOSVCertificationParser()
+
+	// Make requests to the mock server
+	start := time.Now()
+	for i := 0; i < rateLimit+1; i++ {
+		req, err := http.NewRequestWithContext(ctx, "POST", server.URL, nil)
+		assert.NoError(t, err)
+
+		resp, err := cert.(*osvCertifier).osvHTTPClient.Do(req)
+		assert.NoError(t, err)
+		resp.Body.Close()
+	}
+	duration := time.Since(start)
+
+	// Check if the processing time is close to or slightly over 1 minute
+	assert.True(t, duration >= 59*time.Second && duration <= 65*time.Second,
+		"Expected duration to be close to 60 seconds, got %v", duration)
+
+	// Check if the log contains any rate limiting messages
+	logOutput := logBuffer.String()
+
+	assert.Contains(t, logOutput, "Rate limit exceeded")
 }

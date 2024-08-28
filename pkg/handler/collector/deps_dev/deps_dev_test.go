@@ -23,6 +23,7 @@ import (
 	"errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"net"
 	"strings"
 	"testing"
 	"time"
@@ -30,6 +31,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/events"
@@ -39,6 +41,10 @@ import (
 
 	pb "deps.dev/api/v3"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/time/rate"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/test/bufconn"
 )
 
 func TestNewDepsCollector(t *testing.T) {
@@ -55,7 +61,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -234,7 +240,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -356,7 +362,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to parser duration with error: %v", err)
 	}
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency)
+	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency, nil)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return
@@ -535,7 +541,7 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			// Set the logger in the context
 			ctx = logging.WithLogger(ctx)
 
-			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil)
+			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -551,4 +557,98 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			}
 		})
 	}
+}
+
+type mockInsightsServer struct {
+	pb.UnimplementedInsightsServer
+	callCount int
+}
+
+func (s *mockInsightsServer) GetVersion(ctx context.Context, req *pb.GetVersionRequest) (*pb.Version, error) {
+	s.callCount++
+	return &pb.Version{}, nil
+}
+
+type mockDataSource struct{}
+
+func (m *mockDataSource) GetDataSources(ctx context.Context) (*datasource.DataSources, error) {
+	return &datasource.DataSources{}, nil
+}
+
+func (m *mockDataSource) DataSourcesUpdate(ctx context.Context) (<-chan error, error) {
+	errChan := make(chan error)
+	go func() {
+		defer close(errChan)
+		// For the test, we'll just close the channel without sending any errors
+	}()
+	return errChan, nil
+}
+
+func TestDepsDevRateLimiter(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	zapLogger := zap.New(core)
+	logger := zapLogger.Sugar()
+
+	// Temporarily replace the global logger in the logging package
+	logging.SetLogger(t, logger)
+
+	ctx := context.Background()
+	ctx = logging.WithLogger(ctx)
+
+	// Set up the mock gRPC server
+	bufSize := 1024 * 1024
+	lis := bufconn.Listen(bufSize)
+	mockServer := &mockInsightsServer{}
+	grpcServer := grpc.NewServer()
+	pb.RegisterInsightsServer(grpcServer, mockServer)
+	go func() {
+		if err := grpcServer.Serve(lis); err != nil {
+			t.Errorf("Failed to serve: %v", err)
+		}
+	}()
+	defer grpcServer.Stop()
+
+	// Create a dialer for the mock server
+	bufDialer := func(context.Context, string) (net.Conn, error) {
+		return lis.Dial()
+	}
+
+	// Create a connection to the mock server
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
+	assert.NoError(t, err)
+	defer conn.Close()
+
+	// Create a rate limiter
+	limiter := rate.NewLimiter(rate.Every(time.Second), rateLimit)
+
+	// Create a rate-limited client
+	rateLimitedClient := clients.NewRateLimitedClient(conn, limiter)
+
+	// Create a NewDepsCollector with a specific rate limit
+	collector, err := NewDepsCollector(ctx, &mockDataSource{}, false, true, time.Second, nil, rateLimitedClient)
+	assert.NoError(t, err)
+
+	// Clear the log buffer before making calls
+	logBuffer.Reset()
+
+	// Make multiple calls to the mock server
+	for i := 0; i < rateLimit+1; i++ {
+		_, err := collector.client.GetVersion(ctx, &pb.GetVersionRequest{
+			VersionKey: &pb.VersionKey{
+				Version: "",
+			},
+		})
+		assert.NoError(t, err)
+	}
+
+	// Check if the log contains any rate limiting messages
+	logOutput := logBuffer.String()
+	assert.Contains(t, logOutput, "Rate limit exceeded")
 }

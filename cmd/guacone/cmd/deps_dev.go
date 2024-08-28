@@ -72,7 +72,7 @@ var depsDevCmd = &cobra.Command{
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency, nil)
 		if err != nil {
 			logger.Fatalf("unable to register depsdev collector: %v", err)
 		}

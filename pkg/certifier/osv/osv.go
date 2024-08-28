@@ -45,6 +45,7 @@ const (
 	INVOC_URI    string = "guac"
 	PRODUCER_ID  string = "guacsec/guac"
 	OSVCollector string = "osv_certifier"
+	rateLimit    int    = 10000
 )
 
 var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -55,7 +56,7 @@ type osvCertifier struct {
 
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
-	limiter := rate.NewLimiter(rate.Every(time.Minute), 10000)
+	limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit)
 	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
 	client := &http.Client{Transport: transport}
 	return &osvCertifier{

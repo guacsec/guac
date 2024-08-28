@@ -46,6 +46,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 const (
 	PRODUCER_ID string = "guacsec/guac"
 	CDCollector string = "clearlydefined"
+	rateLimit   int    = 2000
 )
 
 var ErrOSVComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -56,7 +57,7 @@ type cdCertifier struct {
 
 // NewClearlyDefinedCertifier initializes the cdCertifier
 func NewClearlyDefinedCertifier() certifier.Certifier {
-	limiter := rate.NewLimiter(rate.Every(time.Minute), 2000)
+	limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit)
 	client := NewClearlyDefinedHTTPClient(limiter)
 	return &cdCertifier{
 		cdHTTPClient: client,
