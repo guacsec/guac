@@ -38,6 +38,8 @@ import (
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
+var rateLimit = 10000
+var rateLimitInterval = time.Minute
 
 const (
 	URI          string = "osv.dev"
@@ -45,7 +47,6 @@ const (
 	INVOC_URI    string = "guac"
 	PRODUCER_ID  string = "guacsec/guac"
 	OSVCollector string = "osv_certifier"
-	rateLimit    int    = 10000
 )
 
 var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -56,7 +57,7 @@ type osvCertifier struct {
 
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
-	limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit)
+	limiter := rate.NewLimiter(rate.Every(rateLimitInterval), rateLimit)
 	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
 	client := &http.Client{Transport: transport}
 	return &osvCertifier{

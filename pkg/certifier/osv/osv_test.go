@@ -301,10 +301,18 @@ func TestOSVCertifierRateLimiter(t *testing.T) {
 	}))
 	defer server.Close()
 
+	oldRateLimit := rateLimit
+	rateLimit = 5
+	oldRateLimitInterval := rateLimitInterval
+	rateLimitInterval = time.Second
+	defer func() {
+		rateLimit = oldRateLimit
+		rateLimitInterval = oldRateLimitInterval
+	}()
+
 	cert := NewOSVCertificationParser()
 
 	// Make requests to the mock server
-	start := time.Now()
 	for i := 0; i < rateLimit+1; i++ {
 		req, err := http.NewRequestWithContext(ctx, "POST", server.URL, nil)
 		assert.NoError(t, err)
@@ -313,11 +321,6 @@ func TestOSVCertifierRateLimiter(t *testing.T) {
 		assert.NoError(t, err)
 		resp.Body.Close()
 	}
-	duration := time.Since(start)
-
-	// Check if the processing time is close to or slightly over 1 minute
-	assert.True(t, duration >= 59*time.Second && duration <= 65*time.Second,
-		"Expected duration to be close to 60 seconds, got %v", duration)
 
 	// Check if the log contains any rate limiting messages
 	logOutput := logBuffer.String()

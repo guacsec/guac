@@ -44,6 +44,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -599,7 +600,9 @@ func TestDepsDevRateLimiter(t *testing.T) {
 	// Temporarily replace the global logger in the logging package
 	logging.SetLogger(t, logger)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
 	ctx = logging.WithLogger(ctx)
 
 	// Set up the mock gRPC server
@@ -621,7 +624,10 @@ func TestDepsDevRateLimiter(t *testing.T) {
 	}
 
 	// Create a connection to the mock server
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
+	conn, err := grpc.NewClient("passthrough://bufnet",
+		grpc.WithContextDialer(bufDialer),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	assert.NoError(t, err)
 	defer conn.Close()
 
