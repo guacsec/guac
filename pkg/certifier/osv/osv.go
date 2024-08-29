@@ -23,18 +23,23 @@ import (
 	"strings"
 	"time"
 
-	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
+
+	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/time/rate"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
+var rateLimit = 10000
+var rateLimitInterval = time.Minute
 
 const (
 	URI          string = "osv.dev"
@@ -52,10 +57,11 @@ type osvCertifier struct {
 
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
+	limiter := rate.NewLimiter(rate.Every(rateLimitInterval), rateLimit)
+	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
+	client := &http.Client{Transport: transport}
 	return &osvCertifier{
-		osvHTTPClient: &http.Client{
-			Transport: version.UATransport,
-		},
+		osvHTTPClient: client,
 	}
 }
 
@@ -85,6 +91,7 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 	if err != nil {
 		return fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
+
 	for i, query := range query.Queries {
 		response := resp.Results[i]
 		purl := query.Package.PURL

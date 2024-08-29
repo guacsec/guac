@@ -16,14 +16,21 @@
 package clearlydefined
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	osv_scanner "github.com/google/osv-scanner/pkg/osv"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"net/http"
+	"net/http/httptest"
 	"testing"
-
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -144,4 +151,66 @@ func TestClearlyDefined(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCDCertifierRateLimiter(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
+	// Set up a mock OSV server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response := osv_scanner.BatchedResponse{
+			Results: []osv_scanner.MinimalResponse{
+				{
+					Vulns: []osv_scanner.MinimalVulnerability{
+						{
+							ID: "TestID",
+						},
+					},
+				},
+			},
+		}
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}))
+	defer server.Close()
+
+	oldRateLimit := rateLimit
+	rateLimit = 5
+	oldRateLimitInterval := rateLimitInterval
+	rateLimitInterval = time.Second
+	defer func() {
+		rateLimit = oldRateLimit
+		rateLimitInterval = oldRateLimitInterval
+	}()
+
+	cert := NewClearlyDefinedCertifier()
+
+	// Make requests to the mock server
+	for i := 0; i < rateLimit+1; i++ {
+		req, err := http.NewRequestWithContext(ctx, "POST", server.URL, nil)
+		assert.NoError(t, err)
+
+		resp, err := cert.(*cdCertifier).cdHTTPClient.Do(req)
+		assert.NoError(t, err)
+		resp.Body.Close()
+	}
+
+	// Check if the log contains any rate limiting messages
+	logOutput := logBuffer.String()
+
+	assert.Contains(t, logOutput, "Rate limit exceeded")
 }

@@ -23,17 +23,20 @@ import (
 	"sync"
 	"time"
 
-	pb "deps.dev/api/v3"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
+
+	pb "deps.dev/api/v3"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/exp/maps"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -49,6 +52,7 @@ const (
 	GetProjectDurationHistogram = "http_deps_dev_project_duration"
 	GetVersionErrorsCounter     = "http_deps_dev_version_errors"
 	prometheusPrefix            = "deps_dev"
+	rateLimit                   = 10000
 )
 
 type IsDepPackage struct {
@@ -84,7 +88,7 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -92,23 +96,28 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		return nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
-	// Connect to the service using TLS.
-	creds := credentials.NewClientTLSFromCert(sysPool, "")
-	conn, err := grpc.NewClient("api.deps.dev:443",
-		grpc.WithTransportCredentials(creds),
-		grpc.WithUserAgent(version.UserAgent))
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
+	// The rateLimitedClient is being passed in for testing purposes
+	if rateLimitedClient == nil {
+		creds := credentials.NewClientTLSFromCert(sysPool, "")
+		conn, err := grpc.NewClient("api.deps.dev:443",
+			grpc.WithTransportCredentials(creds),
+			grpc.WithUserAgent(version.UserAgent))
+		if err != nil {
+			return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
+		}
+		limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
+		rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
 	}
 
-	// Create a new Insights Client.
-	client := pb.NewInsightsClient(conn)
+	// Use the rate-limited client directly
+	client := pb.NewInsightsClient(rateLimitedClient)
 
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
 	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
 		return nil, fmt.Errorf("unable to register Metrics: %w", err)
 	}
+
 	return &depsCollector{
 		collectDataSource:    collectDataSource,
 		client:               client,
