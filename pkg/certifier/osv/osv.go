@@ -39,7 +39,7 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 var rateLimit = 10000
-var rateLimitInterval = time.Minute
+var rateLimitInterval = 30 * time.Second
 
 const (
 	URI          string = "osv.dev"

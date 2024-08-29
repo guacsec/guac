@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -44,8 +43,8 @@ import (
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
-var rateLimit = 2000
-var rateLimitInterval = time.Minute
+var rateLimit = 250
+var rateLimitInterval = 30 * time.Second
 
 const (
 	PRODUCER_ID string = "guacsec/guac"
@@ -85,19 +84,32 @@ func getDefinitions(_ context.Context, client *http.Client, purls []string, coor
 	// Convert coordinates to JSON
 	jsonData, err := json.Marshal(coordinates)
 	if err != nil {
-		log.Fatalf("Error marshalling coordinates: %v", err)
+		return nil, fmt.Errorf("error marshalling coordinates: %w", err)
 	}
 
-	// Make the POST request
-	resp, err := client.Post("https://api.clearlydefined.io/definitions", "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Fatalf("Error making POST request: %v", err)
-	}
-	defer resp.Body.Close()
+	// retries if a 429 is encountered. This could occur even with the rate limiting
+	// as multiple services may be hitting it.
+	var resp *http.Response
+	maxRetries := 5
+	for retries := 0; retries < maxRetries; retries++ {
+		// Make the POST request
+		resp, err = client.Post("https://api.clearlydefined.io/definitions", "application/json", bytes.NewBuffer(jsonData))
+		if err != nil {
+			return nil, fmt.Errorf("error making POST request: %w", err)
+		}
+		defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		// otherwise return an error
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		if resp.StatusCode != http.StatusOK {
+			if resp.StatusCode != http.StatusTooManyRequests {
+				// otherwise return an error
+				return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+			}
+		} else {
+			break
+		}
+
+		// Retry after a delay if status code is 429
+		time.Sleep(5 * time.Second)
 	}
 
 	body, err := io.ReadAll(resp.Body)
