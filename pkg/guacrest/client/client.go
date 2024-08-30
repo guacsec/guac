@@ -363,41 +363,9 @@ func NewGetPackageInfoRequest(server string, purlOrArtifact string, params *GetP
 	if params != nil {
 		queryValues := queryURL.Query()
 
-		if params.Vulns != nil {
+		if params.Query != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vulns", runtime.ParamLocationQuery, *params.Vulns); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.Dependencies != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "dependencies", runtime.ParamLocationQuery, *params.Dependencies); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.LatestSbom != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "latestSbom", runtime.ParamLocationQuery, *params.LatestSbom); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", false, "query", runtime.ParamLocationQuery, *params.Query); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err

@@ -110,21 +110,16 @@ paths:
           description: URL-encoded Package URL (PURL) or artifact identifier
           schema:
             type: string
-        - name: vulns
+        - name: query
           in: query
           required: false
+          description: Comma-separated list of additional information to include in the response
           schema:
-            type: boolean
-        - name: dependencies
-          in: query
-          required: false
-          schema:
-            type: boolean
-        - name: latestSbom
-          in: query
-          required: false
-          schema:
-            type: boolean
+            type: array
+            items:
+              $ref: '#/components/schemas/QueryType'
+          style: form
+          explode: false
       responses:
         "200":
           $ref: "#/components/responses/PackageInfoResponse"
@@ -226,6 +221,10 @@ components:
           type: string
         collector:
           type: string
+    QueryType:
+      type: string
+      enum: [ vulns, dependencies, latestSbom ]
+      x-enum-varnames: [ Vulns, Dependencies, LatestSbom ]
   responses:
     # for code 200
     PurlList:

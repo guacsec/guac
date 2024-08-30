@@ -192,27 +192,11 @@ func (siw *ServerInterfaceWrapper) GetPackageInfo(w http.ResponseWriter, r *http
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetPackageInfoParams
 
-	// ------------- Optional query parameter "vulns" -------------
+	// ------------- Optional query parameter "query" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "vulns", r.URL.Query(), &params.Vulns)
+	err = runtime.BindQueryParameter("form", false, false, "query", r.URL.Query(), &params.Query)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "vulns", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "dependencies" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "dependencies", r.URL.Query(), &params.Dependencies)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "dependencies", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "latestSbom" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "latestSbom", r.URL.Query(), &params.LatestSbom)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "latestSbom", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "query", Err: err})
 		return
 	}
 

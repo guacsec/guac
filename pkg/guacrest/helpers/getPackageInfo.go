@@ -10,10 +10,9 @@ import (
 )
 
 type QueryType struct {
-	Vulns        *bool
-	Dependencies *bool
-	Licenses     *bool
-	LatestSBOM   *bool
+	Vulns        bool
+	Dependencies bool
+	LatestSBOM   bool
 }
 
 func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *model.PkgInputSpec, shouldQuery QueryType) (*gen.PackageInfoResponseJSONResponse, error) {
@@ -25,13 +24,13 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 		Name: &pkgInput.Name,
 	}
 
-	if *pkgInput.Namespace != "" {
+	if pkgInput.Namespace != nil && *pkgInput.Namespace != "" {
 		pkgSpec.Namespace = pkgInput.Namespace
 	}
-	if *pkgInput.Version != "" {
+	if pkgInput.Version != nil && *pkgInput.Version != "" {
 		pkgSpec.Version = pkgInput.Version
 	}
-	if *pkgInput.Subpath != "" {
+	if pkgInput.Subpath != nil && *pkgInput.Subpath != "" {
 		pkgSpec.Subpath = pkgInput.Subpath
 	}
 
@@ -61,18 +60,15 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 	latestSbom := &model.AllHasSBOMTree{}
 
 	// If the LatestSBOM query is specified then all other queries should be for the latest SBOM
-	if shouldQuery.LatestSBOM != nil && *shouldQuery.LatestSBOM {
-		if len(packageIds) > 1 {
-			return nil, fmt.Errorf("cant find latest SBOM when more than one package found for given purl")
-		}
-		latestSbom, err = LatestSBOMForAGivenId(ctx, gqlClient, packageIds[0])
+	if shouldQuery.LatestSBOM {
+		latestSbom, err = LatestSBOMFromID(ctx, gqlClient, packageIds)
 		if err != nil {
 			return nil, err
 		}
 		searchSoftware = true
 	}
 
-	if shouldQuery.Vulns != nil && *shouldQuery.Vulns {
+	if shouldQuery.Vulns {
 		logger.Infof("Searching for vulnerabilities in package %s", pkgInput.Name)
 		vulnerabilities, err := searchAttachedVulns(ctx, gqlClient, pkgSpec, searchSoftware, *latestSbom)
 		if err != nil {
@@ -80,7 +76,7 @@ func GetInfoForPackage(ctx context.Context, gqlClient graphql.Client, pkgInput *
 		}
 		response.Vulnerabilities = &vulnerabilities
 	}
-	if shouldQuery.Dependencies != nil && *shouldQuery.Dependencies {
+	if shouldQuery.Dependencies {
 		logger.Infof("Searching for dependencies in package %s", pkgInput.Name)
 
 		var dependencies []gen.PackageInfo
@@ -202,7 +198,7 @@ func searchDependencies(ctx context.Context, gqlClient graphql.Client, pkgSpec m
 			hasSboms = &model.HasSBOMsResponse{
 				HasSBOM: []model.HasSBOMsHasSBOM{
 					{
-						startSBOM,
+						AllHasSBOMTree: startSBOM,
 					},
 				},
 			}

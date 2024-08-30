@@ -155,7 +155,16 @@ func (s *DefaultServer) GetPackageInfo(ctx context.Context, request gen.GetPacka
 			}, nil
 		}
 
-		pkg := occurrence.IsOccurrence[0].Subject.(*model.AllIsOccurrencesTreeSubjectPackage).AllPkgTree
+		convertedOccurrence, ok := occurrence.IsOccurrence[0].Subject.(*model.AllIsOccurrencesTreeSubjectPackage)
+		if !ok {
+			return gen.GetPackageInfo500JSONResponse{
+				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+					Message: fmt.Sprintf("Error converting issoccurrence to model.IsOccurrencesTreeSubjectPackage: %v", decodedPurlOrArtifact),
+				},
+			}, nil
+		}
+
+		pkg := convertedOccurrence.AllPkgTree
 
 		pkgInput = &model.PkgInputSpec{
 			Type:      pkg.Type,
@@ -167,15 +176,28 @@ func (s *DefaultServer) GetPackageInfo(ctx context.Context, request gen.GetPacka
 	}
 
 	// whatToSearch states what type of query we want to run for the given package or artifact
-	whatToSearch := helpers.QueryType{
-		Vulns:        request.Params.Vulns,
-		Dependencies: request.Params.Dependencies,
-		LatestSBOM:   request.Params.LatestSbom,
+	var whatToSearch helpers.QueryType
+
+	if request.Params.Query != nil {
+		for _, queryParam := range *request.Params.Query {
+			switch queryParam {
+			case gen.Dependencies:
+				whatToSearch.Dependencies = true
+			case gen.Vulns:
+				whatToSearch.Vulns = true
+			case gen.LatestSbom:
+				whatToSearch.LatestSBOM = true
+			}
+		}
 	}
 
 	packageResponse, err := helpers.GetInfoForPackage(ctx, s.gqlClient, pkgInput, whatToSearch)
 	if err != nil {
-		return nil, err
+		return gen.GetPackageInfo400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("error getting package info: %v", err),
+			},
+		}, nil
 	}
 
 	response := gen.GetPackageInfo200JSONResponse{

@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+// Defines values for QueryType.
+const (
+	Dependencies QueryType = "dependencies"
+	LatestSbom   QueryType = "latestSbom"
+	Vulns        QueryType = "vulns"
+)
+
 // Defines values for AnalyzeDependenciesParamsSort.
 const (
 	Frequency AnalyzeDependenciesParamsSort = "frequency"
@@ -37,6 +44,9 @@ type PaginationInfo struct {
 
 // Purl defines model for Purl.
 type Purl = string
+
+// QueryType defines model for QueryType.
+type QueryType string
 
 // ScanMetadata defines model for ScanMetadata.
 type ScanMetadata struct {
@@ -139,9 +149,8 @@ type RetrieveDependenciesParamsLinkCondition string
 
 // GetPackageInfoParams defines parameters for GetPackageInfo.
 type GetPackageInfoParams struct {
-	Vulns        *bool `form:"vulns,omitempty" json:"vulns,omitempty"`
-	Dependencies *bool `form:"dependencies,omitempty" json:"dependencies,omitempty"`
-	LatestSbom   *bool `form:"latestSbom,omitempty" json:"latestSbom,omitempty"`
+	// Query Comma-separated list of additional information to include in the response
+	Query *[]QueryType `form:"query,omitempty" json:"query,omitempty"`
 }
 
 // Getter for additional properties for PackageInfoResponse. Returns the specified

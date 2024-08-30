@@ -26,49 +26,52 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-func LatestSBOMForAGivenId(ctx context.Context, client graphql.Client, id string) (*model.AllHasSBOMTree, error) {
+func LatestSBOMFromID(ctx context.Context, client graphql.Client, IDs []string) (*model.AllHasSBOMTree, error) {
 	logger := logging.FromContext(ctx)
 
-	// Define the spec to filter SBOMs by the package version level ID
-	spec := model.HasSBOMSpec{
-		Subject: &model.PackageOrArtifactSpec{
-			Package: &model.PkgSpec{
-				Id: &id,
-			},
-		},
-	}
+	latestSBOM := model.HasSBOMsHasSBOM{}
 
-	// Query for SBOMs as a package
-	sboms, err := model.HasSBOMs(ctx, client, spec)
-	if err != nil {
-		logger.Errorw("Failed to query SBOMs for package", "id", id, "error", err)
-		return nil, err
-	}
-
-	// If no SBOMs found, try querying as an artifact
-	if len(sboms.HasSBOM) == 0 {
-		spec.Subject = &model.PackageOrArtifactSpec{
-			Artifact: &model.ArtifactSpec{
-				Id: &id,
+	for _, ID := range IDs {
+		// Define the spec to filter SBOMs by the package version level ID
+		spec := model.HasSBOMSpec{
+			Subject: &model.PackageOrArtifactSpec{
+				Package: &model.PkgSpec{
+					Id: &ID,
+				},
 			},
 		}
-		sboms, err = model.HasSBOMs(ctx, client, spec)
+
+		// Query for SBOMs as a package
+		sboms, err := model.HasSBOMs(ctx, client, spec)
 		if err != nil {
-			logger.Errorw("Failed to query SBOMs for artifact", "id", id, "error", err)
+			logger.Errorw("Failed to query SBOMs for package", "ID", ID, "error", err)
 			return nil, err
 		}
-	}
 
-	if len(sboms.HasSBOM) == 0 {
-		logger.Errorf("Failed to find any SBOMs with id: %v", id)
-		return nil, fmt.Errorf("error getting sboms, no sboms with id %v found", id)
-	}
+		// If no SBOMs found, try querying as an artifact
+		if len(sboms.HasSBOM) == 0 {
+			spec.Subject = &model.PackageOrArtifactSpec{
+				Artifact: &model.ArtifactSpec{
+					Id: &ID,
+				},
+			}
+			sboms, err = model.HasSBOMs(ctx, client, spec)
+			if err != nil {
+				logger.Errorw("Failed to query SBOMs for artifact", "ID", ID, "error", err)
+				return nil, err
+			}
+		}
 
-	// Find the latest SBOM
-	latestSBOM := sboms.HasSBOM[0]
-	for _, sbom := range sboms.HasSBOM[1:] {
-		if compare(&sbom.AllHasSBOMTree, &latestSBOM.AllHasSBOMTree, client) {
-			latestSBOM = sbom
+		if len(sboms.HasSBOM) == 0 {
+			logger.Errorf("Failed to find any SBOMs with ID: %v", ID)
+			return nil, fmt.Errorf("error getting sboms, no sboms with ID %v found", ID)
+		}
+
+		// Find the latest SBOM
+		for _, sbom := range sboms.HasSBOM {
+			if latestSBOM.Id == "" || compare(&sbom.AllHasSBOMTree, &latestSBOM.AllHasSBOMTree, client) {
+				latestSBOM = sbom
+			}
 		}
 	}
 
@@ -85,7 +88,7 @@ func compare(a *model.AllHasSBOMTree, b *model.AllHasSBOMTree, gqlClient graphql
 
 	bVersion, err := findSubjectBasedOnType(b, gqlClient)
 	if err != nil {
-		return false
+		return true
 	}
 
 	if (aVersion == "" && bVersion != "") || (aVersion != "" && bVersion == "") {
