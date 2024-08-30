@@ -33,6 +33,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	cdQuerySize = 248
+)
+
 type cdOptions struct {
 	graphqlEndpoint string
 	headerFile      string
@@ -111,7 +115,7 @@ you have access to read and write to the respective blob store.`,
 
 func getCDPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, batchSize, 248, addedLatency)
+		packageQuery := root_package.NewPackageQuery(client, batchSize, cdQuerySize, addedLatency)
 		return packageQuery
 	}, nil
 }

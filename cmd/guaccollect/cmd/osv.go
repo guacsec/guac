@@ -41,6 +41,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	osvQuerySize = 999
+)
+
 type osvOptions struct {
 	graphqlEndpoint string
 	headerFile      string
@@ -166,7 +170,7 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 
 func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, batchSize, 999, addedLatency)
+		packageQuery := root_package.NewPackageQuery(client, batchSize, osvQuerySize, addedLatency)
 		return packageQuery
 	}, nil
 }

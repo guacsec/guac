@@ -40,6 +40,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	cdQuerySize = 248
+)
+
 type cdOptions struct {
 	graphqlEndpoint         string
 	headerFile              string
@@ -96,7 +100,7 @@ var cdCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, 248, opts.addedLatency)
+		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, cdQuerySize, opts.addedLatency)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)
