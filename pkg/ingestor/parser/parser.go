@@ -80,7 +80,7 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scan
 	logger := docTree.Document.ChildLogger
 	docTreeBuilder := newDocTreeBuilder()
 
-	logger.Infof("parsing document tree with root type: %v", docTree.Document.Type)
+	logger.Debugf("parsing document tree with root type: %v", docTree.Document.Type)
 	err := docTreeBuilder.parse(ctx, docTree, map[visitedKey]bool{})
 	if err != nil {
 		return nil, nil, err

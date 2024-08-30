@@ -40,6 +40,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	osvQuerySize = 999
+)
+
 type osvOptions struct {
 	graphqlEndpoint         string
 	headerFile              string
@@ -96,7 +100,7 @@ var osvCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
+		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, osvQuerySize, opts.addedLatency)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)

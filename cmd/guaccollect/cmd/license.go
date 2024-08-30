@@ -26,10 +26,15 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+)
+
+const (
+	cdQuerySize = 248
 )
 
 type cdOptions struct {
@@ -98,7 +103,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		packageQueryFunc, err := getPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
+		packageQueryFunc, err := getCDPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -106,6 +111,13 @@ you have access to read and write to the respective blob store.`,
 
 		initializeNATsandCertifier(ctx, opts.blobAddr, opts.pubsubAddr, opts.poll, opts.publishToQueue, opts.interval, packageQueryFunc())
 	},
+}
+
+func getCDPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
+	return func() certifier.QueryComponents {
+		packageQuery := root_package.NewPackageQuery(client, batchSize, cdQuerySize, addedLatency)
+		return packageQuery
+	}, nil
 }
 
 func validateCDFlags(

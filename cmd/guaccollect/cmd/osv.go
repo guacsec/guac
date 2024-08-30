@@ -41,6 +41,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	osvQuerySize = 999
+)
+
 type osvOptions struct {
 	graphqlEndpoint string
 	headerFile      string
@@ -107,7 +111,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		packageQueryFunc, err := getPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
+		packageQueryFunc, err := getOSVPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -164,9 +168,9 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 	}, nil
 }
 
-func getPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
+func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, batchSize, addedLatency)
+		packageQuery := root_package.NewPackageQuery(client, batchSize, osvQuerySize, addedLatency)
 		return packageQuery
 	}, nil
 }

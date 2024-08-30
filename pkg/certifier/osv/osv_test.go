@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -186,6 +187,25 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				collectedDocs = append(collectedDocs, d)
 			}
 			if err == nil {
+				sort.Slice(collectedDocs, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(collectedDocs[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(collectedDocs[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				sort.Slice(tt.want, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(tt.want[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(tt.want[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				if len(collectedDocs) != len(tt.want) {
+					t.Errorf("collected docs does not match wanted")
+				}
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
 					if err != nil {
@@ -203,8 +223,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 func Test_createAttestation(t *testing.T) {
 	currentTime := time.Now()
 	type args struct {
-		packageNode root_package.PackageNode
-		vulns       []osv_scanner.MinimalVulnerability
+		purl  string
+		vulns []osv_scanner.MinimalVulnerability
 	}
 	tests := []struct {
 		name string
@@ -213,9 +233,7 @@ func Test_createAttestation(t *testing.T) {
 	}{{
 		name: "default",
 		args: args{
-			packageNode: root_package.PackageNode{
-				Purl: "",
-			},
+			purl: "",
 			vulns: []osv_scanner.MinimalVulnerability{
 				{
 					ID: "testId",
@@ -247,7 +265,7 @@ func Test_createAttestation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			currentTime := time.Now()
-			got := CreateAttestation(&test.args.packageNode, test.args.vulns, currentTime)
+			got := createAttestation(test.args.purl, test.args.vulns, currentTime)
 			if !deepEqualIgnoreTimestamp(got, test.want) {
 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
 			}

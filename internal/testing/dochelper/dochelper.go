@@ -16,6 +16,7 @@
 package dochelper
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"time"
@@ -139,6 +140,23 @@ func DocNode(v *processor.Document, children ...*processor.DocumentNode) *proces
 		Document: v,
 		Children: children,
 	}
+}
+
+type minimalDocument struct {
+	Subject []struct {
+		URI string `json:"uri"`
+	} `json:"subject"`
+}
+
+func ExtractURI(blob []byte) (string, error) {
+	var doc minimalDocument
+	if err := json.Unmarshal(blob, &doc); err != nil {
+		return "", err
+	}
+	if len(doc.Subject) == 0 {
+		return "", errors.New("no subject found in document")
+	}
+	return doc.Subject[0].URI, nil
 }
 
 func DocEqualWithTimestamp(gotDoc, wantDoc *processor.Document) (bool, error) {
