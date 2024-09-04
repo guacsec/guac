@@ -32,7 +32,7 @@ import (
 // TODO (pxp928): change to use URI Reference field once the PR merges: https://github.com/cdevents/spec/pull/171
 func CreateArtifactPubEvent(ctx context.Context, key string) (*cloudevents.Event, error) {
 	// Create the base event
-	event, err := cdevents.NewArtifactPublishedEvent()
+	event, err := cdevents.NewArtifactPublishedEventV0_2_0("0.4.1")
 	if err != nil {
 		return nil, fmt.Errorf("could not create a cdevent, %w", err)
 	}
@@ -40,11 +40,26 @@ func CreateArtifactPubEvent(ctx context.Context, key string) (*cloudevents.Event
 	// Set the required context fields
 	event.SetSubjectId(key)
 	event.SetSource(key)
-	ce, err := cdevents.AsCloudEvent(event)
+
+	// Create a CloudEvent
+	ce := cloudevents.NewEvent()
+	ce.SetType(event.GetType().String())
+	ce.SetSource(event.GetSource())
+	ce.SetID(event.GetId())
+	ce.SetTime(event.GetTimestamp())
+	ce.SetSubject(key)
+
+	// Set the data
+	data, err := json.Marshal(event)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create cloud event from cd event, %w", err)
+		return nil, fmt.Errorf("failed to marshal event data, %v", err)
 	}
-	return ce, nil
+	err = ce.SetData(cloudevents.ApplicationJSON, data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set cloud event data, %v", err)
+	}
+
+	return &ce, nil
 }
 
 // DecodeEventSubject takes in the collectedEvent bytes and converts it back into a CloudEvent to retrieve the necessary fields.
