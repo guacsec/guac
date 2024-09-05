@@ -3093,6 +3093,8 @@ type AllHasSBOMTree struct {
 	Collector string `json:"collector"`
 	// Timestamp for SBOM creation
 	KnownSince time.Time `json:"knownSince"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef string `json:"documentRef"`
 	// Included packages and artifacts
 	IncludedSoftware []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact `json:"-"`
 	// Included dependencies
@@ -3127,6 +3129,9 @@ func (v *AllHasSBOMTree) GetCollector() string { return v.Collector }
 
 // GetKnownSince returns AllHasSBOMTree.KnownSince, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTree) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetDocumentRef returns AllHasSBOMTree.DocumentRef, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetDocumentRef() string { return v.DocumentRef }
 
 // GetIncludedSoftware returns AllHasSBOMTree.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTree) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
@@ -3215,6 +3220,8 @@ type __premarshalAllHasSBOMTree struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -3253,6 +3260,7 @@ func (v *AllHasSBOMTree) __premarshalJSON() (*__premarshalAllHasSBOMTree, error)
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
 	retval.KnownSince = v.KnownSince
+	retval.DocumentRef = v.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -10629,6 +10637,11 @@ func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) Get
 	return v.AllHasSBOMTree.KnownSince
 }
 
+// GetDocumentRef returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetDocumentRef() string {
+	return v.AllHasSBOMTree.DocumentRef
+}
+
 // GetIncludedSoftware returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -10688,6 +10701,8 @@ type __premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasS
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -10726,6 +10741,7 @@ func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) __p
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -10884,6 +10900,9 @@ func (v *HasSBOMsHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collec
 // GetKnownSince returns HasSBOMsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *HasSBOMsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns HasSBOMsHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns HasSBOMsHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *HasSBOMsHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -10943,6 +10962,8 @@ type __premarshalHasSBOMsHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -10981,6 +11002,7 @@ func (v *HasSBOMsHasSBOM) __premarshalJSON() (*__premarshalHasSBOMsHasSBOM, erro
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -14425,6 +14447,9 @@ func (v *NeighborsNeighborsHasSBOM) GetCollector() string { return v.AllHasSBOMT
 // GetKnownSince returns NeighborsNeighborsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns NeighborsNeighborsHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns NeighborsNeighborsHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -14486,6 +14511,8 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -14525,6 +14552,7 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -17856,6 +17884,9 @@ func (v *NodeNodeHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collec
 // GetKnownSince returns NodeNodeHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns NodeNodeHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns NodeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -17917,6 +17948,8 @@ type __premarshalNodeNodeHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -17956,6 +17989,7 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -20359,6 +20393,9 @@ func (v *NodesNodesHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Coll
 // GetKnownSince returns NodesNodesHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns NodesNodesHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns NodesNodesHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -20420,6 +20457,8 @@ type __premarshalNodesNodesHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -20459,6 +20498,7 @@ func (v *NodesNodesHasSBOM) __premarshalJSON() (*__premarshalNodesNodesHasSBOM, 
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -24382,6 +24422,9 @@ func (v *PathPathHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collec
 // GetKnownSince returns PathPathHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns PathPathHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns PathPathHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -24443,6 +24486,8 @@ type __premarshalPathPathHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -24482,6 +24527,7 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -32742,6 +32788,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -32887,6 +32934,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -36377,6 +36425,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -36854,6 +36903,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -37329,6 +37379,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -38309,6 +38360,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
