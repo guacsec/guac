@@ -1,3 +1,7 @@
+-- Change ENT auto-migration index name from "certifylegal_package_id_declar_37fd118fe84f0a1eb9042a047d066a77" to "certifylegal_package_id_declared_license_discovered_license_att" from table: "certify_legals"
+ALTER INDEX IF EXISTS "certifylegal_package_id_declar_37fd118fe84f0a1eb9042a047d066a77" RENAME TO "certifylegal_package_id_declared_license_discovered_license_att";
+-- Change ENT auto-migration index name from "certifylegal_source_id_declare_7172c32e012f5a3f84156bd57473bcd2" to "certifylegal_source_id_declared_license_discovered_license_attr" from table: "certify_legals"
+ALTER INDEX IF EXISTS "certifylegal_source_id_declare_7172c32e012f5a3f84156bd57473bcd2" RENAME TO "certifylegal_source_id_declared_license_discovered_license_attr";
 -- Drop index "certifylegal_package_id_declared_license_discovered_license_att" from table: "certify_legals"
 DROP INDEX "certifylegal_package_id_declared_license_discovered_license_att";
 -- Drop index "certifylegal_source_id_declared_license_discovered_license_attr" from table: "certify_legals"
