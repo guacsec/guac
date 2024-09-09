@@ -18,10 +18,10 @@ package guacrest
 // commands are split in order to generate code in different files
 
 // server, spec, and types go to generated package
-//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -generate chi,strict-server -package generated -o generated/server.go openapi.yaml
-//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -generate spec -package generated -o generated/spec.go openapi.yaml
-//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -generate types -package generated -o generated/models.go openapi.yaml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -generate chi,strict-server -package generated -o generated/server.go openapi.yaml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -generate spec -package generated -o generated/spec.go openapi.yaml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -generate types -package generated -o generated/models.go openapi.yaml
 
 // client and types go to client package
-//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -generate types -package client -o client/models.go openapi.yaml
-//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -generate client -package client -o client/client.go openapi.yaml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -generate types -package client -o client/models.go openapi.yaml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -generate client -package client -o client/client.go openapi.yaml
