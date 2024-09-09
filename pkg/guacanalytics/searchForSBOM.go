@@ -191,6 +191,9 @@ func SearchForSBOMViaPkg(ctx context.Context, gqlclient graphql.Client, searchSt
 	return path, tableRows, nil
 }
 
+// SearchForSBOMViaArtifact takes in either a URI for the initial value to find the hasSBOM node.
+// It concurrently checks the artifact node if it contains vulnerabilities and VEX data.
+// The primaryCall parameter is used to know whether the searchString is expected to be an artifact or a package.
 func SearchForSBOMViaArtifact(ctx context.Context, gqlclient graphql.Client, searchString string, maxLength int, primaryCall bool) ([]string, []table.Row, error) {
 	var path []string
 	var tableRows []table.Row
