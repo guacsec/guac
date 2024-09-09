@@ -19,6 +19,9 @@ package cmd
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
@@ -32,10 +35,21 @@ func init() {
 }
 
 func getEnt(_ context.Context) backends.BackendArgs {
+	var connTimeout *time.Duration
+	if flags.dbConnTime != "" {
+		if timeout, err := time.ParseDuration(flags.dbConnTime); err != nil {
+			fmt.Printf("failed to parser duration with error: %v", err)
+			os.Exit(1)
+		} else {
+			connTimeout = &timeout
+		}
+	}
+
 	return &entbackend.BackendOptions{
-		DriverName:  flags.dbDriver,
-		Address:     flags.dbAddress,
-		Debug:       flags.dbDebug,
-		AutoMigrate: flags.dbMigrate,
+		DriverName:            flags.dbDriver,
+		Address:               flags.dbAddress,
+		Debug:                 flags.dbDebug,
+		AutoMigrate:           flags.dbMigrate,
+		ConnectionMaxLifeTime: connTimeout,
 	}
 }
