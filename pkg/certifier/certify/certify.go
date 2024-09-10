@@ -194,19 +194,21 @@ type retryFunc func() error
 func retryWithBackoff(operation retryFunc) retryFunc {
 	return func() error {
 		var lastError error
+		var urlErr *url.Error
 
 		for i := 0; i < maxRetries; i++ {
 			err := operation()
-			var urlErr *url.Error
+			if err == nil {
+				return nil
+			}
 			if errors.As(err, &urlErr) {
 				secRetry := math.Pow(2, float64(i))
 				fmt.Printf("Retrying operation in %f seconds\n", secRetry)
 				delay := time.Duration(secRetry) * baseDelay
 				time.Sleep(delay)
 				lastError = err
-			}
-			if err == nil {
-				return nil
+			} else {
+				return err
 			}
 		}
 		return lastError
