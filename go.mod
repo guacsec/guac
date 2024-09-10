@@ -96,6 +96,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.5 // indirect
 	github.com/aws/smithy-go v1.20.4 // indirect
+	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bombsimon/logrusr/v2 v2.0.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.8.0 // indirect
@@ -332,6 +333,7 @@ require (
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
 	github.com/vektah/gqlparser/v2 v2.5.16
 	go.uber.org/mock v0.4.0
+	go.uber.org/ratelimit v0.3.1
 	gocloud.dev v0.39.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
 	gocloud.dev/pubsub/rabbitpubsub v0.39.0

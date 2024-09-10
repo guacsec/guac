@@ -38,7 +38,7 @@ type RateLimitedClient struct {
 func (c *RateLimitedClient) Invoke(ctx context.Context, method string, args interface{}, reply interface{}, opts ...grpc.CallOption) error {
 	logger := logging.FromContext(ctx)
 	if !c.Limiter.Allow() {
-		logger.Debugf("Rate limit exceeded for method: %s", method)
+		logger.Infof("Rate limit exceeded for method: %s", method)
 		if err := c.Limiter.Wait(ctx); err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func (c *RateLimitedClient) Invoke(ctx context.Context, method string, args inte
 func (c *RateLimitedClient) NewStream(ctx context.Context, desc *grpc.StreamDesc, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 	logger := logging.FromContext(ctx)
 	if !c.Limiter.Allow() {
-		logger.Debugf("Rate limit exceeded for method: %s", method)
+		logger.Infof("Rate limit exceeded for method: %s", method)
 		if err := c.Limiter.Wait(ctx); err != nil {
 			return nil, err
 		}

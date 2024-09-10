@@ -25,7 +25,6 @@ import (
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -34,11 +33,14 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 
 	pb "deps.dev/api/v3"
+	grpc_ratelimit "github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
 	jsoniter "github.com/json-iterator/go"
+	"go.uber.org/ratelimit"
 	"golang.org/x/exp/maps"
-	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -86,6 +88,35 @@ type depsCollector struct {
 	dependencies   map[string]*pb.Dependencies
 }
 
+type limiter struct {
+	ratelimit.Limiter
+}
+
+func (l *limiter) Limit() bool {
+	l.Take()
+	return false
+}
+
+// newLimiter return new go-grpc Limiter, specified the number of requests you want to limit as a counts per second.
+func newLimiter(count int) grpc_ratelimit.Limiter {
+	return &limiter{
+		Limiter: ratelimit.New(count),
+	}
+}
+
+// unaryClientInterceptor return server unary interceptor that limit requests.
+func unaryClientInterceptor(limiter grpc_ratelimit.Limiter) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		logger := logging.FromContext(ctx)
+		if limiter.Limit() {
+			logger.Infof("Rate limit exceeded for method: %s", method)
+			return status.Errorf(codes.ResourceExhausted, "%s have been rejected by rate limiting.", method)
+		}
+
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+}
+
 var registerOnce sync.Once
 
 func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, error) {
@@ -96,21 +127,23 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		return nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
+	var client pb.InsightsClient
+
 	// The rateLimitedClient is being passed in for testing purposes
 	if rateLimitedClient == nil {
 		creds := credentials.NewClientTLSFromCert(sysPool, "")
 		conn, err := grpc.NewClient("api.deps.dev:443",
 			grpc.WithTransportCredentials(creds),
-			grpc.WithUserAgent(version.UserAgent))
+			grpc.WithUserAgent(version.UserAgent),
+			grpc.WithUnaryInterceptor(unaryClientInterceptor(newLimiter(2))))
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 		}
-		limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
-		rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
+		// limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
+		// rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
+		// Use the rate-limited client directly
+		client = pb.NewInsightsClient(conn)
 	}
-
-	// Use the rate-limited client directly
-	client := pb.NewInsightsClient(rateLimitedClient)
 
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
