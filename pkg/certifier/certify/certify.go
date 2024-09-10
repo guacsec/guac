@@ -17,7 +17,10 @@ package certify
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math"
+	"net/url"
 	"time"
 
 	"github.com/guacsec/guac/pkg/certifier"
@@ -28,6 +31,8 @@ import (
 
 const (
 	BufferChannelSize int = 1000
+	maxRetries            = 10
+	baseDelay             = 1 * time.Second
 )
 
 var (
@@ -62,8 +67,19 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		// logger
 		logger := logging.FromContext(ctx)
 
+		// define the GetComponents operation to be retried on failure (if gql server is not up)
+		backoffOperation := func() error {
+			err := query.GetComponents(ctx, compChan)
+			if err != nil {
+				logger.Errorf("GetComponents failed with error: %v", err)
+				return fmt.Errorf("GetComponents failed with error: %w", err)
+			}
+			return nil
+		}
+
 		go func() {
-			errChan <- query.GetComponents(ctx, compChan)
+			wrappedOperation := retryWithBackoff(backoffOperation)
+			errChan <- wrappedOperation()
 		}()
 
 		componentsCaptured := false
@@ -161,4 +177,30 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 		}
 	}
 	return nil
+}
+
+// retryFunc is a function that can be retried
+type retryFunc func() error
+
+// retryWithBackoff retries the given operation with exponential backoff
+func retryWithBackoff(operation retryFunc) retryFunc {
+	return func() error {
+		var lastError error
+
+		for i := 0; i < maxRetries; i++ {
+			err := operation()
+			var urlErr *url.Error
+			if errors.As(err, &urlErr) {
+				secRetry := math.Pow(2, float64(i))
+				fmt.Printf("Retrying operation in %f seconds\n", secRetry)
+				delay := time.Duration(secRetry) * baseDelay
+				time.Sleep(delay)
+				lastError = err
+			}
+			if err == nil {
+				return nil
+			}
+		}
+		return lastError
+	}
 }
