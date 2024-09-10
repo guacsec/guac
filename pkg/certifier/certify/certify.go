@@ -91,6 +91,8 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 				}
 			case err := <-errChan:
 				if !handleErr(err) {
+					// drain channel before exiting
+					drainComponentChannel(compChan, ctx, emitter, handleErr)
 					return err
 				}
 				componentsCaptured = true
@@ -98,12 +100,8 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 				componentsCaptured = true
 			}
 		}
-		for len(compChan) > 0 {
-			d := <-compChan
-			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-				logger.Errorf("generate certifier documents error: %v", err)
-			}
-		}
+		// drain channel before exiting
+		drainComponentChannel(compChan, ctx, emitter, handleErr)
 		return nil
 	}
 
@@ -130,6 +128,16 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		}
 	}
 	return nil
+}
+
+func drainComponentChannel(compChan chan interface{}, ctx context.Context, emitter certifier.Emitter, handleErr certifier.ErrHandler) {
+	logger := logging.FromContext(ctx)
+	for len(compChan) > 0 {
+		d := <-compChan
+		if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
+			logger.Errorf("generate certifier documents error: %v", err)
+		}
+	}
 }
 
 // generateDocuments runs CertifyVulns as a goroutine to scan and generates attestations that
