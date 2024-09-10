@@ -81,6 +81,7 @@ func init() {
 	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
 	set.Bool("db-debug", false, "enable debug logging for database queries")
 	set.Bool("db-migrate", true, "automatically run database migrations on start")
+	set.String("db-conn-time", "", "sets the maximum amount of time a connection may be reused in m, h, s, etc.")
 
 	set.String("arango-addr", "http://localhost:8529", "address to arango db")
 	set.String("arango-user", "", "arango user to connect to graph db")
