@@ -224,8 +224,8 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 			return true
 		}
 		logger.Errorf("certifier ended with error: %v", err)
-		// Continue to emit any documents still in the docChan
-		return true
+		// exit the loop but drain the channel first
+		return false
 	}
 
 	ctx, cf := context.WithCancel(ctx)

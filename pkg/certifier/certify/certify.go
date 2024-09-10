@@ -17,7 +17,10 @@ package certify
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math"
+	"net/url"
 	"time"
 
 	"github.com/guacsec/guac/pkg/certifier"
@@ -28,6 +31,8 @@ import (
 
 const (
 	BufferChannelSize int = 1000
+	maxRetries            = 10
+	baseDelay             = 1 * time.Second
 )
 
 var (
@@ -62,8 +67,19 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		// logger
 		logger := logging.FromContext(ctx)
 
+		// define the GetComponents operation to be retried on failure (if gql server is not up)
+		backoffOperation := func() error {
+			err := query.GetComponents(ctx, compChan)
+			if err != nil {
+				logger.Errorf("GetComponents failed with error: %v", err)
+				return fmt.Errorf("GetComponents failed with error: %w", err)
+			}
+			return nil
+		}
+
 		go func() {
-			errChan <- query.GetComponents(ctx, compChan)
+			wrappedOperation := retryWithBackoff(backoffOperation)
+			errChan <- wrappedOperation()
 		}()
 
 		componentsCaptured := false
@@ -75,6 +91,8 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 				}
 			case err := <-errChan:
 				if !handleErr(err) {
+					// drain channel before exiting
+					drainComponentChannel(compChan, ctx, emitter, handleErr)
 					return err
 				}
 				componentsCaptured = true
@@ -82,12 +100,8 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 				componentsCaptured = true
 			}
 		}
-		for len(compChan) > 0 {
-			d := <-compChan
-			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-				logger.Errorf("generate certifier documents error: %v", err)
-			}
-		}
+		// drain channel before exiting
+		drainComponentChannel(compChan, ctx, emitter, handleErr)
 		return nil
 	}
 
@@ -114,6 +128,16 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		}
 	}
 	return nil
+}
+
+func drainComponentChannel(compChan chan interface{}, ctx context.Context, emitter certifier.Emitter, handleErr certifier.ErrHandler) {
+	logger := logging.FromContext(ctx)
+	for len(compChan) > 0 {
+		d := <-compChan
+		if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
+			logger.Errorf("generate certifier documents error: %v", err)
+		}
+	}
 }
 
 // generateDocuments runs CertifyVulns as a goroutine to scan and generates attestations that
@@ -161,4 +185,32 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 		}
 	}
 	return nil
+}
+
+// retryFunc is a function that can be retried
+type retryFunc func() error
+
+// retryWithBackoff retries the given operation with exponential backoff
+func retryWithBackoff(operation retryFunc) retryFunc {
+	return func() error {
+		var lastError error
+		var urlErr *url.Error
+
+		for i := 0; i < maxRetries; i++ {
+			err := operation()
+			if err == nil {
+				return nil
+			}
+			if errors.As(err, &urlErr) {
+				secRetry := math.Pow(2, float64(i))
+				fmt.Printf("Retrying operation in %f seconds\n", secRetry)
+				delay := time.Duration(secRetry) * baseDelay
+				time.Sleep(delay)
+				lastError = err
+			} else {
+				return err
+			}
+		}
+		return lastError
+	}
 }
