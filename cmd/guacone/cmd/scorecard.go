@@ -143,7 +143,6 @@ var scorecardCmd = &cobra.Command{
 		// Collect
 		errHandler := func(err error) bool {
 			if err == nil {
-				logger.Info("certifier ended gracefully")
 				return true
 			}
 			logger.Errorf("certifier ended with error: %v", err)

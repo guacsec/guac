@@ -34,9 +34,9 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 
 	pb "deps.dev/api/v3"
+
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/exp/maps"
-	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -52,7 +52,8 @@ const (
 	GetProjectDurationHistogram = "http_deps_dev_project_duration"
 	GetVersionErrorsCounter     = "http_deps_dev_version_errors"
 	prometheusPrefix            = "deps_dev"
-	rateLimit                   = 10000
+	// RPS = rate per second
+	rateLimit = 150
 )
 
 type IsDepPackage struct {
@@ -88,7 +89,7 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -97,20 +98,17 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	}
 
 	// The rateLimitedClient is being passed in for testing purposes
-	if rateLimitedClient == nil {
-		creds := credentials.NewClientTLSFromCert(sysPool, "")
-		conn, err := grpc.NewClient("api.deps.dev:443",
-			grpc.WithTransportCredentials(creds),
-			grpc.WithUserAgent(version.UserAgent))
-		if err != nil {
-			return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
-		}
-		limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
-		rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
+	creds := credentials.NewClientTLSFromCert(sysPool, "")
+	conn, err := grpc.NewClient("api.deps.dev:443",
+		grpc.WithTransportCredentials(creds),
+		grpc.WithUserAgent(version.UserAgent),
+		// add the rate limit to the grpc client
+		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(rateLimit))),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}
-
-	// Use the rate-limited client directly
-	client := pb.NewInsightsClient(rateLimitedClient)
+	client := pb.NewInsightsClient(conn)
 
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
@@ -171,8 +169,7 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 		return nil
 	}
 
-	err = d.getAllDependencies(ctx, ds.PurlDataSources)
-	if err != nil {
+	if err := d.getAllDependencies(ctx, ds.PurlDataSources); err != nil {
 		return fmt.Errorf("failed to get all dependencies: %w", err)
 	}
 	for _, purl := range ds.PurlDataSources {
@@ -339,6 +336,13 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 	// TODO: Concurrently fetch the dependencies for each purl
 	for _, p := range purls {
 		purl := p.Value
+
+		// check if top level purl has already been queried
+		if _, ok := d.checkedPurls[purl]; ok {
+			logger.Infof("purl %s already queried", purl)
+			continue
+		}
+
 		packageInput, err := helpers.PurlToPkg(purl)
 		if err != nil {
 			logger.Infof("failed to parse purl to pkg: %s", purl)

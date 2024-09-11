@@ -18,61 +18,39 @@ package clients
 import (
 	"context"
 
+	grpc_ratelimit "github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
 	"github.com/guacsec/guac/pkg/logging"
-
-	"golang.org/x/time/rate"
+	"go.uber.org/ratelimit"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-// RateLimitedClient is a wrapper around grpc.ClientConn that adds rate limiting
-// functionality to gRPC calls. It uses a rate.Limiter to control the rate of
-// outgoing requests.
-type RateLimitedClient struct {
-	ClientConn *grpc.ClientConn
-	Limiter    *rate.Limiter
+type limiter struct {
+	ratelimit.Limiter
 }
 
-// Invoke performs a gRPC call on the wrapped grpc.ClientConn, applying
-// rate limiting before making the call. If the rate limit is exceeded, it waits
-// until the limiter allows the request.
-func (c *RateLimitedClient) Invoke(ctx context.Context, method string, args interface{}, reply interface{}, opts ...grpc.CallOption) error {
-	logger := logging.FromContext(ctx)
-	if !c.Limiter.Allow() {
-		logger.Debugf("Rate limit exceeded for method: %s", method)
-		if err := c.Limiter.Wait(ctx); err != nil {
-			return err
-		}
+// Limit blocks to ensure that RPS is met
+func (l *limiter) Limit() bool {
+	l.Take()
+	return false
+}
+
+// NewLimiter return new go-grpc Limiter, specified the number of requests you want to limit as a counts per second.
+func NewLimiter(count int) grpc_ratelimit.Limiter {
+	return &limiter{
+		Limiter: ratelimit.New(count),
 	}
-	return c.ClientConn.Invoke(ctx, method, args, reply, opts...)
 }
 
-// NewStream creates a new stream on the wrapped grpc.ClientConn, applying rate
-// limiting before creating the stream. If the rate limit is exceeded, it waits
-// until the limiter allows the request.
-func (c *RateLimitedClient) NewStream(ctx context.Context, desc *grpc.StreamDesc, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
-	logger := logging.FromContext(ctx)
-	if !c.Limiter.Allow() {
-		logger.Debugf("Rate limit exceeded for method: %s", method)
-		if err := c.Limiter.Wait(ctx); err != nil {
-			return nil, err
+// UnaryClientInterceptor return server unary interceptor that limit requests.
+func UnaryClientInterceptor(limiter grpc_ratelimit.Limiter) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		logger := logging.FromContext(ctx)
+		if limiter.Limit() {
+			logger.Infof("Rate limit exceeded for method: %s", method)
+			return status.Errorf(codes.ResourceExhausted, "%s have been rejected by rate limiting.", method)
 		}
-	}
-	return c.ClientConn.NewStream(ctx, desc, method, opts...)
-}
-
-// NewRateLimitedClient creates a new RateLimitedClient that wraps the provided
-// grpc.ClientConn and uses the provided rate.Limiter to control the rate of
-// outgoing requests. It returns a grpc.ClientConnInterface that can be used
-// wherever a grpc.ClientConn is expected.
-//
-// Parameters:
-//   - conn: The underlying grpc.ClientConn to wrap. This is typically an instance
-//     of grpc.ClientConn created using grpc.NewClient or any custom implementation of
-//     grpc.ClientConnInterface.
-//   - limiter: The rate.Limiter to use for controlling the rate of outgoing requests.
-func NewRateLimitedClient(conn *grpc.ClientConn, limiter *rate.Limiter) grpc.ClientConnInterface {
-	return &RateLimitedClient{
-		ClientConn: conn,
-		Limiter:    limiter,
+		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

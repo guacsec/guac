@@ -78,7 +78,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		}
 
 		go func() {
-			wrappedOperation := retryWithBackoff(backoffOperation)
+			wrappedOperation := retryWithBackoff(ctx, backoffOperation)
 			errChan <- wrappedOperation()
 		}()
 
@@ -191,7 +191,8 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 type retryFunc func() error
 
 // retryWithBackoff retries the given operation with exponential backoff
-func retryWithBackoff(operation retryFunc) retryFunc {
+func retryWithBackoff(ctx context.Context, operation retryFunc) retryFunc {
+	logger := logging.FromContext(ctx)
 	return func() error {
 		var lastError error
 		var urlErr *url.Error
@@ -203,7 +204,7 @@ func retryWithBackoff(operation retryFunc) retryFunc {
 			}
 			if errors.As(err, &urlErr) {
 				secRetry := math.Pow(2, float64(i))
-				fmt.Printf("Retrying operation in %f seconds\n", secRetry)
+				logger.Infof("Retrying operation in %f seconds\n", secRetry)
 				delay := time.Duration(secRetry) * baseDelay
 				time.Sleep(delay)
 				lastError = err
