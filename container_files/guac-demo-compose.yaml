@@ -43,6 +43,17 @@ services:
       graphql:
         condition: service_healthy
 
+  cd-certifier:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacone certifier cd -p --csub-addr=collectsub:2782 --gql-addr=http://graphql:8080/query"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      collectsub:
+        condition: service_healthy
+      graphql:
+        condition: service_healthy
+
   osv-certifier:
     image: $GUAC_IMAGE
     command: "/opt/guac/guacone certifier osv -p --csub-addr=collectsub:2782 --gql-addr=http://graphql:8080/query"
