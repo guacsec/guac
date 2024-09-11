@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package deps_dev
 
 import (
@@ -290,7 +288,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 }
 
 func TestPerformanceDepsCollector(t *testing.T) {
-	tests := struct {
+	tests := []struct {
 		name                 string
 		packages             []string
 		want                 []*processor.Document
@@ -300,97 +298,108 @@ func TestPerformanceDepsCollector(t *testing.T) {
 		errMessage           error
 		ignoreResultsForPerf bool
 	}{
-		name: "large number of packages",
-		packages: []string{
-			"pkg:golang/github.com/rhysd/actionlint@v1.6.15",
-			"pkg:golang/gotest.tools@v2.2.0+incompatible",
-			"pkg:golang/cloud.google.com/go/bigquery@v1.53.0",
-			"pkg:golang/cloud.google.com/go/monitoring@v1.15.1",
-			"pkg:golang/cloud.google.com/go/pubsub@v1.33.0",
-			"pkg:golang/cloud.google.com/go/trace@v1.10.1",
-			"pkg:golang/contrib.go.opencensus.io/exporter/stackdriver@v0.13.14",
-			"pkg:golang/github.com/bombsimon/logrusr/v2@v2.0.1",
-			"pkg:golang/github.com/bradleyfalzon/ghinstallation/v2@v2.6.0",
-			"pkg:golang/github.com/go-git/go-git/v5@v5.8.1",
-			"pkg:golang/github.com/go-logr/logr@v1.2.4",
-			"pkg:golang/go.uber.org/mock/mockgen@v0.4.0",
-			"pkg:golang/github.com/google/go-cmp@v0.5.9",
-			"pkg:golang/github.com/google/go-containerregistry@v0.16.1",
-			"pkg:golang/github.com/grafeas/kritis@v0.2.3-0.20210120183821-faeba81c520c",
-			"pkg:golang/github.com/h2non/filetype@v1.1.3",
-			"pkg:golang/github.com/jszwec/csvutil@v1.8.0",
-			"pkg:golang/github.com/moby/buildkit@v0.12.1",
-			"pkg:golang/github.com/olekukonko/tablewriter@v0.0.5",
-			"pkg:golang/github.com/onsi/gomega@v1.27.10",
-			"pkg:golang/github.com/shurcooL/githubv4@v0.0.0-20201206200315-234843c633fa",
-			"pkg:golang/github.com/shurcooL/graphql@v0.0.0-20200928012149-18c5c3165e3a",
-			"pkg:golang/github.com/sirupsen/logrus@v1.9.3",
-			"pkg:golang/github.com/spf13/cobra@v1.7.0",
-			"pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0",
-			"pkg:golang/go.opencensus.io@v0.24.0",
-			"pkg:golang/gocloud.dev@v0.33.0",
-			"pkg:golang/golang.org/x/text@v0.12.0",
-			"pkg:golang/golang.org/x/tools@v0.11.0",
-			"pkg:golang/google.golang.org/genproto@v0.0.0-20230731193218-e0aa005b6bdf",
-			"pkg:golang/google.golang.org/protobuf@v1.31.0",
-			"pkg:golang/gopkg.in/yaml.v2@v2.4.0",
-			"pkg:golang/gopkg.in/yaml.v3@v3.0.1",
-			"pkg:golang/mvdan.cc/sh/v3@v3.7.0",
-			"pkg:golang/github.com/Masterminds/semver/v3@v3.2.1",
-			"pkg:golang/github.com/caarlos0/env/v6@v6.10.0",
+
+		{
+			name: "large number of packages 1",
+			packages: []string{
+				"pkg:golang/github.com/rhysd/actionlint@v1.6.15",
+				"pkg:golang/gotest.tools@v2.2.0+incompatible",
+				"pkg:golang/cloud.google.com/go/bigquery@v1.53.0",
+				"pkg:golang/cloud.google.com/go/monitoring@v1.15.1",
+				"pkg:golang/cloud.google.com/go/pubsub@v1.33.0",
+				"pkg:golang/cloud.google.com/go/trace@v1.10.1",
+				"pkg:golang/contrib.go.opencensus.io/exporter/stackdriver@v0.13.14",
+				"pkg:golang/github.com/bombsimon/logrusr/v2@v2.0.1",
+				"pkg:golang/github.com/bradleyfalzon/ghinstallation/v2@v2.6.0",
+				"pkg:golang/github.com/go-git/go-git/v5@v5.8.1",
+				"pkg:golang/github.com/go-logr/logr@v1.2.4",
+				"pkg:golang/go.uber.org/mock/mockgen@v0.4.0",
+				"pkg:golang/github.com/google/go-cmp@v0.5.9",
+				"pkg:golang/github.com/google/go-containerregistry@v0.16.1",
+				"pkg:golang/github.com/grafeas/kritis@v0.2.3-0.20210120183821-faeba81c520c",
+				"pkg:golang/github.com/h2non/filetype@v1.1.3",
+				"pkg:golang/github.com/jszwec/csvutil@v1.8.0",
+			},
+			poll:                 true,
+			interval:             time.Second * 5,
+			wantErr:              false,
+			ignoreResultsForPerf: true,
 		},
-		poll:                 true,
-		interval:             time.Second * 5,
-		wantErr:              false,
-		ignoreResultsForPerf: true,
+		{
+			name: "large number of packages 2",
+			packages: []string{
+				"pkg:golang/github.com/moby/buildkit@v0.12.1",
+				"pkg:golang/github.com/olekukonko/tablewriter@v0.0.5",
+				"pkg:golang/github.com/onsi/gomega@v1.27.10",
+				"pkg:golang/github.com/shurcooL/githubv4@v0.0.0-20201206200315-234843c633fa",
+				"pkg:golang/github.com/shurcooL/graphql@v0.0.0-20200928012149-18c5c3165e3a",
+				"pkg:golang/github.com/sirupsen/logrus@v1.9.3",
+				"pkg:golang/github.com/spf13/cobra@v1.7.0",
+				"pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0",
+				"pkg:golang/go.opencensus.io@v0.24.0",
+				"pkg:golang/gocloud.dev@v0.33.0",
+				"pkg:golang/golang.org/x/text@v0.12.0",
+				"pkg:golang/golang.org/x/tools@v0.11.0",
+			},
+			poll:                 true,
+			interval:             time.Second * 5,
+			wantErr:              false,
+			ignoreResultsForPerf: true,
+		},
 	}
-	var ctx context.Context
-	var cancel context.CancelFunc
-	if tests.poll {
-		ctx, cancel = context.WithTimeout(context.Background(), tests.interval)
-		defer cancel()
-	} else {
-		ctx = context.Background()
-	}
-	addedLatency, err := time.ParseDuration("3ms")
-	if err != nil {
-		t.Errorf("failed to parser duration with error: %v", err)
-	}
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency)
-	if err != nil {
-		t.Errorf("NewDepsCollector() error = %v", err)
-		return
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 
-	if err := collector.RegisterDocumentCollector(c, DepsCollector); err != nil &&
-		!errors.Is(err, collector.ErrCollectorOverwrite) {
-		t.Fatalf("could not register collector: %v", err)
-	}
-	var collectedDocs []*processor.Document
-	em := func(d *processor.Document) error {
-		collectedDocs = append(collectedDocs, d)
-		return nil
-	}
-	eh := func(err error) bool {
-		if (err != nil) != tests.wantErr {
-			t.Errorf("gcsCollector.RetrieveArtifacts() = %v, want %v", err, tests.wantErr)
-		}
-		if err != nil {
-			if !errors.Is(err, tests.errMessage) {
-				t.Errorf("gcsCollector.RetrieveArtifacts() errored with message = %v, wanted error message %v", err, tests.errMessage)
+			var ctx context.Context
+			var cancel context.CancelFunc
+			if tt.poll {
+				ctx, cancel = context.WithTimeout(context.Background(), tt.interval)
+				defer cancel()
+			} else {
+				ctx = context.Background()
 			}
-		}
-		return true
-	}
-	if err := collector.Collect(ctx, em, eh); err != nil {
-		t.Fatalf("Collector error: %v", err)
-	}
-	if c.Type() != DepsCollector {
-		t.Errorf("g.Type() = %s, want %s", c.Type(), DepsCollector)
-	}
+			addedLatency, err := time.ParseDuration("3ms")
+			if err != nil {
+				t.Errorf("failed to parser duration with error: %v", err)
+			}
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, true, tt.interval, &addedLatency)
+			if err != nil {
+				t.Errorf("NewDepsCollector() error = %v", err)
+				return
+			}
 
-	if len(collectedDocs) == 0 {
-		t.Errorf("g.RetrieveArtifacts() = %v", len(collectedDocs))
+			if err := collector.RegisterDocumentCollector(c, DepsCollector); err != nil &&
+				!errors.Is(err, collector.ErrCollectorOverwrite) {
+				t.Fatalf("could not register collector: %v", err)
+			}
+			var collectedDocs []*processor.Document
+			em := func(d *processor.Document) error {
+				collectedDocs = append(collectedDocs, d)
+				return nil
+			}
+			eh := func(err error) bool {
+				if (err != nil) != tt.wantErr {
+					t.Errorf("gcsCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
+				}
+				if err != nil {
+					if !errors.Is(err, tt.errMessage) {
+						t.Errorf("gcsCollector.RetrieveArtifacts() errored with message = %v, wanted error message %v", err, tt.errMessage)
+					}
+				}
+				return true
+			}
+			if err := collector.Collect(ctx, em, eh); err != nil {
+				t.Fatalf("Collector error: %v", err)
+			}
+
+			if c.Type() != DepsCollector {
+				t.Errorf("g.Type() = %s, want %s", c.Type(), DepsCollector)
+			}
+
+			if len(collectedDocs) == 0 {
+				t.Errorf("g.RetrieveArtifacts() = %v", len(collectedDocs))
+			}
+		})
 	}
 }
 
@@ -551,29 +560,4 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			}
 		})
 	}
-}
-
-type mockInsightsServer struct {
-	pb.UnimplementedInsightsServer
-	callCount int
-}
-
-func (s *mockInsightsServer) GetVersion(ctx context.Context, req *pb.GetVersionRequest) (*pb.Version, error) {
-	s.callCount++
-	return &pb.Version{}, nil
-}
-
-type mockDataSource struct{}
-
-func (m *mockDataSource) GetDataSources(ctx context.Context) (*datasource.DataSources, error) {
-	return &datasource.DataSources{}, nil
-}
-
-func (m *mockDataSource) DataSourcesUpdate(ctx context.Context) (<-chan error, error) {
-	errChan := make(chan error)
-	go func() {
-		defer close(errChan)
-		// For the test, we'll just close the channel without sending any errors
-	}()
-	return errChan, nil
 }
