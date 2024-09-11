@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -49,6 +50,8 @@ var rateLimitInterval = 30 * time.Second
 const (
 	PRODUCER_ID string = "guacsec/guac"
 	CDCollector string = "clearlydefined"
+	maxRetries         = 10
+	baseDelay          = 1 * time.Second
 )
 
 var ErrComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -72,7 +75,7 @@ func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
 }
 
 // getDefinitions uses the coordinates to query clearly defined for license definition
-func getDefinitions(_ context.Context, client *http.Client, purls []string, coordinates []string) (map[string]*attestation.Definition, error) {
+func getDefinitions(ctx context.Context, client *http.Client, purls []string, coordinates []string) (map[string]*attestation.Definition, error) {
 
 	coordinateToPurl := make(map[string]string)
 	for i, purl := range purls {
@@ -87,30 +90,17 @@ func getDefinitions(_ context.Context, client *http.Client, purls []string, coor
 		return nil, fmt.Errorf("error marshalling coordinates: %w", err)
 	}
 
-	// retries if a 429 is encountered. This could occur even with the rate limiting
-	// as multiple services may be hitting it.
-	var resp *http.Response
-	maxRetries := 5
-	for retries := 0; retries < maxRetries; retries++ {
-		// Make the POST request
-		resp, err = client.Post("https://api.clearlydefined.io/definitions", "application/json", bytes.NewBuffer(jsonData))
-		if err != nil {
-			return nil, fmt.Errorf("error making POST request: %w", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			if resp.StatusCode != http.StatusTooManyRequests {
-				// otherwise return an error
-				return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-			}
-		} else {
-			break
-		}
-
-		// Retry after a delay if status code is 429
-		time.Sleep(5 * time.Second)
+	// retries if a 429 is encountered
+	backoffOperation := func() (*http.Response, error) {
+		return client.Post("https://api.clearlydefined.io/definitions", "application/json", bytes.NewBuffer(jsonData))
 	}
+
+	wrappedOperation := retryWithBackoff(ctx, backoffOperation)
+	resp, err := wrappedOperation()
+	if err != nil {
+		return nil, fmt.Errorf("clearly defined POST request failed with error: %w", err)
+	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -299,4 +289,36 @@ func createAttestation(purl string, definition *attestation.Definition, currentT
 	attestation.Statement.Subject = append(attestation.Statement.Subject, subject)
 
 	return attestation
+}
+
+// retryFunc is a function that can be retried
+type retryFunc func() (*http.Response, error)
+
+// retryWithBackoff retries the given operation with exponential backoff
+func retryWithBackoff(ctx context.Context, operation retryFunc) retryFunc {
+	logger := logging.FromContext(ctx)
+	return func() (*http.Response, error) {
+		var collectedResp *http.Response
+		for i := 0; i < maxRetries; i++ {
+			resp, err := operation()
+			if err != nil {
+				return nil, fmt.Errorf("error making POST request: %w", err)
+			}
+			if resp.StatusCode != http.StatusOK {
+				if resp.StatusCode != http.StatusTooManyRequests {
+					// otherwise return an error
+					return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+				} else {
+					secRetry := math.Pow(2, float64(i))
+					logger.Infof("Retrying operation in %f seconds\n", secRetry)
+					delay := time.Duration(secRetry) * baseDelay
+					time.Sleep(delay)
+				}
+			} else {
+				collectedResp = resp
+				break
+			}
+		}
+		return collectedResp, nil
+	}
 }
