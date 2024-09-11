@@ -357,6 +357,18 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 	return c.identifierStrings, nil
 }
 
+func getArtifactInput(subject string) (*model.ArtifactInputSpec, error) {
+	split := strings.Split(subject, ":")
+	if len(split) != 2 {
+		return nil, fmt.Errorf("failed to parse artifact. Needs to be in algorithm:digest form")
+	}
+	artifactInput := &model.ArtifactInputSpec{
+		Algorithm: strings.ToLower(split[0]),
+		Digest:    strings.ToLower(split[1]),
+	}
+	return artifactInput, nil
+}
+
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 	preds := &assembler.IngestPredicates{}
@@ -364,8 +376,24 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	var topLevelPkgs []*model.PkgInputSpec
 
 	if c.cdxBom.Metadata != nil && c.cdxBom.Metadata.Component != nil {
-		topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
-		topLevelPkgs = c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]
+		if c.cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
+			if pkgs, exists := c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]; exists {
+				topLevelPkgs = append(topLevelPkgs, pkgs...)
+			}
+
+			if topLevelPkgs[0].Version != nil && *topLevelPkgs[0].Version != "" {
+				artInput, err := getArtifactInput(*topLevelPkgs[0].Version)
+				if err != nil {
+					logger.Errorf("CDX artifact was not parsable: %v", err)
+				}
+				topLevelArts = append(topLevelArts, artInput)
+
+				logger.Infof("getArtInput %v", artInput)
+			}
+		} else {
+			topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
+			topLevelPkgs = c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]
+		}
 	}
 
 	// adding top level package edge manually for all depends on package
@@ -477,6 +505,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 							if dependencyType == model.DependencyTypeUnknown {
 								justificationStr = "top-level package GUAC heuristic connecting to each file/package"
 							}
+							fmt.Println(topLevelPkgs, topLevelArts)
 							p, err := common.GetIsDep(topLevelPkgs[0], depPkg, []*model.PkgInputSpec{}, justificationStr, dependencyType)
 							if err != nil {
 								logger.Errorf("error generating CycloneDX edge %v", err)

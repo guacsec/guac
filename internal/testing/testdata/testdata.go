@@ -1107,13 +1107,16 @@ var (
 
 	CdxHasSBOM = []assembler.HasSBOMIngest{
 		{
-			Pkg: cdxTopLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
 				Algorithm:        "sha256",
 				Digest:           "01942b5eefd3c15b50318c66d8d16627be573197c877e8a286a8cb12de7939cb",
 				DownloadLocation: "TestSource",
 				KnownSince:       cdxTime,
+			},
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
 			},
 		},
 	}
