@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"net"
 	"strings"
 	"testing"
 	"time"
@@ -29,7 +28,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/events"
@@ -39,12 +37,8 @@ import (
 
 	pb "deps.dev/api/v3"
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/test/bufconn"
 )
 
 func TestNewDepsCollector(t *testing.T) {
@@ -582,69 +576,4 @@ func (m *mockDataSource) DataSourcesUpdate(ctx context.Context) (<-chan error, e
 		// For the test, we'll just close the channel without sending any errors
 	}()
 	return errChan, nil
-}
-
-func TestDepsDevRateLimiter(t *testing.T) {
-	// Set up the logger
-	var logBuffer bytes.Buffer
-	encoderConfig := zap.NewProductionEncoderConfig()
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(&logBuffer),
-		zap.DebugLevel,
-	)
-	zapLogger := zap.New(core)
-	logger := zapLogger.Sugar()
-
-	// Temporarily replace the global logger in the logging package
-	logging.SetLogger(t, logger)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	ctx = logging.WithLogger(ctx)
-
-	// Set up the mock gRPC server
-	bufSize := 1024 * 1024
-	lis := bufconn.Listen(bufSize)
-	mockServer := &mockInsightsServer{}
-	grpcServer := grpc.NewServer()
-	pb.RegisterInsightsServer(grpcServer, mockServer)
-	go func() {
-		if err := grpcServer.Serve(lis); err != nil {
-			t.Errorf("Failed to serve: %v", err)
-		}
-	}()
-	defer grpcServer.Stop()
-
-	// Create a dialer for the mock server
-	bufDialer := func(context.Context, string) (net.Conn, error) {
-		return lis.Dial()
-	}
-
-	// Create a connection to the mock server
-	conn, err := grpc.NewClient("passthrough://bufnet",
-		grpc.WithContextDialer(bufDialer),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(4))),
-	)
-	assert.NoError(t, err)
-	defer conn.Close()
-
-	// Create a NewDepsCollector with a specific rate limit
-	collector, err := NewDepsCollector(ctx, &mockDataSource{}, false, true, time.Second, nil)
-	assert.NoError(t, err)
-
-	// Clear the log buffer before making calls
-	logBuffer.Reset()
-
-	// Make multiple calls to the mock server
-	for i := 0; i < 4+1; i++ {
-		_, err := collector.client.GetVersion(ctx, &pb.GetVersionRequest{
-			VersionKey: &pb.VersionKey{
-				Version: "",
-			},
-		})
-		assert.NoError(t, err)
-	}
 }

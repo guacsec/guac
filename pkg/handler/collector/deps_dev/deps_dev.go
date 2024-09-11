@@ -102,14 +102,12 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	conn, err := grpc.NewClient("api.deps.dev:443",
 		grpc.WithTransportCredentials(creds),
 		grpc.WithUserAgent(version.UserAgent),
+		// add the rate limit to the grpc client
 		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(rateLimit))),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}
-	// limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
-	// rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
-	// Use the rate-limited client directly
 	client := pb.NewInsightsClient(conn)
 
 	// Initialize the Metrics collector

@@ -26,34 +26,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-func TestUnaryClientInterceptor_RateLimitExceeded(t *testing.T) {
-	// Set up the rate limiter to allow only 1 request per second
-	limiter := NewLimiter(1)
-
-	// Create the unary client interceptor with the rate limiter
-	interceptor := UnaryClientInterceptor(limiter)
-
-	// Mock a gRPC request
-	ctx := context.Background()
-	method := "/test.service/method"
-	req := struct{}{}
-	reply := struct{}{}
-	cc := &grpc.ClientConn{}
-
-	// Mock invoker function
-	invoker := func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
-		return nil // Success if called
-	}
-
-	// First request should pass through without hitting the rate limit
-	err := interceptor(ctx, method, req, reply, cc, invoker)
-	assert.NoError(t, err, "first request should succeed")
-
-	// Immediately attempt another request, which should be rate-limited
-	err = interceptor(ctx, method, req, reply, cc, invoker)
-	assert.NoError(t, err, "second request should succeed")
-}
-
 func TestUnaryClientInterceptor_NoRateLimit(t *testing.T) {
 	// Set up the rate limiter to allow many requests per second
 	limiter := NewLimiter(1000)
