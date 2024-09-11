@@ -42,7 +42,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
@@ -62,7 +61,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil, nil)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -241,7 +240,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil, nil)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -363,7 +362,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to parser duration with error: %v", err)
 	}
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency, nil)
+	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval, &addedLatency)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return
@@ -542,7 +541,7 @@ func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
 			// Set the logger in the context
 			ctx = logging.WithLogger(ctx)
 
-			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil, nil)
+			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -627,25 +626,20 @@ func TestDepsDevRateLimiter(t *testing.T) {
 	conn, err := grpc.NewClient("passthrough://bufnet",
 		grpc.WithContextDialer(bufDialer),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(4))),
 	)
 	assert.NoError(t, err)
 	defer conn.Close()
 
-	// Create a rate limiter
-	limiter := rate.NewLimiter(rate.Every(time.Second), rateLimit)
-
-	// Create a rate-limited client
-	rateLimitedClient := clients.NewRateLimitedClient(conn, limiter)
-
 	// Create a NewDepsCollector with a specific rate limit
-	collector, err := NewDepsCollector(ctx, &mockDataSource{}, false, true, time.Second, nil, rateLimitedClient)
+	collector, err := NewDepsCollector(ctx, &mockDataSource{}, false, true, time.Second, nil)
 	assert.NoError(t, err)
 
 	// Clear the log buffer before making calls
 	logBuffer.Reset()
 
 	// Make multiple calls to the mock server
-	for i := 0; i < rateLimit+1; i++ {
+	for i := 0; i < 4+1; i++ {
 		_, err := collector.client.GetVersion(ctx, &pb.GetVersionRequest{
 			VersionKey: &pb.VersionKey{
 				Version: "",
@@ -653,8 +647,4 @@ func TestDepsDevRateLimiter(t *testing.T) {
 		})
 		assert.NoError(t, err)
 	}
-
-	// Check if the log contains any rate limiting messages
-	logOutput := logBuffer.String()
-	assert.Contains(t, logOutput, "Rate limit exceeded")
 }

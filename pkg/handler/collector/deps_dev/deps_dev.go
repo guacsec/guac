@@ -89,7 +89,7 @@ type depsCollector struct {
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration, rateLimitedClient grpc.ClientConnInterface) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies bool, interval time.Duration, addedLatency *time.Duration) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -97,23 +97,20 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		return nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
-	var client pb.InsightsClient
-
 	// The rateLimitedClient is being passed in for testing purposes
-	if rateLimitedClient == nil {
-		creds := credentials.NewClientTLSFromCert(sysPool, "")
-		conn, err := grpc.NewClient("api.deps.dev:443",
-			grpc.WithTransportCredentials(creds),
-			grpc.WithUserAgent(version.UserAgent),
-			grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(rateLimit))))
-		if err != nil {
-			return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
-		}
-		// limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
-		// rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
-		// Use the rate-limited client directly
-		client = pb.NewInsightsClient(conn)
+	creds := credentials.NewClientTLSFromCert(sysPool, "")
+	conn, err := grpc.NewClient("api.deps.dev:443",
+		grpc.WithTransportCredentials(creds),
+		grpc.WithUserAgent(version.UserAgent),
+		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(rateLimit))),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}
+	// limiter := rate.NewLimiter(rate.Every(time.Minute), rateLimit) // 10,000 requests per minute with burst capacity of 10,000
+	// rateLimitedClient = clients.NewRateLimitedClient(conn, limiter)
+	// Use the rate-limited client directly
+	client := pb.NewInsightsClient(conn)
 
 	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
