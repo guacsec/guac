@@ -171,8 +171,7 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 		return nil
 	}
 
-	err = d.getAllDependencies(ctx, ds.PurlDataSources)
-	if err != nil {
+	if err := d.getAllDependencies(ctx, ds.PurlDataSources); err != nil {
 		return fmt.Errorf("failed to get all dependencies: %w", err)
 	}
 	for _, purl := range ds.PurlDataSources {
@@ -339,6 +338,13 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 	// TODO: Concurrently fetch the dependencies for each purl
 	for _, p := range purls {
 		purl := p.Value
+
+		// check if top level purl has already been queried
+		if _, ok := d.checkedPurls[purl]; ok {
+			logger.Infof("purl %s already queried", purl)
+			continue
+		}
+
 		packageInput, err := helpers.PurlToPkg(purl)
 		if err != nil {
 			logger.Infof("failed to parse purl to pkg: %s", purl)

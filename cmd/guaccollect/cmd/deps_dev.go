@@ -98,7 +98,7 @@ you have access to read and write to the respective blob store.`,
 			os.Exit(1)
 		}
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency, nil)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
 		}

@@ -30,8 +30,8 @@ type limiter struct {
 	ratelimit.Limiter
 }
 
+// Limit blocks to ensure that RPS is met
 func (l *limiter) Limit() bool {
-	// blocks to ensure that RPS is met
 	l.Take()
 	return false
 }
@@ -51,7 +51,6 @@ func UnaryClientInterceptor(limiter grpc_ratelimit.Limiter) grpc.UnaryClientInte
 			logger.Infof("Rate limit exceeded for method: %s", method)
 			return status.Errorf(codes.ResourceExhausted, "%s have been rejected by rate limiting.", method)
 		}
-
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }
