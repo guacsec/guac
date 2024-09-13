@@ -93,6 +93,19 @@ services:
     volumes:
       - ./blobstore:/tmp/blobstore:z
 
+  cd-certifier:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacone certifier cd -p --csub-addr=collectsub:2782 --gql-addr=http://graphql:8080/query"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      collectsub:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    volumes:
+      - ./blobstore:/tmp/blobstore:z
+
   oci-collector:
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect image --csub-addr=collectsub:2782 --blob-addr=file:///tmp/blobstore?no_tmp_dir=true  --pubsub-addr=nats://nats:4222"
