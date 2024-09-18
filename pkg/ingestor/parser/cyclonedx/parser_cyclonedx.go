@@ -360,7 +360,7 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 func getArtifactInput(subject string) (*model.ArtifactInputSpec, error) {
 	split := strings.Split(subject, ":")
 	if len(split) != 2 {
-		return nil, fmt.Errorf("failed to parse artifact. Needs to be in algorithm:digest form")
+		return nil, fmt.Errorf("failed to parse subject: %s. Needs to be in algorithm:digest form", subject)
 	}
 	artifactInput := &model.ArtifactInputSpec{
 		Algorithm: strings.ToLower(split[0]),
@@ -384,11 +384,11 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			if topLevelPkgs[0].Version != nil && *topLevelPkgs[0].Version != "" {
 				artInput, err := getArtifactInput(*topLevelPkgs[0].Version)
 				if err != nil {
-					logger.Errorf("CDX artifact was not parsable: %v", err)
+					logger.Infof("CDX artifact was not parsable: %v", err)
+				} else {
+					topLevelArts = append(topLevelArts, artInput)
+					logger.Infof("getArtInput %v", artInput)
 				}
-				topLevelArts = append(topLevelArts, artInput)
-
-				logger.Infof("getArtInput %v", artInput)
 			}
 		} else {
 			topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
