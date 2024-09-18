@@ -54,6 +54,19 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantPredicates: &testdata.CdxIngestionPredicates,
 		wantErr:        false,
 	}, {
+		name: "valid small CycloneDX document - invalid container version",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXDistrolessInvalidVersionExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantPredicates: &testdata.CdxIngestionInvalidVersionPredicates,
+		wantErr:        false,
+	}, {
 		name: "valid small CycloneDX document with package dependencies and a hash",
 		doc: &processor.Document{
 			Blob:   testdata.CycloneDXExampleSmallDeps,
@@ -147,7 +160,7 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
 		wantErr:        true,
-		reportedErr:    unsupportedLicenseVersionError,
+		reportedErr:    errUnsupportedLicenseVersion,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

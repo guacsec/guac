@@ -77,6 +77,9 @@ var (
 	//go:embed exampledata/distroless-cyclonedx.json
 	CycloneDXDistrolessExample []byte
 
+	//go:embed exampledata/distroless-cyclonedx-invalid-version.json
+	CycloneDXDistrolessInvalidVersionExample []byte
+
 	//go:embed exampledata/busybox-cyclonedx.json
 	CycloneDXBusyboxExample []byte
 
@@ -1068,6 +1071,8 @@ var (
 	// CycloneDX Testdata
 	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot")
 
+	cdxTopLevelInvalidVersionPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@nonroot")
+
 	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11")
 
 	cdxNetbasePack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11")
@@ -1107,7 +1112,6 @@ var (
 
 	CdxHasSBOM = []assembler.HasSBOMIngest{
 		{
-			Pkg: cdxTopLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
 				Algorithm:        "sha256",
@@ -1115,12 +1119,61 @@ var (
 				DownloadLocation: "TestSource",
 				KnownSince:       cdxTime,
 			},
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+			},
 		},
 	}
 
 	CdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: CdxDeps,
 		HasSBOM:      CdxHasSBOM,
+	}
+
+	CdxHasSBOMInvalidVersion = []assembler.HasSBOMIngest{
+		{
+			Pkg: cdxTopLevelInvalidVersionPack,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
+				Algorithm:        "sha256",
+				Digest:           "cb3ea440e0529e8b07e0e1b694e96ec10149fd00d8b634a0027e5e15f11e3c9b",
+				DownloadLocation: "TestSource",
+				KnownSince:       cdxTime,
+			},
+		},
+	}
+
+	CdxInvalidVersionDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:    cdxTopLevelInvalidVersionPack,
+			DepPkg: cdxBasefilesPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopLevelInvalidVersionPack,
+			DepPkg: cdxNetbasePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopLevelInvalidVersionPack,
+			DepPkg: cdxTzdataPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+	}
+
+	CdxIngestionInvalidVersionPredicates = assembler.IngestPredicates{
+		IsDependency: CdxInvalidVersionDeps,
+		HasSBOM:      CdxHasSBOMInvalidVersion,
 	}
 
 	cdxTopQuarkusPack, _ = asmhelpers.PurlToPkg("pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar")
