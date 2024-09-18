@@ -409,8 +409,8 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	// license information
 	for id, cls := range c.packageLegals {
 		for _, cl := range cls {
-			dec := common.ParseLicenses(cl.DeclaredLicense, nil, c.licenseInLine)
-			dis := common.ParseLicenses(cl.DiscoveredLicense, nil, c.licenseInLine)
+			dec := common.ParseLicenses(cl.DeclaredLicense, nil, c.licenseInLine, false)
+			dis := common.ParseLicenses(cl.DiscoveredLicense, nil, c.licenseInLine, false)
 			for _, pkg := range c.packagePackages[id] {
 				cli := assembler.CertifyLegalIngest{
 					Pkg:          pkg,
