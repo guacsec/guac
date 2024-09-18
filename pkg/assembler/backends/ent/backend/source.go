@@ -540,6 +540,8 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 }
 
 func generateSourceNameCreate(tx *ent.Tx, srcNameID *uuid.UUID, srcInput *model.IDorSourceInput) *ent.SourceNameCreate {
+
+	// ensure that guacEmpty does not get added into the DB
 	var namespace string
 	var tag *string
 	var commit *string

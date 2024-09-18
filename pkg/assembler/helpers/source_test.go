@@ -200,6 +200,25 @@ func TestGuacSrcIdToSourceInput(t *testing.T) {
 				Tag:       ptrfrom.String("8.1.7"),
 			},
 		},
+		{
+			srcID: "pypi::guac-empty-@@::click::guac-empty-@@::?",
+			want: &generated.SourceInputSpec{
+				Type:      "pypi",
+				Namespace: "",
+				Name:      "click",
+				Tag:       ptrfrom.String(""),
+			},
+		},
+		{
+			srcID: "pypi::guac-empty-@@::click::8.1.7::guac-empty-@@?",
+			want: &generated.SourceInputSpec{
+				Type:      "pypi",
+				Namespace: "",
+				Name:      "click",
+				Tag:       ptrfrom.String("8.1.7"),
+				Commit:    ptrfrom.String(""),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.srcID, func(t *testing.T) {
