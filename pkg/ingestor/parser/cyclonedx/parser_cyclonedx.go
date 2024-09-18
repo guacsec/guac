@@ -69,7 +69,7 @@ type vulnData struct {
 	vex          []assembler.VexIngest
 }
 
-var unsupportedLicenseVersionError error = errors.New("GUAC CycloneDX license ingestion currently only support CycloneDX v1.5")
+var errUnsupportedLicenseVersion error = errors.New("GUAC CycloneDX license ingestion currently only support CycloneDX v1.5")
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
@@ -294,7 +294,7 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 				// having multiple expressions is not valid per v1.5 so we currently do not support any
 				// version below it.
 				if compLicense.Expression != "" {
-					return unsupportedLicenseVersionError
+					return errUnsupportedLicenseVersion
 				}
 				// skip if the license is not set or the SPDX expression is not set
 				if compLicense.License == nil {
@@ -505,7 +505,6 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 							if dependencyType == model.DependencyTypeUnknown {
 								justificationStr = "top-level package GUAC heuristic connecting to each file/package"
 							}
-							fmt.Println(topLevelPkgs, topLevelArts)
 							p, err := common.GetIsDep(topLevelPkgs[0], depPkg, []*model.PkgInputSpec{}, justificationStr, dependencyType)
 							if err != nil {
 								logger.Errorf("error generating CycloneDX edge %v", err)

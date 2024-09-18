@@ -147,7 +147,7 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
 		wantErr:        true,
-		reportedErr:    unsupportedLicenseVersionError,
+		reportedErr:    errUnsupportedLicenseVersion,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
