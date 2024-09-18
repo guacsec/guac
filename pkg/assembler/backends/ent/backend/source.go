@@ -37,8 +37,9 @@ import (
 )
 
 const (
-	srcTypeString      = "source_types"
-	srcNamespaceString = "source_namespaces"
+	srcTypeString             = "source_types"
+	srcNamespaceString        = "source_namespaces"
+	guacEmpty          string = "guac-empty-@@"
 )
 
 func hasSourceAtGlobalID(id string) string {
@@ -539,13 +540,40 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 }
 
 func generateSourceNameCreate(tx *ent.Tx, srcNameID *uuid.UUID, srcInput *model.IDorSourceInput) *ent.SourceNameCreate {
+
+	// ensure that guacEmpty does not get added into the DB
+	var namespace string
+	var tag *string
+	var commit *string
+	if srcInput.SourceInput.Namespace == guacEmpty {
+		namespace = ""
+	} else {
+		namespace = srcInput.SourceInput.Namespace
+	}
+
+	if srcInput.SourceInput.Tag != nil {
+		if *srcInput.SourceInput.Tag == guacEmpty {
+			tag = ptrfrom.String("")
+		} else {
+			tag = srcInput.SourceInput.Tag
+		}
+	}
+
+	if srcInput.SourceInput.Commit != nil {
+		if *srcInput.SourceInput.Commit == guacEmpty {
+			commit = ptrfrom.String("")
+		} else {
+			commit = srcInput.SourceInput.Commit
+		}
+	}
+
 	return tx.SourceName.Create().
 		SetID(*srcNameID).
 		SetType(srcInput.SourceInput.Type).
-		SetNamespace(srcInput.SourceInput.Namespace).
+		SetNamespace(namespace).
 		SetName(srcInput.SourceInput.Name).
-		SetTag(stringOrEmpty(srcInput.SourceInput.Tag)).
-		SetCommit(stringOrEmpty(srcInput.SourceInput.Commit))
+		SetTag(stringOrEmpty(tag)).
+		SetCommit(stringOrEmpty(commit))
 }
 
 func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*model.SourceIDs, error) {

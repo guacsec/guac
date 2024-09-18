@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -83,18 +84,31 @@ func GuacSrcIdToSourceInput(srcID string) (*generated.SourceInputSpec, error) {
 	}
 
 	srcInput := &generated.SourceInputSpec{
-		Type:      srcIDSplit[0],
-		Namespace: srcIDSplit[1],
-		Name:      srcIDSplit[2],
+		Type: srcIDSplit[0],
+		Name: srcIDSplit[2],
+	}
+
+	if srcIDSplit[1] == guacEmpty {
+		srcInput.Namespace = ""
+	} else {
+		srcInput.Namespace = srcIDSplit[1]
 	}
 
 	if srcIDSplit[3] != "" {
-		srcInput.Tag = &srcIDSplit[3]
+		if srcIDSplit[3] == guacEmpty {
+			srcInput.Tag = ptrfrom.String("")
+		} else {
+			srcInput.Tag = &srcIDSplit[3]
+		}
 	}
 
 	trimmedCommit := strings.TrimRight(srcIDSplit[4], "?")
 	if trimmedCommit != "" {
-		srcInput.Commit = &trimmedCommit
+		if trimmedCommit == guacEmpty {
+			srcInput.Commit = ptrfrom.String("")
+		} else {
+			srcInput.Commit = &trimmedCommit
+		}
 	}
 
 	return srcInput, nil
