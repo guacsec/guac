@@ -6,6 +6,8 @@ import (
 	"sort"
 
 	"github.com/olekukonko/tablewriter"
+	ui "github.com/gizak/termui/v3"
+	"github.com/gizak/termui/v3/widgets"
 )
 
 const (
@@ -153,32 +155,25 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 	if len(diffs.Nodes) == 0 {
 		return nil
 	}
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetAutoWrapText(false)
 
-	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
+	if err := ui.Init(); err != nil {
+		return fmt.Errorf("failed to initialize termui: %v", err)
+	}
+	defer ui.Close()
 
-	table.SetNoWhiteSpace(true)
-
-	table.SetColumnSeparator("\t\t")
-	table.SetAutoMergeCells(false)
-	table.SetAutoWrapText(false)
-	table.SetRowLine(true) 
-
-	table.SetHeader([]string{"Node Differences"})
-	var row []string
-
-	table.SetColMinWidth(0, colMinWidth)
-	table.SetColMinWidth(2, colMinWidth)
+	table := widgets.NewTable()
+	table.Rows = [][]string{
+		{"Node Differences"},
+	}
 
 	for _, diff := range diffs.Nodes {
+		var row []string
 
 		s, err := GetNodeString(*diff.NodeOne)
 		if err != nil {
 			return fmt.Errorf("unable to print diffs: %v", err)
 		}
 		row = append(row, s)
-
 		row = append(row, "<--->")
 
 		s, err = GetNodeString(*diff.NodeTwo)
@@ -186,13 +181,36 @@ func PrintDiffedNodeTable(diffs DiffResult) error {
 			return fmt.Errorf("unable to print diffs: %v", err)
 		}
 		row = append(row, s)
-		table.Append(row)
-		table.Append([]string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
+
+		table.Rows = append(table.Rows, row)
+		table.Rows = append(table.Rows, []string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
 	}
 
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.Render()
-	return nil
+	table.TextStyle = ui.NewStyle(ui.ColorWhite)
+	table.SetRect(0, 0, 100, 30)
+	table.RowSeparator = true
+	table.BorderStyle.Fg = ui.ColorCyan
+
+	// Event handler for zoom
+	uiEvents := ui.PollEvents()
+	zoomFactor := 1
+
+	for {
+		ui.Render(table)
+		e := <-uiEvents
+		switch e.ID {
+		case "q", "<C-c>":
+			return nil
+		case "+":
+			zoomFactor++
+			table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
+		case "-":
+			if zoomFactor > 1 {
+				zoomFactor--
+				table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
+			}
+		}
+	}
 }
 
 func PrintDiffedPathTable(diffs DiffResult) error {
@@ -200,42 +218,146 @@ func PrintDiffedPathTable(diffs DiffResult) error {
 		return nil
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetAutoWrapText(false)
+	if err := ui.Init(); err != nil {
+		return fmt.Errorf("failed to initialize termui: %v", err)
+	}
+	defer ui.Close()
 
-	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
-
-	table.SetNoWhiteSpace(true)
-	table.SetRowLine(true) 
-
-
-	table.SetAutoMergeCells(false)
-
-	table.SetHeader([]string{"Path Differences"})
+	table := widgets.NewTable()
+	// table.Rows = [][]string{
+	// 	{"Path Differences"},
+	// }
 
 	for _, diff := range diffs.Paths {
 		var row []string
-		for i, node := range diff.NodeDiffs {
+		for _, node := range diff.NodeDiffs {
 			if len(row) != 0 {
-				row = append(row, "--->")
-				table.SetColMinWidth(i+1, colMinWidth)
-			} else {
-				table.SetColMinWidth(i, colMinWidth)
+				row = append(row, "\t--->\t")
 			}
 
 			s, err := GetNodeString(node)
-
 			if err != nil {
 				return fmt.Errorf("unable to print diffs: %v", err)
 			}
 			row = append(row, s)
 		}
-	
-		table.Append(row)
+		table.Rows = append(table.Rows, row)
 	}
 
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.Render()
-	return nil
+	table.TextStyle = ui.NewStyle(ui.ColorWhite) 
+	table.SetRect(0, 0, 100, 30)
+	table.RowSeparator = true
+	table.BorderStyle.Fg = ui.ColorCyan
 
+	// Event handler for zoom
+	uiEvents := ui.PollEvents()
+	zoomFactor := 1
+
+	for {
+		ui.Render(table)
+		e := <-uiEvents
+		switch e.ID {
+		case "q", "<C-c>":
+			return nil
+		case "+":
+			zoomFactor++
+			table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
+		case "-":
+			if zoomFactor > 1 {
+				zoomFactor--
+				table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
+			}
+		}
+	}
 }
+
+// func PrintDiffedNodeTable(diffs DiffResult) error {
+// 	if len(diffs.Nodes) == 0 {
+// 		return nil
+// 	}
+// 	table := tablewriter.NewWriter(os.Stdout)
+// 	table.SetAutoWrapText(false)
+
+// 	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
+
+// 	table.SetNoWhiteSpace(true)
+
+// 	table.SetColumnSeparator("\t\t")
+// 	table.SetAutoMergeCells(false)
+// 	table.SetAutoWrapText(false)
+// 	table.SetRowLine(true) 
+
+// 	table.SetHeader([]string{"Node Differences"})
+// 	var row []string
+
+// 	table.SetColMinWidth(0, colMinWidth)
+// 	table.SetColMinWidth(2, colMinWidth)
+
+// 	for _, diff := range diffs.Nodes {
+
+// 		s, err := GetNodeString(*diff.NodeOne)
+// 		if err != nil {
+// 			return fmt.Errorf("unable to print diffs: %v", err)
+// 		}
+// 		row = append(row, s)
+
+// 		row = append(row, "<--->")
+
+// 		s, err = GetNodeString(*diff.NodeTwo)
+// 		if err != nil {
+// 			return fmt.Errorf("unable to print diffs: %v", err)
+// 		}
+// 		row = append(row, s)
+// 		table.Append(row)
+// 		table.Append([]string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
+// 	}
+
+// 	table.SetAlignment(tablewriter.ALIGN_LEFT)
+// 	table.Render()
+// 	return nil
+// }
+
+// func PrintDiffedPathTable(diffs DiffResult) error {
+// 	if len(diffs.Paths) == 0 {
+// 		return nil
+// 	}
+
+// 	table := tablewriter.NewWriter(os.Stdout)
+// 	table.SetAutoWrapText(false)
+
+// 	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
+
+// 	table.SetNoWhiteSpace(true)
+// 	table.SetRowLine(true) 
+
+
+// 	table.SetAutoMergeCells(false)
+
+// 	table.SetHeader([]string{"Path Differences"})
+
+// 	for _, diff := range diffs.Paths {
+// 		var row []string
+// 		for i, node := range diff.NodeDiffs {
+// 			if len(row) != 0 {
+// 				row = append(row, "--->")
+// 				table.SetColMinWidth(i+1, colMinWidth)
+// 			} else {
+// 				table.SetColMinWidth(i, colMinWidth)
+// 			}
+
+// 			s, err := GetNodeString(node)
+
+// 			if err != nil {
+// 				return fmt.Errorf("unable to print diffs: %v", err)
+// 			}
+// 			row = append(row, s)
+// 		}
+	
+// 		table.Append(row)
+// 	}
+
+// 	table.SetAlignment(tablewriter.ALIGN_LEFT)
+// 	table.Render()
+// 	return nil
+
+// }
