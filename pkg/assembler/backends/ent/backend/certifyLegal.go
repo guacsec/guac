@@ -142,7 +142,6 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 func certifyLegalConflictColumns() []string {
 	return []string{
 		certifylegal.FieldDeclaredLicense,
-		certifylegal.FieldDiscoveredLicense,
 		certifylegal.FieldJustification,
 		certifylegal.FieldTimeScanned,
 		certifylegal.FieldOrigin,

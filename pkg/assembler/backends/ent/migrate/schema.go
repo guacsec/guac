@@ -235,17 +235,17 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifylegal_source_id_declared_license_discovered_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
+				Name:    "certifylegal_source_id_declared_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyLegalsColumns[12], CertifyLegalsColumns[1], CertifyLegalsColumns[2], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
+				Columns: []*schema.Column{CertifyLegalsColumns[12], CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND source_id IS NOT NULL",
 				},
 			},
 			{
-				Name:    "certifylegal_package_id_declared_license_discovered_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
+				Name:    "certifylegal_package_id_declared_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[1], CertifyLegalsColumns[2], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
+				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND source_id IS NULL",
 				},
