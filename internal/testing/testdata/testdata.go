@@ -1127,6 +1127,16 @@ var (
 	}
 
 	CdxIngestionPredicates = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: cdxTopLevelPack,
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+				},
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
 		IsDependency: CdxDeps,
 		HasSBOM:      CdxHasSBOM,
 	}

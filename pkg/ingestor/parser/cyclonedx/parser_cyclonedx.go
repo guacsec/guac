@@ -387,6 +387,8 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 					logger.Infof("CDX artifact was not parsable: %v", err)
 				} else {
 					topLevelArts = append(topLevelArts, artInput)
+					// append to packageArtifacts so that isOccurrence is created
+					c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef] = append(c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef], artInput)
 					logger.Infof("getArtInput %v", artInput)
 				}
 			}
