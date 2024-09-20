@@ -23,7 +23,6 @@ import (
 	"math"
 	"sync"
 
-	"regexp"
 	"sort"
 	"strings"
 
@@ -604,15 +603,7 @@ func DiffMissingNamespace(dmp *diffmatchpatch.DiffMatchPatch, namespace model.Al
 	return namespace
 }
 
-func StartsWithSHA(text string) bool {
-	for _, pattern := range shaPatterns {
-		match, _ := regexp.MatchString(pattern, text)
-		if match {
-			return true
-		}
-	}
-	return false
-}
+
 
 func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string) string {
 

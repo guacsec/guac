@@ -6,8 +6,7 @@ import (
 	"sort"
 
 	"github.com/olekukonko/tablewriter"
-	ui "github.com/gizak/termui/v3"
-	"github.com/gizak/termui/v3/widgets"
+	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 const (
@@ -23,14 +22,23 @@ func GetNodeString(node Node) (string, error) {
 		sort.Sort(packageNameSpaces(pkg.Namespaces))
 		message := "Type:" + pkg.Type + "\n"
 		for _, namespace := range pkg.Namespaces {
+			if namespace.Namespace == "" {
+				continue
+			}
 			message += "Namespace: " + namespace.Namespace + "\n"
 
 			for _, name := range namespace.Names {
+				if name.Name == "" {
+					continue
+				}
 				message += "\t"
 				message += "Name: " + name.Name
 				message += "\n"
 
 				for _, version := range name.Versions {
+					if version.Version == "" {
+						continue
+					}
 					message += "\t\t"
 					message += "Version: " + version.Version + "\n"
 					message += "\t\t"
@@ -38,6 +46,9 @@ func GetNodeString(node Node) (string, error) {
 					message += "\t\tQualifiers: {\n"
 
 					for _, outlier := range version.Qualifiers {
+						if outlier.Key == "" {
+							continue
+						}
 						message += "\t\t\t"
 						message += outlier.Key + ": " + outlier.Value + "\n"
 					}
@@ -51,14 +62,23 @@ func GetNodeString(node Node) (string, error) {
 		depPkg := node.DepPkg
 		message := "Type:" + depPkg.Type + "\n"
 		for _, namespace := range depPkg.Namespaces {
+			if namespace.Namespace == "" {
+				continue
+			}
 			message += "Namespace: " + namespace.Namespace + "\n"
 
 			for _, name := range namespace.Names {
+				if name.Name == "" {
+					continue
+				}
 				message += "\t"
 				message += "Name: " + name.Name
 				message += "\n"
 
 				for _, version := range name.Versions {
+					if version.Version == "" {
+						continue
+					}
 					message += "\t\t"
 					message += "Version: " + version.Version + "\n"
 					message += "\t\t"
@@ -66,6 +86,9 @@ func GetNodeString(node Node) (string, error) {
 					message += "\t\tQualifiers: {\n"
 
 					for _, outlier := range version.Qualifiers {
+						if outlier.Key == "" {
+							continue
+						}
 						message += "\t\t\t"
 						message += outlier.Key + ": " + outlier.Value + "\n"
 					}
@@ -151,66 +174,44 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 	return nil
 }
 
+
+
+
 func PrintDiffedNodeTable(diffs DiffResult) error {
 	if len(diffs.Nodes) == 0 {
 		return nil
 	}
 
-	if err := ui.Init(); err != nil {
-		return fmt.Errorf("failed to initialize termui: %v", err)
-	}
-	defer ui.Close()
-
-	table := widgets.NewTable()
-	table.Rows = [][]string{
-		{"Node Differences"},
-	}
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleLight)
+	t.SetTitle("Node Differences")
+	t.AppendHeader(table.Row{"Node One", "\t", "Node Two", "Difference Count"})
 
 	for _, diff := range diffs.Nodes {
-		var row []string
-
-		s, err := GetNodeString(*diff.NodeOne)
+		nodeOneStr, err := GetNodeString(*diff.NodeOne)
 		if err != nil {
 			return fmt.Errorf("unable to print diffs: %v", err)
 		}
-		row = append(row, s)
-		row = append(row, "<--->")
 
-		s, err = GetNodeString(*diff.NodeTwo)
+		nodeTwoStr, err := GetNodeString(*diff.NodeTwo)
 		if err != nil {
 			return fmt.Errorf("unable to print diffs: %v", err)
 		}
-		row = append(row, s)
 
-		table.Rows = append(table.Rows, row)
-		table.Rows = append(table.Rows, []string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
-	}
-
-	table.TextStyle = ui.NewStyle(ui.ColorWhite)
-	table.SetRect(0, 0, 100, 30)
-	table.RowSeparator = true
-	table.BorderStyle.Fg = ui.ColorCyan
-
-	// Event handler for zoom
-	uiEvents := ui.PollEvents()
-	zoomFactor := 1
-
-	for {
-		ui.Render(table)
-		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
-			return nil
-		case "+":
-			zoomFactor++
-			table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
-		case "-":
-			if zoomFactor > 1 {
-				zoomFactor--
-				table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
-			}
+		// Create a row for the table
+		row := table.Row{
+			nodeOneStr,       // First node representation
+			"<--->",          // Separator
+			nodeTwoStr,       // Second node representation
+			fmt.Sprintf("%v", diff.Count), // Difference count
 		}
+
+		t.AppendRow(row)
 	}
+
+	t.Render()
+	return nil
 }
 
 func PrintDiffedPathTable(diffs DiffResult) error {
@@ -218,146 +219,34 @@ func PrintDiffedPathTable(diffs DiffResult) error {
 		return nil
 	}
 
-	if err := ui.Init(); err != nil {
-		return fmt.Errorf("failed to initialize termui: %v", err)
-	}
-	defer ui.Close()
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleLight)
+	t.SetTitle("Path Differences")
+	
+	
 
-	table := widgets.NewTable()
-	// table.Rows = [][]string{
-	// 	{"Path Differences"},
-	// }
 
 	for _, diff := range diffs.Paths {
 		var row []string
 		for _, node := range diff.NodeDiffs {
-			if len(row) != 0 {
-				row = append(row, "\t--->\t")
-			}
-
-			s, err := GetNodeString(node)
+	
+			nodeStr, err := GetNodeString(node)
 			if err != nil {
 				return fmt.Errorf("unable to print diffs: %v", err)
 			}
-			row = append(row, s)
+			row = append(row, nodeStr)
 		}
-		table.Rows = append(table.Rows, row)
+		// Convert []string to table.Row (which is []interface{})
+		interfaceRow := make(table.Row, len(row))
+		for i, val := range row {
+			interfaceRow[i] = val
+		}
+
+		// Append the row to the table
+		t.AppendRow(interfaceRow)
 	}
 
-	table.TextStyle = ui.NewStyle(ui.ColorWhite) 
-	table.SetRect(0, 0, 100, 30)
-	table.RowSeparator = true
-	table.BorderStyle.Fg = ui.ColorCyan
-
-	// Event handler for zoom
-	uiEvents := ui.PollEvents()
-	zoomFactor := 1
-
-	for {
-		ui.Render(table)
-		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
-			return nil
-		case "+":
-			zoomFactor++
-			table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
-		case "-":
-			if zoomFactor > 1 {
-				zoomFactor--
-				table.SetRect(0, 0, 100*zoomFactor, 30*zoomFactor)
-			}
-		}
-	}
+	t.Render()
+	return nil
 }
-
-// func PrintDiffedNodeTable(diffs DiffResult) error {
-// 	if len(diffs.Nodes) == 0 {
-// 		return nil
-// 	}
-// 	table := tablewriter.NewWriter(os.Stdout)
-// 	table.SetAutoWrapText(false)
-
-// 	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
-
-// 	table.SetNoWhiteSpace(true)
-
-// 	table.SetColumnSeparator("\t\t")
-// 	table.SetAutoMergeCells(false)
-// 	table.SetAutoWrapText(false)
-// 	table.SetRowLine(true) 
-
-// 	table.SetHeader([]string{"Node Differences"})
-// 	var row []string
-
-// 	table.SetColMinWidth(0, colMinWidth)
-// 	table.SetColMinWidth(2, colMinWidth)
-
-// 	for _, diff := range diffs.Nodes {
-
-// 		s, err := GetNodeString(*diff.NodeOne)
-// 		if err != nil {
-// 			return fmt.Errorf("unable to print diffs: %v", err)
-// 		}
-// 		row = append(row, s)
-
-// 		row = append(row, "<--->")
-
-// 		s, err = GetNodeString(*diff.NodeTwo)
-// 		if err != nil {
-// 			return fmt.Errorf("unable to print diffs: %v", err)
-// 		}
-// 		row = append(row, s)
-// 		table.Append(row)
-// 		table.Append([]string{fmt.Sprintf("Node pair causing %v paths to differ", diff.Count)})
-// 	}
-
-// 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-// 	table.Render()
-// 	return nil
-// }
-
-// func PrintDiffedPathTable(diffs DiffResult) error {
-// 	if len(diffs.Paths) == 0 {
-// 		return nil
-// 	}
-
-// 	table := tablewriter.NewWriter(os.Stdout)
-// 	table.SetAutoWrapText(false)
-
-// 	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
-
-// 	table.SetNoWhiteSpace(true)
-// 	table.SetRowLine(true) 
-
-
-// 	table.SetAutoMergeCells(false)
-
-// 	table.SetHeader([]string{"Path Differences"})
-
-// 	for _, diff := range diffs.Paths {
-// 		var row []string
-// 		for i, node := range diff.NodeDiffs {
-// 			if len(row) != 0 {
-// 				row = append(row, "--->")
-// 				table.SetColMinWidth(i+1, colMinWidth)
-// 			} else {
-// 				table.SetColMinWidth(i, colMinWidth)
-// 			}
-
-// 			s, err := GetNodeString(node)
-
-// 			if err != nil {
-// 				return fmt.Errorf("unable to print diffs: %v", err)
-// 			}
-// 			row = append(row, s)
-// 		}
-	
-// 		table.Append(row)
-// 	}
-
-// 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-// 	table.Render()
-// 	return nil
-
-// }
