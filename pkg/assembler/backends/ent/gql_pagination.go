@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdeployed"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -3103,6 +3104,255 @@ func (he *HashEqual) ToEdge(order *HashEqualOrder) *HashEqualEdge {
 	return &HashEqualEdge{
 		Node:   he,
 		Cursor: order.Field.toCursor(he),
+	}
+}
+
+// IsDeployedEdge is the edge representation of IsDeployed.
+type IsDeployedEdge struct {
+	Node   *IsDeployed `json:"node"`
+	Cursor Cursor      `json:"cursor"`
+}
+
+// IsDeployedConnection is the connection containing edges to IsDeployed.
+type IsDeployedConnection struct {
+	Edges      []*IsDeployedEdge `json:"edges"`
+	PageInfo   PageInfo          `json:"pageInfo"`
+	TotalCount int               `json:"totalCount"`
+}
+
+func (c *IsDeployedConnection) build(nodes []*IsDeployed, pager *isdeployedPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *IsDeployed
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *IsDeployed {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *IsDeployed {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*IsDeployedEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &IsDeployedEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// IsDeployedPaginateOption enables pagination customization.
+type IsDeployedPaginateOption func(*isdeployedPager) error
+
+// WithIsDeployedOrder configures pagination ordering.
+func WithIsDeployedOrder(order *IsDeployedOrder) IsDeployedPaginateOption {
+	if order == nil {
+		order = DefaultIsDeployedOrder
+	}
+	o := *order
+	return func(pager *isdeployedPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultIsDeployedOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithIsDeployedFilter configures pagination filter.
+func WithIsDeployedFilter(filter func(*IsDeployedQuery) (*IsDeployedQuery, error)) IsDeployedPaginateOption {
+	return func(pager *isdeployedPager) error {
+		if filter == nil {
+			return errors.New("IsDeployedQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type isdeployedPager struct {
+	reverse bool
+	order   *IsDeployedOrder
+	filter  func(*IsDeployedQuery) (*IsDeployedQuery, error)
+}
+
+func newIsDeployedPager(opts []IsDeployedPaginateOption, reverse bool) (*isdeployedPager, error) {
+	pager := &isdeployedPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultIsDeployedOrder
+	}
+	return pager, nil
+}
+
+func (p *isdeployedPager) applyFilter(query *IsDeployedQuery) (*IsDeployedQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *isdeployedPager) toCursor(id *IsDeployed) Cursor {
+	return p.order.Field.toCursor(id)
+}
+
+func (p *isdeployedPager) applyCursors(query *IsDeployedQuery, after, before *Cursor) (*IsDeployedQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultIsDeployedOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *isdeployedPager) applyOrder(query *IsDeployedQuery) *IsDeployedQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultIsDeployedOrder.Field {
+		query = query.Order(DefaultIsDeployedOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *isdeployedPager) orderExpr(query *IsDeployedQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultIsDeployedOrder.Field {
+			b.Comma().Ident(DefaultIsDeployedOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to IsDeployed.
+func (id *IsDeployedQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...IsDeployedPaginateOption,
+) (*IsDeployedConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newIsDeployedPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if id, err = pager.applyFilter(id); err != nil {
+		return nil, err
+	}
+	conn := &IsDeployedConnection{Edges: []*IsDeployedEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := id.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if id, err = pager.applyCursors(id, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		id.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := id.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	id = pager.applyOrder(id)
+	nodes, err := id.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// IsDeployedOrderField defines the ordering field of IsDeployed.
+type IsDeployedOrderField struct {
+	// Value extracts the ordering value from the given IsDeployed.
+	Value    func(*IsDeployed) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) isdeployed.OrderOption
+	toCursor func(*IsDeployed) Cursor
+}
+
+// IsDeployedOrder defines the ordering of IsDeployed.
+type IsDeployedOrder struct {
+	Direction OrderDirection        `json:"direction"`
+	Field     *IsDeployedOrderField `json:"field"`
+}
+
+// DefaultIsDeployedOrder is the default ordering of IsDeployed.
+var DefaultIsDeployedOrder = &IsDeployedOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &IsDeployedOrderField{
+		Value: func(id *IsDeployed) (ent.Value, error) {
+			return id.ID, nil
+		},
+		column: isdeployed.FieldID,
+		toTerm: isdeployed.ByID,
+		toCursor: func(id *IsDeployed) Cursor {
+			return Cursor{ID: id.ID}
+		},
+	},
+}
+
+// ToEdge converts IsDeployed into IsDeployedEdge.
+func (id *IsDeployed) ToEdge(order *IsDeployedOrder) *IsDeployedEdge {
+	if order == nil {
+		order = DefaultIsDeployedOrder
+	}
+	return &IsDeployedEdge{
+		Node:   id,
+		Cursor: order.Field.toCursor(id),
 	}
 }
 

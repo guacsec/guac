@@ -330,6 +330,28 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	IsDeployed struct {
+		Collector     func(childComplexity int) int
+		DeployedSince func(childComplexity int) int
+		DeployedUntil func(childComplexity int) int
+		Environment   func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Package       func(childComplexity int) int
+		ResourceID    func(childComplexity int) int
+	}
+
+	IsDeployedConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	IsDeployedEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	IsOccurrence struct {
 		Artifact      func(childComplexity int) int
 		Collector     func(childComplexity int) int
@@ -387,6 +409,8 @@ type ComplexityRoot struct {
 		IngestCertifyVulns              func(childComplexity int, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) int
 		IngestDependencies              func(childComplexity int, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency                func(childComplexity int, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) int
+		IngestDeployment                func(childComplexity int, isDeploymentInputSpec model.IsDeployedInputSpec) int
+		IngestDeployments               func(childComplexity int, isDeploymentInputSpec []*model.IsDeployedInputSpec) int
 		IngestHasMetadata               func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) int
 		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) int
@@ -557,6 +581,8 @@ type ComplexityRoot struct {
 		HashEqualList             func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
 		IsDependency              func(childComplexity int, isDependencySpec model.IsDependencySpec) int
 		IsDependencyList          func(childComplexity int, isDependencySpec model.IsDependencySpec, after *string, first *int) int
+		IsDeployed                func(childComplexity int, isDeployedSpec model.IsDeployedSpec) int
+		IsDeployedList            func(childComplexity int, isDeployedSpec model.IsDeployedSpec, after *string, first *int) int
 		IsOccurrence              func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
 		IsOccurrenceList          func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) int
 		LicenseList               func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
@@ -1918,6 +1944,97 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependencyEdge.Node(childComplexity), true
 
+	case "IsDeployed.collector":
+		if e.complexity.IsDeployed.Collector == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.Collector(childComplexity), true
+
+	case "IsDeployed.deployedSince":
+		if e.complexity.IsDeployed.DeployedSince == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.DeployedSince(childComplexity), true
+
+	case "IsDeployed.deployedUntil":
+		if e.complexity.IsDeployed.DeployedUntil == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.DeployedUntil(childComplexity), true
+
+	case "IsDeployed.environment":
+		if e.complexity.IsDeployed.Environment == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.Environment(childComplexity), true
+
+	case "IsDeployed.id":
+		if e.complexity.IsDeployed.ID == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.ID(childComplexity), true
+
+	case "IsDeployed.origin":
+		if e.complexity.IsDeployed.Origin == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.Origin(childComplexity), true
+
+	case "IsDeployed.package":
+		if e.complexity.IsDeployed.Package == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.Package(childComplexity), true
+
+	case "IsDeployed.resourceID":
+		if e.complexity.IsDeployed.ResourceID == nil {
+			break
+		}
+
+		return e.complexity.IsDeployed.ResourceID(childComplexity), true
+
+	case "IsDeployedConnection.edges":
+		if e.complexity.IsDeployedConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.IsDeployedConnection.Edges(childComplexity), true
+
+	case "IsDeployedConnection.pageInfo":
+		if e.complexity.IsDeployedConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.IsDeployedConnection.PageInfo(childComplexity), true
+
+	case "IsDeployedConnection.totalCount":
+		if e.complexity.IsDeployedConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.IsDeployedConnection.TotalCount(childComplexity), true
+
+	case "IsDeployedEdge.cursor":
+		if e.complexity.IsDeployedEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.IsDeployedEdge.Cursor(childComplexity), true
+
+	case "IsDeployedEdge.node":
+		if e.complexity.IsDeployedEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.IsDeployedEdge.Node(childComplexity), true
+
 	case "IsOccurrence.artifact":
 		if e.complexity.IsOccurrence.Artifact == nil {
 			break
@@ -2268,6 +2385,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["dependency"].(model.IsDependencyInputSpec)), true
+
+	case "Mutation.ingestDeployment":
+		if e.complexity.Mutation.IngestDeployment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestDeployment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestDeployment(childComplexity, args["isDeploymentInputSpec"].(model.IsDeployedInputSpec)), true
+
+	case "Mutation.ingestDeployments":
+		if e.complexity.Mutation.IngestDeployments == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestDeployments_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestDeployments(childComplexity, args["isDeploymentInputSpec"].([]*model.IsDeployedInputSpec)), true
 
 	case "Mutation.ingestHasMetadata":
 		if e.complexity.Mutation.IngestHasMetadata == nil {
@@ -3371,6 +3512,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsDependencyList(childComplexity, args["isDependencySpec"].(model.IsDependencySpec), args["after"].(*string), args["first"].(*int)), true
 
+	case "Query.isDeployed":
+		if e.complexity.Query.IsDeployed == nil {
+			break
+		}
+
+		args, err := ec.field_Query_isDeployed_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsDeployed(childComplexity, args["isDeployedSpec"].(model.IsDeployedSpec)), true
+
+	case "Query.isDeployedList":
+		if e.complexity.Query.IsDeployedList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_isDeployedList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsDeployedList(childComplexity, args["isDeployedSpec"].(model.IsDeployedSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.IsOccurrence":
 		if e.complexity.Query.IsOccurrence == nil {
 			break
@@ -4347,6 +4512,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIDorVulnerabilityInput,
 		ec.unmarshalInputIsDependencyInputSpec,
 		ec.unmarshalInputIsDependencySpec,
+		ec.unmarshalInputIsDeployedInputSpec,
+		ec.unmarshalInputIsDeployedSpec,
 		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputLicenseInputSpec,
@@ -6503,6 +6670,91 @@ extend type Mutation {
   ): [ID!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/isDeployment.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for specifying deployments
+
+
+type IsDeployed {
+  id: ID!
+  "Package that is deployed"
+  package: Package!
+  "Timestamp when the package was deployed and became active"
+  deployedSince: Time!
+  "Timestamp when the package was no longer deployed and became inactive"
+  deployedUntil: Time
+  "Deployment resource ID"
+  resourceID: String!
+  "Deployment environment"
+  environment: String!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+}
+
+input IsDeployedSpec {
+  id: ID
+  package: PkgSpec
+  resourceID: String
+  environment: String
+  origin: String
+  collector: String
+}
+
+input IsDeployedInputSpec {
+    package: PkgSpec!
+    deployedSince: Time!
+    deployedUntil: Time
+    resourceID: String!
+    environment: String!
+    origin: String!
+    collector: String!
+}
+
+type IsDeployedConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [IsDeployedEdge!]!
+}
+
+type IsDeployedEdge {
+  cursor: ID!
+  node: IsDeployed!
+}
+
+extend type Query {
+  "Returns all package deployments that match the filter."
+  isDeployed(isDeployedSpec: IsDeployedSpec!): [IsDeployed!]!
+  "Returns a paginated results via IsDeployedConnection"
+  isDeployedList(isDeployedSpec: IsDeployedSpec!, after: ID, first: Int): IsDeployedConnection
+}
+
+extend type Mutation {
+  "Adds a deployment edge for a package"
+  ingestDeployment(
+    isDeploymentInputSpec: IsDeployedInputSpec!
+  ): ID!
+  "Bulk adds deployment edge for packages."
+  ingestDeployments(
+    isDeploymentInputSpec: [IsDeployedInputSpec!]!
+  ): [ID!]!
+}`, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #

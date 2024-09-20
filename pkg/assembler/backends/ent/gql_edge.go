@@ -436,6 +436,14 @@ func (he *HashEqual) ArtifactB(ctx context.Context) (*Artifact, error) {
 	return result, err
 }
 
+func (id *IsDeployed) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := id.Edges.PackageOrErr()
+	if IsNotLoaded(err) {
+		result, err = id.QueryPackage().Only(ctx)
+	}
+	return result, err
+}
+
 func (l *License) DeclaredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = l.NamedDeclaredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)

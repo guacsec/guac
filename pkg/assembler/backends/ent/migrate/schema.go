@@ -623,6 +623,53 @@ var (
 			},
 		},
 	}
+	// IsDeployedsColumns holds the columns for the "is_deployeds" table.
+	IsDeployedsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "deployed_since", Type: field.TypeTime},
+		{Name: "deployed_until", Type: field.TypeTime},
+		{Name: "resource_id", Type: field.TypeString},
+		{Name: "environment", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeUUID},
+	}
+	// IsDeployedsTable holds the schema information for the "is_deployeds" table.
+	IsDeployedsTable = &schema.Table{
+		Name:       "is_deployeds",
+		Columns:    IsDeployedsColumns,
+		PrimaryKey: []*schema.Column{IsDeployedsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "is_deployeds_package_versions_package",
+				Columns:    []*schema.Column{IsDeployedsColumns[7]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "isdeployed_package_id_resource_id_environment_origin_collector",
+				Unique:  true,
+				Columns: []*schema.Column{IsDeployedsColumns[7], IsDeployedsColumns[3], IsDeployedsColumns[4], IsDeployedsColumns[5], IsDeployedsColumns[6]},
+			},
+			{
+				Name:    "isdeployed_package_id",
+				Unique:  false,
+				Columns: []*schema.Column{IsDeployedsColumns[7]},
+			},
+			{
+				Name:    "isdeployed_resource_id",
+				Unique:  false,
+				Columns: []*schema.Column{IsDeployedsColumns[3]},
+			},
+			{
+				Name:    "isdeployed_environment",
+				Unique:  false,
+				Columns: []*schema.Column{IsDeployedsColumns[4]},
+			},
+		},
+	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -1242,6 +1289,7 @@ var (
 		HasMetadataTable,
 		HasSourceAtsTable,
 		HashEqualsTable,
+		IsDeployedsTable,
 		LicensesTable,
 		OccurrencesTable,
 		PackageNamesTable,
@@ -1289,6 +1337,7 @@ func init() {
 	HasSourceAtsTable.ForeignKeys[2].RefTable = SourceNamesTable
 	HashEqualsTable.ForeignKeys[0].RefTable = ArtifactsTable
 	HashEqualsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	IsDeployedsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
 	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable

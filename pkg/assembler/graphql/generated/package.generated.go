@@ -2263,6 +2263,11 @@ func (ec *executionContext) unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpk
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v interface{}) (*model.PkgSpec, error) {
+	res, err := ec.unmarshalInputPkgSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorPkgInput, error) {
 	if v == nil {
 		return nil, nil

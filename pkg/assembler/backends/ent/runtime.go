@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdeployed"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -116,6 +117,12 @@ func init() {
 	hashequalDescID := hashequalFields[0].Descriptor()
 	// hashequal.DefaultID holds the default value on creation for the id field.
 	hashequal.DefaultID = hashequalDescID.Default.(func() uuid.UUID)
+	isdeployedFields := schema.IsDeployed{}.Fields()
+	_ = isdeployedFields
+	// isdeployedDescID is the schema descriptor for id field.
+	isdeployedDescID := isdeployedFields[0].Descriptor()
+	// isdeployed.DefaultID holds the default value on creation for the id field.
+	isdeployed.DefaultID = isdeployedDescID.Default.(func() uuid.UUID)
 	licenseFields := schema.License{}.Fields()
 	_ = licenseFields
 	// licenseDescName is the schema descriptor for name field.

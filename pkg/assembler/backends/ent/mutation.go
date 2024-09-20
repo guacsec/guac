@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdeployed"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -60,6 +61,7 @@ const (
 	TypeHasMetadata           = "HasMetadata"
 	TypeHasSourceAt           = "HasSourceAt"
 	TypeHashEqual             = "HashEqual"
+	TypeIsDeployed            = "IsDeployed"
 	TypeLicense               = "License"
 	TypeOccurrence            = "Occurrence"
 	TypePackageName           = "PackageName"
@@ -12241,6 +12243,716 @@ func (m *HashEqualMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown HashEqual edge %s", name)
+}
+
+// IsDeployedMutation represents an operation that mutates the IsDeployed nodes in the graph.
+type IsDeployedMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	deployed_since  *time.Time
+	deployed_until  *time.Time
+	resource_id     *string
+	environment     *string
+	origin          *string
+	collector       *string
+	clearedFields   map[string]struct{}
+	_package        *uuid.UUID
+	cleared_package bool
+	done            bool
+	oldValue        func(context.Context) (*IsDeployed, error)
+	predicates      []predicate.IsDeployed
+}
+
+var _ ent.Mutation = (*IsDeployedMutation)(nil)
+
+// isdeployedOption allows management of the mutation configuration using functional options.
+type isdeployedOption func(*IsDeployedMutation)
+
+// newIsDeployedMutation creates new mutation for the IsDeployed entity.
+func newIsDeployedMutation(c config, op Op, opts ...isdeployedOption) *IsDeployedMutation {
+	m := &IsDeployedMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeIsDeployed,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withIsDeployedID sets the ID field of the mutation.
+func withIsDeployedID(id uuid.UUID) isdeployedOption {
+	return func(m *IsDeployedMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *IsDeployed
+		)
+		m.oldValue = func(ctx context.Context) (*IsDeployed, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().IsDeployed.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withIsDeployed sets the old IsDeployed of the mutation.
+func withIsDeployed(node *IsDeployed) isdeployedOption {
+	return func(m *IsDeployedMutation) {
+		m.oldValue = func(context.Context) (*IsDeployed, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m IsDeployedMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m IsDeployedMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of IsDeployed entities.
+func (m *IsDeployedMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *IsDeployedMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *IsDeployedMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().IsDeployed.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageID sets the "package_id" field.
+func (m *IsDeployedMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
+}
+
+// PackageID returns the value of the "package_id" field in the mutation.
+func (m *IsDeployedMutation) PackageID() (r uuid.UUID, exists bool) {
+	v := m._package
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageID returns the old "package_id" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldPackageID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageID: %w", err)
+	}
+	return oldValue.PackageID, nil
+}
+
+// ResetPackageID resets all changes to the "package_id" field.
+func (m *IsDeployedMutation) ResetPackageID() {
+	m._package = nil
+}
+
+// SetDeployedSince sets the "deployed_since" field.
+func (m *IsDeployedMutation) SetDeployedSince(t time.Time) {
+	m.deployed_since = &t
+}
+
+// DeployedSince returns the value of the "deployed_since" field in the mutation.
+func (m *IsDeployedMutation) DeployedSince() (r time.Time, exists bool) {
+	v := m.deployed_since
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeployedSince returns the old "deployed_since" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldDeployedSince(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeployedSince is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeployedSince requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeployedSince: %w", err)
+	}
+	return oldValue.DeployedSince, nil
+}
+
+// ResetDeployedSince resets all changes to the "deployed_since" field.
+func (m *IsDeployedMutation) ResetDeployedSince() {
+	m.deployed_since = nil
+}
+
+// SetDeployedUntil sets the "deployed_until" field.
+func (m *IsDeployedMutation) SetDeployedUntil(t time.Time) {
+	m.deployed_until = &t
+}
+
+// DeployedUntil returns the value of the "deployed_until" field in the mutation.
+func (m *IsDeployedMutation) DeployedUntil() (r time.Time, exists bool) {
+	v := m.deployed_until
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeployedUntil returns the old "deployed_until" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldDeployedUntil(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeployedUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeployedUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeployedUntil: %w", err)
+	}
+	return oldValue.DeployedUntil, nil
+}
+
+// ResetDeployedUntil resets all changes to the "deployed_until" field.
+func (m *IsDeployedMutation) ResetDeployedUntil() {
+	m.deployed_until = nil
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *IsDeployedMutation) SetResourceID(s string) {
+	m.resource_id = &s
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *IsDeployedMutation) ResourceID() (r string, exists bool) {
+	v := m.resource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldResourceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *IsDeployedMutation) ResetResourceID() {
+	m.resource_id = nil
+}
+
+// SetEnvironment sets the "environment" field.
+func (m *IsDeployedMutation) SetEnvironment(s string) {
+	m.environment = &s
+}
+
+// Environment returns the value of the "environment" field in the mutation.
+func (m *IsDeployedMutation) Environment() (r string, exists bool) {
+	v := m.environment
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnvironment returns the old "environment" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldEnvironment(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnvironment is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnvironment requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnvironment: %w", err)
+	}
+	return oldValue.Environment, nil
+}
+
+// ResetEnvironment resets all changes to the "environment" field.
+func (m *IsDeployedMutation) ResetEnvironment() {
+	m.environment = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *IsDeployedMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *IsDeployedMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *IsDeployedMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *IsDeployedMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *IsDeployedMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the IsDeployed entity.
+// If the IsDeployed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDeployedMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *IsDeployedMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// ClearPackage clears the "package" edge to the PackageVersion entity.
+func (m *IsDeployedMutation) ClearPackage() {
+	m.cleared_package = true
+	m.clearedFields[isdeployed.FieldPackageID] = struct{}{}
+}
+
+// PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
+func (m *IsDeployedMutation) PackageCleared() bool {
+	return m.cleared_package
+}
+
+// PackageIDs returns the "package" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageID instead. It exists only for internal usage by the builders.
+func (m *IsDeployedMutation) PackageIDs() (ids []uuid.UUID) {
+	if id := m._package; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackage resets all changes to the "package" edge.
+func (m *IsDeployedMutation) ResetPackage() {
+	m._package = nil
+	m.cleared_package = false
+}
+
+// Where appends a list predicates to the IsDeployedMutation builder.
+func (m *IsDeployedMutation) Where(ps ...predicate.IsDeployed) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the IsDeployedMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *IsDeployedMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.IsDeployed, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *IsDeployedMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *IsDeployedMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (IsDeployed).
+func (m *IsDeployedMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *IsDeployedMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m._package != nil {
+		fields = append(fields, isdeployed.FieldPackageID)
+	}
+	if m.deployed_since != nil {
+		fields = append(fields, isdeployed.FieldDeployedSince)
+	}
+	if m.deployed_until != nil {
+		fields = append(fields, isdeployed.FieldDeployedUntil)
+	}
+	if m.resource_id != nil {
+		fields = append(fields, isdeployed.FieldResourceID)
+	}
+	if m.environment != nil {
+		fields = append(fields, isdeployed.FieldEnvironment)
+	}
+	if m.origin != nil {
+		fields = append(fields, isdeployed.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, isdeployed.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *IsDeployedMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case isdeployed.FieldPackageID:
+		return m.PackageID()
+	case isdeployed.FieldDeployedSince:
+		return m.DeployedSince()
+	case isdeployed.FieldDeployedUntil:
+		return m.DeployedUntil()
+	case isdeployed.FieldResourceID:
+		return m.ResourceID()
+	case isdeployed.FieldEnvironment:
+		return m.Environment()
+	case isdeployed.FieldOrigin:
+		return m.Origin()
+	case isdeployed.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *IsDeployedMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case isdeployed.FieldPackageID:
+		return m.OldPackageID(ctx)
+	case isdeployed.FieldDeployedSince:
+		return m.OldDeployedSince(ctx)
+	case isdeployed.FieldDeployedUntil:
+		return m.OldDeployedUntil(ctx)
+	case isdeployed.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case isdeployed.FieldEnvironment:
+		return m.OldEnvironment(ctx)
+	case isdeployed.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case isdeployed.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown IsDeployed field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IsDeployedMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case isdeployed.FieldPackageID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageID(v)
+		return nil
+	case isdeployed.FieldDeployedSince:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeployedSince(v)
+		return nil
+	case isdeployed.FieldDeployedUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeployedUntil(v)
+		return nil
+	case isdeployed.FieldResourceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case isdeployed.FieldEnvironment:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnvironment(v)
+		return nil
+	case isdeployed.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case isdeployed.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown IsDeployed field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *IsDeployedMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *IsDeployedMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IsDeployedMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown IsDeployed numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *IsDeployedMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *IsDeployedMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *IsDeployedMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown IsDeployed nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *IsDeployedMutation) ResetField(name string) error {
+	switch name {
+	case isdeployed.FieldPackageID:
+		m.ResetPackageID()
+		return nil
+	case isdeployed.FieldDeployedSince:
+		m.ResetDeployedSince()
+		return nil
+	case isdeployed.FieldDeployedUntil:
+		m.ResetDeployedUntil()
+		return nil
+	case isdeployed.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case isdeployed.FieldEnvironment:
+		m.ResetEnvironment()
+		return nil
+	case isdeployed.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case isdeployed.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown IsDeployed field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *IsDeployedMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m._package != nil {
+		edges = append(edges, isdeployed.EdgePackage)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *IsDeployedMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case isdeployed.EdgePackage:
+		if id := m._package; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *IsDeployedMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *IsDeployedMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *IsDeployedMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleared_package {
+		edges = append(edges, isdeployed.EdgePackage)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *IsDeployedMutation) EdgeCleared(name string) bool {
+	switch name {
+	case isdeployed.EdgePackage:
+		return m.cleared_package
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *IsDeployedMutation) ClearEdge(name string) error {
+	switch name {
+	case isdeployed.EdgePackage:
+		m.ClearPackage()
+		return nil
+	}
+	return fmt.Errorf("unknown IsDeployed unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *IsDeployedMutation) ResetEdge(name string) error {
+	switch name {
+	case isdeployed.EdgePackage:
+		m.ResetPackage()
+		return nil
+	}
+	return fmt.Errorf("unknown IsDeployed edge %s", name)
 }
 
 // LicenseMutation represents an operation that mutates the License nodes in the graph.

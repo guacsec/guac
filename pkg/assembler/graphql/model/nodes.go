@@ -1076,6 +1076,54 @@ type IsDependencySpec struct {
 	DocumentRef       *string         `json:"documentRef,omitempty"`
 }
 
+type IsDeployed struct {
+	ID string `json:"id"`
+	// Package that is deployed
+	Package *Package `json:"package"`
+	// Timestamp when the package was deployed and became active
+	DeployedSince time.Time `json:"deployedSince"`
+	// Timestamp when the package was no longer deployed and became inactive
+	DeployedUntil *time.Time `json:"deployedUntil,omitempty"`
+	// Deployment resource ID
+	ResourceID string `json:"resourceID"`
+	// Deployment environment
+	Environment string `json:"environment"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
+type IsDeployedConnection struct {
+	TotalCount int               `json:"totalCount"`
+	PageInfo   *PageInfo         `json:"pageInfo"`
+	Edges      []*IsDeployedEdge `json:"edges"`
+}
+
+type IsDeployedEdge struct {
+	Cursor string      `json:"cursor"`
+	Node   *IsDeployed `json:"node"`
+}
+
+type IsDeployedInputSpec struct {
+	Package       *PkgSpec   `json:"package"`
+	DeployedSince time.Time  `json:"deployedSince"`
+	DeployedUntil *time.Time `json:"deployedUntil,omitempty"`
+	ResourceID    string     `json:"resourceID"`
+	Environment   string     `json:"environment"`
+	Origin        string     `json:"origin"`
+	Collector     string     `json:"collector"`
+}
+
+type IsDeployedSpec struct {
+	ID          *string  `json:"id,omitempty"`
+	Package     *PkgSpec `json:"package,omitempty"`
+	ResourceID  *string  `json:"resourceID,omitempty"`
+	Environment *string  `json:"environment,omitempty"`
+	Origin      *string  `json:"origin,omitempty"`
+	Collector   *string  `json:"collector,omitempty"`
+}
+
 // IsOccurrence is an attestation to link an artifact to a package or source.
 //
 // Attestation must occur at the PackageVersion or at the SourceName.

@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdeployed"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -1858,6 +1859,115 @@ type hashequalPaginateArgs struct {
 
 func newHashEqualPaginateArgs(rv map[string]any) *hashequalPaginateArgs {
 	args := &hashequalPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (id *IsDeployedQuery) CollectFields(ctx context.Context, satisfies ...string) (*IsDeployedQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return id, nil
+	}
+	if err := id.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return id, nil
+}
+
+func (id *IsDeployedQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(isdeployed.Columns))
+		selectedFields = []string{isdeployed.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+
+		case "package":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: id.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
+				return err
+			}
+			id.withPackage = query
+			if _, ok := fieldSeen[isdeployed.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldPackageID)
+				fieldSeen[isdeployed.FieldPackageID] = struct{}{}
+			}
+		case "packageID":
+			if _, ok := fieldSeen[isdeployed.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldPackageID)
+				fieldSeen[isdeployed.FieldPackageID] = struct{}{}
+			}
+		case "deployedSince":
+			if _, ok := fieldSeen[isdeployed.FieldDeployedSince]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldDeployedSince)
+				fieldSeen[isdeployed.FieldDeployedSince] = struct{}{}
+			}
+		case "deployedUntil":
+			if _, ok := fieldSeen[isdeployed.FieldDeployedUntil]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldDeployedUntil)
+				fieldSeen[isdeployed.FieldDeployedUntil] = struct{}{}
+			}
+		case "resourceID":
+			if _, ok := fieldSeen[isdeployed.FieldResourceID]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldResourceID)
+				fieldSeen[isdeployed.FieldResourceID] = struct{}{}
+			}
+		case "environment":
+			if _, ok := fieldSeen[isdeployed.FieldEnvironment]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldEnvironment)
+				fieldSeen[isdeployed.FieldEnvironment] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[isdeployed.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldOrigin)
+				fieldSeen[isdeployed.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[isdeployed.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, isdeployed.FieldCollector)
+				fieldSeen[isdeployed.FieldCollector] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		id.Select(selectedFields...)
+	}
+	return nil
+}
+
+type isdeployedPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []IsDeployedPaginateOption
+}
+
+func newIsDeployedPaginateArgs(rv map[string]any) *isdeployedPaginateArgs {
+	args := &isdeployedPaginateArgs{}
 	if rv == nil {
 		return args
 	}

@@ -21,6 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdeployed"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -99,6 +100,11 @@ var hashequalImplementors = []string{"HashEqual", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*HashEqual) IsNode() {}
+
+var isdeployedImplementors = []string{"IsDeployed", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*IsDeployed) IsNode() {}
 
 var licenseImplementors = []string{"License", "Node"}
 
@@ -317,6 +323,15 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 			Where(hashequal.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, hashequalImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case isdeployed.Table:
+		query := c.IsDeployed.Query().
+			Where(isdeployed.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, isdeployedImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -673,6 +688,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		query := c.HashEqual.Query().
 			Where(hashequal.IDIn(ids...))
 		query, err := query.CollectFields(ctx, hashequalImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case isdeployed.Table:
+		query := c.IsDeployed.Query().
+			Where(isdeployed.IDIn(ids...))
+		query, err := query.CollectFields(ctx, isdeployedImplementors...)
 		if err != nil {
 			return nil, err
 		}
