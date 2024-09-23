@@ -267,12 +267,10 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 
 		if len(s.topLevelArtifacts) > 0 {
-			for id, arts := range s.topLevelArtifacts {
+			for _, arts := range s.topLevelArtifacts {
 				for _, art := range arts {
 					preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(art, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
 				}
-				// append to packageArtifacts so that isOccurrence is created
-				s.packageArtifacts[id] = append(s.packageArtifacts[id], arts...)
 			}
 
 			if len(s.topLevelArtifacts) != len(s.topLevelPackages) {
