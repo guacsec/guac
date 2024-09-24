@@ -58,14 +58,14 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 // Certify queries the graph DB to get the components to scan. Utilizing the registered certifiers,
 // it generates new nodes and attestations.
 func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler, poll bool, interval time.Duration) error {
+	// logger
+	logger := logging.FromContext(ctx)
 
 	runCertifier := func() error {
 		// compChan to collect query components
 		compChan := make(chan interface{}, BufferChannelSize)
 		// errChan to receive error from collectors
 		errChan := make(chan error, 1)
-		// logger
-		logger := logging.FromContext(ctx)
 
 		// define the GetComponents operation to be retried on failure (if gql server is not up)
 		backoffOperation := func() error {
@@ -106,21 +106,27 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 	}
 
 	// initially run the certifier the first time and then tick per interval if polling
+	logger.Infof("Starting certifier run: %v", time.Now().UTC())
 	err := runCertifier()
 	if err != nil {
 		return fmt.Errorf("certifier failed with an error: %w", err)
 	}
+	logger.Infof("Certifier run completed: %v", time.Now().UTC())
 
 	if poll {
 		ticker := time.NewTicker(interval)
 		for {
 			select {
 			case <-ticker.C:
+				// add logging to determine when the certifier run is started
+				logger.Infof("Starting polling certifier run: %v", time.Now().UTC())
 				err := runCertifier()
 				if err != nil {
 					return fmt.Errorf("certifier failed with an error: %w", err)
 				}
+				// reset the interval timer and log completion of the current certifier run
 				ticker.Reset(interval)
+				logger.Infof("Certifier polling run completed: %v", time.Now().UTC())
 			// if the context has been canceled return the err.
 			case <-ctx.Done():
 				return ctx.Err() // nolint:wrapcheck
