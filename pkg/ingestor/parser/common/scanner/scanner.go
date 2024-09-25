@@ -39,7 +39,7 @@ func PurlsVulnScan(ctx context.Context, purls []string) ([]assembler.VulnEqualIn
 
 	if osvProcessorDocs, err := osv_certifier.EvaluateOSVResponse(ctx, &http.Client{
 		Transport: version.UATransport,
-	}, purls); err != nil {
+	}, purls, nil); err != nil {
 		return nil, nil, fmt.Errorf("failed get response from OSV with error: %w", err)
 	} else {
 		for _, doc := range osvProcessorDocs {
@@ -109,7 +109,7 @@ func runQueryOnBatchedPurls(ctx context.Context, cdParser common.DocumentParser,
 	var hasSourceAtIngest []assembler.HasSourceAtIngest
 	if cdProcessorDocs, err := cd_certifier.EvaluateClearlyDefinedDefinition(ctx, &http.Client{
 		Transport: version.UATransport,
-	}, batchPurls); err != nil {
+	}, batchPurls, nil); err != nil {
 		return nil, nil, fmt.Errorf("failed get definition from clearly defined with error: %w", err)
 	} else {
 		for _, doc := range cdProcessorDocs {

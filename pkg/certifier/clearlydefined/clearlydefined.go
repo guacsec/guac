@@ -112,10 +112,6 @@ func getDefinitions(ctx context.Context, client *http.Client, purls []string, co
 		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
 	}
 
-	if len(purls) != len(definitions) {
-		return nil, fmt.Errorf("failed to get expected responses back! Purl count: %d, returned definition count %d", len(purls), len(definitions))
-	}
-
 	for coordinate, definition := range definitions {
 		definitionMap[coordinateToPurl[coordinate]] = definition
 	}
@@ -124,7 +120,7 @@ func getDefinitions(ctx context.Context, client *http.Client, purls []string, co
 }
 
 // EvaluateClearlyDefinedDefinition converts the purls into coordinates to query clearly defined
-func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, purls []string) ([]*processor.Document, error) {
+func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, purls []string, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	logger := logging.FromContext(ctx)
 	var batchCoordinates []string
 	var queryPurls []string
@@ -147,7 +143,7 @@ func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, 
 			batchCoordinates = append(batchCoordinates, coordinate.ToString())
 		}
 	}
-	if genCDDocs, err := generateDefinitions(ctx, client, batchCoordinates, queryPurls); err != nil {
+	if genCDDocs, err := generateDefinitions(ctx, client, batchCoordinates, queryPurls, docChannel); err != nil {
 		return nil, fmt.Errorf("generateDefinitions failed with error: %w", err)
 	} else {
 		generatedCDDocs = append(generatedCDDocs, genCDDocs...)
@@ -158,7 +154,7 @@ func EvaluateClearlyDefinedDefinition(ctx context.Context, client *http.Client, 
 
 // generateDefinitions takes in the batched coordinated to retrieve the definition. It uses the definition to check if source
 // information can be queried in clearly defined.
-func generateDefinitions(ctx context.Context, client *http.Client, batchCoordinates, queryPurls []string) ([]*processor.Document, error) {
+func generateDefinitions(ctx context.Context, client *http.Client, batchCoordinates, queryPurls []string, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	var generatedCDDocs []*processor.Document
 	if len(batchCoordinates) > 0 {
 		definitionMap, err := getDefinitions(ctx, client, queryPurls, batchCoordinates)
@@ -166,13 +162,13 @@ func generateDefinitions(ctx context.Context, client *http.Client, batchCoordina
 			return nil, fmt.Errorf("failed get package definition from clearly defined with error: %w", err)
 		}
 
-		if genCDPkgDocs, err := generateDocument(definitionMap); err != nil {
+		if genCDPkgDocs, err := generateDocument(definitionMap, docChannel); err != nil {
 			return nil, fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
 		} else {
 			generatedCDDocs = append(generatedCDDocs, genCDPkgDocs...)
 		}
 
-		if genCDSrcDocs, err := evaluateDefinitionForSource(ctx, client, definitionMap); err != nil {
+		if genCDSrcDocs, err := evaluateDefinitionForSource(ctx, client, definitionMap, docChannel); err != nil {
 			return nil, fmt.Errorf("evaluateDefinitionForSource failed with error: %w", err)
 		} else {
 			generatedCDDocs = append(generatedCDDocs, genCDSrcDocs...)
@@ -194,12 +190,8 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 		purls = append(purls, node.Purl)
 	}
 
-	if genCDDocs, err := EvaluateClearlyDefinedDefinition(ctx, c.cdHTTPClient, purls); err != nil {
+	if _, err := EvaluateClearlyDefinedDefinition(ctx, c.cdHTTPClient, purls, docChannel); err != nil {
 		return fmt.Errorf("could not generate document from Clearly Defined results: %w", err)
-	} else {
-		for _, doc := range genCDDocs {
-			docChannel <- doc
-		}
 	}
 
 	return nil
@@ -207,7 +199,7 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 
 // evaluateDefinitionForSource takes in the returned definitions from package coordinates to determine if
 // source information can be obtained to re-query clearly defined for source related license information
-func evaluateDefinitionForSource(ctx context.Context, client *http.Client, definitionMap map[string]*attestation.Definition) ([]*processor.Document, error) {
+func evaluateDefinitionForSource(ctx context.Context, client *http.Client, definitionMap map[string]*attestation.Definition, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	sourceMap := map[string]bool{}
 	var batchCoordinates []string
 	var sourceInputs []string
@@ -238,13 +230,13 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 		if err != nil {
 			return nil, fmt.Errorf("failed get source definition from clearly defined with error: %w", err)
 		}
-		return generateDocument(definitionMap)
+		return generateDocument(definitionMap, docChannel)
 	}
 	return nil, nil
 }
 
 // generateDocument generates the processor document for ingestion
-func generateDocument(definitionMap map[string]*attestation.Definition) ([]*processor.Document, error) {
+func generateDocument(definitionMap map[string]*attestation.Definition, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	var generatedCDDocs []*processor.Document
 	for purl, definition := range definitionMap {
 		if definition.Described.ReleaseDate == "" {
@@ -264,6 +256,9 @@ func generateDocument(definitionMap map[string]*attestation.Definition) ([]*proc
 				Source:      CDCollector,
 				DocumentRef: events.GetDocRef(payload),
 			},
+		}
+		if docChannel != nil {
+			docChannel <- doc
 		}
 		generatedCDDocs = append(generatedCDDocs, doc)
 	}

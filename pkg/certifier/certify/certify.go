@@ -90,7 +90,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 					return fmt.Errorf("generate certifier documents error: %w", err)
 				}
 			case err := <-errChan:
-				if !handleErr(err) {
+				if err != nil {
 					// drain channel before exiting
 					drainComponentChannel(compChan, ctx, emitter, handleErr)
 					return err
@@ -119,14 +119,14 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 			select {
 			case <-ticker.C:
 				// add logging to determine when the certifier run is started
-				logger.Infof("Starting polling certifier run: %v", time.Now().UTC())
+				logger.Infof("Starting certifier run: %v", time.Now().UTC())
 				err := runCertifier()
 				if err != nil {
 					return fmt.Errorf("certifier failed with an error: %w", err)
 				}
 				// reset the interval timer and log completion of the current certifier run
 				ticker.Reset(interval)
-				logger.Infof("Certifier polling run completed: %v", time.Now().UTC())
+				logger.Infof("Certifier run completed: %v", time.Now().UTC())
 			// if the context has been canceled return the err.
 			case <-ctx.Done():
 				return ctx.Err() // nolint:wrapcheck
