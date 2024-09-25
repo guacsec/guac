@@ -20,34 +20,87 @@ import (
 func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["keyName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyName"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.dir_filter_argsKeyName(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["keyName"] = arg0
-	var arg1 *model.FilterOperation
-	if tmp, ok := rawArgs["operation"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("operation"))
-		arg1, err = ec.unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.dir_filter_argsOperation(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["operation"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["value"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.dir_filter_argsValue(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["value"] = arg2
 	return args, nil
+}
+func (ec *executionContext) dir_filter_argsKeyName(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["keyName"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("keyName"))
+	if tmp, ok := rawArgs["keyName"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) dir_filter_argsOperation(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.FilterOperation, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["operation"]
+	if !ok {
+		var zeroVal *model.FilterOperation
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("operation"))
+	if tmp, ok := rawArgs["operation"]; ok {
+		return ec.unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation(ctx, tmp)
+	}
+
+	var zeroVal *model.FilterOperation
+	return zeroVal, nil
+}
+
+func (ec *executionContext) dir_filter_argsValue(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["value"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+	if tmp, ok := rawArgs["value"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

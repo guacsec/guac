@@ -173,7 +173,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20240620165639-de9c06129bec // indirect
-	github.com/logrusorgru/aurora/v3 v3.0.0 // indirect
+	github.com/logrusorgru/aurora/v4 v4.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -277,7 +277,7 @@ require (
 	deps.dev/api/v3 v3.0.0-20240807013505-16da96fe8b66
 	entgo.io/contrib v0.6.0
 	entgo.io/ent v0.14.0
-	github.com/99designs/gqlgen v0.17.49
+	github.com/99designs/gqlgen v0.17.54
 	github.com/CycloneDX/cyclonedx-go v0.9.0
 	github.com/Khan/genqlient v0.7.0
 	github.com/Masterminds/semver v1.5.0
