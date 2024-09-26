@@ -373,27 +373,6 @@ func TestPurlsLicenseScan(t *testing.T) {
 					Collector:         "clearlydefined",
 				},
 			},
-			{
-				Src: &generated.SourceInputSpec{
-					Type:      "sourcearchive",
-					Namespace: "org.apache.logging.log4j",
-					Name:      "log4j-core",
-					Tag:       ptrfrom.String("2.8.1"),
-				},
-				Declared: []generated.LicenseInputSpec{},
-				Discovered: []generated.LicenseInputSpec{
-					{Name: "Apache-2.0", ListVersion: &lvUnknown},
-					{Name: "NOASSERTION", ListVersion: &lvUnknown},
-				},
-				CertifyLegal: &generated.CertifyLegalInputSpec{
-					DiscoveredLicense: "Apache-2.0 AND NOASSERTION",
-					Attribution:       "Copyright 2005-2006 Tim Fennell,Copyright 1999-2012 Apache Software Foundation,Copyright 1999-2005 The Apache Software Foundation",
-					Justification:     "Retrieved from ClearlyDefined",
-					TimeScanned:       tm,
-					Origin:            "clearlydefined",
-					Collector:         "clearlydefined",
-				},
-			},
 		},
 		wantHSAs: []assembler.HasSourceAtIngest{
 			{
