@@ -18,6 +18,7 @@ package parser
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -75,6 +76,8 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool, scanForLicense bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+	var wg sync.WaitGroup
+
 	assemblerInputs := []assembler.IngestPredicates{}
 	identifierStrings := []*common.IdentifierStrings{}
 	logger := docTree.Document.ChildLogger
@@ -98,40 +101,49 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scan
 	}
 
 	if scanForVulns {
-		// scan purls via OSV on initial ingestion to capture vulnerability information
-		var purls []string
-		for _, idString := range identifierStrings {
-			purls = append(purls, idString.PurlStrings...)
-		}
-
-		vulnEquals, certVulns, err := scanner.PurlsVulnScan(ctx, purls)
-		if err != nil {
-			logger.Errorf("error scanning purls for vulnerabilities %v", err)
-		} else {
-			if len(assemblerInputs) > 0 {
-				assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
-				assemblerInputs[0].CertifyVuln = append(assemblerInputs[0].CertifyVuln, certVulns...)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// scan purls via OSV on initial ingestion to capture vulnerability information
+			var purls []string
+			for _, idString := range identifierStrings {
+				purls = append(purls, idString.PurlStrings...)
 			}
-		}
+
+			vulnEquals, certVulns, err := scanner.PurlsVulnScan(ctx, purls)
+			if err != nil {
+				logger.Errorf("error scanning purls for vulnerabilities %v", err)
+			} else {
+				if len(assemblerInputs) > 0 {
+					assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
+					assemblerInputs[0].CertifyVuln = append(assemblerInputs[0].CertifyVuln, certVulns...)
+				}
+			}
+		}()
 	}
 
 	if scanForLicense {
-		// scan purls via clearly defined on initial ingestion to capture license information
-		var purls []string
-		for _, idString := range identifierStrings {
-			purls = append(purls, idString.PurlStrings...)
-		}
-
-		certLegal, hasSourceAt, err := scanner.PurlsLicenseScan(ctx, purls)
-		if err != nil {
-			logger.Errorf("error scanning purls for licenses %v", err)
-		} else {
-			if len(assemblerInputs) > 0 {
-				assemblerInputs[0].CertifyLegal = append(assemblerInputs[0].CertifyLegal, certLegal...)
-				assemblerInputs[0].HasSourceAt = append(assemblerInputs[0].HasSourceAt, hasSourceAt...)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// scan purls via clearly defined on initial ingestion to capture license information
+			var purls []string
+			for _, idString := range identifierStrings {
+				purls = append(purls, idString.PurlStrings...)
 			}
-		}
+
+			certLegal, hasSourceAt, err := scanner.PurlsLicenseScan(ctx, purls)
+			if err != nil {
+				logger.Errorf("error scanning purls for licenses %v", err)
+			} else {
+				if len(assemblerInputs) > 0 {
+					assemblerInputs[0].CertifyLegal = append(assemblerInputs[0].CertifyLegal, certLegal...)
+					assemblerInputs[0].HasSourceAt = append(assemblerInputs[0].HasSourceAt, hasSourceAt...)
+				}
+			}
+		}()
 	}
+	wg.Wait()
 
 	return assemblerInputs, identifierStrings, nil
 }
