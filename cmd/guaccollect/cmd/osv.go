@@ -222,9 +222,9 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 		if err == nil {
 			return true
 		}
-		logger.Errorf("certifier ended with error: %v", err)
-		// exit the loop but drain the channel first
-		return false
+		logger.Errorf("certifier encountered an error: %v, continuing...", err)
+		// log the error but continue forward with the rest of the package processing
+		return true
 	}
 
 	ctx, cf := context.WithCancel(ctx)

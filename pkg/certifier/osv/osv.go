@@ -78,18 +78,14 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 		purls = append(purls, node.Purl)
 	}
 
-	if genOSVDocs, err := EvaluateOSVResponse(ctx, o.osvHTTPClient, purls); err != nil {
+	if _, err := EvaluateOSVResponse(ctx, o.osvHTTPClient, purls, docChannel); err != nil {
 		return fmt.Errorf("could not generate document from OSV results: %w", err)
-	} else {
-		for _, doc := range genOSVDocs {
-			docChannel <- doc
-		}
 	}
 	return nil
 }
 
 // EvaluateOSVResponse takes a list of purls and batch queries OSV for vulnerability information
-func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []string) ([]*processor.Document, error) {
+func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []string, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	var query osv_scanner.BatchedQuery
 	packMap := map[string]bool{}
 
@@ -117,11 +113,11 @@ func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []strin
 
 		responseMap[purl] = &response
 	}
-	return generateDocument(responseMap)
+	return generateDocument(responseMap, docChannel)
 }
 
 // generateDocument generated the processor document for ingestion
-func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse) ([]*processor.Document, error) {
+func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	var generatedOSVDocs []*processor.Document
 	for purl, response := range responseMap {
 		currentTime := time.Now()
@@ -138,6 +134,9 @@ func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse) ([]*p
 				Source:      OSVCollector,
 				DocumentRef: events.GetDocRef(payload),
 			},
+		}
+		if docChannel != nil {
+			docChannel <- doc
 		}
 		generatedOSVDocs = append(generatedOSVDocs, doc)
 	}
