@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+
+	"github.com/Khan/genqlient/graphql"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
@@ -36,59 +37,85 @@ func SearchForSBOMViaArtifact(ctx context.Context, gqlclient graphql.Client, sea
 	var tableRows []table.Row
 	checkedPkgIDs := make(map[string]bool)
 	var collectedPkgVersionResults []*pkgVersionNeighborQueryResults
+	AlreadyIncludedTableRows := make(map[string]bool)
 
-	queue := make([]string, 0) // the queue of nodes in bfs
+	// Define the node structure for traversal
 	type dfsNode struct {
-		expanded bool // true once all node neighbors are added to queue
-		parent   string
-		pkgID    string
-		depth    int
+		expanded bool   // Indicates if all node neighbors are added to the queue
+		parent   string // Parent node in the traversal
+		pkgID    string // Package ID
+		depth    int    // Depth in the traversal
 	}
-	nodeMap := map[string]dfsNode{}
 
-	nodeMap[searchString] = dfsNode{}
-	queue = append(queue, searchString)
+	// Initialize the node map and queue with the search string
+	nodeMap := map[string]dfsNode{
+		searchString: {},
+	}
+	queue := []string{searchString}
 
 	for len(queue) > 0 {
 		now := queue[0]
 		queue = queue[1:]
 		nowNode := nodeMap[now]
 
+		// Stop traversal if the maximum depth is reached
 		if maxLength != 0 && nowNode.depth >= maxLength {
 			break
 		}
 
 		var foundHasSBOM *model.HasSBOMsResponse
 
-		// if the initial depth, check if it's a purl or an SBOM URI. Otherwise, always search by pkgID
-		// note that primaryCall will be static throughout the entire function.
 		if nowNode.depth == 0 {
+			// Initial depth: treat searchString as an artifact
 			artResponse, err := getArtifactResponseFromArtifact(ctx, gqlclient, now)
 			if err != nil {
-				return nil, nil, fmt.Errorf("getPkgResponseFromPurl - error: %v", err)
+				return nil, nil, fmt.Errorf("getArtifactResponseFromArtifact - error: %v", err)
 			}
-			foundHasSBOM, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Artifact: &model.ArtifactSpec{Id: &artResponse.Artifacts[0].Id}}})
+
+			artifactID := artResponse.Artifacts[0].Id
+			hasSBOMSpec := model.HasSBOMSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{Id: &artifactID},
+				},
+			}
+			foundHasSBOM, err = model.HasSBOMs(ctx, gqlclient, hasSBOMSpec)
 			if err != nil {
-				return nil, nil, fmt.Errorf("failed getting hasSBOM via purl: %s with error :%w", now, err)
+				return nil, nil, fmt.Errorf("failed getting hasSBOM via artifact: %s with error: %w", now, err)
 			}
 		} else {
-			foundHasSBOMPkg, err := model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Package: &model.PkgSpec{Id: &now}}})
+			// Subsequent depths: treat 'now' as a package ID
+			hasSBOMSpec := model.HasSBOMSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Package: &model.PkgSpec{Id: &now},
+				},
+			}
+			foundHasSBOMPkg, err := model.HasSBOMs(ctx, gqlclient, hasSBOMSpec)
 			if err != nil {
-				return nil, nil, fmt.Errorf("failed getting hasSBOM via purl: %s with error :%w", now, err)
+				return nil, nil, fmt.Errorf("failed getting hasSBOM via package: %s with error: %w", now, err)
 			}
 			if foundHasSBOMPkg != nil {
 				foundHasSBOM = foundHasSBOMPkg
 			} else {
-				occur, err := model.Occurrences(ctx, gqlclient, model.IsOccurrenceSpec{
-					Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{Id: &now}},
-				})
+				// If no HasSBOM found via package, try via occurrences
+				occurSpec := model.IsOccurrenceSpec{
+					Subject: &model.PackageOrSourceSpec{
+						Package: &model.PkgSpec{Id: &now},
+					},
+				}
+				occurrences, err := model.Occurrences(ctx, gqlclient, occurSpec)
 				if err != nil {
 					return nil, nil, fmt.Errorf("error querying for occurrences: %v", err)
 				}
-				if occur != nil && len(occur.IsOccurrence) > 0 {
-					foundHasSBOMArt, err := model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Artifact: &model.ArtifactSpec{Id: &occur.IsOccurrence[0].Artifact.Id}}})
+				if occurrences != nil && len(occurrences.IsOccurrence) > 0 {
+					artifactID := occurrences.IsOccurrence[0].Artifact.Id
+					hasSBOMSpec := model.HasSBOMSpec{
+						Subject: &model.PackageOrArtifactSpec{
+							Artifact: &model.ArtifactSpec{Id: &artifactID},
+						},
+					}
+					foundHasSBOMArt, err := model.HasSBOMs(ctx, gqlclient, hasSBOMSpec)
 					if err != nil {
-						return nil, nil, fmt.Errorf("failed getting hasSBOM via purl: %s with error :%w", now, err)
+						return nil, nil, fmt.Errorf("failed getting hasSBOM via occurrence: %s with error: %w", now, err)
 					}
 					if foundHasSBOMArt != nil {
 						foundHasSBOM = foundHasSBOMArt
@@ -97,40 +124,21 @@ func SearchForSBOMViaArtifact(ctx context.Context, gqlclient graphql.Client, sea
 			}
 		}
 
+		if foundHasSBOM == nil {
+			// If no HasSBOM is found, continue to the next node
+			continue
+		}
+
+		// Process the HasSBOM results
 		for _, hasSBOM := range foundHasSBOM.HasSBOM {
-
-			subjectArtifact, ok := hasSBOM.Subject.(*model.AllHasSBOMTreeSubjectArtifact)
-			if ok {
-				occur, err := model.Occurrences(ctx, gqlclient, model.IsOccurrenceSpec{
-					Artifact: &model.ArtifactSpec{Id: &subjectArtifact.Id},
-				})
-				if err != nil {
-					return nil, nil, fmt.Errorf("error querying for occurrences: %v", err)
-				}
-				pkgResponse, ok := occur.IsOccurrence[0].Subject.(*model.AllIsOccurrencesTreeSubjectPackage)
-				if ok {
-					if pkgResponse.Type != guacType {
-						if !checkedPkgIDs[pkgResponse.Namespaces[0].Names[0].Versions[0].Id] {
-							vulnPath, pkgVulnTableRows, err := queryVulnsViaPackageNeighbors(ctx, gqlclient, pkgResponse.Namespaces[0].Names[0].Versions[0].Id)
-							if err != nil {
-								return nil, nil, fmt.Errorf("error querying neighbor: %w", err)
-							}
-							path = append(path, vulnPath...)
-							tableRows = append(tableRows, pkgVulnTableRows...)
-							path = append([]string{pkgResponse.Namespaces[0].Names[0].Versions[0].Id,
-								pkgResponse.Namespaces[0].Names[0].Id, pkgResponse.Namespaces[0].Id,
-								pkgResponse.Id}, path...)
-							checkedPkgIDs[pkgResponse.Namespaces[0].Names[0].Versions[0].Id] = true
-						}
-					}
-				}
-			}
-
+			// Handle included dependencies
 			for _, isDep := range hasSBOM.IncludedDependencies {
 				if isDep.DependencyPackage.Type == guacType {
 					continue
 				}
 				depPkgID := isDep.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id
+
+				// Check if the dependency package ID is already in the node map
 				dfsN, seen := nodeMap[depPkgID]
 				if !seen {
 					dfsN = dfsNode{
@@ -140,68 +148,79 @@ func SearchForSBOMViaArtifact(ctx context.Context, gqlclient graphql.Client, sea
 					}
 					nodeMap[depPkgID] = dfsN
 				}
+
+				// **Include the missing `if !dfsN.expanded` check**
 				if !dfsN.expanded {
 					queue = append(queue, depPkgID)
 				}
-				pkgVersionNeighbors, err := getVulnAndVexNeighborsForPackage(ctx, gqlclient, depPkgID, isDep)
-				if err != nil {
-					return nil, nil, fmt.Errorf("getVulnAndVexNeighbors failed with error: %w", err)
-				}
-				collectedPkgVersionResults = append(collectedPkgVersionResults, pkgVersionNeighbors)
-				checkedPkgIDs[depPkgID] = true
 
-			}
-
-			for _, isDep := range hasSBOM.IncludedDependencies {
-				if isDep.DependencyPackage.Type == guacType {
-					continue
-				}
-
-				depPkgID := isDep.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id
-				if _, seen := nodeMap[depPkgID]; !seen {
-					dfsN := dfsNode{
-						parent: now,
-						pkgID:  depPkgID,
-						depth:  nowNode.depth + 1,
+				// Process vulnerabilities and VEX statements for the dependency
+				if !checkedPkgIDs[depPkgID] {
+					pkgVersionNeighbors, err := getVulnAndVexNeighborsForPackage(ctx, gqlclient, depPkgID, isDep)
+					if err != nil {
+						return nil, nil, fmt.Errorf("getVulnAndVexNeighbors failed with error: %w", err)
 					}
-					nodeMap[depPkgID] = dfsN
+					collectedPkgVersionResults = append(collectedPkgVersionResults, pkgVersionNeighbors)
+					checkedPkgIDs[depPkgID] = true
 				}
 			}
 		}
+
 		nowNode.expanded = true
 		nodeMap[now] = nowNode
 	}
 
+	// Process collected package version results
 	checkedCertifyVulnIDs := make(map[string]bool)
 
-	// Collect results from the channel
 	for _, result := range collectedPkgVersionResults {
 		for _, neighbor := range result.pkgVersionNeighborResponse.Neighbors {
-			if certifyVuln, ok := neighbor.(*model.NeighborsNeighborsCertifyVuln); ok {
-				if !checkedCertifyVulnIDs[certifyVuln.Id] && certifyVuln.Vulnerability.Type != noVulnType {
-					checkedCertifyVulnIDs[certifyVuln.Id] = true
-					for _, vuln := range certifyVuln.Vulnerability.VulnerabilityIDs {
-						tableRows = append(tableRows, table.Row{certifyVulnStr, certifyVuln.Id, "vulnerability ID: " + vuln.VulnerabilityID})
-						path = append(path, []string{vuln.Id, certifyVuln.Id,
-							certifyVuln.Package.Namespaces[0].Names[0].Versions[0].Id,
-							certifyVuln.Package.Namespaces[0].Names[0].Id, certifyVuln.Package.Namespaces[0].Id,
-							certifyVuln.Package.Id}...)
+			switch n := neighbor.(type) {
+			case *model.NeighborsNeighborsCertifyVuln:
+				if !checkedCertifyVulnIDs[n.Id] && n.Vulnerability.Type != noVulnType {
+					checkedCertifyVulnIDs[n.Id] = true
+					for _, vuln := range n.Vulnerability.VulnerabilityIDs {
+						if !AlreadyIncludedTableRows[vuln.VulnerabilityID] {
+							tableRows = append(tableRows, table.Row{
+								certifyVulnStr,
+								n.Id,
+								"vulnerability ID: " + vuln.VulnerabilityID,
+							})
+							path = append(path, []string{
+								vuln.Id,
+								n.Id,
+								n.Package.Namespaces[0].Names[0].Versions[0].Id,
+								n.Package.Namespaces[0].Names[0].Id,
+								n.Package.Namespaces[0].Id,
+								n.Package.Id,
+							}...)
+							AlreadyIncludedTableRows[vuln.VulnerabilityID] = true
+						}
 					}
-					path = append(path, result.isDep.Id, result.isDep.Package.Namespaces[0].Names[0].Versions[0].Id,
-						result.isDep.Package.Namespaces[0].Names[0].Id, result.isDep.Package.Namespaces[0].Id,
-						result.isDep.Package.Id)
+					// Include dependency path
+					isDep := result.isDep
+					path = append(path, []string{
+						isDep.Id,
+						isDep.Package.Namespaces[0].Names[0].Versions[0].Id,
+						isDep.Package.Namespaces[0].Names[0].Id,
+						isDep.Package.Namespaces[0].Id,
+						isDep.Package.Id,
+					}...)
 				}
-			}
-
-			if certifyVex, ok := neighbor.(*model.NeighborsNeighborsCertifyVEXStatement); ok {
-				for _, vuln := range certifyVex.Vulnerability.VulnerabilityIDs {
-					tableRows = append(tableRows, table.Row{vexLinkStr, certifyVex.Id, "vulnerability ID: " + vuln.VulnerabilityID + ", Vex Status: " + string(certifyVex.Status) + ", Subject: " + VexSubjectString(certifyVex.Subject)})
-					path = append(path, certifyVex.Id, vuln.Id)
+			case *model.NeighborsNeighborsCertifyVEXStatement:
+				for _, vuln := range n.Vulnerability.VulnerabilityIDs {
+					tableRows = append(tableRows, table.Row{
+						vexLinkStr,
+						n.Id,
+						"vulnerability ID: " + vuln.VulnerabilityID + ", Vex Status: " + string(n.Status) + ", Subject: " + VexSubjectString(n.Subject),
+					})
+					path = append(path, n.Id, vuln.Id)
 				}
-				path = append(path, vexSubjectIds(certifyVex.Subject)...)
+				path = append(path, vexSubjectIds(n.Subject)...)
 			}
 		}
 	}
+
 	return path, tableRows, nil
 }
 
@@ -372,10 +391,10 @@ func getArtifactResponseFromArtifact(ctx context.Context, gqlclient graphql.Clie
 	}
 	artResponse, err := model.Artifacts(ctx, gqlclient, *artFilter)
 	if err != nil {
-		return nil, fmt.Errorf("error querying for package: %v", err)
+		return nil, fmt.Errorf("error querying for artifact: %v", err)
 	}
 	if len(artResponse.Artifacts) != 1 {
-		return nil, fmt.Errorf("failed to located package based on purl")
+		return nil, fmt.Errorf("failed to locate artifact based on algorithm and digest")
 	}
 	return artResponse, nil
 }
