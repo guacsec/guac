@@ -19,3 +19,13 @@ func (r *queryResolver) FindSoftware(ctx context.Context, searchText string) ([]
 func (r *queryResolver) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return r.Backend.FindSoftwareList(ctx, searchText, after, first)
 }
+
+// QueryVulnPackagesList is the resolver for the queryVulnPackagesList field.
+func (r *queryResolver) QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return r.Backend.QueryVulnPackagesList(ctx, pkgSpec, lastInterval, after, first)
+}
+
+// QueryLicensePackagesList is the resolver for the queryLicensePackagesList field.
+func (r *queryResolver) QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return r.Backend.QueryLicensePackagesList(ctx, pkgSpec, lastInterval, after, first)
+}

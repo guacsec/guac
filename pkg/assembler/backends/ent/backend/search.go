@@ -18,11 +18,17 @@ package backend
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"entgo.io/contrib/entgql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -99,4 +105,79 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 
 func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
+}
+
+func (b *EntBackend) QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != packageversion.Table {
+			return nil, fmt.Errorf("after cursor is not type packageversion but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	pkgConn, err := b.client.PackageVersion.Query().
+		Where(packageQueryPredicates(&pkgSpec)).
+		Where(packageQueryCertifyVulnTime(lastInterval)).
+		WithName(func(q *ent.PackageNameQuery) {}).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed package query with error: %w", err)
+	}
+
+	// if not found return nil
+	if pkgConn == nil {
+		return nil, nil
+	}
+
+	var edges []*model.PackageEdge
+	for _, edge := range pkgConn.Edges {
+		edges = append(edges, &model.PackageEdge{
+			Cursor: pkgVersionGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelPackage(backReferencePackageVersion(edge.Node)),
+		})
+	}
+
+	if pkgConn.PageInfo.StartCursor != nil {
+		return &model.PackageConnection{
+			TotalCount: pkgConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: pkgConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func packageQueryCertifyVulnTime(lastInterval *int) predicate.PackageVersion {
+	if lastInterval != nil {
+		now := time.Now()
+		lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour)
+
+		return packageversion.And(
+			packageversion.HasVulnWith(
+				optionalPredicate(&lastIntervalTime, certifyvuln.TimeScannedGTE),
+				optionalPredicate(&now, certifyvuln.TimeScannedLTE),
+			),
+		)
+	} else {
+		return packageversion.And(NoOpSelector())
+	}
+}
+
+func (b *EntBackend) QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: QueryLicensePackagesList")
 }

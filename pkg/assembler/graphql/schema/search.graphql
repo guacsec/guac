@@ -64,4 +64,14 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
+  """
+  Returns a paginated results via PackageConnection for all packages that need updated
+  results for certifyVuln (query for vulnerabilities)
+  """
+  queryVulnPackagesList(pkgSpec: PkgSpec!, lastInterval: Int, after: ID, first: Int): PackageConnection
+  """
+  Returns a paginated results via PackageConnection for all packages that need updated
+  results for certifyLegal (query for Licenses)
+  """
+  queryLicensePackagesList(pkgSpec: PkgSpec!, lastInterval: Int,  after: ID, first: Int): PackageConnection
 }

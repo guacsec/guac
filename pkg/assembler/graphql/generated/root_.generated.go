@@ -572,6 +572,8 @@ type ComplexityRoot struct {
 		PkgEqualList              func(childComplexity int, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) int
 		PointOfContact            func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
 		PointOfContactList        func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
+		QueryLicensePackagesList  func(childComplexity int, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) int
+		QueryVulnPackagesList     func(childComplexity int, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) int
 		Scorecards                func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
 		ScorecardsList            func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
 		Sources                   func(childComplexity int, sourceSpec model.SourceSpec) int
@@ -3550,6 +3552,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PointOfContactList(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.queryLicensePackagesList":
+		if e.complexity.Query.QueryLicensePackagesList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryLicensePackagesList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryLicensePackagesList(childComplexity, args["pkgSpec"].(model.PkgSpec), args["lastInterval"].(*int), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.queryVulnPackagesList":
+		if e.complexity.Query.QueryVulnPackagesList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryVulnPackagesList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryVulnPackagesList(childComplexity, args["pkgSpec"].(model.PkgSpec), args["lastInterval"].(*int), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -7597,6 +7623,16 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
+  """
+  Returns a paginated results via PackageConnection for all packages that need updated
+  results for certifyVuln (query for vulnerabilities)
+  """
+  queryVulnPackagesList(pkgSpec: PkgSpec!, lastInterval: Int, after: ID, first: Int): PackageConnection
+  """
+  Returns a paginated results via PackageConnection for all packages that need updated
+  results for certifyLegal (query for Licenses)
+  """
+  queryLicensePackagesList(pkgSpec: PkgSpec!, lastInterval: Int,  after: ID, first: Int): PackageConnection
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
