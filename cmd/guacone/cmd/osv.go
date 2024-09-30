@@ -57,6 +57,9 @@ type osvOptions struct {
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// last time the scan was done in hours, if not set it will return
+	// all packages to check
+	lastScan *int
 }
 
 var osvCmd = &cobra.Command{
@@ -75,6 +78,7 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -99,10 +103,9 @@ var osvCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		lastScan := 1
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeVulnerability, opts.batchSize, osvQuerySize, opts.addedLatency, &lastScan)
+		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeVulnerability, opts.batchSize, osvQuerySize, opts.addedLatency, opts.lastScan)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)
@@ -233,7 +236,7 @@ func validateOSVFlags(
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
 	certifierLatencyStr string,
-	batchSize int,
+	batchSize int, lastScan int,
 ) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -257,6 +260,10 @@ func validateOSVFlags(
 
 	opts.batchSize = batchSize
 
+	if lastScan != 0 {
+		opts.lastScan = &lastScan
+	}
+
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
@@ -270,7 +277,7 @@ func validateOSVFlags(
 
 func init() {
 	set, err := cli.BuildFlags([]string{"certifier-latency",
-		"certifier-batch-size"})
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

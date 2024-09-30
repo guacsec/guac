@@ -63,6 +63,9 @@ type osvOptions struct {
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// last time the scan was done in hours, if not set it will return
+	// all packages to check
+	lastScan *int
 }
 
 var osvCmd = &cobra.Command{
@@ -94,6 +97,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("publish-to-queue"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -112,7 +116,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		packageQueryFunc, err := getOSVPackageQuery(gqlclient, opts.batchSize, opts.addedLatency)
+		packageQueryFunc, err := getOSVPackageQuery(gqlclient, opts.batchSize, opts.addedLatency, opts.lastScan)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -131,7 +135,7 @@ func validateOSVFlags(
 	poll bool,
 	pubToQueue bool,
 	certifierLatencyStr string,
-	batchSize int) (osvOptions, error) {
+	batchSize int, lastScan int) (osvOptions, error) {
 
 	var opts osvOptions
 
@@ -159,7 +163,9 @@ func validateOSVFlags(
 	}
 
 	opts.batchSize = batchSize
-
+	if lastScan != 0 {
+		opts.lastScan = &lastScan
+	}
 	return opts, nil
 }
 
@@ -169,9 +175,9 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 	}, nil
 }
 
-func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
+func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration, lastScan *int) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeVulnerability, batchSize, osvQuerySize, addedLatency, nil)
+		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeVulnerability, batchSize, osvQuerySize, addedLatency, lastScan)
 		return packageQuery
 	}, nil
 }
@@ -254,7 +260,7 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
 		"header-file", "certifier-latency",
-		"certifier-batch-size"})
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
