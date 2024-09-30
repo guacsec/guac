@@ -113,8 +113,7 @@ type QueryResolver interface {
 	PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error)
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
 	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
-	QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error)
-	QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error)
+	QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error)
 	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
 	SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error)
 	VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error)
@@ -6146,32 +6145,37 @@ func (ec *executionContext) field_Query_path_argsUsingOnly(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_queryLicensePackagesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_queryPackagesListForType_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_queryLicensePackagesList_argsPkgSpec(ctx, rawArgs)
+	arg0, err := ec.field_Query_queryPackagesListForType_argsPkgSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["pkgSpec"] = arg0
-	arg1, err := ec.field_Query_queryLicensePackagesList_argsLastInterval(ctx, rawArgs)
+	arg1, err := ec.field_Query_queryPackagesListForType_argsQueryType(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["lastInterval"] = arg1
-	arg2, err := ec.field_Query_queryLicensePackagesList_argsAfter(ctx, rawArgs)
+	args["queryType"] = arg1
+	arg2, err := ec.field_Query_queryPackagesListForType_argsLastInterval(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["after"] = arg2
-	arg3, err := ec.field_Query_queryLicensePackagesList_argsFirst(ctx, rawArgs)
+	args["lastInterval"] = arg2
+	arg3, err := ec.field_Query_queryPackagesListForType_argsAfter(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["first"] = arg3
+	args["after"] = arg3
+	arg4, err := ec.field_Query_queryPackagesListForType_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg4
 	return args, nil
 }
-func (ec *executionContext) field_Query_queryLicensePackagesList_argsPkgSpec(
+func (ec *executionContext) field_Query_queryPackagesListForType_argsPkgSpec(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (model.PkgSpec, error) {
@@ -6193,7 +6197,29 @@ func (ec *executionContext) field_Query_queryLicensePackagesList_argsPkgSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_queryLicensePackagesList_argsLastInterval(
+func (ec *executionContext) field_Query_queryPackagesListForType_argsQueryType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.QueryType, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["queryType"]
+	if !ok {
+		var zeroVal model.QueryType
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("queryType"))
+	if tmp, ok := rawArgs["queryType"]; ok {
+		return ec.unmarshalNQueryType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐQueryType(ctx, tmp)
+	}
+
+	var zeroVal model.QueryType
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryPackagesListForType_argsLastInterval(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*int, error) {
@@ -6215,7 +6241,7 @@ func (ec *executionContext) field_Query_queryLicensePackagesList_argsLastInterva
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_queryLicensePackagesList_argsAfter(
+func (ec *executionContext) field_Query_queryPackagesListForType_argsAfter(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*string, error) {
@@ -6237,120 +6263,7 @@ func (ec *executionContext) field_Query_queryLicensePackagesList_argsAfter(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_queryLicensePackagesList_argsFirst(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-	if tmp, ok := rawArgs["first"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_queryVulnPackagesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_queryVulnPackagesList_argsPkgSpec(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["pkgSpec"] = arg0
-	arg1, err := ec.field_Query_queryVulnPackagesList_argsLastInterval(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["lastInterval"] = arg1
-	arg2, err := ec.field_Query_queryVulnPackagesList_argsAfter(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["after"] = arg2
-	arg3, err := ec.field_Query_queryVulnPackagesList_argsFirst(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["first"] = arg3
-	return args, nil
-}
-func (ec *executionContext) field_Query_queryVulnPackagesList_argsPkgSpec(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (model.PkgSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgSpec"]
-	if !ok {
-		var zeroVal model.PkgSpec
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
-	if tmp, ok := rawArgs["pkgSpec"]; ok {
-		return ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
-	}
-
-	var zeroVal model.PkgSpec
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_queryVulnPackagesList_argsLastInterval(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["lastInterval"]
-	if !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("lastInterval"))
-	if tmp, ok := rawArgs["lastInterval"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_queryVulnPackagesList_argsAfter(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-	if tmp, ok := rawArgs["after"]; ok {
-		return ec.unmarshalOID2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_queryVulnPackagesList_argsFirst(
+func (ec *executionContext) field_Query_queryPackagesListForType_argsFirst(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*int, error) {
@@ -12545,8 +12458,8 @@ func (ec *executionContext) fieldContext_Query_findSoftwareList(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_queryVulnPackagesList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_queryVulnPackagesList(ctx, field)
+func (ec *executionContext) _Query_queryPackagesListForType(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_queryPackagesListForType(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -12559,7 +12472,7 @@ func (ec *executionContext) _Query_queryVulnPackagesList(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().QueryVulnPackagesList(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["lastInterval"].(*int), fc.Args["after"].(*string), fc.Args["first"].(*int))
+		return ec.resolvers.Query().QueryPackagesListForType(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["queryType"].(model.QueryType), fc.Args["lastInterval"].(*int), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
 
 	if resTmp == nil {
@@ -12570,7 +12483,7 @@ func (ec *executionContext) _Query_queryVulnPackagesList(ctx context.Context, fi
 	return ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_queryVulnPackagesList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_queryPackagesListForType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -12595,64 +12508,7 @@ func (ec *executionContext) fieldContext_Query_queryVulnPackagesList(ctx context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_queryVulnPackagesList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_queryLicensePackagesList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_queryLicensePackagesList(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().QueryLicensePackagesList(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["lastInterval"].(*int), fc.Args["after"].(*string), fc.Args["first"].(*int))
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.PackageConnection)
-	fc.Result = res
-	return ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_queryLicensePackagesList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_PackageConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_PackageConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_PackageConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PackageConnection", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_queryLicensePackagesList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_queryPackagesListForType_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -14846,7 +14702,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "queryVulnPackagesList":
+		case "queryPackagesListForType":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -14855,26 +14711,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_queryVulnPackagesList(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "queryLicensePackagesList":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_queryLicensePackagesList(ctx, field)
+				res = ec._Query_queryPackagesListForType(ctx, field)
 				return res
 			}
 

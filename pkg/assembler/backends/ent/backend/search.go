@@ -164,13 +164,12 @@ func (b *EntBackend) QueryVulnPackagesList(ctx context.Context, pkgSpec model.Pk
 
 func packageQueryCertifyVulnTime(lastInterval *int) predicate.PackageVersion {
 	if lastInterval != nil {
-		now := time.Now()
-		lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour)
+		now := time.Now().UTC()
+		lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour).UTC()
 
 		return packageversion.And(
 			packageversion.HasVulnWith(
-				optionalPredicate(&lastIntervalTime, certifyvuln.TimeScannedGTE),
-				optionalPredicate(&now, certifyvuln.TimeScannedLTE),
+				optionalPredicate(&lastIntervalTime, certifyvuln.TimeScannedLTE),
 			),
 		)
 	} else {

@@ -27,3 +27,20 @@ query FindSoftware($searchText: String!) {
     }
   }
 }
+
+query QueryPackagesListForType($filter: PkgSpec!, $queryType: QueryType!, $lastInterval: Int, $after: ID, $first: Int) {
+  queryPackagesListForType(pkgSpec: $filter, queryType: $queryType, lastInterval: $lastInterval, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllPkgTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

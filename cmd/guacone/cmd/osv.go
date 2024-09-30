@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -98,9 +99,10 @@ var osvCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
+		lastScan := 1
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, osvQuerySize, opts.addedLatency)
+		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeVulnerability, opts.batchSize, osvQuerySize, opts.addedLatency, &lastScan)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)

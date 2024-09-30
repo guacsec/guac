@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
@@ -115,7 +116,7 @@ you have access to read and write to the respective blob store.`,
 
 func getCDPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, batchSize, cdQuerySize, addedLatency)
+		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeLicense, batchSize, cdQuerySize, addedLatency, nil)
 		return packageQuery
 	}, nil
 }

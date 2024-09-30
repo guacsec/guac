@@ -41,6 +41,16 @@ type SoftwareEdge {
   node: PackageSourceOrArtifact!
 }
 
+
+
+"QueryType to determine which filter to use."
+enum QueryType {
+  "direct dependency"
+  VULNERABILITY
+  "indirect dependency"
+  LICENSE
+}
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -68,10 +78,5 @@ extend type Query {
   Returns a paginated results via PackageConnection for all packages that need updated
   results for certifyVuln (query for vulnerabilities)
   """
-  queryVulnPackagesList(pkgSpec: PkgSpec!, lastInterval: Int, after: ID, first: Int): PackageConnection
-  """
-  Returns a paginated results via PackageConnection for all packages that need updated
-  results for certifyLegal (query for Licenses)
-  """
-  queryLicensePackagesList(pkgSpec: PkgSpec!, lastInterval: Int,  after: ID, first: Int): PackageConnection
+  queryPackagesListForType(pkgSpec: PkgSpec!, queryType: QueryType!, lastInterval: Int, after: ID, first: Int): PackageConnection
 }

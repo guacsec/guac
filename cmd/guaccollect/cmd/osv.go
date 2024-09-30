@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
@@ -170,7 +171,7 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 
 func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, batchSize, osvQuerySize, addedLatency)
+		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeVulnerability, batchSize, osvQuerySize, addedLatency, nil)
 		return packageQuery
 	}, nil
 }
