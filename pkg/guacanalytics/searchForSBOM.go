@@ -233,6 +233,7 @@ func SearchForSBOMViaPkg(ctx context.Context, gqlclient graphql.Client, searchSt
 	var tableRows []table.Row
 	checkedPkgIDs := make(map[string]bool)
 	var collectedPkgVersionResults []*pkgVersionNeighborQueryResults
+	AlreadyIncludedTableRows := make(map[string]bool)
 
 	queue := make([]string, 0) // the queue of nodes in bfs
 	type dfsNode struct {
@@ -354,16 +355,20 @@ func SearchForSBOMViaPkg(ctx context.Context, gqlclient graphql.Client, searchSt
 			if certifyVuln, ok := neighbor.(*model.NeighborsNeighborsCertifyVuln); ok {
 				if !checkedCertifyVulnIDs[certifyVuln.Id] && certifyVuln.Vulnerability.Type != noVulnType {
 					checkedCertifyVulnIDs[certifyVuln.Id] = true
-					for _, vuln := range certifyVuln.Vulnerability.VulnerabilityIDs {
-						tableRows = append(tableRows, table.Row{certifyVulnStr, certifyVuln.Id, "vulnerability ID: " + vuln.VulnerabilityID})
-						path = append(path, []string{vuln.Id, certifyVuln.Id,
-							certifyVuln.Package.Namespaces[0].Names[0].Versions[0].Id,
-							certifyVuln.Package.Namespaces[0].Names[0].Id, certifyVuln.Package.Namespaces[0].Id,
-							certifyVuln.Package.Id}...)
+					if !AlreadyIncludedTableRows[certifyVuln.Vulnerability.VulnerabilityIDs[0].VulnerabilityID] {
+						for _, vuln := range certifyVuln.Vulnerability.VulnerabilityIDs {
+							tableRows = append(tableRows, table.Row{certifyVulnStr, certifyVuln.Id, "vulnerability ID: " + vuln.VulnerabilityID})
+							path = append(path, []string{vuln.Id, certifyVuln.Id,
+								certifyVuln.Package.Namespaces[0].Names[0].Versions[0].Id,
+								certifyVuln.Package.Namespaces[0].Names[0].Id, certifyVuln.Package.Namespaces[0].Id,
+								certifyVuln.Package.Id}...)
+						}
+						path = append(path, result.isDep.Id, result.isDep.Package.Namespaces[0].Names[0].Versions[0].Id,
+							result.isDep.Package.Namespaces[0].Names[0].Id, result.isDep.Package.Namespaces[0].Id,
+							result.isDep.Package.Id)
+
+						AlreadyIncludedTableRows[certifyVuln.Vulnerability.VulnerabilityIDs[0].VulnerabilityID] = true
 					}
-					path = append(path, result.isDep.Id, result.isDep.Package.Namespaces[0].Names[0].Versions[0].Id,
-						result.isDep.Package.Namespaces[0].Names[0].Id, result.isDep.Package.Namespaces[0].Id,
-						result.isDep.Package.Id)
 				}
 			}
 
