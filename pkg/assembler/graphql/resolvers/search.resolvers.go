@@ -22,9 +22,5 @@ func (r *queryResolver) FindSoftwareList(ctx context.Context, searchText string,
 
 // QueryPackagesListForType is the resolver for the queryPackagesListForType field.
 func (r *queryResolver) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	if queryType == model.QueryTypeLicense {
-		return r.Backend.QueryLicensePackagesList(ctx, pkgSpec, lastInterval, after, first)
-	} else {
-		return r.Backend.QueryVulnPackagesList(ctx, pkgSpec, lastInterval, after, first)
-	}
+	return r.Backend.QueryPackagesListForType(ctx, pkgSpec, queryType, lastInterval, after, first)
 }

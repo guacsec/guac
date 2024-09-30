@@ -1390,34 +1390,19 @@ func (mr *MockBackendMockRecorder) PointOfContactList(ctx, pointOfContactSpec, a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PointOfContactList", reflect.TypeOf((*MockBackend)(nil).PointOfContactList), ctx, pointOfContactSpec, after, first)
 }
 
-// QueryLicensePackagesList mocks base method.
-func (m *MockBackend) QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+// QueryPackagesListForType mocks base method.
+func (m *MockBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryLicensePackagesList", ctx, pkgSpec, lastInterval, after, first)
+	ret := m.ctrl.Call(m, "QueryPackagesListForType", ctx, pkgSpec, queryType, lastInterval, after, first)
 	ret0, _ := ret[0].(*model.PackageConnection)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryLicensePackagesList indicates an expected call of QueryLicensePackagesList.
-func (mr *MockBackendMockRecorder) QueryLicensePackagesList(ctx, pkgSpec, lastInterval, after, first any) *gomock.Call {
+// QueryPackagesListForType indicates an expected call of QueryPackagesListForType.
+func (mr *MockBackendMockRecorder) QueryPackagesListForType(ctx, pkgSpec, queryType, lastInterval, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLicensePackagesList", reflect.TypeOf((*MockBackend)(nil).QueryLicensePackagesList), ctx, pkgSpec, lastInterval, after, first)
-}
-
-// QueryVulnPackagesList mocks base method.
-func (m *MockBackend) QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryVulnPackagesList", ctx, pkgSpec, lastInterval, after, first)
-	ret0, _ := ret[0].(*model.PackageConnection)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryVulnPackagesList indicates an expected call of QueryVulnPackagesList.
-func (mr *MockBackendMockRecorder) QueryVulnPackagesList(ctx, pkgSpec, lastInterval, after, first any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryVulnPackagesList", reflect.TypeOf((*MockBackend)(nil).QueryVulnPackagesList), ctx, pkgSpec, lastInterval, after, first)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForType", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForType), ctx, pkgSpec, queryType, lastInterval, after, first)
 }
 
 // Scorecards mocks base method.

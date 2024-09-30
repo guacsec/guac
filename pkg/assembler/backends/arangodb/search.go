@@ -27,12 +27,8 @@ func (c *arangoClient) FindSoftwareList(ctx context.Context, searchText string, 
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (c *arangoClient) QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: QueryVulnPackagesList")
-}
-
-func (c *arangoClient) QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: QueryLicensePackagesList")
+func (c *arangoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: QueryPackagesListForType")
 }
 
 // TODO(lumjjb): add source when it is implemented in arango backend

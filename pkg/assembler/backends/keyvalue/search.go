@@ -256,10 +256,6 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	return pvs
 }
 
-func (c *demoClient) QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: QueryVulnPackagesList")
-}
-
-func (c *demoClient) QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: QueryLicensePackagesList")
+func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: QueryPackagesListForType")
 }

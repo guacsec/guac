@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -107,7 +108,7 @@ func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (b *EntBackend) QueryVulnPackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
@@ -124,9 +125,16 @@ func (b *EntBackend) QueryVulnPackagesList(ctx context.Context, pkgSpec model.Pk
 		afterCursor = nil
 	}
 
-	pkgConn, err := b.client.PackageVersion.Query().
-		Where(packageQueryPredicates(&pkgSpec)).
-		Where(packageQueryCertifyVulnTime(lastInterval)).
+	pkgQuery := b.client.PackageVersion.Query().
+		Where(packageQueryPredicates(&pkgSpec))
+
+	if queryType == model.QueryTypeVulnerability {
+		pkgQuery = pkgQuery.Where(packageQueryCertifyVulnTime(lastInterval))
+	} else {
+		pkgQuery = pkgQuery.Where(packageQueryCertifyLegalTime(lastInterval))
+	}
+
+	pkgConn, err := pkgQuery.
 		WithName(func(q *ent.PackageNameQuery) {}).
 		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
@@ -177,6 +185,17 @@ func packageQueryCertifyVulnTime(lastInterval *int) predicate.PackageVersion {
 	}
 }
 
-func (b *EntBackend) QueryLicensePackagesList(ctx context.Context, pkgSpec model.PkgSpec, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: QueryLicensePackagesList")
+func packageQueryCertifyLegalTime(lastInterval *int) predicate.PackageVersion {
+	if lastInterval != nil {
+		now := time.Now().UTC()
+		lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour).UTC()
+
+		return packageversion.And(
+			packageversion.HasCertifyLegalWith(
+				optionalPredicate(&lastIntervalTime, certifylegal.TimeScannedLTE),
+			),
+		)
+	} else {
+		return packageversion.And(NoOpSelector())
+	}
 }
