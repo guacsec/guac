@@ -255,8 +255,7 @@ func traverseComponents(c cyclonedxParser, components *[]cdx.Component) error {
 				return fmt.Errorf("failed to get license information for component package with error: %w", err)
 			}
 
-			err = traverseComponents(c, comp.Components)
-			if err != nil {
+			if err := traverseComponents(c, comp.Components); err != nil {
 				return err
 			}
 		}

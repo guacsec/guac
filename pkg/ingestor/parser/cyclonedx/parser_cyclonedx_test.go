@@ -161,6 +161,24 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
 		wantErr:        true,
 		reportedErr:    errUnsupportedLicenseVersion,
+	}, {
+		name: "CycloneDX nested components",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXComponentsNested,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.NestedComponentsPredicates,
+		wantErr:        false,
+	}, {
+		name: "CycloneDX flat components",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXComponentsFlat,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.FlatComponentsPredicates,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

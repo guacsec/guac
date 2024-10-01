@@ -194,6 +194,12 @@ var (
 	//go:embed exampledata/small-legal-cyclonedx.json
 	CycloneDXLegalExample []byte
 
+	//go:embed exampledata/cyclonedx-components-nested.json
+	CycloneDXComponentsNested []byte
+
+	//go:embed exampledata/cyclonedx-components-flat.json
+	CycloneDXComponentsFlat []byte
+
 	// json format
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// CycloneDX VEX testdata unaffected
@@ -1624,6 +1630,123 @@ var (
 		HasSBOM:      quarkusParentPackageHasSBOM,
 		CertifyLegal: quarkusParentPackageLegal,
 	}
+
+	NestedComponentsPredicates = assembler.IngestPredicates{
+		IsDependency: ociComponentsIsDependencyIngests,
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg:          ociMandrel,
+				Artifact:     ociMandrelArtifact,
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
+		HasSBOM: nestedComponentsHasSBOM,
+	}
+
+	FlatComponentsPredicates = assembler.IngestPredicates{
+		IsDependency: ociComponentsIsDependencyIngests,
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg:          ociMandrel,
+				Artifact:     ociMandrelArtifact,
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
+		HasSBOM: flatComponentsHasSBOM,
+	}
+
+	ociComponentsIsDependencyIngests = []assembler.IsDependencyIngest{
+		{
+			Pkg:    ociMandrel,
+			DepPkg: mavenCompiler,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: mavenCompiler,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: mavenCompiler,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: ociMandrel,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: abattisCantarellFonts,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: abattisCantarellFonts,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: abattisCantarellFonts,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+	}
+
+	ociMandrel, _            = asmhelpers.PurlToPkg("pkg:oci/mandrel-for-jdk-21-rhel8@sha256%3A41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04?arch=amd64&os=linux&tag=23.1-13.1724180416")
+	mavenCompiler, _         = asmhelpers.PurlToPkg("pkg:maven/compiler/compiler@23.1.4.0-1-redhat-00001?type=jar")
+	abattisCantarellFonts, _ = asmhelpers.PurlToPkg("pkg:rpm/redhat/abattis-cantarell-fonts@0.0.25-6.el8?arch=noarch")
+	ociMandrelArtifact       = &model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04",
+	}
+
+	nestedComponentsHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Artifact: ociMandrelArtifact,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:        "urn:uuid:c096003c-c9fa-4d9e-9390-fefa51745fe1",
+				Algorithm:  "sha256",
+				Digest:     "6a9598f69e87d0c45f3dd4c5d69d8812b734b28f07506a9f7b6ada7e9696c5e5",
+				KnownSince: nestedComponentsTime,
+			},
+		},
+	}
+
+	flatComponentsHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Artifact: ociMandrelArtifact,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:        "urn:uuid:c096003c-c9fa-4d9e-9390-fefa51745fe1",
+				Algorithm:  "sha256",
+				Digest:     "1dedfbd09dbf68a29279395444e76f300285cf1731ad25f39252c4d689403531",
+				KnownSince: nestedComponentsTime,
+			},
+		},
+	}
+
+	nestedComponentsTime, _ = time.Parse(time.RFC3339, "2024-09-24T08:20:03Z")
 
 	// ceritifer testdata
 
