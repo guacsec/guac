@@ -78,5 +78,5 @@ extend type Query {
   Returns a paginated results via PackageConnection for all packages that need updated
   results for certifyVuln (query for vulnerabilities)
   """
-  queryPackagesListForType(pkgSpec: PkgSpec!, queryType: QueryType!, lastInterval: Int, after: ID, first: Int): PackageConnection
+  queryPackagesListForType(pkgSpec: PkgSpec!, queryType: QueryType!, lastScan: Int, after: ID, first: Int): PackageConnection
 }

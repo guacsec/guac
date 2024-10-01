@@ -108,7 +108,7 @@ func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
@@ -129,9 +129,9 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 		Where(packageQueryPredicates(&pkgSpec))
 
 	if queryType == model.QueryTypeVulnerability {
-		pkgQuery = pkgQuery.Where(packageQueryCertifyVulnTime(lastInterval))
+		pkgQuery = pkgQuery.Where(packageQueryCertifyVulnTime(lastScan))
 	} else {
-		pkgQuery = pkgQuery.Where(packageQueryCertifyLegalTime(lastInterval))
+		pkgQuery = pkgQuery.Where(packageQueryCertifyLegalTime(lastScan))
 	}
 
 	pkgConn, err := pkgQuery.
@@ -170,14 +170,16 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 	}
 }
 
-func packageQueryCertifyVulnTime(lastInterval *int) predicate.PackageVersion {
-	if lastInterval != nil {
+func packageQueryCertifyVulnTime(lastScan *int) predicate.PackageVersion {
+	if lastScan != nil {
 		now := time.Now().UTC()
-		lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour).UTC()
+		scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
+		lastScanTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
 
 		return packageversion.And(
 			packageversion.HasVulnWith(
-				optionalPredicate(&lastIntervalTime, certifyvuln.TimeScannedLTE),
+				optionalPredicate(&lastScanTime, certifyvuln.TimeScannedLTE),
+				optionalPredicate(&scanInterval, certifyvuln.TimeScannedGTE),
 			),
 		)
 	} else {
@@ -185,14 +187,16 @@ func packageQueryCertifyVulnTime(lastInterval *int) predicate.PackageVersion {
 	}
 }
 
-func packageQueryCertifyLegalTime(lastInterval *int) predicate.PackageVersion {
-	if lastInterval != nil {
+func packageQueryCertifyLegalTime(lastScan *int) predicate.PackageVersion {
+	if lastScan != nil {
 		now := time.Now().UTC()
-		lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour).UTC()
+		scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
+		lastScanTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
 
 		return packageversion.And(
 			packageversion.HasCertifyLegalWith(
-				optionalPredicate(&lastIntervalTime, certifylegal.TimeScannedLTE),
+				optionalPredicate(&lastScanTime, certifylegal.TimeScannedLTE),
+				optionalPredicate(&scanInterval, certifylegal.TimeScannedGTE),
 			),
 		)
 	} else {

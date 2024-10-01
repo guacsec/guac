@@ -113,7 +113,7 @@ type QueryResolver interface {
 	PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error)
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
 	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
-	QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error)
+	QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error)
 	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
 	SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error)
 	VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error)
@@ -6158,11 +6158,11 @@ func (ec *executionContext) field_Query_queryPackagesListForType_args(ctx contex
 		return nil, err
 	}
 	args["queryType"] = arg1
-	arg2, err := ec.field_Query_queryPackagesListForType_argsLastInterval(ctx, rawArgs)
+	arg2, err := ec.field_Query_queryPackagesListForType_argsLastScan(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["lastInterval"] = arg2
+	args["lastScan"] = arg2
 	arg3, err := ec.field_Query_queryPackagesListForType_argsAfter(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6219,21 +6219,21 @@ func (ec *executionContext) field_Query_queryPackagesListForType_argsQueryType(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_queryPackagesListForType_argsLastInterval(
+func (ec *executionContext) field_Query_queryPackagesListForType_argsLastScan(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*int, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
-	_, ok := rawArgs["lastInterval"]
+	_, ok := rawArgs["lastScan"]
 	if !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
 
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("lastInterval"))
-	if tmp, ok := rawArgs["lastInterval"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("lastScan"))
+	if tmp, ok := rawArgs["lastScan"]; ok {
 		return ec.unmarshalOInt2ᚖint(ctx, tmp)
 	}
 
@@ -12472,7 +12472,7 @@ func (ec *executionContext) _Query_queryPackagesListForType(ctx context.Context,
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().QueryPackagesListForType(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["queryType"].(model.QueryType), fc.Args["lastInterval"].(*int), fc.Args["after"].(*string), fc.Args["first"].(*int))
+		return ec.resolvers.Query().QueryPackagesListForType(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
 
 	if resTmp == nil {

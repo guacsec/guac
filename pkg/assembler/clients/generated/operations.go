@@ -31325,11 +31325,11 @@ func (v *__PointOfContactsInput) GetFilter() PointOfContactSpec { return v.Filte
 
 // __QueryPackagesListForTypeInput is used internally by genqlient
 type __QueryPackagesListForTypeInput struct {
-	Filter       PkgSpec   `json:"filter"`
-	QueryType    QueryType `json:"queryType"`
-	LastInterval *int      `json:"lastInterval"`
-	After        *string   `json:"after"`
-	First        *int      `json:"first"`
+	Filter    PkgSpec   `json:"filter"`
+	QueryType QueryType `json:"queryType"`
+	LastScan  *int      `json:"lastScan"`
+	After     *string   `json:"after"`
+	First     *int      `json:"first"`
 }
 
 // GetFilter returns __QueryPackagesListForTypeInput.Filter, and is useful for accessing the field via an interface.
@@ -31338,8 +31338,8 @@ func (v *__QueryPackagesListForTypeInput) GetFilter() PkgSpec { return v.Filter 
 // GetQueryType returns __QueryPackagesListForTypeInput.QueryType, and is useful for accessing the field via an interface.
 func (v *__QueryPackagesListForTypeInput) GetQueryType() QueryType { return v.QueryType }
 
-// GetLastInterval returns __QueryPackagesListForTypeInput.LastInterval, and is useful for accessing the field via an interface.
-func (v *__QueryPackagesListForTypeInput) GetLastInterval() *int { return v.LastInterval }
+// GetLastScan returns __QueryPackagesListForTypeInput.LastScan, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForTypeInput) GetLastScan() *int { return v.LastScan }
 
 // GetAfter returns __QueryPackagesListForTypeInput.After, and is useful for accessing the field via an interface.
 func (v *__QueryPackagesListForTypeInput) GetAfter() *string { return v.After }
@@ -39133,8 +39133,8 @@ func PointOfContacts(
 
 // The query or mutation executed by QueryPackagesListForType.
 const QueryPackagesListForType_Operation = `
-query QueryPackagesListForType ($filter: PkgSpec!, $queryType: QueryType!, $lastInterval: Int, $after: ID, $first: Int) {
-	queryPackagesListForType(pkgSpec: $filter, queryType: $queryType, lastInterval: $lastInterval, after: $after, first: $first) {
+query QueryPackagesListForType ($filter: PkgSpec!, $queryType: QueryType!, $lastScan: Int, $after: ID, $first: Int) {
+	queryPackagesListForType(pkgSpec: $filter, queryType: $queryType, lastScan: $lastScan, after: $after, first: $first) {
 		totalCount
 		edges {
 			cursor
@@ -39178,7 +39178,7 @@ func QueryPackagesListForType(
 	client_ graphql.Client,
 	filter PkgSpec,
 	queryType QueryType,
-	lastInterval *int,
+	lastScan *int,
 	after *string,
 	first *int,
 ) (*QueryPackagesListForTypeResponse, error) {
@@ -39186,11 +39186,11 @@ func QueryPackagesListForType(
 		OpName: "QueryPackagesListForType",
 		Query:  QueryPackagesListForType_Operation,
 		Variables: &__QueryPackagesListForTypeInput{
-			Filter:       filter,
-			QueryType:    queryType,
-			LastInterval: lastInterval,
-			After:        after,
-			First:        first,
+			Filter:    filter,
+			QueryType: queryType,
+			LastScan:  lastScan,
+			After:     after,
+			First:     first,
 		},
 	}
 	var err_ error

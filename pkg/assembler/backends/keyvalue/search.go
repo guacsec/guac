@@ -259,7 +259,7 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	return pvs
 }
 
-func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
 
@@ -319,8 +319,9 @@ func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model
 									continue
 								}
 								now := time.Now().UTC()
-								lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour).UTC()
-								if lastIntervalTime.After(link.TimeScanned) {
+								scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
+								lastIntervalTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastIntervalTime.After(link.TimeScanned) && scanInterval.Before(link.TimeScanned) {
 									pvs = append(pvs, &model.PackageVersion{
 										ID:         pkgVer.ThisID,
 										Version:    pkgVer.Version,
@@ -336,8 +337,9 @@ func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model
 									continue
 								}
 								now := time.Now().UTC()
-								lastIntervalTime := now.Add(time.Duration(-*lastInterval) * time.Hour).UTC()
-								if lastIntervalTime.After(link.TimeScanned) {
+								scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
+								lastIntervalTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastIntervalTime.After(link.TimeScanned) && scanInterval.Before(link.TimeScanned) {
 									pvs = append(pvs, &model.PackageVersion{
 										ID:         pkgVer.ThisID,
 										Version:    pkgVer.Version,
