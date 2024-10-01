@@ -18,6 +18,7 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
+	"strings"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -3464,8 +3465,14 @@ func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
 	return gLess(e1, e2)
 }
 
-func isDependencyLess(e1, e2 assembler.IsDependencyIngest) bool {
-	return gLess(e1, e2)
+func isDependencyLess(a, b assembler.IsDependencyIngest) bool {
+	if strings.Compare(a.Pkg.Name, b.Pkg.Name) != 0 {
+		return a.Pkg.Name < b.Pkg.Name
+	}
+	if d := strings.Compare(a.DepPkg.Name, b.DepPkg.Name); d != 0 {
+		return a.DepPkg.Name < b.DepPkg.Name
+	}
+	return false
 }
 
 func isOccurenceLess(e1, e2 assembler.IsOccurrenceIngest) bool {
