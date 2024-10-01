@@ -1,0 +1,93 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:c096003c-c9fa-4d9e-9390-fefa51745fe1",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-09-24T08:20:03Z",
+    "component": {
+      "type": "container",
+      "name": "quarkus/mandrel-for-jdk-21-rhel8",
+      "purl": "pkg:oci/mandrel-for-jdk-21-rhel8@sha256%3A41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04?arch=amd64&os=linux&tag=23.1-13.1724180416"
+    }
+  },
+  "components": [
+    {
+      "type": "container",
+      "bom-ref": "pkg:oci/mandrel-for-jdk-21-rhel8@sha256%3A41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04?arch=amd64&os=linux&tag=23.1-13.1724180416",
+      "name": "quarkus/mandrel-for-jdk-21-rhel8",
+      "version": "sha256:41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04",
+      "purl": "pkg:oci/mandrel-for-jdk-21-rhel8@sha256%3A41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04?arch=amd64&os=linux&tag=23.1-13.1724180416",
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "pkg:rpm/redhat/abattis-cantarell-fonts@0.0.25-6.el8?arch=noarch",
+          "publisher": "Red Hat, Inc.",
+          "name": "abattis-cantarell-fonts",
+          "version": "0.0.25-6.el8",
+          "purl": "pkg:rpm/redhat/abattis-cantarell-fonts@0.0.25-6.el8?arch=noarch",
+          "properties": [
+            {
+              "name": "sbomer:package:type",
+              "value": "rpm"
+            },
+            {
+              "name": "sbomer:location:0:path",
+              "value": "/var/lib/rpm/Packages"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:maven/compiler/compiler@23.1.4.0-1-redhat-00001?type=jar",
+          "name": "compiler",
+          "version": "23.1.4.0-1-redhat-00001",
+          "purl": "pkg:maven/compiler/compiler@23.1.4.0-1-redhat-00001?type=jar",
+          "externalReferences": [
+            {
+              "type": "build-meta",
+              "url": "",
+              "hashes": [
+                {
+                  "alg": "SHA-1",
+                  "content": "e96edb6e7bab65204479c293378a7485ae2d1c8f"
+                }
+              ]
+            }
+          ],
+          "properties": [
+            {
+              "name": "sbomer:package:language",
+              "value": "java"
+            },
+            {
+              "name": "sbomer:package:type",
+              "value": "java-archive"
+            },
+            {
+              "name": "sbomer:location:0:path",
+              "value": "/usr/share/java/quarkus-mandrel-java/compiler.jar"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:oci/mandrel-for-jdk-21-rhel8@sha256%3A41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04?arch=amd64&os=linux&tag=23.1-13.1724180416",
+      "dependsOn": [
+        "pkg:rpm/redhat/abattis-cantarell-fonts@0.0.25-6.el8?arch=noarch",
+        "pkg:maven/compiler/compiler@23.1.4.0-1-redhat-00001?type=jar"
+      ]
+    },
+    {
+      "ref": "pkg:rpm/redhat/abattis-cantarell-fonts@0.0.25-6.el8?arch=noarch",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:maven/compiler/compiler@23.1.4.0-1-redhat-00001?type=jar",
+      "dependsOn": []
+    }
+  ]
+}
