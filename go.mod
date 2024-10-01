@@ -10,7 +10,7 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0
 	github.com/spf13/cobra v1.8.1
 	go.uber.org/zap v1.27.0
-	google.golang.org/api v0.198.0
+	google.golang.org/api v0.199.0
 )
 
 require (
@@ -46,9 +46,9 @@ require (
 
 require (
 	ariga.io/atlas v0.25.1-0.20240717145915-af51d3945208 // indirect
-	cloud.google.com/go/auth v0.9.4 // indirect
+	cloud.google.com/go/auth v0.9.5 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
-	cloud.google.com/go/compute/metadata v0.5.1 // indirect
+	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	deps.dev/util/maven v0.0.0-20240807013505-16da96fe8b66 // indirect
 	deps.dev/util/resolve v0.0.0-20240807013505-16da96fe8b66 // indirect
