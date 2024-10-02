@@ -99,7 +99,7 @@ var skipMatrix = map[string]map[string]bool{
 	"TestDeleteCertifyVuln":        {arango: true, memmap: true, redis: true, tikv: true},
 	"TestDeleteHasSBOM":            {arango: true, memmap: true, redis: true, tikv: true},
 	"TestDeleteHasSLSAs":           {arango: true, memmap: true, redis: true, tikv: true},
-	"TestQueryPackagesListForType": {arango: true, redis: true, tikv: true},
+	"TestQueryPackagesListForScan": {arango: true, redis: true, tikv: true},
 }
 
 type backend interface {

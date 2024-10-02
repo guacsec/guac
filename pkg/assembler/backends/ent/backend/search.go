@@ -108,7 +108,7 @@ func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
@@ -192,8 +192,6 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 			if queryErr != nil {
 				return nil, fmt.Errorf("failed package query with error: %w", queryErr)
 			}
-		} else {
-
 		}
 	}
 

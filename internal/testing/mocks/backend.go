@@ -1390,19 +1390,19 @@ func (mr *MockBackendMockRecorder) PointOfContactList(ctx, pointOfContactSpec, a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PointOfContactList", reflect.TypeOf((*MockBackend)(nil).PointOfContactList), ctx, pointOfContactSpec, after, first)
 }
 
-// QueryPackagesListForType mocks base method.
-func (m *MockBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+// QueryPackagesListForScan mocks base method.
+func (m *MockBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryPackagesListForType", ctx, pkgSpec, queryType, lastScan, after, first)
+	ret := m.ctrl.Call(m, "QueryPackagesListForScan", ctx, pkgSpec, queryType, lastScan, after, first)
 	ret0, _ := ret[0].(*model.PackageConnection)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryPackagesListForType indicates an expected call of QueryPackagesListForType.
-func (mr *MockBackendMockRecorder) QueryPackagesListForType(ctx, pkgSpec, queryType, lastScan, after, first any) *gomock.Call {
+// QueryPackagesListForScan indicates an expected call of QueryPackagesListForScan.
+func (mr *MockBackendMockRecorder) QueryPackagesListForScan(ctx, pkgSpec, queryType, lastScan, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForType", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForType), ctx, pkgSpec, queryType, lastScan, after, first)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForScan", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForScan), ctx, pkgSpec, queryType, lastScan, after, first)
 }
 
 // Scorecards mocks base method.

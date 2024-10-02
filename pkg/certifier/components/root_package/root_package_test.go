@@ -73,7 +73,7 @@ func TestNewPackageQuery(t *testing.T) {
 }
 
 func Test_packageQuery_GetComponents(t *testing.T) {
-	testPypiPackage := generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnectionEdgesPackageEdgeNodePackage{}
+	testPypiPackage := generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage{}
 
 	testPypiPackage.Type = "pypi"
 	testPypiPackage.Namespaces = append(testPypiPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
@@ -92,7 +92,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		},
 	})
 
-	testOpenSSLPackage := generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnectionEdgesPackageEdgeNodePackage{}
+	testOpenSSLPackage := generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage{}
 	testOpenSSLPackage.Type = "conan"
 	testOpenSSLPackage.Namespaces = append(testOpenSSLPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
 		Id:        "",
@@ -113,24 +113,24 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 	tests := []struct {
 		name         string
 		lastScan     int
-		getPackages  func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForTypeResponse, error)
+		getPackages  func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
 		wantPackNode []*PackageNode
 		wantErr      bool
 	}{
 		{
 			name:     "django:",
 			lastScan: 0,
-			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForTypeResponse, error) {
-				return &generated.QueryPackagesListForTypeResponse{
-					QueryPackagesListForType: &generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnection{
+			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
+				return &generated.QueryPackagesListForScanResponse{
+					QueryPackagesListForScan: &generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnection{
 						TotalCount: 1,
-						Edges: []generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnectionEdgesPackageEdge{
+						Edges: []generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge{
 							{
 								Node:   testPypiPackage,
 								Cursor: "",
 							},
 						},
-						PageInfo: generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnectionPageInfo{
+						PageInfo: generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo{
 							HasNextPage: false,
 						},
 					},
@@ -145,11 +145,11 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:     "multiple packages",
 			lastScan: 0,
-			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForTypeResponse, error) {
-				return &generated.QueryPackagesListForTypeResponse{
-					QueryPackagesListForType: &generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnection{
+			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
+				return &generated.QueryPackagesListForScanResponse{
+					QueryPackagesListForScan: &generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnection{
 						TotalCount: 2,
-						Edges: []generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnectionEdgesPackageEdge{
+						Edges: []generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge{
 							{
 								Node:   testPypiPackage,
 								Cursor: "",
@@ -159,7 +159,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 								Cursor: "",
 							},
 						},
-						PageInfo: generated.QueryPackagesListForTypeQueryPackagesListForTypePackageConnectionPageInfo{
+						PageInfo: generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo{
 							HasNextPage: false,
 						},
 					},

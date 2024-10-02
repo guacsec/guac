@@ -161,7 +161,7 @@ func TestFindSoftware(t *testing.T) {
 	}
 }
 
-func TestQueryPackagesListForType(t *testing.T) {
+func TestQueryPackagesListForScan(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	now := time.Now().UTC()
@@ -381,7 +381,7 @@ func TestQueryPackagesListForType(t *testing.T) {
 					t.Fatalf("did not get expected ingest error: %v", err)
 				}
 			}
-			got, err := b.QueryPackagesListForType(ctx, model.PkgSpec{}, test.QueryType, test.lastScan, nil, ptrfrom.Int(10))
+			got, err := b.QueryPackagesListForScan(ctx, model.PkgSpec{}, test.QueryType, test.lastScan, nil, ptrfrom.Int(10))
 			if err != nil {
 				t.Fatalf("did not get expected query error: %v", err)
 			}

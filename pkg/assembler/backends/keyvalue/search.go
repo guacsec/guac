@@ -259,7 +259,7 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	return pvs
 }
 
-func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
 

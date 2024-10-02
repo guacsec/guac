@@ -30,6 +30,6 @@ func (c *neo4jClient) FindSoftwareList(ctx context.Context, searchText string, a
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (c *neo4jClient) QueryPackagesListForType(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: QueryPackagesListForType")
+func (c *neo4jClient) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: QueryPackagesListForScan")
 }
