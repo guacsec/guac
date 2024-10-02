@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend_test
 
 import (
@@ -186,6 +188,13 @@ func TestQueryPackagesListForType(t *testing.T) {
 		lastScan    *int
 	}{
 		{
+			Name:      "last scan 2 hour, certifyVuln not created",
+			InPkg:     []*model.IDorPkgInput{{PackageInput: testdata.P5}},
+			lastScan:  ptrfrom.Int(2),
+			QueryType: model.QueryTypeVulnerability,
+			ExpNodes:  []*model.Package{testdata.P5out},
+		},
+		{
 			Name:   "last scan 2 hour, timescanned 1 hours ago",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
@@ -206,7 +215,7 @@ func TestQueryPackagesListForType(t *testing.T) {
 			},
 			lastScan:  ptrfrom.Int(2),
 			QueryType: model.QueryTypeVulnerability,
-			ExpNodes:  nil,
+			ExpNodes:  []*model.Package{testdata.P5out},
 		},
 		{
 			Name:   "last scan 1 hour, timescanned 2 hours ago",
@@ -229,7 +238,7 @@ func TestQueryPackagesListForType(t *testing.T) {
 			},
 			lastScan:  ptrfrom.Int(1),
 			QueryType: model.QueryTypeVulnerability,
-			ExpNodes:  []*model.Package{testdata.P2out},
+			ExpNodes:  []*model.Package{testdata.P2out, testdata.P5out},
 		},
 		{
 			Name:   "last scan 4 hour, timescanned 4 hours ago",
@@ -252,7 +261,7 @@ func TestQueryPackagesListForType(t *testing.T) {
 			},
 			lastScan:  ptrfrom.Int(4),
 			QueryType: model.QueryTypeVulnerability,
-			ExpNodes:  []*model.Package{testdata.P3out},
+			ExpNodes:  []*model.Package{testdata.P3out, testdata.P5out},
 		},
 		{
 			Name:   "last scan 1 hour, multiple packages, one package over 24 hours to not include",
@@ -301,7 +310,7 @@ func TestQueryPackagesListForType(t *testing.T) {
 			},
 			lastScan:  ptrfrom.Int(3),
 			QueryType: model.QueryTypeVulnerability,
-			ExpNodes:  []*model.Package{testdata.P4out, testdata.P1out, testdata.P3out},
+			ExpNodes:  []*model.Package{testdata.P5out, testdata.P4out, testdata.P1out, testdata.P3out},
 		},
 		{
 			Name:  "License - last scan 1 hour, multiple packages, one package over 24 hours to not include",
@@ -341,7 +350,7 @@ func TestQueryPackagesListForType(t *testing.T) {
 			},
 			lastScan:  ptrfrom.Int(3),
 			QueryType: model.QueryTypeLicense,
-			ExpNodes:  []*model.Package{testdata.P1out},
+			ExpNodes:  []*model.Package{testdata.P1out, testdata.P3out, testdata.P4out, testdata.P5out},
 		},
 	}
 	for _, test := range tests {

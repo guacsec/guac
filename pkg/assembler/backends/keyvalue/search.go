@@ -314,22 +314,23 @@ func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model
 						}
 						if queryType == model.QueryTypeVulnerability {
 							if len(pkgVer.CertifyVulnLinks) > 0 {
+								var timeScanned []time.Time
 								for _, certVulnID := range pkgVer.CertifyVulnLinks {
 									link, err := byIDkv[*certifyVulnerabilityLink](ctx, certVulnID, c)
 									if err != nil {
 										continue
 									}
-									now := time.Now().UTC()
-									scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
-									lastIntervalTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
-									if lastIntervalTime.After(link.TimeScanned) && scanInterval.Before(link.TimeScanned) {
-										pvs = append(pvs, &model.PackageVersion{
-											ID:         pkgVer.ThisID,
-											Version:    pkgVer.Version,
-											Subpath:    pkgVer.Subpath,
-											Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
-										})
-									}
+									timeScanned = append(timeScanned, link.TimeScanned)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pvs = append(pvs, &model.PackageVersion{
+										ID:         pkgVer.ThisID,
+										Version:    pkgVer.Version,
+										Subpath:    pkgVer.Subpath,
+										Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+									})
 								}
 							} else {
 								pvs = append(pvs, &model.PackageVersion{
@@ -341,22 +342,23 @@ func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model
 							}
 						} else {
 							if len(pkgVer.CertifyLegals) > 0 {
+								var timeScanned []time.Time
 								for _, certLegalID := range pkgVer.CertifyLegals {
 									link, err := byIDkv[*certifyLegalStruct](ctx, certLegalID, c)
 									if err != nil {
 										continue
 									}
-									now := time.Now().UTC()
-									scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
-									lastIntervalTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
-									if lastIntervalTime.After(link.TimeScanned) && scanInterval.Before(link.TimeScanned) {
-										pvs = append(pvs, &model.PackageVersion{
-											ID:         pkgVer.ThisID,
-											Version:    pkgVer.Version,
-											Subpath:    pkgVer.Subpath,
-											Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
-										})
-									}
+									timeScanned = append(timeScanned, link.TimeScanned)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pvs = append(pvs, &model.PackageVersion{
+										ID:         pkgVer.ThisID,
+										Version:    pkgVer.Version,
+										Subpath:    pkgVer.Subpath,
+										Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+									})
 								}
 							} else {
 								pvs = append(pvs, &model.PackageVersion{
@@ -450,4 +452,19 @@ func (c *demoClient) QueryPackagesListForType(ctx context.Context, pkgSpec model
 		}, nil
 	}
 	return nil, nil
+}
+
+// Get the latest time from a slice of time.Time
+func latestTime(times []time.Time) time.Time {
+	if len(times) == 0 {
+		return time.Time{} // Return zero value of time.Time if slice is empty
+	}
+
+	latest := times[0] // Initialize with the first time in the slice
+	for _, t := range times {
+		if t.After(latest) {
+			latest = t
+		}
+	}
+	return latest
 }

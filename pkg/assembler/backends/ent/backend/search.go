@@ -150,7 +150,7 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
 					t := sql.Table(certifyvuln.Table)
-					s.Join(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
+					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
 					return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
 				}).
 				Scan(ctx, &pkgLatestScan)
@@ -164,7 +164,7 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
 					t := sql.Table(certifylegal.Table)
-					s.Join(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
+					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
 					return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
 				}).
 				Scan(ctx, &pkgLatestScan)
@@ -192,6 +192,8 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 			if queryErr != nil {
 				return nil, fmt.Errorf("failed package query with error: %w", queryErr)
 			}
+		} else {
+
 		}
 	}
 
