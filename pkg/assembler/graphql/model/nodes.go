@@ -2682,7 +2682,9 @@ func (e PkgMatchType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// QueryType to determine which filter to use.
+// QueryType is used in conjunction with queryPackagesListForScan to
+// specify if the last time scanned is checked for either certifyVuln
+// or certifyLegal.
 type QueryType string
 
 const (

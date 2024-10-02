@@ -27446,7 +27446,9 @@ func (v *QueryPackagesListForScanResponse) GetQueryPackagesListForScan() *QueryP
 	return v.QueryPackagesListForScan
 }
 
-// QueryType to determine which filter to use.
+// QueryType is used in conjunction with queryPackagesListForScan to
+// specify if the last time scanned is checked for either certifyVuln
+// or certifyLegal.
 type QueryType string
 
 const (
