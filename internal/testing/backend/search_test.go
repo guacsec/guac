@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -165,24 +163,33 @@ func TestQueryPackagesListForType(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	now := time.Now().UTC()
-	type call struct {
+	type vulnCall struct {
 		Pkg         *model.PkgInputSpec
 		Vuln        *model.VulnerabilityInputSpec
 		CertifyVuln *model.ScanMetadataInput
 	}
+	type licenseCall struct {
+		PkgSrc model.PackageOrSourceInput
+		Dec    []*model.IDorLicenseInput
+		Dis    []*model.IDorLicenseInput
+		Legal  *model.CertifyLegalInputSpec
+	}
 	tests := []struct {
-		InPkg    []*model.IDorPkgInput
-		Name     string
-		InVuln   []*model.VulnerabilityInputSpec
-		Calls    []call
-		ExpNodes []*model.Package
-		lastScan *int
+		InPkg       []*model.IDorPkgInput
+		Name        string
+		InVuln      []*model.VulnerabilityInputSpec
+		InLic       []*model.LicenseInputSpec
+		VulnCall    []vulnCall
+		LicenseCall []licenseCall
+		QueryType   model.QueryType
+		ExpNodes    []*model.Package
+		lastScan    *int
 	}{
 		{
 			Name:   "last scan 2 hour, timescanned 1 hours ago",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
-			Calls: []call{
+			VulnCall: []vulnCall{
 				{
 					Pkg:  testdata.P2,
 					Vuln: testdata.C1,
@@ -197,14 +204,15 @@ func TestQueryPackagesListForType(t *testing.T) {
 					},
 				},
 			},
-			lastScan: ptrfrom.Int(2),
-			ExpNodes: nil,
+			lastScan:  ptrfrom.Int(2),
+			QueryType: model.QueryTypeVulnerability,
+			ExpNodes:  nil,
 		},
 		{
 			Name:   "last scan 1 hour, timescanned 2 hours ago",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
-			Calls: []call{
+			VulnCall: []vulnCall{
 				{
 					Pkg:  testdata.P2,
 					Vuln: testdata.G1,
@@ -215,18 +223,19 @@ func TestQueryPackagesListForType(t *testing.T) {
 						ScannerURI:     "test scanner uri 1",
 						DbVersion:      "2023.08.01",
 						DbURI:          "test db uri",
-						TimeScanned:    now.Add(time.Duration(-2) * time.Hour).UTC(),
+						TimeScanned:    now.Add(time.Duration(-5) * time.Hour).UTC(),
 					},
 				},
 			},
-			lastScan: ptrfrom.Int(1),
-			ExpNodes: []*model.Package{testdata.P2out},
+			lastScan:  ptrfrom.Int(1),
+			QueryType: model.QueryTypeVulnerability,
+			ExpNodes:  []*model.Package{testdata.P2out},
 		},
 		{
 			Name:   "last scan 4 hour, timescanned 4 hours ago",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P3}},
-			Calls: []call{
+			VulnCall: []vulnCall{
 				{
 					Pkg:  testdata.P3,
 					Vuln: testdata.G1,
@@ -241,14 +250,15 @@ func TestQueryPackagesListForType(t *testing.T) {
 					},
 				},
 			},
-			lastScan: ptrfrom.Int(4),
-			ExpNodes: []*model.Package{testdata.P3out},
+			lastScan:  ptrfrom.Int(4),
+			QueryType: model.QueryTypeVulnerability,
+			ExpNodes:  []*model.Package{testdata.P3out},
 		},
 		{
 			Name:   "last scan 1 hour, multiple packages, one package over 24 hours to not include",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P4}, {PackageInput: testdata.P1}},
-			Calls: []call{
+			VulnCall: []vulnCall{
 				{
 					Pkg:  testdata.P4,
 					Vuln: testdata.NoVulnInput,
@@ -263,6 +273,19 @@ func TestQueryPackagesListForType(t *testing.T) {
 					},
 				},
 				{
+					Pkg:  testdata.P4,
+					Vuln: testdata.NoVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    now.Add(time.Duration(-4) * time.Hour).UTC(),
+					},
+				},
+				{
 					Pkg:  testdata.P1,
 					Vuln: testdata.C1,
 					CertifyVuln: &model.ScanMetadataInput{
@@ -272,12 +295,53 @@ func TestQueryPackagesListForType(t *testing.T) {
 						ScannerURI:     "test scanner uri",
 						DbVersion:      "2023.01.01",
 						DbURI:          "test db uri",
-						TimeScanned:    now.Add(time.Duration(-2) * time.Hour).UTC(),
+						TimeScanned:    now.Add(time.Duration(-4) * time.Hour).UTC(),
 					},
 				},
 			},
-			lastScan: ptrfrom.Int(1),
-			ExpNodes: []*model.Package{testdata.P2out},
+			lastScan:  ptrfrom.Int(3),
+			QueryType: model.QueryTypeVulnerability,
+			ExpNodes:  []*model.Package{testdata.P4out, testdata.P1out, testdata.P3out},
+		},
+		{
+			Name:  "License - last scan 1 hour, multiple packages, one package over 24 hours to not include",
+			InPkg: []*model.IDorPkgInput{{PackageInput: testdata.P4}, {PackageInput: testdata.P1}},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
+			LicenseCall: []licenseCall{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Dec: []*model.IDorLicenseInput{{LicenseInput: testdata.L1}},
+					Legal: &model.CertifyLegalInputSpec{
+						Justification: "test justification",
+						TimeScanned:   now.Add(time.Duration(-25) * time.Hour).UTC(),
+					},
+				},
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Dec: []*model.IDorLicenseInput{{LicenseInput: testdata.L1}},
+					Legal: &model.CertifyLegalInputSpec{
+						Justification: "test justification",
+						TimeScanned:   now.Add(time.Duration(-4) * time.Hour).UTC(),
+					},
+				},
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
+					},
+					Dec: []*model.IDorLicenseInput{{LicenseInput: testdata.L1}},
+					Legal: &model.CertifyLegalInputSpec{
+						Justification: "test justification",
+						TimeScanned:   now.Add(time.Duration(-2) * time.Hour).UTC(),
+					},
+				},
+			},
+			lastScan:  ptrfrom.Int(3),
+			QueryType: model.QueryTypeLicense,
+			ExpNodes:  []*model.Package{testdata.P1out},
 		},
 	}
 	for _, test := range tests {
@@ -290,13 +354,25 @@ func TestQueryPackagesListForType(t *testing.T) {
 			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
-			for _, o := range test.Calls {
+			for _, o := range test.VulnCall {
 				_, err := b.IngestCertifyVuln(ctx, model.IDorPkgInput{PackageInput: o.Pkg}, model.IDorVulnerabilityInput{VulnerabilityInput: o.Vuln}, *o.CertifyVuln)
 				if err != nil {
 					t.Fatalf("did not get expected ingest error, want: %v", err)
 				}
 			}
-			got, err := b.QueryPackagesListForType(ctx, model.PkgSpec{}, model.QueryTypeVulnerability, test.lastScan, nil, ptrfrom.Int(1))
+
+			for _, a := range test.InLic {
+				if _, err := b.IngestLicense(ctx, &model.IDorLicenseInput{LicenseInput: a}); err != nil {
+					t.Fatalf("Could not ingest license: %v", err)
+				}
+			}
+			for _, o := range test.LicenseCall {
+				_, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error: %v", err)
+				}
+			}
+			got, err := b.QueryPackagesListForType(ctx, model.PkgSpec{}, test.QueryType, test.lastScan, nil, ptrfrom.Int(10))
 			if err != nil {
 				t.Fatalf("did not get expected query error: %v", err)
 			}

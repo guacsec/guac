@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"entgo.io/contrib/entgql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -29,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -125,20 +125,74 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 		afterCursor = nil
 	}
 
-	pkgQuery := b.client.PackageVersion.Query().
-		Where(packageQueryPredicates(&pkgSpec))
+	var pkgConn *ent.PackageVersionConnection
+	if lastScan == nil {
+		var err error
+		pkgQuery := b.client.PackageVersion.Query().
+			Where(packageQueryPredicates(&pkgSpec))
 
-	if queryType == model.QueryTypeVulnerability {
-		pkgQuery = pkgQuery.Where(packageQueryCertifyVulnTime(lastScan))
+		pkgConn, err = pkgQuery.
+			WithName(func(q *ent.PackageNameQuery) {}).
+			Paginate(ctx, afterCursor, first, nil, nil)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed package query with error: %w", err)
+		}
 	} else {
-		pkgQuery = pkgQuery.Where(packageQueryCertifyLegalTime(lastScan))
-	}
+		var pkgLatestScan []struct {
+			ID             uuid.UUID `json:"id"`
+			LastScanTimeDB time.Time `json:"max"`
+		}
 
-	pkgConn, err := pkgQuery.
-		WithName(func(q *ent.PackageNameQuery) {}).
-		Paginate(ctx, afterCursor, first, nil, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed package query with error: %w", err)
+		if queryType == model.QueryTypeVulnerability {
+			err := b.client.PackageVersion.Query().
+				Where(packageQueryPredicates(&pkgSpec)).
+				GroupBy(packageversion.FieldID). // Group by Package ID
+				Aggregate(func(s *sql.Selector) string {
+					t := sql.Table(certifyvuln.Table)
+					s.Join(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
+					return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
+				}).
+				Scan(ctx, &pkgLatestScan)
+
+			if err != nil {
+				return nil, fmt.Errorf("failed package query with error: %w", err)
+			}
+		} else {
+			err := b.client.PackageVersion.Query().
+				Where(packageQueryPredicates(&pkgSpec)).
+				GroupBy(packageversion.FieldID). // Group by Package ID
+				Aggregate(func(s *sql.Selector) string {
+					t := sql.Table(certifylegal.Table)
+					s.Join(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
+					return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
+				}).
+				Scan(ctx, &pkgLatestScan)
+
+			if err != nil {
+				return nil, fmt.Errorf("failed package query with error: %w", err)
+			}
+		}
+
+		lastScanTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+		var packagesThatNeedScanning []uuid.UUID
+		for _, record := range pkgLatestScan {
+			if record.LastScanTimeDB.Before(lastScanTime) {
+				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID) // Add the package ID
+			}
+		}
+
+		if len(packagesThatNeedScanning) > 0 {
+			var queryErr error
+			pkgConn, queryErr = b.client.PackageVersion.Query().
+				Where(packageversion.IDIn(packagesThatNeedScanning...)).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				Paginate(ctx, afterCursor, first, nil, nil)
+
+			if queryErr != nil {
+				return nil, fmt.Errorf("failed package query with error: %w", queryErr)
+			}
+		}
 	}
 
 	// if not found return nil
@@ -167,39 +221,5 @@ func (b *EntBackend) QueryPackagesListForType(ctx context.Context, pkgSpec model
 	} else {
 		// if not found return nil
 		return nil, nil
-	}
-}
-
-func packageQueryCertifyVulnTime(lastScan *int) predicate.PackageVersion {
-	if lastScan != nil {
-		now := time.Now().UTC()
-		scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
-		lastScanTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
-
-		return packageversion.And(
-			packageversion.HasVulnWith(
-				optionalPredicate(&lastScanTime, certifyvuln.TimeScannedLTE),
-				optionalPredicate(&scanInterval, certifyvuln.TimeScannedGTE),
-			),
-		)
-	} else {
-		return packageversion.And(NoOpSelector())
-	}
-}
-
-func packageQueryCertifyLegalTime(lastScan *int) predicate.PackageVersion {
-	if lastScan != nil {
-		now := time.Now().UTC()
-		scanInterval := now.Add(time.Duration(-24) * time.Hour).UTC()
-		lastScanTime := now.Add(time.Duration(-*lastScan) * time.Hour).UTC()
-
-		return packageversion.And(
-			packageversion.HasCertifyLegalWith(
-				optionalPredicate(&lastScanTime, certifylegal.TimeScannedLTE),
-				optionalPredicate(&scanInterval, certifylegal.TimeScannedGTE),
-			),
-		)
-	} else {
-		return packageversion.And(NoOpSelector())
 	}
 }
