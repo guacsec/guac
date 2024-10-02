@@ -195,6 +195,9 @@ var (
 	//go:embed exampledata/small-legal-cyclonedx.json
 	CycloneDXLegalExample []byte
 
+	//go:embed exampledata/small-legal-cyclonedx-no-inline.json
+	CycloneDXLegalNoInlineExample []byte
+
 	//go:embed exampledata/cyclonedx-components-nested.json
 	CycloneDXComponentsNested []byte
 
@@ -1552,11 +1555,141 @@ var (
 		},
 	}
 
+	cdxLegalHasSBOMNoInLine = []assembler.HasSBOMIngest{
+		{
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
+				Algorithm:        "sha256",
+				Digest:           "09522e1c53eb2b919446c2e904f6517482de731dc6e61d7e7ad559675cb9355b",
+				DownloadLocation: "",
+				KnownSince:       cdxQuarkusTime,
+			},
+		},
+	}
+
 	CdxQuarkusLegalPredicates = assembler.IngestPredicates{
 		IsDependency: cdxLegalDeps,
 		IsOccurrence: cdxLegalOccurrence,
 		HasSBOM:      cdxLegalHasSBOM,
 		CertifyLegal: cdxLegalCertifyLegal,
+	}
+
+	CdxQuarkusLegalNoInlinePredicates = assembler.IngestPredicates{
+		IsDependency: cdxLegalDeps,
+		IsOccurrence: cdxLegalOccurrence,
+		HasSBOM:      cdxLegalHasSBOMNoInLine,
+		CertifyLegal: cdxLegalCertifyLegalNoInline,
+	}
+
+	cdxLegalCertifyLegalNoInline = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxNetbasePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15 AND LicenseRef-59a01e67",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxSmallRye,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "MIT",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND (MIT OR GPL-2.0-only)",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxTopQuarkusPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "LGPL-3.0-or-later",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "GPL-2.0 AND LGPL-3.0-or-later",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxMicroprofilePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "LicenseRef-a7fb6b15 AND LicenseRef-59a01e67",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
 	}
 
 	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")

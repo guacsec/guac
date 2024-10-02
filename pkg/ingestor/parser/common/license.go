@@ -83,25 +83,29 @@ func ParseLicenses(exp string, lv *string, inLineMap map[string]string, ignoreLR
 		if ignoreLR && strings.HasPrefix(p, "LicenseRef") {
 			continue
 		}
-		var license model.LicenseInputSpec
+		var license *model.LicenseInputSpec
 		if inline, ok := inLineMap[p]; ok {
-			license = model.LicenseInputSpec{
+			license = &model.LicenseInputSpec{
 				Name:        p,
 				Inline:      &inline,
 				ListVersion: lv,
 			}
 		} else if lv != nil {
-			license = model.LicenseInputSpec{
+			license = &model.LicenseInputSpec{
 				Name:        p,
 				ListVersion: lv,
 			}
 		} else {
-			license = model.LicenseInputSpec{
-				Name:        p,
-				ListVersion: &unknown,
+			if !strings.HasPrefix(p, "LicenseRef") {
+				license = &model.LicenseInputSpec{
+					Name:        p,
+					ListVersion: &unknown,
+				}
 			}
 		}
-		rv = append(rv, license)
+		if license != nil {
+			rv = append(rv, *license)
+		}
 	}
 	return rv
 }
