@@ -572,6 +572,7 @@ type ComplexityRoot struct {
 		PkgEqualList              func(childComplexity int, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) int
 		PointOfContact            func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
 		PointOfContactList        func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
+		QueryPackagesListForScan  func(childComplexity int, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) int
 		Scorecards                func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
 		ScorecardsList            func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
 		Sources                   func(childComplexity int, sourceSpec model.SourceSpec) int
@@ -3550,6 +3551,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PointOfContactList(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.queryPackagesListForScan":
+		if e.complexity.Query.QueryPackagesListForScan == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryPackagesListForScan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryPackagesListForScan(childComplexity, args["pkgSpec"].(model.PkgSpec), args["queryType"].(model.QueryType), args["lastScan"].(*int), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -7574,6 +7587,18 @@ type SoftwareEdge {
   node: PackageSourceOrArtifact!
 }
 
+"""
+QueryType is used in conjunction with queryPackagesListForScan to
+specify if the last time scanned is checked for either certifyVuln
+or certifyLegal.
+"""
+enum QueryType {
+  "direct dependency"
+  VULNERABILITY
+  "indirect dependency"
+  LICENSE
+}
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -7597,6 +7622,16 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
+
+  """
+  queryPackagesListForScan returns a paginated results via PackageConnection 
+  for all packages that need to be re-scanned (based on the last scan in hours)
+  or have never been scanned.
+
+  queryType is used to specify if the last time scanned is checked for either
+  certifyVuln or certifyLegal.
+  """
+  queryPackagesListForScan(pkgSpec: PkgSpec!, queryType: QueryType!, lastScan: Int, after: ID, first: Int): PackageConnection
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#

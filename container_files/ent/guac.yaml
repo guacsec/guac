@@ -23,6 +23,9 @@ use-csub: true
 poll: true
 interval: 5m
 
+# number of hours since the last scan was run. 0 means run on all packages/sources
+last-scan: 4
+
 # Ent config
 db-driver: postgres
 db-address: postgres://guac:guac@postgres:5432/guac?sslmode=disable

@@ -25,3 +25,6 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# number of hours since the last scan was run. 0 means run on all packages/sources
+last-scan: 4

@@ -18,8 +18,11 @@ package keyvalue
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -254,4 +257,214 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	}
 
 	return pvs
+}
+
+func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	edges := make([]*model.PackageEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	currentPage := false
+
+	// If no cursor present start from the top
+	if after == nil {
+		currentPage = true
+	}
+
+	var done bool
+	scn := c.kv.Keys(pkgTypeCol)
+	for !done {
+		var typeKeys []string
+		var err error
+		typeKeys, done, err = scn.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		sort.Strings(typeKeys)
+		totalCount = len(typeKeys)
+
+		for i, tk := range typeKeys {
+			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+			if err != nil {
+				return nil, err
+			}
+			pNamespaces := []*model.PackageNamespace{}
+			for _, nsID := range pkgTypeNode.Namespaces {
+				pkgNS, err := byIDkv[*pkgNamespace](ctx, nsID, c)
+				if err != nil {
+					continue
+				}
+				pns := []*model.PackageName{}
+				for _, nameID := range pkgNS.Names {
+					pkgNameNode, err := byIDkv[*pkgName](ctx, nameID, c)
+					if err != nil {
+						continue
+					}
+					pvs := []*model.PackageVersion{}
+					for _, verID := range pkgNameNode.Versions {
+						pkgVer, err := byIDkv[*pkgVersion](ctx, verID, c)
+						if err != nil {
+							continue
+						}
+						if queryType == model.QueryTypeVulnerability {
+							if len(pkgVer.CertifyVulnLinks) > 0 {
+								var timeScanned []time.Time
+								for _, certVulnID := range pkgVer.CertifyVulnLinks {
+									link, err := byIDkv[*certifyVulnerabilityLink](ctx, certVulnID, c)
+									if err != nil {
+										continue
+									}
+									timeScanned = append(timeScanned, link.TimeScanned)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pvs = append(pvs, &model.PackageVersion{
+										ID:         pkgVer.ThisID,
+										Version:    pkgVer.Version,
+										Subpath:    pkgVer.Subpath,
+										Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+									})
+								}
+							} else {
+								pvs = append(pvs, &model.PackageVersion{
+									ID:         pkgVer.ThisID,
+									Version:    pkgVer.Version,
+									Subpath:    pkgVer.Subpath,
+									Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+								})
+							}
+						} else {
+							if len(pkgVer.CertifyLegals) > 0 {
+								var timeScanned []time.Time
+								for _, certLegalID := range pkgVer.CertifyLegals {
+									link, err := byIDkv[*certifyLegalStruct](ctx, certLegalID, c)
+									if err != nil {
+										continue
+									}
+									timeScanned = append(timeScanned, link.TimeScanned)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pvs = append(pvs, &model.PackageVersion{
+										ID:         pkgVer.ThisID,
+										Version:    pkgVer.Version,
+										Subpath:    pkgVer.Subpath,
+										Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+									})
+								}
+							} else {
+								pvs = append(pvs, &model.PackageVersion{
+									ID:         pkgVer.ThisID,
+									Version:    pkgVer.Version,
+									Subpath:    pkgVer.Subpath,
+									Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+								})
+							}
+						}
+					}
+					if len(pvs) > 0 {
+						pns = append(pns, &model.PackageName{
+							ID:       pkgNameNode.ThisID,
+							Name:     pkgNameNode.Name,
+							Versions: pvs,
+						})
+					}
+				}
+				if len(pns) > 0 {
+					pNamespaces = append(pNamespaces, &model.PackageNamespace{
+						ID:        pkgNS.ThisID,
+						Namespace: pkgNS.Namespace,
+						Names:     pns,
+					})
+				}
+			}
+
+			for _, namespace := range pNamespaces {
+				for _, name := range namespace.Names {
+					for _, version := range name.Versions {
+						p := &model.Package{
+							ID:   pkgTypeNode.ThisID,
+							Type: pkgTypeNode.Type,
+							Namespaces: []*model.PackageNamespace{
+								{
+									ID:        namespace.ID,
+									Namespace: namespace.Namespace,
+									Names: []*model.PackageName{
+										{
+											ID:   name.ID,
+											Name: name.Name,
+											Versions: []*model.PackageVersion{
+												version,
+											},
+										},
+									},
+								},
+							},
+						}
+
+						if after != nil && !currentPage {
+							if p.Namespaces[0].Names[0].Versions[0].ID == *after {
+								totalCount = len(typeKeys) - (i + 1)
+								currentPage = true
+							}
+							continue
+						}
+
+						if first != nil {
+							if numNodes < *first {
+								edges = append(edges, &model.PackageEdge{
+									Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
+									Node:   p,
+								})
+								numNodes++
+							} else if numNodes == *first {
+								hasNextPage = true
+							}
+						} else {
+							edges = append(edges, &model.PackageEdge{
+								Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
+								Node:   p,
+							})
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.PackageConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
+// Get the latest time from a slice of time.Time
+func latestTime(times []time.Time) time.Time {
+	if len(times) == 0 {
+		return time.Time{} // Return zero value of time.Time if slice is empty
+	}
+
+	latest := times[0] // Initialize with the first time in the slice
+	for _, t := range times {
+		if t.After(latest) {
+			latest = t
+		}
+	}
+	return latest
 }

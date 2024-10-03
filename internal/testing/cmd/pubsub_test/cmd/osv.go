@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
@@ -92,7 +93,7 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 
 func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, 60000, 999, nil)
+		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeVulnerability, 60000, 999, nil, nil)
 		return packageQuery
 	}, nil
 }

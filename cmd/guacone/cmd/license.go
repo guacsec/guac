@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
@@ -56,6 +57,9 @@ type cdOptions struct {
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// last time the scan was done in hours, if not set it will return
+	// all packages to check
+	lastScan *int
 }
 
 var cdCmd = &cobra.Command{
@@ -74,6 +78,7 @@ var cdCmd = &cobra.Command{
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -100,7 +105,7 @@ var cdCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, opts.batchSize, cdQuerySize, opts.addedLatency)
+		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeLicense, opts.batchSize, cdQuerySize, opts.addedLatency, opts.lastScan)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)
@@ -230,7 +235,7 @@ func validateCDFlags(
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
 	certifierLatencyStr string,
-	batchSize int,
+	batchSize int, lastScan int,
 ) (cdOptions, error) {
 	var opts cdOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -254,6 +259,10 @@ func validateCDFlags(
 
 	opts.batchSize = batchSize
 
+	if lastScan != 0 {
+		opts.lastScan = &lastScan
+	}
+
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
@@ -267,7 +276,7 @@ func validateCDFlags(
 
 func init() {
 	set, err := cli.BuildFlags([]string{"certifier-latency",
-		"certifier-batch-size"})
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

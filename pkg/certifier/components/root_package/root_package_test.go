@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 )
@@ -36,6 +37,8 @@ func TestNewPackageQuery(t *testing.T) {
 		batchSize        int
 		serviceBatchSize int
 		addedLatency     *time.Duration
+		lastScan         *int
+		queryType        generated.QueryType
 	}
 	tests := []struct {
 		name string
@@ -48,17 +51,21 @@ func TestNewPackageQuery(t *testing.T) {
 			batchSize:        60000,
 			serviceBatchSize: 1000,
 			addedLatency:     nil,
+			lastScan:         ptrfrom.Int(1),
+			queryType:        generated.QueryTypeVulnerability,
 		},
 		want: &packageQuery{
 			client:           gqlclient,
 			batchSize:        60000,
 			serviceBatchSize: 1000,
 			addedLatency:     nil,
+			lastScan:         ptrfrom.Int(1),
+			queryType:        generated.QueryTypeVulnerability,
 		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewPackageQuery(tt.args.client, tt.args.batchSize, tt.args.serviceBatchSize, tt.args.addedLatency); !reflect.DeepEqual(got, tt.want) {
+			if got := NewPackageQuery(tt.args.client, tt.args.queryType, tt.args.batchSize, tt.args.serviceBatchSize, tt.args.addedLatency, tt.args.lastScan); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewPackageQuery() = %v, want %v", got, tt.want)
 			}
 		})
@@ -66,7 +73,7 @@ func TestNewPackageQuery(t *testing.T) {
 }
 
 func Test_packageQuery_GetComponents(t *testing.T) {
-	testPypiPackage := generated.PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage{}
+	testPypiPackage := generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage{}
 
 	testPypiPackage.Type = "pypi"
 	testPypiPackage.Namespaces = append(testPypiPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
@@ -85,7 +92,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		},
 	})
 
-	testOpenSSLPackage := generated.PackagesListPackagesListPackageConnectionEdgesPackageEdgeNodePackage{}
+	testOpenSSLPackage := generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage{}
 	testOpenSSLPackage.Type = "conan"
 	testOpenSSLPackage.Namespaces = append(testOpenSSLPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
 		Id:        "",
@@ -105,23 +112,25 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		getPackages  func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
+		lastScan     int
+		getPackages  func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
 		wantPackNode []*PackageNode
 		wantErr      bool
 	}{
 		{
-			name: "django:",
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
+			name:     "django:",
+			lastScan: 0,
+			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
+				return &generated.QueryPackagesListForScanResponse{
+					QueryPackagesListForScan: &generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnection{
 						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
+						Edges: []generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge{
 							{
 								Node:   testPypiPackage,
 								Cursor: "",
 							},
 						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
+						PageInfo: generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo{
 							HasNextPage: false,
 						},
 					},
@@ -134,12 +143,13 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			},
 			wantErr: false,
 		}, {
-			name: "multiple packages",
-			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error) {
-				return &generated.PackagesListResponse{
-					PackagesList: &generated.PackagesListPackagesListPackageConnection{
-						TotalCount: 1,
-						Edges: []generated.PackagesListPackagesListPackageConnectionEdgesPackageEdge{
+			name:     "multiple packages",
+			lastScan: 0,
+			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
+				return &generated.QueryPackagesListForScanResponse{
+					QueryPackagesListForScan: &generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnection{
+						TotalCount: 2,
+						Edges: []generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge{
 							{
 								Node:   testPypiPackage,
 								Cursor: "",
@@ -149,7 +159,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 								Cursor: "",
 							},
 						},
-						PageInfo: generated.PackagesListPackagesListPackageConnectionPageInfo{
+						PageInfo: generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo{
 							HasNextPage: false,
 						},
 					},
@@ -170,10 +180,10 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			p := &packageQuery{
-				client:           nil,
-				batchSize:        1,
-				serviceBatchSize: 250,
-				addedLatency:     &addedLatency,
+				client:       nil,
+				batchSize:    1,
+				addedLatency: &addedLatency,
+				queryType:    generated.QueryTypeVulnerability,
 			}
 			getPackages = tt.getPackages
 
@@ -192,7 +202,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 				select {
 				case d := <-compChan:
 					if component, ok := d.([]*PackageNode); ok {
-						pnList = component
+						pnList = append(pnList, component...)
 					}
 				case err := <-errChan:
 					if err != nil {
@@ -204,7 +214,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			for len(compChan) > 0 {
 				d := <-compChan
 				if component, ok := d.([]*PackageNode); ok {
-					pnList = component
+					pnList = append(pnList, component...)
 				}
 			}
 			if !reflect.DeepEqual(pnList, tt.wantPackNode) {

@@ -29,3 +29,7 @@ func (c *neo4jClient) FindSoftware(ctx context.Context, searchText string) ([]mo
 func (c *neo4jClient) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
+
+func (c *neo4jClient) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastInterval *int, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: QueryPackagesListForScan")
+}

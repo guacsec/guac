@@ -41,18 +41,22 @@ type packageQuery struct {
 	serviceBatchSize int
 	// add artificial latency to throttle the pagination query
 	addedLatency *time.Duration
+	lastScan     *int
+	queryType    generated.QueryType
 }
 
-var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
+var getPackages func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphql.Client, batchSize, serviceBatchSize int, addedLatency *time.Duration) certifier.QueryComponents {
-	getPackages = generated.PackagesList
+func NewPackageQuery(client graphql.Client, queryType generated.QueryType, batchSize, serviceBatchSize int, addedLatency *time.Duration, lastScan *int) certifier.QueryComponents {
+	getPackages = generated.QueryPackagesListForScan
 	return &packageQuery{
 		client:           client,
 		batchSize:        batchSize,
 		serviceBatchSize: serviceBatchSize,
 		addedLatency:     addedLatency,
+		lastScan:         lastScan,
+		queryType:        queryType,
 	}
 }
 
@@ -129,14 +133,15 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 
 	first := p.batchSize
 	for {
-		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, afterCursor, &first)
+		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, p.queryType, p.lastScan, afterCursor, &first)
 		if err != nil {
 			return fmt.Errorf("failed to query packages with error: %w", err)
 		}
-		if pkgConn == nil || pkgConn.PackagesList == nil {
+
+		if pkgConn == nil || pkgConn.QueryPackagesListForScan == nil {
 			continue
 		}
-		pkgEdges := pkgConn.PackagesList.Edges
+		pkgEdges := pkgConn.QueryPackagesListForScan.Edges
 
 		for _, pkgNode := range pkgEdges {
 			if pkgNode.Node.Type == guacType {
@@ -153,10 +158,10 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 				}
 			}
 		}
-		if !pkgConn.PackagesList.PageInfo.HasNextPage {
+		if !pkgConn.QueryPackagesListForScan.PageInfo.HasNextPage {
 			break
 		}
-		afterCursor = pkgConn.PackagesList.PageInfo.EndCursor
+		afterCursor = pkgConn.QueryPackagesListForScan.PageInfo.EndCursor
 		// add artificial latency to throttle the pagination query
 		if p.addedLatency != nil {
 			time.Sleep(*p.addedLatency)

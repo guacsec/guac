@@ -27257,6 +27257,207 @@ func (v *PointOfContactsResponse) GetPointOfContact() []PointOfContactsPointOfCo
 	return v.PointOfContact
 }
 
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+// The GraphQL type's documentation follows.
+//
+// PackageConnection returns the paginated results for Package.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PackageEdge which contains the current cursor
+// and the Package node itself
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnection struct {
+	TotalCount int                                                                                 `json:"totalCount"`
+	Edges      []QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge `json:"edges"`
+	PageInfo   QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns QueryPackagesListForScanQueryPackagesListForScanPackageConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns QueryPackagesListForScanQueryPackagesListForScanPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnection) GetEdges() []QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns QueryPackagesListForScanQueryPackagesListForScanPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnection) GetPageInfo() QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// PackageEdge contains the cursor for the resulting node and
+// the Package node itself.
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge struct {
+	Cursor string                                                                                       `json:"cursor"`
+	Node   QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetCursor returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge) GetNode() QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.AllPkgTree.Id
+}
+
+// GetType returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage.Type, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) GetType() string {
+	return v.AllPkgTree.Type
+}
+
+// GetNamespaces returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalQueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) __premarshalJSON() (*__premarshalQueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage, error) {
+	var retval __premarshalQueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// QueryPackagesListForScanResponse is returned by QueryPackagesListForScan on success.
+type QueryPackagesListForScanResponse struct {
+	// queryPackagesListForScan returns a paginated results via PackageConnection
+	// for all packages that need to be re-scanned (based on the last scan in hours)
+	// or have never been scanned.
+	//
+	// queryType is used to specify if the last time scanned is checked for either
+	// certifyVuln or certifyLegal.
+	QueryPackagesListForScan *QueryPackagesListForScanQueryPackagesListForScanPackageConnection `json:"queryPackagesListForScan"`
+}
+
+// GetQueryPackagesListForScan returns QueryPackagesListForScanResponse.QueryPackagesListForScan, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanResponse) GetQueryPackagesListForScan() *QueryPackagesListForScanQueryPackagesListForScanPackageConnection {
+	return v.QueryPackagesListForScan
+}
+
+// QueryType is used in conjunction with queryPackagesListForScan to
+// specify if the last time scanned is checked for either certifyVuln
+// or certifyLegal.
+type QueryType string
+
+const (
+	// direct dependency
+	QueryTypeVulnerability QueryType = "VULNERABILITY"
+	// indirect dependency
+	QueryTypeLicense QueryType = "LICENSE"
+)
+
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
@@ -31127,6 +31328,30 @@ type __PointOfContactsInput struct {
 
 // GetFilter returns __PointOfContactsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__PointOfContactsInput) GetFilter() PointOfContactSpec { return v.Filter }
+
+// __QueryPackagesListForScanInput is used internally by genqlient
+type __QueryPackagesListForScanInput struct {
+	Filter    PkgSpec   `json:"filter"`
+	QueryType QueryType `json:"queryType"`
+	LastScan  *int      `json:"lastScan"`
+	After     *string   `json:"after"`
+	First     *int      `json:"first"`
+}
+
+// GetFilter returns __QueryPackagesListForScanInput.Filter, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetFilter() PkgSpec { return v.Filter }
+
+// GetQueryType returns __QueryPackagesListForScanInput.QueryType, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetQueryType() QueryType { return v.QueryType }
+
+// GetLastScan returns __QueryPackagesListForScanInput.LastScan, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetLastScan() *int { return v.LastScan }
+
+// GetAfter returns __QueryPackagesListForScanInput.After, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __QueryPackagesListForScanInput.First, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetFirst() *int { return v.First }
 
 // __ScorecardsInput is used internally by genqlient
 type __ScorecardsInput struct {
@@ -38901,6 +39126,82 @@ func PointOfContacts(
 	var err_ error
 
 	var data_ PointOfContactsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by QueryPackagesListForScan.
+const QueryPackagesListForScan_Operation = `
+query QueryPackagesListForScan ($filter: PkgSpec!, $queryType: QueryType!, $lastScan: Int, $after: ID, $first: Int) {
+	queryPackagesListForScan(pkgSpec: $filter, queryType: $queryType, lastScan: $lastScan, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPkgTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func QueryPackagesListForScan(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgSpec,
+	queryType QueryType,
+	lastScan *int,
+	after *string,
+	first *int,
+) (*QueryPackagesListForScanResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "QueryPackagesListForScan",
+		Query:  QueryPackagesListForScan_Operation,
+		Variables: &__QueryPackagesListForScanInput{
+			Filter:    filter,
+			QueryType: queryType,
+			LastScan:  lastScan,
+			After:     after,
+			First:     first,
+		},
+	}
+	var err_ error
+
+	var data_ QueryPackagesListForScanResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

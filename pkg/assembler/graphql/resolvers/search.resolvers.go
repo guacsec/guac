@@ -19,3 +19,8 @@ func (r *queryResolver) FindSoftware(ctx context.Context, searchText string) ([]
 func (r *queryResolver) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return r.Backend.FindSoftwareList(ctx, searchText, after, first)
 }
+
+// QueryPackagesListForScan is the resolver for the queryPackagesListForScan field.
+func (r *queryResolver) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+	return r.Backend.QueryPackagesListForScan(ctx, pkgSpec, queryType, lastScan, after, first)
+}
