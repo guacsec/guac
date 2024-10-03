@@ -61,6 +61,61 @@ func (n *certifyVulnerabilityLink) Key() string {
 	}, ":"))
 }
 
+// removeLinkFromList is a helper function to remove a link from an array of links. This works by setting all the links except the specified linkID.
+func removeLinkFromList(linkID string, links []string) []string {
+	var newLinks []string
+	for _, link := range links {
+		if link != linkID {
+			newLinks = append(newLinks, link)
+		}
+	}
+	return newLinks
+}
+
+// DeleteCertifyVuln deletes a specified certifyVuln node along with all associated relationships.
+func (c *demoClient) DeleteCertifyVuln(ctx context.Context, id string) (bool, error) {
+	funcName := "DeleteCertifyVuln"
+
+	// Retrieve the certifyVulnerabilityLink by ID
+	link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil // Not found, nothing to delete
+		}
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated package and vulnerability
+	foundPkgNode, err := c.returnFoundPkgVersion(ctx, &model.IDorPkgInput{PackageVersionID: &link.PackageID})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	foundPkgNode.CertifyVulnLinks = removeLinkFromList(link.ThisID, foundPkgNode.CertifyVulnLinks)
+	err = setkv(ctx, pkgVerCol, foundPkgNode, c)
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	foundVulnNode, err := c.returnFoundVulnerability(ctx, &model.IDorVulnerabilityInput{VulnerabilityNodeID: &link.VulnerabilityID})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	foundVulnNode.CertifyVulnLinks = removeLinkFromList(link.ThisID, foundPkgNode.CertifyVulnLinks)
+	err = setkv(ctx, vulnIDCol, foundPkgNode, c)
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Delete the link from the KeyValue store
+	if err := c.kv.Remove(ctx, cVulnCol, link.Key()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return true, nil
+}
+
 func (n *certifyVulnerabilityLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2)
 	if allowedEdges[model.EdgeCertifyVulnPackage] {

@@ -72,6 +72,65 @@ func (n *hasSLSAStruct) Key() string {
 	}, ":"))
 }
 
+// DeleteHasSLSA deletes a specified SLSA node along with all associated relationships.
+func (c *demoClient) DeleteHasSLSA(ctx context.Context, id string) (bool, error) {
+	funcName := "DeleteSLSA"
+
+	// Retrieve the SLSA link by ID
+	link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil // Not found, nothing to delete
+		}
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated subject
+	foundSubject, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &link.Subject})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	foundSubject.HasSLSAs = removeLinkFromList(link.ThisID, foundSubject.HasSLSAs)
+	err = setkv(ctx, artCol, foundSubject, c)
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated builtBy
+	foundBuiltBy, err := c.returnFoundBuilder(ctx, &model.IDorBuilderInput{BuilderID: &link.BuiltBy})
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	foundBuiltBy.HasSLSAs = removeLinkFromList(link.ThisID, foundBuiltBy.HasSLSAs)
+	err = setkv(ctx, builderCol, foundBuiltBy, c)
+	if err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Remove backlinks from associated builtFrom
+	for _, builtFromID := range link.BuiltFrom {
+		foundBuiltFrom, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &builtFromID})
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+
+		foundBuiltFrom.HasSLSAs = removeLinkFromList(link.ThisID, foundBuiltFrom.HasSLSAs)
+		err = setkv(ctx, artCol, foundBuiltFrom, c)
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+	}
+
+	// Delete the link from the KeyValue store
+	if err := c.kv.Remove(ctx, slsaCol, link.Key()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return true, nil
+}
+
 func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2+len(n.BuiltFrom))
 	if allowedEdges[model.EdgeHasSlsaSubject] {

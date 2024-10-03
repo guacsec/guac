@@ -67,6 +67,66 @@ func (n *hasSBOMStruct) Key() string {
 	}, ":"))
 }
 
+// DeleteHasSBOM deletes a specified hasSBOM node along with all associated relationships.
+func (c *demoClient) DeleteHasSBOM(ctx context.Context, id string) (bool, error) {
+	funcName := "DeleteHasSBOM"
+
+	// Retrieve the hasSBOM link by ID
+	link, err := byIDkv[*hasSBOMStruct](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil // Not found, nothing to delete
+		}
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Delete associated isDependency nodes
+	for _, depID := range link.IncludedDependencies {
+		if err := c.kv.Remove(ctx, "dependencies", depID); !errors.Is(err, kv.NotFoundError) {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+	}
+
+	// Delete associated isOccurrence nodes
+	for _, occurID := range link.IncludedOccurrences {
+		if err := c.kv.Remove(ctx, "occurrences", occurID); !errors.Is(err, kv.NotFoundError) {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+	}
+
+	// Remove backlinks from associated package or artifact
+	if link.Pkg != "" {
+		foundPkg, err := c.returnFoundPkgVersion(ctx, &model.IDorPkgInput{PackageVersionID: &link.Pkg})
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+
+		foundPkg.CertifyVulnLinks = removeLinkFromList(link.ThisID, foundPkg.HasSBOMs)
+		err = setkv(ctx, pkgVerCol, foundPkg, c)
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+	} else if link.Artifact != "" {
+		foundArtifact, err := c.returnFoundArtifact(ctx, &model.IDorArtifactInput{ArtifactID: &link.Artifact})
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+
+		foundArtifact.HasSBOMs = removeLinkFromList(link.ThisID, foundArtifact.HasSBOMs)
+		err = setkv(ctx, artCol, foundArtifact, c)
+		if err != nil {
+			return false, gqlerror.Errorf("%v :: %s", funcName, err)
+		}
+	}
+
+	// Delete the hasSBOM link from the KeyValue store
+	if err := c.kv.Remove(ctx, hasSBOMCol, link.Key()); err != nil {
+		return false, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return true, nil
+}
+
 func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
 	var out []string
 	if n.Pkg != "" && allowedEdges[model.EdgeHasSbomPackage] {
