@@ -152,6 +152,15 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
 		wantErr:        false,
 	}, {
+		name: "valid CycloneDX VEX document with LicenseRef and no inline",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXLegalNoInlineExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CdxQuarkusLegalNoInlinePredicates,
+		wantErr:        false,
+	}, {
 		name: "CycloneDX v1.4 with valid but unparsable license information",
 		doc: &processor.Document{
 			Blob:   testdata.CycloneDXVersion1_4,

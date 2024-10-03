@@ -69,7 +69,7 @@ var ignore = []string{
 // "Universal-FOSS-exception-1.0",
 // "WxWindows-exception-3.1",
 
-func ParseLicenses(exp string, lv *string, inLineMap map[string]string, ignoreLR bool) []model.LicenseInputSpec {
+func ParseLicenses(exp string, lv *string, inLineMap map[string]string) []model.LicenseInputSpec {
 	if exp == "" {
 		return nil
 	}
@@ -80,28 +80,31 @@ func ParseLicenses(exp string, lv *string, inLineMap map[string]string, ignoreLR
 		if slices.Contains(ignore, p) {
 			continue
 		}
-		if ignoreLR && strings.HasPrefix(p, "LicenseRef") {
-			continue
-		}
-		var license model.LicenseInputSpec
+		var license *model.LicenseInputSpec
 		if inline, ok := inLineMap[p]; ok {
-			license = model.LicenseInputSpec{
+			license = &model.LicenseInputSpec{
 				Name:        p,
 				Inline:      &inline,
 				ListVersion: lv,
 			}
-		} else if lv != nil {
-			license = model.LicenseInputSpec{
-				Name:        p,
-				ListVersion: lv,
-			}
 		} else {
-			license = model.LicenseInputSpec{
-				Name:        p,
-				ListVersion: &unknown,
+			if !strings.HasPrefix(p, "LicenseRef") {
+				if lv != nil {
+					license = &model.LicenseInputSpec{
+						Name:        p,
+						ListVersion: lv,
+					}
+				} else {
+					license = &model.LicenseInputSpec{
+						Name:        p,
+						ListVersion: &unknown,
+					}
+				}
 			}
 		}
-		rv = append(rv, license)
+		if license != nil {
+			rv = append(rv, *license)
+		}
 	}
 	return rv
 }
@@ -115,4 +118,22 @@ func HashLicense(inline string) string {
 
 func CombineLicense(licenses []string) string {
 	return strings.Join(licenses, " AND ")
+}
+
+func FixSPDXLicenseExpression(licenseExpression string, inLineMap map[string]string) string {
+	modifiedLicenseExpression := licenseExpression
+	for _, part := range strings.Split(licenseExpression, " ") {
+		p := strings.Trim(part, "()+")
+		if slices.Contains(ignore, p) {
+			continue
+		}
+		if strings.HasPrefix(p, "LicenseRef-") {
+			if inline, ok := inLineMap[p]; ok {
+				newLicenseName := HashLicense(inline)
+				inLineMap[newLicenseName] = inline
+				modifiedLicenseExpression = strings.ReplaceAll(modifiedLicenseExpression, p, newLicenseName)
+			}
+		}
+	}
+	return modifiedLicenseExpression
 }

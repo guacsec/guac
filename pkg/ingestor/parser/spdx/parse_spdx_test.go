@@ -1016,8 +1016,9 @@ func Test_spdxParser(t *testing.T) {
 						},
 						Declared: []generated.LicenseInputSpec{
 							{
-								Name:   "LicenseRef-2ba8ded3",
-								Inline: ptrfrom.String("Redistribution and use of the this code or any derivative works are permitted provided that the following conditions are met..."),
+								Name:        "LicenseRef-2ba8ded3",
+								Inline:      ptrfrom.String("Redistribution and use of the this code or any derivative works are permitted provided that the following conditions are met..."),
+								ListVersion: ptrfrom.String("1.2.3"),
 							},
 						},
 						CertifyLegal: &generated.CertifyLegalInputSpec{
