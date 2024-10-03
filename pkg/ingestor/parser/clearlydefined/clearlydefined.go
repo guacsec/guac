@@ -113,11 +113,11 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDe
 		var discoveredLicenseStr string = ""
 		if len(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions) > 0 {
 			discoveredLicenseStr = common.CombineLicense(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions)
-			discoveredLicenses = append(discoveredLicenses, common.ParseLicenses(discoveredLicenseStr, nil, nil, true)...)
+			discoveredLicenses = append(discoveredLicenses, common.ParseLicenses(discoveredLicenseStr, nil, nil)...)
 		}
 
 		declared := assembler.CertifyLegalIngest{
-			Declared:   common.ParseLicenses(s.Predicate.Definition.Licensed.Declared, nil, nil, true),
+			Declared:   common.ParseLicenses(s.Predicate.Definition.Licensed.Declared, nil, nil),
 			Discovered: discoveredLicenses,
 			CertifyLegal: &generated.CertifyLegalInputSpec{
 				DeclaredLicense:   s.Predicate.Definition.Licensed.Declared,
@@ -140,7 +140,7 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDe
 
 			discovered := assembler.CertifyLegalIngest{
 				Declared:   []generated.LicenseInputSpec{},
-				Discovered: common.ParseLicenses(discoveredLicense, nil, nil, true),
+				Discovered: common.ParseLicenses(discoveredLicense, nil, nil),
 				CertifyLegal: &generated.CertifyLegalInputSpec{
 					DiscoveredLicense: discoveredLicense,
 					DeclaredLicense:   "",

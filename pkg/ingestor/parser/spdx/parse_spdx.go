@@ -373,8 +373,8 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 	for id, cls := range s.packageLegals {
 		for _, cl := range cls {
-			dec := common.ParseLicenses(cl.DeclaredLicense, &lv, nil, false)
-			dis := common.ParseLicenses(cl.DiscoveredLicense, &lv, nil, false)
+			dec := common.ParseLicenses(cl.DeclaredLicense, &lv, nil)
+			dis := common.ParseLicenses(cl.DiscoveredLicense, &lv, nil)
 			for i := range dec {
 				o, n := fixLicense(ctx, &dec[i], s.spdxDoc.OtherLicenses)
 				if o != "" {
