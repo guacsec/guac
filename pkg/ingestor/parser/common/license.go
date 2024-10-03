@@ -119,3 +119,21 @@ func HashLicense(inline string) string {
 func CombineLicense(licenses []string) string {
 	return strings.Join(licenses, " AND ")
 }
+
+func FixSPDXLicenseExpression(licenseExpression string, inLineMap map[string]string) string {
+	modifiedLicenseExpression := licenseExpression
+	for _, part := range strings.Split(licenseExpression, " ") {
+		p := strings.Trim(part, "()+")
+		if slices.Contains(ignore, p) {
+			continue
+		}
+		if strings.HasPrefix(p, "LicenseRef-") {
+			if inline, ok := inLineMap[p]; ok {
+				newLicenseName := HashLicense(inline)
+				inLineMap[newLicenseName] = inline
+				modifiedLicenseExpression = strings.ReplaceAll(modifiedLicenseExpression, p, newLicenseName)
+			}
+		}
+	}
+	return modifiedLicenseExpression
+}
