@@ -99,34 +99,182 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
-  "/v1/package/{purlOrArtifact}":
+#  "/v0/package/{purlOrArtifact}":
+#    get:
+#      summary: Get package or artifact information
+#      operationId: getPackageInfo
+#      parameters:
+#        - name: purlOrArtifact
+#          in: path
+#          required: true
+#          description: URL-encoded Package URL <pURL> or artifact identifier <algorithm:digest>
+#          schema:
+#            type: string
+#        - name: query
+#          in: query
+#          required: false
+#          description: Comma-separated list of additional information to include in the response
+#          schema:
+#            type: array
+#            items:
+#              $ref: '#/components/schemas/QueryType'
+#          style: form
+#          explode: false
+#      responses:
+#        "200":
+#          $ref: "#/components/responses/PackageInfoResponse"
+#        "400":
+#          $ref: "#/components/responses/BadRequest"
+#        "500":
+#          $ref: "#/components/responses/InternalServerError"
+  "/v0/package/{purl}":
     get:
-      summary: Get package or artifact information
-      operationId: getPackageInfo
+      summary: Get package information by Package URL (PURL)
+      operationId: getPackagePurlsByPurl
       parameters:
-        - name: purlOrArtifact
+        - name: purl
           in: path
           required: true
-          description: URL-encoded Package URL (PURL) or artifact identifier
+          description: URL-encoded Package URL (PURL)
           schema:
             type: string
-        - name: query
-          in: query
-          required: false
-          description: Comma-separated list of additional information to include in the response
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/QueryType'
-          style: form
-          explode: false
       responses:
         "200":
-          $ref: "#/components/responses/PackageInfoResponse"
+          description: A list of PURLs associated with the specified PURL
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Package URL (PURL)
         "400":
           $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  "/v0/package/{purl}/vulns":
+    get:
+      summary: Get vulnerabilities for a specific Package URL (PURL)
+      operationId: getPackageVulnerabilitiesByPurl
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (PURL)
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  "/v0/package/{purl}/dependencies":
+    get:
+      summary: Get dependencies for a specific Package URL (PURL)
+      operationId: getPackageDependenciesByPurl
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (PURL)
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/DependencyList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+#  # New Artifact Endpoints
+#  "/v0/artifact/{artifact}":
+#    get:
+#      summary: Get artifact information by Artifact Identifier
+#      operationId: getArtifactInfo
+#      parameters:
+#        - name: artifact
+#          in: path
+#          required: true
+#          description: Artifact identifier in the format <algorithm:digest>
+#          schema:
+#            type: string
+#      responses:
+#        "200":
+#          description: A list of PURLs associated with the specified Artifact
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  type: string
+#                  description: Package URL (PURL)
+#        "400":
+#          $ref: "#/components/responses/BadRequest"
+#        "500":
+#          $ref: "#/components/responses/InternalServerError"
+  "/v0/artifact/{artifact}/vulns":
+    get:
+      summary: Get vulnerabilities for a specific Artifact
+      operationId: getArtifactVulnerabilities
+      parameters:
+        - name: artifact
+          in: path
+          required: true
+          description: Artifact identifier in the format <algorithm:digest>
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+#  "/v0/artifact/{artifact}/dependencies":
+#    get:
+#      summary: Get dependencies for a specific Artifact
+#      operationId: getArtifactDependencies
+#      parameters:
+#        - name: artifact
+#          in: path
+#          required: true
+#          description: Artifact identifier in the format <algorithm:digest>
+#          schema:
+#            type: string
+#        - name: latestSBOM
+#          in: query
+#          required: false
+#          description: Whether the query should search in the latest sbom
+#          schema:
+#            type: boolean
+#      responses:
+#        "200":
+#          $ref: "#/components/responses/DependencyList"
+#        "400":
+#          $ref: "#/components/responses/BadRequest"
+#        "500":
+#          $ref: "#/components/responses/InternalServerError"
+
 components:
   parameters:
     PaginationSpec:
@@ -164,7 +312,7 @@ components:
       properties:
         Message:
           type: string
-    WeightedNACDPackageName:
+    AnalyzeDependenciesPackageName:
       type: object
       required:
         - Name
@@ -174,9 +322,6 @@ components:
           $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
-    PackageInfo:
-      type: string
-      description: The Package URL (PURL) of the package(s) being outputted
     Vulnerability:
       type: object
       required:
@@ -187,7 +332,7 @@ components:
         packages:
           type: array
           items:
-            $ref: "#/components/schemas/PackageInfo"
+            type: string
         vulnerability:
           $ref: '#/components/schemas/VulnerabilityDetails'
         metadata:
@@ -250,29 +395,23 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/WeightedNACDPackageName"
-    PackageInfoResponse:
-      description: Package information and optional related data
+              $ref: "#/components/schemas/AnalyzeDependenciesPackageName"
+    VulnerabilityList:
+      description: A list of vulnerabilities associated with the package or artifact
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - packages
-            properties:
-              packages:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PackageInfo"
-              vulnerabilities:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Vulnerability"
-              dependencies:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PackageInfo"
-            additionalProperties: true  # This allows for future extensibility
+            type: array
+            items:
+              $ref: "#/components/schemas/Vulnerability"
+    DependencyList:
+      description: A list of dependencies associated with the package or artifact
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
     # intended for code 400, client side error
     BadRequest:
       description: Bad request, such as from invalid or missing parameters

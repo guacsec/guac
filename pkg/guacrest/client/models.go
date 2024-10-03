@@ -4,16 +4,7 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
 	"time"
-)
-
-// Defines values for QueryType.
-const (
-	Dependencies QueryType = "dependencies"
-	LatestSbom   QueryType = "latestSbom"
-	Vulns        QueryType = "vulns"
 )
 
 // Defines values for AnalyzeDependenciesParamsSort.
@@ -28,13 +19,16 @@ const (
 	Name   RetrieveDependenciesParamsLinkCondition = "name"
 )
 
+// AnalyzeDependenciesPackageName defines model for AnalyzeDependenciesPackageName.
+type AnalyzeDependenciesPackageName struct {
+	DependentCount int  `json:"DependentCount"`
+	Name           Purl `json:"Name"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	Message string `json:"Message"`
 }
-
-// PackageInfo The Package URL (PURL) of the package(s) being outputted
-type PackageInfo = string
 
 // PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
 type PaginationInfo struct {
@@ -44,9 +38,6 @@ type PaginationInfo struct {
 
 // Purl defines model for Purl.
 type Purl = string
-
-// QueryType defines model for QueryType.
-type QueryType string
 
 // ScanMetadata defines model for ScanMetadata.
 type ScanMetadata struct {
@@ -62,7 +53,7 @@ type ScanMetadata struct {
 // Vulnerability defines model for Vulnerability.
 type Vulnerability struct {
 	Metadata      ScanMetadata         `json:"metadata"`
-	Packages      []PackageInfo        `json:"packages"`
+	Packages      []string             `json:"packages"`
 	Vulnerability VulnerabilityDetails `json:"vulnerability"`
 }
 
@@ -70,12 +61,6 @@ type Vulnerability struct {
 type VulnerabilityDetails struct {
 	Type             *string  `json:"type,omitempty"`
 	VulnerabilityIDs []string `json:"vulnerabilityIDs"`
-}
-
-// WeightedNACDPackageName defines model for WeightedNACDPackageName.
-type WeightedNACDPackageName struct {
-	DependentCount int  `json:"DependentCount"`
-	Name           Purl `json:"Name"`
 }
 
 // PaginationSpec defines model for PaginationSpec.
@@ -90,19 +75,14 @@ type BadGateway = Error
 // BadRequest defines model for BadRequest.
 type BadRequest = Error
 
+// DependencyList defines model for DependencyList.
+type DependencyList = []string
+
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = Error
 
-// PackageInfoResponse defines model for PackageInfoResponse.
-type PackageInfoResponse struct {
-	Dependencies         *[]PackageInfo         `json:"dependencies,omitempty"`
-	Packages             []PackageInfo          `json:"packages"`
-	Vulnerabilities      *[]Vulnerability       `json:"vulnerabilities,omitempty"`
-	AdditionalProperties map[string]interface{} `json:"-"`
-}
-
 // PackageNameList defines model for PackageNameList.
-type PackageNameList = []WeightedNACDPackageName
+type PackageNameList = []AnalyzeDependenciesPackageName
 
 // PurlList defines model for PurlList.
 type PurlList struct {
@@ -110,6 +90,9 @@ type PurlList struct {
 	PaginationInfo PaginationInfo `json:"PaginationInfo"`
 	PurlList       []Purl         `json:"PurlList"`
 }
+
+// VulnerabilityList defines model for VulnerabilityList.
+type VulnerabilityList = []Vulnerability
 
 // AnalyzeDependenciesParams defines parameters for AnalyzeDependencies.
 type AnalyzeDependenciesParams struct {
@@ -147,104 +130,20 @@ type RetrieveDependenciesParams struct {
 // RetrieveDependenciesParamsLinkCondition defines parameters for RetrieveDependencies.
 type RetrieveDependenciesParamsLinkCondition string
 
-// GetPackageInfoParams defines parameters for GetPackageInfo.
-type GetPackageInfoParams struct {
-	// Query Comma-separated list of additional information to include in the response
-	Query *[]QueryType `form:"query,omitempty" json:"query,omitempty"`
+// GetArtifactVulnerabilitiesParams defines parameters for GetArtifactVulnerabilities.
+type GetArtifactVulnerabilitiesParams struct {
+	// LatestSBOM Whether the query should search in the latest sbom
+	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
 }
 
-// Getter for additional properties for PackageInfoResponse. Returns the specified
-// element and whether it was found
-func (a PackageInfoResponse) Get(fieldName string) (value interface{}, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
+// GetPackageDependenciesByPurlParams defines parameters for GetPackageDependenciesByPurl.
+type GetPackageDependenciesByPurlParams struct {
+	// LatestSBOM Whether the query should search in the latest sbom
+	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
 }
 
-// Setter for additional properties for PackageInfoResponse
-func (a *PackageInfoResponse) Set(fieldName string, value interface{}) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]interface{})
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for PackageInfoResponse to handle AdditionalProperties
-func (a *PackageInfoResponse) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if raw, found := object["dependencies"]; found {
-		err = json.Unmarshal(raw, &a.Dependencies)
-		if err != nil {
-			return fmt.Errorf("error reading 'dependencies': %w", err)
-		}
-		delete(object, "dependencies")
-	}
-
-	if raw, found := object["packages"]; found {
-		err = json.Unmarshal(raw, &a.Packages)
-		if err != nil {
-			return fmt.Errorf("error reading 'packages': %w", err)
-		}
-		delete(object, "packages")
-	}
-
-	if raw, found := object["vulnerabilities"]; found {
-		err = json.Unmarshal(raw, &a.Vulnerabilities)
-		if err != nil {
-			return fmt.Errorf("error reading 'vulnerabilities': %w", err)
-		}
-		delete(object, "vulnerabilities")
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]interface{})
-		for fieldName, fieldBuf := range object {
-			var fieldVal interface{}
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for PackageInfoResponse to handle AdditionalProperties
-func (a PackageInfoResponse) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	if a.Dependencies != nil {
-		object["dependencies"], err = json.Marshal(a.Dependencies)
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling 'dependencies': %w", err)
-		}
-	}
-
-	object["packages"], err = json.Marshal(a.Packages)
-	if err != nil {
-		return nil, fmt.Errorf("error marshaling 'packages': %w", err)
-	}
-
-	if a.Vulnerabilities != nil {
-		object["vulnerabilities"], err = json.Marshal(a.Vulnerabilities)
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling 'vulnerabilities': %w", err)
-		}
-	}
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
-		}
-	}
-	return json.Marshal(object)
+// GetPackageVulnerabilitiesByPurlParams defines parameters for GetPackageVulnerabilitiesByPurl.
+type GetPackageVulnerabilitiesByPurlParams struct {
+	// LatestSBOM Whether the query should search in the latest sbom
+	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
 }
