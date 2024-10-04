@@ -22,8 +22,8 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	cd_certifier "github.com/guacsec/guac/pkg/certifier/clearlydefined"
-	osv_certifier "github.com/guacsec/guac/pkg/certifier/osv"
 	eol_certifier "github.com/guacsec/guac/pkg/certifier/eol"
+	osv_certifier "github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/ingestor/parser/clearlydefined"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/eol"
@@ -104,6 +104,10 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	}
 
 	return certLegalIngest, hasSourceAtIngest, nil
+}
+
+func PurlsDepsDevScan(ctx context.Context, purls []string) ([]assembler.CertifyScorecardIngest, []assembler.HasSourceAtIngest, error) {
+	return nil, nil, fmt.Errorf("Unimplemented")
 }
 
 // runQueryOnBatchedPurls runs EvaluateClearlyDefinedDefinition from the clearly defined
