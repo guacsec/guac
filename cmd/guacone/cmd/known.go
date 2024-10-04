@@ -462,8 +462,8 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 				certifyLegalStr,
 				legal.Id,
 				"Declared License: " + legal.DeclaredLicense +
-				",\nDiscovered License: " + legal.DiscoveredLicense +
-				",\nOrigin: " + legal.Origin,
+					",\nDiscovered License: " + legal.DiscoveredLicense +
+					",\nOrigin: " + legal.Origin,
 			})
 		}
 	}

@@ -48,6 +48,7 @@ type options struct {
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -110,6 +111,7 @@ func ingest(cmd *cobra.Command, args []string) {
 			opts.queryVulnOnIngestion,
 			opts.queryLicenseOnIngestion,
 			opts.queryEOLOnIngestion,
+			opts.queryDepsDevOnIngestion,
 		); err != nil {
 			var urlErr *url.Error
 			if errors.As(err, &urlErr) {

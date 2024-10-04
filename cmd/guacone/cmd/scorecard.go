@@ -50,6 +50,7 @@ type scorecardOptions struct {
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
@@ -71,6 +72,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 		)
@@ -143,8 +145,8 @@ var scorecardCmd = &cobra.Command{
 				opts.queryVulnOnIngestion,
 				opts.queryLicenseOnIngestion,
 				opts.queryEOLOnIngestion,
+				opts.queryDepsDevOnIngestion,
 			)
-
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
 			}
@@ -202,6 +204,7 @@ func validateScorecardFlags(
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
 	queryEOLOnIngestion bool,
+	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int,
 ) (scorecardOptions, error) {
@@ -236,6 +239,7 @@ func validateScorecardFlags(
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	opts.queryEOLOnIngestion = queryEOLOnIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevIngestion
 	return opts, nil
 }
 

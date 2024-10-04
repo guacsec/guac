@@ -54,6 +54,7 @@ type fileOptions struct {
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 }
 
 var filesCmd = &cobra.Command{
@@ -71,6 +72,7 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -140,6 +142,7 @@ var filesCmd = &cobra.Command{
 				opts.queryVulnOnIngestion,
 				opts.queryLicenseOnIngestion,
 				opts.queryEOLOnIngestion,
+				opts.queryDepsDevOnIngestion,
 			); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
@@ -173,7 +176,7 @@ var filesCmd = &cobra.Command{
 }
 
 func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, args []string) (fileOptions, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -202,6 +205,7 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 	return opts, nil
 }
 

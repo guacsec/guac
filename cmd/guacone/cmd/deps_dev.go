@@ -97,6 +97,9 @@ var depsDevCmd = &cobra.Command{
 				opts.queryVulnOnIngestion,
 				opts.queryLicenseOnIngestion,
 				opts.queryEOLOnIngestion,
+				// since this is a deps.dev collector, by we don't query deps.dev on ingestion
+				/* queryDepsDevOnIngestion = */
+				false,
 			); err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
