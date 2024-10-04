@@ -74,6 +74,10 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	return certLegalIngest, hasSourceAtIngest, nil
 }
 
+func PurlsDepsDevScan(ctx context.Context, purls []string) ([]assembler.CertifyScorecardIngest, []assembler.HasSourceAtIngest, error) {
+	return nil, nil, fmt.Errorf("Unimplemented")
+}
+
 // runQueryOnBatchedPurls runs EvaluateClearlyDefinedDefinition from the clearly defined
 // certifier to evaluate the batched purls for license information
 func runQueryOnBatchedPurls(ctx context.Context, cdParser common.DocumentParser, batchPurls []string) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {

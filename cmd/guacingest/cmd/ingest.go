@@ -47,6 +47,7 @@ type options struct {
 	headerFile              string
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryDepsDevOnIngestion bool
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -99,7 +100,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	defer csubClient.Close()
 
 	emit := func(d *processor.Document) error {
-		if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
+		if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion, opts.queryDepsDevOnIngestion); err != nil {
 			var urlErr *url.Error
 			if errors.As(err, &urlErr) {
 				return fmt.Errorf("unable to ingest document due to connection error with graphQL %q : %w", d.SourceInformation.Source, urlErr)

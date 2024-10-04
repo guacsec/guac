@@ -52,6 +52,7 @@ type cdOptions struct {
 	interval                time.Duration
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryDepsDevOnIngestion bool
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
@@ -72,6 +73,7 @@ var cdCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 		)
@@ -120,7 +122,7 @@ var cdCmd = &cobra.Command{
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient,
-							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion, opts.queryDepsDevOnIngestion)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -134,7 +136,7 @@ var cdCmd = &cobra.Command{
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient,
-							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion, opts.queryDepsDevOnIngestion)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -153,7 +155,7 @@ var cdCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion, opts.queryDepsDevOnIngestion)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -162,7 +164,7 @@ var cdCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion, opts.queryDepsDevOnIngestion)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
@@ -229,6 +231,7 @@ func validateCDFlags(
 	csubTlsSkipVerify bool,
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
+	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int,
 ) (cdOptions, error) {
@@ -261,6 +264,7 @@ func validateCDFlags(
 	opts.csubClientOptions = csubOpts
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevIngestion
 
 	return opts, nil
 }

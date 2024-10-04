@@ -42,6 +42,7 @@ type gcsOptions struct {
 	bucket                  string
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryDepsDevOnIngestion bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -61,6 +62,7 @@ var gcsCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -112,7 +114,7 @@ var gcsCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion, opts.queryDepsDevOnIngestion)
 
 			if err != nil {
 				gotErr = true
@@ -143,7 +145,7 @@ var gcsCmd = &cobra.Command{
 }
 
 func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (gcsOptions, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryDepsDevOnIngestion bool, args []string) (gcsOptions, error) {
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.headerFile = headerFile
@@ -164,6 +166,7 @@ func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string,
 	}
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 	return opts, nil
 }
 

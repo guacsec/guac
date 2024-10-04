@@ -87,7 +87,9 @@ var depsDevCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 
-			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
+			// since this is a deps.dev collector, by we don't query deps.dev on ingestion
+			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion,
+				/* queryDepsDevOnIngestion = */ false); err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
