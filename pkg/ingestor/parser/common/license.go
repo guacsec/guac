@@ -83,9 +83,8 @@ func ParseLicenses(exp string, lv *string, inLineMap map[string]string) []model.
 		var license *model.LicenseInputSpec
 		if inline, ok := inLineMap[p]; ok {
 			license = &model.LicenseInputSpec{
-				Name:        p,
-				Inline:      &inline,
-				ListVersion: lv,
+				Name:   p,
+				Inline: &inline,
 			}
 		} else {
 			if !strings.HasPrefix(p, "LicenseRef") {
