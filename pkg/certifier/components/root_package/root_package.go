@@ -23,6 +23,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 const guacType string = "guac"
@@ -64,6 +65,15 @@ func NewPackageQuery(client graphql.Client, queryType generated.QueryType, batch
 func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
+	}
+
+	// logger
+	logger := logging.FromContext(ctx)
+	if p.lastScan != nil {
+		lastScanTime := time.Now().Add(time.Duration(-*p.lastScan) * time.Hour).UTC()
+		logger.Infof("last-scan set to: %d hours, last scan time set to: %v", *p.lastScan, lastScanTime)
+	} else {
+		logger.Infof("last-scan not set, running on full package list")
 	}
 
 	tickInterval := 5 * time.Second
