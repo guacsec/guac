@@ -119,7 +119,7 @@ func findSubjectBasedOnType(a *model.AllHasSBOMTree, gqlClient graphql.Client) (
 	switch subject := a.Subject.(type) {
 	case *model.AllHasSBOMTreeSubjectArtifact:
 		// Get the package attached to the artifact via an isOccurrence node
-		pkg, err := getPkgFromArtifact(gqlClient, subject.Id)
+		pkg, err := GetPkgFromArtifact(gqlClient, subject.Id)
 		if err != nil {
 			return "", fmt.Errorf("could not find package for subject: %s, with err: %v", subject.Id, err)
 		}
@@ -132,7 +132,7 @@ func findSubjectBasedOnType(a *model.AllHasSBOMTree, gqlClient graphql.Client) (
 	return version, nil
 }
 
-func getPkgFromArtifact(gqlClient graphql.Client, id string) (*model.AllPkgTree, error) {
+func GetPkgFromArtifact(gqlClient graphql.Client, id string) (*model.AllPkgTree, error) {
 	rsp, err := model.Occurrences(context.Background(), gqlClient, model.IsOccurrenceSpec{
 		Artifact: &model.ArtifactSpec{
 			Id: &id,

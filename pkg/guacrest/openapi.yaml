@@ -99,37 +99,9 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
-#  "/v0/package/{purlOrArtifact}":
-#    get:
-#      summary: Get package or artifact information
-#      operationId: getPackageInfo
-#      parameters:
-#        - name: purlOrArtifact
-#          in: path
-#          required: true
-#          description: URL-encoded Package URL <pURL> or artifact identifier <algorithm:digest>
-#          schema:
-#            type: string
-#        - name: query
-#          in: query
-#          required: false
-#          description: Comma-separated list of additional information to include in the response
-#          schema:
-#            type: array
-#            items:
-#              $ref: '#/components/schemas/QueryType'
-#          style: form
-#          explode: false
-#      responses:
-#        "200":
-#          $ref: "#/components/responses/PackageInfoResponse"
-#        "400":
-#          $ref: "#/components/responses/BadRequest"
-#        "500":
-#          $ref: "#/components/responses/InternalServerError"
   "/v0/package/{purl}":
     get:
-      summary: Get package information by Package URL (PURL)
+      summary: Get purls related to the specific Package URL (PURL)
       operationId: getPackagePurlsByPurl
       parameters:
         - name: purl
@@ -195,40 +167,14 @@ paths:
             type: boolean
       responses:
         "200":
-          $ref: "#/components/responses/DependencyList"
+          $ref: "#/components/responses/PurlList"
         "400":
           $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalServerError"
-#  # New Artifact Endpoints
-#  "/v0/artifact/{artifact}":
-#    get:
-#      summary: Get artifact information by Artifact Identifier
-#      operationId: getArtifactInfo
-#      parameters:
-#        - name: artifact
-#          in: path
-#          required: true
-#          description: Artifact identifier in the format <algorithm:digest>
-#          schema:
-#            type: string
-#      responses:
-#        "200":
-#          description: A list of PURLs associated with the specified Artifact
-#          content:
-#            application/json:
-#              schema:
-#                type: array
-#                items:
-#                  type: string
-#                  description: Package URL (PURL)
-#        "400":
-#          $ref: "#/components/responses/BadRequest"
-#        "500":
-#          $ref: "#/components/responses/InternalServerError"
   "/v0/artifact/{artifact}/vulns":
     get:
-      summary: Get vulnerabilities for a specific Artifact
+      summary: Get vulnerabilities for a specific Artifact (<algorithm>:<digest>)
       operationId: getArtifactVulnerabilities
       parameters:
         - name: artifact
@@ -250,30 +196,30 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalServerError"
-#  "/v0/artifact/{artifact}/dependencies":
-#    get:
-#      summary: Get dependencies for a specific Artifact
-#      operationId: getArtifactDependencies
-#      parameters:
-#        - name: artifact
-#          in: path
-#          required: true
-#          description: Artifact identifier in the format <algorithm:digest>
-#          schema:
-#            type: string
-#        - name: latestSBOM
-#          in: query
-#          required: false
-#          description: Whether the query should search in the latest sbom
-#          schema:
-#            type: boolean
-#      responses:
-#        "200":
-#          $ref: "#/components/responses/DependencyList"
-#        "400":
-#          $ref: "#/components/responses/BadRequest"
-#        "500":
-#          $ref: "#/components/responses/InternalServerError"
+  "/v0/artifact/{artifact}/dependencies":
+    get:
+      summary: Get dependencies for a specific Artifact (<algorithm>:<digest>)
+      operationId: getArtifactDependencies
+      parameters:
+        - name: artifact
+          in: path
+          required: true
+          description: Artifact identifier in the format <algorithm:digest>
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   parameters:
@@ -312,7 +258,7 @@ components:
       properties:
         Message:
           type: string
-    AnalyzeDependenciesPackageName:
+    PackageName:
       type: object
       required:
         - Name
@@ -395,7 +341,7 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/AnalyzeDependenciesPackageName"
+              $ref: "#/components/schemas/PackageName"
     VulnerabilityList:
       description: A list of vulnerabilities associated with the package or artifact
       content:

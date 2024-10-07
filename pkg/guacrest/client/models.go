@@ -19,15 +19,15 @@ const (
 	Name   RetrieveDependenciesParamsLinkCondition = "name"
 )
 
-// AnalyzeDependenciesPackageName defines model for AnalyzeDependenciesPackageName.
-type AnalyzeDependenciesPackageName struct {
-	DependentCount int  `json:"DependentCount"`
-	Name           Purl `json:"Name"`
-}
-
 // Error defines model for Error.
 type Error struct {
 	Message string `json:"Message"`
+}
+
+// PackageName defines model for PackageName.
+type PackageName struct {
+	DependentCount int  `json:"DependentCount"`
+	Name           Purl `json:"Name"`
 }
 
 // PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
@@ -75,14 +75,11 @@ type BadGateway = Error
 // BadRequest defines model for BadRequest.
 type BadRequest = Error
 
-// DependencyList defines model for DependencyList.
-type DependencyList = []string
-
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = Error
 
 // PackageNameList defines model for PackageNameList.
-type PackageNameList = []AnalyzeDependenciesPackageName
+type PackageNameList = []PackageName
 
 // PurlList defines model for PurlList.
 type PurlList struct {
@@ -129,6 +126,12 @@ type RetrieveDependenciesParams struct {
 
 // RetrieveDependenciesParamsLinkCondition defines parameters for RetrieveDependencies.
 type RetrieveDependenciesParamsLinkCondition string
+
+// GetArtifactDependenciesParams defines parameters for GetArtifactDependencies.
+type GetArtifactDependenciesParams struct {
+	// LatestSBOM Whether the query should search in the latest sbom
+	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
+}
 
 // GetArtifactVulnerabilitiesParams defines parameters for GetArtifactVulnerabilities.
 type GetArtifactVulnerabilitiesParams struct {
