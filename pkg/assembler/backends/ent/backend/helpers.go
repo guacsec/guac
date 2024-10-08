@@ -23,8 +23,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -99,23 +97,24 @@ func builderIDEQ(id string) func(*sql.Selector) {
 	return sql.FieldEQ("built_by_id", filterGlobalID.id)
 }
 
+func slsaArtifactIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("subject_id", filterGlobalID.id)
+}
+
 func artifactIDEQ(id string) func(*sql.Selector) {
 	filterGlobalID := fromGlobalID(id)
-	if filterGlobalID.nodeType == slsaattestation.Table {
-		return sql.FieldEQ("subject_id", filterGlobalID.id)
-	} else {
-		return sql.FieldEQ("artifact_id", filterGlobalID.id)
-	}
+	return sql.FieldEQ("artifact_id", filterGlobalID.id)
 }
 
 func vulnerabilityIDEQ(id string) func(*sql.Selector) {
 	filterGlobalID := fromGlobalID(id)
-	if filterGlobalID.nodeType == vulnerabilitymetadata.Table {
-		return sql.FieldEQ("vulnerability_id_id", filterGlobalID.id)
-	} else {
-		return sql.FieldEQ("vulnerability_id", filterGlobalID.id)
-	}
+	return sql.FieldEQ("vulnerability_id", filterGlobalID.id)
+}
 
+func vulnerabilityIDMetaEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("vulnerability_id_id", filterGlobalID.id)
 }
 
 func NoOpSelector() func(*sql.Selector) {

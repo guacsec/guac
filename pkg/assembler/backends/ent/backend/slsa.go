@@ -141,7 +141,7 @@ func hasSLSAQuery(spec model.HasSLSASpec) predicate.SLSAAttestation {
 	if spec.Subject != nil {
 		if spec.Subject.ID != nil {
 			predicates = append(predicates,
-				optionalPredicate(spec.Subject.ID, artifactIDEQ))
+				optionalPredicate(spec.Subject.ID, slsaArtifactIDEQ))
 		} else {
 			predicates = append(predicates,
 				slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
