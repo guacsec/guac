@@ -223,14 +223,30 @@ func queryCertifications(typ certification.Type, filter *model.CertifyBadSpec) p
 	if filter.Subject != nil {
 		switch {
 		case filter.Subject.Artifact != nil:
-			predicates = append(predicates, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+			if filter.Subject.Artifact.ID != nil {
+				predicates = append(predicates,
+					optionalPredicate(filter.Subject.Artifact.ID, artifactIDEQ))
+			} else {
+				predicates = append(predicates,
+					certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+			}
 		case filter.Subject.Package != nil:
-			predicates = append(predicates, certification.Or(
-				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
-				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
-			))
+			if filter.Subject.Package.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Package.ID, packageVersionOrNameIDEQ))
+			} else {
+				predicates = append(predicates, certification.Or(
+					certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
+					certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
+				))
+			}
 		case filter.Subject.Source != nil:
-			predicates = append(predicates, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
+			if filter.Subject.Source.ID != nil {
+				predicates = append(predicates,
+					optionalPredicate(filter.Subject.Source.ID, sourceIDEQ))
+			} else {
+				predicates = append(predicates,
+					certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
+			}
 		}
 	}
 

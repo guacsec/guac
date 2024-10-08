@@ -152,9 +152,13 @@ func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.Certify
 	}
 
 	if filter.Source != nil {
-		predicates = append(predicates,
-			certifyscorecard.HasSourceWith(sourceQuery(filter.Source)),
-		)
+		if filter.Source.ID != nil {
+			predicates = append(predicates, optionalPredicate(filter.Source.ID, sourceIDEQ))
+		} else {
+			predicates = append(predicates,
+				certifyscorecard.HasSourceWith(sourceQuery(filter.Source)),
+			)
+		}
 	}
 
 	return certifyscorecard.And(predicates...)

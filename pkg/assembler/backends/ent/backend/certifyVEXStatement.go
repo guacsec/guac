@@ -386,21 +386,36 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
-			predicates = append(predicates, certifyvex.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+			if filter.Subject.Package.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Package.ID, packageIDEQ))
+			} else {
+				predicates = append(predicates,
+					certifyvex.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+			}
 		} else if filter.Subject.Artifact != nil {
-			predicates = append(predicates, certifyvex.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+			if filter.Subject.Artifact.ID != nil {
+				predicates = append(predicates,
+					optionalPredicate(filter.Subject.Artifact.ID, artifactIDEQ))
+			} else {
+				predicates = append(predicates,
+					certifyvex.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+			}
 		}
 	}
 
 	if filter.Vulnerability != nil {
-		if filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
-			predicates = append(predicates, certifyvex.Not(certifyvex.HasVulnerability()))
+		if filter.Vulnerability.ID != nil {
+			predicates = append(predicates, optionalPredicate(filter.Vulnerability.ID, vulnerabilityIDEQ))
 		} else {
-			predicates = append(predicates,
-				certifyvex.HasVulnerabilityWith(
-					vulnerabilityQueryPredicates(*filter.Vulnerability)...,
-				),
-			)
+			if filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
+				predicates = append(predicates, certifyvex.Not(certifyvex.HasVulnerability()))
+			} else {
+				predicates = append(predicates,
+					certifyvex.HasVulnerabilityWith(
+						vulnerabilityQueryPredicates(*filter.Vulnerability)...,
+					),
+				)
+			}
 		}
 	}
 	return certifyvex.And(predicates...)
