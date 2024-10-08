@@ -310,7 +310,7 @@ func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 
 	if spec.Vulnerability != nil {
 		if spec.Vulnerability.ID != nil {
-			predicates = append(predicates, optionalPredicate(spec.Package.ID, packageIDEQ))
+			predicates = append(predicates, optionalPredicate(spec.Vulnerability.ID, vulnerabilityIDEQ))
 		} else {
 			predicates = append(predicates,
 				certifyvuln.HasVulnerabilityWith(
