@@ -309,7 +309,7 @@ type CertifyGoodSpec struct {
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice

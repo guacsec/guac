@@ -1024,7 +1024,7 @@ func (v *AllCertifyGoodSubjectSource) __premarshalJSON() (*__premarshalAllCertif
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -8195,7 +8195,7 @@ func (v *CertifyGoodSpec) GetDocumentRef() *string { return v.DocumentRef }
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -8439,7 +8439,7 @@ func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegal
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -13805,7 +13805,7 @@ func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighbo
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -17260,7 +17260,7 @@ func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGo
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -19767,7 +19767,7 @@ func (v *NodesNodesCertifyGood) __premarshalJSON() (*__premarshalNodesNodesCerti
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -23798,7 +23798,7 @@ func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGo
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
