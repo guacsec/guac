@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"entgo.io/contrib/entgql"
@@ -138,6 +139,13 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 		if err != nil {
 			return nil, fmt.Errorf("failed package query with error: %w", err)
 		}
+
+		// if not found return nil
+		if pkgConn == nil {
+			return nil, nil
+		}
+
+		return constructPkgConn(pkgConn, pkgConn.TotalCount, pkgConn.PageInfo.HasNextPage), nil
 	} else {
 		var pkgLatestScan []struct {
 			ID             uuid.UUID `json:"id"`
@@ -145,7 +153,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 		}
 
 		if queryType == model.QueryTypeVulnerability {
-			err := b.client.PackageVersion.Query().
+			err := b.client.Debug().PackageVersion.Query().
 				Where(packageQueryPredicates(&pkgSpec)).
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
@@ -156,10 +164,10 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 				Scan(ctx, &pkgLatestScan)
 
 			if err != nil {
-				return nil, fmt.Errorf("failed package query with error: %w", err)
+				return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 			}
 		} else {
-			err := b.client.PackageVersion.Query().
+			err := b.client.Debug().PackageVersion.Query().
 				Where(packageQueryPredicates(&pkgSpec)).
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
@@ -170,7 +178,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 				Scan(ctx, &pkgLatestScan)
 
 			if err != nil {
-				return nil, fmt.Errorf("failed package query with error: %w", err)
+				return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
 			}
 		}
 
@@ -183,22 +191,59 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 		}
 
 		if len(packagesThatNeedScanning) > 0 {
+			if first == nil {
+				first = ptrfrom.Int(60000)
+			}
+			var shortenedQueryList []uuid.UUID
+			// Sort the UUID slice
+			sort.Sort(UUIDSlice(packagesThatNeedScanning))
+
+			startIndex := 0
+			if after != nil {
+				filterGlobalID := fromGlobalID(*after)
+				// Find the index of the specified UUID
+				startIndex = findUUIDIndex(packagesThatNeedScanning, filterGlobalID.id)
+
+				if startIndex == -1 {
+					return nil, nil
+				}
+			}
+
+			startAfterPackageIDList := packagesThatNeedScanning[startIndex:]
+
+			// Loop through the sorted list starting from the specified UUID
+			for i, id := range startAfterPackageIDList {
+				if i <= *first {
+					shortenedQueryList = append(shortenedQueryList, id)
+				}
+			}
 			var queryErr error
-			pkgConn, queryErr = b.client.PackageVersion.Query().
-				Where(packageversion.IDIn(packagesThatNeedScanning...)).
+			pkgConn, queryErr = b.client.Debug().PackageVersion.Query().
+				Where(packageversion.IDIn(shortenedQueryList...)).
 				WithName(func(q *ent.PackageNameQuery) {}).
 				Paginate(ctx, afterCursor, first, nil, nil)
 
 			if queryErr != nil {
-				return nil, fmt.Errorf("failed package query with error: %w", queryErr)
+				return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
 			}
-		}
-	}
 
-	// if not found return nil
-	if pkgConn == nil {
+			// if not found return nil
+			if pkgConn == nil {
+				return nil, nil
+			}
+
+			hasNextPage := false
+			if (startIndex + *first) < len(packagesThatNeedScanning) {
+				hasNextPage = true
+			}
+
+			return constructPkgConn(pkgConn, len(packagesThatNeedScanning), hasNextPage), nil
+		}
 		return nil, nil
 	}
+}
+
+func constructPkgConn(pkgConn *ent.PackageVersionConnection, totalCount int, hasNextPage bool) *model.PackageConnection {
 
 	var edges []*model.PackageEdge
 	for _, edge := range pkgConn.Edges {
@@ -210,16 +255,16 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 
 	if pkgConn.PageInfo.StartCursor != nil {
 		return &model.PackageConnection{
-			TotalCount: pkgConn.TotalCount,
+			TotalCount: totalCount,
 			PageInfo: &model.PageInfo{
-				HasNextPage: pkgConn.PageInfo.HasNextPage,
+				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.StartCursor.ID.String())),
 				EndCursor:   ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
-		}, nil
+		}
 	} else {
 		// if not found return nil
-		return nil, nil
+		return nil
 	}
 }

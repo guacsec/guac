@@ -149,7 +149,7 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 		}
 
 		if pkgConn == nil || pkgConn.QueryPackagesListForScan == nil {
-			continue
+			break
 		}
 		pkgEdges := pkgConn.QueryPackagesListForScan.Edges
 
