@@ -19,7 +19,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
+
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+
+	helpers2 "github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/guacrest/helpers"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/dependencies"
@@ -98,4 +105,313 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 	default:
 		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
 	}
+}
+
+func (s *DefaultServer) GetPackagePurlsByPurl(ctx context.Context, request gen.GetPackagePurlsByPurlRequestObject) (gen.GetPackagePurlsByPurlResponseObject, error) {
+	purl, err := url.QueryUnescape(request.Purl)
+	if err != nil {
+		return gen.GetPackagePurlsByPurl400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to unencode purl: %v", err),
+			},
+		}, nil
+	}
+
+	// Convert the PURL string to a PkgInputSpec
+	pkgInput, err := helpers2.PurlToPkg(purl)
+	if err != nil {
+		return gen.GetPackagePurlsByPurl400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to parse PURL: %v", err),
+			},
+		}, nil
+	}
+
+	pkgSpec := helpers.ConvertPkgInputSpecToPkgSpec(pkgInput)
+
+	// Retrieve package information using the helper function
+	purls, _, err := helpers.GetPurlsForPkg(ctx, s.gqlClient, pkgSpec)
+	if err != nil {
+		return gen.GetPackagePurlsByPurl500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving package info: %v", err),
+			},
+		}, nil
+	}
+
+	result := gen.GetPackagePurlsByPurl200JSONResponse{}
+	result = append(result, purls...)
+
+	// Return the successful response with the retrieved package information
+	return result, nil
+}
+
+func (s *DefaultServer) GetPackageVulnerabilitiesByPurl(ctx context.Context, request gen.GetPackageVulnerabilitiesByPurlRequestObject) (gen.GetPackageVulnerabilitiesByPurlResponseObject, error) {
+	purl, err := url.QueryUnescape(request.Purl)
+	if err != nil {
+		return gen.GetPackageVulnerabilitiesByPurl400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to unencode purl: %v", err),
+			},
+		}, nil
+	}
+
+	// Convert the PURL string to a PkgInputSpec
+	pkgInput, err := helpers2.PurlToPkg(purl)
+	if err != nil {
+		return gen.GetPackageVulnerabilitiesByPurl400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to parse PURL: %v", err),
+			},
+		}, nil
+	}
+
+	pkgSpec := helpers.ConvertPkgInputSpecToPkgSpec(pkgInput)
+
+	// Retrieve package information using the helper function
+	_, packageIDs, err := helpers.GetPurlsForPkg(ctx, s.gqlClient, pkgSpec)
+	if err != nil {
+		return gen.GetPackageVulnerabilitiesByPurl500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving package info: %v", err),
+			},
+		}, nil
+	}
+
+	latestSbom := &model.AllHasSBOMTree{}
+	shouldSearchSoftware := false
+
+	// If the LatestSBOM query is specified then all other queries should be for the latest SBOM
+	if request.Params.LatestSBOM != nil && *request.Params.LatestSBOM {
+		latestSbom, err = helpers.LatestSBOMFromID(ctx, s.gqlClient, packageIDs)
+		if err != nil {
+			return nil, err
+		}
+		shouldSearchSoftware = true
+	}
+
+	vulns, err := searchVulnerabilitiesViaPkg(ctx, s.gqlClient, pkgSpec, shouldSearchSoftware, *latestSbom)
+	if err != nil {
+		return gen.GetPackageVulnerabilitiesByPurl500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving vulnerabilities for package: %v", err),
+			},
+		}, nil
+	}
+
+	result := gen.GetPackageVulnerabilitiesByPurl200JSONResponse{
+		VulnerabilityListJSONResponse: vulns,
+	}
+
+	// Return the successful response with the retrieved package information
+	return result, nil
+}
+
+func (s *DefaultServer) GetPackageDependenciesByPurl(ctx context.Context, request gen.GetPackageDependenciesByPurlRequestObject) (gen.GetPackageDependenciesByPurlResponseObject, error) {
+	purl, err := url.QueryUnescape(request.Purl)
+	if err != nil {
+		return gen.GetPackageDependenciesByPurl400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to unencode purl: %v", err),
+			},
+		}, nil
+	}
+
+	// Convert the PURL string to a PkgInputSpec
+	pkgInput, err := helpers2.PurlToPkg(purl)
+	if err != nil {
+		return gen.GetPackageDependenciesByPurl400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to parse PURL: %v", err),
+			},
+		}, nil
+	}
+
+	pkgSpec := helpers.ConvertPkgInputSpecToPkgSpec(pkgInput)
+
+	// Retrieve package IDs
+	_, packageIDs, err := helpers.GetPurlsForPkg(ctx, s.gqlClient, pkgSpec)
+	if err != nil {
+		return gen.GetPackageDependenciesByPurl500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving package info: %v", err),
+			},
+		}, nil
+	}
+
+	latestSbom := &model.AllHasSBOMTree{}
+	shouldSearchSoftware := false
+
+	// If 'latestSBOM' is true, retrieve the latest SBOM
+	if request.Params.LatestSBOM != nil && *request.Params.LatestSBOM {
+		latestSbom, err = helpers.LatestSBOMFromID(ctx, s.gqlClient, packageIDs)
+		if err != nil {
+			return gen.GetPackageDependenciesByPurl500JSONResponse{
+				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+					Message: fmt.Sprintf("Error retrieving latest SBOM: %v", err),
+				},
+			}, nil
+		}
+		shouldSearchSoftware = true
+	}
+
+	// Use the searchDependencies function to retrieve deps
+	deps, err := searchDependencies(ctx, s.gqlClient, pkgSpec, shouldSearchSoftware, *latestSbom)
+	if err != nil {
+		return gen.GetPackageDependenciesByPurl500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving deps: %v", err),
+			},
+		}, nil
+	}
+
+	result := gen.GetPackageDependenciesByPurl200JSONResponse{}
+
+	for _, depPurl := range deps {
+		result.PurlList = append(result.PurlList, depPurl)
+	}
+
+	return result, nil
+}
+
+func (s *DefaultServer) GetArtifactVulnerabilities(ctx context.Context, request gen.GetArtifactVulnerabilitiesRequestObject) (gen.GetArtifactVulnerabilitiesResponseObject, error) {
+	artifactStr, err := url.QueryUnescape(request.Artifact)
+	if err != nil {
+		return gen.GetArtifactVulnerabilities400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to unencode artifact: %v", err),
+			},
+		}, nil
+	}
+
+	// Parse the artifact string into an ArtifactSpec
+	parts := strings.SplitN(artifactStr, ":", 2)
+	if len(parts) != 2 {
+		return gen.GetArtifactVulnerabilities400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Invalid artifact format: %s", artifactStr),
+			},
+		}, nil
+	}
+	algorithm := parts[0]
+	digest := parts[1]
+
+	artifactSpec := model.ArtifactSpec{
+		Algorithm: &algorithm,
+		Digest:    &digest,
+	}
+
+	art, err := model.Artifacts(ctx, s.gqlClient, artifactSpec)
+	if err != nil {
+		return gen.GetArtifactVulnerabilities500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving artifact: %s", artifactStr),
+			},
+		}, nil
+	}
+
+	latestSbom := &model.AllHasSBOMTree{}
+	shouldSearchSoftware := false
+
+	// If 'latestSBOM' is true, retrieve the latest SBOM
+	if request.Params.LatestSBOM != nil && *request.Params.LatestSBOM {
+		latestSbom, err = helpers.LatestSBOMFromID(ctx, s.gqlClient, []string{art.Artifacts[0].Id})
+		if err != nil {
+			return gen.GetArtifactVulnerabilities500JSONResponse{
+				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+					Message: fmt.Sprintf("Error retrieving latest SBOM: %v", err),
+				},
+			}, nil
+		}
+		shouldSearchSoftware = true
+	}
+
+	// Call the helper function to search for vulnerabilities
+	vulnerabilities, err := searchVulnerabilitiesViaArtifact(ctx, s.gqlClient, artifactSpec, shouldSearchSoftware, *latestSbom)
+	if err != nil {
+		logging.FromContext(ctx).Errorf("Error retrieving vulnerabilities: %v", err)
+		return gen.GetArtifactVulnerabilities500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving vulnerabilities: %v", err),
+			},
+		}, nil
+	}
+
+	result := gen.GetArtifactVulnerabilities200JSONResponse{}
+	result.VulnerabilityListJSONResponse = append(result.VulnerabilityListJSONResponse, vulnerabilities...)
+
+	// Return the list of vulnerabilities
+	return result, nil
+}
+
+func (s *DefaultServer) GetArtifactDependencies(ctx context.Context, request gen.GetArtifactDependenciesRequestObject) (gen.GetArtifactDependenciesResponseObject, error) {
+	artifactStr, err := url.QueryUnescape(request.Artifact)
+	if err != nil {
+		return gen.GetArtifactDependencies400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Failed to unencode artifact: %v", err),
+			},
+		}, nil
+	}
+
+	// Parse the artifact string into an ArtifactSpec
+	parts := strings.SplitN(artifactStr, ":", 2)
+	if len(parts) != 2 {
+		return gen.GetArtifactDependencies400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("Invalid artifact format: %s", artifactStr),
+			},
+		}, nil
+	}
+	algorithm := parts[0]
+	digest := parts[1]
+
+	artifactSpec := model.ArtifactSpec{
+		Algorithm: &algorithm,
+		Digest:    &digest,
+	}
+
+	art, err := model.Artifacts(ctx, s.gqlClient, artifactSpec)
+	if err != nil {
+		return gen.GetArtifactDependencies500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving artifact: %s", artifactStr),
+			},
+		}, nil
+	}
+
+	latestSbom := &model.AllHasSBOMTree{}
+	shouldSearchSoftware := false
+
+	// If 'latestSBOM' is true, retrieve the latest SBOM
+	if request.Params.LatestSBOM != nil && *request.Params.LatestSBOM {
+		latestSbom, err = helpers.LatestSBOMFromID(ctx, s.gqlClient, []string{art.Artifacts[0].Id})
+		if err != nil {
+			return gen.GetArtifactDependencies500JSONResponse{
+				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+					Message: fmt.Sprintf("Error retrieving latest SBOM: %v", err),
+				},
+			}, nil
+		}
+		shouldSearchSoftware = true
+	}
+
+	// Call the helper function to search for dependencies
+	deps, _, err := searchDependenciesByArtifact(ctx, s.gqlClient, artifactSpec, shouldSearchSoftware, *latestSbom)
+	if err != nil {
+		logging.FromContext(ctx).Errorf("Error retrieving vulnerabilities: %v", err)
+		return gen.GetArtifactDependencies500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: fmt.Sprintf("Error retrieving vulnerabilities: %v", err),
+			},
+		}, nil
+	}
+
+	result := gen.GetArtifactDependencies200JSONResponse{}
+
+	for _, dep := range deps {
+		result.PurlList = append(result.PurlList, dep.purl)
+	}
+
+	return result, nil
 }
