@@ -193,11 +193,15 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (pr
 	predicates = append(predicates, comparator)
 
 	if filter.Vulnerability != nil {
-		predicates = append(predicates,
-			vulnerabilitymetadata.HasVulnerabilityIDWith(
-				vulnerabilityQueryPredicates(*filter.Vulnerability)...,
-			),
-		)
+		if filter.Vulnerability.ID != nil {
+			predicates = append(predicates, optionalPredicate(filter.Vulnerability.ID, vulnerabilityIDMetaEQ))
+		} else {
+			predicates = append(predicates,
+				vulnerabilitymetadata.HasVulnerabilityIDWith(
+					vulnerabilityQueryPredicates(*filter.Vulnerability)...,
+				),
+			)
+		}
 	}
 	return vulnerabilitymetadata.And(predicates...), nil
 }

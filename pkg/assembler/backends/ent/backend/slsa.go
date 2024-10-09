@@ -129,11 +129,23 @@ func hasSLSAQuery(spec model.HasSLSASpec) predicate.SLSAAttestation {
 	}
 
 	if spec.BuiltBy != nil {
-		predicates = append(predicates, slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
+		if spec.BuiltBy.ID != nil {
+			predicates = append(predicates,
+				optionalPredicate(spec.BuiltBy.ID, builderIDEQ))
+		} else {
+			predicates = append(predicates,
+				slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
+		}
 	}
 
 	if spec.Subject != nil {
-		predicates = append(predicates, slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
+		if spec.Subject.ID != nil {
+			predicates = append(predicates,
+				optionalPredicate(spec.Subject.ID, slsaArtifactIDEQ))
+		} else {
+			predicates = append(predicates,
+				slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
+		}
 	}
 
 	for _, art := range spec.BuiltFrom {

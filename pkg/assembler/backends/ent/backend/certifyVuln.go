@@ -297,17 +297,29 @@ func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 		optionalPredicate(spec.ScannerVersion, certifyvuln.ScannerVersionEQ),
 		optionalPredicate(spec.TimeScanned, certifyvuln.TimeScannedEQ),
 		optionalPredicate(spec.DocumentRef, certifyvuln.DocumentRefEQ),
-		optionalPredicate(spec.Package, func(pkg model.PkgSpec) predicate.CertifyVuln {
-			return certifyvuln.HasPackageWith(
-				packageVersionQuery(spec.Package),
-			)
-		}),
-		optionalPredicate(spec.Vulnerability, func(vuln model.VulnerabilitySpec) predicate.CertifyVuln {
-			return certifyvuln.HasVulnerabilityWith(
-				vulnerabilityQueryPredicates(*spec.Vulnerability)...,
-			)
-		}),
 	}
+
+	if spec.Package != nil {
+		if spec.Package.ID != nil {
+			predicates = append(predicates, optionalPredicate(spec.Package.ID, packageIDEQ))
+		} else {
+			predicates = append(predicates,
+				certifyvuln.HasPackageWith(packageVersionQuery(spec.Package)))
+		}
+	}
+
+	if spec.Vulnerability != nil {
+		if spec.Vulnerability.ID != nil {
+			predicates = append(predicates, optionalPredicate(spec.Vulnerability.ID, vulnerabilityIDEQ))
+		} else {
+			predicates = append(predicates,
+				certifyvuln.HasVulnerabilityWith(
+					vulnerabilityQueryPredicates(*spec.Vulnerability)...,
+				),
+			)
+		}
+	}
+
 	return certifyvuln.And(predicates...)
 }
 

@@ -145,16 +145,26 @@ func hasSourceAtQuery(filter model.HasSourceAtSpec) predicate.HasSourceAt {
 	}
 
 	if filter.Package != nil {
-		predicates = append(predicates,
-			hassourceat.Or(
-				hassourceat.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Package))),
-				hassourceat.HasPackageVersionWith(packageVersionQuery(filter.Package)),
-			),
-		)
+		if filter.Package.ID != nil {
+			predicates = append(predicates, optionalPredicate(filter.Package.ID, packageVersionOrNameIDEQ))
+		} else {
+			predicates = append(predicates,
+				hassourceat.Or(
+					hassourceat.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Package))),
+					hassourceat.HasPackageVersionWith(packageVersionQuery(filter.Package)),
+				),
+			)
+		}
 	}
 
 	if filter.Source != nil {
-		predicates = append(predicates, hassourceat.HasSourceWith(sourceQuery(filter.Source)))
+		if filter.Source.ID != nil {
+			predicates = append(predicates,
+				optionalPredicate(filter.Source.ID, sourceIDEQ))
+		} else {
+			predicates = append(predicates,
+				hassourceat.HasSourceWith(sourceQuery(filter.Source)))
+		}
 	}
 	return hassourceat.And(predicates...)
 }

@@ -402,12 +402,20 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
-			predicates = append(predicates,
-				certifylegal.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+			if filter.Subject.Package.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Package.ID, packageIDEQ))
+			} else {
+				predicates = append(predicates,
+					certifylegal.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+			}
 		} else if filter.Subject.Source != nil {
-			predicates = append(predicates,
-				certifylegal.HasSourceWith(sourceQuery(filter.Subject.Source)),
-			)
+			if filter.Subject.Source.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Source.ID, sourceIDEQ))
+			} else {
+				predicates = append(predicates,
+					certifylegal.HasSourceWith(sourceQuery(filter.Subject.Source)),
+				)
+			}
 		}
 	}
 
