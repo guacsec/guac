@@ -97,7 +97,7 @@ wipe_data() {
   fi
 }
 
-go run ${GUAC_DIR}"/cmd/guacingest" --add-vuln-on-ingest=true &
+go run ${GUAC_DIR}"/cmd/guacingest" --add-vuln-on-ingest=true --add-license-on-ingest &
 go run ${GUAC_DIR}"/cmd/guacone" collect deps_dev -p &
 go run ${GUAC_DIR}"/cmd/guaccsub" &
 
@@ -120,6 +120,7 @@ queryValues["OSVQ1"]='del(.. | .id?)'
 queryValues["CertifyVulnQ1"]='del(.. | .id?) | del(.. | .timeScanned?)'
 queryValues["ArtifactsQ1"]='.artifacts |= sort'
 queryValues["PkgQ9"]='.packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.id) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) | del(.. | .id?)'
+queryValues["CertifyLegalQ1"]='.CertifyLegal[] | select(.subject.namespaces[]?.names[]?.versions[]?.purl == "pkg:deb/debian/base-passwd@3.5.51?arch=arm64&distro=debian-11") | del(.. | .id?) | del(.. | .timeScanned?) | del(.subject.namespaces[].names[].versions[].qualifiers?)'
 
 # Define an indexed array to maintain the order of the queries
 queryOrder=(
@@ -134,6 +135,7 @@ queryOrder=(
   "CertifyVulnQ1"
   "ArtifactsQ1"
   "PkgQ9"
+  "CertifyLegalQ1"
 )
 
 queries="${GUAC_DIR}/demo/graphql/queries.gql"

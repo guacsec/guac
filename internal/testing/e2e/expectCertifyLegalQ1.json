@@ -1,0 +1,29 @@
+{
+  "subject": {
+    "__typename": "Package",
+    "type": "deb",
+    "namespaces": [
+      {
+        "namespace": "debian",
+        "names": [
+          {
+            "name": "base-passwd",
+            "versions": [
+              {
+                "purl": "pkg:deb/debian/base-passwd@3.5.51?arch=arm64&distro=debian-11",
+                "version": "3.5.51",
+                "subpath": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "declaredLicense": "GPL-2.0-only",
+  "discoveredLicense": "GPL-2.0-only",
+  "attribution": "",
+  "justification": "Found in SPDX document.",
+  "origin": "file:////home/rob/go/src/guacsec/guac/guac-data/docs/spdx/spdx_vuln.json",
+  "collector": "FileCollector"
+}

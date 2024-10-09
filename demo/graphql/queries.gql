@@ -251,3 +251,44 @@ query PkgQ9 {
     ...allPkgTree
   }
 }
+
+fragment allSourceTree on Source {
+  id
+  type
+  namespaces {
+    id
+    namespace
+    names {
+      id
+      name
+      tag
+      commit
+    }
+  }
+}
+
+fragment allCertifyLegalTree on CertifyLegal {
+  id
+  subject {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+  }
+  declaredLicense
+  discoveredLicense
+  attribution
+  justification
+  timeScanned
+  origin
+  collector
+}
+
+query CertifyLegalQ1 {
+  CertifyLegal(certifyLegalSpec: {}) @filter(keyName: "declaredLicense", operation: CONTAINS, value: "GPL-2.0-only") {
+    ...allCertifyLegalTree
+  }
+}
