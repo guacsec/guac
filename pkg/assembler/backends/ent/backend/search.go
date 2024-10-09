@@ -153,7 +153,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 		}
 
 		if queryType == model.QueryTypeVulnerability {
-			err := b.client.Debug().PackageVersion.Query().
+			err := b.client.PackageVersion.Query().
 				Where(packageQueryPredicates(&pkgSpec)).
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
@@ -167,7 +167,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 				return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 			}
 		} else {
-			err := b.client.Debug().PackageVersion.Query().
+			err := b.client.PackageVersion.Query().
 				Where(packageQueryPredicates(&pkgSpec)).
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
@@ -218,7 +218,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 				}
 			}
 			var queryErr error
-			pkgConn, queryErr = b.client.Debug().PackageVersion.Query().
+			pkgConn, queryErr = b.client.PackageVersion.Query().
 				Where(packageversion.IDIn(shortenedQueryList...)).
 				WithName(func(q *ent.PackageNameQuery) {}).
 				Paginate(ctx, afterCursor, first, nil, nil)
