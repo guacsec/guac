@@ -1,29 +1,108 @@
 {
-  "subject": {
-    "__typename": "Package",
-    "type": "deb",
-    "namespaces": [
+  "data": {
+    "CertifyLegal": [
       {
-        "namespace": "debian",
-        "names": [
+        "subject": {
+          "__typename": "Package",
+          "type": "maven",
+          "namespaces": [
+            {
+              "namespace": "org.apache.logging.log4j",
+              "names": [
+                {
+                  "name": "log4j-core",
+                  "versions": [
+                    {
+                      "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+                      "version": "2.8.1",
+                      "qualifiers": [],
+                      "subpath": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "declaredLicense": "NONE",
+        "declaredLicenses": [
           {
-            "name": "base-passwd",
-            "versions": [
-              {
-                "purl": "pkg:deb/debian/base-passwd@3.5.51?arch=arm64&distro=debian-11",
-                "version": "3.5.51",
-                "subpath": ""
-              }
-            ]
+            "name": "GPL-2.0-only",
+            "inline": null,
+            "listVersion": "3.18"
+          },
+          {
+            "name": "Zlib",
+            "inline": null,
+            "listVersion": "3.18"
+          },
+          {
+            "name": "BSD-3-Clause",
+            "inline": null,
+            "listVersion": "3.18"
           }
-        ]
+        ],
+        "discoveredLicense": "NONE",
+        "discoveredLicenses": [
+          {
+            "name": "GPL-2.0-only",
+            "inline": null,
+            "listVersion": "3.18"
+          },
+          {
+            "name": "Zlib",
+            "inline": null,
+            "listVersion": "3.18"
+          },
+          {
+            "name": "BSD-3-Clause",
+            "inline": null,
+            "listVersion": "3.18"
+          }
+        ],
+        "attribution": "",
+        "justification": "Found in SPDX document.",
+        "origin": "file:///../guac-data/docs/spdx/spdx_vuln.json",
+        "collector": "FileCollector"
+      },
+      {
+        "subject": {
+          "__typename": "Package",
+          "type": "maven",
+          "namespaces": [
+            {
+              "namespace": "org.apache.logging.log4j",
+              "names": [
+                {
+                  "name": "log4j-core",
+                  "versions": [
+                    {
+                      "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+                      "version": "2.8.1",
+                      "qualifiers": [],
+                      "subpath": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "declaredLicense": "Apache-2.0",
+        "declaredLicenses": [],
+        "discoveredLicense": "Apache-2.0",
+        "discoveredLicenses": [
+          {
+            "name": "NOASSERTION",
+            "inline": null,
+            "listVersion": "UNKNOWN"
+          }
+        ],
+        "attribution": "",
+        "justification": "Retrieved from ClearlyDefined",
+        "origin": "clearlydefined",
+        "collector": "clearlydefined"
       }
     ]
-  },
-  "declaredLicense": "GPL-2.0-only",
-  "discoveredLicense": "GPL-2.0-only",
-  "attribution": "",
-  "justification": "Found in SPDX document.",
-  "origin": "file:////home/rob/go/src/guacsec/guac/guac-data/docs/spdx/spdx_vuln.json",
-  "collector": "FileCollector"
+  }
 }

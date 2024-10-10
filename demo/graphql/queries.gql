@@ -288,7 +288,7 @@ fragment allCertifyLegalTree on CertifyLegal {
 }
 
 query CertifyLegalQ1 {
-  CertifyLegal(certifyLegalSpec: {}) @filter(keyName: "declaredLicense", operation: CONTAINS, value: "GPL-2.0-only") {
-    ...allCertifyLegalTree
-  }
+    CertifyLegal(certifyLegalSpec: {subject: {package: {name: "log4j-core"} } }) {
+        ...allCertifyLegalTree
+    }
 }
