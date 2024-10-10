@@ -255,9 +255,9 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 		return nil, nil
 	}
 
-	hasNextPage := false
-	if (startIndex + *first) < len(pkgIDs) {
-		hasNextPage = true
+	hasNextPage := true
+	if (startIndex + *first) > len(pkgIDs) {
+		hasNextPage = false
 	}
 
 	return constructPkgConn(pkgConn, len(pkgIDs), hasNextPage), nil

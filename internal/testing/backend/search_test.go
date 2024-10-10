@@ -382,7 +382,7 @@ func TestQueryPackagesListForScan(t *testing.T) {
 				}
 			}
 
-			pkgIDsResponse, err := b.FindPackagesThatNeedScanning(ctx, model.PkgSpec{}, test.QueryType, test.lastScan)
+			pkgIDsResponse, err := b.FindPackagesThatNeedScanning(ctx, test.QueryType, test.lastScan)
 			if err != nil {
 				t.Fatalf("did not get expected query error: %v", err)
 			}
