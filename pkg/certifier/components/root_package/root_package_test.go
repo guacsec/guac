@@ -111,16 +111,22 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 	})
 
 	tests := []struct {
-		name         string
-		lastScan     int
-		getPackages  func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
-		wantPackNode []*PackageNode
-		wantErr      bool
+		name                         string
+		lastScan                     int
+		getPackages                  func(ctx_ context.Context, client_ graphql.Client, pkgIDs []string, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
+		findPackagesThatNeedScanning func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error)
+		wantPackNode                 []*PackageNode
+		wantErr                      bool
 	}{
 		{
 			name:     "django:",
 			lastScan: 0,
-			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
+			findPackagesThatNeedScanning: func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error) {
+				return &generated.FindPackagesThatNeedScanningResponse{
+					FindPackagesThatNeedScanning: []string{},
+				}, nil
+			},
+			getPackages: func(ctx_ context.Context, client_ graphql.Client, pkgIDs []string, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
 				return &generated.QueryPackagesListForScanResponse{
 					QueryPackagesListForScan: &generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnection{
 						TotalCount: 1,
@@ -145,7 +151,12 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:     "multiple packages",
 			lastScan: 0,
-			getPackages: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
+			findPackagesThatNeedScanning: func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error) {
+				return &generated.FindPackagesThatNeedScanningResponse{
+					FindPackagesThatNeedScanning: []string{},
+				}, nil
+			},
+			getPackages: func(ctx_ context.Context, client_ graphql.Client, pkgIDs []string, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error) {
 				return &generated.QueryPackagesListForScanResponse{
 					QueryPackagesListForScan: &generated.QueryPackagesListForScanQueryPackagesListForScanPackageConnection{
 						TotalCount: 2,
@@ -186,6 +197,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 				queryType:    generated.QueryTypeVulnerability,
 			}
 			getPackages = tt.getPackages
+			findPackagesThatNeedScanning = tt.findPackagesThatNeedScanning
 
 			// compChan to collect query components
 			compChan := make(chan interface{}, 1)

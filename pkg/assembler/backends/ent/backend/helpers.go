@@ -269,3 +269,13 @@ func getIDfromNode(node model.Node) (string, error) {
 		return "", fmt.Errorf("unknown type: %v", v)
 	}
 }
+
+// findTargetIndex finds the index of the specified UUID in the sorted slice
+func findTargetIndex(uuids []string, target string) int {
+	for i, id := range uuids {
+		if id == target {
+			return i
+		}
+	}
+	return -1 // Return -1 if not found
+}

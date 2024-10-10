@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"entgo.io/contrib/entgql"
@@ -30,9 +31,12 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+const guacType string = "guac"
 
 // FindSoftware takes in a searchText string and looks for software
 // that may be relevant for the input text. This can be seen as fuzzy search
@@ -108,7 +112,87 @@ func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+func notGUACTypePackagePredicates() predicate.PackageVersion {
+	return packageversion.And(
+		packageversion.HasNameWith(
+			optionalPredicate(ptrfrom.String(guacType), packagename.TypeNEQ),
+		),
+	)
+}
+
+func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
+	var pkgLatestScan []struct {
+		ID             uuid.UUID `json:"id"`
+		LastScanTimeDB time.Time `json:"max"`
+	}
+
+	if lastScan == nil {
+		err := b.client.PackageVersion.Query().
+			Where(notGUACTypePackagePredicates()).
+			GroupBy(packageversion.FieldID). // Group by Package ID
+			Aggregate(func(s *sql.Selector) string {
+				t := sql.Table(certifyvuln.Table)
+				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
+				return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
+			}).
+			Scan(ctx, &pkgLatestScan)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
+		}
+
+		var packagesThatNeedScanning []string
+		for _, record := range pkgLatestScan {
+			packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
+		}
+
+		return packagesThatNeedScanning, nil
+	} else {
+
+		if queryType == model.QueryTypeVulnerability {
+			err := b.client.PackageVersion.Query().
+				Where(notGUACTypePackagePredicates()).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				GroupBy(packageversion.FieldID). // Group by Package ID
+				Aggregate(func(s *sql.Selector) string {
+					t := sql.Table(certifyvuln.Table)
+					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
+					return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
+				}).
+				Scan(ctx, &pkgLatestScan)
+
+			if err != nil {
+				return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
+			}
+		} else {
+			err := b.client.PackageVersion.Query().
+				Where(notGUACTypePackagePredicates()).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				GroupBy(packageversion.FieldID). // Group by Package ID
+				Aggregate(func(s *sql.Selector) string {
+					t := sql.Table(certifylegal.Table)
+					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
+					return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
+				}).
+				Scan(ctx, &pkgLatestScan)
+
+			if err != nil {
+				return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
+			}
+		}
+
+		lastScanTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+		var packagesThatNeedScanning []string
+		for _, record := range pkgLatestScan {
+			if record.LastScanTimeDB.Before(lastScanTime) {
+				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
+			}
+		}
+		return packagesThatNeedScanning, nil
+	}
+}
+
+func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
@@ -126,79 +210,60 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 	}
 
 	var pkgConn *ent.PackageVersionConnection
-	if lastScan == nil {
-		var err error
-		pkgQuery := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&pkgSpec))
+	if first == nil {
+		first = ptrfrom.Int(60000)
+	}
 
-		pkgConn, err = pkgQuery.
-			WithName(func(q *ent.PackageNameQuery) {}).
-			Paginate(ctx, afterCursor, first, nil, nil)
+	// Sort the UUID slice
+	sort.Strings(pkgIDs)
 
-		if err != nil {
-			return nil, fmt.Errorf("failed package query with error: %w", err)
+	startIndex := 0
+	if after != nil {
+		filterGlobalID := fromGlobalID(*after)
+		// Find the index of the specified UUID
+		startIndex = findTargetIndex(pkgIDs, filterGlobalID.id)
+		if startIndex == -1 {
+			return nil, nil
 		}
-	} else {
-		var pkgLatestScan []struct {
-			ID             uuid.UUID `json:"id"`
-			LastScanTimeDB time.Time `json:"max"`
-		}
+	}
 
-		if queryType == model.QueryTypeVulnerability {
-			err := b.client.PackageVersion.Query().
-				Where(packageQueryPredicates(&pkgSpec)).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(certifyvuln.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
-					return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
+	startAfterPackageIDList := pkgIDs[startIndex:]
 
+	var shortenedQueryList []uuid.UUID
+	// Loop through the sorted list starting from the specified UUID
+	for i, id := range startAfterPackageIDList {
+		if i < *first {
+			convertedID, err := uuid.Parse(id)
 			if err != nil {
-				return nil, fmt.Errorf("failed package query with error: %w", err)
+				return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
 			}
-		} else {
-			err := b.client.PackageVersion.Query().
-				Where(packageQueryPredicates(&pkgSpec)).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(certifylegal.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
-					return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed package query with error: %w", err)
-			}
+			shortenedQueryList = append(shortenedQueryList, convertedID)
 		}
+	}
+	var queryErr error
+	pkgConn, queryErr = b.client.PackageVersion.Query().
+		Where(packageversion.IDIn(shortenedQueryList...)).
+		WithName(func(q *ent.PackageNameQuery) {}).
+		Paginate(ctx, afterCursor, first, nil, nil)
 
-		lastScanTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
-		var packagesThatNeedScanning []uuid.UUID
-		for _, record := range pkgLatestScan {
-			if record.LastScanTimeDB.Before(lastScanTime) {
-				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID) // Add the package ID
-			}
-		}
-
-		if len(packagesThatNeedScanning) > 0 {
-			var queryErr error
-			pkgConn, queryErr = b.client.PackageVersion.Query().
-				Where(packageversion.IDIn(packagesThatNeedScanning...)).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				Paginate(ctx, afterCursor, first, nil, nil)
-
-			if queryErr != nil {
-				return nil, fmt.Errorf("failed package query with error: %w", queryErr)
-			}
-		}
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
 	}
 
 	// if not found return nil
 	if pkgConn == nil {
 		return nil, nil
 	}
+
+	hasNextPage := true
+	if (startIndex + *first) > len(pkgIDs) {
+		hasNextPage = false
+	}
+
+	return constructPkgConn(pkgConn, len(pkgIDs), hasNextPage), nil
+}
+
+func constructPkgConn(pkgConn *ent.PackageVersionConnection, totalCount int, hasNextPage bool) *model.PackageConnection {
 
 	var edges []*model.PackageEdge
 	for _, edge := range pkgConn.Edges {
@@ -210,16 +275,16 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 
 	if pkgConn.PageInfo.StartCursor != nil {
 		return &model.PackageConnection{
-			TotalCount: pkgConn.TotalCount,
+			TotalCount: totalCount,
 			PageInfo: &model.PageInfo{
-				HasNextPage: pkgConn.PageInfo.HasNextPage,
+				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.StartCursor.ID.String())),
 				EndCursor:   ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
-		}, nil
+		}
 	} else {
 		// if not found return nil
-		return nil, nil
+		return nil
 	}
 }

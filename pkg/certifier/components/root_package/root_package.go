@@ -46,11 +46,13 @@ type packageQuery struct {
 	queryType    generated.QueryType
 }
 
-var getPackages func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastInterval *int, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
+var getPackages func(ctx_ context.Context, client_ graphql.Client, pkgIDs []string, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
+var findPackagesThatNeedScanning func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
 func NewPackageQuery(client graphql.Client, queryType generated.QueryType, batchSize, serviceBatchSize int, addedLatency *time.Duration, lastScan *int) certifier.QueryComponents {
 	getPackages = generated.QueryPackagesListForScan
+	findPackagesThatNeedScanning = generated.FindPackagesThatNeedScanning
 	return &packageQuery{
 		client:           client,
 		batchSize:        batchSize,
@@ -142,14 +144,22 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 	var afterCursor *string
 
 	first := p.batchSize
+
+	pkgScanResults, err := findPackagesThatNeedScanning(ctx, p.client, p.queryType, p.lastScan)
+	if err != nil {
+		return fmt.Errorf("findPackagesThatNeedScanning query failed with error: %w", err)
+	}
+
+	pkgIDs := pkgScanResults.FindPackagesThatNeedScanning
+
 	for {
-		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, p.queryType, p.lastScan, afterCursor, &first)
+		pkgConn, err := getPackages(ctx, p.client, pkgIDs, afterCursor, &first)
 		if err != nil {
 			return fmt.Errorf("failed to query packages with error: %w", err)
 		}
 
 		if pkgConn == nil || pkgConn.QueryPackagesListForScan == nil {
-			continue
+			break
 		}
 		pkgEdges := pkgConn.QueryPackagesListForScan.Edges
 

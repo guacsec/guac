@@ -64,12 +64,41 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	var certLegalIngest []assembler.CertifyLegalIngest
 	var hasSourceAtIngest []assembler.HasSourceAtIngest
 
-	batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, purls)
-	if err != nil {
-		return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+	// the limit for the batch size that is allowed for clearly defined
+	if len(purls) > 250 {
+		i := 0
+		var batchPurls []string
+		for _, purl := range purls {
+			if i < 249 {
+				batchPurls = append(batchPurls, purl)
+				i++
+			} else {
+				batchPurls = append(batchPurls, purl)
+				batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, batchPurls)
+				if err != nil {
+					return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+				}
+				certLegalIngest = append(certLegalIngest, batchedCL...)
+				hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
+				batchPurls = make([]string, 0)
+			}
+		}
+		if len(batchPurls) > 0 {
+			batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, batchPurls)
+			if err != nil {
+				return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+			}
+			certLegalIngest = append(certLegalIngest, batchedCL...)
+			hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
+		}
+	} else {
+		batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, purls)
+		if err != nil {
+			return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
+		}
+		certLegalIngest = append(certLegalIngest, batchedCL...)
+		hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
 	}
-	certLegalIngest = append(certLegalIngest, batchedCL...)
-	hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
 
 	return certLegalIngest, hasSourceAtIngest, nil
 }
