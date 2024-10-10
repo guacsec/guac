@@ -109,48 +109,34 @@ func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
-	var afterCursor *entgql.Cursor[uuid.UUID]
-
-	if after != nil {
-		globalID := fromGlobalID(*after)
-		if globalID.nodeType != packageversion.Table {
-			return nil, fmt.Errorf("after cursor is not type packageversion but type: %s", globalID.nodeType)
-		}
-		afterUUID, err := uuid.Parse(globalID.id)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
-		}
-		afterCursor = &ent.Cursor{ID: afterUUID}
-	} else {
-		afterCursor = nil
+func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+	var pkgLatestScan []struct {
+		ID             uuid.UUID `json:"id"`
+		LastScanTimeDB time.Time `json:"max"`
 	}
 
-	var pkgConn *ent.PackageVersionConnection
 	if lastScan == nil {
-		var err error
-		pkgQuery := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&pkgSpec))
-
-		pkgConn, err = pkgQuery.
-			WithName(func(q *ent.PackageNameQuery) {}).
-			Paginate(ctx, afterCursor, first, nil, nil)
+		err := b.client.PackageVersion.Query().
+			Where(packageQueryPredicates(&pkgSpec)).
+			GroupBy(packageversion.FieldID). // Group by Package ID
+			Aggregate(func(s *sql.Selector) string {
+				t := sql.Table(certifyvuln.Table)
+				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
+				return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
+			}).
+			Scan(ctx, &pkgLatestScan)
 
 		if err != nil {
-			return nil, fmt.Errorf("failed package query with error: %w", err)
+			return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 		}
 
-		// if not found return nil
-		if pkgConn == nil {
-			return nil, nil
+		var packagesThatNeedScanning []string
+		for _, record := range pkgLatestScan {
+			packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
 		}
 
-		return constructPkgConn(pkgConn, pkgConn.TotalCount, pkgConn.PageInfo.HasNextPage), nil
+		return packagesThatNeedScanning, nil
 	} else {
-		var pkgLatestScan []struct {
-			ID             uuid.UUID `json:"id"`
-			LastScanTimeDB time.Time `json:"max"`
-		}
 
 		if queryType == model.QueryTypeVulnerability {
 			err := b.client.PackageVersion.Query().
@@ -183,64 +169,85 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 		}
 
 		lastScanTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
-		var packagesThatNeedScanning []uuid.UUID
+		var packagesThatNeedScanning []string
 		for _, record := range pkgLatestScan {
 			if record.LastScanTimeDB.Before(lastScanTime) {
-				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID) // Add the package ID
+				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
 			}
 		}
+		return packagesThatNeedScanning, nil
+	}
+}
 
-		if len(packagesThatNeedScanning) > 0 {
-			if first == nil {
-				first = ptrfrom.Int(60000)
-			}
-			var shortenedQueryList []uuid.UUID
-			// Sort the UUID slice
-			sort.Sort(UUIDSlice(packagesThatNeedScanning))
+func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
 
-			startIndex := 0
-			if after != nil {
-				filterGlobalID := fromGlobalID(*after)
-				// Find the index of the specified UUID
-				startIndex = findUUIDIndex(packagesThatNeedScanning, filterGlobalID.id)
-
-				if startIndex == -1 {
-					return nil, nil
-				}
-			}
-
-			startAfterPackageIDList := packagesThatNeedScanning[startIndex:]
-
-			// Loop through the sorted list starting from the specified UUID
-			for i, id := range startAfterPackageIDList {
-				if i < *first {
-					shortenedQueryList = append(shortenedQueryList, id)
-				}
-			}
-			var queryErr error
-			pkgConn, queryErr = b.client.PackageVersion.Query().
-				Where(packageversion.IDIn(shortenedQueryList...)).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				Paginate(ctx, afterCursor, first, nil, nil)
-
-			if queryErr != nil {
-				return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
-			}
-
-			// if not found return nil
-			if pkgConn == nil {
-				return nil, nil
-			}
-
-			hasNextPage := false
-			if (startIndex + *first) < len(packagesThatNeedScanning) {
-				hasNextPage = true
-			}
-
-			return constructPkgConn(pkgConn, len(packagesThatNeedScanning), hasNextPage), nil
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != packageversion.Table {
+			return nil, fmt.Errorf("after cursor is not type packageversion but type: %s", globalID.nodeType)
 		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	var pkgConn *ent.PackageVersionConnection
+	if first == nil {
+		first = ptrfrom.Int(60000)
+	}
+
+	// Sort the UUID slice
+	sort.Strings(pkgIDs)
+
+	startIndex := 0
+	if after != nil {
+		filterGlobalID := fromGlobalID(*after)
+		// Find the index of the specified UUID
+		startIndex = findTargetIndex(pkgIDs, filterGlobalID.id)
+		if startIndex == -1 {
+			return nil, nil
+		}
+	}
+
+	startAfterPackageIDList := pkgIDs[startIndex:]
+
+	var shortenedQueryList []uuid.UUID
+	// Loop through the sorted list starting from the specified UUID
+	for i, id := range startAfterPackageIDList {
+		if i < *first {
+			convertedID, err := uuid.Parse(id)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+			}
+			shortenedQueryList = append(shortenedQueryList, convertedID)
+		}
+	}
+	var queryErr error
+	pkgConn, queryErr = b.client.PackageVersion.Query().
+		Where(packageversion.IDIn(shortenedQueryList...)).
+		WithName(func(q *ent.PackageNameQuery) {}).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+	}
+
+	// if not found return nil
+	if pkgConn == nil {
 		return nil, nil
 	}
+
+	hasNextPage := false
+	if (startIndex + *first) < len(pkgIDs) {
+		hasNextPage = true
+	}
+
+	return constructPkgConn(pkgConn, len(pkgIDs), hasNextPage), nil
 }
 
 func constructPkgConn(pkgConn *ent.PackageVersionConnection, totalCount int, hasNextPage bool) *model.PackageConnection {

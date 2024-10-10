@@ -17,6 +17,7 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -260,26 +261,10 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 }
 
 func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
-	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
-}
-
-func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
 
-	edges := make([]*model.PackageEdge, 0)
-	hasNextPage := false
-	numNodes := 0
-	totalCount := 0
-	addToCount := 0
-
-	currentPage := false
-
-	// If no cursor present start from the top
-	if after == nil {
-		currentPage = true
-	}
-
+	var pkgIDs []string
 	var done bool
 	scn := c.kv.Keys(pkgTypeCol)
 	for !done {
@@ -291,26 +276,22 @@ func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 		}
 
 		sort.Strings(typeKeys)
-		totalCount = len(typeKeys)
 
-		for i, tk := range typeKeys {
+		for _, tk := range typeKeys {
 			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
 			if err != nil {
 				return nil, err
 			}
-			pNamespaces := []*model.PackageNamespace{}
 			for _, nsID := range pkgTypeNode.Namespaces {
 				pkgNS, err := byIDkv[*pkgNamespace](ctx, nsID, c)
 				if err != nil {
 					continue
 				}
-				pns := []*model.PackageName{}
 				for _, nameID := range pkgNS.Names {
 					pkgNameNode, err := byIDkv[*pkgName](ctx, nameID, c)
 					if err != nil {
 						continue
 					}
-					pvs := []*model.PackageVersion{}
 					for _, verID := range pkgNameNode.Versions {
 						pkgVer, err := byIDkv[*pkgVersion](ctx, verID, c)
 						if err != nil {
@@ -329,20 +310,10 @@ func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 								lastScanTime := latestTime(timeScanned)
 								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
 								if lastScanTime.Before(lastIntervalTime) {
-									pvs = append(pvs, &model.PackageVersion{
-										ID:         pkgVer.ThisID,
-										Version:    pkgVer.Version,
-										Subpath:    pkgVer.Subpath,
-										Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
-									})
+									pkgIDs = append(pkgIDs, pkgVer.ThisID)
 								}
 							} else {
-								pvs = append(pvs, &model.PackageVersion{
-									ID:         pkgVer.ThisID,
-									Version:    pkgVer.Version,
-									Subpath:    pkgVer.Subpath,
-									Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
-								})
+								pkgIDs = append(pkgIDs, pkgVer.ThisID)
 							}
 						} else {
 							if len(pkgVer.CertifyLegals) > 0 {
@@ -357,105 +328,51 @@ func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 								lastScanTime := latestTime(timeScanned)
 								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
 								if lastScanTime.Before(lastIntervalTime) {
-									pvs = append(pvs, &model.PackageVersion{
-										ID:         pkgVer.ThisID,
-										Version:    pkgVer.Version,
-										Subpath:    pkgVer.Subpath,
-										Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
-									})
+									pkgIDs = append(pkgIDs, pkgVer.ThisID)
+
 								}
 							} else {
-								pvs = append(pvs, &model.PackageVersion{
-									ID:         pkgVer.ThisID,
-									Version:    pkgVer.Version,
-									Subpath:    pkgVer.Subpath,
-									Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
-								})
-							}
-						}
-					}
-					if len(pvs) > 0 {
-						pns = append(pns, &model.PackageName{
-							ID:       pkgNameNode.ThisID,
-							Name:     pkgNameNode.Name,
-							Versions: pvs,
-						})
-					}
-				}
-				if len(pns) > 0 {
-					pNamespaces = append(pNamespaces, &model.PackageNamespace{
-						ID:        pkgNS.ThisID,
-						Namespace: pkgNS.Namespace,
-						Names:     pns,
-					})
-				}
-			}
+								pkgIDs = append(pkgIDs, pkgVer.ThisID)
 
-			for _, namespace := range pNamespaces {
-				for _, name := range namespace.Names {
-					for _, version := range name.Versions {
-						p := &model.Package{
-							ID:   pkgTypeNode.ThisID,
-							Type: pkgTypeNode.Type,
-							Namespaces: []*model.PackageNamespace{
-								{
-									ID:        namespace.ID,
-									Namespace: namespace.Namespace,
-									Names: []*model.PackageName{
-										{
-											ID:   name.ID,
-											Name: name.Name,
-											Versions: []*model.PackageVersion{
-												version,
-											},
-										},
-									},
-								},
-							},
-						}
-
-						if after != nil && !currentPage {
-							if p.Namespaces[0].Names[0].Versions[0].ID == *after {
-								totalCount = len(typeKeys) - (i + 1)
-								currentPage = true
 							}
-							continue
-						}
-
-						if first != nil {
-							if numNodes < *first {
-								edges = append(edges, &model.PackageEdge{
-									Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
-									Node:   p,
-								})
-								numNodes++
-							} else if numNodes == *first {
-								hasNextPage = true
-							}
-						} else {
-							edges = append(edges, &model.PackageEdge{
-								Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
-								Node:   p,
-							})
 						}
 					}
 				}
 			}
 		}
 	}
-
-	if len(edges) != 0 {
-		return &model.PackageConnection{
-			TotalCount: totalCount + addToCount,
-			PageInfo: &model.PageInfo{
-				HasNextPage: hasNextPage,
-				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
-			},
-			Edges: edges,
-		}, nil
-	}
 	return nil, nil
+}
+
+func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	var edges []*model.PackageEdge
+	for _, pkgID := range pkgIDs {
+		p, err := c.buildPackageResponse(ctx, pkgID, nil)
+		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
+			return nil, err
+		}
+		edges = append(edges, &model.PackageEdge{
+			Cursor: p.ID,
+			Node:   p,
+		})
+	}
+
+	return &model.PackageConnection{
+		TotalCount: len(pkgIDs),
+		PageInfo: &model.PageInfo{
+			HasNextPage: false,
+			StartCursor: ptrfrom.String(pkgIDs[0]),
+			EndCursor:   ptrfrom.String(pkgIDs[len(pkgIDs)-1]),
+		},
+		Edges: edges,
+	}, nil
 }
 
 // Get the latest time from a slice of time.Time

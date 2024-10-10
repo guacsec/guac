@@ -270,25 +270,10 @@ func getIDfromNode(node model.Node) (string, error) {
 	}
 }
 
-// UUIDSlice attaches the methods of sort.Interface to []uuid.UUID
-type UUIDSlice []uuid.UUID
-
-func (u UUIDSlice) Len() int {
-	return len(u)
-}
-
-func (u UUIDSlice) Less(i, j int) bool {
-	return u[i].String() < u[j].String() // Compare UUIDs as strings
-}
-
-func (u UUIDSlice) Swap(i, j int) {
-	u[i], u[j] = u[j], u[i]
-}
-
-// findUUIDIndex finds the index of the specified UUID in the sorted slice
-func findUUIDIndex(uuids []uuid.UUID, target string) int {
+// findTargetIndex finds the index of the specified UUID in the sorted slice
+func findTargetIndex(uuids []string, target string) int {
 	for i, id := range uuids {
-		if id.String() == target {
+		if id == target {
 			return i
 		}
 	}
