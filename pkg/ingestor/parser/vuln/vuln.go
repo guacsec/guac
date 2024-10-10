@@ -15,7 +15,7 @@
 
 // Package vuln attestation parser parses the attestation defined by by
 // the certifier using the predicate type
-// "https://in-toto.io/attestation/vuln/v0.1" Three different types of ingest
+// "https://in-toto.io/attestation/vulns/v0.1" Three different types of ingest
 // predicates are created.
 //
 // - IsOccurences are created mapping between any package
