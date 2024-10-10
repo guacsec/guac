@@ -25,7 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
-	"github.com/regclient/regclient/types"
+	"github.com/regclient/regclient/types/errs"
 	"github.com/regclient/regclient/types/ref"
 )
 
@@ -58,10 +58,14 @@ func (o *ociRegistryCollector) RetrieveArtifacts(ctx context.Context, docChannel
 
 	rcOpts := getRegClientOptions()
 	rc := regclient.New(rcOpts...)
-	defer rc.Close(ctx, r)
+	defer func(rc *regclient.RegClient, ctx context.Context, r ref.Ref) {
+		if err := rc.Close(ctx, r); err != nil {
+			fmt.Printf("failed to close regclient: %v", err)
+		}
+	}(rc, ctx, r)
 
 	rl, err := rc.RepoList(ctx, o.registry)
-	if err != nil && errors.Is(err, types.ErrNotImplemented) {
+	if err != nil && errors.Is(err, errs.ErrNotImplemented) {
 		return fmt.Errorf("registry %s does not support underlying _catalog API: %w", o.registry, err)
 	}
 	if err != nil {
@@ -73,7 +77,6 @@ func (o *ociRegistryCollector) RetrieveArtifacts(ctx context.Context, docChannel
 
 	sources := []datasource.Source{}
 	for _, repo := range rl.Repositories {
-
 		sources = append(sources, datasource.Source{
 			Value: o.registry + "/" + repo,
 		})
@@ -89,7 +92,11 @@ func (o *ociRegistryCollector) RetrieveArtifacts(ctx context.Context, docChannel
 	if err != nil {
 		return fmt.Errorf("unable to retrieve artifacts from OCI collector: %w", err)
 	}
-	o.checkedDigest = ociCollector.checkedDigest
+	o.checkedDigest = make(map[string][]string)
+	ociCollector.checkedDigest.Range(func(key, value interface{}) bool {
+		o.checkedDigest[key.(string)] = value.([]string)
+		return true
+	})
 	return nil
 }
 

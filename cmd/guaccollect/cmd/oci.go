@@ -56,6 +56,8 @@ type ociRegistryOptions struct {
 	blobAddr string
 	// run as poll collector
 	poll bool
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var ociCmd = &cobra.Command{
@@ -138,13 +140,13 @@ var ociRegistryCmd = &cobra.Command{
 		// TODO(lumjjb): Return this to a longer duration (~10 minutes) so as to not keep hitting
 		// the OCI server. This will require adding triggers to get new repos as they come up from
 		// the CollectSources so that there isn't a long delay from adding new data sources.
-		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, opts.poll, 30*time.Second)
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, opts.poll, 30*time.Second, -1)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
