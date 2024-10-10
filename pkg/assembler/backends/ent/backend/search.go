@@ -31,9 +31,12 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+const guacType string = "guac"
 
 // FindSoftware takes in a searchText string and looks for software
 // that may be relevant for the input text. This can be seen as fuzzy search
@@ -109,7 +112,15 @@ func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
-func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+func notGUACTypePackagePredicates() predicate.PackageVersion {
+	return packageversion.And(
+		packageversion.HasNameWith(
+			optionalPredicate(ptrfrom.String(guacType), packagename.TypeNEQ),
+		),
+	)
+}
+
+func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	var pkgLatestScan []struct {
 		ID             uuid.UUID `json:"id"`
 		LastScanTimeDB time.Time `json:"max"`
@@ -117,7 +128,7 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec m
 
 	if lastScan == nil {
 		err := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&pkgSpec)).
+			Where(notGUACTypePackagePredicates()).
 			GroupBy(packageversion.FieldID). // Group by Package ID
 			Aggregate(func(s *sql.Selector) string {
 				t := sql.Table(certifyvuln.Table)
@@ -140,7 +151,8 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec m
 
 		if queryType == model.QueryTypeVulnerability {
 			err := b.client.PackageVersion.Query().
-				Where(packageQueryPredicates(&pkgSpec)).
+				Where(notGUACTypePackagePredicates()).
+				WithName(func(q *ent.PackageNameQuery) {}).
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
 					t := sql.Table(certifyvuln.Table)
@@ -154,7 +166,8 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec m
 			}
 		} else {
 			err := b.client.PackageVersion.Query().
-				Where(packageQueryPredicates(&pkgSpec)).
+				Where(notGUACTypePackagePredicates()).
+				WithName(func(q *ent.PackageNameQuery) {}).
 				GroupBy(packageversion.FieldID). // Group by Package ID
 				Aggregate(func(s *sql.Selector) string {
 					t := sql.Table(certifylegal.Table)

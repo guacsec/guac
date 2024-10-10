@@ -31,7 +31,7 @@ func (c *arangoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []st
 	return nil, fmt.Errorf("not implemented: QueryPackagesListForScan")
 }
 
-func (c *arangoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+func (c *arangoClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
 }
 

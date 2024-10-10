@@ -26,6 +26,6 @@ func (r *queryResolver) QueryPackagesListForScan(ctx context.Context, pkgIDs []s
 }
 
 // FindPackagesThatNeedScanning is the resolver for the findPackagesThatNeedScanning field.
-func (r *queryResolver) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
-	return r.Backend.FindPackagesThatNeedScanning(ctx, pkgSpec, queryType, lastScan)
+func (r *queryResolver) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
+	return r.Backend.FindPackagesThatNeedScanning(ctx, queryType, lastScan)
 }

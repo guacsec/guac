@@ -114,14 +114,14 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		name                         string
 		lastScan                     int
 		getPackages                  func(ctx_ context.Context, client_ graphql.Client, pkgIDs []string, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
-		findPackagesThatNeedScanning func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error)
+		findPackagesThatNeedScanning func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error)
 		wantPackNode                 []*PackageNode
 		wantErr                      bool
 	}{
 		{
 			name:     "django:",
 			lastScan: 0,
-			findPackagesThatNeedScanning: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error) {
+			findPackagesThatNeedScanning: func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error) {
 				return &generated.FindPackagesThatNeedScanningResponse{
 					FindPackagesThatNeedScanning: []string{},
 				}, nil
@@ -151,7 +151,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:     "multiple packages",
 			lastScan: 0,
-			findPackagesThatNeedScanning: func(ctx_ context.Context, client_ graphql.Client, filter generated.PkgSpec, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error) {
+			findPackagesThatNeedScanning: func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error) {
 				return &generated.FindPackagesThatNeedScanningResponse{
 					FindPackagesThatNeedScanning: []string{},
 				}, nil

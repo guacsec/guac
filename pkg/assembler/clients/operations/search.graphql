@@ -28,8 +28,8 @@ query FindSoftware($searchText: String!) {
   }
 }
 
-query FindPackagesThatNeedScanning($filter: PkgSpec!, $queryType: QueryType!, $lastScan: Int) {
-  findPackagesThatNeedScanning(pkgSpec: $filter, queryType: $queryType, lastScan: $lastScan)
+query FindPackagesThatNeedScanning($queryType: QueryType!, $lastScan: Int) {
+  findPackagesThatNeedScanning(queryType: $queryType, lastScan: $lastScan)
 }
 
 query QueryPackagesListForScan($pkgIDs: [ID!]!, $after: ID, $first: Int) {

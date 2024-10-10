@@ -266,18 +266,18 @@ func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
 }
 
 // FindPackagesThatNeedScanning mocks base method.
-func (m *MockBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+func (m *MockBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindPackagesThatNeedScanning", ctx, pkgSpec, queryType, lastScan)
+	ret := m.ctrl.Call(m, "FindPackagesThatNeedScanning", ctx, queryType, lastScan)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindPackagesThatNeedScanning indicates an expected call of FindPackagesThatNeedScanning.
-func (mr *MockBackendMockRecorder) FindPackagesThatNeedScanning(ctx, pkgSpec, queryType, lastScan any) *gomock.Call {
+func (mr *MockBackendMockRecorder) FindPackagesThatNeedScanning(ctx, queryType, lastScan any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPackagesThatNeedScanning", reflect.TypeOf((*MockBackend)(nil).FindPackagesThatNeedScanning), ctx, pkgSpec, queryType, lastScan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPackagesThatNeedScanning", reflect.TypeOf((*MockBackend)(nil).FindPackagesThatNeedScanning), ctx, queryType, lastScan)
 }
 
 // FindSoftware mocks base method.

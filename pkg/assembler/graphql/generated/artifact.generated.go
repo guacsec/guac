@@ -114,7 +114,7 @@ type QueryResolver interface {
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
 	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
 	QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error)
-	FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error)
+	FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error)
 	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
 	SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error)
 	VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error)
@@ -5446,45 +5446,18 @@ func (ec *executionContext) field_Query_builders_argsBuilderSpec(
 func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_findPackagesThatNeedScanning_argsPkgSpec(ctx, rawArgs)
+	arg0, err := ec.field_Query_findPackagesThatNeedScanning_argsQueryType(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["pkgSpec"] = arg0
-	arg1, err := ec.field_Query_findPackagesThatNeedScanning_argsQueryType(ctx, rawArgs)
+	args["queryType"] = arg0
+	arg1, err := ec.field_Query_findPackagesThatNeedScanning_argsLastScan(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["queryType"] = arg1
-	arg2, err := ec.field_Query_findPackagesThatNeedScanning_argsLastScan(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["lastScan"] = arg2
+	args["lastScan"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsPkgSpec(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (model.PkgSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgSpec"]
-	if !ok {
-		var zeroVal model.PkgSpec
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
-	if tmp, ok := rawArgs["pkgSpec"]; ok {
-		return ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
-	}
-
-	var zeroVal model.PkgSpec
-	return zeroVal, nil
-}
-
 func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsQueryType(
 	ctx context.Context,
 	rawArgs map[string]interface{},
@@ -12562,7 +12535,7 @@ func (ec *executionContext) _Query_findPackagesThatNeedScanning(ctx context.Cont
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().FindPackagesThatNeedScanning(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int))
+		return ec.resolvers.Query().FindPackagesThatNeedScanning(rctx, fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int))
 	})
 
 	if resTmp == nil {

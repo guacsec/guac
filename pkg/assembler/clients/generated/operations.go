@@ -9578,7 +9578,9 @@ const (
 type FindPackagesThatNeedScanningResponse struct {
 	// findPackagesThatNeedScanning returns a list of package IDs
 	// for all packages that need to be re-scanned (based on the last scan in hours)
-	// or have never been scanned.
+	// or have never been scanned. By default it will filter out all packages that have
+	// the type "GUAC" as those are internal packages and will not be found
+	// by external service providers.
 	//
 	// queryType is used to specify if the last time scanned is checked for either
 	// certifyVuln or certifyLegal.
@@ -29954,13 +29956,9 @@ func (v *__DependencyListInput) GetFirst() *int { return v.First }
 
 // __FindPackagesThatNeedScanningInput is used internally by genqlient
 type __FindPackagesThatNeedScanningInput struct {
-	Filter    PkgSpec   `json:"filter"`
 	QueryType QueryType `json:"queryType"`
 	LastScan  *int      `json:"lastScan"`
 }
-
-// GetFilter returns __FindPackagesThatNeedScanningInput.Filter, and is useful for accessing the field via an interface.
-func (v *__FindPackagesThatNeedScanningInput) GetFilter() PkgSpec { return v.Filter }
 
 // GetQueryType returns __FindPackagesThatNeedScanningInput.QueryType, and is useful for accessing the field via an interface.
 func (v *__FindPackagesThatNeedScanningInput) GetQueryType() QueryType { return v.QueryType }
@@ -32706,15 +32704,14 @@ func DependencyList(
 
 // The query or mutation executed by FindPackagesThatNeedScanning.
 const FindPackagesThatNeedScanning_Operation = `
-query FindPackagesThatNeedScanning ($filter: PkgSpec!, $queryType: QueryType!, $lastScan: Int) {
-	findPackagesThatNeedScanning(pkgSpec: $filter, queryType: $queryType, lastScan: $lastScan)
+query FindPackagesThatNeedScanning ($queryType: QueryType!, $lastScan: Int) {
+	findPackagesThatNeedScanning(queryType: $queryType, lastScan: $lastScan)
 }
 `
 
 func FindPackagesThatNeedScanning(
 	ctx_ context.Context,
 	client_ graphql.Client,
-	filter PkgSpec,
 	queryType QueryType,
 	lastScan *int,
 ) (*FindPackagesThatNeedScanningResponse, error) {
@@ -32722,7 +32719,6 @@ func FindPackagesThatNeedScanning(
 		OpName: "FindPackagesThatNeedScanning",
 		Query:  FindPackagesThatNeedScanning_Operation,
 		Variables: &__FindPackagesThatNeedScanningInput{
-			Filter:    filter,
 			QueryType: queryType,
 			LastScan:  lastScan,
 		},

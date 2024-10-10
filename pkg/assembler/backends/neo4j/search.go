@@ -34,6 +34,6 @@ func (c *neo4jClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []str
 	return nil, fmt.Errorf("not implemented: QueryPackagesListForScan")
 }
 
-func (c *neo4jClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+func (c *neo4jClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
 }

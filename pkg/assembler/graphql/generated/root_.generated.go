@@ -543,7 +543,7 @@ type ComplexityRoot struct {
 		CertifyVEXStatementList      func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) int
 		CertifyVuln                  func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
 		CertifyVulnList              func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
-		FindPackagesThatNeedScanning func(childComplexity int, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) int
+		FindPackagesThatNeedScanning func(childComplexity int, queryType model.QueryType, lastScan *int) int
 		FindSoftware                 func(childComplexity int, searchText string) int
 		FindSoftwareList             func(childComplexity int, searchText string, after *string, first *int) int
 		HasMetadata                  func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
@@ -3215,7 +3215,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.FindPackagesThatNeedScanning(childComplexity, args["pkgSpec"].(model.PkgSpec), args["queryType"].(model.QueryType), args["lastScan"].(*int)), true
+		return e.complexity.Query.FindPackagesThatNeedScanning(childComplexity, args["queryType"].(model.QueryType), args["lastScan"].(*int)), true
 
 	case "Query.findSoftware":
 		if e.complexity.Query.FindSoftware == nil {
@@ -7644,12 +7644,14 @@ extend type Query {
   """
   findPackagesThatNeedScanning returns a list of package IDs
   for all packages that need to be re-scanned (based on the last scan in hours)
-  or have never been scanned.
+  or have never been scanned. By default it will filter out all packages that have
+  the type "GUAC" as those are internal packages and will not be found
+  by external service providers.
 
   queryType is used to specify if the last time scanned is checked for either
   certifyVuln or certifyLegal.
   """
-  findPackagesThatNeedScanning(pkgSpec: PkgSpec!, queryType: QueryType!, lastScan: Int): [ID!]!
+  findPackagesThatNeedScanning(queryType: QueryType!, lastScan: Int): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#

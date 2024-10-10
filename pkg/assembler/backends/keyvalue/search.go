@@ -27,6 +27,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+const guacType string = "guac"
+
 func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
@@ -260,7 +262,7 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	return pvs
 }
 
-func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
 
@@ -281,6 +283,9 @@ func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec m
 			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
 			if err != nil {
 				return nil, err
+			}
+			if pkgTypeNode.Type == guacType {
+				continue
 			}
 			for _, nsID := range pkgTypeNode.Namespaces {
 				pkgNS, err := byIDkv[*pkgNamespace](ctx, nsID, c)
