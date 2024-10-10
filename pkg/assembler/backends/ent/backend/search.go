@@ -213,7 +213,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model
 
 			// Loop through the sorted list starting from the specified UUID
 			for i, id := range startAfterPackageIDList {
-				if i <= *first {
+				if i < *first {
 					shortenedQueryList = append(shortenedQueryList, id)
 				}
 			}

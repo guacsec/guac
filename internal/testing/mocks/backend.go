@@ -265,6 +265,21 @@ func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBackend)(nil).Delete), ctx, node)
 }
 
+// FindPackagesThatNeedScanning mocks base method.
+func (m *MockBackend) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindPackagesThatNeedScanning", ctx, pkgSpec, queryType, lastScan)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindPackagesThatNeedScanning indicates an expected call of FindPackagesThatNeedScanning.
+func (mr *MockBackendMockRecorder) FindPackagesThatNeedScanning(ctx, pkgSpec, queryType, lastScan any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPackagesThatNeedScanning", reflect.TypeOf((*MockBackend)(nil).FindPackagesThatNeedScanning), ctx, pkgSpec, queryType, lastScan)
+}
+
 // FindSoftware mocks base method.
 func (m *MockBackend) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	m.ctrl.T.Helper()
@@ -1391,18 +1406,18 @@ func (mr *MockBackendMockRecorder) PointOfContactList(ctx, pointOfContactSpec, a
 }
 
 // QueryPackagesListForScan mocks base method.
-func (m *MockBackend) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+func (m *MockBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryPackagesListForScan", ctx, pkgSpec, queryType, lastScan, after, first)
+	ret := m.ctrl.Call(m, "QueryPackagesListForScan", ctx, pkgIDs, after, first)
 	ret0, _ := ret[0].(*model.PackageConnection)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // QueryPackagesListForScan indicates an expected call of QueryPackagesListForScan.
-func (mr *MockBackendMockRecorder) QueryPackagesListForScan(ctx, pkgSpec, queryType, lastScan, after, first any) *gomock.Call {
+func (mr *MockBackendMockRecorder) QueryPackagesListForScan(ctx, pkgIDs, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForScan", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForScan), ctx, pkgSpec, queryType, lastScan, after, first)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForScan", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForScan), ctx, pkgIDs, after, first)
 }
 
 // Scorecards mocks base method.

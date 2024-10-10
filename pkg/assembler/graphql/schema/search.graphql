@@ -76,14 +76,19 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
-
   """
   queryPackagesListForScan returns a paginated results via PackageConnection 
+  for all packages that need to be re-scanned based on the list of PkgIDs that
+  are found from findPackagesThatNeedScanning
+  """
+  queryPackagesListForScan(pkgIDs: [ID!]!, after: ID, first: Int): PackageConnection
+  """
+  findPackagesThatNeedScanning returns a list of package IDs
   for all packages that need to be re-scanned (based on the last scan in hours)
   or have never been scanned.
 
   queryType is used to specify if the last time scanned is checked for either
   certifyVuln or certifyLegal.
   """
-  queryPackagesListForScan(pkgSpec: PkgSpec!, queryType: QueryType!, lastScan: Int, after: ID, first: Int): PackageConnection
+  findPackagesThatNeedScanning(pkgSpec: PkgSpec!, queryType: QueryType!, lastScan: Int): [ID!]!
 }

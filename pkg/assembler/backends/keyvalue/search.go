@@ -259,7 +259,11 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	return pvs
 }
 
-func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int, after *string, first *int) (*model.PackageConnection, error) {
+func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec model.PkgSpec, queryType model.QueryType, lastScan *int) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
+func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
 

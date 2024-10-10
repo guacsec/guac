@@ -9574,6 +9574,22 @@ const (
 	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
+// FindPackagesThatNeedScanningResponse is returned by FindPackagesThatNeedScanning on success.
+type FindPackagesThatNeedScanningResponse struct {
+	// findPackagesThatNeedScanning returns a list of package IDs
+	// for all packages that need to be re-scanned (based on the last scan in hours)
+	// or have never been scanned.
+	//
+	// queryType is used to specify if the last time scanned is checked for either
+	// certifyVuln or certifyLegal.
+	FindPackagesThatNeedScanning []string `json:"findPackagesThatNeedScanning"`
+}
+
+// GetFindPackagesThatNeedScanning returns FindPackagesThatNeedScanningResponse.FindPackagesThatNeedScanning, and is useful for accessing the field via an interface.
+func (v *FindPackagesThatNeedScanningResponse) GetFindPackagesThatNeedScanning() []string {
+	return v.FindPackagesThatNeedScanning
+}
+
 // FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
 //
@@ -27433,11 +27449,8 @@ func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageIn
 // QueryPackagesListForScanResponse is returned by QueryPackagesListForScan on success.
 type QueryPackagesListForScanResponse struct {
 	// queryPackagesListForScan returns a paginated results via PackageConnection
-	// for all packages that need to be re-scanned (based on the last scan in hours)
-	// or have never been scanned.
-	//
-	// queryType is used to specify if the last time scanned is checked for either
-	// certifyVuln or certifyLegal.
+	// for all packages that need to be re-scanned based on the list of PkgIDs that
+	// are found from findPackagesThatNeedScanning
 	QueryPackagesListForScan *QueryPackagesListForScanQueryPackagesListForScanPackageConnection `json:"queryPackagesListForScan"`
 }
 
@@ -29939,6 +29952,22 @@ func (v *__DependencyListInput) GetAfter() *string { return v.After }
 // GetFirst returns __DependencyListInput.First, and is useful for accessing the field via an interface.
 func (v *__DependencyListInput) GetFirst() *int { return v.First }
 
+// __FindPackagesThatNeedScanningInput is used internally by genqlient
+type __FindPackagesThatNeedScanningInput struct {
+	Filter    PkgSpec   `json:"filter"`
+	QueryType QueryType `json:"queryType"`
+	LastScan  *int      `json:"lastScan"`
+}
+
+// GetFilter returns __FindPackagesThatNeedScanningInput.Filter, and is useful for accessing the field via an interface.
+func (v *__FindPackagesThatNeedScanningInput) GetFilter() PkgSpec { return v.Filter }
+
+// GetQueryType returns __FindPackagesThatNeedScanningInput.QueryType, and is useful for accessing the field via an interface.
+func (v *__FindPackagesThatNeedScanningInput) GetQueryType() QueryType { return v.QueryType }
+
+// GetLastScan returns __FindPackagesThatNeedScanningInput.LastScan, and is useful for accessing the field via an interface.
+func (v *__FindPackagesThatNeedScanningInput) GetLastScan() *int { return v.LastScan }
+
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
 	SearchText string `json:"searchText"`
@@ -31331,21 +31360,13 @@ func (v *__PointOfContactsInput) GetFilter() PointOfContactSpec { return v.Filte
 
 // __QueryPackagesListForScanInput is used internally by genqlient
 type __QueryPackagesListForScanInput struct {
-	Filter    PkgSpec   `json:"filter"`
-	QueryType QueryType `json:"queryType"`
-	LastScan  *int      `json:"lastScan"`
-	After     *string   `json:"after"`
-	First     *int      `json:"first"`
+	PkgIDs []string `json:"pkgIDs"`
+	After  *string  `json:"after"`
+	First  *int     `json:"first"`
 }
 
-// GetFilter returns __QueryPackagesListForScanInput.Filter, and is useful for accessing the field via an interface.
-func (v *__QueryPackagesListForScanInput) GetFilter() PkgSpec { return v.Filter }
-
-// GetQueryType returns __QueryPackagesListForScanInput.QueryType, and is useful for accessing the field via an interface.
-func (v *__QueryPackagesListForScanInput) GetQueryType() QueryType { return v.QueryType }
-
-// GetLastScan returns __QueryPackagesListForScanInput.LastScan, and is useful for accessing the field via an interface.
-func (v *__QueryPackagesListForScanInput) GetLastScan() *int { return v.LastScan }
+// GetPkgIDs returns __QueryPackagesListForScanInput.PkgIDs, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetPkgIDs() []string { return v.PkgIDs }
 
 // GetAfter returns __QueryPackagesListForScanInput.After, and is useful for accessing the field via an interface.
 func (v *__QueryPackagesListForScanInput) GetAfter() *string { return v.After }
@@ -32672,6 +32693,43 @@ func DependencyList(
 	var err_ error
 
 	var data_ DependencyListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by FindPackagesThatNeedScanning.
+const FindPackagesThatNeedScanning_Operation = `
+query FindPackagesThatNeedScanning ($filter: PkgSpec!, $queryType: QueryType!, $lastScan: Int) {
+	findPackagesThatNeedScanning(pkgSpec: $filter, queryType: $queryType, lastScan: $lastScan)
+}
+`
+
+func FindPackagesThatNeedScanning(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgSpec,
+	queryType QueryType,
+	lastScan *int,
+) (*FindPackagesThatNeedScanningResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "FindPackagesThatNeedScanning",
+		Query:  FindPackagesThatNeedScanning_Operation,
+		Variables: &__FindPackagesThatNeedScanningInput{
+			Filter:    filter,
+			QueryType: queryType,
+			LastScan:  lastScan,
+		},
+	}
+	var err_ error
+
+	var data_ FindPackagesThatNeedScanningResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -39139,8 +39197,8 @@ func PointOfContacts(
 
 // The query or mutation executed by QueryPackagesListForScan.
 const QueryPackagesListForScan_Operation = `
-query QueryPackagesListForScan ($filter: PkgSpec!, $queryType: QueryType!, $lastScan: Int, $after: ID, $first: Int) {
-	queryPackagesListForScan(pkgSpec: $filter, queryType: $queryType, lastScan: $lastScan, after: $after, first: $first) {
+query QueryPackagesListForScan ($pkgIDs: [ID!]!, $after: ID, $first: Int) {
+	queryPackagesListForScan(pkgIDs: $pkgIDs, after: $after, first: $first) {
 		totalCount
 		edges {
 			cursor
@@ -39182,9 +39240,7 @@ fragment AllPkgTree on Package {
 func QueryPackagesListForScan(
 	ctx_ context.Context,
 	client_ graphql.Client,
-	filter PkgSpec,
-	queryType QueryType,
-	lastScan *int,
+	pkgIDs []string,
 	after *string,
 	first *int,
 ) (*QueryPackagesListForScanResponse, error) {
@@ -39192,11 +39248,9 @@ func QueryPackagesListForScan(
 		OpName: "QueryPackagesListForScan",
 		Query:  QueryPackagesListForScan_Operation,
 		Variables: &__QueryPackagesListForScanInput{
-			Filter:    filter,
-			QueryType: queryType,
-			LastScan:  lastScan,
-			After:     after,
-			First:     first,
+			PkgIDs: pkgIDs,
+			After:  after,
+			First:  first,
 		},
 	}
 	var err_ error
