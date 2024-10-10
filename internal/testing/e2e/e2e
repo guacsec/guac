@@ -145,8 +145,8 @@ for command in "${ingestion_commands[@]}"; do
   echo @@@@ Running ingestion command: "$command" | tee -a "$LOG_FILE"
   eval "$command"
 
-  echo @@@@ Waiting
-  sleep 60
+  echo @@@@ Waiting for 5 minutes
+  sleep 300
 
   if [ $? -ne 0 ]; then
     echo "Error: Command '$command' failed" | tee -a "$LOG_FILE"
