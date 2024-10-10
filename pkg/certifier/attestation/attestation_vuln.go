@@ -27,7 +27,7 @@ import (
 // Currently, the predicate is defined here but the intention is to upstream this to
 // https://github.com/in-toto/attestation in the near future once the quirks are worked out.
 const (
-	PredicateVuln = "https://in-toto.io/attestation/vuln/v0.1"
+	PredicateVuln = "https://in-toto.io/attestation/vulns/v0.1"
 )
 
 // VulnerabilityStatement defines the statement header and the vulnerability predicate
