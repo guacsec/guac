@@ -333,7 +333,6 @@ func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec m
 								}
 							} else {
 								pkgIDs = append(pkgIDs, pkgVer.ThisID)
-
 							}
 						}
 					}
@@ -341,7 +340,7 @@ func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, pkgSpec m
 			}
 		}
 	}
-	return nil, nil
+	return pkgIDs, nil
 }
 
 func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {

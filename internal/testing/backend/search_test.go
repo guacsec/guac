@@ -381,7 +381,13 @@ func TestQueryPackagesListForScan(t *testing.T) {
 					t.Fatalf("did not get expected ingest error: %v", err)
 				}
 			}
-			got, err := b.QueryPackagesListForScan(ctx, model.PkgSpec{}, test.QueryType, test.lastScan, nil, ptrfrom.Int(10))
+
+			pkgIDsResponse, err := b.FindPackagesThatNeedScanning(ctx, model.PkgSpec{}, test.QueryType, test.lastScan)
+			if err != nil {
+				t.Fatalf("did not get expected query error: %v", err)
+			}
+
+			got, err := b.QueryPackagesListForScan(ctx, pkgIDsResponse, nil, ptrfrom.Int(10))
 			if err != nil {
 				t.Fatalf("did not get expected query error: %v", err)
 			}
