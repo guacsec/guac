@@ -25,7 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_license "github.com/guacsec/guac/pkg/certifier/attestation/license"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
@@ -72,15 +72,15 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	return nil
 }
 
-func parseLegalCertifyPredicate(p []byte) (*attestation.ClearlyDefinedStatement, error) {
-	predicate := attestation.ClearlyDefinedStatement{}
+func parseLegalCertifyPredicate(p []byte) (*attestation_license.ClearlyDefinedStatement, error) {
+	predicate := attestation_license.ClearlyDefinedStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
 		return nil, err
 	}
 	return &predicate, nil
 }
 
-func (c *parser) parseSubject(s *attestation.ClearlyDefinedStatement) error {
+func (c *parser) parseSubject(s *attestation_license.ClearlyDefinedStatement) error {
 	for _, sub := range s.Statement.Subject {
 		p, err := helpers.PurlToPkg(sub.Uri)
 		if err != nil {
@@ -107,7 +107,7 @@ The “licensed” -> “facets” -> “core” -> “attribution” -> “part
 “described” -> “sourceLocation” can be used to create a HasSourceAt GUAC node. */
 
 // parseClearlyDefined parses the attestation to collect the license information
-func (c *parser) parseClearlyDefined(_ context.Context, s *attestation.ClearlyDefinedStatement) error {
+func (c *parser) parseClearlyDefined(_ context.Context, s *attestation_license.ClearlyDefinedStatement) error {
 	if s.Predicate.Definition.Licensed.Declared != "" {
 		discoveredLicenses := make([]generated.LicenseInputSpec, 0)
 		var discoveredLicenseStr string = ""
