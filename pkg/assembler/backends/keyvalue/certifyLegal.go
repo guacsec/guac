@@ -547,6 +547,11 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if legal == nil {
+					continue
+				}
+				
 				out = append(out, legal)
 			}
 		}
