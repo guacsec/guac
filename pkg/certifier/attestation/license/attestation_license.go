@@ -151,3 +151,7 @@ type ClearlyDefinedPredicate struct {
 	Definition Definition `json:"definition,omitempty"`
 	Metadata   Metadata   `json:"metadata,omitempty"`
 }
+
+type Metadata struct {
+	ScannedOn *time.Time `json:"scannedOn,omitempty"`
+}
