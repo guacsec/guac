@@ -31,8 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-type mockQuery struct {
-}
+type mockQuery struct{}
 
 // NewMockQuery initializes the mockQuery to query for tests
 func newMockQuery() certifier.QueryComponents {
@@ -45,8 +44,7 @@ func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface
 	return nil
 }
 
-type mockUnknownQuery struct {
-}
+type mockUnknownQuery struct{}
 
 // NewMockQuery initializes the mockQuery to query for tests
 func newMockUnknownQuery() certifier.QueryComponents {
@@ -60,7 +58,9 @@ func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- in
 }
 
 func TestCertify(t *testing.T) {
-	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+	err := RegisterCertifier(func() certifier.Certifier {
+		return osv.NewOSVCertificationParser()
+	}, certifier.CertifierOSV)
 	if err != nil && !errors.Is(err, errCertifierOverwrite) {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -171,7 +171,6 @@ func TestCertify(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			ctx := logging.WithLogger(context.Background())
 			if tt.poll {
 				var cancel context.CancelFunc

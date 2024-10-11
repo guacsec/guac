@@ -53,9 +53,7 @@ func init() {
 	_ = RegisterDocumentParser(opaque.NewOpaqueParser, processor.DocumentOpaque)
 }
 
-var (
-	documentParser = map[processor.DocumentType]func() common.DocumentParser{}
-)
+var documentParser = map[processor.DocumentType]func() common.DocumentParser{}
 
 type docTreeBuilder struct {
 	identities    []common.TrustInformation

@@ -41,7 +41,7 @@ func PurlsVulnScan(ctx context.Context, purls []string) ([]assembler.VulnEqualIn
 
 	if osvProcessorDocs, err := osv_certifier.EvaluateOSVResponse(ctx, &http.Client{
 		Transport: version.UATransport,
-	}, purls, nil); err != nil {
+	}, purls, nil, false); err != nil {
 		return nil, nil, fmt.Errorf("failed get response from OSV with error: %w", err)
 	} else {
 		for _, doc := range osvProcessorDocs {

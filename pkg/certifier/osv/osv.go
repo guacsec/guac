@@ -59,15 +59,27 @@ type osvCertifier struct {
 	withVulnerabilityMetadata bool
 }
 
+type CertifierOpts func(*osvCertifier)
+
+func WithVulnerabilityMetadata() CertifierOpts {
+	return func(oc *osvCertifier) {
+		oc.withVulnerabilityMetadata = true
+	}
+}
+
 // NewOSVCertificationParser initializes the OSVCertifier
-func NewOSVCertificationParser(withVulnerabilityMetadata bool) certifier.Certifier {
+func NewOSVCertificationParser(opts ...CertifierOpts) certifier.Certifier {
 	limiter := rate.NewLimiter(rate.Every(rateLimitInterval), rateLimit)
 	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
 	client := &http.Client{Transport: transport}
-	return &osvCertifier{
-		osvHTTPClient:             client,
-		withVulnerabilityMetadata: withVulnerabilityMetadata,
+
+	o := &osvCertifier{
+		osvHTTPClient: client,
 	}
+	for _, opt := range opts {
+		opt(o)
+	}
+	return o
 }
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan

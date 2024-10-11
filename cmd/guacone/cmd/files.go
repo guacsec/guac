@@ -52,6 +52,7 @@ type fileOptions struct {
 	// csub client options for identifier strings
 	csubClientOptions       csub_client.CsubClientOptions
 	queryVulnOnIngestion    bool
+	addVulnMetadata         bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
