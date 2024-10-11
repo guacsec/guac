@@ -1891,7 +1891,7 @@ var (
 			  "uri":"pkg:maven/org.apache.commons/commons-text@1.9"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1920,7 +1920,7 @@ var (
 			  "uri":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1943,7 +1943,7 @@ var (
 			  "uri":"pkg:oci/vul-image-latest?repository_url=gcr.io"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -1966,7 +1966,7 @@ var (
 			  "uri":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
@@ -2027,7 +2027,7 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -2051,7 +2051,7 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -2075,7 +2075,7 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -2099,7 +2099,7 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
@@ -2128,7 +2128,7 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
 			"invocation": {
 				"uri": "guac",
