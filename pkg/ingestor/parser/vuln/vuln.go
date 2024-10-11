@@ -32,7 +32,9 @@ package vuln
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
@@ -48,10 +50,11 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type parser struct {
-	packages   []*generated.PkgInputSpec
-	vulnData   *generated.ScanMetadataInput
-	vulns      []*generated.VulnerabilityInputSpec
-	vulnEquals []assembler.VulnEqualIngest
+	packages     []*generated.PkgInputSpec
+	vulnData     *generated.ScanMetadataInput
+	vulns        []*generated.VulnerabilityInputSpec
+	vulnMetadata []assembler.VulnMetadataIngest
+	vulnEquals   []assembler.VulnEqualIngest
 }
 
 var noVulnInput *generated.VulnerabilityInputSpec = &generated.VulnerabilityInputSpec{Type: "noVuln", VulnerabilityID: ""}
@@ -66,6 +69,7 @@ func (c *parser) initializeVulnParser() {
 	c.packages = make([]*generated.PkgInputSpec, 0)
 	c.vulnData = nil
 	c.vulns = make([]*generated.VulnerabilityInputSpec, 0)
+	c.vulnMetadata = make([]assembler.VulnMetadataIngest, 0)
 	c.vulnEquals = make([]assembler.VulnEqualIngest, 0)
 }
 
@@ -82,17 +86,19 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	}
 	c.packages = ps
 	c.vulnData = parseMetadata(statement)
-	vs, ivs, err := parseVulns(ctx, statement)
+	vs, ivs, vms, err := parseVulns(ctx, statement)
 	if err != nil {
 		return fmt.Errorf("unable to parse vulns of statement: %w", err)
 	}
 	c.vulns = vs
+	c.vulnMetadata = vms
 	c.vulnEquals = ivs
 	return nil
 }
 
 func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStatement,
-	error) {
+	error,
+) {
 	predicate := attestation_vuln.VulnerabilityStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
 		return nil, err
@@ -124,8 +130,10 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMe
 
 // TODO (pxp928): Remove creation of osv node and just create the vulnerability nodes specified
 func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
-	[]assembler.VulnEqualIngest, error) {
+	[]assembler.VulnEqualIngest, []assembler.VulnMetadataIngest, error,
+) {
 	var vs []*generated.VulnerabilityInputSpec
+	var vmi []assembler.VulnMetadataIngest
 	var ivs []assembler.VulnEqualIngest
 	for _, res := range s.Predicate.Scanner.Result {
 		v := &generated.VulnerabilityInputSpec{
@@ -135,7 +143,7 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 		vs = append(vs, v)
 		vuln, err := helpers.CreateVulnInput(res.Id)
 		if err != nil {
-			return nil, nil, fmt.Errorf("createVulnInput failed with error: %w", err)
+			return nil, nil, nil, fmt.Errorf("createVulnInput failed with error: %w", err)
 		}
 		iv := assembler.VulnEqualIngest{
 			Vulnerability:      v,
@@ -145,13 +153,32 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 			},
 		}
 		ivs = append(ivs, iv)
+
+		var severityErrors error
+		for _, severity := range id.Severity {
+			scoreVal, err := strconv.ParseFloat(severity.Score, 64)
+			if err != nil {
+				severityErrors = errors.Join(fmt.Errorf("parsing severity score failed for method %s: %w", severity.Method, err))
+			}
+			vmi = append(vmi, assembler.VulnMetadataIngest{
+				Vulnerability: vuln,
+				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+					ScoreType:  generated.VulnerabilityScoreType(severity.Method),
+					ScoreValue: scoreVal,
+				},
+			})
+		}
+		if severityErrors != nil {
+			return nil, nil, nil, severityErrors
+		}
 	}
-	return vs, ivs, nil
+	return vs, ivs, vmi, nil
 }
 
 func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	rv := &assembler.IngestPredicates{
-		VulnEqual: c.vulnEquals,
+		VulnEqual:    c.vulnEquals,
+		VulnMetadata: c.vulnMetadata,
 	}
 	for _, p := range c.packages {
 		if len(c.vulns) > 0 {
