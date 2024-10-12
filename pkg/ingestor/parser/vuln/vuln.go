@@ -35,6 +35,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -131,6 +132,7 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMe
 func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
 	[]assembler.VulnEqualIngest, []assembler.VulnMetadataIngest, error,
 ) {
+	now := time.Now()
 	var vs []*generated.VulnerabilityInputSpec
 	var vmi []assembler.VulnMetadataIngest
 	var ivs []assembler.VulnEqualIngest
@@ -164,6 +166,7 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 					ScoreType:  generated.VulnerabilityScoreType(severity.Method),
 					ScoreValue: score,
+					Timestamp:  now,
 				},
 			})
 		}
