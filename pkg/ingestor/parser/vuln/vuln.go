@@ -34,7 +34,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
@@ -156,7 +155,7 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 
 		var severityErrors error
 		for _, severity := range id.Severity {
-			scoreVal, err := strconv.ParseFloat(severity.Score, 64)
+			score, err := parseScoreBasedOnMethod(severity)
 			if err != nil {
 				severityErrors = errors.Join(fmt.Errorf("parsing severity score failed for method %s: %w", severity.Method, err))
 			}
@@ -164,7 +163,7 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 				Vulnerability: vuln,
 				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 					ScoreType:  generated.VulnerabilityScoreType(severity.Method),
-					ScoreValue: scoreVal,
+					ScoreValue: score,
 				},
 			})
 		}

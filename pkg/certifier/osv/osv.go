@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -203,8 +204,19 @@ func createAttestation(purl string, vulns []osv_models.Vulnerability, currentTim
 			Id: vuln.ID,
 		}
 		for _, severity := range vuln.Severity {
+			var method string
+			switch severity.Type {
+			case osv_models.SeverityCVSSV2:
+				method = string(generated.VulnerabilityScoreTypeCvssv2)
+			case osv_models.SeverityCVSSV3:
+				method = string(generated.VulnerabilityScoreTypeCvssv3)
+			case osv_models.SeverityCVSSV4:
+				method = string(generated.VulnerabilityScoreTypeCvssv4)
+			default:
+				method = string(severity.Type)
+			}
 			result.Severity = append(result.Severity, attestation_vuln.Severity{
-				Method: string(severity.Type),
+				Method: method,
 				Score:  severity.Score,
 			})
 		}
