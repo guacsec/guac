@@ -122,7 +122,7 @@ func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []strin
 	if err != nil {
 		return nil, fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
-	var responseMap map[string][]osv_models.Vulnerability
+	responseMap := make(map[string][]osv_models.Vulnerability, len(packMap))
 	if withVulnerabilityMetadata {
 		hydratedResp, err := osv_scanner.HydrateWithClient(resp, client)
 		if err != nil {
