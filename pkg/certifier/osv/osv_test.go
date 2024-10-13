@@ -30,6 +30,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	osv_models "github.com/google/osv-scanner/pkg/models"
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -225,27 +226,60 @@ func Test_createAttestation(t *testing.T) {
 	currentTime := time.Now()
 	type args struct {
 		purl  string
-		vulns []osv_scanner.MinimalVulnerability
+		vulns []osv_models.Vulnerability
 	}
 	tests := []struct {
 		name string
 		args args
 		want *attestation_vuln.VulnerabilityStatement
-	}{{
-		name: "default",
-		args: args{
-			purl: "",
-			vulns: []osv_scanner.MinimalVulnerability{
-				{
-					ID: "testId",
+	}{
+		{
+			name: "default",
+			args: args{
+				purl: "",
+				vulns: []osv_models.Vulnerability{
+					{
+						ID: "testId",
+					},
+				},
+			},
+			want: &attestation_vuln.VulnerabilityStatement{
+				Statement: attestationv1.Statement{
+					Type:          attestationv1.StatementTypeUri,
+					PredicateType: attestation_vuln.PredicateVuln,
+					Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
+				},
+				Predicate: attestation_vuln.VulnerabilityPredicate{
+					Invocation: attestation_vuln.Invocation{
+						Uri:        INVOC_URI,
+						ProducerID: PRODUCER_ID,
+					},
+					Scanner: attestation_vuln.Scanner{
+						Uri:     URI,
+						Version: VERSION,
+						Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+					},
+					Metadata: attestation_vuln.Metadata{
+						ScannedOn: &currentTime,
+					},
 				},
 			},
 		},
-		want: &attestation_vuln.VulnerabilityStatement{
-			Statement: attestationv1.Statement{
-				Type:          attestationv1.StatementTypeUri,
-				PredicateType: attestation_vuln.PredicateVuln,
-				Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
+		{
+			name: "with severity and score",
+			args: args{
+				purl: "",
+				vulns: []osv_models.Vulnerability{
+					{
+						ID: "CVE-2024-3094",
+						Severity: []osv_models.Severity{
+							{
+								Type:  osv_models.SeverityCVSSV3,
+								Score: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+							},
+						},
+					},
+				},
 			},
 			Predicate: attestation_vuln.VulnerabilityPredicate{
 				Scanner: attestation_vuln.Scanner{
@@ -259,7 +293,7 @@ func Test_createAttestation(t *testing.T) {
 				},
 			},
 		},
-	}}
+	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			currentTime := time.Now()

@@ -56,15 +56,21 @@ var osvCmd = &cobra.Command{
 			viper.GetString("pubsubAddr"),
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
+			viper.GetBool("add-vuln-metadata"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		if err := certify.RegisterCertifier(func() certifier.Certifier {
+			cerifierOpts := []osv.CertifierOpts{}
+			if opts.addVulnMetadata {
+				cerifierOpts = append(cerifierOpts, osv.WithVulnerabilityMetadata())
+			}
+			return osv.NewOSVCertificationParser(cerifierOpts...)
+		}, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -72,7 +78,7 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOsvFlags(user string, pass string, dbAddr string, realm string, pubsubAddr string, poll bool, interval int) (options, error) {
+func validateOsvFlags(user string, pass string, dbAddr string, realm string, pubsubAddr string, poll bool, interval int, addVulnMetadata bool) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
@@ -81,6 +87,7 @@ func validateOsvFlags(user string, pass string, dbAddr string, realm string, pub
 	opts.pubsubAddr = pubsubAddr
 	opts.poll = poll
 	opts.interval = interval
+	opts.addVulnMetadata = addVulnMetadata
 
 	return opts, nil
 }

@@ -199,6 +199,7 @@ func createAttestation(purl string, vulns []osv_models.Vulnerability, currentTim
 			},
 		},
 	}
+
 	for _, vuln := range vulns {
 		result := attestation_vuln.Result{
 			Id: vuln.ID,
