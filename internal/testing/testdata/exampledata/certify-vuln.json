@@ -1,9 +1,9 @@
 {
   "_type": "https://in-toto.io/Statement/v0.1",
   "subject": [
-      {
-        "uri": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
-      }
+    {
+      "uri": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+    }
   ],
   "predicateType": "https://in-toto.io/attestation/vulns/v0.1",
   "predicate": {

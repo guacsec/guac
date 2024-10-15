@@ -40,6 +40,7 @@ func TestParser(t *testing.T) {
 		doc     *processor.Document
 		wantCVs []assembler.CertifyVulnIngest
 		wantIVs []assembler.VulnEqualIngest
+		wantVMs []assembler.VulnMetadataIngest
 		wantErr bool
 	}{{
 		name: "valid vulnerability certifier document",
@@ -243,6 +244,18 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
+		wantVMs: []assembler.VulnMetadataIngest{
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
+				},
+				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+					ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+					ScoreValue: 10.0,
+				},
+			},
+		},
 		wantErr: false,
 	}, {
 		name: "no vulnerability certifier document with package digest",
@@ -287,6 +300,18 @@ func TestParser(t *testing.T) {
 		})
 		return out
 	})
+
+	vmSortOpt := cmp.Transformer("Sort", func(in []assembler.VulnMetadataIngest) []assembler.VulnMetadataIngest {
+		out := append([]assembler.VulnMetadataIngest(nil), in...)
+		sort.Slice(out, func(i, j int) bool {
+			return strings.Compare(out[i].Vulnerability.VulnerabilityID, out[j].Vulnerability.VulnerabilityID) > 0
+		})
+		return out
+	})
+	vmTimeCompareOpt := cmp.Comparer(func(x time.Time, y time.Time) bool {
+		return true
+	})
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewVulnCertificationParser()
@@ -302,6 +327,9 @@ func TestParser(t *testing.T) {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 			if diff := cmp.Diff(tt.wantIVs, ip.VulnEqual, ivSortOpt); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+			if diff := cmp.Diff(tt.wantVMs, ip.VulnMetadata, vmSortOpt, vmTimeCompareOpt); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
