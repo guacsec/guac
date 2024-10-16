@@ -76,7 +76,6 @@ func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
 
 // getDefinitions uses the coordinates to query clearly defined for license definition
 func getDefinitions(ctx context.Context, client *http.Client, purls []string, coordinates []string) (map[string]*attestation.Definition, error) {
-
 	coordinateToPurl := make(map[string]string)
 	for i, purl := range purls {
 		coordinateToPurl[coordinates[i]] = purl
