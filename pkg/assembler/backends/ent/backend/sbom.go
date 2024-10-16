@@ -344,6 +344,7 @@ func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 		if spec.Subject.Package != nil {
 			if spec.Subject.Package.ID != nil {
 				predicates = append(predicates, optionalPredicate(spec.Subject.Package.ID, packageIDEQ))
+				predicates = append(predicates, billofmaterials.ArtifactIDIsNil())
 			} else {
 				predicates = append(predicates,
 					billofmaterials.HasPackageWith(packageVersionQuery(spec.Subject.Package)))
@@ -352,6 +353,7 @@ func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 			if spec.Subject.Artifact.ID != nil {
 				predicates = append(predicates,
 					optionalPredicate(spec.Subject.Artifact.ID, artifactIDEQ))
+				predicates = append(predicates, billofmaterials.PackageIDIsNil())
 			} else {
 				predicates = append(predicates,
 					billofmaterials.HasArtifactWith(artifactQueryPredicates(spec.Subject.Artifact)))

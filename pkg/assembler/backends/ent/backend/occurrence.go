@@ -403,6 +403,7 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 		if filter.Subject.Package != nil {
 			if filter.Subject.Package.ID != nil {
 				predicates = append(predicates, optionalPredicate(filter.Subject.Package.ID, packageIDEQ))
+				predicates = append(predicates, occurrence.SourceIDIsNil())
 			} else {
 				predicates = append(predicates,
 					occurrence.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
@@ -410,6 +411,7 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 		} else if filter.Subject.Source != nil {
 			if filter.Subject.Source.ID != nil {
 				predicates = append(predicates, optionalPredicate(filter.Subject.Source.ID, sourceIDEQ))
+				predicates = append(predicates, occurrence.PackageIDIsNil())
 			} else {
 				predicates = append(predicates,
 					occurrence.HasSourceWith(
