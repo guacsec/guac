@@ -1893,10 +1893,6 @@ var (
 		],
 		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner":{
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
@@ -1904,12 +1900,13 @@ var (
 			  },
 			  "result":[
 				 {
-					"vulnerability_id":"GHSA-599f-7c49-w659"
+					"id":"GHSA-599f-7c49-w659"
 				 }
 			  ]
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:18:58.063182-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+                          "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1922,17 +1919,13 @@ var (
 		],
 		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner": {
 			"uri": "osv.dev",
-			"version": "0.0.14",
-			"db": {}
+			"version": "0.0.14"
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1945,17 +1938,13 @@ var (
 		],
 		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner": {
 			"uri": "osv.dev",
-			"version": "0.0.14",
-			"db": {}
+			"version": "0.0.14"
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1968,10 +1957,6 @@ var (
 		],
 		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner":{
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
@@ -1979,27 +1964,28 @@ var (
 			  },
 			  "result":[
 				 {
-					"vulnerability_id":"GHSA-7rjr-3q55-vv33"
+					"id":"GHSA-7rjr-3q55-vv33"
 				 },
 				 {
-					"vulnerability_id":"GHSA-8489-44mv-ggj8"
+					"id":"GHSA-8489-44mv-ggj8"
 				 },
 				 {
-					"vulnerability_id":"GHSA-fxph-q3j8-mv87"
+					"id":"GHSA-fxph-q3j8-mv87"
 				 },
 				 {
-					"vulnerability_id":"GHSA-jfh8-c2jp-5v3q"
+					"id":"GHSA-jfh8-c2jp-5v3q"
 				 },
 				 {
-					"vulnerability_id":"GHSA-p6xc-xr62-6r2g"
+					"id":"GHSA-p6xc-xr62-6r2g"
 				 },
 				 {
-					"vulnerability_id":"GHSA-vwqq-5vrc-xw9h"
+					"id":"GHSA-vwqq-5vrc-xw9h"
 				 }
 			  ]
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:18:31.607996-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -2029,17 +2015,13 @@ var (
 		],
 		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
-				"version": "0.0.14",
-				"db": {}
+				"version": "0.0.14"
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986308-08:00"
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 			}
 		}
 	}`
@@ -2053,17 +2035,13 @@ var (
 		],
 		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
-				"version": "0.0.14",
-				"db": {}
+				"version": "0.0.14"
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986401-08:00"
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 			}
 		}
 	}`
@@ -2077,17 +2055,13 @@ var (
 		],
 		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
-				"version": "0.0.14",
-				"db": {}
+				"version": "0.0.14"
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.98646-08:00"
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 			}
 		}
 	}`
@@ -2101,22 +2075,18 @@ var (
 		],
 		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
 				"version": "0.0.14",
-				"db": {},
 				"result": [
 					{
-						"vulnerability_id": "GHSA-9ph3-v2vh-3qx7"
+						"id": "GHSA-9ph3-v2vh-3qx7"
 					}
 				]
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986506-08:00"
+				"scanStartedOn":"2023-02-15T11:10:08.986506-08:00",
+				"scanFinishedOn":"2023-02-15T11:10:08.986506-08:00"
 			}
 		}
 	}`
@@ -2130,22 +2100,18 @@ var (
 		],
 		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
 				"version": "0.0.14",
-				"db": {},
 				"result": [
 					{
-						"vulnerability_id": "GHSA-53jx-vvf9-4x38"
+						"id": "GHSA-53jx-vvf9-4x38"
 					}
 				]
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986592-08:00"
+				"scanStartedOn":"2023-02-15T11:10:08.986506-08:00",
+				"scanFinishedOn":"2023-02-15T11:10:08.986506-08:00"
 			}
 		}
 	}`
