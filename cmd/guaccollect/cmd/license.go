@@ -35,7 +35,7 @@ import (
 )
 
 const (
-	cdQuerySize = 248
+	cdQuerySize = 499
 )
 
 type cdOptions struct {

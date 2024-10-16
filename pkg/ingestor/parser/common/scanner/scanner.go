@@ -64,12 +64,12 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 	var certLegalIngest []assembler.CertifyLegalIngest
 	var hasSourceAtIngest []assembler.HasSourceAtIngest
 
-	// the limit for the batch size that is allowed for clearly defined
-	if len(purls) > 250 {
+	// the limit for the batch size that is allowed for clearly defined otherwise you receive a 400 or 414
+	if len(purls) > 500 {
 		i := 0
 		var batchPurls []string
 		for _, purl := range purls {
-			if i < 249 {
+			if i < 499 {
 				batchPurls = append(batchPurls, purl)
 				i++
 			} else {
@@ -81,6 +81,7 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 				certLegalIngest = append(certLegalIngest, batchedCL...)
 				hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
 				batchPurls = make([]string, 0)
+				i = 0
 			}
 		}
 		if len(batchPurls) > 0 {
