@@ -56,6 +56,18 @@ func (s *store) Set(_ context.Context, c, k string, v any) error {
 	return nil
 }
 
+func (s *store) Remove(_ context.Context, c, k string) error {
+	col, ok := s.m[c]
+	if !ok {
+		return fmt.Errorf("%w : Collection %q", kv.NotFoundError, c)
+	}
+	if _, ok := col[k]; !ok {
+		return fmt.Errorf("%w : Key %q", kv.NotFoundError, k)
+	}
+	delete(col, k)
+	return nil
+}
+
 func (s *store) Keys(c string) kv.Scanner {
 	return &scanner{
 		collection: c,
