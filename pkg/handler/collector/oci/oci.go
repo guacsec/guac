@@ -34,6 +34,7 @@ import (
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/platform"
 	"github.com/regclient/regclient/types/ref"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -70,6 +71,8 @@ type ociCollector struct {
 	checkedDigest     sync.Map
 	poll              bool
 	interval          time.Duration
+	// rcOpts are the regclient options
+	rcOpts []regclient.Opt
 }
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
@@ -77,12 +80,16 @@ type ociCollector struct {
 // repos in a given registry. For further details see issue #298
 //
 // Interval should be set to about 5 mins or more for production so that it doesn't clobber registries.
-func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) *ociCollector {
+func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration, rcOpts ...regclient.Opt) *ociCollector {
+	if rcOpts == nil {
+		rcOpts = getRegClientOptions()
+	}
 	return &ociCollector{
 		collectDataSource: collectDataSource,
 		checkedDigest:     sync.Map{},
 		poll:              poll,
 		interval:          interval,
+		rcOpts:            rcOpts,
 	}
 }
 
@@ -157,18 +164,13 @@ func (o *ociCollector) populateRepoRefs(ctx context.Context, repoRefs map[string
 }
 
 func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRefs []ref.Ref, docChannel chan<- *processor.Document) error {
-	rcOpts := []regclient.Opt{}
-	rcOpts = append(rcOpts, regclient.WithDockerCreds())
-	rcOpts = append(rcOpts, regclient.WithDockerCerts())
-	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
-
 	if len(imageRefs) > 0 {
 		for _, r := range imageRefs {
 			if hasNoIdentifier(r) {
 				return errors.New("image identifier not specified to fetch")
 			}
 
-			rc := regclient.New(rcOpts...)
+			rc := regclient.New(o.rcOpts...)
 			defer rc.Close(ctx, r)
 
 			if err := o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel); err != nil {
@@ -181,7 +183,7 @@ func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRe
 			return err
 		}
 
-		rc := regclient.New(rcOpts...)
+		rc := regclient.New(o.rcOpts...)
 		defer rc.Close(ctx, r)
 
 		tags, err := rc.TagList(ctx, r)
@@ -189,17 +191,35 @@ func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRe
 			return fmt.Errorf("reading tags for %s: %w", repo, err)
 		}
 
+		var wg sync.WaitGroup
+		sem := make(chan struct{}, 200)
+		g, ctx := errgroup.WithContext(ctx)
+
 		for _, tag := range tags.Tags {
 			if !strings.HasSuffix(tag, "sbom") && !strings.HasSuffix(tag, "att") && !strings.HasSuffix(tag, "sig") {
-				imageTag := fmt.Sprintf("%v:%v", repo, tag)
-				r, err := ref.New(imageTag)
-				if err != nil {
-					return err
-				}
-				if err := o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel); err != nil {
-					return err
-				}
+				wg.Add(1)
+				sem <- struct{}{}
+
+				g.Go(func() error {
+					defer wg.Done()
+					defer func() { <-sem }()
+
+					imageTag := fmt.Sprintf("%v:%v", repo, tag)
+					r, err := ref.New(imageTag)
+					if err != nil {
+						return err
+					}
+					if err := o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel); err != nil {
+						return err
+					}
+					return nil
+				})
 			}
+		}
+
+		wg.Wait()
+		if err := g.Wait(); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -525,4 +545,12 @@ func hasNoDigest(r ref.Ref) bool {
 // or digest)
 func hasNoIdentifier(r ref.Ref) bool {
 	return hasNoTag(r) && hasNoDigest(r)
+}
+
+func getRegClientOptions() []regclient.Opt {
+	rcOpts := []regclient.Opt{}
+	rcOpts = append(rcOpts, regclient.WithDockerCreds())
+	rcOpts = append(rcOpts, regclient.WithDockerCerts())
+	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
+	return rcOpts
 }
