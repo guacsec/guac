@@ -21,11 +21,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type testDependency struct {
@@ -287,8 +289,81 @@ var includedTestExpectedSBOM = &model.HasSbom{
 
 // End of Test resources
 
+func getGraphQLPreloadCtx() context.Context {
+	ctx := graphql.WithOperationContext(context.Background(), &graphql.OperationContext{})
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Field: graphql.CollectedField{
+			Selections: ast.SelectionSet{
+				&ast.Field{
+					Alias: "totalCount",
+					Name:  "totalCount",
+				},
+				&ast.Field{
+					Alias: "edges",
+					Name:  "edges",
+					SelectionSet: ast.SelectionSet{
+						&ast.Field{
+							Alias: "cursor",
+							Name:  "cursor",
+						},
+						&ast.Field{
+							Alias: "node",
+							Name:  "node",
+							SelectionSet: ast.SelectionSet{
+								&ast.Field{
+									Alias: "includedSoftware",
+									Name:  "includedSoftware",
+								},
+							},
+						},
+						&ast.Field{
+							Alias: "node",
+							Name:  "node",
+							SelectionSet: ast.SelectionSet{
+								&ast.Field{
+									Alias: "includedDependencies",
+									Name:  "includedDependencies",
+								},
+							},
+						},
+						&ast.Field{
+							Alias: "node",
+							Name:  "node",
+							SelectionSet: ast.SelectionSet{
+								&ast.Field{
+									Alias: "includedOccurrences",
+									Name:  "includedOccurrences",
+								},
+							},
+						},
+					},
+				},
+				&ast.Field{
+					Alias: "pageInfo",
+					Name:  "pageInfo",
+					SelectionSet: ast.SelectionSet{
+						&ast.Field{
+							Alias: "startCursor",
+							Name:  "startCursor",
+						},
+						&ast.Field{
+							Alias: "endCursor",
+							Name:  "endCursor",
+						},
+						&ast.Field{
+							Alias: "hasNextPage",
+							Name:  "hasNextPage",
+						},
+					},
+				},
+			},
+		},
+	})
+	return ctx
+}
+
 func TestHasSBOM(t *testing.T) {
-	ctx := context.Background()
+	ctx := getGraphQLPreloadCtx()
 	b := setupTest(t)
 	type call struct {
 		Sub model.PackageOrArtifactInput
@@ -2780,7 +2855,7 @@ func TestHasSBOM(t *testing.T) {
 }
 
 func TestIngestHasSBOMs(t *testing.T) {
-	ctx := context.Background()
+	ctx := getGraphQLPreloadCtx()
 	b := setupTest(t)
 	type call struct {
 		Sub model.PackageOrArtifactInputs
@@ -3127,7 +3202,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 }
 
 func TestDeleteHasSBOM(t *testing.T) {
-	ctx := context.Background()
+	ctx := getGraphQLPreloadCtx()
 	b := setupTest(t)
 	type call struct {
 		Sub model.PackageOrArtifactInputs
