@@ -548,7 +548,7 @@ type ComplexityRoot struct {
 		FindSoftwareList             func(childComplexity int, searchText string, after *string, first *int) int
 		HasMetadata                  func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
 		HasMetadataList              func(childComplexity int, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) int
-		HasSBOMList                  func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) int
+		HasSBOMList                  func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware *bool, getIncludedDependencies *bool, getIncludedOccurrences *bool) int
 		HasSLSAList                  func(childComplexity int, hasSLSASpec model.HasSLSASpec, after *string, first *int) int
 		HasSbom                      func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
 		HasSlsa                      func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
@@ -3275,7 +3275,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSBOMList(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec), args["after"].(*string), args["first"].(*int), args["getIncludedSoftware"].(bool), args["getIncludedDependencies"].(bool), args["getIncludedOccurrences"].(bool)), true
+		return e.complexity.Query.HasSBOMList(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec), args["after"].(*string), args["first"].(*int), args["getIncludedSoftware"].(*bool), args["getIncludedDependencies"].(*bool), args["getIncludedOccurrences"].(*bool)), true
 
 	case "Query.HasSLSAList":
 		if e.complexity.Query.HasSLSAList == nil {
@@ -5987,9 +5987,10 @@ extend type Query {
   """
   Returns a paginated results via HasSBOMConnection
   will by default filter out all deps.dev hasSBOM.
-  It will also allow for output to be modified based on desired output
+  It will also allow for output to be modified based on desired output.
+  If not specified, it will return all values
   """
-  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int, getIncludedSoftware: Boolean!, getIncludedDependencies: Boolean!, getIncludedOccurrences: Boolean!): HasSBOMConnection
+  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int, getIncludedSoftware: Boolean, getIncludedDependencies: Boolean, getIncludedOccurrences: Boolean): HasSBOMConnection
 }
 
 extend type Mutation {

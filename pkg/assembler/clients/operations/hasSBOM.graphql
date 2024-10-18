@@ -50,7 +50,7 @@ query HasSBOMs($filter: HasSBOMSpec!) {
     ...AllHasSBOMTree
   }
 }
-query HasSBOMList($filter: HasSBOMSpec!, $after: ID, $first: Int, $getIncludedSoftware: Boolean!, $getIncludedDependencies: Boolean!, $getIncludedOccurrences: Boolean!) {
+query HasSBOMList($filter: HasSBOMSpec!, $after: ID, $first: Int, $getIncludedSoftware: Boolean, $getIncludedDependencies: Boolean, $getIncludedOccurrences: Boolean) {
   HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first, getIncludedSoftware: $getIncludedSoftware, getIncludedDependencies: $getIncludedDependencies, getIncludedOccurrences: $getIncludedOccurrences) {
     totalCount
     edges {

@@ -356,7 +356,7 @@ func (mr *MockBackendMockRecorder) HasSBOM(ctx, hasSBOMSpec any) *gomock.Call {
 }
 
 // HasSBOMList mocks base method.
-func (m *MockBackend) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences bool) (*model.HasSBOMConnection, error) {
+func (m *MockBackend) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences *bool) (*model.HasSBOMConnection, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HasSBOMList", ctx, hasSBOMSpec, after, first, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
 	ret0, _ := ret[0].(*model.HasSBOMConnection)

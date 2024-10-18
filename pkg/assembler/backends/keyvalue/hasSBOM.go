@@ -325,10 +325,20 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct, getIncl
 
 // Query HasSBOM
 
-func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (*model.HasSBOMConnection, error) {
+func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware *bool, getIncludedDependencies *bool, getIncludedOccurrences *bool) (*model.HasSBOMConnection, error) {
 	funcName := "HasSBOM"
 	c.m.RLock()
 	defer c.m.RUnlock()
+
+	if getIncludedSoftware == nil {
+		getIncludedSoftware = ptrfrom.Bool(true)
+	}
+	if getIncludedDependencies == nil {
+		getIncludedDependencies = ptrfrom.Bool(true)
+	}
+	if getIncludedOccurrences == nil {
+		getIncludedOccurrences = ptrfrom.Bool(true)
+	}
 
 	if hasSBOMSpec.ID != nil {
 		link, err := byIDkv[*hasSBOMStruct](ctx, *hasSBOMSpec.ID, c)
@@ -337,7 +347,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		hs, err := c.convHasSBOM(ctx, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
+		hs, err := c.convHasSBOM(ctx, link, *getIncludedSoftware, *getIncludedDependencies, *getIncludedOccurrences)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -392,7 +402,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
+			hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link, *getIncludedSoftware, *getIncludedDependencies, *getIncludedOccurrences)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -447,7 +457,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 				if err != nil {
 					return nil, err
 				}
-				hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
+				hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link, *getIncludedSoftware, *getIncludedDependencies, *getIncludedOccurrences)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}

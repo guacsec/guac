@@ -47,8 +47,18 @@ func bulkHasSBOMGlobalID(ids []string) []string {
 	return toGlobalIDs(billofmaterials.Table, ids)
 }
 
-func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (*model.HasSBOMConnection, error) {
+func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware *bool, getIncludedDependencies *bool, getIncludedOccurrences *bool) (*model.HasSBOMConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if getIncludedSoftware == nil {
+		getIncludedSoftware = ptrfrom.Bool(true)
+	}
+	if getIncludedDependencies == nil {
+		getIncludedDependencies = ptrfrom.Bool(true)
+	}
+	if getIncludedOccurrences == nil {
+		getIncludedOccurrences = ptrfrom.Bool(true)
+	}
 
 	if after != nil {
 		globalID := fromGlobalID(*after)
@@ -115,7 +125,7 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		sbomID := foundSBOM.Cursor.ID.String()
 
 		// query included packages
-		if getIncludedSoftware {
+		if *getIncludedSoftware {
 			pkgVerChan = make(chan pkgVersionResult, 1)
 			artChan = make(chan artResult, 1)
 			go func(ctx context.Context, b *EntBackend, sbomID string, first int, pkgChan chan<- pkgVersionResult) {
@@ -187,7 +197,7 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		}
 
 		// query included dependencies
-		if getIncludedDependencies {
+		if *getIncludedDependencies {
 			depsChan = make(chan depResult, 1)
 			go func(ctx context.Context, b *EntBackend, sbomID string, first int, artChan chan<- depResult) {
 				var afterCursor *entgql.Cursor[uuid.UUID]
@@ -226,7 +236,7 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		}
 
 		// query included occurrences
-		if getIncludedOccurrences {
+		if *getIncludedOccurrences {
 			occursChan = make(chan occurResult, 1)
 			go func(ctx context.Context, b *EntBackend, sbomID string, first int, occursChan chan<- occurResult) {
 				var afterCursor *entgql.Cursor[uuid.UUID]

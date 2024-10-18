@@ -121,9 +121,10 @@ extend type Query {
   """
   Returns a paginated results via HasSBOMConnection
   will by default filter out all deps.dev hasSBOM.
-  It will also allow for output to be modified based on desired output
+  It will also allow for output to be modified based on desired output.
+  If not specified, it will return all values
   """
-  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int, getIncludedSoftware: Boolean!, getIncludedDependencies: Boolean!, getIncludedOccurrences: Boolean!): HasSBOMConnection
+  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int, getIncludedSoftware: Boolean, getIncludedDependencies: Boolean, getIncludedOccurrences: Boolean): HasSBOMConnection
 }
 
 extend type Mutation {
