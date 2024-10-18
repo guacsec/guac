@@ -99,7 +99,127 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
-
+  "/v0/package/{purl}":
+    get:
+      summary: Get purls related to the specific Package URL (PURL)
+      operationId: getPackagePurlsByPurl
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (PURL)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of PURLs associated with the specified PURL
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Package URL (PURL)
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  "/v0/package/{purl}/vulns":
+    get:
+      summary: Get vulnerabilities for a specific Package URL (PURL)
+      operationId: getPackageVulnerabilitiesByPurl
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (PURL)
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  "/v0/package/{purl}/dependencies":
+    get:
+      summary: Get dependencies for a specific Package URL (PURL)
+      operationId: getPackageDependenciesByPurl
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (PURL)
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  "/v0/artifact/{artifact}/vulns":
+    get:
+      summary: Get vulnerabilities for a specific Artifact (<algorithm>:<digest>)
+      operationId: getArtifactVulnerabilities
+      parameters:
+        - name: artifact
+          in: path
+          required: true
+          description: Artifact identifier in the format <algorithm:digest>
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  "/v0/artifact/{artifact}/dependencies":
+    get:
+      summary: Get dependencies for a specific Artifact (<algorithm>:<digest>)
+      operationId: getArtifactDependencies
+      parameters:
+        - name: artifact
+          in: path
+          required: true
+          description: Artifact identifier in the format <algorithm:digest>
+          schema:
+            type: string
+        - name: latestSBOM
+          in: query
+          required: false
+          description: Whether the query should search in the latest sbom
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   parameters:
@@ -148,6 +268,54 @@ components:
           $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
+    Vulnerability:
+      type: object
+      required:
+        - packages
+        - vulnerability
+        - metadata
+      properties:
+        packages:
+          type: array
+          items:
+            type: string
+        vulnerability:
+          $ref: '#/components/schemas/VulnerabilityDetails'
+        metadata:
+          $ref: '#/components/schemas/ScanMetadata'
+    VulnerabilityDetails:
+      type: object
+      required:
+        - vulnerabilityIDs
+      properties:
+        type:
+          type: string
+        vulnerabilityIDs:
+          type: array
+          items:
+            type: string
+    ScanMetadata:
+      type: object
+      properties:
+        dbUri:
+          type: string
+        dbVersion:
+          type: string
+        scannerUri:
+          type: string
+        scannerVersion:
+          type: string
+        timeScanned:
+          type: string
+          format: date-time
+        origin:
+          type: string
+        collector:
+          type: string
+    QueryType:
+      type: string
+      enum: [ vulns, dependencies, latestSbom ]
+      x-enum-varnames: [ Vulns, Dependencies, LatestSbom ]
   responses:
     # for code 200
     PurlList:
@@ -174,6 +342,22 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/PackageName"
+    VulnerabilityList:
+      description: A list of vulnerabilities associated with the package or artifact
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Vulnerability"
+    DependencyList:
+      description: A list of dependencies associated with the package or artifact
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
     # intended for code 400, client side error
     BadRequest:
       description: Bad request, such as from invalid or missing parameters
