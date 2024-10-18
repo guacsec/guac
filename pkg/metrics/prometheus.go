@@ -293,7 +293,7 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 			OperationName string `json:"operationName"`
 		}
 		if !json.Valid(bodyCopy) { // Check if the body is valid JSON
-			err_msg := fmt.Sprintf("Provided input json couldn't be parsed. likely it was empty or was wrongly structured; error message: %v", err.Error())
+			err_msg := fmt.Sprintf("The JSON parsing failed due to the following error: '%v'. Please review your input for syntax errors or missing elements.", err.Error())
 			http.Error(w, err_msg, http.StatusBadRequest)
 			return
 		}
