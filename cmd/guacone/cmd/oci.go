@@ -48,9 +48,12 @@ type ociOptions struct {
 }
 
 type ociRegistryOptions struct {
-	graphqlEndpoint   string
-	registry          string
-	csubClientOptions client.CsubClientOptions
+	registry                string
+	graphqlEndpoint         string
+	headerFile              string
+	csubClientOptions       csub_client.CsubClientOptions
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 var ociCmd = &cobra.Command{
@@ -133,20 +136,24 @@ var ociRegistryCmd = &cobra.Command{
 	Short: "takes an OCI registry with catalog capability and downloads sbom and attestation stored in OCI to add to GUAC graph",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateOCIRegistryFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
 		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, false, 30*time.Second)
@@ -169,7 +176,7 @@ var ociRegistryCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				gotErr = true
@@ -236,10 +243,15 @@ func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTls
 	return opts, nil
 }
 
-// TODO(ridwanhoq): refactor common logic with validateOCIFlags
-func validateOCIRegistryFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, args []string) (ociRegistryOptions, error) {
+func validateOCIRegistryFlags(gqlEndpoint, headerFile, csubAddr string,
+	csubTls, csubTlsSkipVerify, queryVulnIngestion, queryLicenseIngestion bool,
+	args []string) (ociRegistryOptions, error) {
 	var opts ociRegistryOptions
 	opts.graphqlEndpoint = gqlEndpoint
+	opts.headerFile = headerFile
+	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
+
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)

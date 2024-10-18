@@ -56,6 +56,8 @@ type ociRegistryOptions struct {
 	blobAddr string
 	// run as poll collector
 	poll bool
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var ociCmd = &cobra.Command{
@@ -144,7 +146,7 @@ var ociRegistryCmd = &cobra.Command{
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
