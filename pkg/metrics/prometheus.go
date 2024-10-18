@@ -278,6 +278,7 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 
 		// Create a copy of the request body
 		body, err := io.ReadAll(r.Body)
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -291,6 +292,11 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 		// Parse the operation name from the request body copy
 		var graphqlRequest struct {
 			OperationName string `json:"operationName"`
+		}
+		if !json.Valid(bodyCopy) { // Check if the body is valid JSON
+			err_msg := fmt.Sprintf("Provided input json couldn't be parsed. likely it was empty or was wrongly structured; error message: %v", err.Error())
+			http.Error(w, err_msg, http.StatusBadRequest)
+			return
 		}
 		if err := json.Unmarshal(bodyCopy, &graphqlRequest); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
