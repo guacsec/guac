@@ -398,6 +398,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{CertifyVulnsColumns[10]},
 			},
+			{
+				Name:    "certifyvuln_vulnerability_id",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyVulnsColumns[9]},
+			},
 		},
 	}
 	// DependenciesColumns holds the columns for the "dependencies" table.
