@@ -10814,7 +10814,7 @@ func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetHasNextPage() bool 
 
 // HasSBOMListResponse is returned by HasSBOMList on success.
 type HasSBOMListResponse struct {
-	// Returns a paginated results via HasSBOMConnection
+	// Returns a paginated results via HasSBOMConnection (by default it filters out all deps.dev hasSBOMs)
 	HasSBOMList *HasSBOMListHasSBOMListHasSBOMConnection `json:"HasSBOMList"`
 }
 
@@ -11046,7 +11046,7 @@ func (v *HasSBOMsHasSBOM) __premarshalJSON() (*__premarshalHasSBOMsHasSBOM, erro
 
 // HasSBOMsResponse is returned by HasSBOMs on success.
 type HasSBOMsResponse struct {
-	// Returns all SBOM certifications.
+	// Returns all SBOM certifications (by default it filters out all deps.dev hasSBOMs).
 	HasSBOM []HasSBOMsHasSBOM `json:"HasSBOM"`
 }
 

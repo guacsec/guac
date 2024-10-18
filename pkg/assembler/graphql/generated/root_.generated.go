@@ -5982,9 +5982,9 @@ type HasSBOMEdge {
 }
 
 extend type Query {
-  "Returns all SBOM certifications."
+  "Returns all SBOM certifications (by default it filters out all deps.dev hasSBOMs)."
   HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
-  "Returns a paginated results via HasSBOMConnection"
+  "Returns a paginated results via HasSBOMConnection (by default it filters out all deps.dev hasSBOMs)"
   HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int): HasSBOMConnection
 }
 

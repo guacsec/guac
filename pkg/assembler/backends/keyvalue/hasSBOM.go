@@ -19,16 +19,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
+	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 )
 
 type hasSBOMStruct struct {
@@ -592,6 +594,17 @@ func (c *demoClient) hasSBOMIfMatch(ctx context.Context, filter *model.HasSBOMSp
 	*model.HasSbom, error) {
 
 	if filter != nil {
+		// filter out deps.dev unless the user specifies a specific collector
+		if filter.Collector != nil {
+			if noMatch(filter.Collector, link.Collector) {
+				return nil, nil
+			}
+		} else {
+			if link.Collector == deps_dev.DepsCollector {
+				return nil, nil
+			}
+		}
+
 		if noMatch(filter.URI, link.URI) ||
 			noMatch(toLower(filter.Algorithm), link.Algorithm) ||
 			noMatch(toLower(filter.Digest), link.Digest) ||
