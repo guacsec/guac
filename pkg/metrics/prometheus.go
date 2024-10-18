@@ -292,7 +292,8 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 		var graphqlRequest struct {
 			OperationName string `json:"operationName"`
 		}
-		if !json.Valid(bodyCopy) { // Check if the body is valid JSON
+		// Check if the body is valid JSON
+		if !json.Valid(bodyCopy) {
 			err_msg := fmt.Sprintf("Provided input json couldn't be parsed. likely it was empty or was wrongly structured; error message: %v", err.Error())
 			http.Error(w, err_msg, http.StatusBadRequest)
 			return
