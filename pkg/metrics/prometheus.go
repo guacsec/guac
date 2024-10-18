@@ -278,7 +278,6 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 
 		// Create a copy of the request body
 		body, err := io.ReadAll(r.Body)
-
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
