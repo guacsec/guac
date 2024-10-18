@@ -19,16 +19,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
+	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 )
 
 type hasSBOMStruct struct {
@@ -88,7 +90,7 @@ func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
 }
 
 func (n *hasSBOMStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.convHasSBOM(ctx, n)
+	return c.convHasSBOM(ctx, n, true, true, true)
 }
 
 // Ingest HasSBOM
@@ -250,7 +252,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 	return in.ThisID, nil
 }
 
-func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model.HasSbom, error) {
+func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (*model.HasSbom, error) {
 	out := &model.HasSbom{
 		ID:               in.ThisID,
 		URI:              in.URI,
@@ -275,7 +277,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		}
 		out.Subject = art
 	}
-	if len(in.IncludedSoftware) > 0 {
+	if getIncludedSoftware && len(in.IncludedSoftware) > 0 {
 		out.IncludedSoftware = make([]model.PackageOrArtifact, 0, len(in.IncludedSoftware))
 		for _, id := range in.IncludedSoftware {
 			p, err := c.buildPackageResponse(ctx, id, nil)
@@ -290,7 +292,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 			}
 		}
 	}
-	if len(in.IncludedDependencies) > 0 {
+	if getIncludedDependencies && len(in.IncludedDependencies) > 0 {
 		out.IncludedDependencies = make([]*model.IsDependency, 0, len(in.IncludedDependencies))
 		for _, id := range in.IncludedDependencies {
 			link, err := byIDkv[*isDependencyLink](ctx, id, c)
@@ -304,7 +306,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 			out.IncludedDependencies = append(out.IncludedDependencies, isDep)
 		}
 	}
-	if len(in.IncludedOccurrences) > 0 {
+	if getIncludedOccurrences && len(in.IncludedOccurrences) > 0 {
 		out.IncludedOccurrences = make([]*model.IsOccurrence, 0, len(in.IncludedOccurrences))
 		for _, id := range in.IncludedOccurrences {
 			link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
@@ -323,7 +325,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 
 // Query HasSBOM
 
-func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (*model.HasSBOMConnection, error) {
 	funcName := "HasSBOM"
 	c.m.RLock()
 	defer c.m.RUnlock()
@@ -335,7 +337,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		hs, err := c.convHasSBOM(ctx, link)
+		hs, err := c.convHasSBOM(ctx, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -390,7 +392,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link)
+			hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -445,7 +447,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 				if err != nil {
 					return nil, err
 				}
-				hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link)
+				hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
@@ -508,7 +510,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		sb, err := c.convHasSBOM(ctx, link)
+		sb, err := c.convHasSBOM(ctx, link, true, true, true)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -545,7 +547,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			hs, err := c.hasSBOMIfMatch(ctx, filter, link)
+			hs, err := c.hasSBOMIfMatch(ctx, filter, link, true, true, true)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -571,7 +573,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 				if err != nil {
 					return nil, err
 				}
-				hs, err := c.hasSBOMIfMatch(ctx, filter, link)
+				hs, err := c.hasSBOMIfMatch(ctx, filter, link, true, true, true)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
@@ -588,10 +590,27 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	return out, nil
 }
 
-func (c *demoClient) hasSBOMIfMatch(ctx context.Context, filter *model.HasSBOMSpec, link *hasSBOMStruct) (
+func (c *demoClient) hasSBOMIfMatch(ctx context.Context, filter *model.HasSBOMSpec, link *hasSBOMStruct,
+	getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (
 	*model.HasSbom, error) {
 
 	if filter != nil {
+		// filter out deps.dev unless the user specifies a specific collector
+		if filter.Collector != nil {
+			if noMatch(filter.Collector, link.Collector) {
+				return nil, nil
+			}
+		} else {
+			if link.Collector == deps_dev.DepsCollector {
+				return nil, nil
+			}
+		}
+
+		if !noMatch(filter.Collector, deps_dev.DepsCollector) {
+			if link.Collector == deps_dev.DepsCollector {
+				return nil, nil
+			}
+		}
 		if noMatch(filter.URI, link.URI) ||
 			noMatch(toLower(filter.Algorithm), link.Algorithm) ||
 			noMatch(toLower(filter.Digest), link.Digest) ||
@@ -637,7 +656,7 @@ func (c *demoClient) hasSBOMIfMatch(ctx context.Context, filter *model.HasSBOMSp
 			}
 		}
 	}
-	sb, err := c.convHasSBOM(ctx, link)
+	sb, err := c.convHasSBOM(ctx, link, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
 	if err != nil {
 		return nil, err
 	}

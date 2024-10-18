@@ -10815,6 +10815,8 @@ func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetHasNextPage() bool 
 // HasSBOMListResponse is returned by HasSBOMList on success.
 type HasSBOMListResponse struct {
 	// Returns a paginated results via HasSBOMConnection
+	// will by default filter out all deps.dev hasSBOM.
+	// It will also allow for output to be modified based on desired output
 	HasSBOMList *HasSBOMListHasSBOMListHasSBOMConnection `json:"HasSBOMList"`
 }
 
@@ -11046,7 +11048,7 @@ func (v *HasSBOMsHasSBOM) __premarshalJSON() (*__premarshalHasSBOMsHasSBOM, erro
 
 // HasSBOMsResponse is returned by HasSBOMs on success.
 type HasSBOMsResponse struct {
-	// Returns all SBOM certifications.
+	// Returns all SBOM certifications (by default it filters out all deps.dev hasSBOMs).
 	HasSBOM []HasSBOMsHasSBOM `json:"HasSBOM"`
 }
 
@@ -30000,9 +30002,12 @@ func (v *__HasMetadataListInput) GetFirst() *int { return v.First }
 
 // __HasSBOMListInput is used internally by genqlient
 type __HasSBOMListInput struct {
-	Filter HasSBOMSpec `json:"filter"`
-	After  *string     `json:"after"`
-	First  *int        `json:"first"`
+	Filter                  HasSBOMSpec `json:"filter"`
+	After                   *string     `json:"after"`
+	First                   *int        `json:"first"`
+	GetIncludedSoftware     bool        `json:"getIncludedSoftware"`
+	GetIncludedDependencies bool        `json:"getIncludedDependencies"`
+	GetIncludedOccurrences  bool        `json:"getIncludedOccurrences"`
 }
 
 // GetFilter returns __HasSBOMListInput.Filter, and is useful for accessing the field via an interface.
@@ -30013,6 +30018,15 @@ func (v *__HasSBOMListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __HasSBOMListInput.First, and is useful for accessing the field via an interface.
 func (v *__HasSBOMListInput) GetFirst() *int { return v.First }
+
+// GetGetIncludedSoftware returns __HasSBOMListInput.GetIncludedSoftware, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetGetIncludedSoftware() bool { return v.GetIncludedSoftware }
+
+// GetGetIncludedDependencies returns __HasSBOMListInput.GetIncludedDependencies, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetGetIncludedDependencies() bool { return v.GetIncludedDependencies }
+
+// GetGetIncludedOccurrences returns __HasSBOMListInput.GetIncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetGetIncludedOccurrences() bool { return v.GetIncludedOccurrences }
 
 // __HasSBOMsInput is used internally by genqlient
 type __HasSBOMsInput struct {
@@ -33033,8 +33047,8 @@ func HasMetadataList(
 
 // The query or mutation executed by HasSBOMList.
 const HasSBOMList_Operation = `
-query HasSBOMList ($filter: HasSBOMSpec!, $after: ID, $first: Int) {
-	HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first) {
+query HasSBOMList ($filter: HasSBOMSpec!, $after: ID, $first: Int, $getIncludedSoftware: Boolean!, $getIncludedDependencies: Boolean!, $getIncludedOccurrences: Boolean!) {
+	HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first, getIncludedSoftware: $getIncludedSoftware, getIncludedDependencies: $getIncludedDependencies, getIncludedOccurrences: $getIncludedOccurrences) {
 		totalCount
 		edges {
 			cursor
@@ -33164,14 +33178,20 @@ func HasSBOMList(
 	filter HasSBOMSpec,
 	after *string,
 	first *int,
+	getIncludedSoftware bool,
+	getIncludedDependencies bool,
+	getIncludedOccurrences bool,
 ) (*HasSBOMListResponse, error) {
 	req_ := &graphql.Request{
 		OpName: "HasSBOMList",
 		Query:  HasSBOMList_Operation,
 		Variables: &__HasSBOMListInput{
-			Filter: filter,
-			After:  after,
-			First:  first,
+			Filter:                  filter,
+			After:                   after,
+			First:                   first,
+			GetIncludedSoftware:     getIncludedSoftware,
+			GetIncludedDependencies: getIncludedDependencies,
+			GetIncludedOccurrences:  getIncludedOccurrences,
 		},
 	}
 	var err_ error

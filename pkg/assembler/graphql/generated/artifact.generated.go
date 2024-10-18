@@ -87,7 +87,7 @@ type QueryResolver interface {
 	PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error)
 	PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error)
 	HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error)
-	HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error)
+	HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (*model.HasSBOMConnection, error)
 	HasSlsa(ctx context.Context, hasSLSASpec model.HasSLSASpec) ([]*model.HasSlsa, error)
 	HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error)
 	HasSourceAt(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
@@ -4249,6 +4249,21 @@ func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg2
+	arg3, err := ec.field_Query_HasSBOMList_argsGetIncludedSoftware(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["getIncludedSoftware"] = arg3
+	arg4, err := ec.field_Query_HasSBOMList_argsGetIncludedDependencies(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["getIncludedDependencies"] = arg4
+	arg5, err := ec.field_Query_HasSBOMList_argsGetIncludedOccurrences(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["getIncludedOccurrences"] = arg5
 	return args, nil
 }
 func (ec *executionContext) field_Query_HasSBOMList_argsHasSBOMSpec(
@@ -4314,6 +4329,72 @@ func (ec *executionContext) field_Query_HasSBOMList_argsFirst(
 	}
 
 	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSBOMList_argsGetIncludedSoftware(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (bool, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["getIncludedSoftware"]
+	if !ok {
+		var zeroVal bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("getIncludedSoftware"))
+	if tmp, ok := rawArgs["getIncludedSoftware"]; ok {
+		return ec.unmarshalNBoolean2bool(ctx, tmp)
+	}
+
+	var zeroVal bool
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSBOMList_argsGetIncludedDependencies(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (bool, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["getIncludedDependencies"]
+	if !ok {
+		var zeroVal bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("getIncludedDependencies"))
+	if tmp, ok := rawArgs["getIncludedDependencies"]; ok {
+		return ec.unmarshalNBoolean2bool(ctx, tmp)
+	}
+
+	var zeroVal bool
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSBOMList_argsGetIncludedOccurrences(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (bool, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["getIncludedOccurrences"]
+	if !ok {
+		var zeroVal bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("getIncludedOccurrences"))
+	if tmp, ok := rawArgs["getIncludedOccurrences"]; ok {
+		return ec.unmarshalNBoolean2bool(ctx, tmp)
+	}
+
+	var zeroVal bool
 	return zeroVal, nil
 }
 
@@ -10940,7 +11021,7 @@ func (ec *executionContext) _Query_HasSBOMList(ctx context.Context, field graphq
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HasSBOMList(rctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+		return ec.resolvers.Query().HasSBOMList(rctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec), fc.Args["after"].(*string), fc.Args["first"].(*int), fc.Args["getIncludedSoftware"].(bool), fc.Args["getIncludedDependencies"].(bool), fc.Args["getIncludedOccurrences"].(bool))
 	})
 
 	if resTmp == nil {

@@ -66,9 +66,9 @@ func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSp
 }
 
 // HasSBOMList is the resolver for the HasSBOMList field.
-func (r *queryResolver) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+func (r *queryResolver) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int, getIncludedSoftware bool, getIncludedDependencies bool, getIncludedOccurrences bool) (*model.HasSBOMConnection, error) {
 	if err := validatePackageOrArtifactQueryFilter(hasSBOMSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", "HasSBOM", err)
 	}
-	return r.Backend.HasSBOMList(ctx, hasSBOMSpec, after, first)
+	return r.Backend.HasSBOMList(ctx, hasSBOMSpec, after, first, getIncludedSoftware, getIncludedDependencies, getIncludedOccurrences)
 }

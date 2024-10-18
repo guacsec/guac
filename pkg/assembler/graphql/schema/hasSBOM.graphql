@@ -116,10 +116,14 @@ type HasSBOMEdge {
 }
 
 extend type Query {
-  "Returns all SBOM certifications."
+  "Returns all SBOM certifications (by default it filters out all deps.dev hasSBOMs)."
   HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
-  "Returns a paginated results via HasSBOMConnection"
-  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int): HasSBOMConnection
+  """
+  Returns a paginated results via HasSBOMConnection
+  will by default filter out all deps.dev hasSBOM.
+  It will also allow for output to be modified based on desired output
+  """
+  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int, getIncludedSoftware: Boolean!, getIncludedDependencies: Boolean!, getIncludedOccurrences: Boolean!): HasSBOMConnection
 }
 
 extend type Mutation {
