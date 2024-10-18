@@ -42,6 +42,10 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	return s.mm.Set(ctx, c, k, v)
 }
 
+func (s *store) Remove(ctx context.Context, c, k string) error {
+	return s.mm.Remove(ctx, c, k)
+}
+
 func (s *store) Keys(c string) kv.Scanner {
 	return &scanner{mms: s.mm.Keys(c)}
 }
