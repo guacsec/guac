@@ -560,3 +560,51 @@ var P7 = &model.PkgInputSpec{
 		Value: "https://alternative.report.url/",
 	}},
 }
+
+// ITE6EOLNodejs is a test document for the EOL ingestor
+var ITE6EOLNodejs = []byte(`{
+    "type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "uri": "pkg:npm/nodejs@14.17.0"
+        }
+    ],
+    "predicateType": "https://in-toto.io/attestation/eol/v0.1",
+    "predicate": {
+        "product": "nodejs",
+        "cycle": "14",
+        "version": "14.17.0",
+        "isEOL": true,
+        "eolDate": "2023-04-30",
+        "lts": true,
+        "latest": "14.21.3",
+        "releaseDate": "2021-05-11",
+        "metadata": {
+            "scannedOn": "2024-03-15T12:00:00Z"
+        }
+    }
+}`)
+
+// ITE6EOLPython is a test document for the EOL ingestor
+var ITE6EOLPython = []byte(`{
+    "type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "uri": "pkg:pypi/python@3.9.5"
+        }
+    ],
+    "predicateType": "https://in-toto.io/attestation/eol/v0.1",
+    "predicate": {
+        "product": "python",
+        "cycle": "3.9",
+        "version": "3.9.5",
+        "isEOL": false,
+        "eolDate": "2025-10-05",
+        "lts": false,
+        "latest": "3.9.16",
+        "releaseDate": "2021-05-03",
+        "metadata": {
+            "scannedOn": "2024-03-15T12:00:00Z"
+        }
+    }
+}`)
