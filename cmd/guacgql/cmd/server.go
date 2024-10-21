@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/pkg/version"
 	"net/http"
 	"os"
 	"os/signal"
@@ -101,6 +102,7 @@ func startServer(cmd *cobra.Command) {
 	}
 
 	http.HandleFunc("/healthz", healthHandler)
+	http.HandleFunc("/version", versionHandler)
 
 	http.Handle("/query", srvHandler)
 	proto := "http"
@@ -189,6 +191,12 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, "Server is healthy")
+}
+
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, version.Version)
 }
 
 func getArango(_ context.Context) backends.BackendArgs {
