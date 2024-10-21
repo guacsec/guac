@@ -27471,6 +27471,8 @@ const (
 	QueryTypeVulnerability QueryType = "VULNERABILITY"
 	// indirect dependency
 	QueryTypeLicense QueryType = "LICENSE"
+	// indirect dependency
+	QueryTypeEol QueryType = "EOL"
 )
 
 // SLSAInputSpec is the same as SLSA but for mutation input.

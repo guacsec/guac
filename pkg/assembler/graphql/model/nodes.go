@@ -2692,16 +2692,19 @@ const (
 	QueryTypeVulnerability QueryType = "VULNERABILITY"
 	// indirect dependency
 	QueryTypeLicense QueryType = "LICENSE"
+	// indirect dependency
+	QueryTypeEol QueryType = "EOL"
 )
 
 var AllQueryType = []QueryType{
 	QueryTypeVulnerability,
 	QueryTypeLicense,
+	QueryTypeEol,
 }
 
 func (e QueryType) IsValid() bool {
 	switch e {
-	case QueryTypeVulnerability, QueryTypeLicense:
+	case QueryTypeVulnerability, QueryTypeLicense, QueryTypeEol:
 		return true
 	}
 	return false

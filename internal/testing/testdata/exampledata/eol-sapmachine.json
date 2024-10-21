@@ -1,0 +1,106 @@
+[
+  {
+    "cycle": "23",
+    "releaseDate": "2024-09-18",
+    "eol": "2025-03-18",
+    "latest": "23.0.1",
+    "latestReleaseDate": "2024-10-15",
+    "lts": false
+  },
+  {
+    "cycle": "22",
+    "releaseDate": "2024-03-18",
+    "eol": "2024-09-17",
+    "latest": "22.0.2",
+    "latestReleaseDate": "2024-07-17",
+    "lts": false
+  },
+  {
+    "cycle": "21",
+    "lts": true,
+    "releaseDate": "2023-09-18",
+    "eol": "2028-09-01",
+    "latest": "21.0.5",
+    "latestReleaseDate": "2024-10-15"
+  },
+  {
+    "cycle": "20",
+    "releaseDate": "2023-03-17",
+    "eol": "2023-09-19",
+    "latest": "20.0.2",
+    "latestReleaseDate": "2023-07-18",
+    "lts": false
+  },
+  {
+    "cycle": "19",
+    "releaseDate": "2022-09-19",
+    "eol": "2023-03-17",
+    "latest": "19.0.2",
+    "latestReleaseDate": "2023-01-17",
+    "lts": false
+  },
+  {
+    "cycle": "18",
+    "releaseDate": "2022-03-21",
+    "eol": "2022-09-19",
+    "latest": "18.0.2.1",
+    "latestReleaseDate": "2022-08-23",
+    "lts": false
+  },
+  {
+    "cycle": "17",
+    "lts": true,
+    "releaseDate": "2021-09-14",
+    "eol": "2026-09-01",
+    "latest": "17.0.13",
+    "latestReleaseDate": "2024-10-15"
+  },
+  {
+    "cycle": "16",
+    "releaseDate": "2021-03-15",
+    "eol": "2021-09-14",
+    "latest": "16.0.2",
+    "latestReleaseDate": "2021-07-22",
+    "lts": false
+  },
+  {
+    "cycle": "15",
+    "releaseDate": "2020-09-16",
+    "eol": "2021-03-15",
+    "latest": "15.0.2",
+    "latestReleaseDate": "2021-01-22",
+    "lts": false
+  },
+  {
+    "cycle": "14",
+    "releaseDate": "2020-03-18",
+    "eol": "2020-09-16",
+    "latest": "14.0.2",
+    "latestReleaseDate": "2020-07-16",
+    "lts": false
+  },
+  {
+    "cycle": "13",
+    "releaseDate": "2019-09-18",
+    "eol": "2020-03-18",
+    "latest": "13.0.2",
+    "latestReleaseDate": "2020-01-16",
+    "lts": false
+  },
+  {
+    "cycle": "12",
+    "releaseDate": "2019-03-21",
+    "eol": "2019-09-18",
+    "latest": "12.0.2",
+    "latestReleaseDate": "2019-07-17",
+    "lts": false
+  },
+  {
+    "cycle": "11",
+    "lts": true,
+    "releaseDate": "2019-01-16",
+    "eol": "2024-12-01",
+    "latest": "11.0.25",
+    "latestReleaseDate": "2024-10-15"
+  }
+]

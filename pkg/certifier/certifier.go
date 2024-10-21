@@ -50,4 +50,5 @@ const (
 	CertifierOSV            CertifierType = "OSV"
 	CertifierClearlyDefined CertifierType = "CD"
 	CertifierScorecard      CertifierType = "scorecard"
+	CertifierEOL            CertifierType = "EOL"
 )

@@ -7610,6 +7610,8 @@ enum QueryType {
   VULNERABILITY
   "indirect dependency"
   LICENSE
+  "indirect dependency"
+  EOL
 }
 
 extend type Query {
