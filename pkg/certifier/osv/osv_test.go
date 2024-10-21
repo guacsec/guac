@@ -30,7 +30,7 @@ import (
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 
@@ -247,17 +247,14 @@ func Test_createAttestation(t *testing.T) {
 				Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 			},
 			Predicate: attestation_vuln.VulnerabilityPredicate{
-				Invocation: attestation_vuln.Invocation{
-					Uri:        INVOC_URI,
-					ProducerID: PRODUCER_ID,
-				},
 				Scanner: attestation_vuln.Scanner{
 					Uri:     URI,
 					Version: VERSION,
-					Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+					Result:  []attestation_vuln.Result{{Id: "testId"}},
 				},
 				Metadata: attestation_vuln.Metadata{
-					ScannedOn: &currentTime,
+					ScanStartedOn: &currentTime,
+					ScanFinishedOn: &currentTime,
 				},
 			},
 		},
@@ -277,8 +274,10 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 	// create a copy of a and b, and set the ScannedOn field to nil because the timestamps will be different
 	aCopy := a
 	bCopy := b
-	aCopy.Predicate.Metadata.ScannedOn = nil
-	bCopy.Predicate.Metadata.ScannedOn = nil
+	aCopy.Predicate.Metadata.ScanStartedOn = nil
+	bCopy.Predicate.Metadata.ScanStartedOn = nil
+	aCopy.Predicate.Metadata.ScanFinishedOn = nil
+	bCopy.Predicate.Metadata.ScanFinishedOn = nil
 
 	// use DeepEqual to compare the copies
 	return reflect.DeepEqual(aCopy, bCopy)

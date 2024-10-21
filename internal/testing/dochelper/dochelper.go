@@ -23,7 +23,7 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -173,8 +173,11 @@ func DocEqualWithTimestamp(gotDoc, wantDoc *processor.Document) (bool, error) {
 	}
 
 	// change the timestamp to match else it will fail to compare
-	want.Predicate.Metadata.ScannedOn = &testTime
-	got.Predicate.Metadata.ScannedOn = &testTime
+	want.Predicate.Metadata.ScanStartedOn = &testTime
+	got.Predicate.Metadata.ScanStartedOn = &testTime
+
+	want.Predicate.Metadata.ScanFinishedOn = &testTime
+	got.Predicate.Metadata.ScanFinishedOn = &testTime
 
 	return reflect.DeepEqual(want, got), nil
 }

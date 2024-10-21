@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/certifier"
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
@@ -151,16 +151,13 @@ func createAttestation(purl string, vulns []osv_scanner.MinimalVulnerability, cu
 			PredicateType: attestation_vuln.PredicateVuln,
 		},
 		Predicate: attestation_vuln.VulnerabilityPredicate{
-			Invocation: attestation_vuln.Invocation{
-				Uri:        INVOC_URI,
-				ProducerID: PRODUCER_ID,
-			},
 			Scanner: attestation_vuln.Scanner{
 				Uri:     URI,
 				Version: VERSION,
 			},
 			Metadata: attestation_vuln.Metadata{
-				ScannedOn: &currentTime,
+				ScanStartedOn: &currentTime,
+				ScanFinishedOn: &currentTime,
 			},
 		},
 	}
@@ -170,7 +167,7 @@ func createAttestation(purl string, vulns []osv_scanner.MinimalVulnerability, cu
 
 	for _, vuln := range vulns {
 		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_vuln.Result{
-			VulnerabilityId: vuln.ID,
+			Id: vuln.ID,
 		})
 	}
 	return attestation
