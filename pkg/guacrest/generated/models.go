@@ -13,12 +13,6 @@ const (
 	Scorecard AnalyzeDependenciesParamsSort = "scorecard"
 )
 
-// Defines values for RetrieveDependenciesParamsLinkCondition.
-const (
-	Digest RetrieveDependenciesParamsLinkCondition = "digest"
-	Name   RetrieveDependenciesParamsLinkCondition = "name"
-)
-
 // Error defines model for Error.
 type Error struct {
 	Message string `json:"Message"`
@@ -53,13 +47,15 @@ type ScanMetadata struct {
 // Vulnerability defines model for Vulnerability.
 type Vulnerability struct {
 	Metadata      ScanMetadata         `json:"metadata"`
-	Packages      []string             `json:"packages"`
+	Package       string               `json:"package"`
 	Vulnerability VulnerabilityDetails `json:"vulnerability"`
 }
 
 // VulnerabilityDetails defines model for VulnerabilityDetails.
 type VulnerabilityDetails struct {
-	Type             *string  `json:"type,omitempty"`
+	Type *string `json:"type,omitempty"`
+
+	// VulnerabilityIDs A list of vulnerability identifiers. These can be CVE IDs or other  formats used to identify vulnerabilities.
 	VulnerabilityIDs []string `json:"vulnerabilityIDs"`
 }
 
@@ -107,46 +103,8 @@ type AnalyzeDependenciesParams struct {
 // AnalyzeDependenciesParamsSort defines parameters for AnalyzeDependencies.
 type AnalyzeDependenciesParamsSort string
 
-// RetrieveDependenciesParams defines parameters for RetrieveDependencies.
-type RetrieveDependenciesParams struct {
-	// PaginationSpec The pagination configuration for the query.
-	//   * 'PageSize' specifies the number of results returned
-	//   * 'Cursor' is returned by previous calls and specifies what page to return
-	PaginationSpec *PaginationSpec `form:"paginationSpec,omitempty" json:"paginationSpec,omitempty"`
-
-	// LinkCondition Whether links between nouns must be made by digest or if they  can be made just by name (i.e. purl). Specify 'name' to allow using SBOMs that don't provide the digest of the subject. The default is  'digest'. To search by purl, 'name' must be specified.
-	LinkCondition *RetrieveDependenciesParamsLinkCondition `form:"linkCondition,omitempty" json:"linkCondition,omitempty"`
-
-	// Purl The purl of the dependent package.
-	Purl *string `form:"purl,omitempty" json:"purl,omitempty"`
-
-	// Digest The digest of the dependent package.
-	Digest *string `form:"digest,omitempty" json:"digest,omitempty"`
-}
-
-// RetrieveDependenciesParamsLinkCondition defines parameters for RetrieveDependencies.
-type RetrieveDependenciesParamsLinkCondition string
-
-// GetArtifactDependenciesParams defines parameters for GetArtifactDependencies.
-type GetArtifactDependenciesParams struct {
-	// LatestSBOM Whether the query should search in the latest sbom
-	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
-}
-
-// GetArtifactVulnerabilitiesParams defines parameters for GetArtifactVulnerabilities.
-type GetArtifactVulnerabilitiesParams struct {
-	// LatestSBOM Whether the query should search in the latest sbom
-	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
-}
-
-// GetPackageDependenciesByPurlParams defines parameters for GetPackageDependenciesByPurl.
-type GetPackageDependenciesByPurlParams struct {
-	// LatestSBOM Whether the query should search in the latest sbom
-	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
-}
-
-// GetPackageVulnerabilitiesByPurlParams defines parameters for GetPackageVulnerabilitiesByPurl.
-type GetPackageVulnerabilitiesByPurlParams struct {
-	// LatestSBOM Whether the query should search in the latest sbom
-	LatestSBOM *bool `form:"latestSBOM,omitempty" json:"latestSBOM,omitempty"`
+// GetPackageVulnsParams defines parameters for GetPackageVulns.
+type GetPackageVulnsParams struct {
+	// IncludeDependencies A flag to include vulnerabilities of the dependencies. If true, the  response will include vulnerabilities for the purl and its dependencies  instead of the vulnerabilities of just the purl.
+	IncludeDependencies *bool `form:"includeDependencies,omitempty" json:"includeDependencies,omitempty"`
 }

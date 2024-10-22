@@ -22,24 +22,21 @@ type ServerInterface interface {
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(w http.ResponseWriter, r *http.Request)
-	// Retrieve transitive dependencies
-	// (GET /query/dependencies)
-	RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams)
-	// Get dependencies for a specific Artifact (<algorithm>:<digest>)
-	// (GET /v0/artifact/{artifact}/dependencies)
-	GetArtifactDependencies(w http.ResponseWriter, r *http.Request, artifact string, params GetArtifactDependenciesParams)
-	// Get vulnerabilities for a specific Artifact (<algorithm>:<digest>)
-	// (GET /v0/artifact/{artifact}/vulns)
-	GetArtifactVulnerabilities(w http.ResponseWriter, r *http.Request, artifact string, params GetArtifactVulnerabilitiesParams)
-	// Get purls related to the specific Package URL (PURL)
+	// Get dependencies for a specific digest
+	// (GET /v0/artifact/{digest}/dependencies)
+	GetArtifactDeps(w http.ResponseWriter, r *http.Request, digest string)
+	// Get vulnerabilities for a specific digest
+	// (GET /v0/artifact/{digest}/vulns)
+	GetArtifactVulns(w http.ResponseWriter, r *http.Request, digest string)
+	// Get all purls related to the given purl
 	// (GET /v0/package/{purl})
-	GetPackagePurlsByPurl(w http.ResponseWriter, r *http.Request, purl string)
-	// Get dependencies for a specific Package URL (PURL)
+	GetPackagePurls(w http.ResponseWriter, r *http.Request, purl string)
+	// Get dependencies for a specific Package URL (purl)
 	// (GET /v0/package/{purl}/dependencies)
-	GetPackageDependenciesByPurl(w http.ResponseWriter, r *http.Request, purl string, params GetPackageDependenciesByPurlParams)
-	// Get vulnerabilities for a specific Package URL (PURL)
+	GetPackageDeps(w http.ResponseWriter, r *http.Request, purl string)
+	// Get vulnerabilities for a Package URL (purl)
 	// (GET /v0/package/{purl}/vulns)
-	GetPackageVulnerabilitiesByPurl(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnerabilitiesByPurlParams)
+	GetPackageVulns(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnsParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -58,39 +55,33 @@ func (_ Unimplemented) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Retrieve transitive dependencies
-// (GET /query/dependencies)
-func (_ Unimplemented) RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams) {
+// Get dependencies for a specific digest
+// (GET /v0/artifact/{digest}/dependencies)
+func (_ Unimplemented) GetArtifactDeps(w http.ResponseWriter, r *http.Request, digest string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get dependencies for a specific Artifact (<algorithm>:<digest>)
-// (GET /v0/artifact/{artifact}/dependencies)
-func (_ Unimplemented) GetArtifactDependencies(w http.ResponseWriter, r *http.Request, artifact string, params GetArtifactDependenciesParams) {
+// Get vulnerabilities for a specific digest
+// (GET /v0/artifact/{digest}/vulns)
+func (_ Unimplemented) GetArtifactVulns(w http.ResponseWriter, r *http.Request, digest string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get vulnerabilities for a specific Artifact (<algorithm>:<digest>)
-// (GET /v0/artifact/{artifact}/vulns)
-func (_ Unimplemented) GetArtifactVulnerabilities(w http.ResponseWriter, r *http.Request, artifact string, params GetArtifactVulnerabilitiesParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Get purls related to the specific Package URL (PURL)
+// Get all purls related to the given purl
 // (GET /v0/package/{purl})
-func (_ Unimplemented) GetPackagePurlsByPurl(w http.ResponseWriter, r *http.Request, purl string) {
+func (_ Unimplemented) GetPackagePurls(w http.ResponseWriter, r *http.Request, purl string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get dependencies for a specific Package URL (PURL)
+// Get dependencies for a specific Package URL (purl)
 // (GET /v0/package/{purl}/dependencies)
-func (_ Unimplemented) GetPackageDependenciesByPurl(w http.ResponseWriter, r *http.Request, purl string, params GetPackageDependenciesByPurlParams) {
+func (_ Unimplemented) GetPackageDeps(w http.ResponseWriter, r *http.Request, purl string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get vulnerabilities for a specific Package URL (PURL)
+// Get vulnerabilities for a Package URL (purl)
 // (GET /v0/package/{purl}/vulns)
-func (_ Unimplemented) GetPackageVulnerabilitiesByPurl(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnerabilitiesByPurlParams) {
+func (_ Unimplemented) GetPackageVulns(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -159,48 +150,22 @@ func (siw *ServerInterfaceWrapper) HealthCheck(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
-// RetrieveDependencies operation middleware
-func (siw *ServerInterfaceWrapper) RetrieveDependencies(w http.ResponseWriter, r *http.Request) {
+// GetArtifactDeps operation middleware
+func (siw *ServerInterfaceWrapper) GetArtifactDeps(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params RetrieveDependenciesParams
+	// ------------- Path parameter "digest" -------------
+	var digest string
 
-	// ------------- Optional query parameter "paginationSpec" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "paginationSpec", r.URL.Query(), &params.PaginationSpec)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paginationSpec", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "linkCondition" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "linkCondition", r.URL.Query(), &params.LinkCondition)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "linkCondition", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "purl" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "purl", r.URL.Query(), &params.Purl)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purl", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "digest" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "digest", r.URL.Query(), &params.Digest)
+	err = runtime.BindStyledParameterWithOptions("simple", "digest", chi.URLParam(r, "digest"), &digest, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "digest", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.RetrieveDependencies(w, r, params)
+		siw.Handler.GetArtifactDeps(w, r, digest)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -210,33 +175,22 @@ func (siw *ServerInterfaceWrapper) RetrieveDependencies(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
-// GetArtifactDependencies operation middleware
-func (siw *ServerInterfaceWrapper) GetArtifactDependencies(w http.ResponseWriter, r *http.Request) {
+// GetArtifactVulns operation middleware
+func (siw *ServerInterfaceWrapper) GetArtifactVulns(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-	// ------------- Path parameter "artifact" -------------
-	var artifact string
+	// ------------- Path parameter "digest" -------------
+	var digest string
 
-	err = runtime.BindStyledParameterWithOptions("simple", "artifact", chi.URLParam(r, "artifact"), &artifact, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "digest", chi.URLParam(r, "digest"), &digest, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "artifact", Err: err})
-		return
-	}
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetArtifactDependenciesParams
-
-	// ------------- Optional query parameter "latestSBOM" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "latestSBOM", r.URL.Query(), &params.LatestSBOM)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "latestSBOM", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "digest", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetArtifactDependencies(w, r, artifact, params)
+		siw.Handler.GetArtifactVulns(w, r, digest)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -246,44 +200,8 @@ func (siw *ServerInterfaceWrapper) GetArtifactDependencies(w http.ResponseWriter
 	handler.ServeHTTP(w, r)
 }
 
-// GetArtifactVulnerabilities operation middleware
-func (siw *ServerInterfaceWrapper) GetArtifactVulnerabilities(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "artifact" -------------
-	var artifact string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "artifact", chi.URLParam(r, "artifact"), &artifact, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "artifact", Err: err})
-		return
-	}
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetArtifactVulnerabilitiesParams
-
-	// ------------- Optional query parameter "latestSBOM" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "latestSBOM", r.URL.Query(), &params.LatestSBOM)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "latestSBOM", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetArtifactVulnerabilities(w, r, artifact, params)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// GetPackagePurlsByPurl operation middleware
-func (siw *ServerInterfaceWrapper) GetPackagePurlsByPurl(w http.ResponseWriter, r *http.Request) {
+// GetPackagePurls operation middleware
+func (siw *ServerInterfaceWrapper) GetPackagePurls(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
@@ -297,7 +215,7 @@ func (siw *ServerInterfaceWrapper) GetPackagePurlsByPurl(w http.ResponseWriter, 
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetPackagePurlsByPurl(w, r, purl)
+		siw.Handler.GetPackagePurls(w, r, purl)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -307,8 +225,33 @@ func (siw *ServerInterfaceWrapper) GetPackagePurlsByPurl(w http.ResponseWriter, 
 	handler.ServeHTTP(w, r)
 }
 
-// GetPackageDependenciesByPurl operation middleware
-func (siw *ServerInterfaceWrapper) GetPackageDependenciesByPurl(w http.ResponseWriter, r *http.Request) {
+// GetPackageDeps operation middleware
+func (siw *ServerInterfaceWrapper) GetPackageDeps(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "purl" -------------
+	var purl string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "purl", chi.URLParam(r, "purl"), &purl, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purl", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPackageDeps(w, r, purl)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPackageVulns operation middleware
+func (siw *ServerInterfaceWrapper) GetPackageVulns(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
@@ -322,54 +265,18 @@ func (siw *ServerInterfaceWrapper) GetPackageDependenciesByPurl(w http.ResponseW
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetPackageDependenciesByPurlParams
+	var params GetPackageVulnsParams
 
-	// ------------- Optional query parameter "latestSBOM" -------------
+	// ------------- Optional query parameter "includeDependencies" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "latestSBOM", r.URL.Query(), &params.LatestSBOM)
+	err = runtime.BindQueryParameter("form", true, false, "includeDependencies", r.URL.Query(), &params.IncludeDependencies)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "latestSBOM", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "includeDependencies", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetPackageDependenciesByPurl(w, r, purl, params)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// GetPackageVulnerabilitiesByPurl operation middleware
-func (siw *ServerInterfaceWrapper) GetPackageVulnerabilitiesByPurl(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "purl" -------------
-	var purl string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "purl", chi.URLParam(r, "purl"), &purl, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purl", Err: err})
-		return
-	}
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetPackageVulnerabilitiesByPurlParams
-
-	// ------------- Optional query parameter "latestSBOM" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "latestSBOM", r.URL.Query(), &params.LatestSBOM)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "latestSBOM", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetPackageVulnerabilitiesByPurl(w, r, purl, params)
+		siw.Handler.GetPackageVulns(w, r, purl, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -499,22 +406,19 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/healthz", wrapper.HealthCheck)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/query/dependencies", wrapper.RetrieveDependencies)
+		r.Get(options.BaseURL+"/v0/artifact/{digest}/dependencies", wrapper.GetArtifactDeps)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/v0/artifact/{artifact}/dependencies", wrapper.GetArtifactDependencies)
+		r.Get(options.BaseURL+"/v0/artifact/{digest}/vulns", wrapper.GetArtifactVulns)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/v0/artifact/{artifact}/vulns", wrapper.GetArtifactVulnerabilities)
+		r.Get(options.BaseURL+"/v0/package/{purl}", wrapper.GetPackagePurls)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/v0/package/{purl}", wrapper.GetPackagePurlsByPurl)
+		r.Get(options.BaseURL+"/v0/package/{purl}/dependencies", wrapper.GetPackageDeps)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/v0/package/{purl}/dependencies", wrapper.GetPackageDependenciesByPurl)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/v0/package/{purl}/vulns", wrapper.GetPackageVulnerabilitiesByPurl)
+		r.Get(options.BaseURL+"/v0/package/{purl}/vulns", wrapper.GetPackageVulns)
 	})
 
 	return r
@@ -598,237 +502,233 @@ func (response HealthCheck200JSONResponse) VisitHealthCheckResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RetrieveDependenciesRequestObject struct {
-	Params RetrieveDependenciesParams
+type GetArtifactDepsRequestObject struct {
+	Digest string `json:"digest"`
 }
 
-type RetrieveDependenciesResponseObject interface {
-	VisitRetrieveDependenciesResponse(w http.ResponseWriter) error
+type GetArtifactDepsResponseObject interface {
+	VisitGetArtifactDepsResponse(w http.ResponseWriter) error
 }
 
-type RetrieveDependencies200JSONResponse struct{ PurlListJSONResponse }
+type GetArtifactDeps200JSONResponse struct{ PurlListJSONResponse }
 
-func (response RetrieveDependencies200JSONResponse) VisitRetrieveDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactDeps200JSONResponse) VisitGetArtifactDepsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RetrieveDependencies400JSONResponse struct{ BadRequestJSONResponse }
+type GetArtifactDeps400JSONResponse struct{ BadRequestJSONResponse }
 
-func (response RetrieveDependencies400JSONResponse) VisitRetrieveDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactDeps400JSONResponse) VisitGetArtifactDepsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RetrieveDependencies500JSONResponse struct {
+type GetArtifactDeps500JSONResponse struct {
 	InternalServerErrorJSONResponse
 }
 
-func (response RetrieveDependencies500JSONResponse) VisitRetrieveDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactDeps500JSONResponse) VisitGetArtifactDepsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RetrieveDependencies502JSONResponse struct{ BadGatewayJSONResponse }
+type GetArtifactDeps502JSONResponse struct{ BadGatewayJSONResponse }
 
-func (response RetrieveDependencies502JSONResponse) VisitRetrieveDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactDeps502JSONResponse) VisitGetArtifactDepsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(502)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetArtifactDependenciesRequestObject struct {
-	Artifact string `json:"artifact"`
-	Params   GetArtifactDependenciesParams
+type GetArtifactVulnsRequestObject struct {
+	Digest string `json:"digest"`
 }
 
-type GetArtifactDependenciesResponseObject interface {
-	VisitGetArtifactDependenciesResponse(w http.ResponseWriter) error
+type GetArtifactVulnsResponseObject interface {
+	VisitGetArtifactVulnsResponse(w http.ResponseWriter) error
 }
 
-type GetArtifactDependencies200JSONResponse struct{ PurlListJSONResponse }
+type GetArtifactVulns200JSONResponse struct{ VulnerabilityListJSONResponse }
 
-func (response GetArtifactDependencies200JSONResponse) VisitGetArtifactDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactVulns200JSONResponse) VisitGetArtifactVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetArtifactDependencies400JSONResponse struct{ BadRequestJSONResponse }
+type GetArtifactVulns400JSONResponse struct{ BadRequestJSONResponse }
 
-func (response GetArtifactDependencies400JSONResponse) VisitGetArtifactDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactVulns400JSONResponse) VisitGetArtifactVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetArtifactDependencies500JSONResponse struct {
+type GetArtifactVulns500JSONResponse struct {
 	InternalServerErrorJSONResponse
 }
 
-func (response GetArtifactDependencies500JSONResponse) VisitGetArtifactDependenciesResponse(w http.ResponseWriter) error {
+func (response GetArtifactVulns500JSONResponse) VisitGetArtifactVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetArtifactVulnerabilitiesRequestObject struct {
-	Artifact string `json:"artifact"`
-	Params   GetArtifactVulnerabilitiesParams
-}
+type GetArtifactVulns502JSONResponse struct{ BadGatewayJSONResponse }
 
-type GetArtifactVulnerabilitiesResponseObject interface {
-	VisitGetArtifactVulnerabilitiesResponse(w http.ResponseWriter) error
-}
-
-type GetArtifactVulnerabilities200JSONResponse struct{ VulnerabilityListJSONResponse }
-
-func (response GetArtifactVulnerabilities200JSONResponse) VisitGetArtifactVulnerabilitiesResponse(w http.ResponseWriter) error {
+func (response GetArtifactVulns502JSONResponse) VisitGetArtifactVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(502)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetArtifactVulnerabilities400JSONResponse struct{ BadRequestJSONResponse }
-
-func (response GetArtifactVulnerabilities400JSONResponse) VisitGetArtifactVulnerabilitiesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetArtifactVulnerabilities500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetArtifactVulnerabilities500JSONResponse) VisitGetArtifactVulnerabilitiesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPackagePurlsByPurlRequestObject struct {
+type GetPackagePurlsRequestObject struct {
 	Purl string `json:"purl"`
 }
 
-type GetPackagePurlsByPurlResponseObject interface {
-	VisitGetPackagePurlsByPurlResponse(w http.ResponseWriter) error
+type GetPackagePurlsResponseObject interface {
+	VisitGetPackagePurlsResponse(w http.ResponseWriter) error
 }
 
-type GetPackagePurlsByPurl200JSONResponse []string
+type GetPackagePurls200JSONResponse struct{ PurlListJSONResponse }
 
-func (response GetPackagePurlsByPurl200JSONResponse) VisitGetPackagePurlsByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackagePurls200JSONResponse) VisitGetPackagePurlsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPackagePurlsByPurl400JSONResponse struct{ BadRequestJSONResponse }
+type GetPackagePurls400JSONResponse struct{ BadRequestJSONResponse }
 
-func (response GetPackagePurlsByPurl400JSONResponse) VisitGetPackagePurlsByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackagePurls400JSONResponse) VisitGetPackagePurlsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPackagePurlsByPurl500JSONResponse struct {
+type GetPackagePurls500JSONResponse struct {
 	InternalServerErrorJSONResponse
 }
 
-func (response GetPackagePurlsByPurl500JSONResponse) VisitGetPackagePurlsByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackagePurls500JSONResponse) VisitGetPackagePurlsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPackageDependenciesByPurlRequestObject struct {
+type GetPackagePurls502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response GetPackagePurls502JSONResponse) VisitGetPackagePurlsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageDepsRequestObject struct {
+	Purl string `json:"purl"`
+}
+
+type GetPackageDepsResponseObject interface {
+	VisitGetPackageDepsResponse(w http.ResponseWriter) error
+}
+
+type GetPackageDeps200JSONResponse struct{ PurlListJSONResponse }
+
+func (response GetPackageDeps200JSONResponse) VisitGetPackageDepsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageDeps400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response GetPackageDeps400JSONResponse) VisitGetPackageDepsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageDeps500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetPackageDeps500JSONResponse) VisitGetPackageDepsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageDeps502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response GetPackageDeps502JSONResponse) VisitGetPackageDepsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPackageVulnsRequestObject struct {
 	Purl   string `json:"purl"`
-	Params GetPackageDependenciesByPurlParams
+	Params GetPackageVulnsParams
 }
 
-type GetPackageDependenciesByPurlResponseObject interface {
-	VisitGetPackageDependenciesByPurlResponse(w http.ResponseWriter) error
+type GetPackageVulnsResponseObject interface {
+	VisitGetPackageVulnsResponse(w http.ResponseWriter) error
 }
 
-type GetPackageDependenciesByPurl200JSONResponse struct{ PurlListJSONResponse }
+type GetPackageVulns200JSONResponse struct{ VulnerabilityListJSONResponse }
 
-func (response GetPackageDependenciesByPurl200JSONResponse) VisitGetPackageDependenciesByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackageVulns200JSONResponse) VisitGetPackageVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPackageDependenciesByPurl400JSONResponse struct{ BadRequestJSONResponse }
+type GetPackageVulns400JSONResponse struct{ BadRequestJSONResponse }
 
-func (response GetPackageDependenciesByPurl400JSONResponse) VisitGetPackageDependenciesByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackageVulns400JSONResponse) VisitGetPackageVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPackageDependenciesByPurl500JSONResponse struct {
+type GetPackageVulns500JSONResponse struct {
 	InternalServerErrorJSONResponse
 }
 
-func (response GetPackageDependenciesByPurl500JSONResponse) VisitGetPackageDependenciesByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackageVulns500JSONResponse) VisitGetPackageVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPackageVulnerabilitiesByPurlRequestObject struct {
-	Purl   string `json:"purl"`
-	Params GetPackageVulnerabilitiesByPurlParams
-}
+type GetPackageVulns502JSONResponse struct{ BadGatewayJSONResponse }
 
-type GetPackageVulnerabilitiesByPurlResponseObject interface {
-	VisitGetPackageVulnerabilitiesByPurlResponse(w http.ResponseWriter) error
-}
-
-type GetPackageVulnerabilitiesByPurl200JSONResponse struct{ VulnerabilityListJSONResponse }
-
-func (response GetPackageVulnerabilitiesByPurl200JSONResponse) VisitGetPackageVulnerabilitiesByPurlResponse(w http.ResponseWriter) error {
+func (response GetPackageVulns502JSONResponse) VisitGetPackageVulnsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPackageVulnerabilitiesByPurl400JSONResponse struct{ BadRequestJSONResponse }
-
-func (response GetPackageVulnerabilitiesByPurl400JSONResponse) VisitGetPackageVulnerabilitiesByPurlResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPackageVulnerabilitiesByPurl500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetPackageVulnerabilitiesByPurl500JSONResponse) VisitGetPackageVulnerabilitiesByPurlResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(502)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -841,24 +741,21 @@ type StrictServerInterface interface {
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(ctx context.Context, request HealthCheckRequestObject) (HealthCheckResponseObject, error)
-	// Retrieve transitive dependencies
-	// (GET /query/dependencies)
-	RetrieveDependencies(ctx context.Context, request RetrieveDependenciesRequestObject) (RetrieveDependenciesResponseObject, error)
-	// Get dependencies for a specific Artifact (<algorithm>:<digest>)
-	// (GET /v0/artifact/{artifact}/dependencies)
-	GetArtifactDependencies(ctx context.Context, request GetArtifactDependenciesRequestObject) (GetArtifactDependenciesResponseObject, error)
-	// Get vulnerabilities for a specific Artifact (<algorithm>:<digest>)
-	// (GET /v0/artifact/{artifact}/vulns)
-	GetArtifactVulnerabilities(ctx context.Context, request GetArtifactVulnerabilitiesRequestObject) (GetArtifactVulnerabilitiesResponseObject, error)
-	// Get purls related to the specific Package URL (PURL)
+	// Get dependencies for a specific digest
+	// (GET /v0/artifact/{digest}/dependencies)
+	GetArtifactDeps(ctx context.Context, request GetArtifactDepsRequestObject) (GetArtifactDepsResponseObject, error)
+	// Get vulnerabilities for a specific digest
+	// (GET /v0/artifact/{digest}/vulns)
+	GetArtifactVulns(ctx context.Context, request GetArtifactVulnsRequestObject) (GetArtifactVulnsResponseObject, error)
+	// Get all purls related to the given purl
 	// (GET /v0/package/{purl})
-	GetPackagePurlsByPurl(ctx context.Context, request GetPackagePurlsByPurlRequestObject) (GetPackagePurlsByPurlResponseObject, error)
-	// Get dependencies for a specific Package URL (PURL)
+	GetPackagePurls(ctx context.Context, request GetPackagePurlsRequestObject) (GetPackagePurlsResponseObject, error)
+	// Get dependencies for a specific Package URL (purl)
 	// (GET /v0/package/{purl}/dependencies)
-	GetPackageDependenciesByPurl(ctx context.Context, request GetPackageDependenciesByPurlRequestObject) (GetPackageDependenciesByPurlResponseObject, error)
-	// Get vulnerabilities for a specific Package URL (PURL)
+	GetPackageDeps(ctx context.Context, request GetPackageDepsRequestObject) (GetPackageDepsResponseObject, error)
+	// Get vulnerabilities for a Package URL (purl)
 	// (GET /v0/package/{purl}/vulns)
-	GetPackageVulnerabilitiesByPurl(ctx context.Context, request GetPackageVulnerabilitiesByPurlRequestObject) (GetPackageVulnerabilitiesByPurlResponseObject, error)
+	GetPackageVulns(ctx context.Context, request GetPackageVulnsRequestObject) (GetPackageVulnsResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -940,25 +837,25 @@ func (sh *strictHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// RetrieveDependencies operation middleware
-func (sh *strictHandler) RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams) {
-	var request RetrieveDependenciesRequestObject
+// GetArtifactDeps operation middleware
+func (sh *strictHandler) GetArtifactDeps(w http.ResponseWriter, r *http.Request, digest string) {
+	var request GetArtifactDepsRequestObject
 
-	request.Params = params
+	request.Digest = digest
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.RetrieveDependencies(ctx, request.(RetrieveDependenciesRequestObject))
+		return sh.ssi.GetArtifactDeps(ctx, request.(GetArtifactDepsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "RetrieveDependencies")
+		handler = middleware(handler, "GetArtifactDeps")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(RetrieveDependenciesResponseObject); ok {
-		if err := validResponse.VisitRetrieveDependenciesResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetArtifactDepsResponseObject); ok {
+		if err := validResponse.VisitGetArtifactDepsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -966,26 +863,25 @@ func (sh *strictHandler) RetrieveDependencies(w http.ResponseWriter, r *http.Req
 	}
 }
 
-// GetArtifactDependencies operation middleware
-func (sh *strictHandler) GetArtifactDependencies(w http.ResponseWriter, r *http.Request, artifact string, params GetArtifactDependenciesParams) {
-	var request GetArtifactDependenciesRequestObject
+// GetArtifactVulns operation middleware
+func (sh *strictHandler) GetArtifactVulns(w http.ResponseWriter, r *http.Request, digest string) {
+	var request GetArtifactVulnsRequestObject
 
-	request.Artifact = artifact
-	request.Params = params
+	request.Digest = digest
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetArtifactDependencies(ctx, request.(GetArtifactDependenciesRequestObject))
+		return sh.ssi.GetArtifactVulns(ctx, request.(GetArtifactVulnsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetArtifactDependencies")
+		handler = middleware(handler, "GetArtifactVulns")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetArtifactDependenciesResponseObject); ok {
-		if err := validResponse.VisitGetArtifactDependenciesResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetArtifactVulnsResponseObject); ok {
+		if err := validResponse.VisitGetArtifactVulnsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -993,52 +889,25 @@ func (sh *strictHandler) GetArtifactDependencies(w http.ResponseWriter, r *http.
 	}
 }
 
-// GetArtifactVulnerabilities operation middleware
-func (sh *strictHandler) GetArtifactVulnerabilities(w http.ResponseWriter, r *http.Request, artifact string, params GetArtifactVulnerabilitiesParams) {
-	var request GetArtifactVulnerabilitiesRequestObject
-
-	request.Artifact = artifact
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetArtifactVulnerabilities(ctx, request.(GetArtifactVulnerabilitiesRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetArtifactVulnerabilities")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetArtifactVulnerabilitiesResponseObject); ok {
-		if err := validResponse.VisitGetArtifactVulnerabilitiesResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetPackagePurlsByPurl operation middleware
-func (sh *strictHandler) GetPackagePurlsByPurl(w http.ResponseWriter, r *http.Request, purl string) {
-	var request GetPackagePurlsByPurlRequestObject
+// GetPackagePurls operation middleware
+func (sh *strictHandler) GetPackagePurls(w http.ResponseWriter, r *http.Request, purl string) {
+	var request GetPackagePurlsRequestObject
 
 	request.Purl = purl
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetPackagePurlsByPurl(ctx, request.(GetPackagePurlsByPurlRequestObject))
+		return sh.ssi.GetPackagePurls(ctx, request.(GetPackagePurlsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetPackagePurlsByPurl")
+		handler = middleware(handler, "GetPackagePurls")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetPackagePurlsByPurlResponseObject); ok {
-		if err := validResponse.VisitGetPackagePurlsByPurlResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetPackagePurlsResponseObject); ok {
+		if err := validResponse.VisitGetPackagePurlsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1046,53 +915,52 @@ func (sh *strictHandler) GetPackagePurlsByPurl(w http.ResponseWriter, r *http.Re
 	}
 }
 
-// GetPackageDependenciesByPurl operation middleware
-func (sh *strictHandler) GetPackageDependenciesByPurl(w http.ResponseWriter, r *http.Request, purl string, params GetPackageDependenciesByPurlParams) {
-	var request GetPackageDependenciesByPurlRequestObject
+// GetPackageDeps operation middleware
+func (sh *strictHandler) GetPackageDeps(w http.ResponseWriter, r *http.Request, purl string) {
+	var request GetPackageDepsRequestObject
+
+	request.Purl = purl
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPackageDeps(ctx, request.(GetPackageDepsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPackageDeps")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPackageDepsResponseObject); ok {
+		if err := validResponse.VisitGetPackageDepsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPackageVulns operation middleware
+func (sh *strictHandler) GetPackageVulns(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnsParams) {
+	var request GetPackageVulnsRequestObject
 
 	request.Purl = purl
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetPackageDependenciesByPurl(ctx, request.(GetPackageDependenciesByPurlRequestObject))
+		return sh.ssi.GetPackageVulns(ctx, request.(GetPackageVulnsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetPackageDependenciesByPurl")
+		handler = middleware(handler, "GetPackageVulns")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetPackageDependenciesByPurlResponseObject); ok {
-		if err := validResponse.VisitGetPackageDependenciesByPurlResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetPackageVulnerabilitiesByPurl operation middleware
-func (sh *strictHandler) GetPackageVulnerabilitiesByPurl(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnerabilitiesByPurlParams) {
-	var request GetPackageVulnerabilitiesByPurlRequestObject
-
-	request.Purl = purl
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetPackageVulnerabilitiesByPurl(ctx, request.(GetPackageVulnerabilitiesByPurlRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetPackageVulnerabilitiesByPurl")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetPackageVulnerabilitiesByPurlResponseObject); ok {
-		if err := validResponse.VisitGetPackageVulnerabilitiesByPurlResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetPackageVulnsResponseObject); ok {
+		if err := validResponse.VisitGetPackageVulnsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

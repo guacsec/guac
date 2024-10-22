@@ -94,23 +94,20 @@ type ClientInterface interface {
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// RetrieveDependencies request
-	RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetArtifactDeps request
+	GetArtifactDeps(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetArtifactDependencies request
-	GetArtifactDependencies(ctx context.Context, artifact string, params *GetArtifactDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetArtifactVulns request
+	GetArtifactVulns(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetArtifactVulnerabilities request
-	GetArtifactVulnerabilities(ctx context.Context, artifact string, params *GetArtifactVulnerabilitiesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetPackagePurls request
+	GetPackagePurls(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetPackagePurlsByPurl request
-	GetPackagePurlsByPurl(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetPackageDeps request
+	GetPackageDeps(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetPackageDependenciesByPurl request
-	GetPackageDependenciesByPurl(ctx context.Context, purl string, params *GetPackageDependenciesByPurlParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetPackageVulnerabilitiesByPurl request
-	GetPackageVulnerabilitiesByPurl(ctx context.Context, purl string, params *GetPackageVulnerabilitiesByPurlParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetPackageVulns request
+	GetPackageVulns(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -137,8 +134,8 @@ func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
-func (c *Client) RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewRetrieveDependenciesRequest(c.Server, params)
+func (c *Client) GetArtifactDeps(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetArtifactDepsRequest(c.Server, digest)
 	if err != nil {
 		return nil, err
 	}
@@ -149,8 +146,8 @@ func (c *Client) RetrieveDependencies(ctx context.Context, params *RetrieveDepen
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetArtifactDependencies(ctx context.Context, artifact string, params *GetArtifactDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetArtifactDependenciesRequest(c.Server, artifact, params)
+func (c *Client) GetArtifactVulns(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetArtifactVulnsRequest(c.Server, digest)
 	if err != nil {
 		return nil, err
 	}
@@ -161,8 +158,8 @@ func (c *Client) GetArtifactDependencies(ctx context.Context, artifact string, p
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetArtifactVulnerabilities(ctx context.Context, artifact string, params *GetArtifactVulnerabilitiesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetArtifactVulnerabilitiesRequest(c.Server, artifact, params)
+func (c *Client) GetPackagePurls(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPackagePurlsRequest(c.Server, purl)
 	if err != nil {
 		return nil, err
 	}
@@ -173,8 +170,8 @@ func (c *Client) GetArtifactVulnerabilities(ctx context.Context, artifact string
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetPackagePurlsByPurl(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPackagePurlsByPurlRequest(c.Server, purl)
+func (c *Client) GetPackageDeps(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPackageDepsRequest(c.Server, purl)
 	if err != nil {
 		return nil, err
 	}
@@ -185,20 +182,8 @@ func (c *Client) GetPackagePurlsByPurl(ctx context.Context, purl string, reqEdit
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetPackageDependenciesByPurl(ctx context.Context, purl string, params *GetPackageDependenciesByPurlParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPackageDependenciesByPurlRequest(c.Server, purl, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetPackageVulnerabilitiesByPurl(ctx context.Context, purl string, params *GetPackageVulnerabilitiesByPurlParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPackageVulnerabilitiesByPurlRequest(c.Server, purl, params)
+func (c *Client) GetPackageVulns(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPackageVulnsRequest(c.Server, purl, params)
 	if err != nil {
 		return nil, err
 	}
@@ -297,110 +282,13 @@ func NewHealthCheckRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewRetrieveDependenciesRequest generates requests for RetrieveDependencies
-func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/query/dependencies")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.PaginationSpec != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "paginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.LinkCondition != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "linkCondition", runtime.ParamLocationQuery, *params.LinkCondition); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.Purl != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "purl", runtime.ParamLocationQuery, *params.Purl); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.Digest != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "digest", runtime.ParamLocationQuery, *params.Digest); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetArtifactDependenciesRequest generates requests for GetArtifactDependencies
-func NewGetArtifactDependenciesRequest(server string, artifact string, params *GetArtifactDependenciesParams) (*http.Request, error) {
+// NewGetArtifactDepsRequest generates requests for GetArtifactDeps
+func NewGetArtifactDepsRequest(server string, digest string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "artifact", runtime.ParamLocationPath, artifact)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "digest", runtime.ParamLocationPath, digest)
 	if err != nil {
 		return nil, err
 	}
@@ -420,28 +308,6 @@ func NewGetArtifactDependenciesRequest(server string, artifact string, params *G
 		return nil, err
 	}
 
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.LatestSBOM != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "latestSBOM", runtime.ParamLocationQuery, *params.LatestSBOM); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -450,13 +316,13 @@ func NewGetArtifactDependenciesRequest(server string, artifact string, params *G
 	return req, nil
 }
 
-// NewGetArtifactVulnerabilitiesRequest generates requests for GetArtifactVulnerabilities
-func NewGetArtifactVulnerabilitiesRequest(server string, artifact string, params *GetArtifactVulnerabilitiesParams) (*http.Request, error) {
+// NewGetArtifactVulnsRequest generates requests for GetArtifactVulns
+func NewGetArtifactVulnsRequest(server string, digest string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "artifact", runtime.ParamLocationPath, artifact)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "digest", runtime.ParamLocationPath, digest)
 	if err != nil {
 		return nil, err
 	}
@@ -476,28 +342,6 @@ func NewGetArtifactVulnerabilitiesRequest(server string, artifact string, params
 		return nil, err
 	}
 
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.LatestSBOM != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "latestSBOM", runtime.ParamLocationQuery, *params.LatestSBOM); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -506,8 +350,8 @@ func NewGetArtifactVulnerabilitiesRequest(server string, artifact string, params
 	return req, nil
 }
 
-// NewGetPackagePurlsByPurlRequest generates requests for GetPackagePurlsByPurl
-func NewGetPackagePurlsByPurlRequest(server string, purl string) (*http.Request, error) {
+// NewGetPackagePurlsRequest generates requests for GetPackagePurls
+func NewGetPackagePurlsRequest(server string, purl string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -540,8 +384,8 @@ func NewGetPackagePurlsByPurlRequest(server string, purl string) (*http.Request,
 	return req, nil
 }
 
-// NewGetPackageDependenciesByPurlRequest generates requests for GetPackageDependenciesByPurl
-func NewGetPackageDependenciesByPurlRequest(server string, purl string, params *GetPackageDependenciesByPurlParams) (*http.Request, error) {
+// NewGetPackageDepsRequest generates requests for GetPackageDeps
+func NewGetPackageDepsRequest(server string, purl string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -566,28 +410,6 @@ func NewGetPackageDependenciesByPurlRequest(server string, purl string, params *
 		return nil, err
 	}
 
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.LatestSBOM != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "latestSBOM", runtime.ParamLocationQuery, *params.LatestSBOM); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -596,8 +418,8 @@ func NewGetPackageDependenciesByPurlRequest(server string, purl string, params *
 	return req, nil
 }
 
-// NewGetPackageVulnerabilitiesByPurlRequest generates requests for GetPackageVulnerabilitiesByPurl
-func NewGetPackageVulnerabilitiesByPurlRequest(server string, purl string, params *GetPackageVulnerabilitiesByPurlParams) (*http.Request, error) {
+// NewGetPackageVulnsRequest generates requests for GetPackageVulns
+func NewGetPackageVulnsRequest(server string, purl string, params *GetPackageVulnsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -625,9 +447,9 @@ func NewGetPackageVulnerabilitiesByPurlRequest(server string, purl string, param
 	if params != nil {
 		queryValues := queryURL.Query()
 
-		if params.LatestSBOM != nil {
+		if params.IncludeDependencies != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "latestSBOM", runtime.ParamLocationQuery, *params.LatestSBOM); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeDependencies", runtime.ParamLocationQuery, *params.IncludeDependencies); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -701,23 +523,20 @@ type ClientWithResponsesInterface interface {
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
-	// RetrieveDependenciesWithResponse request
-	RetrieveDependenciesWithResponse(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*RetrieveDependenciesResponse, error)
+	// GetArtifactDepsWithResponse request
+	GetArtifactDepsWithResponse(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*GetArtifactDepsResponse, error)
 
-	// GetArtifactDependenciesWithResponse request
-	GetArtifactDependenciesWithResponse(ctx context.Context, artifact string, params *GetArtifactDependenciesParams, reqEditors ...RequestEditorFn) (*GetArtifactDependenciesResponse, error)
+	// GetArtifactVulnsWithResponse request
+	GetArtifactVulnsWithResponse(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*GetArtifactVulnsResponse, error)
 
-	// GetArtifactVulnerabilitiesWithResponse request
-	GetArtifactVulnerabilitiesWithResponse(ctx context.Context, artifact string, params *GetArtifactVulnerabilitiesParams, reqEditors ...RequestEditorFn) (*GetArtifactVulnerabilitiesResponse, error)
+	// GetPackagePurlsWithResponse request
+	GetPackagePurlsWithResponse(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*GetPackagePurlsResponse, error)
 
-	// GetPackagePurlsByPurlWithResponse request
-	GetPackagePurlsByPurlWithResponse(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*GetPackagePurlsByPurlResponse, error)
+	// GetPackageDepsWithResponse request
+	GetPackageDepsWithResponse(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*GetPackageDepsResponse, error)
 
-	// GetPackageDependenciesByPurlWithResponse request
-	GetPackageDependenciesByPurlWithResponse(ctx context.Context, purl string, params *GetPackageDependenciesByPurlParams, reqEditors ...RequestEditorFn) (*GetPackageDependenciesByPurlResponse, error)
-
-	// GetPackageVulnerabilitiesByPurlWithResponse request
-	GetPackageVulnerabilitiesByPurlWithResponse(ctx context.Context, purl string, params *GetPackageVulnerabilitiesByPurlParams, reqEditors ...RequestEditorFn) (*GetPackageVulnerabilitiesByPurlResponse, error)
+	// GetPackageVulnsWithResponse request
+	GetPackageVulnsWithResponse(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*GetPackageVulnsResponse, error)
 }
 
 type AnalyzeDependenciesResponse struct {
@@ -767,7 +586,7 @@ func (r HealthCheckResponse) StatusCode() int {
 	return 0
 }
 
-type RetrieveDependenciesResponse struct {
+type GetArtifactDepsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *PurlList
@@ -777,7 +596,7 @@ type RetrieveDependenciesResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveDependenciesResponse) Status() string {
+func (r GetArtifactDepsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -785,47 +604,24 @@ func (r RetrieveDependenciesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveDependenciesResponse) StatusCode() int {
+func (r GetArtifactDepsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetArtifactDependenciesResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *PurlList
-	JSON400      *BadRequest
-	JSON500      *InternalServerError
-}
-
-// Status returns HTTPResponse.Status
-func (r GetArtifactDependenciesResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetArtifactDependenciesResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetArtifactVulnerabilitiesResponse struct {
+type GetArtifactVulnsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VulnerabilityList
 	JSON400      *BadRequest
 	JSON500      *InternalServerError
+	JSON502      *BadGateway
 }
 
 // Status returns HTTPResponse.Status
-func (r GetArtifactVulnerabilitiesResponse) Status() string {
+func (r GetArtifactVulnsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -833,47 +629,24 @@ func (r GetArtifactVulnerabilitiesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetArtifactVulnerabilitiesResponse) StatusCode() int {
+func (r GetArtifactVulnsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetPackagePurlsByPurlResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *[]string
-	JSON400      *BadRequest
-	JSON500      *InternalServerError
-}
-
-// Status returns HTTPResponse.Status
-func (r GetPackagePurlsByPurlResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetPackagePurlsByPurlResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetPackageDependenciesByPurlResponse struct {
+type GetPackagePurlsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *PurlList
 	JSON400      *BadRequest
 	JSON500      *InternalServerError
+	JSON502      *BadGateway
 }
 
 // Status returns HTTPResponse.Status
-func (r GetPackageDependenciesByPurlResponse) Status() string {
+func (r GetPackagePurlsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -881,23 +654,24 @@ func (r GetPackageDependenciesByPurlResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetPackageDependenciesByPurlResponse) StatusCode() int {
+func (r GetPackagePurlsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetPackageVulnerabilitiesByPurlResponse struct {
+type GetPackageDepsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *VulnerabilityList
+	JSON200      *PurlList
 	JSON400      *BadRequest
 	JSON500      *InternalServerError
+	JSON502      *BadGateway
 }
 
 // Status returns HTTPResponse.Status
-func (r GetPackageVulnerabilitiesByPurlResponse) Status() string {
+func (r GetPackageDepsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -905,7 +679,32 @@ func (r GetPackageVulnerabilitiesByPurlResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetPackageVulnerabilitiesByPurlResponse) StatusCode() int {
+func (r GetPackageDepsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPackageVulnsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *VulnerabilityList
+	JSON400      *BadRequest
+	JSON500      *InternalServerError
+	JSON502      *BadGateway
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPackageVulnsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPackageVulnsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -930,58 +729,49 @@ func (c *ClientWithResponses) HealthCheckWithResponse(ctx context.Context, reqEd
 	return ParseHealthCheckResponse(rsp)
 }
 
-// RetrieveDependenciesWithResponse request returning *RetrieveDependenciesResponse
-func (c *ClientWithResponses) RetrieveDependenciesWithResponse(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*RetrieveDependenciesResponse, error) {
-	rsp, err := c.RetrieveDependencies(ctx, params, reqEditors...)
+// GetArtifactDepsWithResponse request returning *GetArtifactDepsResponse
+func (c *ClientWithResponses) GetArtifactDepsWithResponse(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*GetArtifactDepsResponse, error) {
+	rsp, err := c.GetArtifactDeps(ctx, digest, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveDependenciesResponse(rsp)
+	return ParseGetArtifactDepsResponse(rsp)
 }
 
-// GetArtifactDependenciesWithResponse request returning *GetArtifactDependenciesResponse
-func (c *ClientWithResponses) GetArtifactDependenciesWithResponse(ctx context.Context, artifact string, params *GetArtifactDependenciesParams, reqEditors ...RequestEditorFn) (*GetArtifactDependenciesResponse, error) {
-	rsp, err := c.GetArtifactDependencies(ctx, artifact, params, reqEditors...)
+// GetArtifactVulnsWithResponse request returning *GetArtifactVulnsResponse
+func (c *ClientWithResponses) GetArtifactVulnsWithResponse(ctx context.Context, digest string, reqEditors ...RequestEditorFn) (*GetArtifactVulnsResponse, error) {
+	rsp, err := c.GetArtifactVulns(ctx, digest, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetArtifactDependenciesResponse(rsp)
+	return ParseGetArtifactVulnsResponse(rsp)
 }
 
-// GetArtifactVulnerabilitiesWithResponse request returning *GetArtifactVulnerabilitiesResponse
-func (c *ClientWithResponses) GetArtifactVulnerabilitiesWithResponse(ctx context.Context, artifact string, params *GetArtifactVulnerabilitiesParams, reqEditors ...RequestEditorFn) (*GetArtifactVulnerabilitiesResponse, error) {
-	rsp, err := c.GetArtifactVulnerabilities(ctx, artifact, params, reqEditors...)
+// GetPackagePurlsWithResponse request returning *GetPackagePurlsResponse
+func (c *ClientWithResponses) GetPackagePurlsWithResponse(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*GetPackagePurlsResponse, error) {
+	rsp, err := c.GetPackagePurls(ctx, purl, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetArtifactVulnerabilitiesResponse(rsp)
+	return ParseGetPackagePurlsResponse(rsp)
 }
 
-// GetPackagePurlsByPurlWithResponse request returning *GetPackagePurlsByPurlResponse
-func (c *ClientWithResponses) GetPackagePurlsByPurlWithResponse(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*GetPackagePurlsByPurlResponse, error) {
-	rsp, err := c.GetPackagePurlsByPurl(ctx, purl, reqEditors...)
+// GetPackageDepsWithResponse request returning *GetPackageDepsResponse
+func (c *ClientWithResponses) GetPackageDepsWithResponse(ctx context.Context, purl string, reqEditors ...RequestEditorFn) (*GetPackageDepsResponse, error) {
+	rsp, err := c.GetPackageDeps(ctx, purl, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetPackagePurlsByPurlResponse(rsp)
+	return ParseGetPackageDepsResponse(rsp)
 }
 
-// GetPackageDependenciesByPurlWithResponse request returning *GetPackageDependenciesByPurlResponse
-func (c *ClientWithResponses) GetPackageDependenciesByPurlWithResponse(ctx context.Context, purl string, params *GetPackageDependenciesByPurlParams, reqEditors ...RequestEditorFn) (*GetPackageDependenciesByPurlResponse, error) {
-	rsp, err := c.GetPackageDependenciesByPurl(ctx, purl, params, reqEditors...)
+// GetPackageVulnsWithResponse request returning *GetPackageVulnsResponse
+func (c *ClientWithResponses) GetPackageVulnsWithResponse(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*GetPackageVulnsResponse, error) {
+	rsp, err := c.GetPackageVulns(ctx, purl, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetPackageDependenciesByPurlResponse(rsp)
-}
-
-// GetPackageVulnerabilitiesByPurlWithResponse request returning *GetPackageVulnerabilitiesByPurlResponse
-func (c *ClientWithResponses) GetPackageVulnerabilitiesByPurlWithResponse(ctx context.Context, purl string, params *GetPackageVulnerabilitiesByPurlParams, reqEditors ...RequestEditorFn) (*GetPackageVulnerabilitiesByPurlResponse, error) {
-	rsp, err := c.GetPackageVulnerabilitiesByPurl(ctx, purl, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetPackageVulnerabilitiesByPurlResponse(rsp)
+	return ParseGetPackageVulnsResponse(rsp)
 }
 
 // ParseAnalyzeDependenciesResponse parses an HTTP response from a AnalyzeDependenciesWithResponse call
@@ -1057,15 +847,15 @@ func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) 
 	return response, nil
 }
 
-// ParseRetrieveDependenciesResponse parses an HTTP response from a RetrieveDependenciesWithResponse call
-func ParseRetrieveDependenciesResponse(rsp *http.Response) (*RetrieveDependenciesResponse, error) {
+// ParseGetArtifactDepsResponse parses an HTTP response from a GetArtifactDepsWithResponse call
+func ParseGetArtifactDepsResponse(rsp *http.Response) (*GetArtifactDepsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveDependenciesResponse{
+	response := &GetArtifactDepsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1104,55 +894,15 @@ func ParseRetrieveDependenciesResponse(rsp *http.Response) (*RetrieveDependencie
 	return response, nil
 }
 
-// ParseGetArtifactDependenciesResponse parses an HTTP response from a GetArtifactDependenciesWithResponse call
-func ParseGetArtifactDependenciesResponse(rsp *http.Response) (*GetArtifactDependenciesResponse, error) {
+// ParseGetArtifactVulnsResponse parses an HTTP response from a GetArtifactVulnsWithResponse call
+func ParseGetArtifactVulnsResponse(rsp *http.Response) (*GetArtifactVulnsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetArtifactDependenciesResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest PurlList
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest BadRequest
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest InternalServerError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetArtifactVulnerabilitiesResponse parses an HTTP response from a GetArtifactVulnerabilitiesWithResponse call
-func ParseGetArtifactVulnerabilitiesResponse(rsp *http.Response) (*GetArtifactVulnerabilitiesResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetArtifactVulnerabilitiesResponse{
+	response := &GetArtifactVulnsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1179,60 +929,27 @@ func ParseGetArtifactVulnerabilitiesResponse(rsp *http.Response) (*GetArtifactVu
 		}
 		response.JSON500 = &dest
 
-	}
-
-	return response, nil
-}
-
-// ParseGetPackagePurlsByPurlResponse parses an HTTP response from a GetPackagePurlsByPurlWithResponse call
-func ParseGetPackagePurlsByPurlResponse(rsp *http.Response) (*GetPackagePurlsByPurlResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetPackagePurlsByPurlResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []string
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest BadRequest
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest InternalServerError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
+		response.JSON502 = &dest
 
 	}
 
 	return response, nil
 }
 
-// ParseGetPackageDependenciesByPurlResponse parses an HTTP response from a GetPackageDependenciesByPurlWithResponse call
-func ParseGetPackageDependenciesByPurlResponse(rsp *http.Response) (*GetPackageDependenciesByPurlResponse, error) {
+// ParseGetPackagePurlsResponse parses an HTTP response from a GetPackagePurlsWithResponse call
+func ParseGetPackagePurlsResponse(rsp *http.Response) (*GetPackagePurlsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetPackageDependenciesByPurlResponse{
+	response := &GetPackagePurlsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1259,20 +976,74 @@ func ParseGetPackageDependenciesByPurlResponse(rsp *http.Response) (*GetPackageD
 		}
 		response.JSON500 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
 	}
 
 	return response, nil
 }
 
-// ParseGetPackageVulnerabilitiesByPurlResponse parses an HTTP response from a GetPackageVulnerabilitiesByPurlWithResponse call
-func ParseGetPackageVulnerabilitiesByPurlResponse(rsp *http.Response) (*GetPackageVulnerabilitiesByPurlResponse, error) {
+// ParseGetPackageDepsResponse parses an HTTP response from a GetPackageDepsWithResponse call
+func ParseGetPackageDepsResponse(rsp *http.Response) (*GetPackageDepsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetPackageVulnerabilitiesByPurlResponse{
+	response := &GetPackageDepsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PurlList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPackageVulnsResponse parses an HTTP response from a GetPackageVulnsWithResponse call
+func ParseGetPackageVulnsResponse(rsp *http.Response) (*GetPackageVulnsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPackageVulnsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1298,6 +1069,13 @@ func ParseGetPackageVulnerabilitiesByPurlResponse(rsp *http.Response) (*GetPacka
 			return nil, err
 		}
 		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
 
 	}
 

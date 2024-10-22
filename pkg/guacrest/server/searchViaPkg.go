@@ -22,6 +22,8 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/helpers"
+	"github.com/guacsec/guac/pkg/logging"
+	"net/url"
 )
 
 // searchVulnerabilitiesViaPkg searches for vulnerabilities associated with the given package
@@ -38,12 +40,34 @@ import (
 //
 // The function performs a breadth-first search starting from the given package,
 // collecting vulnerabilities for each package and its dependencies.
-func searchVulnerabilitiesViaPkg(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec, searchSoftware bool, startSBOM model.AllHasSBOMTree) ([]gen.Vulnerability, error) {
+func searchVulnerabilitiesViaPkg(ctx context.Context, gqlClient graphql.Client, purl string, includeDependencies *bool) ([]gen.Vulnerability, error) {
+	logger := logging.FromContext(ctx)
 	var vulnerabilities []gen.Vulnerability
 
-	pkgs, err := searchDependencies(ctx, gqlClient, pkgSpec, searchSoftware, startSBOM)
+	unescapedPurl, err := url.QueryUnescape(purl)
 	if err != nil {
-		return nil, fmt.Errorf("error searching dependencies: %w", err)
+		return nil, fmt.Errorf("failed to unescape package url: %w", err)
+	}
+	pkg, err := helpers.FindPackageWithPurl(ctx, gqlClient, unescapedPurl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find package with purl: %w", err)
+	}
+
+	var n = &pkg
+
+	pkgs, err := mapPkgNodesToPurls(ctx, gqlClient, []node{n})
+	if err != nil {
+		return nil, fmt.Errorf("failed to map package nodes to purls: %w", err)
+	}
+
+	if includeDependencies != nil && *includeDependencies {
+		dependencies, err := GetDepsForPackage(ctx, gqlClient, purl)
+		if err != nil {
+			return nil, fmt.Errorf("error searching dependencies: %w", err)
+		}
+		for k, v := range dependencies {
+			pkgs[k] = v
+		}
 	}
 
 	for pkg := range pkgs {
@@ -53,7 +77,8 @@ func searchVulnerabilitiesViaPkg(ctx context.Context, gqlClient graphql.Client, 
 			},
 		})
 		if err != nil {
-			return nil, fmt.Errorf("error fetching vulnerabilities from package spec: %w", err)
+			logger.Errorf("error fetching vulnerabilities from package spec: %v", err)
+			return nil, helpers.Err502
 		}
 
 		for _, vuln := range vulns.CertifyVuln {
@@ -72,13 +97,7 @@ func searchVulnerabilitiesViaPkg(ctx context.Context, gqlClient graphql.Client, 
 				},
 			}
 
-			for _, namespace := range vuln.Package.Namespaces {
-				for _, name := range namespace.Names {
-					for _, version := range name.Versions {
-						vulnerability.Packages = append(vulnerability.Packages, version.Purl)
-					}
-				}
-			}
+			vulnerability.Package = vuln.Package.Namespaces[0].Names[0].Versions[0].Purl
 
 			for _, vIDs := range vuln.Vulnerability.VulnerabilityIDs {
 				vulnerability.Vulnerability.VulnerabilityIDs = append(vulnerability.Vulnerability.VulnerabilityIDs, vIDs.VulnerabilityID)
@@ -89,97 +108,4 @@ func searchVulnerabilitiesViaPkg(ctx context.Context, gqlClient graphql.Client, 
 	}
 
 	return vulnerabilities, nil
-}
-
-func searchDependencies(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec, searchSoftware bool, startSBOM model.AllHasSBOMTree) (map[string]string, error) {
-	dependencies := make(map[string]string)
-
-	pkgs, err := model.Packages(ctx, gqlClient, pkgSpec)
-	if err != nil {
-		return nil, fmt.Errorf("error searching packages: %w", err)
-	}
-
-	for _, pkg := range pkgs.Packages {
-		for _, ns := range pkg.Namespaces {
-			for _, name := range ns.Names {
-				for _, version := range name.Versions {
-					dependencies[version.Id] = version.Purl
-				}
-			}
-		}
-	}
-
-	doneFirst := false
-
-	queue := []model.PkgSpec{pkgSpec}
-	depsFinished := make(map[string]bool)
-
-	for len(queue) > 0 {
-		pop := queue[0]
-		queue = queue[1:]
-
-		if pop.Id != nil {
-			if depsFinished[*pop.Id] {
-				continue
-			}
-			depsFinished[*pop.Id] = true
-		}
-
-		hasSboms, err := model.HasSBOMs(ctx, gqlClient, model.HasSBOMSpec{
-			Subject: &model.PackageOrArtifactSpec{
-				Package: &pop,
-			},
-		})
-
-		if err != nil {
-			return nil, fmt.Errorf("error fetching hasSboms from package spec %+v: %w", pop, err)
-		}
-
-		if !doneFirst && searchSoftware {
-			hasSboms = &model.HasSBOMsResponse{
-				HasSBOM: []model.HasSBOMsHasSBOM{
-					{
-						AllHasSBOMTree: startSBOM,
-					},
-				},
-			}
-		}
-
-		doneFirst = true
-
-		if !searchSoftware {
-			for _, hasSbom := range hasSboms.HasSBOM {
-				for _, dep := range hasSbom.IncludedDependencies {
-					dependencies[dep.Package.Namespaces[0].Names[0].Versions[0].Id] = dep.Package.Namespaces[0].Names[0].Versions[0].Purl
-					queue = append(queue, model.PkgSpec{
-						Id: &dep.Package.Namespaces[0].Names[0].Versions[0].Id,
-					})
-				}
-			}
-		} else {
-			for _, hasSbom := range hasSboms.HasSBOM {
-				for _, software := range hasSbom.IncludedSoftware {
-					switch s := software.(type) {
-					case *model.AllHasSBOMTreeIncludedSoftwarePackage:
-						dependencies[s.Namespaces[0].Names[0].Versions[0].Id] = s.Namespaces[0].Names[0].Versions[0].Purl
-						queue = append(queue, model.PkgSpec{
-							Id: &s.Namespaces[0].Names[0].Versions[0].Id,
-						})
-					case *model.AllHasSBOMTreeIncludedSoftwareArtifact:
-						// convert artifact to pkg, then use the pkg id to get the vulnerability
-						pkg, err := helpers.GetPkgFromArtifact(gqlClient, s.Id)
-						if err != nil {
-							return nil, fmt.Errorf("failed to get package attached to artifact %s: %w", s.Id, err)
-						}
-						dependencies[pkg.Namespaces[0].Names[0].Versions[0].Id] = pkg.Namespaces[0].Names[0].Versions[0].Purl
-						queue = append(queue, model.PkgSpec{
-							Id: &pkg.Namespaces[0].Names[0].Versions[0].Id,
-						})
-					}
-				}
-			}
-		}
-	}
-
-	return dependencies, nil
 }

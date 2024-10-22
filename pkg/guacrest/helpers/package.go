@@ -72,25 +72,7 @@ func FindPackageWithPurl(ctx context.Context, gqlClient graphql.Client,
 	return response.GetPackages()[0].AllPkgTree.GetNamespaces()[0].GetNames()[0].GetVersions()[0], nil
 }
 
-func ConvertPkgInputSpecToPkgSpec(pkgInput *model.PkgInputSpec) model.PkgSpec {
-	pkgSpec := model.PkgSpec{
-		Type: &pkgInput.Type,
-		Name: &pkgInput.Name,
-	}
-
-	if pkgInput.Namespace != nil && *pkgInput.Namespace != "" {
-		pkgSpec.Namespace = pkgInput.Namespace
-	}
-	if pkgInput.Version != nil && *pkgInput.Version != "" {
-		pkgSpec.Version = pkgInput.Version
-	}
-	if pkgInput.Subpath != nil && *pkgInput.Subpath != "" {
-		pkgSpec.Subpath = pkgInput.Subpath
-	}
-
-	return pkgSpec
-}
-
+// GetPurlsForPkg returns all purls associated with the pkgSpec passed in.
 func GetPurlsForPkg(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec) ([]string, []string, error) {
 	var purls []string
 	var packageIds []string

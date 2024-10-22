@@ -19,208 +19,90 @@ package server
 
 import (
 	"context"
-	gen "github.com/guacsec/guac/pkg/guacrest/generated"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	clients "github.com/guacsec/guac/internal/testing/graphqlClients"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	gen "github.com/guacsec/guac/pkg/guacrest/generated"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
-// TestSearchVulnerabilitiesViaPkg_BasicRetrieval tests the searchVulnerabilitiesViaPkg function
-func TestSearchVulnerabilitiesViaPkg_BasicRetrieval(t *testing.T) {
-	ctx := context.Background()
-	gqlClient := clients.SetupTest(t)
-
-	// Ingest main package
-	pkgNS := "github.com/hashicorp/consul"
-	pkgVersion := "v1.0.0"
-	pkgName := "sdk"
-	pkgType := "golang"
-	pkgInput := model.IDorPkgInput{
-		PackageInput: &model.PkgInputSpec{
-			Type:      pkgType,
-			Namespace: &pkgNS,
-			Name:      pkgName,
-			Version:   &pkgVersion,
-		},
-	}
-
-	_, err := model.IngestPackage(ctx, gqlClient, pkgInput)
-	if err != nil {
-		t.Fatalf("unable to ingest package: %v", err)
-	}
-
-	// Ingest a vulnerability
-	vulnType := "osv"
-	vulnID := "osv-2022-0001"
-	vulnSpec := model.VulnerabilityInputSpec{
-		Type:            vulnType,
-		VulnerabilityID: vulnID,
-	}
-
-	vulnInput := model.IDorVulnerabilityInput{
-		VulnerabilityInput: &vulnSpec,
-	}
-
-	_, err = model.IngestVulnerability(ctx, gqlClient, vulnInput)
-	if err != nil {
-		t.Fatalf("unable to ingest vulnerability: %v", err)
-	}
-
-	// Ingest CertifyVuln relationship between the package and the vulnerability
-	scanner := "test-scanner"
-	dbURI := "https://vuln-db.example.com"
-	timeScanned := time.Now()
-	certifyVulnInput := model.ScanMetadataInput{
-		TimeScanned:    timeScanned,
-		DbUri:          dbURI,
-		ScannerUri:     scanner,
-		ScannerVersion: "1.0.0",
-		Collector:      "test-collector",
-		Origin:         "test-origin",
-	}
-
-	_, err = model.IngestCertifyVulnPkg(ctx, gqlClient, pkgInput, vulnInput, certifyVulnInput)
-	if err != nil {
-		t.Fatalf("unable to ingest CertifyVuln: %v", err)
-	}
-
-	// Prepare the package specification for searchVulnerabilitiesViaPkg
-	pkgSpec := model.PkgSpec{
-		Type:      &pkgType,
-		Namespace: &pkgNS,
-		Name:      &pkgName,
-		Version:   &pkgVersion,
-	}
-
-	// Call searchVulnerabilitiesViaPkg
-	vulnerabilities, err := searchVulnerabilitiesViaPkg(ctx, gqlClient, pkgSpec, false, model.AllHasSBOMTree{})
-	if err != nil {
-		t.Fatalf("searchVulnerabilitiesViaPkg failed: %v", err)
-	}
-
-	// Define expected vulnerabilities
-	expectedVulnerabilities := []gen.Vulnerability{
+func TestSearchVulnerabilitiesViaPkg(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	tests := []struct {
+		name                string
+		data                clients.GuacData
+		purl                string
+		includeDependencies bool
+		startSBOM           model.AllHasSBOMTree
+		expected            []gen.Vulnerability
+	}{
 		{
-			Metadata: gen.ScanMetadata{
-				Collector:      &certifyVulnInput.Collector,
-				DbUri:          &certifyVulnInput.DbUri,
-				DbVersion:      &certifyVulnInput.DbVersion,
-				Origin:         &certifyVulnInput.Origin,
-				ScannerUri:     &certifyVulnInput.ScannerUri,
-				ScannerVersion: &certifyVulnInput.ScannerVersion,
-				TimeScanned:    &certifyVulnInput.TimeScanned,
-			},
-			Vulnerability: gen.VulnerabilityDetails{
-				Type: &vulnInput.VulnerabilityInput.Type,
-				VulnerabilityIDs: []string{
-					vulnID,
+			name: "Basic vulnerability retrieval",
+			data: clients.GuacData{
+				Packages: []string{
+					"pkg:golang/github.com/hashicorp/consul/sdk@v1.0.0",
+				},
+				Vulnerabilities: []string{
+					"osv/osv-2022-0001",
+				},
+				CertifyVulns: []clients.CertifyVuln{
+					{
+						Package:       "pkg:golang/github.com/hashicorp/consul/sdk@v1.0.0",
+						Vulnerability: "osv/osv-2022-0001",
+						Metadata: &model.ScanMetadataInput{
+							TimeScanned:    time.Now(),
+							DbUri:          "https://vuln-db.example.com",
+							DbVersion:      "1.0.0",
+							ScannerUri:     "test-scanner",
+							ScannerVersion: "1.0.0",
+							Origin:         "test-origin",
+							Collector:      "test-collector",
+						},
+					},
 				},
 			},
-			Packages: []string{
-				"pkg:golang/github.com/hashicorp/consul/sdk@v1.0.0",
+			purl:                "pkg%3Agolang%2Fgithub.com%2Fhashicorp%2Fconsul%2Fsdk%40v1.0.0", // url encoded purl
+			includeDependencies: false,
+			startSBOM:           model.AllHasSBOMTree{},
+			expected: []gen.Vulnerability{
+				{
+					Metadata: gen.ScanMetadata{
+						TimeScanned:    ptrfrom.Time(time.Now()),
+						DbUri:          ptrfrom.String("https://vuln-db.example.com"),
+						DbVersion:      ptrfrom.String("1.0.0"),
+						ScannerUri:     ptrfrom.String("test-scanner"),
+						ScannerVersion: ptrfrom.String("1.0.0"),
+						Origin:         ptrfrom.String("test-origin"),
+						Collector:      ptrfrom.String("test-collector"),
+					},
+					Vulnerability: gen.VulnerabilityDetails{
+						Type:             ptrfrom.String("osv"),
+						VulnerabilityIDs: []string{"osv-2022-0001"},
+					},
+					Package: "pkg:golang/github.com/hashicorp/consul/sdk@v1.0.0",
+				},
 			},
 		},
 	}
 
-	// Compare the results using cmp
-	if diff := cmp.Diff(expectedVulnerabilities, vulnerabilities); diff != "" {
-		t.Errorf("Vulnerabilities mismatch (-expected +got):\n%s", diff)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gqlClient := clients.SetupTest(t)
+			clients.Ingest(ctx, t, gqlClient, tt.data)
 
-// Test for basic dependency retrieval
-func TestSearchDependencies_BasicRetrieval(t *testing.T) {
-	ctx := context.Background()
-	gqlClient := clients.SetupTest(t)
+			vulnerabilities, err := searchVulnerabilitiesViaPkg(ctx, gqlClient, tt.purl, &tt.includeDependencies)
+			if err != nil {
+				t.Fatalf("searchVulnerabilitiesViaPkg returned unexpected error: %v", err)
+			}
 
-	// Ingest main package
-	pkgNS := "github.com/hashicorp/consul"
-	pkgVersion := "v1.0.0"
-	pkgInput := model.IDorPkgInput{
-		PackageInput: &model.PkgInputSpec{
-			Type:      "golang",
-			Namespace: &pkgNS,
-			Name:      "sdk",
-			Version:   &pkgVersion,
-		},
-	}
-
-	pkgID, err := model.IngestPackage(ctx, gqlClient, pkgInput)
-	if err != nil {
-		t.Fatalf("unable to ingest package: %v", err)
-	}
-
-	// Ingest dependent package
-	depPkgNS := "github.com/hashicorp/consul-dep"
-	depPkgVersion := "v1.0.0-dep"
-	depPkgInput := model.IDorPkgInput{
-		PackageInput: &model.PkgInputSpec{
-			Type:      "golang",
-			Namespace: &depPkgNS,
-			Name:      "dependency",
-			Version:   &depPkgVersion,
-		},
-	}
-
-	_, err = model.IngestPackage(ctx, gqlClient, depPkgInput)
-	if err != nil {
-		t.Fatalf("unable to ingest dependency package: %v", err)
-	}
-
-	depID, err := model.IngestIsDependency(ctx, gqlClient, pkgInput, depPkgInput, model.IsDependencyInputSpec{
-		DependencyType: model.DependencyTypeDirect,
-	})
-	if err != nil {
-		t.Fatalf("unable to ingest dependency node: %v", err)
-	}
-
-	// Ingest a SBOM that includes the dependency
-	hasSBOMInput := model.HasSBOMInputSpec{
-		KnownSince: time.Now(),
-	}
-
-	_, err = model.IngestHasSBOMPkg(ctx, gqlClient, model.IDorPkgInput{PackageInput: &model.PkgInputSpec{
-		Type:      "golang",
-		Namespace: &pkgNS,
-		Name:      "sdk",
-		Version:   &pkgVersion,
-	}}, hasSBOMInput, model.HasSBOMIncludesInputSpec{
-		Dependencies: []string{depID.IngestDependency},
-		Packages:     []string{},
-		Artifacts:    []string{},
-		Occurrences:  []string{},
-	})
-	if err != nil {
-		log.Fatalf("Failed to ingest HasSBOM: %v", err)
-	}
-
-	pkgType := "golang"
-	pkgName := "sdk"
-	// Prepare the package specification for searchDependencies
-	pkgSpec := model.PkgSpec{
-		Type:      &pkgType,
-		Namespace: &pkgNS,
-		Name:      &pkgName,
-		Version:   &pkgVersion,
-	}
-
-	// Call searchDependencies
-	dependencies, err := searchDependencies(ctx, gqlClient, pkgSpec, false, model.AllHasSBOMTree{})
-	if err != nil {
-		t.Fatalf("searchDependencies failed: %v", err)
-	}
-
-	// Define expected dependencies
-	expectedDependencies := map[string]string{
-		pkgID.IngestPackage.PackageVersionID: "pkg:golang/github.com/hashicorp/consul/sdk@v1.0.0",
-	}
-
-	// Compare the results using cmp
-	if diff := cmp.Diff(expectedDependencies, dependencies); diff != "" {
-		t.Errorf("Dependencies mismatch (-expected +got):\n%s", diff)
+			if diff := cmp.Diff(tt.expected, vulnerabilities, cmpopts.EquateApproxTime(time.Second)); diff != "" {
+				t.Errorf("searchVulnerabilitiesViaPkg mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }

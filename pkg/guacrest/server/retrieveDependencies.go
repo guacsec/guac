@@ -1,44 +1,58 @@
+//
+// Copyright 2024 The GUAC Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package server
 
 import (
 	"context"
 	"fmt"
+	assembler_helpers "github.com/guacsec/guac/pkg/assembler/helpers"
+	"golang.org/x/exp/maps"
+	"net/url"
 
 	"github.com/Khan/genqlient/graphql"
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	assembler_helpers "github.com/guacsec/guac/pkg/assembler/helpers"
-	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/helpers"
-	"github.com/guacsec/guac/pkg/guacrest/pagination"
 	"github.com/guacsec/guac/pkg/logging"
-	"golang.org/x/exp/maps"
 )
 
-// node is implemented by all graphQL client types
+// node is implemented by all GraphQL client types
 type node interface {
 	GetId() string
 }
 
 // edgeGen defines the edges used by the transitive dependencies graph traversal.
 type edgeGen interface {
-	// getDirectDependencies returns the nouns that are direct dependencies of the input noun.
+	// getDirectDependencies returns the nodes that are direct dependencies of the input noun.
 	getDirectDependencies(ctx context.Context, v node) ([]node, error)
 
-	// getEquivalentNodes returns the nouns that are considered equivalent to the input noun.
+	// getEquivalentNodes returns the nodes that are considered equivalent to the input noun.
 	getEquivalentNodes(ctx context.Context, v node) ([]node, error)
 }
 
-// byDigest is an edgeGen that observes relationships between nouns when they are
+// byDigest is a edgeGen that observes relationships between noun when they are
 // linked by digest.
 //
 // The dependency edges are:
-// - artifact -> sbom -> package
-// - artifact -> sbom -> artifact
-// - artifact -> slsa -> artifact
+// - digest -> sbom -> package
+// - digest -> sbom -> digest
+// - digest -> slsa -> digest
 //
 // And the equivalence edges are:
-// - artifact -> IsOccurrence -> package
-// - artifact -> HashEquals -> artifact
+// - digest -> IsOccurrence -> package
+// - digest -> HashEquals -> digest
 //
 // byDigest lazily generates edges using calls to the GraphQL server, instead
 // of precomputing the graph.
@@ -57,10 +71,10 @@ func newByDigest(gqlClient graphql.Client) byDigest {
 // It implements all edges defined by byDigest, in addition to the following:
 // dependency edges:
 // - package -> sbom -> package
-// - package -> sbom -> artifact
+// - package -> sbom -> digest
 //
 // equivalence edges:
-// - package -> IsOccurrence -> artifact
+// - package -> IsOccurrence -> digest
 //
 // byName lazily generates edges using calls to the GraphQL server, instead of
 // precomputing the graph.
@@ -73,7 +87,7 @@ func newByName(gqlClient graphql.Client) byName {
 	return byName{gqlClient: gqlClient, bd: newByDigest(gqlClient)}
 }
 
-/********* The graph traversal *********/
+//********* The graph traversal *********/
 
 func getTransitiveDependencies(
 	ctx context.Context,
@@ -92,27 +106,28 @@ func getTransitiveDependencies(
 	nodesEquivalentToStart := map[node]any{start: struct{}{}}
 
 	for len(queue) > 0 {
-		node := queue[0]
+		currentNode := queue[0]
 		queue = queue[1:]
 
-		if _, ok := visited[node.GetId()]; ok {
+		if _, ok := visited[currentNode.GetId()]; ok {
 			continue
 		}
-		visited[node.GetId()] = node
+		visited[currentNode.GetId()] = currentNode
 
-		adjacent, err := edges.getDirectDependencies(ctx, node)
+		// Get direct dependencies
+		adjacent, err := edges.getDirectDependencies(ctx, currentNode)
 		if err != nil {
 			return nil, err
 		}
 		queue = append(queue, adjacent...)
 
-		adjacent, err = edges.getEquivalentNodes(ctx, node)
+		adjacent, err = edges.getEquivalentNodes(ctx, currentNode)
 		if err != nil {
 			return nil, err
 		}
 		queue = append(queue, adjacent...)
 
-		if _, ok := nodesEquivalentToStart[node]; ok {
+		if _, ok := nodesEquivalentToStart[currentNode]; ok {
 			for _, equivalentNode := range adjacent {
 				nodesEquivalentToStart[equivalentNode] = struct{}{}
 			}
@@ -180,10 +195,10 @@ func (eg byName) getEquivalentNodes(ctx context.Context, v node) ([]node, error)
 	return neighborsTwoHops(ctx, eg.gqlClient, v, edgesToPredicates, edgesFromPredicates)
 }
 
-/********* Graphql helper functions *********/
+//********* GraphQL helper functions *********/
 
-// neighborsTwoHops calls the GraphQL Neighbors endpoint once with edgesToPredicates, and
-// then again on the result with edgesFromPredicates.
+// neighborsTwoHops calls the GraphQL Neighbors endpoint once with edgesToPredicates,
+// and then again on the result with edgesFromPredicates.
 func neighborsTwoHops(ctx context.Context, gqlClient graphql.Client, v node,
 	edgesToPredicates []gql.Edge, edgesFromPredicates []gql.Edge) ([]node, error) {
 	predicates, err := neighbors(ctx, gqlClient, v, edgesToPredicates)
@@ -207,7 +222,7 @@ func neighbors(ctx context.Context, gqlClient graphql.Client, v node, edges []gq
 	logger := logging.FromContext(ctx)
 	neighborsResponse, err := gql.Neighbors(ctx, gqlClient, v.GetId(), edges)
 	if err != nil {
-		logger.Errorf("Neighbors query returned err: ", err)
+		logger.Errorf("Neighbors query returned err: %v", err)
 		return nil, helpers.Err502
 	}
 	if neighborsResponse == nil {
@@ -230,9 +245,9 @@ func transformWithError[A any, B any](ctx context.Context, lst []A, f func(conte
 	return res, nil
 }
 
-// Returns the graphQL type that is nested in the neighbors response node. For package tries,
-// the leaf version node is returned. Only the types relevant to the retrieveDependecies
-// graph traversal are implemented.
+// neighborToNode returns the GraphQL type that is nested in the neighbors response node.
+// For package trees, the leaf version node is returned. Only the types relevant
+// to the retrieveDependencies graph traversal are implemented.
 func neighborToNode(ctx context.Context, neighborsNode gql.NeighborsNeighborsNode) (node, error) {
 	logger := logging.FromContext(ctx)
 	switch val := neighborsNode.(type) {
@@ -288,10 +303,9 @@ func neighborToNode(ctx context.Context, neighborsNode gql.NeighborsNeighborsNod
 	return nil, helpers.Err500
 }
 
-// Maps nodes in the input to purls, ignoring nodes that are not package version
-// nodes.
+// Maps nodes in the input to a map of "pkg id : purl", ignoring nodes that are not package version nodes.
 func mapPkgNodesToPurls(ctx context.Context, gqlClient graphql.Client,
-	nodes []node) ([]string, error) {
+	nodes []node) (map[string]string, error) {
 	logger := logging.FromContext(ctx)
 
 	// get the IDs of the package nodes
@@ -320,75 +334,80 @@ func mapPkgNodesToPurls(ctx context.Context, gqlClient graphql.Client,
 		logger.Warnf("GQL query \"nodes\" did not return the expected number of results")
 	}
 
-	// map the package tries to purls
-	purls := make([]string, 0, len(gqlNodes.GetNodes()))
+	// map the package tries to a map of "pkg id : purl"
+	purlMap := make(map[string]string)
 	for _, gqlNode := range gqlNodes.GetNodes() {
 		if v, ok := gqlNode.(*gql.NodesNodesPackage); ok {
 			purl := assembler_helpers.AllPkgTreeToPurl(&v.AllPkgTree)
-			purls = append(purls, purl)
+			purlMap[v.AllPkgTree.Namespaces[0].Names[0].Versions[0].Id] = purl
 		} else {
 			logger.Warnf("Nodes query returned an unexpected type: %T", *gqlNode.GetTypename())
 		}
 	}
+	return purlMap, nil
+}
+
+// GetDepsForPackage gets all direct and transitive dependencies for a given purl
+func GetDepsForPackage(
+	ctx context.Context,
+	gqlClient graphql.Client,
+	purl string,
+) (map[string]string, error) {
+	// Find the start node
+	unescapedPurl, err := url.QueryUnescape(purl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unescape package url: %w", err)
+	}
+	pkg, err := helpers.FindPackageWithPurl(ctx, gqlClient, unescapedPurl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find package with purl: %w", err)
+	}
+
+	edgeGenerator := newByName(gqlClient)
+	// Perform traversal
+	deps, err := getTransitiveDependencies(ctx, gqlClient, &pkg, edgeGenerator)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get dependencies: %w", err)
+	}
+
+	// Map nodes to PURLs
+	purls, err := mapPkgNodesToPurls(ctx, gqlClient, deps)
+	if err != nil {
+		return nil, fmt.Errorf("failed to map dependencies: %w", err)
+	}
+
 	return purls, nil
 }
 
-/********* The endpoint handler *********/
-func (s *DefaultServer) RetrieveDependencies(
+// GetDepsForArtifact gets all direct and transitive dependencies for a digest
+func GetDepsForArtifact(
 	ctx context.Context,
-	request gen.RetrieveDependenciesRequestObject,
-) (gen.RetrieveDependenciesResponseObject, error) {
+	gqlClient graphql.Client,
+	digest string,
+) (map[string]string, error) {
 	// Find the start node
-	var start node
-	if request.Params.Purl != nil {
-		pkg, err := helpers.FindPackageWithPurl(ctx, s.gqlClient, *request.Params.Purl)
-		if err != nil {
-			return handleErr(ctx, err), nil
-		}
-		start = &pkg
-	} else if request.Params.Digest != nil {
-		artifact, err := helpers.FindArtifactWithDigest(ctx, s.gqlClient, *request.Params.Digest)
-		if err != nil {
-			return handleErr(ctx, err), nil
-		}
-		start = &artifact
-	} else {
-		return gen.RetrieveDependencies400JSONResponse{
-			BadRequestJSONResponse: gen.BadRequestJSONResponse{
-				Message: "Neither a purl or a digest argument was provided",
-			}}, nil
+	unescapedDigest, err := url.QueryUnescape(digest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unescape digest: %w", err)
+	}
+	art, err := helpers.FindArtifactWithDigest(ctx, gqlClient, unescapedDigest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find digest: %w", err)
 	}
 
-	// Select the edgeGen. The default is byDigest
-	var edgeGenerator edgeGen
-	cond := request.Params.LinkCondition
-	if cond == nil {
-		edgeGenerator = newByDigest(s.gqlClient)
-	} else if *cond == gen.Name {
-		edgeGenerator = newByName(s.gqlClient)
-	} else if *cond == gen.Digest {
-		edgeGenerator = newByDigest(s.gqlClient)
-	} else {
-		err := fmt.Errorf("Unrecognized linkCondition: %s", *request.Params.LinkCondition)
-		return handleErr(ctx, err), nil
+	edgeGenerator := newByDigest(gqlClient)
+
+	// Perform traversal
+	deps, err := getTransitiveDependencies(ctx, gqlClient, &art, edgeGenerator)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get dependencies: %w", err)
 	}
 
-	// Compute the result and map to purls
-	deps, err := getTransitiveDependencies(ctx, s.gqlClient, start, edgeGenerator)
+	// Map nodes to PURLs
+	purls, err := mapPkgNodesToPurls(ctx, gqlClient, deps)
 	if err != nil {
-		return handleErr(ctx, err), nil
-	}
-	purls, err := mapPkgNodesToPurls(ctx, s.gqlClient, deps)
-	if err != nil {
-		return handleErr(ctx, err), nil
+		return nil, fmt.Errorf("failed to map dependencies: %w", err)
 	}
 
-	page, pageInfo, err := pagination.Paginate(ctx, purls, request.Params.PaginationSpec)
-	if err != nil {
-		return handleErr(ctx, err), nil
-	}
-	return gen.RetrieveDependencies200JSONResponse{PurlListJSONResponse: gen.PurlListJSONResponse{
-		PurlList:       page,
-		PaginationInfo: pageInfo,
-	}}, nil
+	return purls, nil
 }
