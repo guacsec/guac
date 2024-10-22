@@ -1,4 +1,4 @@
-//
+////
 // Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,15 +31,18 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
 
+	osv_models "github.com/google/osv-scanner/pkg/models"
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/time/rate"
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
-var rateLimit = 10000
-var rateLimitInterval = 30 * time.Second
+var (
+	json              = jsoniter.ConfigCompatibleWithStandardLibrary
+	rateLimit         = 10000
+	rateLimitInterval = 30 * time.Second
+)
 
 const (
 	URI          string = "osv.dev"
@@ -52,16 +55,18 @@ const (
 var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type osvCertifier struct {
-	osvHTTPClient *http.Client
+	osvHTTPClient             *http.Client
+	withVulnerabilityMetadata bool
 }
 
 // NewOSVCertificationParser initializes the OSVCertifier
-func NewOSVCertificationParser() certifier.Certifier {
+func NewOSVCertificationParser(withVulnerabilityMetadata bool) certifier.Certifier {
 	limiter := rate.NewLimiter(rate.Every(rateLimitInterval), rateLimit)
 	transport := clients.NewRateLimitedTransport(version.UATransport, limiter)
 	client := &http.Client{Transport: transport}
 	return &osvCertifier{
-		osvHTTPClient: client,
+		osvHTTPClient:             client,
+		withVulnerabilityMetadata: withVulnerabilityMetadata,
 	}
 }
 
@@ -78,14 +83,14 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 		purls = append(purls, node.Purl)
 	}
 
-	if _, err := EvaluateOSVResponse(ctx, o.osvHTTPClient, purls, docChannel); err != nil {
+	if _, err := EvaluateOSVResponse(ctx, o.osvHTTPClient, purls, docChannel, o.withVulnerabilityMetadata); err != nil {
 		return fmt.Errorf("could not generate document from OSV results: %w", err)
 	}
 	return nil
 }
 
 // EvaluateOSVResponse takes a list of purls and batch queries OSV for vulnerability information
-func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []string, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
+func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []string, docChannel chan<- *processor.Document, withVulnerabilityMetadata bool) ([]*processor.Document, error) {
 	var query osv_scanner.BatchedQuery
 	packMap := map[string]bool{}
 
@@ -105,23 +110,38 @@ func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []strin
 	if err != nil {
 		return nil, fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
+	var responseMap map[string][]osv_models.Vulnerability
+	if withVulnerabilityMetadata {
+		hydratedResp, err := osv_scanner.HydrateWithClient(resp, client)
+		if err != nil {
+			return nil, fmt.Errorf("hydrating vulnerability with metadata failed: %w", err)
+		}
+		for i, query := range query.Queries {
+			res := hydratedResp.Results[i]
+			purl := query.Package.PURL
+			responseMap[purl] = res.Vulns
+		}
+	} else {
+		for i, query := range query.Queries {
+			res := resp.Results[i]
+			purl := query.Package.PURL
 
-	responseMap := make(map[string]*osv_scanner.MinimalResponse)
-	for i, query := range query.Queries {
-		response := resp.Results[i]
-		purl := query.Package.PURL
-
-		responseMap[purl] = &response
+			vulns := make([]osv_models.Vulnerability, 0, len(res.Vulns))
+			for _, minimal := range res.Vulns {
+				vulns = append(vulns, minimalVulnerabilityToVulnerability(&minimal))
+			}
+			responseMap[purl] = vulns
+		}
 	}
 	return generateDocument(responseMap, docChannel)
 }
 
 // generateDocument generated the processor document for ingestion
-func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
+func generateDocument(responseMap map[string][]osv_models.Vulnerability, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	var generatedOSVDocs []*processor.Document
-	for purl, response := range responseMap {
+	for purl, vulns := range responseMap {
 		currentTime := time.Now()
-		payload, err := json.Marshal(createAttestation(purl, response.Vulns, currentTime))
+		payload, err := json.Marshal(createAttestation(purl, vulns, currentTime))
 		if err != nil {
 			return nil, fmt.Errorf("unable to marshal attestation: %w", err)
 		}
@@ -144,11 +164,16 @@ func generateDocument(responseMap map[string]*osv_scanner.MinimalResponse, docCh
 }
 
 // createAttestation generated the in-toto vuln attestation
-func createAttestation(purl string, vulns []osv_scanner.MinimalVulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
+func createAttestation(purl string, vulns []osv_models.Vulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
 	attestation := &attestation_vuln.VulnerabilityStatement{
 		Statement: attestationv1.Statement{
 			Type:          attestationv1.StatementTypeUri,
 			PredicateType: attestation_vuln.PredicateVuln,
+			Subject: []*attestationv1.ResourceDescriptor{
+				{
+					Uri: purl,
+				},
+			},
 		},
 		Predicate: attestation_vuln.VulnerabilityPredicate{
 			Scanner: attestation_vuln.Scanner{
@@ -156,19 +181,28 @@ func createAttestation(purl string, vulns []osv_scanner.MinimalVulnerability, cu
 				Version: VERSION,
 			},
 			Metadata: attestation_vuln.Metadata{
-				ScanStartedOn: &currentTime,
+				ScanStartedOn:  &currentTime,
 				ScanFinishedOn: &currentTime,
 			},
 		},
 	}
-
-	subject := &attestationv1.ResourceDescriptor{Uri: purl}
-	attestation.Statement.Subject = append(attestation.Statement.Subject, subject)
-
 	for _, vuln := range vulns {
-		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_vuln.Result{
+		result := attestation_vuln.Result{
 			Id: vuln.ID,
-		})
+		}
+		for _, severity := range vuln.Severity {
+			result.Severity = append(result.Severity, attestation_vuln.Severity{
+				Method: string(severity.Type),
+				Score:  severity.Score,
+			})
+		}
+		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, result)
 	}
 	return attestation
+}
+
+func minimalVulnerabilityToVulnerability(minimal *osv_scanner.MinimalVulnerability) osv_models.Vulnerability {
+	return osv_models.Vulnerability{
+		ID: minimal.ID,
+	}
 }
