@@ -48,6 +48,8 @@ type DocumentParser interface {
 type IdentifierStrings struct {
 	// OciStrings should contain pointers to OCI packages
 	OciStrings []string
+	// OciRegistryStrings should contain pointers to OCI registries
+	OciRegistryStrings []string
 	// VcsStrings should contain VCS strings for source control
 	VcsStrings []string
 	// PurlStrings should contain package url to specific packages

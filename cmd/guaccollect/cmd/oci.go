@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -34,6 +35,19 @@ import (
 )
 
 type ociOptions struct {
+	// datasource for the collector
+	dataSource datasource.CollectSource
+	// address for pubsub connection
+	pubsubAddr string
+	// address for blob store
+	blobAddr string
+	// run as poll collector
+	poll bool
+	// enable/disable message publish to queue
+	publishToQueue bool
+}
+
+type ociRegistryOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
 	// address for pubsub connection
@@ -98,6 +112,43 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
+var ociRegistryCmd = &cobra.Command{
+	Use:   "registry [flags] registry",
+	Short: "takes an OCI registry with catalog capability and downloads sbom and attestation stored in OCI to add to GUAC graph",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
+		opts, err := validateOCIRegistryFlags(
+			viper.GetString("pubsub-addr"),
+			viper.GetString("blob-addr"),
+			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("use-csub"),
+			viper.GetBool("service-poll"),
+			viper.GetBool("publish-to-queue"),
+			args)
+		if err != nil {
+			fmt.Printf("unable to validate flags: %v\n", err)
+			_ = cmd.Help()
+			os.Exit(1)
+		}
+
+		// Register collector
+		// We probably want a much longer poll interval for registry collectors as the _catalog
+		// endpoint can be expensive to hit and likely won't change often.
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute)
+		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
+		if err != nil {
+			logger.Errorf("unable to register oci collector: %v", err)
+		}
+
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
+	},
+}
+
 func validateOCIFlags(
 	pubsubAddr,
 	blobAddr,
@@ -154,6 +205,65 @@ func validateOCIFlags(
 	return opts, nil
 }
 
+func validateOCIRegistryFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll,
+	pubToQueue bool,
+	args []string,
+) (ociRegistryOptions, error) {
+	var opts ociRegistryOptions
+	opts.pubsubAddr = pubsubAddr
+	opts.blobAddr = blobAddr
+	opts.poll = poll
+	opts.publishToQueue = pubToQueue
+
+	if useCsub {
+		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+		if err != nil {
+			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+		}
+		c, err := csubclient.NewClient(csubOpts)
+		if err != nil {
+			return opts, err
+		}
+		opts.dataSource, err = csubsource.NewCsubDatasource(c, 10*time.Second)
+		return opts, err
+	}
+
+	// else direct CLI call, no polling
+	if len(args) < 1 {
+		return opts, fmt.Errorf("expected positional argument(s) for registr(y|ies)")
+	}
+
+	sources := []datasource.Source{}
+	for _, arg := range args {
+		// Min check to validate registry by resolving hostname
+		_, err := net.LookupHost(arg)
+		if err != nil {
+			return opts, fmt.Errorf("registry parsing error. require format registry:port")
+		}
+		sources = append(sources, datasource.Source{
+			Value: arg,
+		})
+	}
+
+	var err error
+	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciDataSources: sources,
+	})
+	if err != nil {
+		return opts, err
+	}
+
+	return opts, nil
+}
+
 func init() {
 	rootCmd.AddCommand(ociCmd)
+	rootCmd.AddCommand(ociRegistryCmd)
 }

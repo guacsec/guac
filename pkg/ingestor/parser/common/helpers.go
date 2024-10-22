@@ -128,6 +128,9 @@ func RemoveDuplicateIdentifiers(identifierStrings *IdentifierStrings) {
 	if len(identifierStrings.OciStrings) > 0 {
 		identifierStrings.OciStrings = removeDuplicate(identifierStrings.OciStrings)
 	}
+	if len(identifierStrings.OciRegistryStrings) > 0 {
+		identifierStrings.OciRegistryStrings = removeDuplicate(identifierStrings.OciRegistryStrings)
+	}
 	if len(identifierStrings.VcsStrings) > 0 {
 		identifierStrings.VcsStrings = removeDuplicate(identifierStrings.VcsStrings)
 	}

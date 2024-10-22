@@ -44,6 +44,13 @@ func identifierStringsToCollectEntry(i *parser_common.IdentifierStrings) []*pb.C
 		})
 	}
 
+	for _, v := range i.OciRegistryStrings {
+		entries = append(entries, &pb.CollectEntry{
+			Type:  pb.CollectDataType_DATATYPE_OCI_REGISTRY,
+			Value: v,
+		})
+	}
+
 	for _, v := range i.VcsStrings {
 		entries = append(entries, &pb.CollectEntry{
 			Type:  pb.CollectDataType_DATATYPE_GIT,

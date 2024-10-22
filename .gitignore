@@ -16,3 +16,4 @@ go.work
 container_files/pg/
 
 dist/
+**/__debug_bin*
