@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
@@ -48,9 +47,12 @@ type ociOptions struct {
 }
 
 type ociRegistryOptions struct {
-	graphqlEndpoint   string
-	registry          string
-	csubClientOptions client.CsubClientOptions
+	graphqlEndpoint         string
+	headerFile              string
+	dataSource              datasource.CollectSource
+	csubClientOptions       csub_client.CsubClientOptions
+	queryVulnOnIngestion    bool
+	queryLicenseOnIngestion bool
 }
 
 var ociCmd = &cobra.Command{
@@ -133,14 +135,14 @@ var ociRegistryCmd = &cobra.Command{
 	Short: "takes an OCI registry with catalog capability and downloads sbom and attestation stored in OCI to add to GUAC graph",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateOCIRegistryFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("add-vuln-on-ingest"),
+			viper.GetBool("add-license-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -148,8 +150,12 @@ var ociRegistryCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
 		// Register collector
-		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, false, 30*time.Second)
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, false, 30*time.Second)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -169,7 +175,7 @@ var ociRegistryCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
 
 			if err != nil {
 				gotErr = true
@@ -236,28 +242,42 @@ func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTls
 	return opts, nil
 }
 
-// TODO(ridwanhoq): refactor common logic with validateOCIFlags
-func validateOCIRegistryFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, args []string) (ociRegistryOptions, error) {
+func validateOCIRegistryFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (ociRegistryOptions, error) {
 	var opts ociRegistryOptions
 	opts.graphqlEndpoint = gqlEndpoint
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	opts.headerFile = headerFile
+	opts.queryVulnOnIngestion = queryVulnIngestion
+	opts.queryLicenseOnIngestion = queryLicenseIngestion
+
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 	opts.csubClientOptions = csubOpts
 
-	// else direct CLI call, no polling
-	if len(args) != 1 {
-		return opts, fmt.Errorf("expected exactly one argument for registry, got %v", len(args))
+	if len(args) < 1 {
+		return opts, fmt.Errorf("expected positional argument(s) for registr(y|ies)")
+	}
+	sources := []datasource.Source{}
+	for _, arg := range args {
+		// Min check to validate registry by resolving hostname
+		_, err := net.LookupHost(arg)
+		if err != nil {
+			return opts, fmt.Errorf("registry parsing error. require format registry:port")
+		}
+		sources = append(sources, datasource.Source{
+			Value: arg,
+		})
 	}
 
-	registry := args[0]
-	// validate that the supplied registry is a valid hostname
-	_, err = net.LookupHost(registry)
+	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciRegistryDataSources: sources,
+	})
 	if err != nil {
-		return opts, fmt.Errorf("%s is not a valid hostname: %w", registry, err)
+		return opts, err
 	}
-	opts.registry = registry
+
 	return opts, nil
 }
 

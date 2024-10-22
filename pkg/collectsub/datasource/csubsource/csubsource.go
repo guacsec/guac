@@ -52,6 +52,7 @@ func (d *csubDataSources) GetDataSources(ctx context.Context) (*datasource.DataS
 		{Type: pb.CollectDataType_DATATYPE_GIT, Glob: "*"},
 		{Type: pb.CollectDataType_DATATYPE_PURL, Glob: "*"},
 		{Type: pb.CollectDataType_DATATYPE_GITHUB_RELEASE, Glob: "*"},
+		{Type: pb.CollectDataType_DATATYPE_OCI_REGISTRY, Glob: "*"},
 	})
 	if err != nil {
 		return nil, err
@@ -113,6 +114,10 @@ func entriesToSources(ctx context.Context, entries []*pb.CollectEntry) *datasour
 			})
 		case pb.CollectDataType_DATATYPE_GITHUB_RELEASE:
 			d.GithubReleaseDataSources = append(d.GithubReleaseDataSources, datasource.Source{
+				Value: e.Value,
+			})
+		case pb.CollectDataType_DATATYPE_OCI_REGISTRY:
+			d.OciRegistryDataSources = append(d.OciRegistryDataSources, datasource.Source{
 				Value: e.Value,
 			})
 

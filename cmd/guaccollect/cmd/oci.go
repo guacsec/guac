@@ -48,14 +48,16 @@ type ociOptions struct {
 }
 
 type ociRegistryOptions struct {
-	// registry to collect from
-	registry string
+	// datasource for the collector
+	dataSource datasource.CollectSource
 	// address for pubsub connection
 	pubsubAddr string
 	// address for blob store
 	blobAddr string
 	// run as poll collector
 	poll bool
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var ociCmd = &cobra.Command{
@@ -110,7 +112,6 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-
 var ociRegistryCmd = &cobra.Command{
 	Use:   "registry [flags] registry",
 	Short: "takes an OCI registry with catalog capability and downloads sbom and attestation stored in OCI to add to GUAC graph",
@@ -127,6 +128,7 @@ var ociRegistryCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("publish-to-queue"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -135,16 +137,15 @@ var ociRegistryCmd = &cobra.Command{
 		}
 
 		// Register collector
-		// TODO(lumjjb): Return this to a longer duration (~10 minutes) so as to not keep hitting
-		// the OCI server. This will require adding triggers to get new repos as they come up from
-		// the CollectSources so that there isn't a long delay from adding new data sources.
-		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, opts.poll, 30*time.Second)
+		// We probably want a much longer poll interval for registry collectors as the _catalog
+		// endpoint can be expensive to hit and likely won't change often.
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
@@ -204,24 +205,61 @@ func validateOCIFlags(
 	return opts, nil
 }
 
-// TODO(ridwanhoq): refactor common logic with validateOCIFlags
-func validateOCIRegistryFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociRegistryOptions, error) {
+func validateOCIRegistryFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll,
+	pubToQueue bool,
+	args []string,
+) (ociRegistryOptions, error) {
 	var opts ociRegistryOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
+	opts.publishToQueue = pubToQueue
 
-	if len(args) != 1 {
-		return opts, fmt.Errorf("expected exactly one argument for registry")
+	if useCsub {
+		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+		if err != nil {
+			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+		}
+		c, err := csubclient.NewClient(csubOpts)
+		if err != nil {
+			return opts, err
+		}
+		opts.dataSource, err = csubsource.NewCsubDatasource(c, 10*time.Second)
+		return opts, err
 	}
 
-	registry := args[0]
-	// validate that the supplied registry is a valid hostname
-	_, err := net.LookupHost(registry)
+	// else direct CLI call, no polling
+	if len(args) < 1 {
+		return opts, fmt.Errorf("expected positional argument(s) for registr(y|ies)")
+	}
+
+	sources := []datasource.Source{}
+	for _, arg := range args {
+		// Min check to validate registry by resolving hostname
+		_, err := net.LookupHost(arg)
+		if err != nil {
+			return opts, fmt.Errorf("registry parsing error. require format registry:port")
+		}
+		sources = append(sources, datasource.Source{
+			Value: arg,
+		})
+	}
+
+	var err error
+	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciDataSources: sources,
+	})
 	if err != nil {
-		return opts, fmt.Errorf("%s is not a valid hostname: %w", registry, err)
+		return opts, err
 	}
-	opts.registry = registry
+
 	return opts, nil
 }
 

@@ -36,6 +36,7 @@ type CollectSource interface {
 
 type DataSources struct {
 	OciDataSources []Source
+	OciRegistryDataSources []Source
 	// NOTE: Git data sources should follow the URI scheme as defined in:
 	// https://spdx.github.io/spdx-spec/v2.3/package-information/#771-description
 	// <vcs_tool>+<transport>://<host_name>[/<path_to_repository>][@<revision_tag_or_branch>][#<sub_path>]
