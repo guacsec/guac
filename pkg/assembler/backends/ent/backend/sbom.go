@@ -34,7 +34,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -383,17 +382,11 @@ func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 		optionalPredicate(toLowerPtr(spec.Algorithm), billofmaterials.AlgorithmEQ),
 		optionalPredicate(toLowerPtr(spec.Digest), billofmaterials.DigestEQ),
 		optionalPredicate(spec.URI, billofmaterials.URI),
+		optionalPredicate(spec.Collector, billofmaterials.CollectorEQ),
 		optionalPredicate(spec.DownloadLocation, billofmaterials.DownloadLocationEQ),
 		optionalPredicate(spec.Origin, billofmaterials.OriginEQ),
 		optionalPredicate(spec.KnownSince, billofmaterials.KnownSinceEQ),
 		optionalPredicate(spec.DocumentRef, billofmaterials.DocumentRefEQ),
-	}
-
-	// filter out deps.dev unless the user specifies a specific collector
-	if spec.Collector != nil {
-		predicates = append(predicates, optionalPredicate(spec.Collector, billofmaterials.CollectorEQ))
-	} else {
-		predicates = append(predicates, optionalPredicate(ptrfrom.String(deps_dev.DepsCollector), billofmaterials.CollectorNEQ))
 	}
 
 	if spec.Subject != nil {
