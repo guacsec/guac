@@ -19,10 +19,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
