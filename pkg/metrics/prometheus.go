@@ -292,6 +292,10 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 		var graphqlRequest struct {
 			OperationName string `json:"operationName"`
 		}
+		if !json.Valid(bodyCopy) { // Check if the body is valid JSON
+			http.Error(w, "invalid JSON body please check your request!", http.StatusBadRequest)
+			return
+		}
 		if err := json.Unmarshal(bodyCopy, &graphqlRequest); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
