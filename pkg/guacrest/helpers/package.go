@@ -19,10 +19,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Khan/genqlient/graphql"
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	assembler_helpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/logging"
+
+	"github.com/Khan/genqlient/graphql"
 )
 
 // Returns all of the version nodes of the AllPkgTree fragment input
@@ -68,4 +70,28 @@ func FindPackageWithPurl(ctx context.Context, gqlClient graphql.Client,
 	}
 	// The filter should have matched at most one package
 	return response.GetPackages()[0].AllPkgTree.GetNamespaces()[0].GetNames()[0].GetVersions()[0], nil
+}
+
+// GetPurlsForPkg returns all purls associated with the pkgSpec passed in.
+func GetPurlsForPkg(ctx context.Context, gqlClient graphql.Client, pkgSpec model.PkgSpec) ([]string, []string, error) {
+	var purls []string
+	var packageIds []string
+
+	pkgs, err := model.Packages(ctx, gqlClient, pkgSpec)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for _, pkg := range pkgs.Packages {
+		for _, namespace := range pkg.Namespaces {
+			for _, n := range namespace.Names {
+				for _, v := range n.Versions {
+					purls = append(purls, v.Purl)
+					packageIds = append(packageIds, v.Id)
+				}
+			}
+		}
+	}
+
+	return purls, packageIds, nil
 }
