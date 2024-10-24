@@ -265,6 +265,36 @@ func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBackend)(nil).Delete), ctx, node)
 }
 
+// FindAllLicenses mocks base method.
+func (m *MockBackend) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAllLicenses", ctx, pkgIDs, after, first)
+	ret0, _ := ret[0].(*model.CertifyVulnConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAllLicenses indicates an expected call of FindAllLicenses.
+func (mr *MockBackendMockRecorder) FindAllLicenses(ctx, pkgIDs, after, first any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllLicenses", reflect.TypeOf((*MockBackend)(nil).FindAllLicenses), ctx, pkgIDs, after, first)
+}
+
+// FindAllVulnerabilities mocks base method.
+func (m *MockBackend) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAllVulnerabilities", ctx, pkgIDs, after, first)
+	ret0, _ := ret[0].(*model.CertifyVulnConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAllVulnerabilities indicates an expected call of FindAllVulnerabilities.
+func (mr *MockBackendMockRecorder) FindAllVulnerabilities(ctx, pkgIDs, after, first any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllVulnerabilities", reflect.TypeOf((*MockBackend)(nil).FindAllVulnerabilities), ctx, pkgIDs, after, first)
+}
+
 // FindPackagesThatNeedScanning mocks base method.
 func (m *MockBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	m.ctrl.T.Helper()

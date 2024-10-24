@@ -288,3 +288,104 @@ func constructPkgConn(pkgConn *ent.PackageVersionConnection, totalCount int, has
 		return nil
 	}
 }
+
+func (b *EntBackend) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != packageversion.Table {
+			return nil, fmt.Errorf("after cursor is not type packageversion but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	var pkgConn *ent.PackageVersionConnection
+	if first == nil {
+		first = ptrfrom.Int(60000)
+	}
+
+	// Sort the UUID slice
+	sort.Strings(pkgIDs)
+
+	startIndex := 0
+	if after != nil {
+		filterGlobalID := fromGlobalID(*after)
+		// Find the index of the specified UUID
+		startIndex = findTargetIndex(pkgIDs, filterGlobalID.id)
+		if startIndex == -1 {
+			return nil, nil
+		}
+	}
+
+	startAfterPackageIDList := pkgIDs[startIndex:]
+
+	var shortenedQueryList []uuid.UUID
+	// Loop through the sorted list starting from the specified UUID
+	for i, id := range startAfterPackageIDList {
+		if i < *first {
+			convertedID, err := uuid.Parse(id)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+			}
+			shortenedQueryList = append(shortenedQueryList, convertedID)
+		}
+	}
+	var queryErr error
+	pkgConn, queryErr = b.client.PackageVersion.Query().
+		Where(packageversion.IDIn(shortenedQueryList...)).
+		WithName(func(q *ent.PackageNameQuery) {}).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+	}
+
+	// if not found return nil
+	if pkgConn == nil {
+		return nil, nil
+	}
+
+	hasNextPage := true
+	if (startIndex + *first) > len(pkgIDs) {
+		hasNextPage = false
+	}
+
+	return constructCertifyVulnConn(pkgConn, len(pkgIDs), hasNextPage), nil
+}
+
+func constructCertifyVulnConn(pkgConn *ent.PackageVersionConnection, totalCount int, hasNextPage bool) *model.PackageConnection {
+
+	var edges []*model.PackageEdge
+	for _, edge := range pkgConn.Edges {
+		edges = append(edges, &model.PackageEdge{
+			Cursor: pkgVersionGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelPackage(backReferencePackageVersion(edge.Node)),
+		})
+	}
+
+	if pkgConn.PageInfo.StartCursor != nil {
+		return &model.PackageConnection{
+			TotalCount: totalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}
+	} else {
+		// if not found return nil
+		return nil
+	}
+}
+
+func (b *EntBackend) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}

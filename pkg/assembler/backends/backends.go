@@ -143,6 +143,8 @@ type Backend interface {
 	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
 	QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error)
 	FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error)
+	FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error)
+	FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

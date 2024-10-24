@@ -33,6 +33,14 @@ func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
+func (c *demoClient) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
+func (c *demoClient) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	scanner := c.kv.Keys("artifacts")
 	var res []model.PackageSourceOrArtifact

@@ -37,3 +37,11 @@ func (c *neo4jClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []str
 func (c *neo4jClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
 }
+
+func (c *neo4jClient) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
+func (c *neo4jClient) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}

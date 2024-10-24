@@ -35,6 +35,14 @@ func (c *arangoClient) FindPackagesThatNeedScanning(ctx context.Context, queryTy
 	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
 }
 
+func (c *arangoClient) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
+func (c *arangoClient) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
 // TODO(lumjjb): add source when it is implemented in arango backend
 func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 

@@ -93,4 +93,7 @@ extend type Query {
   certifyVuln or certifyLegal.
   """
   findPackagesThatNeedScanning(queryType: QueryType!, lastScan: Int): [ID!]!
+
+  findAllVulnerabilities(pkgIDs: [ID!]!, after: ID, first: Int): CertifyVulnConnection
+  findAllLicenses(pkgIDs: [ID!]!, after: ID, first: Int): CertifyVulnConnection
 }
