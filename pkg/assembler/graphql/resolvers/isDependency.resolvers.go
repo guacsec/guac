@@ -59,3 +59,13 @@ func (r *queryResolver) IsDependencyList(ctx context.Context, isDependencySpec m
 
 	return r.Backend.IsDependencyList(ctx, isDependencySpec, after, first)
 }
+
+// BatchQuerySubjectPkgDependency is the resolver for the BatchQuerySubjectPkgDependency field.
+func (r *queryResolver) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return r.Backend.BatchQuerySubjectPkgDependency(ctx, pkgIDs)
+}
+
+// BatchQueryDepPkgDependency is the resolver for the BatchQueryDepPkgDependency field.
+func (r *queryResolver) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return r.Backend.BatchQueryDepPkgDependency(ctx, pkgIDs)
+}
