@@ -34,11 +34,27 @@ func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, af
 }
 
 func (c *demoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
-	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyVuln")
+	var collectedCertVulns []*model.CertifyVuln
+	for _, pkgID := range pkgIDs {
+		certVuln, err := c.CertifyVuln(ctx, &model.CertifyVulnSpec{Package: &model.PkgSpec{ID: &pkgID}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query CertifyVuln for pkgID: %s, with error: %w", pkgID, err)
+		}
+		collectedCertVulns = append(collectedCertVulns, certVuln...)
+	}
+	return collectedCertVulns, nil
 }
 
 func (c *demoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
-	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyLegal")
+	var collectedCertLegal []*model.CertifyLegal
+	for _, pkgID := range pkgIDs {
+		certLegal, err := c.CertifyLegal(ctx, &model.CertifyLegalSpec{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: &pkgID}}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query CertifyLegal for pkgID: %s, with error: %w", pkgID, err)
+		}
+		collectedCertLegal = append(collectedCertLegal, certLegal...)
+	}
+	return collectedCertLegal, nil
 }
 
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {

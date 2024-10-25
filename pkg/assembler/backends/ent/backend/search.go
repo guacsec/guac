@@ -244,7 +244,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 		}
 	}
 	var queryErr error
-	pkgConn, queryErr = b.client.Debug().PackageVersion.Query().
+	pkgConn, queryErr = b.client.PackageVersion.Query().
 		Where(packageversion.IDIn(shortenedQueryList...)).
 		WithName(func(q *ent.PackageNameQuery) {}).
 		Paginate(ctx, afterCursor, first, nil, nil)
@@ -317,7 +317,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 
 	predicates = append(predicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
-	certVulnConn, err := b.client.Debug().CertifyVuln.Query().
+	certVulnConn, err := b.client.CertifyVuln.Query().
 		Where(certifyvuln.And(predicates...)).
 		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
 		WithPackage(func(q *ent.PackageVersionQuery) {
@@ -350,7 +350,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 	var predicates []predicate.CertifyLegal
 
 	predicates = append(predicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
-	certLegalConn, err := b.client.Debug().CertifyLegal.Query().
+	certLegalConn, err := b.client.CertifyLegal.Query().
 		Where(certifylegal.And(predicates...)).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
