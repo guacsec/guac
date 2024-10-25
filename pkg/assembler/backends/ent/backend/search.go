@@ -34,11 +34,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
 	guacType string = "guac"
-	noVulnID string = "110d9f78-db10-52ba-99e2-4f65cca5e6c1"
 )
 
 // FindSoftware takes in a searchText string and looks for software
@@ -296,12 +296,8 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 
 	// static ID for noVuln that is generated from type = novuln and vulnid = ""
 	// this is generated via:
-	// vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](spec.VulnerabilityInput, helpers.VulnServerKey)
-	// vulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
-	noVulnID, err := uuid.Parse(noVulnID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
-	}
+	vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&model.VulnerabilityInputSpec{Type: NoVuln, VulnerabilityID: ""}, helpers.VulnServerKey)
+	noVulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
 	var queryList []uuid.UUID
 	// Loop through the sorted list starting from the specified UUID
 	for _, id := range pkgIDs {
