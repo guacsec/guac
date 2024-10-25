@@ -299,7 +299,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 	vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&model.VulnerabilityInputSpec{Type: NoVuln, VulnerabilityID: ""}, helpers.VulnServerKey)
 	noVulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
 	var queryList []uuid.UUID
-	// Loop through the sorted list starting from the specified UUID
+
 	for _, id := range pkgIDs {
 		globalID := fromGlobalID(id)
 		convertedID, err := uuid.Parse(globalID.id)
@@ -333,7 +333,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
 
 	var queryList []uuid.UUID
-	// Loop through the sorted list starting from the specified UUID
+
 	for _, id := range pkgIDs {
 		globalID := fromGlobalID(id)
 		convertedID, err := uuid.Parse(globalID.id)
