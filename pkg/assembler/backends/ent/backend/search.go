@@ -396,5 +396,29 @@ func (b *EntBackend) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs 
 }
 
 func (b *EntBackend) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
-	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
+	var queryList []uuid.UUID
+
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+		}
+		queryList = append(queryList, convertedID)
+	}
+
+	idDepConn, err := b.client.Dependency.Query().
+		Where(dependency.DependentPackageVersionIDIn(queryList...)).
+		WithPackage(withPackageVersionTree()).
+		WithDependentPackageVersion(withPackageVersionTree()).All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed isDependency subject query based on package IDs with error: %w", err)
+	}
+
+	var collectedIsDependency []*model.IsDependency
+	for _, entIsDep := range idDepConn {
+		collectedIsDependency = append(collectedIsDependency, toModelIsDependencyWithBackrefs(entIsDep))
+	}
+	return collectedIsDependency, nil
 }
