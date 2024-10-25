@@ -33,6 +33,14 @@ func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
+func (c *demoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQuerySubjectPkgDependency")
+}
+
+func (c *demoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
+}
+
 func (c *demoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
 	var collectedCertVulns []*model.CertifyVuln
 	for _, pkgID := range pkgIDs {
