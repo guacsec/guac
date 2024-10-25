@@ -31,7 +31,7 @@ func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
 	set, err := cli.BuildFlags([]string{"pubsub-addr", "blob-addr", "csub-addr", "gql-addr",
-		"header-file", "add-vuln-on-ingest", "add-license-on-ingest"})
+		"header-file", "add-vuln-on-ingest", "add-license-on-ingest", "add-eol-on-ingest"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

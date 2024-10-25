@@ -204,6 +204,12 @@ var (
 	//go:embed exampledata/cyclonedx-components-flat.json
 	CycloneDXComponentsFlat []byte
 
+	//go:embed exampledata/eol-all.json
+	EOLAll []byte
+
+	//go:embed exampledata/eol-sapmachine.json
+	EOLSapMachine []byte
+
 	// json format
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// CycloneDX VEX testdata unaffected

@@ -28,10 +28,9 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
-	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/certifier/eol"
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -42,32 +41,25 @@ import (
 )
 
 const (
-	cdQuerySize = 248
+	eolQuerySize = 1000
 )
 
-type cdOptions struct {
-	graphqlEndpoint         string
-	headerFile              string
-	poll                    bool
-	csubClientOptions       csub_client.CsubClientOptions
-	interval                time.Duration
-	queryVulnOnIngestion    bool
-	queryLicenseOnIngestion bool
-	queryEOLOnIngestion     bool
-	// sets artificial latency on the certifier (default to nil)
-	addedLatency *time.Duration
-	// sets the batch size for pagination query for the certifier
-	batchSize int
-	// last time the scan was done in hours, if not set it will return
-	// all packages to check
-	lastScan *int
+type eolOptions struct {
+	graphqlEndpoint   string
+	headerFile        string
+	poll              bool
+	csubClientOptions csub_client.CsubClientOptions
+	interval          time.Duration
+	addedLatency      *time.Duration
+	batchSize         int
+	lastScan          *int
 }
 
-var cdCmd = &cobra.Command{
-	Use:   "cd [flags]",
-	Short: "runs the clearly defined certifier",
+var eolCmd = &cobra.Command{
+	Use:   "eol [flags]",
+	Short: "runs the End of Life (EOL) certifier",
 	Run: func(cmd *cobra.Command, args []string) {
-		opts, err := validateCDFlags(
+		opts, err := validateEOLFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("header-file"),
 			viper.GetString("interval"),
@@ -75,9 +67,6 @@ var cdCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetBool("add-vuln-on-ingest"),
-			viper.GetBool("add-license-on-ingest"),
-			viper.GetBool("add-eol-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
@@ -92,7 +81,7 @@ var cdCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
+		if err := certify.RegisterCertifier(eol.NewEOLCertifier, eol.EOLCollector); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -107,7 +96,7 @@ var cdCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeLicense, opts.batchSize, cdQuerySize, opts.addedLatency, opts.lastScan)
+		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeEol, opts.batchSize, eolQuerySize, opts.addedLatency, opts.lastScan)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)
@@ -126,15 +115,7 @@ var cdCmd = &cobra.Command{
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
-						err = ingestor.MergedIngest(ctx,
-							totalDocs,
-							opts.graphqlEndpoint,
-							transport,
-							csubClient,
-							opts.queryVulnOnIngestion,
-							opts.queryLicenseOnIngestion,
-							opts.queryEOLOnIngestion,
-						)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, false, false, false)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -147,15 +128,7 @@ var cdCmd = &cobra.Command{
 					totalNum += 1
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
-						err = ingestor.MergedIngest(ctx,
-							totalDocs,
-							opts.graphqlEndpoint,
-							transport,
-							csubClient,
-							opts.queryVulnOnIngestion,
-							opts.queryLicenseOnIngestion,
-							opts.queryEOLOnIngestion,
-						)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, false, false, false)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -174,16 +147,7 @@ var cdCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(
-						ctx,
-						totalDocs,
-						opts.graphqlEndpoint,
-						transport,
-						csubClient,
-						opts.queryVulnOnIngestion,
-						opts.queryLicenseOnIngestion,
-						opts.queryEOLOnIngestion,
-					)
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, false, false, false)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -192,16 +156,7 @@ var cdCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(
-					ctx,
-					totalDocs,
-					opts.graphqlEndpoint,
-					transport,
-					csubClient,
-					opts.queryVulnOnIngestion,
-					opts.queryLicenseOnIngestion,
-					opts.queryEOLOnIngestion,
-				)
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, false, false, false)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
@@ -258,7 +213,7 @@ var cdCmd = &cobra.Command{
 	},
 }
 
-func validateCDFlags(
+func validateEOLFlags(
 	graphqlEndpoint,
 	headerFile,
 	interval,
@@ -266,26 +221,29 @@ func validateCDFlags(
 	poll,
 	csubTls,
 	csubTlsSkipVerify bool,
-	queryVulnIngestion bool,
-	queryLicenseIngestion bool,
-	queryEOLIngestion bool,
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
-) (cdOptions, error) {
-	var opts cdOptions
+) (eolOptions, error) {
+	var opts eolOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
 	opts.poll = poll
-	i, err := time.ParseDuration(interval)
-	if err != nil {
-		return opts, err
+
+	if interval == "" {
+		// 14 days by default
+		opts.interval = 14 * 24 * time.Hour
+	} else {
+		i, err := time.ParseDuration(interval)
+		if err != nil {
+			return opts, err
+		}
+		opts.interval = i
 	}
-	opts.interval = i
 
 	if certifierLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(certifierLatencyStr)
 		if err != nil {
-			return opts, fmt.Errorf("failed to parser duration with error: %w", err)
+			return opts, fmt.Errorf("failed to parse duration with error: %w", err)
 		}
 		opts.addedLatency = &addedLatency
 	} else {
@@ -303,9 +261,6 @@ func validateCDFlags(
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 	opts.csubClientOptions = csubOpts
-	opts.queryVulnOnIngestion = queryVulnIngestion
-	opts.queryLicenseOnIngestion = queryLicenseIngestion
-	opts.queryEOLOnIngestion = queryEOLIngestion
 
 	return opts, nil
 }
@@ -317,10 +272,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
-	cdCmd.PersistentFlags().AddFlagSet(set)
-	if err := viper.BindPFlags(cdCmd.PersistentFlags()); err != nil {
+	eolCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(eolCmd.PersistentFlags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
-	certifierCmd.AddCommand(cdCmd)
+	certifierCmd.AddCommand(eolCmd)
 }
