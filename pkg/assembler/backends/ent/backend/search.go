@@ -36,7 +36,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-const guacType string = "guac"
+const (
+	guacType string = "guac"
+	noVulnID string = "110d9f78-db10-52ba-99e2-4f65cca5e6c1"
+)
 
 // FindSoftware takes in a searchText string and looks for software
 // that may be relevant for the input text. This can be seen as fuzzy search
@@ -241,7 +244,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 		}
 	}
 	var queryErr error
-	pkgConn, queryErr = b.client.PackageVersion.Query().
+	pkgConn, queryErr = b.client.Debug().PackageVersion.Query().
 		Where(packageversion.IDIn(shortenedQueryList...)).
 		WithName(func(q *ent.PackageNameQuery) {}).
 		Paginate(ctx, afterCursor, first, nil, nil)
@@ -289,103 +292,77 @@ func constructPkgConn(pkgConn *ent.PackageVersionConnection, totalCount int, has
 	}
 }
 
-func (b *EntBackend) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	var afterCursor *entgql.Cursor[uuid.UUID]
+func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
 
-	if after != nil {
-		globalID := fromGlobalID(*after)
-		if globalID.nodeType != packageversion.Table {
-			return nil, fmt.Errorf("after cursor is not type packageversion but type: %s", globalID.nodeType)
-		}
-		afterUUID, err := uuid.Parse(globalID.id)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
-		}
-		afterCursor = &ent.Cursor{ID: afterUUID}
-	} else {
-		afterCursor = nil
+	// static ID for noVuln that is generated from type = novuln and vulnid = ""
+	// this is generated via:
+	// vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](spec.VulnerabilityInput, helpers.VulnServerKey)
+	// vulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
+	noVulnID, err := uuid.Parse(noVulnID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
 	}
-
-	var pkgConn *ent.PackageVersionConnection
-	if first == nil {
-		first = ptrfrom.Int(60000)
-	}
-
-	// Sort the UUID slice
-	sort.Strings(pkgIDs)
-
-	startIndex := 0
-	if after != nil {
-		filterGlobalID := fromGlobalID(*after)
-		// Find the index of the specified UUID
-		startIndex = findTargetIndex(pkgIDs, filterGlobalID.id)
-		if startIndex == -1 {
-			return nil, nil
-		}
-	}
-
-	startAfterPackageIDList := pkgIDs[startIndex:]
-
-	var shortenedQueryList []uuid.UUID
+	var queryList []uuid.UUID
 	// Loop through the sorted list starting from the specified UUID
-	for i, id := range startAfterPackageIDList {
-		if i < *first {
-			convertedID, err := uuid.Parse(id)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
-			}
-			shortenedQueryList = append(shortenedQueryList, convertedID)
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
 		}
-	}
-	var queryErr error
-	pkgConn, queryErr = b.client.PackageVersion.Query().
-		Where(packageversion.IDIn(shortenedQueryList...)).
-		WithName(func(q *ent.PackageNameQuery) {}).
-		Paginate(ctx, afterCursor, first, nil, nil)
-
-	if queryErr != nil {
-		return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+		queryList = append(queryList, convertedID)
 	}
 
-	// if not found return nil
-	if pkgConn == nil {
-		return nil, nil
-	}
+	var predicates []predicate.CertifyVuln
 
-	hasNextPage := true
-	if (startIndex + *first) > len(pkgIDs) {
-		hasNextPage = false
-	}
+	predicates = append(predicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
-	return constructCertifyVulnConn(pkgConn, len(pkgIDs), hasNextPage), nil
+	certVulnConn, err := b.client.Debug().CertifyVuln.Query().
+		Where(certifyvuln.And(predicates...)).
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyVuln query based on package IDs with error: %w", err)
+	}
+	var collectedCertVuln []*model.CertifyVuln
+	for _, entCertVuln := range certVulnConn {
+		collectedCertVuln = append(collectedCertVuln, toModelCertifyVulnerability(entCertVuln))
+	}
+	return collectedCertVuln, nil
 }
 
-func constructCertifyVulnConn(pkgConn *ent.PackageVersionConnection, totalCount int, hasNextPage bool) *model.PackageConnection {
+func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
 
-	var edges []*model.PackageEdge
-	for _, edge := range pkgConn.Edges {
-		edges = append(edges, &model.PackageEdge{
-			Cursor: pkgVersionGlobalID(edge.Cursor.ID.String()),
-			Node:   toModelPackage(backReferencePackageVersion(edge.Node)),
-		})
-	}
-
-	if pkgConn.PageInfo.StartCursor != nil {
-		return &model.PackageConnection{
-			TotalCount: totalCount,
-			PageInfo: &model.PageInfo{
-				HasNextPage: hasNextPage,
-				StartCursor: ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.EndCursor.ID.String())),
-			},
-			Edges: edges,
+	var queryList []uuid.UUID
+	// Loop through the sorted list starting from the specified UUID
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
 		}
-	} else {
-		// if not found return nil
-		return nil
+		queryList = append(queryList, convertedID)
 	}
-}
 
-func (b *EntBackend) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+	var predicates []predicate.CertifyLegal
+
+	predicates = append(predicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
+	certLegalConn, err := b.client.Debug().CertifyLegal.Query().
+		Where(certifylegal.And(predicates...)).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyLegal query based on package IDs with error: %w", err)
+	}
+
+	var collectedCertLegal []*model.CertifyLegal
+	for _, entCertLegal := range certLegalConn {
+		collectedCertLegal = append(collectedCertLegal, toModelCertifyLegal(entCertLegal))
+	}
+	return collectedCertLegal, nil
 }

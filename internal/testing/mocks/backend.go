@@ -70,6 +70,36 @@ func (mr *MockBackendMockRecorder) ArtifactsList(ctx, artifactSpec, after, first
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArtifactsList", reflect.TypeOf((*MockBackend)(nil).ArtifactsList), ctx, artifactSpec, after, first)
 }
 
+// BatchQueryPkgIDCertifyLegal mocks base method.
+func (m *MockBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQueryPkgIDCertifyLegal", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.CertifyLegal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQueryPkgIDCertifyLegal indicates an expected call of BatchQueryPkgIDCertifyLegal.
+func (mr *MockBackendMockRecorder) BatchQueryPkgIDCertifyLegal(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryPkgIDCertifyLegal", reflect.TypeOf((*MockBackend)(nil).BatchQueryPkgIDCertifyLegal), ctx, pkgIDs)
+}
+
+// BatchQueryPkgIDCertifyVuln mocks base method.
+func (m *MockBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQueryPkgIDCertifyVuln", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.CertifyVuln)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQueryPkgIDCertifyVuln indicates an expected call of BatchQueryPkgIDCertifyVuln.
+func (mr *MockBackendMockRecorder) BatchQueryPkgIDCertifyVuln(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryPkgIDCertifyVuln", reflect.TypeOf((*MockBackend)(nil).BatchQueryPkgIDCertifyVuln), ctx, pkgIDs)
+}
+
 // Builders mocks base method.
 func (m *MockBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	m.ctrl.T.Helper()
@@ -263,36 +293,6 @@ func (m *MockBackend) Delete(ctx context.Context, node string) (bool, error) {
 func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBackend)(nil).Delete), ctx, node)
-}
-
-// FindAllLicenses mocks base method.
-func (m *MockBackend) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAllLicenses", ctx, pkgIDs, after, first)
-	ret0, _ := ret[0].(*model.CertifyVulnConnection)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAllLicenses indicates an expected call of FindAllLicenses.
-func (mr *MockBackendMockRecorder) FindAllLicenses(ctx, pkgIDs, after, first any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllLicenses", reflect.TypeOf((*MockBackend)(nil).FindAllLicenses), ctx, pkgIDs, after, first)
-}
-
-// FindAllVulnerabilities mocks base method.
-func (m *MockBackend) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAllVulnerabilities", ctx, pkgIDs, after, first)
-	ret0, _ := ret[0].(*model.CertifyVulnConnection)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAllVulnerabilities indicates an expected call of FindAllVulnerabilities.
-func (mr *MockBackendMockRecorder) FindAllVulnerabilities(ctx, pkgIDs, after, first any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllVulnerabilities", reflect.TypeOf((*MockBackend)(nil).FindAllVulnerabilities), ctx, pkgIDs, after, first)
 }
 
 // FindPackagesThatNeedScanning mocks base method.

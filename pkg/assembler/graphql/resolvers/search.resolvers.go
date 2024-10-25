@@ -29,13 +29,3 @@ func (r *queryResolver) QueryPackagesListForScan(ctx context.Context, pkgIDs []s
 func (r *queryResolver) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	return r.Backend.FindPackagesThatNeedScanning(ctx, queryType, lastScan)
 }
-
-// FindAllVulnerabilities is the resolver for the findAllVulnerabilities field.
-func (r *queryResolver) FindAllVulnerabilities(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	return r.Backend.FindAllVulnerabilities(ctx, pkgIDs, after, first)
-}
-
-// FindAllLicenses is the resolver for the findAllLicenses field.
-func (r *queryResolver) FindAllLicenses(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	return r.Backend.FindAllLicenses(ctx, pkgIDs, after, first)
-}

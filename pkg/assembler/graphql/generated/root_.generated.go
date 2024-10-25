@@ -531,6 +531,8 @@ type ComplexityRoot struct {
 	Query struct {
 		Artifacts                    func(childComplexity int, artifactSpec model.ArtifactSpec) int
 		ArtifactsList                func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
+		BatchQueryPkgIDCertifyLegal  func(childComplexity int, pkgIDs []string) int
+		BatchQueryPkgIDCertifyVuln   func(childComplexity int, pkgIDs []string) int
 		Builders                     func(childComplexity int, builderSpec model.BuilderSpec) int
 		BuildersList                 func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
 		CertifyBad                   func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
@@ -543,8 +545,6 @@ type ComplexityRoot struct {
 		CertifyVEXStatementList      func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) int
 		CertifyVuln                  func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
 		CertifyVulnList              func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
-		FindAllLicenses              func(childComplexity int, pkgIDs []string, after *string, first *int) int
-		FindAllVulnerabilities       func(childComplexity int, pkgIDs []string, after *string, first *int) int
 		FindPackagesThatNeedScanning func(childComplexity int, queryType model.QueryType, lastScan *int) int
 		FindSoftware                 func(childComplexity int, searchText string) int
 		FindSoftwareList             func(childComplexity int, searchText string, after *string, first *int) int
@@ -3063,6 +3063,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int)), true
 
+	case "Query.BatchQueryPkgIDCertifyLegal":
+		if e.complexity.Query.BatchQueryPkgIDCertifyLegal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryPkgIDCertifyLegal(childComplexity, args["pkgIDs"].([]string)), true
+
+	case "Query.BatchQueryPkgIDCertifyVuln":
+		if e.complexity.Query.BatchQueryPkgIDCertifyVuln == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryPkgIDCertifyVuln(childComplexity, args["pkgIDs"].([]string)), true
+
 	case "Query.builders":
 		if e.complexity.Query.Builders == nil {
 			break
@@ -3206,30 +3230,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CertifyVulnList(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec), args["after"].(*string), args["first"].(*int)), true
-
-	case "Query.findAllLicenses":
-		if e.complexity.Query.FindAllLicenses == nil {
-			break
-		}
-
-		args, err := ec.field_Query_findAllLicenses_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.FindAllLicenses(childComplexity, args["pkgIDs"].([]string), args["after"].(*string), args["first"].(*int)), true
-
-	case "Query.findAllVulnerabilities":
-		if e.complexity.Query.FindAllVulnerabilities == nil {
-			break
-		}
-
-		args, err := ec.field_Query_findAllVulnerabilities_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.FindAllVulnerabilities(childComplexity, args["pkgIDs"].([]string), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.findPackagesThatNeedScanning":
 		if e.complexity.Query.FindPackagesThatNeedScanning == nil {
@@ -5183,6 +5183,8 @@ extend type Query {
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
   "Returns a paginated results via CertifyLegalConnection"
   CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
+  "Batch queries via pkgIDs to find all CertifyLegal"
+  BatchQueryPkgIDCertifyLegal(pkgIDs: [ID!]!): [CertifyLegal!]!
 }
 
 extend type Mutation {
@@ -5676,6 +5678,8 @@ extend type Query {
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
   "Returns a paginated results via CertifyVulnConnection"
   CertifyVulnList(certifyVulnSpec: CertifyVulnSpec!, after: ID, first: Int): CertifyVulnConnection
+  "Batch queries via pkgIDs to find all CertifyVulns that contain vulnerabilities"
+  BatchQueryPkgIDCertifyVuln(pkgIDs: [ID!]!): [CertifyVuln!]!
 }
 
 extend type Mutation {
@@ -7678,9 +7682,6 @@ extend type Query {
   certifyVuln or certifyLegal.
   """
   findPackagesThatNeedScanning(queryType: QueryType!, lastScan: Int): [ID!]!
-
-  findAllVulnerabilities(pkgIDs: [ID!]!, after: ID, first: Int): CertifyVulnConnection
-  findAllLicenses(pkgIDs: [ID!]!, after: ID, first: Int): CertifyVulnConnection
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
