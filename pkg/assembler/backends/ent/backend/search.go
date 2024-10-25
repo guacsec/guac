@@ -354,7 +354,10 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 		Where(certifylegal.And(predicates...)).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).All(ctx)
+		}).
+		WithSource(func(q *ent.SourceNameQuery) {}).
+		WithDeclaredLicenses().
+		WithDiscoveredLicenses().All(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyLegal query based on package IDs with error: %w", err)
