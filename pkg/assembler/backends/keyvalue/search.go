@@ -33,6 +33,30 @@ func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, af
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
+func (c *demoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	var collectedIsDep []*model.IsDependency
+	for _, pkgID := range pkgIDs {
+		isDep, err := c.IsDependency(ctx, &model.IsDependencySpec{Package: &model.PkgSpec{ID: &pkgID}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query IsDependency for pkgID: %s, with error: %w", pkgID, err)
+		}
+		collectedIsDep = append(collectedIsDep, isDep...)
+	}
+	return collectedIsDep, nil
+}
+
+func (c *demoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	var collectedIsDep []*model.IsDependency
+	for _, pkgID := range pkgIDs {
+		isDep, err := c.IsDependency(ctx, &model.IsDependencySpec{DependencyPackage: &model.PkgSpec{ID: &pkgID}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query IsDependency for dependency pkgID: %s, with error: %w", pkgID, err)
+		}
+		collectedIsDep = append(collectedIsDep, isDep...)
+	}
+	return collectedIsDep, nil
+}
+
 func (c *demoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
 	var collectedCertVulns []*model.CertifyVuln
 	for _, pkgID := range pkgIDs {
@@ -55,14 +79,6 @@ func (c *demoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 		collectedCertLegal = append(collectedCertLegal, certLegal...)
 	}
 	return collectedCertLegal, nil
-}
-
-func (c *demoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
-	return nil, fmt.Errorf("not implemented: BatchQuerySubjectPkgDependency")
-}
-
-func (c *demoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
-	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
 }
 
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
