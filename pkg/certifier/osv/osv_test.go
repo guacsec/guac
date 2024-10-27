@@ -32,6 +32,7 @@ import (
 
 	osv_models "github.com/google/osv-scanner/pkg/models"
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
@@ -250,17 +251,13 @@ func Test_createAttestation(t *testing.T) {
 					Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 				},
 				Predicate: attestation_vuln.VulnerabilityPredicate{
-					Invocation: attestation_vuln.Invocation{
-						Uri:        INVOC_URI,
-						ProducerID: PRODUCER_ID,
-					},
 					Scanner: attestation_vuln.Scanner{
 						Uri:     URI,
 						Version: VERSION,
-						Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+						Result:  []attestation_vuln.Result{{Id: "testId"}},
 					},
 					Metadata: attestation_vuln.Metadata{
-						ScannedOn: &currentTime,
+						ScanStartedOn: &currentTime,
 					},
 				},
 			},
@@ -281,15 +278,31 @@ func Test_createAttestation(t *testing.T) {
 					},
 				},
 			},
-			Predicate: attestation_vuln.VulnerabilityPredicate{
-				Scanner: attestation_vuln.Scanner{
-					Uri:     URI,
-					Version: VERSION,
-					Result:  []attestation_vuln.Result{{Id: "testId"}},
+			want: &attestation_vuln.VulnerabilityStatement{
+				Statement: attestationv1.Statement{
+					Type:          attestationv1.StatementTypeUri,
+					PredicateType: attestation_vuln.PredicateVuln,
+					Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 				},
-				Metadata: attestation_vuln.Metadata{
-					ScanStartedOn: &currentTime,
-					ScanFinishedOn: &currentTime,
+				Predicate: attestation_vuln.VulnerabilityPredicate{
+					Scanner: attestation_vuln.Scanner{
+						Uri:     URI,
+						Version: VERSION,
+						Result: []attestation_vuln.Result{
+							{
+								Id: "CVE-2024-3094",
+								Severity: []attestation_vuln.Severity{
+									{
+										Method: string(generated.VulnerabilityScoreTypeCvssv3),
+										Score:  "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+									},
+								},
+							},
+						},
+					},
+					Metadata: attestation_vuln.Metadata{
+						ScanStartedOn: &currentTime,
+					},
 				},
 			},
 		},

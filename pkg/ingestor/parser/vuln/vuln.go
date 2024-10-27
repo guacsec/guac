@@ -156,7 +156,7 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 		ivs = append(ivs, iv)
 
 		var severityErrors error
-		for _, severity := range id.Severity {
+		for _, severity := range res.Severity {
 			score, err := parseScoreBasedOnMethod(severity)
 			if err != nil {
 				severityErrors = errors.Join(fmt.Errorf("parsing severity score failed for method %s: %w", severity.Method, err))
