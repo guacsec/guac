@@ -898,3 +898,175 @@ func TestIsDependencies(t *testing.T) {
 		})
 	}
 }
+
+func TestBatchQuerySubjectPkgDependency(t *testing.T) {
+	ctx := context.Background()
+	b := setupTest(t)
+	type call struct {
+		P1s []*model.IDorPkgInput
+		P2s []*model.IDorPkgInput
+		IDs []*model.IsDependencyInputSpec
+	}
+	tests := []struct {
+		Name     string
+		InPkg    []*model.PkgInputSpec
+		InDepPkg []*model.PkgInputSpec
+		Calls    []call
+		ExpDeps  []*model.IsDependency
+	}{
+		{
+			Name:     "HappyPath",
+			InPkg:    []*model.PkgInputSpec{testdata.P1, testdata.P3, testdata.P4},
+			InDepPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4, testdata.P5},
+			Calls: []call{{
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P3}, {PackageInput: testdata.P4}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}, {PackageInput: testdata.P5}},
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpDeps: []*model.IsDependency{
+				{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2out,
+					Justification:     "test justification",
+				},
+				{
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P4out,
+					Justification:     "test justification",
+				},
+				{
+					Package:           testdata.P4out,
+					DependencyPackage: testdata.P5out,
+					Justification:     "test justification",
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			var pkgIDs []string
+			for _, a := range test.InPkg {
+				if pkgID, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				} else {
+					pkgIDs = append(pkgIDs, pkgID.PackageVersionID)
+				}
+			}
+			for _, a := range test.InDepPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.IDs)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error: %v", err)
+				}
+			}
+
+			got, err := b.BatchQuerySubjectPkgDependency(ctx, pkgIDs)
+			if err != nil {
+				t.Fatalf("did not get expected query error: %v", err)
+			}
+			if diff := cmp.Diff(test.ExpDeps, got, commonOpts); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestBatchQueryDepPkgDependency(t *testing.T) {
+	ctx := context.Background()
+	b := setupTest(t)
+	type call struct {
+		P1s []*model.IDorPkgInput
+		P2s []*model.IDorPkgInput
+		IDs []*model.IsDependencyInputSpec
+	}
+	tests := []struct {
+		Name     string
+		InPkg    []*model.PkgInputSpec
+		InDepPkg []*model.PkgInputSpec
+		Calls    []call
+		ExpDeps  []*model.IsDependency
+	}{
+		{
+			Name:     "HappyPath",
+			InPkg:    []*model.PkgInputSpec{testdata.P1, testdata.P3, testdata.P4},
+			InDepPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4, testdata.P5},
+			Calls: []call{{
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P3}, {PackageInput: testdata.P4}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}, {PackageInput: testdata.P5}},
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpDeps: []*model.IsDependency{
+				{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2out,
+					Justification:     "test justification",
+				},
+				{
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P4out,
+					Justification:     "test justification",
+				},
+				{
+					Package:           testdata.P4out,
+					DependencyPackage: testdata.P5out,
+					Justification:     "test justification",
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			var depPkgIDs []string
+			for _, a := range test.InDepPkg {
+				if depPkgID, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				} else {
+					depPkgIDs = append(depPkgIDs, depPkgID.PackageVersionID)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.IDs)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error: %v", err)
+				}
+			}
+
+			got, err := b.BatchQueryDepPkgDependency(ctx, depPkgIDs)
+			if err != nil {
+				t.Fatalf("did not get expected query error: %v", err)
+			}
+			if diff := cmp.Diff(test.ExpDeps, got, commonOpts); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
