@@ -70,6 +70,21 @@ func (mr *MockBackendMockRecorder) ArtifactsList(ctx, artifactSpec, after, first
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArtifactsList", reflect.TypeOf((*MockBackend)(nil).ArtifactsList), ctx, artifactSpec, after, first)
 }
 
+// BatchQueryDepPkgDependency mocks base method.
+func (m *MockBackend) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQueryDepPkgDependency", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.IsDependency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQueryDepPkgDependency indicates an expected call of BatchQueryDepPkgDependency.
+func (mr *MockBackendMockRecorder) BatchQueryDepPkgDependency(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryDepPkgDependency", reflect.TypeOf((*MockBackend)(nil).BatchQueryDepPkgDependency), ctx, pkgIDs)
+}
+
 // BatchQueryPkgIDCertifyLegal mocks base method.
 func (m *MockBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
 	m.ctrl.T.Helper()
@@ -98,6 +113,21 @@ func (m *MockBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []s
 func (mr *MockBackendMockRecorder) BatchQueryPkgIDCertifyVuln(ctx, pkgIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryPkgIDCertifyVuln", reflect.TypeOf((*MockBackend)(nil).BatchQueryPkgIDCertifyVuln), ctx, pkgIDs)
+}
+
+// BatchQuerySubjectPkgDependency mocks base method.
+func (m *MockBackend) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQuerySubjectPkgDependency", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.IsDependency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQuerySubjectPkgDependency indicates an expected call of BatchQuerySubjectPkgDependency.
+func (mr *MockBackendMockRecorder) BatchQuerySubjectPkgDependency(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQuerySubjectPkgDependency", reflect.TypeOf((*MockBackend)(nil).BatchQuerySubjectPkgDependency), ctx, pkgIDs)
 }
 
 // Builders mocks base method.

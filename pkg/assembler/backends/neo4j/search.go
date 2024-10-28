@@ -45,3 +45,11 @@ func (c *neo4jClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []s
 func (c *neo4jClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
 	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyLegal")
 }
+
+func (c *neo4jClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQuerySubjectPkgDependency")
+}
+
+func (c *neo4jClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
+}

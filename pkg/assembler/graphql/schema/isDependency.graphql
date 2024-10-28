@@ -106,6 +106,10 @@ extend type Query {
   IsDependency(isDependencySpec: IsDependencySpec!): [IsDependency!]!
   "Returns a paginated results via IsDependencyConnection"
   IsDependencyList(isDependencySpec: IsDependencySpec!, after: ID, first: Int): IsDependencyConnection
+  "Batch queries via pkgVersion IDs to find to find all isDependency nodes that have the subject pkg ID"
+  BatchQuerySubjectPkgDependency(pkgIDs: [ID!]!): [IsDependency!]!
+  "Batch queries via pkgVersion IDs to find to find all isDependency nodes that have the dependency pkg ID"
+  BatchQueryDepPkgDependency(pkgIDs: [ID!]!): [IsDependency!]!
 }
 
 extend type Mutation {

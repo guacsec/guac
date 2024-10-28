@@ -43,6 +43,14 @@ func (c *arangoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs [
 	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyLegal")
 }
 
+func (c *arangoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQuerySubjectPkgDependency")
+}
+
+func (c *arangoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
+}
+
 // TODO(lumjjb): add source when it is implemented in arango backend
 func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 

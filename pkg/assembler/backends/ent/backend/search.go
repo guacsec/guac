@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -364,4 +365,60 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 		collectedCertLegal = append(collectedCertLegal, toModelCertifyLegal(entCertLegal))
 	}
 	return collectedCertLegal, nil
+}
+
+func (b *EntBackend) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	var queryList []uuid.UUID
+
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+		}
+		queryList = append(queryList, convertedID)
+	}
+
+	idDepConn, err := b.client.Dependency.Query().
+		Where(dependency.PackageIDIn(queryList...)).
+		WithPackage(withPackageVersionTree()).
+		WithDependentPackageVersion(withPackageVersionTree()).All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed isDependency subject query based on package IDs with error: %w", err)
+	}
+
+	var collectedIsDependency []*model.IsDependency
+	for _, entIsDep := range idDepConn {
+		collectedIsDependency = append(collectedIsDependency, toModelIsDependencyWithBackrefs(entIsDep))
+	}
+	return collectedIsDependency, nil
+}
+
+func (b *EntBackend) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	var queryList []uuid.UUID
+
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+		}
+		queryList = append(queryList, convertedID)
+	}
+
+	idDepConn, err := b.client.Dependency.Query().
+		Where(dependency.DependentPackageVersionIDIn(queryList...)).
+		WithPackage(withPackageVersionTree()).
+		WithDependentPackageVersion(withPackageVersionTree()).All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed isDependency subject query based on package IDs with error: %w", err)
+	}
+
+	var collectedIsDependency []*model.IsDependency
+	for _, entIsDep := range idDepConn {
+		collectedIsDependency = append(collectedIsDependency, toModelIsDependencyWithBackrefs(entIsDep))
+	}
+	return collectedIsDependency, nil
 }
