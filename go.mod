@@ -346,9 +346,9 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.18
 	go.uber.org/mock v0.4.0
 	go.uber.org/ratelimit v0.3.1
-	gocloud.dev v0.39.0
+	gocloud.dev v0.40.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
-	gocloud.dev/pubsub/rabbitpubsub v0.39.0
+	gocloud.dev/pubsub/rabbitpubsub v0.40.0
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/time v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
