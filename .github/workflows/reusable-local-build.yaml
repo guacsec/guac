@@ -24,10 +24,18 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: ${{ inputs.repository }}
@@ -37,7 +45,7 @@ jobs:
         with:
           go-version: 'stable'
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
         with:
           install-only: true
       - run: |
@@ -53,7 +61,7 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-local-organic-guac-amd64 local-organic-guac
           docker save -o ./bin/local-organic-guac.tar local-organic-guac
         shell: bash
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: guac-artifacts
           path: ./bin

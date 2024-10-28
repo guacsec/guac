@@ -11,3 +11,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: docker
+    directory: /pkg/assembler/backends/ent/migrate
+    schedule:
+      interval: daily

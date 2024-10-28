@@ -25,6 +25,11 @@ jobs:
     runs-on: ubuntu-latest
     name: CI for Integration Merge Test
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit
+
       - name: Checkout code
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
       - name: setup-go
@@ -38,7 +43,7 @@ jobs:
       - name: Setup the project
         run: go mod download
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Run integration merge test
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
