@@ -37,3 +37,11 @@ func (c *neo4jClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []str
 func (c *neo4jClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
 	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
 }
+
+func (c *neo4jClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyVuln")
+}
+
+func (c *neo4jClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyLegal")
+}

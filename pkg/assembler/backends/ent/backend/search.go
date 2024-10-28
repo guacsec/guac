@@ -34,9 +34,12 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
-const guacType string = "guac"
+const (
+	guacType string = "guac"
+)
 
 // FindSoftware takes in a searchText string and looks for software
 // that may be relevant for the input text. This can be seen as fuzzy search
@@ -287,4 +290,78 @@ func constructPkgConn(pkgConn *ent.PackageVersionConnection, totalCount int, has
 		// if not found return nil
 		return nil
 	}
+}
+
+func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+
+	// static ID for noVuln that is generated from type = novuln and vulnid = ""
+	// this is generated via:
+	vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&model.VulnerabilityInputSpec{Type: NoVuln, VulnerabilityID: ""}, helpers.VulnServerKey)
+	noVulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
+	var queryList []uuid.UUID
+
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+		}
+		queryList = append(queryList, convertedID)
+	}
+
+	var predicates []predicate.CertifyVuln
+
+	predicates = append(predicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
+
+	certVulnConn, err := b.client.CertifyVuln.Query().
+		Where(certifyvuln.And(predicates...)).
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyVuln query based on package IDs with error: %w", err)
+	}
+	var collectedCertVuln []*model.CertifyVuln
+	for _, entCertVuln := range certVulnConn {
+		collectedCertVuln = append(collectedCertVuln, toModelCertifyVulnerability(entCertVuln))
+	}
+	return collectedCertVuln, nil
+}
+
+func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+
+	var queryList []uuid.UUID
+
+	for _, id := range pkgIDs {
+		globalID := fromGlobalID(id)
+		convertedID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ID to UUID with error: %w", err)
+		}
+		queryList = append(queryList, convertedID)
+	}
+
+	var predicates []predicate.CertifyLegal
+
+	predicates = append(predicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
+	certLegalConn, err := b.client.CertifyLegal.Query().
+		Where(certifylegal.And(predicates...)).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithSource(func(q *ent.SourceNameQuery) {}).
+		WithDeclaredLicenses().
+		WithDiscoveredLicenses().All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyLegal query based on package IDs with error: %w", err)
+	}
+
+	var collectedCertLegal []*model.CertifyLegal
+	for _, entCertLegal := range certLegalConn {
+		collectedCertLegal = append(collectedCertLegal, toModelCertifyLegal(entCertLegal))
+	}
+	return collectedCertLegal, nil
 }

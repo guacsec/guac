@@ -531,6 +531,8 @@ type ComplexityRoot struct {
 	Query struct {
 		Artifacts                    func(childComplexity int, artifactSpec model.ArtifactSpec) int
 		ArtifactsList                func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
+		BatchQueryPkgIDCertifyLegal  func(childComplexity int, pkgIDs []string) int
+		BatchQueryPkgIDCertifyVuln   func(childComplexity int, pkgIDs []string) int
 		Builders                     func(childComplexity int, builderSpec model.BuilderSpec) int
 		BuildersList                 func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
 		CertifyBad                   func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
@@ -3061,6 +3063,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int)), true
 
+	case "Query.BatchQueryPkgIDCertifyLegal":
+		if e.complexity.Query.BatchQueryPkgIDCertifyLegal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryPkgIDCertifyLegal(childComplexity, args["pkgIDs"].([]string)), true
+
+	case "Query.BatchQueryPkgIDCertifyVuln":
+		if e.complexity.Query.BatchQueryPkgIDCertifyVuln == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryPkgIDCertifyVuln(childComplexity, args["pkgIDs"].([]string)), true
+
 	case "Query.builders":
 		if e.complexity.Query.Builders == nil {
 			break
@@ -5157,6 +5183,8 @@ extend type Query {
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
   "Returns a paginated results via CertifyLegalConnection"
   CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
+  "Batch queries via pkgVersion IDs to find all CertifyLegal"
+  BatchQueryPkgIDCertifyLegal(pkgIDs: [ID!]!): [CertifyLegal!]!
 }
 
 extend type Mutation {
@@ -5650,6 +5678,8 @@ extend type Query {
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
   "Returns a paginated results via CertifyVulnConnection"
   CertifyVulnList(certifyVulnSpec: CertifyVulnSpec!, after: ID, first: Int): CertifyVulnConnection
+  "Batch queries via pkgVersion IDs to find all CertifyVulns that contain vulnerabilities"
+  BatchQueryPkgIDCertifyVuln(pkgIDs: [ID!]!): [CertifyVuln!]!
 }
 
 extend type Mutation {

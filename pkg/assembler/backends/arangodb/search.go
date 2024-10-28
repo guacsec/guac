@@ -35,6 +35,14 @@ func (c *arangoClient) FindPackagesThatNeedScanning(ctx context.Context, queryTy
 	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
 }
 
+func (c *arangoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyVuln")
+}
+
+func (c *arangoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyLegal")
+}
+
 // TODO(lumjjb): add source when it is implemented in arango backend
 func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 

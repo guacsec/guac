@@ -163,3 +163,8 @@ func (r *queryResolver) CertifyVulnList(ctx context.Context, certifyVulnSpec mod
 		return r.Backend.CertifyVulnList(ctx, certifyVulnSpec, after, first)
 	}
 }
+
+// BatchQueryPkgIDCertifyVuln is the resolver for the BatchQueryPkgIDCertifyVuln field.
+func (r *queryResolver) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	return r.Backend.BatchQueryPkgIDCertifyVuln(ctx, pkgIDs)
+}

@@ -64,3 +64,8 @@ func (r *queryResolver) CertifyLegalList(ctx context.Context, certifyLegalSpec m
 
 	return r.Backend.CertifyLegalList(ctx, certifyLegalSpec, after, first)
 }
+
+// BatchQueryPkgIDCertifyLegal is the resolver for the BatchQueryPkgIDCertifyLegal field.
+func (r *queryResolver) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	return r.Backend.BatchQueryPkgIDCertifyLegal(ctx, pkgIDs)
+}
