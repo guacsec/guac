@@ -46,7 +46,7 @@ jobs:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Setup the project
         run: go mod download
       - name: Run backends
@@ -77,7 +77,7 @@ jobs:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Setup the project
         run: go mod download
       - name: Run tests
@@ -94,7 +94,7 @@ jobs:
         with:
           go-version: '1.21'
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Install formatter
         run: go install golang.org/x/tools/cmd/goimports@latest
       - name: Check format
@@ -112,7 +112,7 @@ jobs:
         with:
           go-version: '1.21'
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # tag=v3.2.0
         with:
