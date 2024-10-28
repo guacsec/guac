@@ -57,6 +57,14 @@ func (c *demoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 	return collectedCertLegal, nil
 }
 
+func (c *demoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQuerySubjectPkgDependency")
+}
+
+func (c *demoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
+}
+
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	scanner := c.kv.Keys("artifacts")
 	var res []model.PackageSourceOrArtifact
