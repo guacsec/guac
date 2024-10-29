@@ -306,7 +306,7 @@ require (
 	github.com/cdevents/sdk-go v0.4.1
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/getkin/kin-openapi v0.127.0
+	github.com/getkin/kin-openapi v0.128.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-git/go-git/v5 v5.12.0
