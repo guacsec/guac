@@ -23,8 +23,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	cd_certifier "github.com/guacsec/guac/pkg/certifier/clearlydefined"
 	osv_certifier "github.com/guacsec/guac/pkg/certifier/osv"
+	eol_certifier "github.com/guacsec/guac/pkg/certifier/eol"
 	"github.com/guacsec/guac/pkg/ingestor/parser/clearlydefined"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/eol"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/version"
 )
@@ -126,4 +128,27 @@ func runQueryOnBatchedPurls(ctx context.Context, cdParser common.DocumentParser,
 		}
 	}
 	return certLegalIngest, hasSourceAtIngest, nil
+}
+
+func PurlsEOLScan(ctx context.Context, purls []string) ([]assembler.HasMetadataIngest, error) {
+	// use the existing EOL parser to parse and obtain EOL metadata
+	eolParser := eol.NewEOLCertificationParser()
+	var eolIngest []assembler.HasMetadataIngest
+
+	if eolProcessorDocs, err := eol_certifier.EvaluateEOLResponse(ctx, &http.Client{
+		Transport: version.UATransport,
+	}, purls, nil); err != nil {
+		return nil, fmt.Errorf("failed to get response from endoflife.date with error: %w", err)
+	} else {
+		for _, doc := range eolProcessorDocs {
+			err := eolParser.Parse(ctx, doc)
+			if err != nil {
+				return nil, fmt.Errorf("EOL parser failed with error: %w", err)
+			}
+			preds := eolParser.GetPredicates(ctx)
+			common.AddMetadata(preds, nil, doc.SourceInformation)
+			eolIngest = append(eolIngest, preds.HasMetadata...)
+		}
+	}
+	return eolIngest, nil
 }

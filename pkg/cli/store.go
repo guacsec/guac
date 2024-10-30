@@ -71,6 +71,9 @@ func init() {
 	// the ingestor will query and ingest clearly defined for licenses
 	set.Bool("add-license-on-ingest", false, "if enabled, the ingestor will query and ingest clearly defined for licenses. Warning: This will increase ingestion times")
 
+	// the ingestor will query and ingest endoflife.date for EOL
+	set.Bool("add-eol-on-ingest", false, "if enabled, the ingestor will query and ingest endoflife.date for EOL data. Warning: This will increase ingestion times")
+
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")
 	set.String("neptune-region", "us-east-1", "region to connect to neptune db")

@@ -69,6 +69,7 @@ type githubOptions struct {
 	headerFile              string
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
 }
 
 var githubCmd = &cobra.Command{
@@ -91,6 +92,7 @@ var githubCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-eol-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -155,7 +157,16 @@ var githubCmd = &cobra.Command{
 		var errFound bool
 
 		emit := func(d *processor.Document) error {
-			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+			_, err := ingestor.Ingest(
+				ctx,
+				d,
+				opts.graphqlEndpoint,
+				transport,
+				csubClient,
+				opts.queryVulnOnIngestion,
+				opts.queryLicenseOnIngestion,
+				opts.queryEOLOnIngestion,
+			)
 
 			if err != nil {
 				errFound = true
@@ -209,7 +220,7 @@ var githubCmd = &cobra.Command{
 }
 
 func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls,
-	csubTlsSkipVerify, useCsub, poll bool, queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (githubOptions, error) {
+	csubTlsSkipVerify, useCsub, poll bool, queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -219,6 +230,7 @@ func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, work
 	opts.workflowFileName = workflowFileName
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryEOLOnIngestion = queryEOLIngestion
 
 	if useCsub {
 		csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

@@ -74,6 +74,9 @@ func (e *parser) Parse(ctx context.Context, doc *processor.Document) error {
 
 	if statement.Predicate.Metadata.ScannedOn != nil {
 		e.timeScanned = *statement.Predicate.Metadata.ScannedOn
+	} else {
+		logger.Warn("no scan time found in EOL statement")
+		e.timeScanned = time.Now()
 	}
 
 	if err := e.parseSubject(statement); err != nil {

@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -168,7 +169,7 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 			if err != nil {
 				return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 			}
-		} else {
+		} else if queryType == model.QueryTypeLicense {
 			err := b.client.PackageVersion.Query().
 				Where(notGUACTypePackagePredicates()).
 				WithName(func(q *ent.PackageNameQuery) {}).
@@ -182,6 +183,25 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 
 			if err != nil {
 				return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
+			}
+		} else { // queryType == model.QueryTypeEol via hasMetadata
+			err := b.client.PackageVersion.Query().
+				Where(notGUACTypePackagePredicates()).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				GroupBy(packageversion.FieldID). // Group by Package ID
+				Aggregate(func(s *sql.Selector) string {
+					t := sql.Table(hasmetadata.Table)
+					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(hasmetadata.FieldPackageVersionID))
+					s.Where(sql.And(
+						sql.NotNull(t.C(hasmetadata.FieldTimestamp)),
+						sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"),
+					))
+					return sql.As(sql.Max(t.C(hasmetadata.FieldTimestamp)), "max")
+				}).
+				Scan(ctx, &pkgLatestScan)
+
+			if err != nil {
+				return nil, fmt.Errorf("failed aggregate packages based on hasMetadata with error: %w", err)
 			}
 		}
 
