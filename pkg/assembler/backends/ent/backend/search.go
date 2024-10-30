@@ -310,12 +310,35 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		queryList = append(queryList, convertedID)
 	}
 
+	var cvLatestScan []struct {
+		ID             uuid.UUID `json:"id"`
+		LastScanTimeDB time.Time `json:"max"`
+	}
+
 	var predicates []predicate.CertifyVuln
 
 	predicates = append(predicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
-	certVulnConn, err := b.client.CertifyVuln.Query().
+	err := b.client.Debug().CertifyVuln.Query().
 		Where(certifyvuln.And(predicates...)).
+		GroupBy(certifyvuln.FieldID). // Group by certifyvuln ID
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(certifyvuln.Table)
+			return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
+		}).
+		Scan(ctx, &cvLatestScan)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed aggregate certifyVuln based on packageIDs with error: %w", err)
+	}
+
+	var cvIDs []uuid.UUID
+	for _, record := range cvLatestScan {
+		cvIDs = append(cvIDs, record.ID) // collect all certifyvuln ID
+	}
+
+	certVulnConn, err := b.client.Debug().CertifyVuln.Query().
+		Where(certifyvuln.IDIn(cvIDs...)).
 		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
@@ -344,15 +367,37 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 		queryList = append(queryList, convertedID)
 	}
 
+	var clLatestScan []struct {
+		ID             uuid.UUID `json:"id"`
+		LastScanTimeDB time.Time `json:"max"`
+	}
+
 	var predicates []predicate.CertifyLegal
 
 	predicates = append(predicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
-	certLegalConn, err := b.client.CertifyLegal.Query().
+	err := b.client.Debug().CertifyLegal.Query().
 		Where(certifylegal.And(predicates...)).
+		GroupBy(certifylegal.FieldID). // Group by certifylegal ID
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(certifylegal.Table)
+			return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
+		}).
+		Scan(ctx, &clLatestScan)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed aggregate certifylegal based on packageIDs with error: %w", err)
+	}
+
+	var clIDs []uuid.UUID
+	for _, record := range clLatestScan {
+		clIDs = append(clIDs, record.ID) // collect all certifylegal ID
+	}
+
+	certLegalConn, err := b.client.Debug().CertifyLegal.Query().
+		Where(certifylegal.IDIn(clIDs...)).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
-		WithSource(func(q *ent.SourceNameQuery) {}).
 		WithDeclaredLicenses().
 		WithDiscoveredLicenses().All(ctx)
 
