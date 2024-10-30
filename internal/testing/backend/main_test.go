@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend_test
 
 import (
@@ -113,10 +115,10 @@ type backend interface {
 
 var testBackends = map[string]backend{
 	memmap: newMemMap(),
-	// arango: newArango(),
-	// redis:  newRedis(),
-	// ent:    newEnt(),
-	// tikv:   newTikv(),
+	arango: newArango(),
+	redis:  newRedis(),
+	ent:    newEnt(),
+	tikv:   newTikv(),
 }
 
 var currentBackend string

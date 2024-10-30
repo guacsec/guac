@@ -5209,7 +5209,7 @@ extend type Query {
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
   "Returns a paginated results via CertifyLegalConnection"
   CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
-  "Batch queries via pkgVersion IDs to find all CertifyLegal"
+  "Batch queries via pkgVersion IDs to find all CertifyLegal (latest timestamp)"
   BatchQueryPkgIDCertifyLegal(pkgIDs: [ID!]!): [CertifyLegal!]!
 }
 
@@ -5704,7 +5704,7 @@ extend type Query {
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
   "Returns a paginated results via CertifyVulnConnection"
   CertifyVulnList(certifyVulnSpec: CertifyVulnSpec!, after: ID, first: Int): CertifyVulnConnection
-  "Batch queries via pkgVersion IDs to find all CertifyVulns that contain vulnerabilities"
+  "Batch queries via pkgVersion IDs to find all CertifyVulns (latest timestamp) that contain vulnerabilities"
   BatchQueryPkgIDCertifyVuln(pkgIDs: [ID!]!): [CertifyVuln!]!
 }
 
