@@ -15,7 +15,7 @@
 
 //go:build !(386 || arm || mips || darwin)
 
-package cmd
+package keyvalue
 
 import "github.com/guacsec/guac/pkg/assembler/kv/tikv"
 

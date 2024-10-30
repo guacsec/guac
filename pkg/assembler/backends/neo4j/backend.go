@@ -23,6 +23,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -50,8 +52,41 @@ type neo4jClient struct {
 	driver neo4j.Driver
 }
 
+// flags holds the command-line flags for Neo4j configuration
+var flags = struct {
+	addr  string
+	user  string
+	pass  string
+	realm string
+}{}
+
 func init() {
-	backends.Register("neo4j", getBackend)
+	backends.Register("neo4j", getBackend, registerFlags, parseFlags)
+}
+
+// registerFlags registers Neo4j-specific command line flags
+func registerFlags(cmd *cobra.Command) error {
+	flagSet := cmd.Flags()
+	flagSet.StringVar(&flags.addr, "neo4j-addr", "neo4j://localhost:7687", "address to neo4j db")
+	flagSet.StringVar(&flags.user, "neo4j-user", "", "neo4j user credential to connect to graph db")
+	flagSet.StringVar(&flags.pass, "neo4j-pass", "", "neo4j password credential to connect to graph db")
+	flagSet.StringVar(&flags.realm, "neo4j-realm", "neo4j", "realm to connect to graph db")
+
+	if err := viper.BindPFlags(flagSet); err != nil {
+		return fmt.Errorf("failed to bind flags: %w", err)
+	}
+
+	return nil
+}
+
+// parseFlags returns the Neo4j configuration from parsed flags
+func parseFlags(ctx context.Context) (backends.BackendArgs, error) {
+	return &Neo4jConfig{
+		DBAddr: flags.addr,
+		User:   flags.user,
+		Pass:   flags.pass,
+		Realm:  flags.realm,
+	}, nil
 }
 
 func getBackend(_ context.Context, args backends.BackendArgs) (backends.Backend, error) {
