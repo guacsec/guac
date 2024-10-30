@@ -311,18 +311,18 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 	}
 
 	var cvLatestScan []struct {
-		ID             uuid.UUID `json:"id"`
+		PkgID          uuid.UUID `json:"package_id"`
+		VulnID         uuid.UUID `json:"vulnerability_id"`
 		LastScanTimeDB time.Time `json:"max"`
 	}
 
-	var predicates []predicate.CertifyVuln
-
-	predicates = append(predicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
+	var aggPredicates []predicate.CertifyVuln
+	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
 	// aggregate to find the latest timescanned for certifyVulns for list of packages
-	err := b.client.CertifyVuln.Query().
-		Where(certifyvuln.And(predicates...)).
-		GroupBy(certifyvuln.FieldID). // Group by certifyvuln ID
+	err := b.client.Debug().CertifyVuln.Query().
+		Where(certifyvuln.And(aggPredicates...)).
+		GroupBy(certifyvuln.FieldPackageID, certifyvuln.FieldVulnerabilityID). // Group by Package ID
 		Aggregate(func(s *sql.Selector) string {
 			t := sql.Table(certifyvuln.Table)
 			return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
@@ -333,13 +333,18 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		return nil, fmt.Errorf("failed aggregate certifyVuln based on packageIDs with error: %w", err)
 	}
 
-	var cvIDs []uuid.UUID
+	var predicates []predicate.CertifyVuln
 	for _, record := range cvLatestScan {
-		cvIDs = append(cvIDs, record.ID) // collect all certifyvuln ID
+		predicates = append(predicates,
+			certifyvuln.And(
+				certifyvuln.VulnerabilityID(record.VulnID),
+				certifyvuln.PackageID(record.PkgID),
+				certifyvuln.TimeScannedEQ(record.LastScanTimeDB),
+			))
 	}
 
-	certVulnConn, err := b.client.CertifyVuln.Query().
-		Where(certifyvuln.IDIn(cvIDs...)).
+	certVulnConn, err := b.client.Debug().CertifyVuln.Query().
+		Where(certifyvuln.Or(predicates...)).
 		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
@@ -369,16 +374,18 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 	}
 
 	var clLatestScan []struct {
-		ID             uuid.UUID `json:"id"`
-		LastScanTimeDB time.Time `json:"max"`
+		PkgID             uuid.UUID `json:"package_id"`
+		DeclaredLicense   string    `json:"declared_licenses_hash"`
+		DiscoveredLicense string    `json:"discovered_licenses_hash"`
+		LastScanTimeDB    time.Time `json:"max"`
 	}
 
-	var predicates []predicate.CertifyLegal
+	var aggPredicates []predicate.CertifyLegal
 	// aggregate to find the latest timescanned for certifyLegals for list of packages
-	predicates = append(predicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
-	err := b.client.CertifyLegal.Query().
-		Where(certifylegal.And(predicates...)).
-		GroupBy(certifylegal.FieldID). // Group by certifylegal ID
+	aggPredicates = append(aggPredicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
+	err := b.client.Debug().CertifyLegal.Query().
+		Where(certifylegal.And(aggPredicates...)).
+		GroupBy(certifylegal.FieldPackageID, certifylegal.FieldDeclaredLicensesHash, certifylegal.FieldDiscoveredLicensesHash). // Group by certifylegal ID
 		Aggregate(func(s *sql.Selector) string {
 			t := sql.Table(certifylegal.Table)
 			return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
@@ -389,13 +396,20 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 		return nil, fmt.Errorf("failed aggregate certifylegal based on packageIDs with error: %w", err)
 	}
 
-	var clIDs []uuid.UUID
+	var predicates []predicate.CertifyLegal
 	for _, record := range clLatestScan {
-		clIDs = append(clIDs, record.ID) // collect all certifylegal ID
+		predicates = append(predicates,
+			certifylegal.And(
+				certifylegal.PackageID(record.PkgID),
+				certifylegal.SourceIDIsNil(),
+				certifylegal.DeclaredLicensesHashEQ(record.DeclaredLicense),
+				certifylegal.DiscoveredLicensesHashEQ(record.DiscoveredLicense),
+				certifylegal.TimeScannedEQ(record.LastScanTimeDB),
+			))
 	}
 
-	certLegalConn, err := b.client.CertifyLegal.Query().
-		Where(certifylegal.IDIn(clIDs...)).
+	certLegalConn, err := b.client.Debug().CertifyLegal.Query().
+		Where(certifylegal.Or(predicates...)).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
