@@ -319,6 +319,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 
 	predicates = append(predicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
+	// aggregate to find the latest timescanned for certifyVulns for list of packages
 	err := b.client.Debug().CertifyVuln.Query().
 		Where(certifyvuln.And(predicates...)).
 		GroupBy(certifyvuln.FieldID). // Group by certifyvuln ID
@@ -373,7 +374,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 	}
 
 	var predicates []predicate.CertifyLegal
-
+	// aggregate to find the latest timescanned for certifyLegals for list of packages
 	predicates = append(predicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
 	err := b.client.Debug().CertifyLegal.Query().
 		Where(certifylegal.And(predicates...)).

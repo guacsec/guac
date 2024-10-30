@@ -25,6 +25,7 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/maps"
 )
 
 const guacType string = "guac"
@@ -58,27 +59,73 @@ func (c *demoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []st
 }
 
 func (c *demoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
-	var collectedCertVulns []*model.CertifyVuln
+	pkgCVs := make(map[string][]*model.CertifyVuln)
 	for _, pkgID := range pkgIDs {
 		certVuln, err := c.CertifyVuln(ctx, &model.CertifyVulnSpec{Package: &model.PkgSpec{ID: &pkgID}})
 		if err != nil {
 			return nil, fmt.Errorf("failed to query CertifyVuln for pkgID: %s, with error: %w", pkgID, err)
 		}
-		collectedCertVulns = append(collectedCertVulns, certVuln...)
+		pkgCVs[pkgID] = append(pkgCVs[pkgID], certVuln...)
 	}
-	return collectedCertVulns, nil
+
+	deduplicatedPkgCVs := make(map[string][]*model.CertifyVuln)
+	for _, certVulns := range pkgCVs {
+		pkgID := certVulns[0].Package.Namespaces[0].Names[0].Versions[0].ID
+		cvsByVulnID := make(map[string]*model.CertifyVuln)
+		for _, cv := range certVulns {
+			cv := cv
+			vulnID := cv.Vulnerability.VulnerabilityIDs[0].VulnerabilityID
+			if existing, ok := cvsByVulnID[vulnID]; ok {
+				if existing.Metadata.TimeScanned.After(cv.Metadata.TimeScanned) {
+					continue
+				}
+			}
+			cvsByVulnID[vulnID] = cv
+		}
+		deduplicatedPkgCVs[pkgID] = append(deduplicatedPkgCVs[pkgID], maps.Values(cvsByVulnID)...)
+	}
+
+	var filteredCertVulns []*model.CertifyVuln
+	for _, certVulns := range deduplicatedPkgCVs {
+		filteredCertVulns = append(filteredCertVulns, certVulns...)
+	}
+
+	return filteredCertVulns, nil
 }
 
 func (c *demoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
-	var collectedCertLegal []*model.CertifyLegal
+	pkgCLs := make(map[string][]*model.CertifyLegal)
 	for _, pkgID := range pkgIDs {
 		certLegal, err := c.CertifyLegal(ctx, &model.CertifyLegalSpec{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: &pkgID}}})
 		if err != nil {
 			return nil, fmt.Errorf("failed to query CertifyLegal for pkgID: %s, with error: %w", pkgID, err)
 		}
-		collectedCertLegal = append(collectedCertLegal, certLegal...)
+		pkgCLs[pkgID] = append(pkgCLs[pkgID], certLegal...)
 	}
-	return collectedCertLegal, nil
+
+	deduplicatedPkgCLs := make(map[string]*model.CertifyLegal)
+	for _, certLegals := range pkgCLs {
+		if pkg, ok := certLegals[0].Subject.(*model.Package); ok {
+			var latest time.Time
+			pkgID := pkg.Namespaces[0].Names[0].Versions[0].ID
+			for _, cl := range certLegals {
+				if cl.TimeScanned.After(latest) {
+					latestcl := cl
+					latest = cl.TimeScanned
+					deduplicatedPkgCLs[pkgID] = latestcl
+				}
+			}
+		} else {
+			continue
+		}
+	}
+
+	var filteredCertLegals []*model.CertifyLegal
+	for _, certLegal := range deduplicatedPkgCLs {
+		filteredCertLegals = append(filteredCertLegals, certLegal)
+	}
+
+	return filteredCertLegals, nil
 }
 
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {

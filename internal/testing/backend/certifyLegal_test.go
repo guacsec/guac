@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -631,10 +629,10 @@ func TestBatchQueryPkgIDCertifyLegal(t *testing.T) {
 					Dec: [][]*model.IDorLicenseInput{{{LicenseInput: testdata.L1}}, {{LicenseInput: testdata.L2}}, {{LicenseInput: testdata.L3}}, {{LicenseInput: testdata.L4}}},
 					Dis: [][]*model.IDorLicenseInput{{{LicenseInput: testdata.L1}}, {{LicenseInput: testdata.L2}}, {}, {}},
 					Legal: []*model.CertifyLegalInputSpec{
-						{Justification: "test justification"},
-						{Justification: "test justification"},
-						{Justification: "test justification"},
-						{Justification: "test justification"},
+						{Justification: "test justification", TimeScanned: testdata.T1},
+						{Justification: "test justification", TimeScanned: testdata.T1},
+						{Justification: "test justification", TimeScanned: testdata.T1},
+						{Justification: "test justification", TimeScanned: testdata.T1},
 					},
 				},
 			},
@@ -644,22 +642,26 @@ func TestBatchQueryPkgIDCertifyLegal(t *testing.T) {
 					DeclaredLicenses:   []*model.License{testdata.L1out},
 					DiscoveredLicenses: []*model.License{testdata.L1out},
 					Justification:      "test justification",
+					TimeScanned:        testdata.T1,
 				},
 				{
 					Subject:            testdata.P2out,
 					DeclaredLicenses:   []*model.License{testdata.L2out},
 					DiscoveredLicenses: []*model.License{testdata.L2out},
 					Justification:      "test justification",
+					TimeScanned:        testdata.T1,
 				},
 				{
 					Subject:          testdata.P3out,
 					DeclaredLicenses: []*model.License{testdata.L3out},
 					Justification:    "test justification",
+					TimeScanned:      testdata.T1,
 				},
 				{
 					Subject:          testdata.P4out,
 					DeclaredLicenses: []*model.License{testdata.L4out},
 					Justification:    "test justification",
+					TimeScanned:      testdata.T1,
 				},
 			},
 		},
