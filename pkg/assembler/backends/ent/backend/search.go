@@ -320,7 +320,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
 	// aggregate to find the latest timescanned for certifyVulns for list of packages
-	err := b.client.Debug().CertifyVuln.Query().
+	err := b.client.CertifyVuln.Query().
 		Where(certifyvuln.And(aggPredicates...)).
 		GroupBy(certifyvuln.FieldPackageID, certifyvuln.FieldVulnerabilityID). // Group by Package ID
 		Aggregate(func(s *sql.Selector) string {
@@ -343,7 +343,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 			))
 	}
 
-	certVulnConn, err := b.client.Debug().CertifyVuln.Query().
+	certVulnConn, err := b.client.CertifyVuln.Query().
 		Where(certifyvuln.Or(predicates...)).
 		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
 		WithPackage(func(q *ent.PackageVersionQuery) {
@@ -383,7 +383,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 	var aggPredicates []predicate.CertifyLegal
 	// aggregate to find the latest timescanned for certifyLegals for list of packages
 	aggPredicates = append(aggPredicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
-	err := b.client.Debug().CertifyLegal.Query().
+	err := b.client.CertifyLegal.Query().
 		Where(certifylegal.And(aggPredicates...)).
 		GroupBy(certifylegal.FieldPackageID, certifylegal.FieldDeclaredLicensesHash, certifylegal.FieldDiscoveredLicensesHash). // Group by certifylegal ID
 		Aggregate(func(s *sql.Selector) string {
@@ -408,7 +408,7 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 			))
 	}
 
-	certLegalConn, err := b.client.Debug().CertifyLegal.Query().
+	certLegalConn, err := b.client.CertifyLegal.Query().
 		Where(certifylegal.Or(predicates...)).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
