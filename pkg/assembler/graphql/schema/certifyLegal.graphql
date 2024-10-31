@@ -128,7 +128,7 @@ extend type Query {
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
   "Returns a paginated results via CertifyLegalConnection"
   CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
-  "Batch queries via pkgVersion IDs to find all CertifyLegal"
+  "Batch queries via pkgVersion IDs to find all CertifyLegal (latest timestamp)"
   BatchQueryPkgIDCertifyLegal(pkgIDs: [ID!]!): [CertifyLegal!]!
 }
 

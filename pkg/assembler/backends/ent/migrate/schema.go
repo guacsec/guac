@@ -258,6 +258,14 @@ var (
 					Where: "package_id IS NOT NULL AND source_id IS NULL",
 				},
 			},
+			{
+				Name:    "certifylegal_package_id_declared_licenses_hash_discovered_licenses_hash_time_scanned",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[9], CertifyLegalsColumns[10], CertifyLegalsColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND source_id IS NULL",
+				},
+			},
 		},
 	}
 	// CertifyScorecardsColumns holds the columns for the "certify_scorecards" table.
@@ -402,6 +410,11 @@ var (
 				Name:    "certifyvuln_vulnerability_id",
 				Unique:  false,
 				Columns: []*schema.Column{CertifyVulnsColumns[9]},
+			},
+			{
+				Name:    "certifyvuln_vulnerability_id_package_id_time_scanned",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyVulnsColumns[9], CertifyVulnsColumns[10], CertifyVulnsColumns[1]},
 			},
 		},
 	}
