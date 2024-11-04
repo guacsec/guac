@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/deps_dev"
 	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
+	"github.com/guacsec/guac/pkg/ingestor/parser/eol"
 	"github.com/guacsec/guac/pkg/ingestor/parser/open_vex"
 	"github.com/guacsec/guac/pkg/ingestor/parser/scorecard"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
@@ -47,6 +48,7 @@ func init() {
 	_ = RegisterDocumentParser(deps_dev.NewDepsDevParser, processor.DocumentDepsDev)
 	_ = RegisterDocumentParser(csaf.NewCsafParser, processor.DocumentCsaf)
 	_ = RegisterDocumentParser(open_vex.NewOpenVEXParser, processor.DocumentOpenVEX)
+	_ = RegisterDocumentParser(eol.NewEOLCertificationParser, processor.DocumentITE6EOL)
 }
 
 var (
@@ -75,7 +77,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool, scanForLicense bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool, scanForLicense bool, scanForEOL bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	var wg sync.WaitGroup
 
 	assemblerInputs := []assembler.IngestPredicates{}
@@ -139,6 +141,27 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scan
 				if len(assemblerInputs) > 0 {
 					assemblerInputs[0].CertifyLegal = append(assemblerInputs[0].CertifyLegal, certLegal...)
 					assemblerInputs[0].HasSourceAt = append(assemblerInputs[0].HasSourceAt, hasSourceAt...)
+				}
+			}
+		}()
+	}
+
+	if scanForEOL {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// scrape EOL information from the EOL API
+			var purls []string
+			for _, idString := range identifierStrings {
+				purls = append(purls, idString.PurlStrings...)
+			}
+
+			eolData, err := scanner.PurlsEOLScan(ctx, purls)
+			if err != nil {
+				logger.Errorf("error scraping purls for EOL information %v", err)
+			} else {
+				if len(assemblerInputs) > 0 {
+					assemblerInputs[0].HasMetadata = eolData
 				}
 			}
 		}()

@@ -45,6 +45,9 @@ add-vuln-on-ingest: false
 # query licenses during ingestion
 add-license-on-ingest: false
 
+# query eol during ingestion
+add-eol-on-ingest: false
+
 # CSub setup
 csub-addr: localhost:2782
 csub-listen-port: 2782

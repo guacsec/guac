@@ -415,7 +415,7 @@ func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, queryType
 							} else {
 								pkgIDs = append(pkgIDs, pkgVer.ThisID)
 							}
-						} else {
+						} else if queryType == model.QueryTypeLicense {
 							if len(pkgVer.CertifyLegals) > 0 {
 								var timeScanned []time.Time
 								for _, certLegalID := range pkgVer.CertifyLegals {
@@ -430,6 +430,28 @@ func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, queryType
 								if lastScanTime.Before(lastIntervalTime) {
 									pkgIDs = append(pkgIDs, pkgVer.ThisID)
 
+								}
+							} else {
+								pkgIDs = append(pkgIDs, pkgVer.ThisID)
+							}
+						} else { // queryType == model.QueryTypeEol via hasMetadataLink
+							if len(pkgVer.HasMetadataLinks) > 0 {
+								var timeScanned []time.Time
+								for _, hasMetadataLinkID := range pkgVer.HasMetadataLinks {
+									link, err := byIDkv[*hasMetadataLink](ctx, hasMetadataLinkID, c)
+									if err != nil {
+										continue
+									}
+									// only pick endoflife metadata
+									if link.MDKey != "endoflife" {
+										continue
+									}
+									timeScanned = append(timeScanned, link.Timestamp)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pkgIDs = append(pkgIDs, pkgVer.ThisID)
 								}
 							} else {
 								pkgIDs = append(pkgIDs, pkgVer.ThisID)
