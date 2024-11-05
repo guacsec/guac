@@ -34,11 +34,14 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type sigstoreVerifier struct {
+	keyless bool
 }
 
 // NewSigstoreVerifier initializes the sigstore verifier
-func NewSigstoreAndKeyVerifier() *sigstoreVerifier {
-	return &sigstoreVerifier{}
+func NewSigstoreAndKeyVerifier(keyless bool) *sigstoreVerifier {
+	return &sigstoreVerifier{
+		keyless: keyless,
+	}
 }
 
 // Verify validates that the signature is valid for the payload
