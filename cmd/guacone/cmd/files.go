@@ -99,7 +99,7 @@ var filesCmd = &cobra.Command{
 		}
 
 		// Register Verifier
-		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier()
+		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier(true)
 		err = verifier.RegisterVerifier(sigstoreAndKeyVerifier, sigstoreAndKeyVerifier.Type())
 		if err != nil {
 			logger.Fatalf("unable to register key provider: %v", err)

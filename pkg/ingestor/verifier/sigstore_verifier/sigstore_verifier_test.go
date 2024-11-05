@@ -193,7 +193,7 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sigVerifier := NewSigstoreAndKeyVerifier()
+			sigVerifier := NewSigstoreAndKeyVerifier(false)
 			got, err := sigVerifier.Verify(ctx, tt.doc.Blob)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SigstoreVerifier.Verify() error = %v, wantErr %v", err, tt.wantErr)
@@ -292,7 +292,7 @@ func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sigVerifier := NewSigstoreAndKeyVerifier()
+			sigVerifier := NewSigstoreAndKeyVerifier(false)
 			got, err := sigVerifier.Verify(ctx, tt.doc.Blob)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SigstoreVerifier.Verify() error = %v, wantErr %v", err, tt.wantErr)
