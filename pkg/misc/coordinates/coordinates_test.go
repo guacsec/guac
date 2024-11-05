@@ -234,7 +234,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				t.Errorf("ConvertPurlToCoordinate() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+			if !reflect.DeepEqual(*got, *tt.want) {
 				t.Errorf("ConvertPurlToCoordinate() = %v, want %v", got, tt.want)
 			}
 		})
