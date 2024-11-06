@@ -108,6 +108,7 @@ var scorecardCmd = &cobra.Command{
 
 		// running and getting the scorecard checks
 		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner)
+
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -116,6 +117,7 @@ var scorecardCmd = &cobra.Command{
 
 		// scorecard certifier is the certifier that gets the scorecard data graphQL
 		query, err := sc.NewCertifier(gqlclient, opts.batchSize, opts.addedLatency)
+
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -145,6 +147,7 @@ var scorecardCmd = &cobra.Command{
 				opts.queryEOLOnIngestion,
 				opts.queryDepsDevOnIngestion,
 			)
+
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
 			}
@@ -242,10 +245,8 @@ func validateScorecardFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{
-		"certifier-latency",
-		"certifier-batch-size",
-	})
+	set, err := cli.BuildFlags([]string{"certifier-latency",
+		"certifier-batch-size"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
