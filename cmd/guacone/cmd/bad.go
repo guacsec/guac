@@ -226,6 +226,11 @@ var queryBadCmd = &cobra.Command{
 						case *model.AllIsOccurrencesTreeSubjectSource:
 							path = append(path, v.Id, occurrenceSubject.Namespaces[0].Names[0].Id, occurrenceSubject.Namespaces[0].Id, occurrenceSubject.Id)
 						}
+					case *model.NeighborsNeighborsHasSLSA:
+						path = append(path, v.Id)
+						for _, builtFrom := range v.Slsa.BuiltFrom {
+							path = append(path, builtFrom.Id)
+						}
 					default:
 						continue
 					}

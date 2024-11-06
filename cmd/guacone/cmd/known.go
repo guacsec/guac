@@ -311,6 +311,9 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 		case *model.NeighborsNeighborsHasSLSA:
 			collectedNeighbors.hasSLSAs = append(collectedNeighbors.hasSLSAs, v)
 			path = append(path, v.Id)
+			for _, builtFrom := range v.Slsa.BuiltFrom {
+				path = append(path, builtFrom.Id)
+			}
 		case *model.NeighborsNeighborsHasSourceAt:
 			collectedNeighbors.hasSrcAt = append(collectedNeighbors.hasSrcAt, v)
 			path = append(path, v.Id)
@@ -384,7 +387,11 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 		if len(collectedNeighbors.hasSLSAs) > 0 {
 			for _, slsa := range collectedNeighbors.hasSLSAs {
 				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Id, "SLSA Attestation Location: " + slsa.Slsa.Origin})
+				for _, builtFrom := range slsa.Slsa.BuiltFrom {
+					tableRows = append(tableRows, table.Row{hasSLSAStr, builtFrom.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
+				}
 			}
+
 		} else {
 			// if there is an isOccurrence, check to see if there are slsa attestation associated with it
 			for _, occurrence := range collectedNeighbors.occurrences {
@@ -395,6 +402,9 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 					for _, neighborHasSLSA := range neighborResponseHasSLSA.Neighbors {
 						if hasSLSA, ok := neighborHasSLSA.(*model.NeighborsNeighborsHasSLSA); ok {
 							tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "SLSA Attestation Location: " + hasSLSA.Slsa.Origin})
+							for _, builtFrom := range hasSLSA.Slsa.BuiltFrom {
+								tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
+							}
 						}
 					}
 				}
