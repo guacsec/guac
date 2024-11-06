@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"os/signal"
 	"strings"
 	"sync"
 	"syscall"
@@ -30,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
+
+	"os/signal"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
