@@ -22,6 +22,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/bundle"
 	"github.com/guacsec/guac/pkg/ingestor/parser/clearlydefined"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common/scanner"
@@ -47,6 +48,7 @@ func init() {
 	_ = RegisterDocumentParser(deps_dev.NewDepsDevParser, processor.DocumentDepsDev)
 	_ = RegisterDocumentParser(csaf.NewCsafParser, processor.DocumentCsaf)
 	_ = RegisterDocumentParser(open_vex.NewOpenVEXParser, processor.DocumentOpenVEX)
+	_ = RegisterDocumentParser(bundle.NewBundleParser, processor.DocumentSigstoreBundle)
 }
 
 var (

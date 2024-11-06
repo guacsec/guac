@@ -70,6 +70,7 @@ const (
 	DocumentCsaf               DocumentType = "CSAF"
 	DocumentOpenVEX            DocumentType = "OPEN_VEX"
 	DocumentIngestPredicates   DocumentType = "INGEST_PREDICATES"
+	DocumentSigstoreBundle     DocumentType = "SIGSTORE_BUNDLE"
 	DocumentUnknown            DocumentType = "UNKNOWN"
 )
 

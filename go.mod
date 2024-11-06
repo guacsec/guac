@@ -251,7 +251,6 @@ require (
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
-	github.com/sigstore/protobuf-specs v0.3.2 // indirect
 	github.com/sigstore/rekor v1.3.6 // indirect
 	github.com/sigstore/timestamp-authority v1.2.2 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -362,6 +361,7 @@ require (
 	github.com/regclient/regclient v0.7.1
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
+	github.com/sigstore/protobuf-specs v0.3.2
 	github.com/sigstore/sigstore v1.8.9
 	github.com/sigstore/sigstore-go v0.6.2
 	github.com/spdx/tools-golang v0.5.5

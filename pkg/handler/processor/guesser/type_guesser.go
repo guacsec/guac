@@ -30,6 +30,7 @@ func init() {
 	_ = RegisterDocumentTypeGuesser(&openVexTypeGuesser{}, "openvex")
 	_ = RegisterDocumentTypeGuesser(&depsDevTypeGuesser{}, "deps.dev")
 	_ = RegisterDocumentTypeGuesser(&csafTypeGuesser{}, "csaf")
+	_ = RegisterDocumentTypeGuesser(&sigstoreBundleTypeGuesser{}, "sigstore")
 }
 
 // DocumentTypeGuesser guesses the document type based on the blob and format given

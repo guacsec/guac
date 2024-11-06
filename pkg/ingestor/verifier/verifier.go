@@ -74,6 +74,10 @@ func VerifyIdentity(ctx context.Context, doc *processor.Document) ([]Identity, e
 		if verifier, ok := verifierProviders["sigstore"]; ok {
 			return verifier.Verify(ctx, doc.Blob)
 		}
+	case processor.DocumentSigstoreBundle:
+		if verifier, ok := verifierProviders["sigstore"]; ok {
+			return verifier.Verify(ctx, doc.Blob)
+		}
 	}
 	return nil, fmt.Errorf("failed verification for document type: %s", doc.Type)
 }

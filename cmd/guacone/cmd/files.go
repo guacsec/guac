@@ -87,6 +87,7 @@ var filesCmd = &cobra.Command{
 			logger.Fatalf("unable to register key provider: %v", err)
 		}
 
+		keyless := true
 		if opts.keyPath != "" && opts.keyID != "" {
 			keyRaw, err := os.ReadFile(opts.keyPath)
 			if err != nil {
@@ -96,10 +97,11 @@ var filesCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("error: %v", err)
 			}
+			keyless = false
 		}
 
 		// Register Verifier
-		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier(true)
+		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier(keyless)
 		err = verifier.RegisterVerifier(sigstoreAndKeyVerifier, sigstoreAndKeyVerifier.Type())
 		if err != nil {
 			logger.Fatalf("unable to register key provider: %v", err)

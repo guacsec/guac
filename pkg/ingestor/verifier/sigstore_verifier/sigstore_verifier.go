@@ -57,7 +57,6 @@ func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]v
 
 	if d.keyless {
 		opts := tuf.DefaultOptions()
-		opts.RepositoryBaseURL = "tuf-repo-cdn.sigstore.dev"
 		fetcher := fetcher.DefaultFetcher{}
 		fetcher.SetHTTPUserAgent(util.ConstructUserAgent())
 		opts.Fetcher = &fetcher
@@ -85,10 +84,12 @@ func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]v
 		var bundle bundle.Bundle
 		bundle.Bundle = new(protobundle.Bundle)
 
-		if err = bundle.UnmarshalJSON(payloadBytes); err != nil {
+		if err := bundle.UnmarshalJSON(payloadBytes); err != nil {
 			return nil, fmt.Errorf("failed to create bundle form payload")
 		}
 
+		// currently WithoutArtifactUnsafe and WithoutIdentitiesUnsafe are set to validate without artifact digest and certificate identity.
+		// For production use cases this needs to be passed in to ensure proper validation.
 		if _, err := sev.Verify(&bundle, verify.NewPolicy(verify.WithoutArtifactUnsafe(), verify.WithoutIdentitiesUnsafe())); err != nil {
 			return nil, fmt.Errorf("failed to verify with error: %w", err)
 		}
