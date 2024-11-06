@@ -48,7 +48,6 @@ type scorecardOptions struct {
 	interval                time.Duration
 	csubClientOptions       csub_client.CsubClientOptions
 	queryVulnOnIngestion    bool
-	addVulnMetadata         bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
@@ -76,7 +75,6 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
-			viper.GetBool("add-vuln-metadata"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -207,7 +205,6 @@ func validateScorecardFlags(
 	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int,
-	addVulnMetadata bool,
 ) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint

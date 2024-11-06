@@ -52,7 +52,6 @@ type cdOptions struct {
 	csubClientOptions       csub_client.CsubClientOptions
 	interval                time.Duration
 	queryVulnOnIngestion    bool
-	addVulnMetadata         bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
@@ -84,7 +83,6 @@ var cdCmd = &cobra.Command{
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
-			viper.GetBool("add-vuln-metadata"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -280,7 +278,6 @@ func validateCDFlags(
 	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
-	addVulnMetadata bool,
 ) (cdOptions, error) {
 	var opts cdOptions
 	opts.graphqlEndpoint = graphqlEndpoint

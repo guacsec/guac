@@ -41,7 +41,6 @@ type gcsOptions struct {
 	csubClientOptions       csub_client.CsubClientOptions
 	bucket                  string
 	queryVulnOnIngestion    bool
-	addVulnMetadata         bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool

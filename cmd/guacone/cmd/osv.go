@@ -335,6 +335,7 @@ func init() {
 	set, err := cli.BuildFlags([]string{
 		"certifier-latency",
 		"certifier-batch-size", "last-scan",
+		"add-vuln-metadata",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

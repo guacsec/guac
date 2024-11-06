@@ -51,7 +51,6 @@ type depsDevOptions struct {
 	graphqlEndpoint         string
 	headerFile              string
 	queryVulnOnIngestion    bool
-	addVulnMetadata         bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	// sets artificial latency on the deps.dev collector (default to nil)
@@ -158,7 +157,6 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 		graphqlEndpoint:         viper.GetString("gql-addr"),
 		headerFile:              viper.GetString("header-file"),
 		queryVulnOnIngestion:    viper.GetBool("add-vuln-on-ingest"),
-		addVulnMetadata:         viper.GetBool("add-vuln-metadata"),
 		queryLicenseOnIngestion: viper.GetBool("add-license-on-ingest"),
 		queryEOLOnIngestion:     viper.GetBool("add-eol-on-ingest"),
 	}

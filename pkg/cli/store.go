@@ -67,7 +67,7 @@ func init() {
 
 	// the ingestor will query and ingest OSV for vulnerabilities
 	set.Bool("add-vuln-on-ingest", false, "if enabled, the ingestor will query and ingest OSV for vulnerabilities. Warning: This will increase ingestion times")
-	set.Bool("add-vuln-metadata", false, "if enabled, the ingestor will add metadata to vulnerabilities from OSV")
+	set.Bool("add-vuln-metadata", false, "if enabled, the osv certifier will add metadata to vulnerabilities from OSV")
 
 	// the ingestor will query and ingest clearly defined for licenses
 	set.Bool("add-license-on-ingest", false, "if enabled, the ingestor will query and ingest clearly defined for licenses. Warning: This will increase ingestion times")
