@@ -78,4 +78,5 @@ func TestValidateGCSFlags(t *testing.T) {
 			}
 		})
 	}
+
 }
