@@ -127,7 +127,6 @@ var gcsCmd = &cobra.Command{
 				opts.queryEOLOnIngestion,
 				opts.queryDepsDevOnIngestion,
 			)
-
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
