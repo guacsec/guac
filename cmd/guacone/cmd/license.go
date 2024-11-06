@@ -319,10 +319,8 @@ func validateCDFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{
-		"certifier-latency",
-		"certifier-batch-size", "last-scan",
-	})
+	set, err := cli.BuildFlags([]string{"certifier-latency",
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
