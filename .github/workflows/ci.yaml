@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
@@ -68,6 +70,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
@@ -89,6 +93,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
@@ -107,6 +113,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v5.1.0
         with:
@@ -144,6 +152,8 @@ jobs:
           --health-retries 5
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        persist-credentials: false
     - uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed
       with:
         go-version: '~1.21'
@@ -229,6 +239,8 @@ jobs:
           install-only: true
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
