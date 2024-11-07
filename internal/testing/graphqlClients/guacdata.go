@@ -81,7 +81,7 @@ type GuacData struct {
 	Artifacts       []string // artifacts are specified by digest
 	Sources         []string // sources are specified by the name in the SourceName node
 	Builders        []string // builders are specified by URI
-	Vulnerabilities []string // vulnerabilities are specified by type and ID
+	Vulnerabilities []string // vulnerabilities are specified by type and ID. The type and ID are separated by a "/".
 
 	/** verbs **/
 	HasSboms       []HasSbom
