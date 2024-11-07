@@ -12,3 +12,9 @@ rules:
       - db-performance-test.yaml:167:9
       # `env.NIGHTLY_RELEASE_TAG` is defined in the workflow file
       - nightly-release.yaml:54:9
+      # The release workflow only runs against well-defined tags and requires
+      # maintainer action to trigger, so using `github.ref_name` in a template
+      # is low-risk
+      - release.yaml:201:9
+      - release.yaml:217:9
+      - release.yaml:228:9
