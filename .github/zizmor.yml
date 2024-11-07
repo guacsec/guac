@@ -10,3 +10,5 @@ rules:
       - db-performance-test.yaml:152:9
       - db-performance-test.yaml:158:9
       - db-performance-test.yaml:167:9
+      # `env.NIGHTLY_RELEASE_TAG` is defined in the workflow file
+      - nightly-release.yaml:54:9
