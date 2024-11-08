@@ -96,6 +96,7 @@ func init() {
 
 	set.String("verifier-key-path", "", "path to pem file to verify dsse")
 	set.String("verifier-key-id", "", "ID of the key to be stored")
+	set.String("artifact-hash", "", "hash of artifact to verify dsse")
 
 	// certifier
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")

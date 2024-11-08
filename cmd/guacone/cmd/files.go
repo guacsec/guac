@@ -53,6 +53,7 @@ type fileOptions struct {
 	csubClientOptions       csub_client.CsubClientOptions
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	artifactHash            string
 }
 
 var filesCmd = &cobra.Command{
@@ -69,6 +70,7 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetString("artifact-hash"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -130,6 +132,7 @@ var filesCmd = &cobra.Command{
 		gotErr := false
 
 		emit := func(d *processor.Document) error {
+			d.ArtifactHash = opts.artifactHash
 			totalNum += 1
 			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
 				gotErr = true
@@ -164,11 +167,11 @@ var filesCmd = &cobra.Command{
 }
 
 func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (fileOptions, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, artHash string, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
-
+	opts.artifactHash = artHash
 	if keyPath != "" {
 		if strings.HasSuffix(keyPath, "pem") {
 			opts.keyPath = keyPath
@@ -196,7 +199,7 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"verifier-key-path", "verifier-key-id"})
+	set, err := cli.BuildFlags([]string{"verifier-key-path", "verifier-key-id", "artifact-hash"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

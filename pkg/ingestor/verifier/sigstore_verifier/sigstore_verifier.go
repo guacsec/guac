@@ -141,7 +141,7 @@ func NewSigstoreAndKeyVerifier(keyless bool) *sigstoreVerifier {
 func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte, artifactHash string) ([]verifier.Identity, error) {
 
 	if d.keyless {
-		err := verifyArtifact(ctx, payloadBytes, "sha256:29b46bd09e2ff54f7f31cf8c1eed0925e70ff03ee46269714cea84c8cd7ed9da")
+		err := verifyArtifact(ctx, payloadBytes, artifactHash)
 		if err != nil {
 			return nil, fmt.Errorf("failed to verify artifact with error: %w", err)
 		}
