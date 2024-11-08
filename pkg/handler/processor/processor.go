@@ -38,6 +38,7 @@ type Document struct {
 	Format            FormatType
 	Encoding          EncodingType
 	SourceInformation SourceInformation
+	ArtifactHash      string
 	ChildLogger       *zap.SugaredLogger
 }
 

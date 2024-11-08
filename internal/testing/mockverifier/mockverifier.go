@@ -30,7 +30,7 @@ func NewMockSigstoreVerifier() *mockSigstoreVerifier {
 	return &mockSigstoreVerifier{}
 }
 
-func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]verifier.Identity, error) {
+func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte, artifactHash string) ([]verifier.Identity, error) {
 
 	keyHash, _ := dsse.SHA256KeyID(testdata.EcdsaPubKey)
 	return []verifier.Identity{

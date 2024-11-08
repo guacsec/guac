@@ -37,7 +37,7 @@ type Verifier interface {
 	// about the unverified identity. Upstream caller is expected to know
 	// which verifier it needs to based on what type of enveloper or
 	// signature is being verified.
-	Verify(ctx context.Context, payloadBytes []byte) ([]Identity, error)
+	Verify(ctx context.Context, payloadBytes []byte, artifactHash string) ([]Identity, error)
 	// Type returns the verifier type
 	Type() VerifierType
 }
@@ -72,11 +72,11 @@ func VerifyIdentity(ctx context.Context, doc *processor.Document) ([]Identity, e
 	switch doc.Type {
 	case processor.DocumentDSSE:
 		if verifier, ok := verifierProviders["sigstore"]; ok {
-			return verifier.Verify(ctx, doc.Blob)
+			return verifier.Verify(ctx, doc.Blob, doc.ArtifactHash)
 		}
 	case processor.DocumentSigstoreBundle:
 		if verifier, ok := verifierProviders["sigstore"]; ok {
-			return verifier.Verify(ctx, doc.Blob)
+			return verifier.Verify(ctx, doc.Blob, doc.ArtifactHash)
 		}
 	}
 	return nil, fmt.Errorf("failed verification for document type: %s", doc.Type)

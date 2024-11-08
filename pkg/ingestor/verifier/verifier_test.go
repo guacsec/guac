@@ -104,7 +104,7 @@ func newMockSigstoreVerifier() *mockSigstoreVerifier {
 	return &mockSigstoreVerifier{}
 }
 
-func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]Identity, error) {
+func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte, artifactHash string) ([]Identity, error) {
 	keyHash, err := dsse.SHA256KeyID(ecdsaPubKey)
 	if err != nil {
 		return nil, err
