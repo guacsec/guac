@@ -47,5 +47,12 @@ func GuessDocument(ctx context.Context, d *processor.Document) (processor.Docume
 		}
 	}
 
+	// if the document is of format json lines, then we can set the document type to opaque so
+	// we can feed the document into the json processor so that the lines can be processed
+	// individually.
+	if format == processor.FormatJSONLines {
+		documentType = processor.DocumentOpaque
+	}
+
 	return documentType, format, nil
 }

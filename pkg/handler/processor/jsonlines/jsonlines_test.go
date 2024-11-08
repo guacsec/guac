@@ -37,7 +37,7 @@ var (
 	}`, "\n", "")
 	jsonLinesUnknownDSSEDoc = processor.Document{
 		Blob:   []byte(fmt.Sprintf("%s\n%s", singleLineDSSE, singleLineDSSE)),
-		Type:   processor.DocumentJsonLines,
+		Type:   processor.DocumentOpaque,
 		Format: processor.FormatJSONLines,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
@@ -56,7 +56,7 @@ var (
 	singleLineJson  = `{"a": "b"}`
 	jsonLinesSimple = processor.Document{
 		Blob:   []byte(fmt.Sprintf("%s\n%s", singleLineJson, singleLineJson)),
-		Type:   processor.DocumentJsonLines,
+		Type:   processor.DocumentOpaque,
 		Format: processor.FormatJSONLines,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",

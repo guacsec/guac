@@ -29,8 +29,8 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 type JsonLinesProcessor struct{}
 
 func (d *JsonLinesProcessor) ValidateSchema(i *processor.Document) error {
-	if i.Type != processor.DocumentJsonLines {
-		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentJsonLines, i.Type)
+	if i.Type != processor.DocumentOpaque {
+		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentOpaque, i.Type)
 	}
 	_, err := parseJsonLines(i.Blob)
 	return err
@@ -43,8 +43,8 @@ func (d *JsonLinesProcessor) ValidateSchema(i *processor.Document) error {
 // Returns empty list and nil error if nothing to unpack
 // Returns unpacked list and nil error if successfully unpacked
 func (d *JsonLinesProcessor) Unpack(i *processor.Document) ([]*processor.Document, error) {
-	if i.Type != processor.DocumentJsonLines {
-		return nil, fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentJsonLines, i.Type)
+	if i.Type != processor.DocumentOpaque {
+		return nil, fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentOpaque, i.Type)
 	}
 
 	lines, err := parseJsonLines(i.Blob)

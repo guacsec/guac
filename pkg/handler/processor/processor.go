@@ -64,7 +64,7 @@ const (
 	DocumentITE6ClearlyDefined DocumentType = "ITE6CD"
 	DocumentDSSE               DocumentType = "DSSE"
 	DocumentSPDX               DocumentType = "SPDX"
-	DocumentJsonLines          DocumentType = "JSON_LINES"
+	DocumentOpaque             DocumentType = "OPAQUE"
 	DocumentScorecard          DocumentType = "SCORECARD"
 	DocumentCycloneDX          DocumentType = "CycloneDX"
 	DocumentDepsDev            DocumentType = "DEPS_DEV"
@@ -72,7 +72,6 @@ const (
 	DocumentOpenVEX            DocumentType = "OPEN_VEX"
 	DocumentIngestPredicates   DocumentType = "INGEST_PREDICATES"
 	DocumentUnknown            DocumentType = "UNKNOWN"
-	// End of life
 )
 
 // FormatType describes the document format for malform checks
