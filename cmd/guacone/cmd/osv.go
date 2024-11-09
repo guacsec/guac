@@ -54,6 +54,7 @@ type osvOptions struct {
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
@@ -78,6 +79,7 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
@@ -135,6 +137,7 @@ var osvCmd = &cobra.Command{
 							opts.queryVulnOnIngestion,
 							opts.queryLicenseOnIngestion,
 							opts.queryEOLOnIngestion,
+							opts.queryDepsDevOnIngestion,
 						)
 						if err != nil {
 							stop = true
@@ -157,6 +160,7 @@ var osvCmd = &cobra.Command{
 							opts.queryVulnOnIngestion,
 							opts.queryLicenseOnIngestion,
 							opts.queryEOLOnIngestion,
+							opts.queryDepsDevOnIngestion,
 						)
 						if err != nil {
 							stop = true
@@ -185,6 +189,7 @@ var osvCmd = &cobra.Command{
 						opts.queryVulnOnIngestion,
 						opts.queryLicenseOnIngestion,
 						opts.queryEOLOnIngestion,
+						opts.queryDepsDevOnIngestion,
 					)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
@@ -203,6 +208,7 @@ var osvCmd = &cobra.Command{
 					opts.queryVulnOnIngestion,
 					opts.queryLicenseOnIngestion,
 					opts.queryEOLOnIngestion,
+					opts.queryDepsDevOnIngestion,
 				)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
@@ -272,6 +278,7 @@ func validateOSVFlags(
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
 	queryEOLIngestion bool,
+	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
 ) (osvOptions, error) {
@@ -309,6 +316,7 @@ func validateOSVFlags(
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevIngestion
 
 	return opts, nil
 }

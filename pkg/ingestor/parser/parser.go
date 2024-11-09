@@ -79,7 +79,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool, scanForLicense bool, scanForEOL bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scanForVulns bool, scanForLicense bool, scanForEOL bool, scanForDepsDev bool) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	var wg sync.WaitGroup
 
 	assemblerInputs := []assembler.IngestPredicates{}
@@ -121,6 +121,28 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scan
 				if len(assemblerInputs) > 0 {
 					assemblerInputs[0].VulnEqual = append(assemblerInputs[0].VulnEqual, vulnEquals...)
 					assemblerInputs[0].CertifyVuln = append(assemblerInputs[0].CertifyVuln, certVulns...)
+				}
+			}
+		}()
+	}
+
+	if scanForDepsDev {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// scan purls via deps.dev on initial ingestion to capture additional deps.dev information
+			var purls []string
+			for _, idString := range identifierStrings {
+				purls = append(purls, idString.PurlStrings...)
+			}
+
+			certScorecard, hasSrcAt, err := scanner.PurlsDepsDevScan(ctx, purls)
+			if err != nil {
+				logger.Errorf("error scanning purls for vulnerabilities %v", err)
+			} else {
+				if len(assemblerInputs) > 0 {
+					assemblerInputs[0].CertifyScorecard = append(assemblerInputs[0].CertifyScorecard, certScorecard...)
+					assemblerInputs[0].HasSourceAt = append(assemblerInputs[0].HasSourceAt, hasSrcAt...)
 				}
 			}
 		}()
