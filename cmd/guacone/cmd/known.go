@@ -312,6 +312,10 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 			collectedNeighbors.hasSLSAs = append(collectedNeighbors.hasSLSAs, v)
 			path = append(path, v.Id)
 			for _, builtFrom := range v.Slsa.BuiltFrom {
+				err := recursiveHasSLSA(ctx, gqlclient, builtFrom, path)
+				if err != nil {
+					return nil, nil, fmt.Errorf("recursiveHasSLSA failed with error: %s", err)
+				}
 				path = append(path, builtFrom.Id)
 			}
 		case *model.NeighborsNeighborsHasSourceAt:
@@ -331,6 +335,32 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 		}
 	}
 	return collectedNeighbors, path, nil
+}
+
+func recursiveHasSLSA(ctx context.Context, gqlclient graphql.Client, builtFrom model.AllSLSATreeSlsaSLSABuiltFromArtifact, path []string) error {
+	neighborResponse, err := model.Neighbors(ctx, gqlclient, builtFrom.Id, []model.Edge{model.EdgeArtifactHasSlsa})
+	if err != nil {
+		return fmt.Errorf("error querying neighbors: %v", err)
+	}
+	for _, neighbor := range neighborResponse.Neighbors {
+		switch v := neighbor.(type) {
+		case *model.NeighborsNeighborsHasSLSA:
+			if v.Subject.Id != builtFrom.Id {
+				continue
+			}
+			path = append(path, v.Id)
+			for _, builtFrom := range v.Slsa.BuiltFrom {
+				err := recursiveHasSLSA(ctx, gqlclient, builtFrom, path)
+				if err != nil {
+					return fmt.Errorf("recursiveHasSLSA failed with error: %w", err)
+				}
+				path = append(path, builtFrom.Id)
+			}
+		default:
+			continue
+		}
+	}
+	return nil
 }
 
 func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string, subjectType string) []table.Row {

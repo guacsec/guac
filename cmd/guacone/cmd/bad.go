@@ -211,7 +211,7 @@ var queryBadCmd = &cobra.Command{
 				if len(artifactResponse.Artifacts) != 1 {
 					logger.Fatalf("failed to located artifacts based on (algorithm:digest)")
 				}
-				neighborResponse, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHashEqual, model.EdgeArtifactIsOccurrence})
+				neighborResponse, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHashEqual, model.EdgeArtifactIsOccurrence, model.EdgeArtifactHasSlsa})
 				if err != nil {
 					logger.Fatalf("error querying neighbors: %v", err)
 				}
@@ -229,6 +229,10 @@ var queryBadCmd = &cobra.Command{
 					case *model.NeighborsNeighborsHasSLSA:
 						path = append(path, v.Id)
 						for _, builtFrom := range v.Slsa.BuiltFrom {
+							err := recursiveHasSLSA(ctx, gqlclient, builtFrom, path)
+							if err != nil {
+								logger.Fatalf("recursiveHasSLSA failed with error: %s", err)
+							}
 							path = append(path, builtFrom.Id)
 						}
 					default:
