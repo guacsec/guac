@@ -24,6 +24,7 @@ enum CollectDataType {
     DATATYPE_OCI = 2;
     DATATYPE_PURL = 3;
     DATATYPE_GITHUB_RELEASE = 4;
+    DATATYPE_OCI_REGISTRY = 5;
 }
 
 // Generic types
