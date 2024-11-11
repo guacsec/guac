@@ -217,23 +217,25 @@ var queryBadCmd = &cobra.Command{
 				}
 				for _, neighbor := range neighborResponse.Neighbors {
 					switch v := neighbor.(type) {
-					case *model.NeighborsNeighborsHashEqual:
-						path = append(path, v.Id)
-					case *model.NeighborsNeighborsIsOccurrence:
-						switch occurrenceSubject := v.Subject.(type) {
-						case *model.AllIsOccurrencesTreeSubjectPackage:
-							path = append(path, v.Id, occurrenceSubject.Namespaces[0].Names[0].Versions[0].Id, occurrenceSubject.Namespaces[0].Names[0].Id, occurrenceSubject.Namespaces[0].Id, occurrenceSubject.Id)
-						case *model.AllIsOccurrencesTreeSubjectSource:
-							path = append(path, v.Id, occurrenceSubject.Namespaces[0].Names[0].Id, occurrenceSubject.Namespaces[0].Id, occurrenceSubject.Id)
-						}
+					// case *model.NeighborsNeighborsHashEqual:
+					// 	path = append(path, v.Id)
+					// case *model.NeighborsNeighborsIsOccurrence:
+					// 	switch occurrenceSubject := v.Subject.(type) {
+					// 	case *model.AllIsOccurrencesTreeSubjectPackage:
+					// 		path = append(path, v.Id, occurrenceSubject.Namespaces[0].Names[0].Versions[0].Id, occurrenceSubject.Namespaces[0].Names[0].Id, occurrenceSubject.Namespaces[0].Id, occurrenceSubject.Id)
+					// 	case *model.AllIsOccurrencesTreeSubjectSource:
+					// 		path = append(path, v.Id, occurrenceSubject.Namespaces[0].Names[0].Id, occurrenceSubject.Namespaces[0].Id, occurrenceSubject.Id)
+					// 	}
 					case *model.NeighborsNeighborsHasSLSA:
 						path = append(path, v.Id)
+						collectedHasSLSA := map[string]*model.NeighborsNeighborsHasSLSA{}
 						for _, builtFrom := range v.Slsa.BuiltFrom {
-							err := recursiveHasSLSA(ctx, gqlclient, builtFrom, path)
+							path = append(path, builtFrom.Id)
+							collectedPath, err := recursiveHasSLSA(ctx, gqlclient, builtFrom, collectedHasSLSA)
 							if err != nil {
 								logger.Fatalf("recursiveHasSLSA failed with error: %s", err)
 							}
-							path = append(path, builtFrom.Id)
+							path = append(path, collectedPath...)
 						}
 					default:
 						continue

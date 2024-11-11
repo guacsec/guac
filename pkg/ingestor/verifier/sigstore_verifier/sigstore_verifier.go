@@ -141,10 +141,52 @@ func NewSigstoreAndKeyVerifier(keyless bool) *sigstoreVerifier {
 func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte, artifactHash string) ([]verifier.Identity, error) {
 
 	if d.keyless {
+
+		// opts := tuf.DefaultOptions()
+		// fetcher := fetcher.DefaultFetcher{}
+		// fetcher.SetHTTPUserAgent(util.ConstructUserAgent())
+		// opts.Fetcher = &fetcher
+
+		// client, err := tuf.New(opts)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("failed to create new client for tuf with error: %w", err)
+		// }
+		// trustedRootJSON, err := client.GetTarget("trusted_root.json")
+		// if err != nil {
+		// 	return nil, fmt.Errorf("loading in trusted root failed with error: %w", err)
+		// }
+
+		// trustedMaterial, err := root.NewTrustedRootFromJSON(trustedRootJSON)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("sigstore trusted root failed with error: %w", err)
+		// }
+
+		// sev, err := verify.NewSignedEntityVerifier(trustedMaterial, verify.WithSignedCertificateTimestamps(1), verify.WithTransparencyLog(1), verify.WithObserverTimestamps(1))
+		// if err != nil {
+		// 	return nil, fmt.Errorf("NewSignedEntityVerifier failed with error: %w", err)
+
+		// }
+
+		// var bundle bundle.Bundle
+		// bundle.Bundle = new(protobundle.Bundle)
+
+		// if err := bundle.UnmarshalJSON(payloadBytes); err != nil {
+		// 	return nil, fmt.Errorf("failed to create bundle form payload")
+		// }
+
+		// // currently WithoutArtifactUnsafe and WithoutIdentitiesUnsafe are set to validate without artifact digest and certificate identity.
+		// // For production use cases this needs to be passed in to ensure proper validation.
+		// if _, err := sev.Verify(&bundle, verify.NewPolicy(verify.WithoutArtifactUnsafe(), verify.WithoutIdentitiesUnsafe())); err != nil {
+		// 	return nil, fmt.Errorf("failed to verify with error: %w", err)
+		// }
+
+		// return nil, nil
+
 		err := verifyArtifact(ctx, payloadBytes, artifactHash)
 		if err != nil {
 			return nil, fmt.Errorf("failed to verify artifact with error: %w", err)
 		}
+		fmt.Fprintf(os.Stderr, "Verified signature against tlog entry")
 	} else {
 		identities := []verifier.Identity{}
 		envelope, err := parseDSSE(payloadBytes)

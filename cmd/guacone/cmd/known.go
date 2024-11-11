@@ -264,7 +264,18 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSBOMStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSLSAStr, artifactSubjectType))
+
+			for _, slsa := range artifactNeighbors.hasSLSAs {
+				var tableRows []table.Row
+				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Subject.Digest, "Location: " + slsa.Slsa.Origin})
+				for _, builtFrom := range slsa.Slsa.BuiltFrom {
+					tableRows = append(tableRows, table.Row{hasSLSAStr, builtFrom.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
+				}
+				t.AppendRows(tableRows)
+				t.AppendSeparator()
+			}
+
+			// t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSLSAStr, artifactSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, vexLinkStr, artifactSubjectType))
 			t.AppendSeparator()
@@ -309,15 +320,28 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 			collectedNeighbors.hasSBOMs = append(collectedNeighbors.hasSBOMs, v)
 			path = append(path, v.Id)
 		case *model.NeighborsNeighborsHasSLSA:
+			if v.Subject.Id != subjectQueryID {
+				continue
+			}
 			collectedNeighbors.hasSLSAs = append(collectedNeighbors.hasSLSAs, v)
 			path = append(path, v.Id)
 			for _, builtFrom := range v.Slsa.BuiltFrom {
-				err := recursiveHasSLSA(ctx, gqlclient, builtFrom, path)
+				path = append(path, builtFrom.Id)
+			}
+			collectedHasSLSA := map[string]*model.NeighborsNeighborsHasSLSA{}
+			for _, builtFrom := range v.Slsa.BuiltFrom {
+				builtFrom := builtFrom
+				collectedPath, err := recursiveHasSLSA(ctx, gqlclient, builtFrom, collectedHasSLSA)
 				if err != nil {
 					return nil, nil, fmt.Errorf("recursiveHasSLSA failed with error: %s", err)
 				}
-				path = append(path, builtFrom.Id)
+				path = append(path, collectedPath...)
 			}
+
+			for _, value := range collectedHasSLSA {
+				collectedNeighbors.hasSLSAs = append(collectedNeighbors.hasSLSAs, value)
+			}
+
 		case *model.NeighborsNeighborsHasSourceAt:
 			collectedNeighbors.hasSrcAt = append(collectedNeighbors.hasSrcAt, v)
 			path = append(path, v.Id)
@@ -337,10 +361,12 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 	return collectedNeighbors, path, nil
 }
 
-func recursiveHasSLSA(ctx context.Context, gqlclient graphql.Client, builtFrom model.AllSLSATreeSlsaSLSABuiltFromArtifact, path []string) error {
+func recursiveHasSLSA(ctx context.Context, gqlclient graphql.Client, builtFrom model.AllSLSATreeSlsaSLSABuiltFromArtifact, collectedNeighbors map[string]*model.NeighborsNeighborsHasSLSA) ([]string, error) {
+
+	var path []string
 	neighborResponse, err := model.Neighbors(ctx, gqlclient, builtFrom.Id, []model.Edge{model.EdgeArtifactHasSlsa})
 	if err != nil {
-		return fmt.Errorf("error querying neighbors: %v", err)
+		return nil, fmt.Errorf("error querying neighbors: %v", err)
 	}
 	for _, neighbor := range neighborResponse.Neighbors {
 		switch v := neighbor.(type) {
@@ -348,19 +374,25 @@ func recursiveHasSLSA(ctx context.Context, gqlclient graphql.Client, builtFrom m
 			if v.Subject.Id != builtFrom.Id {
 				continue
 			}
-			path = append(path, v.Id)
-			for _, builtFrom := range v.Slsa.BuiltFrom {
-				err := recursiveHasSLSA(ctx, gqlclient, builtFrom, path)
-				if err != nil {
-					return fmt.Errorf("recursiveHasSLSA failed with error: %w", err)
+			if _, ok := collectedNeighbors[v.Id]; !ok {
+				collectedNeighbors[v.Id] = v
+				path = append(path, v.Id)
+				for _, builtFrom := range v.Slsa.BuiltFrom {
+					builtFrom := builtFrom
+					path = append(path, builtFrom.Id)
+					recurPath, err := recursiveHasSLSA(ctx, gqlclient, builtFrom, collectedNeighbors)
+					if err != nil {
+						return nil, fmt.Errorf("recursiveHasSLSA failed with error: %w", err)
+					}
+					path = append(path, recurPath...)
 				}
-				path = append(path, builtFrom.Id)
 			}
 		default:
 			continue
 		}
 	}
-	return nil
+
+	return path, nil
 }
 
 func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string, subjectType string) []table.Row {
@@ -416,29 +448,28 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	case hasSLSAStr:
 		if len(collectedNeighbors.hasSLSAs) > 0 {
 			for _, slsa := range collectedNeighbors.hasSLSAs {
-				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Id, "SLSA Attestation Location: " + slsa.Slsa.Origin})
+				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Subject.Digest, "Location: " + slsa.Slsa.Origin})
 				for _, builtFrom := range slsa.Slsa.BuiltFrom {
 					tableRows = append(tableRows, table.Row{hasSLSAStr, builtFrom.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
 				}
 			}
-
 		} else {
-			// if there is an isOccurrence, check to see if there are slsa attestation associated with it
-			for _, occurrence := range collectedNeighbors.occurrences {
-				neighborResponseHasSLSA, err := getAssociatedArtifact(ctx, gqlclient, occurrence, model.EdgeArtifactHasSlsa)
-				if err != nil {
-					logger.Debugf("error querying neighbors: %v", err)
-				} else {
-					for _, neighborHasSLSA := range neighborResponseHasSLSA.Neighbors {
-						if hasSLSA, ok := neighborHasSLSA.(*model.NeighborsNeighborsHasSLSA); ok {
-							tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "SLSA Attestation Location: " + hasSLSA.Slsa.Origin})
-							for _, builtFrom := range hasSLSA.Slsa.BuiltFrom {
-								tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
-							}
-						}
-					}
-				}
-			}
+			// // if there is an isOccurrence, check to see if there are slsa attestation associated with it
+			// for _, occurrence := range collectedNeighbors.occurrences {
+			// 	neighborResponseHasSLSA, err := getAssociatedArtifact(ctx, gqlclient, occurrence, model.EdgeArtifactHasSlsa)
+			// 	if err != nil {
+			// 		logger.Debugf("error querying neighbors: %v", err)
+			// 	} else {
+			// 		for _, neighborHasSLSA := range neighborResponseHasSLSA.Neighbors {
+			// 			if hasSLSA, ok := neighborHasSLSA.(*model.NeighborsNeighborsHasSLSA); ok {
+			// 				tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "SLSA Attestation Location: " + hasSLSA.Slsa.Origin})
+			// 				for _, builtFrom := range hasSLSA.Slsa.BuiltFrom {
+			// 					tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 	case hasSrcAtStr:
 		for _, src := range collectedNeighbors.hasSrcAt {

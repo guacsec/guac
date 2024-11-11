@@ -645,7 +645,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 	}
 
 	return &model.CertifyBad{
-		ID:            v.ID.String(),
+		ID:            certifyBadGlobalID(v.ID.String()),
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
@@ -673,7 +673,7 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 	}
 
 	return &model.CertifyGood{
-		ID:            v.ID.String(),
+		ID:            certifyGoodGlobalID(v.ID.String()),
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
