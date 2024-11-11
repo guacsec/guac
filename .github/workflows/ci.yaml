@@ -183,6 +183,11 @@ jobs:
       labels: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Fix flakiness with tilt-ci that may be potentially related to https://github.com/tilt-dev/tilt/issues/2079
+      - name: Increase inotify max user watches
+        shell: bash
+        run: |
+          sudo sysctl fs.inotify.max_user_watches=524288 && sudo sysctl -p
       - name: Install tools
         shell: bash
         run: |
