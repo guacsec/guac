@@ -267,9 +267,9 @@ var queryKnownCmd = &cobra.Command{
 
 			for _, slsa := range artifactNeighbors.hasSLSAs {
 				var tableRows []table.Row
-				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Subject.Digest, "Location: " + slsa.Slsa.Origin})
+				tableRows = append(tableRows, table.Row{hasSLSAStr, truncateString(slsa.Subject.Algorithm + ":" + slsa.Subject.Digest), "Location: " + slsa.Slsa.Origin})
 				for _, builtFrom := range slsa.Slsa.BuiltFrom {
-					tableRows = append(tableRows, table.Row{hasSLSAStr, builtFrom.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
+					tableRows = append(tableRows, table.Row{"artifact", truncateString(builtFrom.Id), "Materials: " + truncateString(builtFrom.Algorithm+":"+builtFrom.Digest)})
 				}
 				t.AppendRows(tableRows)
 				t.AppendSeparator()
@@ -395,6 +395,13 @@ func recursiveHasSLSA(ctx context.Context, gqlclient graphql.Client, builtFrom m
 	return path, nil
 }
 
+func truncateString(str string) string {
+	if len(str) > 15 {
+		return str[:15]
+	}
+	return str
+}
+
 func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string, subjectType string) []table.Row {
 	logger := logging.FromContext(ctx)
 	var tableRows []table.Row
@@ -448,9 +455,9 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	case hasSLSAStr:
 		if len(collectedNeighbors.hasSLSAs) > 0 {
 			for _, slsa := range collectedNeighbors.hasSLSAs {
-				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Subject.Digest, "Location: " + slsa.Slsa.Origin})
+				tableRows = append(tableRows, table.Row{hasSLSAStr, truncateString(slsa.Subject.Algorithm + ":" + slsa.Subject.Digest), "Location: " + slsa.Slsa.Origin})
 				for _, builtFrom := range slsa.Slsa.BuiltFrom {
-					tableRows = append(tableRows, table.Row{hasSLSAStr, builtFrom.Id, "Materials: " + builtFrom.Algorithm + ":" + builtFrom.Digest})
+					tableRows = append(tableRows, table.Row{hasSLSAStr, truncateString(builtFrom.Id), "Materials: " + truncateString(builtFrom.Algorithm+":"+builtFrom.Digest)})
 				}
 			}
 		} else {
@@ -494,28 +501,28 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 			tableRows = append(tableRows, table.Row{hashEqualStr, hash.Id, ""})
 		}
 	case occurrenceStr:
-		for _, occurrence := range collectedNeighbors.occurrences {
-			if subjectType == artifactSubjectType {
-				switch v := occurrence.Subject.(type) {
-				case *model.AllIsOccurrencesTreeSubjectPackage:
-					purl := helpers.PkgToPurl(v.Type, v.Namespaces[0].Namespace,
-						v.Namespaces[0].Names[0].Name, v.Namespaces[0].Names[0].Versions[0].Version, "", []string{})
+		// for _, occurrence := range collectedNeighbors.occurrences {
+		// 	if subjectType == artifactSubjectType {
+		// 		switch v := occurrence.Subject.(type) {
+		// 		case *model.AllIsOccurrencesTreeSubjectPackage:
+		// 			purl := helpers.PkgToPurl(v.Type, v.Namespaces[0].Namespace,
+		// 				v.Namespaces[0].Names[0].Name, v.Namespaces[0].Names[0].Versions[0].Version, "", []string{})
 
-					tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Package: " + purl})
-				case *model.AllIsOccurrencesTreeSubjectSource:
-					namespace := ""
-					if !strings.HasPrefix(v.Namespaces[0].Namespace, "https://") {
-						namespace = "https://" + v.Namespaces[0].Namespace
-					} else {
-						namespace = v.Namespaces[0].Namespace
-					}
-					tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Package: " + v.Type + "+" + namespace + "/" +
-						v.Namespaces[0].Names[0].Name})
-				}
-			} else {
-				tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Artifact: " + occurrence.Artifact.Algorithm + ":" + occurrence.Artifact.Digest})
-			}
-		}
+		// 			tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Package: " + purl})
+		// 		case *model.AllIsOccurrencesTreeSubjectSource:
+		// 			namespace := ""
+		// 			if !strings.HasPrefix(v.Namespaces[0].Namespace, "https://") {
+		// 				namespace = "https://" + v.Namespaces[0].Namespace
+		// 			} else {
+		// 				namespace = v.Namespaces[0].Namespace
+		// 			}
+		// 			tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Package: " + v.Type + "+" + namespace + "/" +
+		// 				v.Namespaces[0].Names[0].Name})
+		// 		}
+		// 	} else {
+		// 		tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Artifact: " + occurrence.Artifact.Algorithm + ":" + occurrence.Artifact.Digest})
+		// 	}
+		// }
 	case pkgEqualStr:
 		for _, equal := range collectedNeighbors.pkgEquals {
 			tableRows = append(tableRows, table.Row{pkgEqualStr, equal.Id, ""})
