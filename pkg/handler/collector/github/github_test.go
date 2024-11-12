@@ -374,6 +374,7 @@ func Test_githubCollector_RetrieveArtifacts(t *testing.T) {
 			ctx := context.Background()
 			var cancel context.CancelFunc
 
+			collector.DeregisterDocumentCollector(GithubCollector)
 			if err := collector.RegisterDocumentCollector(g, GithubCollector); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {
 				t.Fatalf("could not register collector: %v", err)
