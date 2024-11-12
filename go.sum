@@ -620,8 +620,8 @@ github.com/oapi-codegen/oapi-codegen/v2 v2.3.1-0.20240823215434-d232e9efa9f5 h1:
 github.com/oapi-codegen/oapi-codegen/v2 v2.3.1-0.20240823215434-d232e9efa9f5/go.mod h1:ZBPUgGu64Z0KswMMFH+qiCjpZmnyXB0khpUR/z79tmg=
 github.com/oapi-codegen/runtime v1.1.1 h1:EXLHh0DXIJnWhdRPN2w4MXAzFyE4CskzhNLUmtpMYro=
 github.com/oapi-codegen/runtime v1.1.1/go.mod h1:SK9X900oXmPWilYR5/WKPzt3Kqxn/uS/+lbpREv+eCg=
-github.com/olareg/olareg v0.1.0 h1:1dXBOgPrig5N7zoXyIZVQqU0QBo6sD9pbL6UYjY75CA=
-github.com/olareg/olareg v0.1.0/go.mod h1:RBuU7JW7SoIIxZKzLRhq8sVtQeAHzCAtRrXEBx2KlM4=
+github.com/olareg/olareg v0.1.1 h1:Ui7q93zjcoF+U9U71sgqgZWByDoZOpqHitUXEu2xV+g=
+github.com/olareg/olareg v0.1.1/go.mod h1:w8NP4SWrHHtxsFaUiv1lnCnYPm4sN1seCd2h7FK/dc0=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
@@ -709,8 +709,8 @@ github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 h1:N/ElC8H3+5X
 github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/redis/go-redis/v9 v9.6.1 h1:HHDteefn6ZkTtY5fGUE8tj8uy85AHk6zP7CpzIAM0y4=
 github.com/redis/go-redis/v9 v9.6.1/go.mod h1:0C0c6ycQsdpVNQpxb1njEQIqkx5UcsM8FJCQLgE9+RA=
-github.com/regclient/regclient v0.7.1 h1:qEsJrTmZd98fZKjueAbrZCSNGU+ifnr6xjlSAs3WOPs=
-github.com/regclient/regclient v0.7.1/go.mod h1:+w/BFtJuw0h0nzIw/z2+1FuA2/dVXBzDq4rYmziJpMc=
+github.com/regclient/regclient v0.7.2 h1:vcldDAwBMLtighYVMeb6qNt5+0hKg3AN2IkCc0JIJNM=
+github.com/regclient/regclient v0.7.2/go.mod h1:QlA7W9/pvmbblOXM4d49JgfuOTwVXcUMKt3bFuOSVIQ=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 h1:OdAsTTz6OkFY5QxjkYwrChwuRruF69c169dPK26NUlk=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
 github.com/rhysd/actionlint v1.6.26 h1:zi7jPZf3Ks14gCXYAAL47uBziyFlX7+Xwilqhexct9g=
