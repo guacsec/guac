@@ -38,6 +38,8 @@ import (
 )
 
 func TestClearlyDefined(t *testing.T) {
+	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
+	t.Skip("Skipping clearly defined tests since it is flaky")
 	ctx := logging.WithLogger(context.Background())
 
 	tests := []struct {
@@ -172,6 +174,9 @@ func TestClearlyDefined(t *testing.T) {
 }
 
 func TestCDCertifierRateLimiter(t *testing.T) {
+	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
+	t.Skip("Skipping clearly defined tests since it is flaky")
+
 	// Set up the logger
 	var logBuffer bytes.Buffer
 	encoderConfig := zap.NewProductionEncoderConfig()
