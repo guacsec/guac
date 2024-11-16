@@ -1,0 +1,20 @@
+# Configuration file for zizmor: https://github.com/woodruffw/zizmor
+rules:
+  template-injection:
+    ignore:
+      # Values of `matrix.database` are defined in the workflow file
+      - db-performance-test.yaml:98:9
+      # For the next three, exploiting template injection would require first
+      # compromising the guac-data repo in a way that causes guacone to produce
+      # exploit-triggering text
+      - db-performance-test.yaml:152:9
+      - db-performance-test.yaml:158:9
+      - db-performance-test.yaml:167:9
+      # `env.NIGHTLY_RELEASE_TAG` is defined in the workflow file
+      - nightly-release.yaml:54:9
+      # The release workflow only runs against well-defined tags and requires
+      # maintainer action to trigger, so using `github.ref_name` in a template
+      # is low-risk
+      - release.yaml:201:9
+      - release.yaml:217:9
+      - release.yaml:228:9

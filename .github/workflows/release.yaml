@@ -24,9 +24,6 @@ on:
 
 permissions:
   actions: read # for detecting the Github Actions environment.
-  contents: write # To upload assets to release.
-  packages: write # To publish container images to GHCR
-  id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
   goreleaser:
@@ -40,6 +37,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -106,6 +104,8 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
@@ -133,9 +133,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      id-token: write # needed for signing the images with GitHub OIDC Token
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -186,9 +190,14 @@ jobs:
     name: generate compose tarball
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write # To upload assets to release.
+      packages: write # To publish container images to GHCR
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: Create and publish compose tarball
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
