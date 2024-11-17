@@ -252,7 +252,7 @@ func TestParser(t *testing.T) {
 				},
 				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 					ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
-					ScoreValue: 10.0,
+					ScoreValue: 9.0,
 				},
 			},
 		},

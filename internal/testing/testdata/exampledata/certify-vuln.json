@@ -11,7 +11,11 @@
       "uri": "osv.dev",
       "version": "0.0.14",
       "result": [{
-            "id": "GHSA-7rjr-3q55-vv33"
+            "id": "GHSA-7rjr-3q55-vv33",
+            "severity": [{
+                "method": "CVSSv31",
+                "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
+            }]
         }, {
             "id": "GHSA-8489-44mv-ggj8"
         }, {
