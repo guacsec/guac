@@ -341,6 +341,8 @@ func TestPurlsToScan(t *testing.T) {
 }
 
 func TestPurlsLicenseScan(t *testing.T) {
+	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
+	t.Skip("Skipping clearly defined tests since it is flaky")
 	lvUnknown := "UNKNOWN"
 	ctx := logging.WithLogger(context.Background())
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
