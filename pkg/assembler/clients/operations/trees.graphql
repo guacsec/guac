@@ -273,6 +273,7 @@ fragment AllHasSBOMTree on HasSBOM {
   origin
   collector
   knownSince
+  documentRef
   includedSoftware {
     __typename
     ... on Artifact {

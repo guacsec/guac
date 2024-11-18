@@ -53,6 +53,8 @@ type fileOptions struct {
 	csubClientOptions       csub_client.CsubClientOptions
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 }
 
 var filesCmd = &cobra.Command{
@@ -69,6 +71,8 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -129,7 +133,17 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
+			if _, err := ingestor.Ingest(
+				ctx,
+				d,
+				opts.graphqlEndpoint,
+				transport,
+				csubClient,
+				opts.queryVulnOnIngestion,
+				opts.queryLicenseOnIngestion,
+				opts.queryEOLOnIngestion,
+				opts.queryDepsDevOnIngestion,
+			); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
@@ -162,7 +176,7 @@ var filesCmd = &cobra.Command{
 }
 
 func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (fileOptions, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -190,6 +204,8 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 	opts.path = args[0]
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 	return opts, nil
 }
 

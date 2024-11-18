@@ -41,6 +41,7 @@ const (
 	hasSBOMStr          string = "hasSBOM"
 	hasSLSAStr          string = "hasSLSA"
 	certifyVulnStr      string = "certifyVuln"
+	certifyLegalStr     string = "certifyLegal"
 	vexLinkStr          string = "vexLink"
 	badLinkStr          string = "badLink"
 	goodLinkStr         string = "goodLink"
@@ -61,17 +62,18 @@ type queryKnownOptions struct {
 }
 
 type neighbors struct {
-	hashEquals   []*model.NeighborsNeighborsHashEqual
-	scorecards   []*model.NeighborsNeighborsCertifyScorecard
-	occurrences  []*model.NeighborsNeighborsIsOccurrence
-	hasSrcAt     []*model.NeighborsNeighborsHasSourceAt
-	hasSBOMs     []*model.NeighborsNeighborsHasSBOM
-	hasSLSAs     []*model.NeighborsNeighborsHasSLSA
-	certifyVulns []*model.NeighborsNeighborsCertifyVuln
-	vexLinks     []*model.NeighborsNeighborsCertifyVEXStatement
-	badLinks     []*model.NeighborsNeighborsCertifyBad
-	goodLinks    []*model.NeighborsNeighborsCertifyGood
-	pkgEquals    []*model.NeighborsNeighborsPkgEqual
+	hashEquals    []*model.NeighborsNeighborsHashEqual
+	scorecards    []*model.NeighborsNeighborsCertifyScorecard
+	occurrences   []*model.NeighborsNeighborsIsOccurrence
+	hasSrcAt      []*model.NeighborsNeighborsHasSourceAt
+	hasSBOMs      []*model.NeighborsNeighborsHasSBOM
+	hasSLSAs      []*model.NeighborsNeighborsHasSLSA
+	certifyVulns  []*model.NeighborsNeighborsCertifyVuln
+	certifyLegals []*model.NeighborsNeighborsCertifyLegal
+	vexLinks      []*model.NeighborsNeighborsCertifyVEXStatement
+	badLinks      []*model.NeighborsNeighborsCertifyBad
+	goodLinks     []*model.NeighborsNeighborsCertifyGood
+	pkgEquals     []*model.NeighborsNeighborsPkgEqual
 }
 
 var (
@@ -180,6 +182,8 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, occurrenceStr, packageSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyVulnStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyLegalStr, artifactSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSBOMStr, packageSubjectType))
 			t.AppendSeparator()
@@ -323,6 +327,9 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 		case *model.NeighborsNeighborsPkgEqual:
 			collectedNeighbors.pkgEquals = append(collectedNeighbors.pkgEquals, v)
 			path = append(path, v.Id)
+		case *model.NeighborsNeighborsCertifyLegal:
+			collectedNeighbors.certifyLegals = append(collectedNeighbors.certifyLegals, v)
+			path = append(path, v.Id)
 		default:
 			continue
 		}
@@ -448,6 +455,16 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	case pkgEqualStr:
 		for _, equal := range collectedNeighbors.pkgEquals {
 			tableRows = append(tableRows, table.Row{pkgEqualStr, equal.Id, ""})
+		}
+	case certifyLegalStr:
+		for _, legal := range collectedNeighbors.certifyLegals {
+			tableRows = append(tableRows, table.Row{
+				certifyLegalStr,
+				legal.Id,
+				"Declared License: " + legal.DeclaredLicense +
+					",\nDiscovered License: " + legal.DiscoveredLicense +
+					",\nOrigin: " + legal.Origin,
+			})
 		}
 	}
 

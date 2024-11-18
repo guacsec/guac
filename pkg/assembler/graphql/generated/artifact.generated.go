@@ -78,12 +78,14 @@ type QueryResolver interface {
 	CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error)
 	CertifyLegal(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec) ([]*model.CertifyLegal, error)
 	CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error)
+	BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error)
 	Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
 	ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
 	CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error)
+	BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error)
 	PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error)
 	PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error)
 	HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error)
@@ -96,6 +98,8 @@ type QueryResolver interface {
 	HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error)
 	IsDependency(ctx context.Context, isDependencySpec model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error)
+	BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error)
+	BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error)
 	IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 	IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error)
 	Licenses(ctx context.Context, licenseSpec model.LicenseSpec) ([]*model.License, error)
@@ -113,6 +117,8 @@ type QueryResolver interface {
 	PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error)
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
 	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
+	QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error)
+	FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error)
 	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
 	SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error)
 	VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error)
@@ -130,2641 +136,6881 @@ type QueryResolver interface {
 func (ec *executionContext) field_Mutation_delete_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["node"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_delete_argsNode(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["node"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_delete_argsNode(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["node"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
+	if tmp, ok := rawArgs["node"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.IDorArtifactInput
-	if tmp, ok := rawArgs["artifact"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-		arg0, err = ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestArtifact_argsArtifact(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifact"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestArtifact_argsArtifact(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifact"]
+	if !ok {
+		var zeroVal *model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+	if tmp, ok := rawArgs["artifact"]; ok {
+		return ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal *model.IDorArtifactInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorArtifactInput
-	if tmp, ok := rawArgs["artifacts"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-		arg0, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestArtifacts_argsArtifacts(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifacts"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestArtifacts_argsArtifacts(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifacts"]
+	if !ok {
+		var zeroVal []*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
+	if tmp, ok := rawArgs["artifacts"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorArtifactInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.IDorBuilderInput
-	if tmp, ok := rawArgs["builder"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builder"))
-		arg0, err = ec.unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestBuilder_argsBuilder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builder"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestBuilder_argsBuilder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.IDorBuilderInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builder"]
+	if !ok {
+		var zeroVal *model.IDorBuilderInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builder"))
+	if tmp, ok := rawArgs["builder"]; ok {
+		return ec.unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, tmp)
+	}
+
+	var zeroVal *model.IDorBuilderInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorBuilderInput
-	if tmp, ok := rawArgs["builders"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builders"))
-		arg0, err = ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestBuilders_argsBuilders(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builders"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestBuilders_argsBuilders(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorBuilderInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builders"]
+	if !ok {
+		var zeroVal []*model.IDorBuilderInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builders"))
+	if tmp, ok := rawArgs["builders"]; ok {
+		return ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorBuilderInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestBulkHasMetadata_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestBulkHasMetadata_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 []*model.HasMetadataInputSpec
-	if tmp, ok := rawArgs["hasMetadataList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataList"))
-		arg2, err = ec.unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestBulkHasMetadata_argsHasMetadataList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasMetadataList"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsHasMetadataList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.HasMetadataInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasMetadataList"]
+	if !ok {
+		var zeroVal []*model.HasMetadataInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataList"))
+	if tmp, ok := rawArgs["hasMetadataList"]; ok {
+		return ec.unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.HasMetadataInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerabilities"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg0, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilities(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilities"] = arg0
-	var arg1 []*model.VulnerabilityMetadataInputSpec
-	if tmp, ok := rawArgs["vulnerabilityMetadataList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataList"))
-		arg1, err = ec.unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilityMetadataList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilityMetadataList"] = arg1
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilities(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilities"]
+	if !ok {
+		var zeroVal []*model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
+	if tmp, ok := rawArgs["vulnerabilities"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilityMetadataList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.VulnerabilityMetadataInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilityMetadataList"]
+	if !ok {
+		var zeroVal []*model.VulnerabilityMetadataInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataList"))
+	if tmp, ok := rawArgs["vulnerabilityMetadataList"]; ok {
+		return ec.unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.VulnerabilityMetadataInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyBad_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyBad_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 model.CertifyBadInputSpec
-	if tmp, ok := rawArgs["certifyBad"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBad"))
-		arg2, err = ec.unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyBad_argsCertifyBad(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyBad"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyBad_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyBad_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyBad_argsCertifyBad(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyBadInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyBad"]
+	if !ok {
+		var zeroVal model.CertifyBadInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBad"))
+	if tmp, ok := rawArgs["certifyBad"]; ok {
+		return ec.unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyBadInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyBads_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyBads_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 []*model.CertifyBadInputSpec
-	if tmp, ok := rawArgs["certifyBads"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBads"))
-		arg2, err = ec.unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyBads_argsCertifyBads(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyBads"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyBads_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyBads_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyBads_argsCertifyBads(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.CertifyBadInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyBads"]
+	if !ok {
+		var zeroVal []*model.CertifyBadInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBads"))
+	if tmp, ok := rawArgs["certifyBads"]; ok {
+		return ec.unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.CertifyBadInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyGood_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyGood_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 model.CertifyGoodInputSpec
-	if tmp, ok := rawArgs["certifyGood"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGood"))
-		arg2, err = ec.unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyGood_argsCertifyGood(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyGood"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyGood_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyGood_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyGood_argsCertifyGood(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyGoodInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyGood"]
+	if !ok {
+		var zeroVal model.CertifyGoodInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGood"))
+	if tmp, ok := rawArgs["certifyGood"]; ok {
+		return ec.unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyGoodInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyGoods_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyGoods_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 []*model.CertifyGoodInputSpec
-	if tmp, ok := rawArgs["certifyGoods"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoods"))
-		arg2, err = ec.unmarshalNCertifyGoodInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyGoods_argsCertifyGoods(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyGoods"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsCertifyGoods(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.CertifyGoodInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyGoods"]
+	if !ok {
+		var zeroVal []*model.CertifyGoodInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoods"))
+	if tmp, ok := rawArgs["certifyGoods"]; ok {
+		return ec.unmarshalNCertifyGoodInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.CertifyGoodInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrSourceInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyLegal_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 []*model.IDorLicenseInput
-	if tmp, ok := rawArgs["declaredLicenses"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicenses"))
-		arg1, err = ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyLegal_argsDeclaredLicenses(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["declaredLicenses"] = arg1
-	var arg2 []*model.IDorLicenseInput
-	if tmp, ok := rawArgs["discoveredLicenses"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicenses"))
-		arg2, err = ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyLegal_argsDiscoveredLicenses(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["discoveredLicenses"] = arg2
-	var arg3 model.CertifyLegalInputSpec
-	if tmp, ok := rawArgs["certifyLegal"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegal"))
-		arg3, err = ec.unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Mutation_ingestCertifyLegal_argsCertifyLegal(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyLegal"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageOrSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrSourceInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsDeclaredLicenses(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorLicenseInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["declaredLicenses"]
+	if !ok {
+		var zeroVal []*model.IDorLicenseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicenses"))
+	if tmp, ok := rawArgs["declaredLicenses"]; ok {
+		return ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorLicenseInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsDiscoveredLicenses(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorLicenseInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["discoveredLicenses"]
+	if !ok {
+		var zeroVal []*model.IDorLicenseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicenses"))
+	if tmp, ok := rawArgs["discoveredLicenses"]; ok {
+		return ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorLicenseInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsCertifyLegal(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyLegalInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyLegal"]
+	if !ok {
+		var zeroVal model.CertifyLegalInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegal"))
+	if tmp, ok := rawArgs["certifyLegal"]; ok {
+		return ec.unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyLegalInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrSourceInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyLegals_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 [][]*model.IDorLicenseInput
-	if tmp, ok := rawArgs["declaredLicensesList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicensesList"))
-		arg1, err = ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyLegals_argsDeclaredLicensesList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["declaredLicensesList"] = arg1
-	var arg2 [][]*model.IDorLicenseInput
-	if tmp, ok := rawArgs["discoveredLicensesList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicensesList"))
-		arg2, err = ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyLegals_argsDiscoveredLicensesList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["discoveredLicensesList"] = arg2
-	var arg3 []*model.CertifyLegalInputSpec
-	if tmp, ok := rawArgs["certifyLegals"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegals"))
-		arg3, err = ec.unmarshalNCertifyLegalInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Mutation_ingestCertifyLegals_argsCertifyLegals(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyLegals"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrSourceInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageOrSourceInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrSourceInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsDeclaredLicensesList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([][]*model.IDorLicenseInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["declaredLicensesList"]
+	if !ok {
+		var zeroVal [][]*model.IDorLicenseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicensesList"))
+	if tmp, ok := rawArgs["declaredLicensesList"]; ok {
+		return ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal [][]*model.IDorLicenseInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsDiscoveredLicensesList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([][]*model.IDorLicenseInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["discoveredLicensesList"]
+	if !ok {
+		var zeroVal [][]*model.IDorLicenseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicensesList"))
+	if tmp, ok := rawArgs["discoveredLicensesList"]; ok {
+		return ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal [][]*model.IDorLicenseInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsCertifyLegals(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.CertifyLegalInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyLegals"]
+	if !ok {
+		var zeroVal []*model.CertifyLegalInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegals"))
+	if tmp, ok := rawArgs["certifyLegals"]; ok {
+		return ec.unmarshalNCertifyLegalInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.CertifyLegalInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorPkgInput
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyVuln_argsPkg(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkg"] = arg0
-	var arg1 model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyVuln_argsVulnerability(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerability"] = arg1
-	var arg2 model.ScanMetadataInput
-	if tmp, ok := rawArgs["certifyVuln"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVuln"))
-		arg2, err = ec.unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyVuln_argsCertifyVuln(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyVuln"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsPkg(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkg"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+	if tmp, ok := rawArgs["pkg"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsVulnerability(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerability"]
+	if !ok {
+		var zeroVal model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsCertifyVuln(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.ScanMetadataInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyVuln"]
+	if !ok {
+		var zeroVal model.ScanMetadataInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVuln"))
+	if tmp, ok := rawArgs["certifyVuln"]; ok {
+		return ec.unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx, tmp)
+	}
+
+	var zeroVal model.ScanMetadataInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["pkgs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestCertifyVulns_argsPkgs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgs"] = arg0
-	var arg1 []*model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerabilities"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg1, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestCertifyVulns_argsVulnerabilities(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilities"] = arg1
-	var arg2 []*model.ScanMetadataInput
-	if tmp, ok := rawArgs["certifyVulns"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulns"))
-		arg2, err = ec.unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestCertifyVulns_argsCertifyVulns(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyVulns"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsPkgs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgs"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
+	if tmp, ok := rawArgs["pkgs"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsVulnerabilities(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilities"]
+	if !ok {
+		var zeroVal []*model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
+	if tmp, ok := rawArgs["vulnerabilities"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsCertifyVulns(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.ScanMetadataInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyVulns"]
+	if !ok {
+		var zeroVal []*model.ScanMetadataInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulns"))
+	if tmp, ok := rawArgs["certifyVulns"]; ok {
+		return ec.unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.ScanMetadataInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["pkgs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestDependencies_argsPkgs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgs"] = arg0
-	var arg1 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["depPkgs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkgs"))
-		arg1, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestDependencies_argsDepPkgs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["depPkgs"] = arg1
-	var arg2 []*model.IsDependencyInputSpec
-	if tmp, ok := rawArgs["dependencies"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencies"))
-		arg2, err = ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestDependencies_argsDependencies(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["dependencies"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestDependencies_argsPkgs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgs"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
+	if tmp, ok := rawArgs["pkgs"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestDependencies_argsDepPkgs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["depPkgs"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkgs"))
+	if tmp, ok := rawArgs["depPkgs"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestDependencies_argsDependencies(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IsDependencyInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["dependencies"]
+	if !ok {
+		var zeroVal []*model.IsDependencyInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencies"))
+	if tmp, ok := rawArgs["dependencies"]; ok {
+		return ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IsDependencyInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorPkgInput
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestDependency_argsPkg(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkg"] = arg0
-	var arg1 model.IDorPkgInput
-	if tmp, ok := rawArgs["depPkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
-		arg1, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestDependency_argsDepPkg(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["depPkg"] = arg1
-	var arg2 model.IsDependencyInputSpec
-	if tmp, ok := rawArgs["dependency"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependency"))
-		arg2, err = ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestDependency_argsDependency(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["dependency"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestDependency_argsPkg(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkg"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+	if tmp, ok := rawArgs["pkg"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestDependency_argsDepPkg(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["depPkg"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
+	if tmp, ok := rawArgs["depPkg"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestDependency_argsDependency(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IsDependencyInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["dependency"]
+	if !ok {
+		var zeroVal model.IsDependencyInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("dependency"))
+	if tmp, ok := rawArgs["dependency"]; ok {
+		return ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.IsDependencyInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHasMetadata_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHasMetadata_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 model.HasMetadataInputSpec
-	if tmp, ok := rawArgs["hasMetadata"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadata"))
-		arg2, err = ec.unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHasMetadata_argsHasMetadata(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasMetadata"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHasMetadata_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasMetadata_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasMetadata_argsHasMetadata(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasMetadataInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasMetadata"]
+	if !ok {
+		var zeroVal model.HasMetadataInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadata"))
+	if tmp, ok := rawArgs["hasMetadata"]; ok {
+		return ec.unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasMetadataInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHasSBOM_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.HasSBOMInputSpec
-	if tmp, ok := rawArgs["hasSBOM"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOM"))
-		arg1, err = ec.unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHasSBOM_argsHasSbom(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSBOM"] = arg1
-	var arg2 model.HasSBOMIncludesInputSpec
-	if tmp, ok := rawArgs["includes"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includes"))
-		arg2, err = ec.unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHasSBOM_argsIncludes(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["includes"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHasSBOM_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageOrArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSBOM_argsHasSbom(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSBOMInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSBOM"]
+	if !ok {
+		var zeroVal model.HasSBOMInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOM"))
+	if tmp, ok := rawArgs["hasSBOM"]; ok {
+		return ec.unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSBOMInputSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSBOM_argsIncludes(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSBOMIncludesInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["includes"]
+	if !ok {
+		var zeroVal model.HasSBOMIncludesInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includes"))
+	if tmp, ok := rawArgs["includes"]; ok {
+		return ec.unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSBOMIncludesInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrArtifactInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHasSBOMs_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.HasSBOMInputSpec
-	if tmp, ok := rawArgs["hasSBOMs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMs"))
-		arg1, err = ec.unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHasSBOMs_argsHasSBOMs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSBOMs"] = arg1
-	var arg2 []*model.HasSBOMIncludesInputSpec
-	if tmp, ok := rawArgs["includes"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includes"))
-		arg2, err = ec.unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHasSBOMs_argsIncludes(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["includes"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrArtifactInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageOrArtifactInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrArtifactInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsHasSBOMs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.HasSBOMInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSBOMs"]
+	if !ok {
+		var zeroVal []*model.HasSBOMInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMs"))
+	if tmp, ok := rawArgs["hasSBOMs"]; ok {
+		return ec.unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.HasSBOMInputSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsIncludes(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.HasSBOMIncludesInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["includes"]
+	if !ok {
+		var zeroVal []*model.HasSBOMIncludesInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includes"))
+	if tmp, ok := rawArgs["includes"]; ok {
+		return ec.unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.HasSBOMIncludesInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorPkgInput
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHasSourceAt_argsPkg(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkg"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHasSourceAt_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 model.IDorSourceInput
-	if tmp, ok := rawArgs["source"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg2, err = ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHasSourceAt_argsSource(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["source"] = arg2
-	var arg3 model.HasSourceAtInputSpec
-	if tmp, ok := rawArgs["hasSourceAt"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAt"))
-		arg3, err = ec.unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Mutation_ingestHasSourceAt_argsHasSourceAt(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSourceAt"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsPkg(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkg"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+	if tmp, ok := rawArgs["pkg"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsSource(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["source"]
+	if !ok {
+		var zeroVal model.IDorSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+	if tmp, ok := rawArgs["source"]; ok {
+		return ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorSourceInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsHasSourceAt(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSourceAtInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSourceAt"]
+	if !ok {
+		var zeroVal model.HasSourceAtInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAt"))
+	if tmp, ok := rawArgs["hasSourceAt"]; ok {
+		return ec.unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSourceAtInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["pkgs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHasSourceAts_argsPkgs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgs"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHasSourceAts_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 []*model.IDorSourceInput
-	if tmp, ok := rawArgs["sources"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-		arg2, err = ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHasSourceAts_argsSources(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["sources"] = arg2
-	var arg3 []*model.HasSourceAtInputSpec
-	if tmp, ok := rawArgs["hasSourceAts"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAts"))
-		arg3, err = ec.unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Mutation_ingestHasSourceAts_argsHasSourceAts(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSourceAts"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsPkgs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgs"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
+	if tmp, ok := rawArgs["pkgs"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsSources(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["sources"]
+	if !ok {
+		var zeroVal []*model.IDorSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
+	if tmp, ok := rawArgs["sources"]; ok {
+		return ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorSourceInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsHasSourceAts(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.HasSourceAtInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSourceAts"]
+	if !ok {
+		var zeroVal []*model.HasSourceAtInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAts"))
+	if tmp, ok := rawArgs["hasSourceAts"]; ok {
+		return ec.unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.HasSourceAtInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorArtifactInput
-	if tmp, ok := rawArgs["artifact"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-		arg0, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHashEqual_argsArtifact(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifact"] = arg0
-	var arg1 model.IDorArtifactInput
-	if tmp, ok := rawArgs["otherArtifact"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifact"))
-		arg1, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHashEqual_argsOtherArtifact(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["otherArtifact"] = arg1
-	var arg2 model.HashEqualInputSpec
-	if tmp, ok := rawArgs["hashEqual"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqual"))
-		arg2, err = ec.unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHashEqual_argsHashEqual(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hashEqual"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHashEqual_argsArtifact(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifact"]
+	if !ok {
+		var zeroVal model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+	if tmp, ok := rawArgs["artifact"]; ok {
+		return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHashEqual_argsOtherArtifact(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["otherArtifact"]
+	if !ok {
+		var zeroVal model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifact"))
+	if tmp, ok := rawArgs["otherArtifact"]; ok {
+		return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHashEqual_argsHashEqual(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HashEqualInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hashEqual"]
+	if !ok {
+		var zeroVal model.HashEqualInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqual"))
+	if tmp, ok := rawArgs["hashEqual"]; ok {
+		return ec.unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HashEqualInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorArtifactInput
-	if tmp, ok := rawArgs["artifacts"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-		arg0, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestHashEquals_argsArtifacts(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifacts"] = arg0
-	var arg1 []*model.IDorArtifactInput
-	if tmp, ok := rawArgs["otherArtifacts"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifacts"))
-		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestHashEquals_argsOtherArtifacts(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["otherArtifacts"] = arg1
-	var arg2 []*model.HashEqualInputSpec
-	if tmp, ok := rawArgs["hashEquals"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEquals"))
-		arg2, err = ec.unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestHashEquals_argsHashEquals(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hashEquals"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestHashEquals_argsArtifacts(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifacts"]
+	if !ok {
+		var zeroVal []*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
+	if tmp, ok := rawArgs["artifacts"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHashEquals_argsOtherArtifacts(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["otherArtifacts"]
+	if !ok {
+		var zeroVal []*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifacts"))
+	if tmp, ok := rawArgs["otherArtifacts"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHashEquals_argsHashEquals(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.HashEqualInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hashEquals"]
+	if !ok {
+		var zeroVal []*model.HashEqualInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEquals"))
+	if tmp, ok := rawArgs["hashEquals"]; ok {
+		return ec.unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.HashEqualInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.IDorLicenseInput
-	if tmp, ok := rawArgs["license"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license"))
-		arg0, err = ec.unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestLicense_argsLicense(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["license"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestLicense_argsLicense(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.IDorLicenseInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["license"]
+	if !ok {
+		var zeroVal *model.IDorLicenseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("license"))
+	if tmp, ok := rawArgs["license"]; ok {
+		return ec.unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx, tmp)
+	}
+
+	var zeroVal *model.IDorLicenseInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorLicenseInput
-	if tmp, ok := rawArgs["licenses"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenses"))
-		arg0, err = ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestLicenses_argsLicenses(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["licenses"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestLicenses_argsLicenses(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorLicenseInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["licenses"]
+	if !ok {
+		var zeroVal []*model.IDorLicenseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("licenses"))
+	if tmp, ok := rawArgs["licenses"]; ok {
+		return ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorLicenseInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrSourceInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestOccurrence_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.IDorArtifactInput
-	if tmp, ok := rawArgs["artifact"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-		arg1, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestOccurrence_argsArtifact(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifact"] = arg1
-	var arg2 model.IsOccurrenceInputSpec
-	if tmp, ok := rawArgs["occurrence"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrence"))
-		arg2, err = ec.unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestOccurrence_argsOccurrence(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["occurrence"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestOccurrence_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageOrSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrSourceInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestOccurrence_argsArtifact(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifact"]
+	if !ok {
+		var zeroVal model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+	if tmp, ok := rawArgs["artifact"]; ok {
+		return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestOccurrence_argsOccurrence(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IsOccurrenceInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["occurrence"]
+	if !ok {
+		var zeroVal model.IsOccurrenceInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrence"))
+	if tmp, ok := rawArgs["occurrence"]; ok {
+		return ec.unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.IsOccurrenceInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrSourceInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestOccurrences_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.IDorArtifactInput
-	if tmp, ok := rawArgs["artifacts"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestOccurrences_argsArtifacts(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifacts"] = arg1
-	var arg2 []*model.IsOccurrenceInputSpec
-	if tmp, ok := rawArgs["occurrences"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrences"))
-		arg2, err = ec.unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestOccurrences_argsOccurrences(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["occurrences"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestOccurrences_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrSourceInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageOrSourceInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrSourceInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestOccurrences_argsArtifacts(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifacts"]
+	if !ok {
+		var zeroVal []*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
+	if tmp, ok := rawArgs["artifacts"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestOccurrences_argsOccurrences(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IsOccurrenceInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["occurrences"]
+	if !ok {
+		var zeroVal []*model.IsOccurrenceInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrences"))
+	if tmp, ok := rawArgs["occurrences"]; ok {
+		return ec.unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IsOccurrenceInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorPkgInput
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestPackage_argsPkg(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkg"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestPackage_argsPkg(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkg"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+	if tmp, ok := rawArgs["pkg"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["pkgs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestPackages_argsPkgs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgs"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestPackages_argsPkgs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgs"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
+	if tmp, ok := rawArgs["pkgs"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorPkgInput
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestPkgEqual_argsPkg(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkg"] = arg0
-	var arg1 model.IDorPkgInput
-	if tmp, ok := rawArgs["otherPackage"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackage"))
-		arg1, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestPkgEqual_argsOtherPackage(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["otherPackage"] = arg1
-	var arg2 model.PkgEqualInputSpec
-	if tmp, ok := rawArgs["pkgEqual"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqual"))
-		arg2, err = ec.unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestPkgEqual_argsPkgEqual(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgEqual"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestPkgEqual_argsPkg(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkg"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+	if tmp, ok := rawArgs["pkg"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPkgEqual_argsOtherPackage(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["otherPackage"]
+	if !ok {
+		var zeroVal model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackage"))
+	if tmp, ok := rawArgs["otherPackage"]; ok {
+		return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPkgEqual_argsPkgEqual(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PkgEqualInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgEqual"]
+	if !ok {
+		var zeroVal model.PkgEqualInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqual"))
+	if tmp, ok := rawArgs["pkgEqual"]; ok {
+		return ec.unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PkgEqualInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["pkgs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestPkgEquals_argsPkgs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgs"] = arg0
-	var arg1 []*model.IDorPkgInput
-	if tmp, ok := rawArgs["otherPackages"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackages"))
-		arg1, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestPkgEquals_argsOtherPackages(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["otherPackages"] = arg1
-	var arg2 []*model.PkgEqualInputSpec
-	if tmp, ok := rawArgs["pkgEquals"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEquals"))
-		arg2, err = ec.unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestPkgEquals_argsPkgEquals(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgEquals"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestPkgEquals_argsPkgs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgs"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
+	if tmp, ok := rawArgs["pkgs"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPkgEquals_argsOtherPackages(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorPkgInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["otherPackages"]
+	if !ok {
+		var zeroVal []*model.IDorPkgInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackages"))
+	if tmp, ok := rawArgs["otherPackages"]; ok {
+		return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorPkgInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPkgEquals_argsPkgEquals(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.PkgEqualInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgEquals"]
+	if !ok {
+		var zeroVal []*model.PkgEqualInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEquals"))
+	if tmp, ok := rawArgs["pkgEquals"]; ok {
+		return ec.unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.PkgEqualInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestPointOfContact_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestPointOfContact_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 model.PointOfContactInputSpec
-	if tmp, ok := rawArgs["pointOfContact"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContact"))
-		arg2, err = ec.unmarshalNPointOfContactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestPointOfContact_argsPointOfContact(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pointOfContact"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestPointOfContact_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPointOfContact_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPointOfContact_argsPointOfContact(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PointOfContactInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pointOfContact"]
+	if !ok {
+		var zeroVal model.PointOfContactInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContact"))
+	if tmp, ok := rawArgs["pointOfContact"]; ok {
+		return ec.unmarshalNPointOfContactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PointOfContactInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceOrArtifactInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestPointOfContacts_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestPointOfContacts_argsPkgMatchType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 []*model.PointOfContactInputSpec
-	if tmp, ok := rawArgs["pointOfContacts"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContacts"))
-		arg2, err = ec.unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestPointOfContacts_argsPointOfContacts(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pointOfContacts"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageSourceOrArtifactInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageSourceOrArtifactInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageSourceOrArtifactInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsPkgMatchType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.MatchFlags, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgMatchType"]
+	if !ok {
+		var zeroVal model.MatchFlags
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+	}
+
+	var zeroVal model.MatchFlags
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsPointOfContacts(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.PointOfContactInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pointOfContacts"]
+	if !ok {
+		var zeroVal []*model.PointOfContactInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContacts"))
+	if tmp, ok := rawArgs["pointOfContacts"]; ok {
+		return ec.unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.PointOfContactInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestSLSA_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 []*model.IDorArtifactInput
-	if tmp, ok := rawArgs["builtFrom"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
-		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestSLSA_argsBuiltFrom(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builtFrom"] = arg1
-	var arg2 model.IDorBuilderInput
-	if tmp, ok := rawArgs["builtBy"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtBy"))
-		arg2, err = ec.unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestSLSA_argsBuiltBy(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builtBy"] = arg2
-	var arg3 model.SLSAInputSpec
-	if tmp, ok := rawArgs["slsa"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slsa"))
-		arg3, err = ec.unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Mutation_ingestSLSA_argsSlsa(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["slsa"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestSLSA_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestSLSA_argsBuiltFrom(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builtFrom"]
+	if !ok {
+		var zeroVal []*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
+	if tmp, ok := rawArgs["builtFrom"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestSLSA_argsBuiltBy(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorBuilderInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builtBy"]
+	if !ok {
+		var zeroVal model.IDorBuilderInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builtBy"))
+	if tmp, ok := rawArgs["builtBy"]; ok {
+		return ec.unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorBuilderInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestSLSA_argsSlsa(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.SLSAInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["slsa"]
+	if !ok {
+		var zeroVal model.SLSAInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("slsa"))
+	if tmp, ok := rawArgs["slsa"]; ok {
+		return ec.unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.SLSAInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorArtifactInput
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestSLSAs_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 [][]*model.IDorArtifactInput
-	if tmp, ok := rawArgs["builtFromList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFromList"))
-		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestSLSAs_argsBuiltFromList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builtFromList"] = arg1
-	var arg2 []*model.IDorBuilderInput
-	if tmp, ok := rawArgs["builtByList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtByList"))
-		arg2, err = ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestSLSAs_argsBuiltByList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builtByList"] = arg2
-	var arg3 []*model.SLSAInputSpec
-	if tmp, ok := rawArgs["slsaList"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slsaList"))
-		arg3, err = ec.unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Mutation_ingestSLSAs_argsSlsaList(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["slsaList"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestSLSAs_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal []*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestSLSAs_argsBuiltFromList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([][]*model.IDorArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builtFromList"]
+	if !ok {
+		var zeroVal [][]*model.IDorArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFromList"))
+	if tmp, ok := rawArgs["builtFromList"]; ok {
+		return ec.unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal [][]*model.IDorArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestSLSAs_argsBuiltByList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorBuilderInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builtByList"]
+	if !ok {
+		var zeroVal []*model.IDorBuilderInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builtByList"))
+	if tmp, ok := rawArgs["builtByList"]; ok {
+		return ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorBuilderInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestSLSAs_argsSlsaList(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.SLSAInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["slsaList"]
+	if !ok {
+		var zeroVal []*model.SLSAInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("slsaList"))
+	if tmp, ok := rawArgs["slsaList"]; ok {
+		return ec.unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.SLSAInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorSourceInput
-	if tmp, ok := rawArgs["source"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg0, err = ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestScorecard_argsSource(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["source"] = arg0
-	var arg1 model.ScorecardInputSpec
-	if tmp, ok := rawArgs["scorecard"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecard"))
-		arg1, err = ec.unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestScorecard_argsScorecard(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["scorecard"] = arg1
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestScorecard_argsSource(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["source"]
+	if !ok {
+		var zeroVal model.IDorSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+	if tmp, ok := rawArgs["source"]; ok {
+		return ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorSourceInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestScorecard_argsScorecard(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.ScorecardInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["scorecard"]
+	if !ok {
+		var zeroVal model.ScorecardInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecard"))
+	if tmp, ok := rawArgs["scorecard"]; ok {
+		return ec.unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.ScorecardInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorSourceInput
-	if tmp, ok := rawArgs["sources"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-		arg0, err = ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestScorecards_argsSources(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["sources"] = arg0
-	var arg1 []*model.ScorecardInputSpec
-	if tmp, ok := rawArgs["scorecards"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecards"))
-		arg1, err = ec.unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestScorecards_argsScorecards(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["scorecards"] = arg1
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestScorecards_argsSources(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["sources"]
+	if !ok {
+		var zeroVal []*model.IDorSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
+	if tmp, ok := rawArgs["sources"]; ok {
+		return ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorSourceInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestScorecards_argsScorecards(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.ScorecardInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["scorecards"]
+	if !ok {
+		var zeroVal []*model.ScorecardInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecards"))
+	if tmp, ok := rawArgs["scorecards"]; ok {
+		return ec.unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.ScorecardInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorSourceInput
-	if tmp, ok := rawArgs["source"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg0, err = ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestSource_argsSource(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["source"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestSource_argsSource(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["source"]
+	if !ok {
+		var zeroVal model.IDorSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+	if tmp, ok := rawArgs["source"]; ok {
+		return ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorSourceInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorSourceInput
-	if tmp, ok := rawArgs["sources"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-		arg0, err = ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestSources_argsSources(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["sources"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestSources_argsSources(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorSourceInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["sources"]
+	if !ok {
+		var zeroVal []*model.IDorSourceInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
+	if tmp, ok := rawArgs["sources"]; ok {
+		return ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorSourceInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrArtifactInput
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVEXStatement_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestVEXStatement_argsVulnerability(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerability"] = arg1
-	var arg2 model.VexStatementInputSpec
-	if tmp, ok := rawArgs["vexStatement"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vexStatement"))
-		arg2, err = ec.unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestVEXStatement_argsVexStatement(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vexStatement"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVEXStatement_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrArtifactInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal model.PackageOrArtifactInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrArtifactInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVEXStatement_argsVulnerability(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerability"]
+	if !ok {
+		var zeroVal model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVEXStatement_argsVexStatement(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VexStatementInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vexStatement"]
+	if !ok {
+		var zeroVal model.VexStatementInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vexStatement"))
+	if tmp, ok := rawArgs["vexStatement"]; ok {
+		return ec.unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VexStatementInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrArtifactInputs
-	if tmp, ok := rawArgs["subjects"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVEXStatements_argsSubjects(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerabilities"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg1, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestVEXStatements_argsVulnerabilities(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilities"] = arg1
-	var arg2 []*model.VexStatementInputSpec
-	if tmp, ok := rawArgs["vexStatements"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vexStatements"))
-		arg2, err = ec.unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestVEXStatements_argsVexStatements(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vexStatements"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVEXStatements_argsSubjects(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PackageOrArtifactInputs, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subjects"]
+	if !ok {
+		var zeroVal model.PackageOrArtifactInputs
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		return ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx, tmp)
+	}
+
+	var zeroVal model.PackageOrArtifactInputs
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVEXStatements_argsVulnerabilities(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilities"]
+	if !ok {
+		var zeroVal []*model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
+	if tmp, ok := rawArgs["vulnerabilities"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVEXStatements_argsVexStatements(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.VexStatementInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vexStatements"]
+	if !ok {
+		var zeroVal []*model.VexStatementInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vexStatements"))
+	if tmp, ok := rawArgs["vexStatements"]; ok {
+		return ec.unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.VexStatementInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg0, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVulnEqual_argsVulnerability(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerability"] = arg0
-	var arg1 model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["otherVulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerability"))
-		arg1, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestVulnEqual_argsOtherVulnerability(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["otherVulnerability"] = arg1
-	var arg2 model.VulnEqualInputSpec
-	if tmp, ok := rawArgs["vulnEqual"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqual"))
-		arg2, err = ec.unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestVulnEqual_argsVulnEqual(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnEqual"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVulnEqual_argsVulnerability(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerability"]
+	if !ok {
+		var zeroVal model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnEqual_argsOtherVulnerability(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["otherVulnerability"]
+	if !ok {
+		var zeroVal model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerability"))
+	if tmp, ok := rawArgs["otherVulnerability"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnEqual_argsVulnEqual(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnEqualInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnEqual"]
+	if !ok {
+		var zeroVal model.VulnEqualInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqual"))
+	if tmp, ok := rawArgs["vulnEqual"]; ok {
+		return ec.unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnEqualInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerabilities"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg0, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVulnEquals_argsVulnerabilities(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilities"] = arg0
-	var arg1 []*model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["otherVulnerabilities"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerabilities"))
-		arg1, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestVulnEquals_argsOtherVulnerabilities(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["otherVulnerabilities"] = arg1
-	var arg2 []*model.VulnEqualInputSpec
-	if tmp, ok := rawArgs["vulnEquals"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEquals"))
-		arg2, err = ec.unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Mutation_ingestVulnEquals_argsVulnEquals(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnEquals"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVulnEquals_argsVulnerabilities(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilities"]
+	if !ok {
+		var zeroVal []*model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
+	if tmp, ok := rawArgs["vulnerabilities"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnEquals_argsOtherVulnerabilities(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["otherVulnerabilities"]
+	if !ok {
+		var zeroVal []*model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerabilities"))
+	if tmp, ok := rawArgs["otherVulnerabilities"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnEquals_argsVulnEquals(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.VulnEqualInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnEquals"]
+	if !ok {
+		var zeroVal []*model.VulnEqualInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEquals"))
+	if tmp, ok := rawArgs["vulnEquals"]; ok {
+		return ec.unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.VulnEqualInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulns"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulns"))
-		arg0, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVulnerabilities_argsVulns(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulns"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVulnerabilities_argsVulns(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulns"]
+	if !ok {
+		var zeroVal []*model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulns"))
+	if tmp, ok := rawArgs["vulns"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.IDorVulnerabilityInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg0, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVulnerabilityMetadata_argsVulnerability(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerability"] = arg0
-	var arg1 model.VulnerabilityMetadataInputSpec
-	if tmp, ok := rawArgs["vulnerabilityMetadata"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadata"))
-		arg1, err = ec.unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Mutation_ingestVulnerabilityMetadata_argsVulnerabilityMetadata(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilityMetadata"] = arg1
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_argsVulnerability(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerability"]
+	if !ok {
+		var zeroVal model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_argsVulnerabilityMetadata(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnerabilityMetadataInputSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilityMetadata"]
+	if !ok {
+		var zeroVal model.VulnerabilityMetadataInputSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadata"))
+	if tmp, ok := rawArgs["vulnerabilityMetadata"]; ok {
+		return ec.unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnerabilityMetadataInputSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorVulnerabilityInput
-	if tmp, ok := rawArgs["vuln"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vuln"))
-		arg0, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Mutation_ingestVulnerability_argsVuln(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vuln"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Mutation_ingestVulnerability_argsVuln(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IDorVulnerabilityInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vuln"]
+	if !ok {
+		var zeroVal model.IDorVulnerabilityInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vuln"))
+	if tmp, ok := rawArgs["vuln"]; ok {
+		return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
+	}
+
+	var zeroVal model.IDorVulnerabilityInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_BatchQueryDepPkgDependency_argsPkgIDs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pkgIDs"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_argsPkgIDs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgIDs"]
+	if !ok {
+		var zeroVal []string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgIDs"))
+	if tmp, ok := rawArgs["pkgIDs"]; ok {
+		return ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
+	}
+
+	var zeroVal []string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_argsPkgIDs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pkgIDs"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_argsPkgIDs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgIDs"]
+	if !ok {
+		var zeroVal []string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgIDs"))
+	if tmp, ok := rawArgs["pkgIDs"]; ok {
+		return ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
+	}
+
+	var zeroVal []string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_argsPkgIDs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pkgIDs"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_argsPkgIDs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgIDs"]
+	if !ok {
+		var zeroVal []string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgIDs"))
+	if tmp, ok := rawArgs["pkgIDs"]; ok {
+		return ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
+	}
+
+	var zeroVal []string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_BatchQuerySubjectPkgDependency_argsPkgIDs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pkgIDs"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_argsPkgIDs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgIDs"]
+	if !ok {
+		var zeroVal []string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgIDs"))
+	if tmp, ok := rawArgs["pkgIDs"]; ok {
+		return ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
+	}
+
+	var zeroVal []string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyBadSpec
-	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
-		arg0, err = ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyBadList_argsCertifyBadSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyBadSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_CertifyBadList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_CertifyBadList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyBadList_argsCertifyBadSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyBadSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyBadSpec"]
+	if !ok {
+		var zeroVal model.CertifyBadSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
+	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
+		return ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyBadSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyBadList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyBadList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyBadSpec
-	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
-		arg0, err = ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyBad_argsCertifyBadSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyBadSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyBad_argsCertifyBadSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyBadSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyBadSpec"]
+	if !ok {
+		var zeroVal model.CertifyBadSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
+	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
+		return ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyBadSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyGoodSpec
-	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
-		arg0, err = ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyGoodList_argsCertifyGoodSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyGoodSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_CertifyGoodList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_CertifyGoodList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyGoodList_argsCertifyGoodSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyGoodSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyGoodSpec"]
+	if !ok {
+		var zeroVal model.CertifyGoodSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
+	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
+		return ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyGoodSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyGoodList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyGoodList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyGoodSpec
-	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
-		arg0, err = ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyGood_argsCertifyGoodSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyGoodSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyGood_argsCertifyGoodSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyGoodSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyGoodSpec"]
+	if !ok {
+		var zeroVal model.CertifyGoodSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
+	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
+		return ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyGoodSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyLegalSpec
-	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
-		arg0, err = ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyLegalList_argsCertifyLegalSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyLegalSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_CertifyLegalList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_CertifyLegalList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyLegalList_argsCertifyLegalSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyLegalSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyLegalSpec"]
+	if !ok {
+		var zeroVal model.CertifyLegalSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
+	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
+		return ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyLegalSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyLegalList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyLegalList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyLegalSpec
-	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
-		arg0, err = ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyLegal_argsCertifyLegalSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyLegalSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyLegal_argsCertifyLegalSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyLegalSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyLegalSpec"]
+	if !ok {
+		var zeroVal model.CertifyLegalSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
+	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
+		return ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyLegalSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyVEXStatementSpec
-	if tmp, ok := rawArgs["certifyVEXStatementSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVEXStatementSpec"))
-		arg0, err = ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyVEXStatementList_argsCertifyVEXStatementSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyVEXStatementSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_CertifyVEXStatementList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_CertifyVEXStatementList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyVEXStatementList_argsCertifyVEXStatementSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyVEXStatementSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyVEXStatementSpec"]
+	if !ok {
+		var zeroVal model.CertifyVEXStatementSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVEXStatementSpec"))
+	if tmp, ok := rawArgs["certifyVEXStatementSpec"]; ok {
+		return ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyVEXStatementSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyVEXStatementList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyVEXStatementList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyVEXStatementSpec
-	if tmp, ok := rawArgs["certifyVEXStatementSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVEXStatementSpec"))
-		arg0, err = ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyVEXStatement_argsCertifyVEXStatementSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyVEXStatementSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyVEXStatement_argsCertifyVEXStatementSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyVEXStatementSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyVEXStatementSpec"]
+	if !ok {
+		var zeroVal model.CertifyVEXStatementSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVEXStatementSpec"))
+	if tmp, ok := rawArgs["certifyVEXStatementSpec"]; ok {
+		return ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyVEXStatementSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyVulnSpec
-	if tmp, ok := rawArgs["certifyVulnSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulnSpec"))
-		arg0, err = ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyVulnList_argsCertifyVulnSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyVulnSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_CertifyVulnList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_CertifyVulnList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyVulnList_argsCertifyVulnSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyVulnSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyVulnSpec"]
+	if !ok {
+		var zeroVal model.CertifyVulnSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulnSpec"))
+	if tmp, ok := rawArgs["certifyVulnSpec"]; ok {
+		return ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyVulnSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyVulnList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_CertifyVulnList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyVulnSpec
-	if tmp, ok := rawArgs["certifyVulnSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulnSpec"))
-		arg0, err = ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_CertifyVuln_argsCertifyVulnSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["certifyVulnSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_CertifyVuln_argsCertifyVulnSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyVulnSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["certifyVulnSpec"]
+	if !ok {
+		var zeroVal model.CertifyVulnSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulnSpec"))
+	if tmp, ok := rawArgs["certifyVulnSpec"]; ok {
+		return ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyVulnSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasMetadataSpec
-	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
-		arg0, err = ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasMetadataList_argsHasMetadataSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasMetadataSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_HasMetadataList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_HasMetadataList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasMetadataList_argsHasMetadataSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasMetadataSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasMetadataSpec"]
+	if !ok {
+		var zeroVal model.HasMetadataSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
+	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
+		return ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasMetadataSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasMetadataList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasMetadataList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasMetadataSpec
-	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
-		arg0, err = ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasMetadata_argsHasMetadataSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasMetadataSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasMetadata_argsHasMetadataSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasMetadataSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasMetadataSpec"]
+	if !ok {
+		var zeroVal model.HasMetadataSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
+	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
+		return ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasMetadataSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasSBOMSpec
-	if tmp, ok := rawArgs["hasSBOMSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMSpec"))
-		arg0, err = ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasSBOMList_argsHasSBOMSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSBOMSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_HasSBOMList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_HasSBOMList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasSBOMList_argsHasSBOMSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSBOMSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSBOMSpec"]
+	if !ok {
+		var zeroVal model.HasSBOMSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMSpec"))
+	if tmp, ok := rawArgs["hasSBOMSpec"]; ok {
+		return ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSBOMSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSBOMList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSBOMList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasSBOMSpec
-	if tmp, ok := rawArgs["hasSBOMSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMSpec"))
-		arg0, err = ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasSBOM_argsHasSBOMSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSBOMSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasSBOM_argsHasSBOMSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSBOMSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSBOMSpec"]
+	if !ok {
+		var zeroVal model.HasSBOMSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMSpec"))
+	if tmp, ok := rawArgs["hasSBOMSpec"]; ok {
+		return ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSBOMSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasSLSASpec
-	if tmp, ok := rawArgs["hasSLSASpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSLSASpec"))
-		arg0, err = ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasSLSAList_argsHasSLSASpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSLSASpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_HasSLSAList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_HasSLSAList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasSLSAList_argsHasSLSASpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSLSASpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSLSASpec"]
+	if !ok {
+		var zeroVal model.HasSLSASpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSLSASpec"))
+	if tmp, ok := rawArgs["hasSLSASpec"]; ok {
+		return ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSLSASpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSLSAList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSLSAList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasSLSASpec
-	if tmp, ok := rawArgs["hasSLSASpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSLSASpec"))
-		arg0, err = ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasSLSA_argsHasSLSASpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSLSASpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasSLSA_argsHasSLSASpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSLSASpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSLSASpec"]
+	if !ok {
+		var zeroVal model.HasSLSASpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSLSASpec"))
+	if tmp, ok := rawArgs["hasSLSASpec"]; ok {
+		return ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSLSASpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasSourceAtSpec
-	if tmp, ok := rawArgs["hasSourceAtSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAtSpec"))
-		arg0, err = ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasSourceAtList_argsHasSourceAtSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSourceAtSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_HasSourceAtList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_HasSourceAtList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasSourceAtList_argsHasSourceAtSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSourceAtSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSourceAtSpec"]
+	if !ok {
+		var zeroVal model.HasSourceAtSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAtSpec"))
+	if tmp, ok := rawArgs["hasSourceAtSpec"]; ok {
+		return ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSourceAtSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSourceAtList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HasSourceAtList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HasSourceAtSpec
-	if tmp, ok := rawArgs["hasSourceAtSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAtSpec"))
-		arg0, err = ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HasSourceAt_argsHasSourceAtSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hasSourceAtSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_HasSourceAt_argsHasSourceAtSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HasSourceAtSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hasSourceAtSpec"]
+	if !ok {
+		var zeroVal model.HasSourceAtSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAtSpec"))
+	if tmp, ok := rawArgs["hasSourceAtSpec"]; ok {
+		return ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HasSourceAtSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HashEqualSpec
-	if tmp, ok := rawArgs["hashEqualSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqualSpec"))
-		arg0, err = ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HashEqualList_argsHashEqualSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hashEqualSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_HashEqualList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_HashEqualList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_HashEqualList_argsHashEqualSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HashEqualSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hashEqualSpec"]
+	if !ok {
+		var zeroVal model.HashEqualSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqualSpec"))
+	if tmp, ok := rawArgs["hashEqualSpec"]; ok {
+		return ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HashEqualSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HashEqualList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_HashEqualList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.HashEqualSpec
-	if tmp, ok := rawArgs["hashEqualSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqualSpec"))
-		arg0, err = ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_HashEqual_argsHashEqualSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["hashEqualSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_HashEqual_argsHashEqualSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.HashEqualSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["hashEqualSpec"]
+	if !ok {
+		var zeroVal model.HashEqualSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqualSpec"))
+	if tmp, ok := rawArgs["hashEqualSpec"]; ok {
+		return ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
+	}
+
+	var zeroVal model.HashEqualSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IsDependencySpec
-	if tmp, ok := rawArgs["isDependencySpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
-		arg0, err = ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_IsDependencyList_argsIsDependencySpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["isDependencySpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_IsDependencyList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_IsDependencyList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_IsDependencyList_argsIsDependencySpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IsDependencySpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["isDependencySpec"]
+	if !ok {
+		var zeroVal model.IsDependencySpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
+	if tmp, ok := rawArgs["isDependencySpec"]; ok {
+		return ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
+	}
+
+	var zeroVal model.IsDependencySpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_IsDependencyList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_IsDependencyList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IsDependencySpec
-	if tmp, ok := rawArgs["isDependencySpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
-		arg0, err = ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_IsDependency_argsIsDependencySpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["isDependencySpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_IsDependency_argsIsDependencySpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IsDependencySpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["isDependencySpec"]
+	if !ok {
+		var zeroVal model.IsDependencySpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
+	if tmp, ok := rawArgs["isDependencySpec"]; ok {
+		return ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
+	}
+
+	var zeroVal model.IsDependencySpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IsOccurrenceSpec
-	if tmp, ok := rawArgs["isOccurrenceSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isOccurrenceSpec"))
-		arg0, err = ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_IsOccurrenceList_argsIsOccurrenceSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["isOccurrenceSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_IsOccurrenceList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_IsOccurrenceList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_IsOccurrenceList_argsIsOccurrenceSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IsOccurrenceSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["isOccurrenceSpec"]
+	if !ok {
+		var zeroVal model.IsOccurrenceSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("isOccurrenceSpec"))
+	if tmp, ok := rawArgs["isOccurrenceSpec"]; ok {
+		return ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
+	}
+
+	var zeroVal model.IsOccurrenceSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_IsOccurrenceList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_IsOccurrenceList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IsOccurrenceSpec
-	if tmp, ok := rawArgs["isOccurrenceSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isOccurrenceSpec"))
-		arg0, err = ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_IsOccurrence_argsIsOccurrenceSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["isOccurrenceSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_IsOccurrence_argsIsOccurrenceSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.IsOccurrenceSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["isOccurrenceSpec"]
+	if !ok {
+		var zeroVal model.IsOccurrenceSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("isOccurrenceSpec"))
+	if tmp, ok := rawArgs["isOccurrenceSpec"]; ok {
+		return ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
+	}
+
+	var zeroVal model.IsOccurrenceSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgEqualSpec
-	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
-		arg0, err = ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_PkgEqualList_argsPkgEqualSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgEqualSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_PkgEqualList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_PkgEqualList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_PkgEqualList_argsPkgEqualSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PkgEqualSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgEqualSpec"]
+	if !ok {
+		var zeroVal model.PkgEqualSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
+	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
+		return ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PkgEqualSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_PkgEqualList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_PkgEqualList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgEqualSpec
-	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
-		arg0, err = ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_PkgEqual_argsPkgEqualSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgEqualSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_PkgEqual_argsPkgEqualSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PkgEqualSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgEqualSpec"]
+	if !ok {
+		var zeroVal model.PkgEqualSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
+	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
+		return ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PkgEqualSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PointOfContactSpec
-	if tmp, ok := rawArgs["pointOfContactSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContactSpec"))
-		arg0, err = ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_PointOfContactList_argsPointOfContactSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pointOfContactSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_PointOfContactList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_PointOfContactList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_PointOfContactList_argsPointOfContactSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PointOfContactSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pointOfContactSpec"]
+	if !ok {
+		var zeroVal model.PointOfContactSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContactSpec"))
+	if tmp, ok := rawArgs["pointOfContactSpec"]; ok {
+		return ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PointOfContactSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_PointOfContactList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_PointOfContactList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PointOfContactSpec
-	if tmp, ok := rawArgs["pointOfContactSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContactSpec"))
-		arg0, err = ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_PointOfContact_argsPointOfContactSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pointOfContactSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_PointOfContact_argsPointOfContactSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PointOfContactSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pointOfContactSpec"]
+	if !ok {
+		var zeroVal model.PointOfContactSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContactSpec"))
+	if tmp, ok := rawArgs["pointOfContactSpec"]; ok {
+		return ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PointOfContactSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query___type_argsName(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["name"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+	if tmp, ok := rawArgs["name"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ArtifactSpec
-	if tmp, ok := rawArgs["artifactSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactSpec"))
-		arg0, err = ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_artifactsList_argsArtifactSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifactSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_artifactsList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_artifactsList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_artifactsList_argsArtifactSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.ArtifactSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifactSpec"]
+	if !ok {
+		var zeroVal model.ArtifactSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactSpec"))
+	if tmp, ok := rawArgs["artifactSpec"]; ok {
+		return ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
+	}
+
+	var zeroVal model.ArtifactSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_artifactsList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_artifactsList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ArtifactSpec
-	if tmp, ok := rawArgs["artifactSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactSpec"))
-		arg0, err = ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_artifacts_argsArtifactSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["artifactSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_artifacts_argsArtifactSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.ArtifactSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["artifactSpec"]
+	if !ok {
+		var zeroVal model.ArtifactSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactSpec"))
+	if tmp, ok := rawArgs["artifactSpec"]; ok {
+		return ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
+	}
+
+	var zeroVal model.ArtifactSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.BuilderSpec
-	if tmp, ok := rawArgs["builderSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
-		arg0, err = ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_buildersList_argsBuilderSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builderSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_buildersList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_buildersList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_buildersList_argsBuilderSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.BuilderSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builderSpec"]
+	if !ok {
+		var zeroVal model.BuilderSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
+	if tmp, ok := rawArgs["builderSpec"]; ok {
+		return ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
+	}
+
+	var zeroVal model.BuilderSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_buildersList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_buildersList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.BuilderSpec
-	if tmp, ok := rawArgs["builderSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
-		arg0, err = ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_builders_argsBuilderSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["builderSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_builders_argsBuilderSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.BuilderSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["builderSpec"]
+	if !ok {
+		var zeroVal model.BuilderSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
+	if tmp, ok := rawArgs["builderSpec"]; ok {
+		return ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
+	}
+
+	var zeroVal model.BuilderSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_findPackagesThatNeedScanning_argsQueryType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["queryType"] = arg0
+	arg1, err := ec.field_Query_findPackagesThatNeedScanning_argsLastScan(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["lastScan"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsQueryType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.QueryType, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["queryType"]
+	if !ok {
+		var zeroVal model.QueryType
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("queryType"))
+	if tmp, ok := rawArgs["queryType"]; ok {
+		return ec.unmarshalNQueryType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐQueryType(ctx, tmp)
+	}
+
+	var zeroVal model.QueryType
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsLastScan(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["lastScan"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("lastScan"))
+	if tmp, ok := rawArgs["lastScan"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["searchText"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchText"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_findSoftwareList_argsSearchText(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["searchText"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_findSoftwareList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_findSoftwareList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_findSoftwareList_argsSearchText(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["searchText"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("searchText"))
+	if tmp, ok := rawArgs["searchText"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_findSoftwareList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_findSoftwareList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["searchText"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchText"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_findSoftware_argsSearchText(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["searchText"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_findSoftware_argsSearchText(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["searchText"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("searchText"))
+	if tmp, ok := rawArgs["searchText"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.LicenseSpec
-	if tmp, ok := rawArgs["licenseSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenseSpec"))
-		arg0, err = ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_licenseList_argsLicenseSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["licenseSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_licenseList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_licenseList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_licenseList_argsLicenseSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.LicenseSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["licenseSpec"]
+	if !ok {
+		var zeroVal model.LicenseSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("licenseSpec"))
+	if tmp, ok := rawArgs["licenseSpec"]; ok {
+		return ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, tmp)
+	}
+
+	var zeroVal model.LicenseSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_licenseList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_licenseList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.LicenseSpec
-	if tmp, ok := rawArgs["licenseSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenseSpec"))
-		arg0, err = ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_licenses_argsLicenseSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["licenseSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_licenses_argsLicenseSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.LicenseSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["licenseSpec"]
+	if !ok {
+		var zeroVal model.LicenseSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("licenseSpec"))
+	if tmp, ok := rawArgs["licenseSpec"]; ok {
+		return ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, tmp)
+	}
+
+	var zeroVal model.LicenseSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["node"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_neighborsList_argsNode(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["node"] = arg0
-	var arg1 []model.Edge
-	if tmp, ok := rawArgs["usingOnly"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
-		arg1, err = ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_neighborsList_argsUsingOnly(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["usingOnly"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg2, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_neighborsList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg2
-	var arg3 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Query_neighborsList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Query_neighborsList_argsNode(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["node"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
+	if tmp, ok := rawArgs["node"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_neighborsList_argsUsingOnly(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.Edge, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["usingOnly"]
+	if !ok {
+		var zeroVal []model.Edge
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
+	if tmp, ok := rawArgs["usingOnly"]; ok {
+		return ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.Edge
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_neighborsList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_neighborsList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["node"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_neighbors_argsNode(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["node"] = arg0
-	var arg1 []model.Edge
-	if tmp, ok := rawArgs["usingOnly"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
-		arg1, err = ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_neighbors_argsUsingOnly(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["usingOnly"] = arg1
 	return args, nil
+}
+func (ec *executionContext) field_Query_neighbors_argsNode(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["node"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
+	if tmp, ok := rawArgs["node"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_neighbors_argsUsingOnly(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.Edge, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["usingOnly"]
+	if !ok {
+		var zeroVal []model.Edge
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
+	if tmp, ok := rawArgs["usingOnly"]; ok {
+		return ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.Edge
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["node"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_node_argsNode(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["node"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_node_argsNode(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["node"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
+	if tmp, ok := rawArgs["node"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []string
-	if tmp, ok := rawArgs["nodes"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nodes"))
-		arg0, err = ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_nodes_argsNodes(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["nodes"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_nodes_argsNodes(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["nodes"]
+	if !ok {
+		var zeroVal []string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("nodes"))
+	if tmp, ok := rawArgs["nodes"]; ok {
+		return ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
+	}
+
+	var zeroVal []string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgSpec
-	if tmp, ok := rawArgs["pkgSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
-		arg0, err = ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_packagesList_argsPkgSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_packagesList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_packagesList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_packagesList_argsPkgSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PkgSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgSpec"]
+	if !ok {
+		var zeroVal model.PkgSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
+	if tmp, ok := rawArgs["pkgSpec"]; ok {
+		return ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PkgSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_packagesList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_packagesList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgSpec
-	if tmp, ok := rawArgs["pkgSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
-		arg0, err = ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_packages_argsPkgSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["pkgSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_packages_argsPkgSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PkgSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgSpec"]
+	if !ok {
+		var zeroVal model.PkgSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
+	if tmp, ok := rawArgs["pkgSpec"]; ok {
+		return ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
+	}
+
+	var zeroVal model.PkgSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_path_argsSubject(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["subject"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["target"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg1, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_path_argsTarget(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["target"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["maxPathLength"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxPathLength"))
-		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_path_argsMaxPathLength(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["maxPathLength"] = arg2
-	var arg3 []model.Edge
-	if tmp, ok := rawArgs["usingOnly"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
-		arg3, err = ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_Query_path_argsUsingOnly(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["usingOnly"] = arg3
 	return args, nil
+}
+func (ec *executionContext) field_Query_path_argsSubject(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["subject"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subject"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_path_argsTarget(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["target"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
+	if tmp, ok := rawArgs["target"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_path_argsMaxPathLength(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["maxPathLength"]
+	if !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("maxPathLength"))
+	if tmp, ok := rawArgs["maxPathLength"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_path_argsUsingOnly(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.Edge, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["usingOnly"]
+	if !ok {
+		var zeroVal []model.Edge
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
+	if tmp, ok := rawArgs["usingOnly"]; ok {
+		return ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.Edge
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryPackagesListForScan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_queryPackagesListForScan_argsPkgIDs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pkgIDs"] = arg0
+	arg1, err := ec.field_Query_queryPackagesListForScan_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := ec.field_Query_queryPackagesListForScan_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	return args, nil
+}
+func (ec *executionContext) field_Query_queryPackagesListForScan_argsPkgIDs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["pkgIDs"]
+	if !ok {
+		var zeroVal []string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgIDs"))
+	if tmp, ok := rawArgs["pkgIDs"]; ok {
+		return ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
+	}
+
+	var zeroVal []string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryPackagesListForScan_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryPackagesListForScan_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyScorecardSpec
-	if tmp, ok := rawArgs["scorecardSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
-		arg0, err = ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_scorecardsList_argsScorecardSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["scorecardSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_scorecardsList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_scorecardsList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_scorecardsList_argsScorecardSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyScorecardSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["scorecardSpec"]
+	if !ok {
+		var zeroVal model.CertifyScorecardSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
+	if tmp, ok := rawArgs["scorecardSpec"]; ok {
+		return ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyScorecardSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_scorecardsList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_scorecardsList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.CertifyScorecardSpec
-	if tmp, ok := rawArgs["scorecardSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
-		arg0, err = ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_scorecards_argsScorecardSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["scorecardSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_scorecards_argsScorecardSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.CertifyScorecardSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["scorecardSpec"]
+	if !ok {
+		var zeroVal model.CertifyScorecardSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
+	if tmp, ok := rawArgs["scorecardSpec"]; ok {
+		return ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
+	}
+
+	var zeroVal model.CertifyScorecardSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SourceSpec
-	if tmp, ok := rawArgs["sourceSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceSpec"))
-		arg0, err = ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_sourcesList_argsSourceSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["sourceSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_sourcesList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_sourcesList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_sourcesList_argsSourceSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.SourceSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["sourceSpec"]
+	if !ok {
+		var zeroVal model.SourceSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceSpec"))
+	if tmp, ok := rawArgs["sourceSpec"]; ok {
+		return ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
+	}
+
+	var zeroVal model.SourceSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_sourcesList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_sourcesList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SourceSpec
-	if tmp, ok := rawArgs["sourceSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceSpec"))
-		arg0, err = ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_sources_argsSourceSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["sourceSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_sources_argsSourceSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.SourceSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["sourceSpec"]
+	if !ok {
+		var zeroVal model.SourceSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceSpec"))
+	if tmp, ok := rawArgs["sourceSpec"]; ok {
+		return ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
+	}
+
+	var zeroVal model.SourceSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnEqualSpec
-	if tmp, ok := rawArgs["vulnEqualSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualSpec"))
-		arg0, err = ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_vulnEqualList_argsVulnEqualSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnEqualSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_vulnEqualList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_vulnEqualList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_vulnEqualList_argsVulnEqualSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnEqualSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnEqualSpec"]
+	if !ok {
+		var zeroVal model.VulnEqualSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualSpec"))
+	if tmp, ok := rawArgs["vulnEqualSpec"]; ok {
+		return ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnEqualSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_vulnEqualList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_vulnEqualList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnEqualSpec
-	if tmp, ok := rawArgs["vulnEqualSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualSpec"))
-		arg0, err = ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_vulnEqual_argsVulnEqualSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnEqualSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_vulnEqual_argsVulnEqualSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnEqualSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnEqualSpec"]
+	if !ok {
+		var zeroVal model.VulnEqualSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualSpec"))
+	if tmp, ok := rawArgs["vulnEqualSpec"]; ok {
+		return ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnEqualSpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilitySpec
-	if tmp, ok := rawArgs["vulnSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnSpec"))
-		arg0, err = ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_vulnerabilities_argsVulnSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_vulnerabilities_argsVulnSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnerabilitySpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnSpec"]
+	if !ok {
+		var zeroVal model.VulnerabilitySpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnSpec"))
+	if tmp, ok := rawArgs["vulnSpec"]; ok {
+		return ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnerabilitySpec
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilitySpec
-	if tmp, ok := rawArgs["vulnSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnSpec"))
-		arg0, err = ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_vulnerabilityList_argsVulnSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_vulnerabilityList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_vulnerabilityList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_vulnerabilityList_argsVulnSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnerabilitySpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnSpec"]
+	if !ok {
+		var zeroVal model.VulnerabilitySpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnSpec"))
+	if tmp, ok := rawArgs["vulnSpec"]; ok {
+		return ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnerabilitySpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilityList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilityList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilityMetadataSpec
-	if tmp, ok := rawArgs["vulnerabilityMetadataSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataSpec"))
-		arg0, err = ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_vulnerabilityMetadataList_argsVulnerabilityMetadataSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilityMetadataSpec"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_Query_vulnerabilityMetadataList_argsAfter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["after"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_Query_vulnerabilityMetadataList_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["first"] = arg2
 	return args, nil
+}
+func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsVulnerabilityMetadataSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnerabilityMetadataSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilityMetadataSpec"]
+	if !ok {
+		var zeroVal model.VulnerabilityMetadataSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataSpec"))
+	if tmp, ok := rawArgs["vulnerabilityMetadataSpec"]; ok {
+		return ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnerabilityMetadataSpec
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsAfter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["after"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+	if tmp, ok := rawArgs["after"]; ok {
+		return ec.unmarshalOID2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["first"]
+	if !ok {
+		var zeroVal *int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_vulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilityMetadataSpec
-	if tmp, ok := rawArgs["vulnerabilityMetadataSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataSpec"))
-		arg0, err = ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_Query_vulnerabilityMetadata_argsVulnerabilityMetadataSpec(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["vulnerabilityMetadataSpec"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_Query_vulnerabilityMetadata_argsVulnerabilityMetadataSpec(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.VulnerabilityMetadataSpec, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["vulnerabilityMetadataSpec"]
+	if !ok {
+		var zeroVal model.VulnerabilityMetadataSpec
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataSpec"))
+	if tmp, ok := rawArgs["vulnerabilityMetadataSpec"]; ok {
+		return ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, tmp)
+	}
+
+	var zeroVal model.VulnerabilityMetadataSpec
+	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************
@@ -6234,6 +10480,84 @@ func (ec *executionContext) fieldContext_Query_CertifyLegalList(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_BatchQueryPkgIDCertifyLegal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_BatchQueryPkgIDCertifyLegal(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BatchQueryPkgIDCertifyLegal(rctx, fc.Args["pkgIDs"].([]string))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyLegal)
+	fc.Result = res
+	return ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_BatchQueryPkgIDCertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyLegal_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_CertifyLegal_subject(ctx, field)
+			case "declaredLicense":
+				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
+			case "declaredLicenses":
+				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
+			case "discoveredLicense":
+				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
+			case "discoveredLicenses":
+				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
+			case "attribution":
+				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyLegal_justification(ctx, field)
+			case "timeScanned":
+				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyLegal_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_BatchQueryPkgIDCertifyLegal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_scorecards(ctx, field)
 	if err != nil {
@@ -6597,6 +10921,68 @@ func (ec *executionContext) fieldContext_Query_CertifyVulnList(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyVulnList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_BatchQueryPkgIDCertifyVuln(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_BatchQueryPkgIDCertifyVuln(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BatchQueryPkgIDCertifyVuln(rctx, fc.Args["pkgIDs"].([]string))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyVuln)
+	fc.Result = res
+	return ec.marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_BatchQueryPkgIDCertifyVuln(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyVuln_id(ctx, field)
+			case "package":
+				return ec.fieldContext_CertifyVuln_package(ctx, field)
+			case "vulnerability":
+				return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
+			case "metadata":
+				return ec.fieldContext_CertifyVuln_metadata(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_BatchQueryPkgIDCertifyVuln_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7357,6 +11743,146 @@ func (ec *executionContext) fieldContext_Query_IsDependencyList(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_IsDependencyList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_BatchQuerySubjectPkgDependency(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_BatchQuerySubjectPkgDependency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BatchQuerySubjectPkgDependency(rctx, fc.Args["pkgIDs"].([]string))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IsDependency)
+	fc.Result = res
+	return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_BatchQuerySubjectPkgDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsDependency_id(ctx, field)
+			case "package":
+				return ec.fieldContext_IsDependency_package(ctx, field)
+			case "dependencyPackage":
+				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
+			case "dependencyType":
+				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsDependency_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsDependency_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsDependency_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_IsDependency_documentRef(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_BatchQuerySubjectPkgDependency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_BatchQueryDepPkgDependency(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_BatchQueryDepPkgDependency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BatchQueryDepPkgDependency(rctx, fc.Args["pkgIDs"].([]string))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IsDependency)
+	fc.Result = res
+	return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_BatchQueryDepPkgDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsDependency_id(ctx, field)
+			case "package":
+				return ec.fieldContext_IsDependency_package(ctx, field)
+			case "dependencyPackage":
+				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
+			case "dependencyType":
+				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsDependency_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsDependency_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsDependency_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_IsDependency_documentRef(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_BatchQueryDepPkgDependency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -8344,6 +12870,115 @@ func (ec *executionContext) fieldContext_Query_findSoftwareList(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_findSoftwareList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_queryPackagesListForScan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_queryPackagesListForScan(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().QueryPackagesListForScan(rctx, fc.Args["pkgIDs"].([]string), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PackageConnection)
+	fc.Result = res
+	return ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_queryPackagesListForScan(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_PackageConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_PackageConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_PackageConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PackageConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_queryPackagesListForScan_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_findPackagesThatNeedScanning(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_findPackagesThatNeedScanning(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().FindPackagesThatNeedScanning(rctx, fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_findPackagesThatNeedScanning(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_findPackagesThatNeedScanning_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -9815,6 +14450,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "BatchQueryPkgIDCertifyLegal":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_BatchQueryPkgIDCertifyLegal(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "scorecards":
 			field := field
 
@@ -9929,6 +14586,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_CertifyVulnList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "BatchQueryPkgIDCertifyVuln":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_BatchQueryPkgIDCertifyVuln(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -10175,6 +14854,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_IsDependencyList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "BatchQuerySubjectPkgDependency":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_BatchQuerySubjectPkgDependency(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "BatchQueryDepPkgDependency":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_BatchQueryDepPkgDependency(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -10528,6 +15251,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_findSoftwareList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "queryPackagesListForScan":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_queryPackagesListForScan(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "findPackagesThatNeedScanning":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_findPackagesThatNeedScanning(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 

@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -33,7 +34,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
 	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
 	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
-	fields := getPreloads(ctx)
+	fields := helper.GetPreloads(ctx)
 
 	nameRequired := false
 	namespaceRequired := false

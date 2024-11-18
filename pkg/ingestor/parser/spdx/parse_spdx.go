@@ -42,6 +42,7 @@ type spdxParser struct {
 	packageLegals       map[string][]*model.CertifyLegalInputSpec
 	filePackages        map[string][]*model.PkgInputSpec
 	fileArtifacts       map[string][]*model.ArtifactInputSpec
+	licenseInLine       map[string]string
 	topLevelPackages    []*model.PkgInputSpec
 	topLevelArtifacts   map[string][]*model.ArtifactInputSpec
 	identifierStrings   *common.IdentifierStrings
@@ -58,6 +59,7 @@ func NewSpdxParser() common.DocumentParser {
 		filePackages:        map[string][]*model.PkgInputSpec{},
 		fileArtifacts:       map[string][]*model.ArtifactInputSpec{},
 		topLevelArtifacts:   make(map[string][]*model.ArtifactInputSpec),
+		licenseInLine:       map[string]string{},
 		identifierStrings:   &common.IdentifierStrings{},
 		topLevelIsHeuristic: false,
 	}
@@ -73,6 +75,7 @@ func (s *spdxParser) initializeSPDXParser() {
 	s.fileArtifacts = map[string][]*model.ArtifactInputSpec{}
 	s.topLevelPackages = make([]*model.PkgInputSpec, 0)
 	s.topLevelArtifacts = map[string][]*model.ArtifactInputSpec{}
+	s.licenseInLine = map[string]string{}
 	s.identifierStrings = &common.IdentifierStrings{}
 	s.spdxDoc = nil
 	s.topLevelIsHeuristic = false
@@ -109,6 +112,11 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return err
 	}
 
+	// collect SPDX otherLicenses to InLineMap to be used for license predicate creation
+	for _, o := range s.spdxDoc.OtherLicenses {
+		s.licenseInLine[o.LicenseIdentifier] = o.ExtractedText
+	}
+
 	return nil
 }
 
@@ -143,27 +151,29 @@ func (s *spdxParser) getTopLevelSPDXIDs() ([]string, error) {
 func (s *spdxParser) getPackages(topLevelSPDXIDs []string) error {
 	for _, pac := range s.spdxDoc.Packages {
 		// for each package create a package for each of them
-		purl := ""
+		purls := make([]string, 0)
 		for _, ext := range pac.PackageExternalReferences {
 			if ext.RefType == spdx_common.TypePackageManagerPURL {
-				purl = ext.Locator
+				purls = append(purls, ext.Locator)
 			}
 		}
-		if purl == "" {
-			purl = asmhelpers.GuacPkgPurl(pac.PackageName, &pac.PackageVersion)
+		if len(purls) == 0 {
+			purls = append(purls, asmhelpers.GuacPkgPurl(pac.PackageName, &pac.PackageVersion))
 		}
 
-		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
+		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purls...)
 
-		pkg, err := asmhelpers.PurlToPkg(purl)
-		if err != nil {
-			return err
-		}
+		for _, purl := range purls {
+			pkg, err := asmhelpers.PurlToPkg(purl)
+			if err != nil {
+				return err
+			}
 
-		if slices.Contains(topLevelSPDXIDs, string(pac.PackageSPDXIdentifier)) {
-			s.topLevelPackages = append(s.topLevelPackages, pkg)
+			if slices.Contains(topLevelSPDXIDs, string(pac.PackageSPDXIdentifier)) {
+				s.topLevelPackages = append(s.topLevelPackages, pkg)
+			}
+			s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
 		}
-		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
@@ -371,22 +381,15 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 	for id, cls := range s.packageLegals {
 		for _, cl := range cls {
-			dec := common.ParseLicenses(cl.DeclaredLicense, &lv, nil)
-			dis := common.ParseLicenses(cl.DiscoveredLicense, &lv, nil)
-			for i := range dec {
-				o, n := fixLicense(ctx, &dec[i], s.spdxDoc.OtherLicenses)
-				if o != "" {
-					exp := strings.ReplaceAll(cl.DeclaredLicense, o, n)
-					cl.DeclaredLicense = exp
-				}
-			}
-			for i := range dis {
-				o, n := fixLicense(ctx, &dis[i], s.spdxDoc.OtherLicenses)
-				if o != "" {
-					exp := strings.ReplaceAll(cl.DiscoveredLicense, o, n)
-					cl.DiscoveredLicense = exp
-				}
-			}
+
+			modifiedDecLicense := common.FixSPDXLicenseExpression(cl.DeclaredLicense, s.licenseInLine)
+			modifiedDisLicense := common.FixSPDXLicenseExpression(cl.DiscoveredLicense, s.licenseInLine)
+
+			cl.DeclaredLicense = modifiedDecLicense
+			cl.DiscoveredLicense = modifiedDisLicense
+
+			dec := common.ParseLicenses(modifiedDecLicense, &lv, s.licenseInLine)
+			dis := common.ParseLicenses(modifiedDisLicense, &lv, s.licenseInLine)
 			for _, pkg := range s.packagePackages[id] {
 				cli := assembler.CertifyLegalIngest{
 					Pkg:          pkg,
@@ -427,34 +430,11 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	return preds
 }
 
-func fixLicense(ctx context.Context, l *model.LicenseInputSpec, ol []*spdx.OtherLicense) (string, string) {
-	logger := logging.FromContext(ctx)
-	if !strings.HasPrefix(l.Name, "LicenseRef-") {
-		return "", ""
-	}
-	oldName := l.Name
-	l.ListVersion = nil
-	found := false
-	for _, o := range ol {
-		if o.LicenseIdentifier == l.Name {
-			l.Inline = &o.ExtractedText
-			found = true
-			break
-		}
-	}
-	if !found {
-		logger.Error("License identifier %s not found in OtherLicenses", l.Name)
-		s := "Not found"
-		l.Inline = &s
-	}
-	l.Name = common.HashLicense(*l.Inline)
-	return oldName, l.Name
-}
-
 func isDependency(rel string) bool {
 	return map[string]bool{
-		spdx_common.TypeRelationshipContains:  true,
-		spdx_common.TypeRelationshipDependsOn: true,
+		spdx_common.TypeRelationshipContains:      true,
+		spdx_common.TypeRelationshipDependsOn:     true,
+		spdx_common.TypeRelationshipGeneratedFrom: true,
 	}[rel]
 }
 
@@ -462,6 +442,7 @@ func isDependent(rel string) bool {
 	return map[string]bool{
 		spdx_common.TypeRelationshipContainedBy:  true,
 		spdx_common.TypeRelationshipDependencyOf: true,
+		spdx_common.TypeRelationshipGenerates:    true,
 	}[rel]
 }
 
@@ -476,6 +457,8 @@ func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(s.identifierStrings)
 	return s.identifierStrings, nil
 }
 

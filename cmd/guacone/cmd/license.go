@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
@@ -40,6 +41,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	cdQuerySize = 248
+)
+
 type cdOptions struct {
 	graphqlEndpoint         string
 	headerFile              string
@@ -48,10 +53,15 @@ type cdOptions struct {
 	interval                time.Duration
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// last time the scan was done in hours, if not set it will return
+	// all packages to check
+	lastScan *int
 }
 
 var cdCmd = &cobra.Command{
@@ -68,8 +78,11 @@ var cdCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -96,7 +109,7 @@ var cdCmd = &cobra.Command{
 
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-		packageQuery := root_package.NewPackageQuery(gqlclient, 0, opts.batchSize, opts.addedLatency)
+		packageQuery := root_package.NewPackageQuery(gqlclient, generated.QueryTypeLicense, opts.batchSize, cdQuerySize, opts.addedLatency, opts.lastScan)
 
 		totalNum := 0
 		docChan := make(chan *processor.Document)
@@ -115,8 +128,16 @@ var cdCmd = &cobra.Command{
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient,
-							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+						err = ingestor.MergedIngest(ctx,
+							totalDocs,
+							opts.graphqlEndpoint,
+							transport,
+							csubClient,
+							opts.queryVulnOnIngestion,
+							opts.queryLicenseOnIngestion,
+							opts.queryEOLOnIngestion,
+							opts.queryDepsDevOnIngestion,
+						)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -129,8 +150,16 @@ var cdCmd = &cobra.Command{
 					totalNum += 1
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient,
-							opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+						err = ingestor.MergedIngest(ctx,
+							totalDocs,
+							opts.graphqlEndpoint,
+							transport,
+							csubClient,
+							opts.queryVulnOnIngestion,
+							opts.queryLicenseOnIngestion,
+							opts.queryEOLOnIngestion,
+							opts.queryDepsDevOnIngestion,
+						)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -149,7 +178,17 @@ var cdCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+					err = ingestor.MergedIngest(
+						ctx,
+						totalDocs,
+						opts.graphqlEndpoint,
+						transport,
+						csubClient,
+						opts.queryVulnOnIngestion,
+						opts.queryLicenseOnIngestion,
+						opts.queryEOLOnIngestion,
+						opts.queryDepsDevOnIngestion,
+					)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -158,7 +197,17 @@ var cdCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
+				err = ingestor.MergedIngest(
+					ctx,
+					totalDocs,
+					opts.graphqlEndpoint,
+					transport,
+					csubClient,
+					opts.queryVulnOnIngestion,
+					opts.queryLicenseOnIngestion,
+					opts.queryEOLOnIngestion,
+					opts.queryDepsDevOnIngestion,
+				)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
@@ -176,12 +225,10 @@ var cdCmd = &cobra.Command{
 
 		// Collect
 		errHandler := func(err error) bool {
-			if err == nil {
-				logger.Info("certifier ended gracefully")
-				return true
+			if err != nil {
+				logger.Errorf("certifier ended with error: %v", err)
+				atomic.StoreInt32(&gotErr, 1)
 			}
-			logger.Errorf("certifier ended with error: %v", err)
-			atomic.StoreInt32(&gotErr, 1)
 			// process documents already captures
 			return true
 		}
@@ -227,8 +274,10 @@ func validateCDFlags(
 	csubTlsSkipVerify bool,
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
+	queryEOLIngestion bool,
+	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
-	batchSize int,
+	batchSize int, lastScan int,
 ) (cdOptions, error) {
 	var opts cdOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -252,6 +301,10 @@ func validateCDFlags(
 
 	opts.batchSize = batchSize
 
+	if lastScan != 0 {
+		opts.lastScan = &lastScan
+	}
+
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
@@ -259,13 +312,15 @@ func validateCDFlags(
 	opts.csubClientOptions = csubOpts
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevIngestion
 
 	return opts, nil
 }
 
 func init() {
 	set, err := cli.BuildFlags([]string{"certifier-latency",
-		"certifier-batch-size"})
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

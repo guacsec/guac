@@ -1024,7 +1024,7 @@ func (v *AllCertifyGoodSubjectSource) __premarshalJSON() (*__premarshalAllCertif
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -3093,6 +3093,8 @@ type AllHasSBOMTree struct {
 	Collector string `json:"collector"`
 	// Timestamp for SBOM creation
 	KnownSince time.Time `json:"knownSince"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef string `json:"documentRef"`
 	// Included packages and artifacts
 	IncludedSoftware []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact `json:"-"`
 	// Included dependencies
@@ -3127,6 +3129,9 @@ func (v *AllHasSBOMTree) GetCollector() string { return v.Collector }
 
 // GetKnownSince returns AllHasSBOMTree.KnownSince, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTree) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetDocumentRef returns AllHasSBOMTree.DocumentRef, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetDocumentRef() string { return v.DocumentRef }
 
 // GetIncludedSoftware returns AllHasSBOMTree.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTree) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
@@ -3215,6 +3220,8 @@ type __premarshalAllHasSBOMTree struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -3253,6 +3260,7 @@ func (v *AllHasSBOMTree) __premarshalJSON() (*__premarshalAllHasSBOMTree, error)
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
 	retval.KnownSince = v.KnownSince
+	retval.DocumentRef = v.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -8187,7 +8195,7 @@ func (v *CertifyGoodSpec) GetDocumentRef() *string { return v.DocumentRef }
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -8431,7 +8439,7 @@ func (v *CertifyLegalListCertifyLegalListCertifyLegalConnectionEdgesCertifyLegal
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -9566,6 +9574,24 @@ const (
 	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
+// FindPackagesThatNeedScanningResponse is returned by FindPackagesThatNeedScanning on success.
+type FindPackagesThatNeedScanningResponse struct {
+	// findPackagesThatNeedScanning returns a list of package IDs
+	// for all packages that need to be re-scanned (based on the last scan in hours)
+	// or have never been scanned. By default it will filter out all packages that have
+	// the type "GUAC" as those are internal packages and will not be found
+	// by external service providers.
+	//
+	// queryType is used to specify if the last time scanned is checked for either
+	// certifyVuln or certifyLegal.
+	FindPackagesThatNeedScanning []string `json:"findPackagesThatNeedScanning"`
+}
+
+// GetFindPackagesThatNeedScanning returns FindPackagesThatNeedScanningResponse.FindPackagesThatNeedScanning, and is useful for accessing the field via an interface.
+func (v *FindPackagesThatNeedScanningResponse) GetFindPackagesThatNeedScanning() []string {
+	return v.FindPackagesThatNeedScanning
+}
+
 // FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
 //
@@ -10629,6 +10655,11 @@ func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) Get
 	return v.AllHasSBOMTree.KnownSince
 }
 
+// GetDocumentRef returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetDocumentRef() string {
+	return v.AllHasSBOMTree.DocumentRef
+}
+
 // GetIncludedSoftware returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -10688,6 +10719,8 @@ type __premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasS
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -10726,6 +10759,7 @@ func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) __p
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -10884,6 +10918,9 @@ func (v *HasSBOMsHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collec
 // GetKnownSince returns HasSBOMsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *HasSBOMsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns HasSBOMsHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns HasSBOMsHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *HasSBOMsHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -10943,6 +10980,8 @@ type __premarshalHasSBOMsHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -10981,6 +11020,7 @@ func (v *HasSBOMsHasSBOM) __premarshalJSON() (*__premarshalHasSBOMsHasSBOM, erro
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -13783,7 +13823,7 @@ func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighbo
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -14425,6 +14465,9 @@ func (v *NeighborsNeighborsHasSBOM) GetCollector() string { return v.AllHasSBOMT
 // GetKnownSince returns NeighborsNeighborsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns NeighborsNeighborsHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns NeighborsNeighborsHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -14486,6 +14529,8 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -14525,6 +14570,7 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -17232,7 +17278,7 @@ func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGo
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -17856,6 +17902,9 @@ func (v *NodeNodeHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collec
 // GetKnownSince returns NodeNodeHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns NodeNodeHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns NodeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -17917,6 +17966,8 @@ type __premarshalNodeNodeHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -17956,6 +18007,7 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -19733,7 +19785,7 @@ func (v *NodesNodesCertifyGood) __premarshalJSON() (*__premarshalNodesNodesCerti
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -20359,6 +20411,9 @@ func (v *NodesNodesHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Coll
 // GetKnownSince returns NodesNodesHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns NodesNodesHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns NodesNodesHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -20420,6 +20475,8 @@ type __premarshalNodesNodesHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -20459,6 +20516,7 @@ func (v *NodesNodesHasSBOM) __premarshalJSON() (*__premarshalNodesNodesHasSBOM, 
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -23758,7 +23816,7 @@ func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGo
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -24382,6 +24440,9 @@ func (v *PathPathHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collec
 // GetKnownSince returns PathPathHasSBOM.KnownSince, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
 
+// GetDocumentRef returns PathPathHasSBOM.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetDocumentRef() string { return v.AllHasSBOMTree.DocumentRef }
+
 // GetIncludedSoftware returns PathPathHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
 	return v.AllHasSBOMTree.IncludedSoftware
@@ -24443,6 +24504,8 @@ type __premarshalPathPathHasSBOM struct {
 
 	KnownSince time.Time `json:"knownSince"`
 
+	DocumentRef string `json:"documentRef"`
+
 	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 
 	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
@@ -24482,6 +24545,7 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
 	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	retval.DocumentRef = v.AllHasSBOMTree.DocumentRef
 	{
 
 		dst := &retval.IncludedSoftware
@@ -27211,6 +27275,206 @@ func (v *PointOfContactsResponse) GetPointOfContact() []PointOfContactsPointOfCo
 	return v.PointOfContact
 }
 
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+// The GraphQL type's documentation follows.
+//
+// PackageConnection returns the paginated results for Package.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PackageEdge which contains the current cursor
+// and the Package node itself
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnection struct {
+	TotalCount int                                                                                 `json:"totalCount"`
+	Edges      []QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge `json:"edges"`
+	PageInfo   QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns QueryPackagesListForScanQueryPackagesListForScanPackageConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns QueryPackagesListForScanQueryPackagesListForScanPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnection) GetEdges() []QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns QueryPackagesListForScanQueryPackagesListForScanPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnection) GetPageInfo() QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// PackageEdge contains the cursor for the resulting node and
+// the Package node itself.
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge struct {
+	Cursor string                                                                                       `json:"cursor"`
+	Node   QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetCursor returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdge) GetNode() QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.AllPkgTree.Id
+}
+
+// GetType returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage.Type, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) GetType() string {
+	return v.AllPkgTree.Type
+}
+
+// GetNamespaces returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalQueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage) __premarshalJSON() (*__premarshalQueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage, error) {
+	var retval __premarshalQueryPackagesListForScanQueryPackagesListForScanPackageConnectionEdgesPackageEdgeNodePackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanQueryPackagesListForScanPackageConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// QueryPackagesListForScanResponse is returned by QueryPackagesListForScan on success.
+type QueryPackagesListForScanResponse struct {
+	// queryPackagesListForScan returns a paginated results via PackageConnection
+	// for all packages that need to be re-scanned based on the list of PkgIDs that
+	// are found from findPackagesThatNeedScanning
+	QueryPackagesListForScan *QueryPackagesListForScanQueryPackagesListForScanPackageConnection `json:"queryPackagesListForScan"`
+}
+
+// GetQueryPackagesListForScan returns QueryPackagesListForScanResponse.QueryPackagesListForScan, and is useful for accessing the field via an interface.
+func (v *QueryPackagesListForScanResponse) GetQueryPackagesListForScan() *QueryPackagesListForScanQueryPackagesListForScanPackageConnection {
+	return v.QueryPackagesListForScan
+}
+
+// QueryType is used in conjunction with queryPackagesListForScan to
+// specify if the last time scanned is checked for either certifyVuln
+// or certifyLegal.
+type QueryType string
+
+const (
+	// direct dependency
+	QueryTypeVulnerability QueryType = "VULNERABILITY"
+	// indirect dependency
+	QueryTypeLicense QueryType = "LICENSE"
+	// indirect dependency
+	QueryTypeEol QueryType = "EOL"
+)
+
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
@@ -29692,6 +29956,18 @@ func (v *__DependencyListInput) GetAfter() *string { return v.After }
 // GetFirst returns __DependencyListInput.First, and is useful for accessing the field via an interface.
 func (v *__DependencyListInput) GetFirst() *int { return v.First }
 
+// __FindPackagesThatNeedScanningInput is used internally by genqlient
+type __FindPackagesThatNeedScanningInput struct {
+	QueryType QueryType `json:"queryType"`
+	LastScan  *int      `json:"lastScan"`
+}
+
+// GetQueryType returns __FindPackagesThatNeedScanningInput.QueryType, and is useful for accessing the field via an interface.
+func (v *__FindPackagesThatNeedScanningInput) GetQueryType() QueryType { return v.QueryType }
+
+// GetLastScan returns __FindPackagesThatNeedScanningInput.LastScan, and is useful for accessing the field via an interface.
+func (v *__FindPackagesThatNeedScanningInput) GetLastScan() *int { return v.LastScan }
+
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
 	SearchText string `json:"searchText"`
@@ -31082,6 +31358,22 @@ type __PointOfContactsInput struct {
 // GetFilter returns __PointOfContactsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__PointOfContactsInput) GetFilter() PointOfContactSpec { return v.Filter }
 
+// __QueryPackagesListForScanInput is used internally by genqlient
+type __QueryPackagesListForScanInput struct {
+	PkgIDs []string `json:"pkgIDs"`
+	After  *string  `json:"after"`
+	First  *int     `json:"first"`
+}
+
+// GetPkgIDs returns __QueryPackagesListForScanInput.PkgIDs, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetPkgIDs() []string { return v.PkgIDs }
+
+// GetAfter returns __QueryPackagesListForScanInput.After, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __QueryPackagesListForScanInput.First, and is useful for accessing the field via an interface.
+func (v *__QueryPackagesListForScanInput) GetFirst() *int { return v.First }
+
 // __ScorecardsInput is used internally by genqlient
 type __ScorecardsInput struct {
 	Filter CertifyScorecardSpec `json:"filter"`
@@ -32412,6 +32704,41 @@ func DependencyList(
 	return &data_, err_
 }
 
+// The query or mutation executed by FindPackagesThatNeedScanning.
+const FindPackagesThatNeedScanning_Operation = `
+query FindPackagesThatNeedScanning ($queryType: QueryType!, $lastScan: Int) {
+	findPackagesThatNeedScanning(queryType: $queryType, lastScan: $lastScan)
+}
+`
+
+func FindPackagesThatNeedScanning(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	queryType QueryType,
+	lastScan *int,
+) (*FindPackagesThatNeedScanningResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "FindPackagesThatNeedScanning",
+		Query:  FindPackagesThatNeedScanning_Operation,
+		Variables: &__FindPackagesThatNeedScanningInput{
+			QueryType: queryType,
+			LastScan:  lastScan,
+		},
+	}
+	var err_ error
+
+	var data_ FindPackagesThatNeedScanningResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by FindSoftware.
 const FindSoftware_Operation = `
 query FindSoftware ($searchText: String!) {
@@ -32742,6 +33069,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -32887,6 +33215,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -36377,6 +36706,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -36854,6 +37184,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -37329,6 +37660,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -38309,6 +38641,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	origin
 	collector
 	knownSince
+	documentRef
 	includedSoftware {
 		__typename
 		... on Artifact {
@@ -38849,6 +39182,78 @@ func PointOfContacts(
 	var err_ error
 
 	var data_ PointOfContactsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by QueryPackagesListForScan.
+const QueryPackagesListForScan_Operation = `
+query QueryPackagesListForScan ($pkgIDs: [ID!]!, $after: ID, $first: Int) {
+	queryPackagesListForScan(pkgIDs: $pkgIDs, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPkgTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func QueryPackagesListForScan(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	pkgIDs []string,
+	after *string,
+	first *int,
+) (*QueryPackagesListForScanResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "QueryPackagesListForScan",
+		Query:  QueryPackagesListForScan_Operation,
+		Variables: &__QueryPackagesListForScanInput{
+			PkgIDs: pkgIDs,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ QueryPackagesListForScanResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

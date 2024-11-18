@@ -59,7 +59,7 @@ func ingestExample(cmd *cobra.Command, args []string) {
 	var inputs []assembler.IngestPredicates
 	for _, doc := range docs {
 		// This is a test example, so we will ignore calling out to a collectsub service
-		input, _, err := parser.ParseDocumentTree(ctx, doc, false, false)
+		input, _, err := parser.ParseDocumentTree(ctx, doc, false, false, false, false)
 		if err != nil {
 			logger.Fatalf("unable to parse document: %v", err)
 		}

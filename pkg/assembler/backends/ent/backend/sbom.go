@@ -38,6 +38,12 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+const (
+	nodeIncludeSoftware     = "edges.node.includedSoftware"
+	nodeIncludeDependencies = "edges.node.includedDependencies"
+	nodeIncludeOccurrences  = "edges.node.includedOccurrences"
+)
+
 func hasSBOMGlobalID(id string) string {
 	return toGlobalID(billofmaterials.Table, id)
 }
@@ -47,6 +53,31 @@ func bulkHasSBOMGlobalID(ids []string) []string {
 }
 
 func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+
+	var outputIncludeSoftware bool
+	var outputIncludeDependencies bool
+	var outputIncludedOccurrences bool
+
+	fields := helper.GetPreloads(ctx)
+
+	for _, f := range fields {
+		if f == nodeIncludeSoftware {
+			outputIncludeSoftware = true
+		}
+		if f == nodeIncludeDependencies {
+			outputIncludeDependencies = true
+		}
+		if f == nodeIncludeOccurrences {
+			outputIncludedOccurrences = true
+		}
+	}
+
+	if len(fields) == 0 {
+		outputIncludeSoftware = true
+		outputIncludeDependencies = true
+		outputIncludedOccurrences = true
+	}
+
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
@@ -106,181 +137,199 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		var includedPackages []*ent.PackageVersion
 		var includedArtifacts []*ent.Artifact
 
-		depsChan := make(chan depResult, 1)
-		occursChan := make(chan occurResult, 1)
-		pkgVerChan := make(chan pkgVersionResult, 1)
-		artChan := make(chan artResult, 1)
+		var depsChan chan depResult
+		var occursChan chan occurResult
+		var pkgVerChan chan pkgVersionResult
+		var artChan chan artResult
 
 		sbomID := foundSBOM.Cursor.ID.String()
 
 		// query included packages
+		if outputIncludeSoftware {
+			pkgVerChan = make(chan pkgVersionResult, 1)
+			artChan = make(chan artResult, 1)
+			go func(ctx context.Context, b *EntBackend, sbomID string, first int, pkgChan chan<- pkgVersionResult) {
+				var afterCursor *entgql.Cursor[uuid.UUID]
+				defer close(pkgChan)
+				for {
+					pkgConn, err := b.client.PackageVersion.Query().
+						Where(packageversion.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
+							optionalPredicate(&sbomID, IDEQ)}...)).
+						WithName(func(q *ent.PackageNameQuery) {}).Paginate(ctx, afterCursor, &first, nil, nil)
+					if err != nil {
+						pkgChan <- pkgVersionResult{pkgVersions: nil,
+							pkgVerErr: fmt.Errorf("failed included package query for hasSBOM with error: %w", err)}
+					}
 
-		go func(ctx context.Context, b *EntBackend, sbomID string, first int, pkgChan chan<- pkgVersionResult) {
-			var afterCursor *entgql.Cursor[uuid.UUID]
-			defer close(pkgChan)
-			for {
-				pkgConn, err := b.client.PackageVersion.Query().
-					Where(packageversion.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
-						optionalPredicate(&sbomID, IDEQ)}...)).
-					WithName(func(q *ent.PackageNameQuery) {}).Paginate(ctx, afterCursor, &first, nil, nil)
-				if err != nil {
-					pkgChan <- pkgVersionResult{pkgVersions: nil,
-						pkgVerErr: fmt.Errorf("failed included package query for hasSBOM with error: %w", err)}
+					// if not found break
+					if pkgConn == nil {
+						break
+					}
+
+					var paginatedPkgs []*ent.PackageVersion
+					for _, edge := range pkgConn.Edges {
+						paginatedPkgs = append(paginatedPkgs, edge.Node)
+					}
+
+					pkgChan <- pkgVersionResult{pkgVersions: paginatedPkgs, pkgVerErr: nil}
+
+					if !pkgConn.PageInfo.HasNextPage {
+						break
+					}
+					afterCursor = pkgConn.PageInfo.EndCursor
+				}
+			}(ctx, b, sbomID, includedFirst, pkgVerChan)
+
+			// query included artifacts
+			go func(ctx context.Context, b *EntBackend, sbomID string, first int, artChan chan<- artResult) {
+				var afterCursor *entgql.Cursor[uuid.UUID]
+				defer close(artChan)
+				for {
+					artConn, err := b.client.Artifact.Query().
+						Where(artifact.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
+							optionalPredicate(&sbomID, IDEQ)}...)).Paginate(ctx, afterCursor, &first, nil, nil)
+
+					if err != nil {
+						artChan <- artResult{arts: nil,
+							artErr: fmt.Errorf("failed included artifacts query for hasSBOM with error: %w", err)}
+					}
+
+					// if not found break
+					if artConn == nil {
+						break
+					}
+
+					var paginatedArts []*ent.Artifact
+					for _, edge := range artConn.Edges {
+						paginatedArts = append(paginatedArts, edge.Node)
+					}
+
+					artChan <- artResult{arts: paginatedArts,
+						artErr: nil}
+
+					if !artConn.PageInfo.HasNextPage {
+						break
+					}
+					afterCursor = artConn.PageInfo.EndCursor
 				}
 
-				// if not found break
-				if pkgConn == nil {
-					break
-				}
-
-				var paginatedPkgs []*ent.PackageVersion
-				for _, edge := range pkgConn.Edges {
-					paginatedPkgs = append(paginatedPkgs, edge.Node)
-				}
-
-				pkgChan <- pkgVersionResult{pkgVersions: paginatedPkgs, pkgVerErr: nil}
-
-				if !pkgConn.PageInfo.HasNextPage {
-					break
-				}
-				afterCursor = pkgConn.PageInfo.EndCursor
-			}
-		}(ctx, b, sbomID, includedFirst, pkgVerChan)
-
-		// query included artifacts
-		go func(ctx context.Context, b *EntBackend, sbomID string, first int, artChan chan<- artResult) {
-			var afterCursor *entgql.Cursor[uuid.UUID]
-			defer close(artChan)
-			for {
-				artConn, err := b.client.Artifact.Query().
-					Where(artifact.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
-						optionalPredicate(&sbomID, IDEQ)}...)).Paginate(ctx, afterCursor, &first, nil, nil)
-
-				if err != nil {
-					artChan <- artResult{arts: nil,
-						artErr: fmt.Errorf("failed included artifacts query for hasSBOM with error: %w", err)}
-				}
-
-				// if not found break
-				if artConn == nil {
-					break
-				}
-
-				var paginatedArts []*ent.Artifact
-				for _, edge := range artConn.Edges {
-					paginatedArts = append(paginatedArts, edge.Node)
-				}
-
-				artChan <- artResult{arts: paginatedArts,
-					artErr: nil}
-
-				if !artConn.PageInfo.HasNextPage {
-					break
-				}
-				afterCursor = artConn.PageInfo.EndCursor
-			}
-
-		}(ctx, b, sbomID, includedFirst, artChan)
+			}(ctx, b, sbomID, includedFirst, artChan)
+		}
 
 		// query included dependencies
-		go func(ctx context.Context, b *EntBackend, sbomID string, first int, artChan chan<- depResult) {
-			var afterCursor *entgql.Cursor[uuid.UUID]
-			defer close(depsChan)
-			for {
-				isDepQuery := b.client.Dependency.Query().
-					Where(dependency.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
-						optionalPredicate(&sbomID, IDEQ)}...))
+		if outputIncludeDependencies {
+			depsChan = make(chan depResult, 1)
+			go func(ctx context.Context, b *EntBackend, sbomID string, first int, artChan chan<- depResult) {
+				var afterCursor *entgql.Cursor[uuid.UUID]
+				defer close(depsChan)
+				for {
+					isDepQuery := b.client.Dependency.Query().
+						Where(dependency.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
+							optionalPredicate(&sbomID, IDEQ)}...))
 
-				depConnect, err := getIsDepObject(isDepQuery).
-					Paginate(ctx, afterCursor, &first, nil, nil)
-				if err != nil {
-					depsChan <- depResult{deps: nil,
-						depErr: fmt.Errorf("failed included dependency query for hasSBOM with error: %w", err)}
+					depConnect, err := getIsDepObject(isDepQuery).
+						Paginate(ctx, afterCursor, &first, nil, nil)
+					if err != nil {
+						depsChan <- depResult{deps: nil,
+							depErr: fmt.Errorf("failed included dependency query for hasSBOM with error: %w", err)}
+					}
+
+					// if not found break
+					if depConnect == nil {
+						break
+					}
+
+					var paginatedDeps []*ent.Dependency
+					for _, edge := range depConnect.Edges {
+						paginatedDeps = append(paginatedDeps, edge.Node)
+					}
+
+					depsChan <- depResult{deps: paginatedDeps,
+						depErr: nil}
+
+					if !depConnect.PageInfo.HasNextPage {
+						break
+					}
+					afterCursor = depConnect.PageInfo.EndCursor
 				}
-
-				// if not found break
-				if depConnect == nil {
-					break
-				}
-
-				var paginatedDeps []*ent.Dependency
-				for _, edge := range depConnect.Edges {
-					paginatedDeps = append(paginatedDeps, edge.Node)
-				}
-
-				depsChan <- depResult{deps: paginatedDeps,
-					depErr: nil}
-
-				if !depConnect.PageInfo.HasNextPage {
-					break
-				}
-				afterCursor = depConnect.PageInfo.EndCursor
-			}
-		}(ctx, b, sbomID, includedFirst, depsChan)
+			}(ctx, b, sbomID, includedFirst, depsChan)
+		}
 
 		// query included occurrences
-		go func(ctx context.Context, b *EntBackend, sbomID string, first int, occursChan chan<- occurResult) {
-			var afterCursor *entgql.Cursor[uuid.UUID]
-			defer close(occursChan)
-			for {
-				occurQuery := b.client.Occurrence.Query().
-					Where(occurrence.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
-						optionalPredicate(&sbomID, IDEQ)}...))
+		if outputIncludedOccurrences {
+			occursChan = make(chan occurResult, 1)
+			go func(ctx context.Context, b *EntBackend, sbomID string, first int, occursChan chan<- occurResult) {
+				var afterCursor *entgql.Cursor[uuid.UUID]
+				defer close(occursChan)
+				for {
+					occurQuery := b.client.Occurrence.Query().
+						Where(occurrence.HasIncludedInSbomsWith([]predicate.BillOfMaterials{
+							optionalPredicate(&sbomID, IDEQ)}...))
 
-				occurConnect, err := getOccurrenceObject(occurQuery).
-					Paginate(ctx, afterCursor, &first, nil, nil)
-				if err != nil {
-					occursChan <- occurResult{occurs: nil,
-						occurErr: fmt.Errorf("failed included occurrence query for hasSBOM with error: %w", err)}
+					occurConnect, err := getOccurrenceObject(occurQuery).
+						Paginate(ctx, afterCursor, &first, nil, nil)
+					if err != nil {
+						occursChan <- occurResult{occurs: nil,
+							occurErr: fmt.Errorf("failed included occurrence query for hasSBOM with error: %w", err)}
+					}
+
+					// if not found break
+					if occurConnect == nil {
+						break
+					}
+
+					var paginatedOccurs []*ent.Occurrence
+					for _, edge := range occurConnect.Edges {
+						paginatedOccurs = append(paginatedOccurs, edge.Node)
+					}
+
+					occursChan <- occurResult{occurs: paginatedOccurs,
+						occurErr: nil}
+
+					if !occurConnect.PageInfo.HasNextPage {
+						break
+					}
+					afterCursor = occurConnect.PageInfo.EndCursor
 				}
-
-				// if not found break
-				if occurConnect == nil {
-					break
-				}
-
-				var paginatedOccurs []*ent.Occurrence
-				for _, edge := range occurConnect.Edges {
-					paginatedOccurs = append(paginatedOccurs, edge.Node)
-				}
-
-				occursChan <- occurResult{occurs: paginatedOccurs,
-					occurErr: nil}
-
-				if !occurConnect.PageInfo.HasNextPage {
-					break
-				}
-				afterCursor = occurConnect.PageInfo.EndCursor
-			}
-		}(ctx, b, sbomID, includedFirst, occursChan)
-
-		for art := range artChan {
-			if art.artErr != nil {
-				return nil, fmt.Errorf("artifact channel failure: %w", art.artErr)
-			}
-			includedArtifacts = append(includedArtifacts, art.arts...)
+			}(ctx, b, sbomID, includedFirst, occursChan)
 		}
 
-		for pkg := range pkgVerChan {
-			if pkg.pkgVerErr != nil {
-				return nil, fmt.Errorf("pkgVersion channel failure: %w", pkg.pkgVerErr)
+		if artChan != nil {
+			for art := range artChan {
+				if art.artErr != nil {
+					return nil, fmt.Errorf("artifact channel failure: %w", art.artErr)
+				}
+				includedArtifacts = append(includedArtifacts, art.arts...)
 			}
-			includedPackages = append(includedPackages, pkg.pkgVersions...)
 		}
 
-		for occur := range occursChan {
-			if occur.occurErr != nil {
-				return nil, fmt.Errorf("occurrence channel failure: %w", occur.occurErr)
+		if pkgVerChan != nil {
+			for pkg := range pkgVerChan {
+				if pkg.pkgVerErr != nil {
+					return nil, fmt.Errorf("pkgVersion channel failure: %w", pkg.pkgVerErr)
+				}
+				includedPackages = append(includedPackages, pkg.pkgVersions...)
 			}
-			includedOccurs = append(includedOccurs, occur.occurs...)
 		}
 
-		for dep := range depsChan {
-			if dep.depErr != nil {
-				return nil, fmt.Errorf("dependency channel failure: %w", dep.depErr)
+		if occursChan != nil {
+			for occur := range occursChan {
+				if occur.occurErr != nil {
+					return nil, fmt.Errorf("occurrence channel failure: %w", occur.occurErr)
+				}
+				includedOccurs = append(includedOccurs, occur.occurs...)
 			}
-			includedDeps = append(includedDeps, dep.deps...)
 		}
+
+		if depsChan != nil {
+			for dep := range depsChan {
+				if dep.depErr != nil {
+					return nil, fmt.Errorf("dependency channel failure: %w", dep.depErr)
+				}
+				includedDeps = append(includedDeps, dep.deps...)
+			}
+		}
+
 		reconstructedSBOM := toModelHasSBOMWithIncluded(foundSBOM.Node, includedPackages, includedArtifacts, includedDeps, includedOccurs)
 		reconstructedSBOMs[sbomID] = reconstructedSBOM
 	}
@@ -342,9 +391,22 @@ func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 
 	if spec.Subject != nil {
 		if spec.Subject.Package != nil {
-			predicates = append(predicates, billofmaterials.HasPackageWith(packageVersionQuery(spec.Subject.Package)))
+			if spec.Subject.Package.ID != nil {
+				predicates = append(predicates, optionalPredicate(spec.Subject.Package.ID, packageIDEQ))
+				predicates = append(predicates, billofmaterials.ArtifactIDIsNil())
+			} else {
+				predicates = append(predicates,
+					billofmaterials.HasPackageWith(packageVersionQuery(spec.Subject.Package)))
+			}
 		} else if spec.Subject.Artifact != nil {
-			predicates = append(predicates, billofmaterials.HasArtifactWith(artifactQueryPredicates(spec.Subject.Artifact)))
+			if spec.Subject.Artifact.ID != nil {
+				predicates = append(predicates,
+					optionalPredicate(spec.Subject.Artifact.ID, artifactIDEQ))
+				predicates = append(predicates, billofmaterials.PackageIDIsNil())
+			} else {
+				predicates = append(predicates,
+					billofmaterials.HasArtifactWith(artifactQueryPredicates(spec.Subject.Artifact)))
+			}
 		}
 	}
 

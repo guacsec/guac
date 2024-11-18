@@ -22,6 +22,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -65,6 +66,55 @@ func fromGlobalID(gID string) *globalID {
 func IDEQ(id string) func(*sql.Selector) {
 	filterGlobalID := fromGlobalID(id)
 	return sql.FieldEQ("id", filterGlobalID.id)
+}
+
+func packageIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("package_id", filterGlobalID.id)
+}
+
+func dependencyPackageIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("dependent_package_version_id", filterGlobalID.id)
+}
+
+func packageVersionOrNameIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	if filterGlobalID.nodeType == packagename.Table {
+		return sql.FieldEQ("package_name_id", filterGlobalID.id)
+	} else {
+		return sql.FieldEQ("package_version_id", filterGlobalID.id)
+	}
+}
+
+func sourceIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("source_id", filterGlobalID.id)
+}
+
+func builderIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("built_by_id", filterGlobalID.id)
+}
+
+func slsaArtifactIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("subject_id", filterGlobalID.id)
+}
+
+func artifactIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("artifact_id", filterGlobalID.id)
+}
+
+func vulnerabilityIDEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("vulnerability_id", filterGlobalID.id)
+}
+
+func vulnerabilityIDMetaEQ(id string) func(*sql.Selector) {
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("vulnerability_id_id", filterGlobalID.id)
 }
 
 func NoOpSelector() func(*sql.Selector) {
@@ -218,4 +268,14 @@ func getIDfromNode(node model.Node) (string, error) {
 	default:
 		return "", fmt.Errorf("unknown type: %v", v)
 	}
+}
+
+// findTargetIndex finds the index of the specified UUID in the sorted slice
+func findTargetIndex(uuids []string, target string) int {
+	for i, id := range uuids {
+		if id == target {
+			return i
+		}
+	}
+	return -1 // Return -1 if not found
 }

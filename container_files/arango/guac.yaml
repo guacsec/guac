@@ -23,6 +23,9 @@ use-csub: true
 poll: true
 interval: 5m
 
+# number of hours since the last scan was run. 0 means run on all packages/sources
+last-scan: 4
+
 # arangodb
 arango-user: root
 arango-pass: test123

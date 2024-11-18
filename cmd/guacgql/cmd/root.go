@@ -42,10 +42,11 @@ var flags = struct {
 	nRealm string
 
 	// Needed only if using ent backend
-	dbAddress string
-	dbDriver  string
-	dbDebug   bool
-	dbMigrate bool
+	dbAddress  string
+	dbDriver   string
+	dbDebug    bool
+	dbMigrate  bool
+	dbConnTime string
 
 	// Needed only if using arangodb backend
 	arangoAddr string
@@ -86,6 +87,7 @@ var rootCmd = &cobra.Command{
 		flags.dbDriver = viper.GetString("db-driver")
 		flags.dbDebug = viper.GetBool("db-debug")
 		flags.dbMigrate = viper.GetBool("db-migrate")
+		flags.dbConnTime = viper.GetString("db-conn-time")
 
 		flags.arangoUser = viper.GetString("arango-user")
 		flags.arangoPass = viper.GetString("arango-pass")
@@ -112,7 +114,7 @@ func init() {
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
 		"neptune-endpoint", "neptune-port", "neptune-region", "neptune-user", "neptune-realm",
 		"gql-listen-port", "gql-tls-cert-file", "gql-tls-key-file", "gql-debug", "gql-backend", "gql-trace",
-		"db-address", "db-driver", "db-debug", "db-migrate",
+		"db-address", "db-driver", "db-debug", "db-migrate", "db-conn-time",
 		"kv-store", "kv-redis", "kv-tikv", "enable-prometheus",
 	})
 	if err != nil {

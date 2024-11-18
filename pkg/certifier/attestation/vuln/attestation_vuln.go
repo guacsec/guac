@@ -27,7 +27,7 @@ import (
 // Currently, the predicate is defined here but the intention is to upstream this to
 // https://github.com/in-toto/attestation in the near future once the quirks are worked out.
 const (
-	PredicateVuln = "https://in-toto.io/attestation/vuln/v0.1"
+	PredicateVuln = "https://in-toto.io/attestation/vulns/v0.1"
 )
 
 // VulnerabilityStatement defines the statement header and the vulnerability predicate
@@ -39,20 +39,36 @@ type VulnerabilityStatement struct {
 
 // Metadata defines when the last scan was done
 type Metadata struct {
-	ScannedOn *time.Time `json:"scannedOn,omitempty"`
+	ScanStartedOn *time.Time `json:"scanStartedOn,omitempty"`
+	ScanFinishedOn *time.Time `json:"scanFinishedOn,omitempty"`
 }
 
 // Result defines the Vulnerability ID and its alias. There can be multiple
 // results per artifact
+// TODO: The spec has a discrepency that needs to be resolved, we are following
+// the example json in the spec since that seems to be what 2 examples we've seen
+// are using. Tracking https://github.com/in-toto/attestation/issues/391
 type Result struct {
-	VulnerabilityId string   `json:"vulnerability_id,omitempty"`
-	Aliases         []string `json:"aliases,omitempty"`
+	Id string `json:"id,omitempty"`
+	Severity []Severity `json:"severity,omitempty"`
+}
+
+type Severity struct {
+	// required
+	Method string `json:"method,omitempty"`
+	// required
+	Score string `json:"score,omitempty"`
+	// ambiguous type definition ins spec, look at
+	// https://github.com/in-toto/attestation/issues/390https://github.com/in-toto/attestation/issues/390
+	Annotations []map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // DB defines the scanner database used at the time of scan
 type DB struct {
 	Uri     string `json:"uri,omitempty"`
 	Version string `json:"version,omitempty"`
+	// required
+	LastUpdate *time.Time `json:"lastUpdate,omitempty"`
 }
 
 // Scanner defines the scanner that was used to scan the artifacts and
@@ -61,20 +77,14 @@ type Scanner struct {
 	Uri      string   `json:"uri,omitempty"`
 	Version  string   `json:"version,omitempty"`
 	Database DB       `json:"db,omitempty"`
+	// required
 	Result   []Result `json:"result,omitempty"`
-}
-
-// Invocation defines how the scan was initiated and by which producer
-type Invocation struct {
-	Parameters []string `json:"parameters,omitempty"`
-	Uri        string   `json:"uri,omitempty"`
-	EventID    string   `json:"event_id,omitempty"`
-	ProducerID string   `json:"producer_id,omitempty"`
 }
 
 // VulnerabilityPredicate defines predicate definition of the vulnerability attestation
 type VulnerabilityPredicate struct {
-	Invocation Invocation `json:"invocation,omitempty"`
+	// required
 	Scanner    Scanner    `json:"scanner,omitempty"`
+	// required
 	Metadata   Metadata   `json:"metadata,omitempty"`
 }

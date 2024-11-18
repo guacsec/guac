@@ -41,6 +41,20 @@ type SoftwareEdge {
   node: PackageSourceOrArtifact!
 }
 
+"""
+QueryType is used in conjunction with queryPackagesListForScan to
+specify if the last time scanned is checked for either certifyVuln
+or certifyLegal.
+"""
+enum QueryType {
+  "direct dependency"
+  VULNERABILITY
+  "indirect dependency"
+  LICENSE
+  "indirect dependency"
+  EOL
+}
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -64,4 +78,21 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
+  """
+  queryPackagesListForScan returns a paginated results via PackageConnection 
+  for all packages that need to be re-scanned based on the list of PkgIDs that
+  are found from findPackagesThatNeedScanning
+  """
+  queryPackagesListForScan(pkgIDs: [ID!]!, after: ID, first: Int): PackageConnection
+  """
+  findPackagesThatNeedScanning returns a list of package IDs
+  for all packages that need to be re-scanned (based on the last scan in hours)
+  or have never been scanned. By default it will filter out all packages that have
+  the type "GUAC" as those are internal packages and will not be found
+  by external service providers.
+
+  queryType is used to specify if the last time scanned is checked for either
+  certifyVuln or certifyLegal.
+  """
+  findPackagesThatNeedScanning(queryType: QueryType!, lastScan: Int): [ID!]!
 }

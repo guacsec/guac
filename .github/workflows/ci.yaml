@@ -36,17 +36,19 @@ jobs:
     name: CI for integration tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
           go-version: '1.21'
-      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      - uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Setup the project
         run: go mod download
       - name: Run backends
@@ -67,17 +69,19 @@ jobs:
     name: CI for unit tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
           go-version: '1.21'
-      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      - uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Setup the project
         run: go mod download
       - name: Run tests
@@ -88,13 +92,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
           go-version: '1.21'
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Install formatter
         run: go install golang.org/x/tools/cmd/goimports@latest
       - name: Check format
@@ -106,15 +112,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v5.0.2
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v5.1.0
         with:
           go-version: '1.21'
       - name: Install atlas
-        uses: ariga/setup-atlas@v0
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86 # tag=v3.2.0
+        uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # tag=v3.2.0
         with:
           only-new-issues: true
           skip-cache: true
@@ -143,11 +151,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
-    - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        persist-credentials: false
+    - uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed
       with:
         go-version: '~1.21'
-    - uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
+    - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
       with:
         python-version: '3.10'
     - name: Install PostgreSQL client tools
@@ -183,6 +193,11 @@ jobs:
       labels: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Fix flakiness with tilt-ci that may be potentially related to https://github.com/tilt-dev/tilt/issues/2079
+      - name: Increase inotify max user watches
+        shell: bash
+        run: |
+          sudo sysctl fs.inotify.max_user_watches=524288 && sudo sysctl -p
       - name: Install tools
         shell: bash
         run: |
@@ -219,16 +234,18 @@ jobs:
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/kind
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
+        uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6.1.0
         with:
           install-only: true
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # tag=v3.2.1
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # tag=v3.2.1
         with:
           go-version: '1.21'
-      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      - uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}

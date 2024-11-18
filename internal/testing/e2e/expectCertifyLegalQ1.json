@@ -1,0 +1,33 @@
+{
+  "CertifyLegal": [
+    {
+      "subject": {
+        "__typename": "Package",
+        "type": "maven",
+        "namespaces": [
+          {
+            "namespace": "org.apache.logging.log4j",
+            "names": [
+              {
+                "name": "log4j-core",
+                "versions": [
+                  {
+                    "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+                    "version": "2.8.1",
+                    "qualifiers": [],
+                    "subpath": ""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "declaredLicense": "Apache-2.0",
+      "discoveredLicense": "Apache-2.0",
+      "attribution": "",
+      "justification": "Retrieved from ClearlyDefined",
+      "collector": "clearlydefined"
+    }
+  ]
+}

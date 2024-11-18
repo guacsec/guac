@@ -54,6 +54,19 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantPredicates: &testdata.CdxIngestionPredicates,
 		wantErr:        false,
 	}, {
+		name: "valid small CycloneDX document - invalid container version",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXDistrolessInvalidVersionExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantPredicates: &testdata.CdxIngestionInvalidVersionPredicates,
+		wantErr:        false,
+	}, {
 		name: "valid small CycloneDX document with package dependencies and a hash",
 		doc: &processor.Document{
 			Blob:   testdata.CycloneDXExampleSmallDeps,
@@ -139,6 +152,15 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
 		wantErr:        false,
 	}, {
+		name: "valid CycloneDX VEX document with LicenseRef and no inline",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXLegalNoInlineExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CdxQuarkusLegalNoInlinePredicates,
+		wantErr:        false,
+	}, {
 		name: "CycloneDX v1.4 with valid but unparsable license information",
 		doc: &processor.Document{
 			Blob:   testdata.CycloneDXVersion1_4,
@@ -147,7 +169,25 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.CdxQuarkusLegalPredicates,
 		wantErr:        true,
-		reportedErr:    unsupportedLicenseVersionError,
+		reportedErr:    errUnsupportedLicenseVersion,
+	}, {
+		name: "CycloneDX nested components",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXComponentsNested,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.NestedComponentsPredicates,
+		wantErr:        false,
+	}, {
+		name: "CycloneDX flat components",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXComponentsFlat,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.FlatComponentsPredicates,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -356,7 +396,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 	tests := []struct {
 		name     string
 		cdxBom   *cdx.BOM
-		wantPurl string
+		wantPurl []string
 	}{{
 		name: "purl provided",
 		cdxBom: &cdx.BOM{
@@ -367,7 +407,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				PackageURL: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
 			}},
 		},
-		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+		wantPurl: []string{"pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot"},
 	}, {
 		name: "gcr.io/distroless/static:nonroot - purl not provided",
 		cdxBom: &cdx.BOM{
@@ -377,7 +417,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot",
+		wantPurl: []string{"pkg:guac/pkg/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot"},
 	}, {
 		name: "gcr.io/distroless/static - purl not provided, tag not specified",
 
@@ -388,7 +428,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=",
+		wantPurl: []string{"pkg:guac/pkg/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag="},
 	}, {
 		name: "gcr.io/distroless/static - purl not provided, tag not specified, version not specified",
 
@@ -398,7 +438,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Type: cdx.ComponentTypeContainer,
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/gcr.io/distroless/static@?tag=",
+		wantPurl: []string{"pkg:guac/pkg/gcr.io/distroless/static@?tag="},
 	}, {
 		name: "library/debian:latest - purl not provided, assume docker.io",
 
@@ -409,7 +449,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest",
+		wantPurl: []string{"pkg:guac/pkg/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest"},
 	}, {
 		name: "library/debian - purl not provided, tag not specified",
 		cdxBom: &cdx.BOM{
@@ -419,7 +459,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+		wantPurl: []string{"pkg:guac/pkg/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag="},
 	}, {
 		name: "library - purl not provided, tag not specified",
 		cdxBom: &cdx.BOM{
@@ -429,7 +469,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/library@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+		wantPurl: []string{"pkg:guac/pkg/library@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag="},
 	}, {
 		name: "name split length too long, tag not specified",
 		cdxBom: &cdx.BOM{
@@ -439,7 +479,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+		wantPurl: []string{"pkg:guac/pkg/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870"},
 	}, {
 		name: "name contains local registry, tag specified",
 		cdxBom: &cdx.BOM{
@@ -449,7 +489,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/foo.registry.com:4443/myapp/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest",
+		wantPurl: []string{"pkg:guac/pkg/foo.registry.com:4443/myapp/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest"},
 	}, {
 		name: "ComponentTypeLibrary",
 
@@ -460,7 +500,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/pkg/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+		wantPurl: []string{"pkg:guac/pkg/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870"},
 	}, {
 		name: "file type - purl nor provided, version provided",
 		cdxBom: &cdx.BOM{
@@ -470,7 +510,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/files/sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?filename=/home/work/test/build/webserver",
+		wantPurl: []string{"pkg:guac/files/sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?filename=/home/work/test/build/webserver"},
 	}, {
 		name: "file type - purl nor provided, version not provided",
 		cdxBom: &cdx.BOM{
@@ -479,7 +519,31 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Type: cdx.ComponentTypeFile,
 			}},
 		},
-		wantPurl: "pkg:guac/files/home/work/test/build/webserver",
+		wantPurl: []string{"pkg:guac/files/home/work/test/build/webserver"},
+	}, {
+		name: "nested components",
+		cdxBom: &cdx.BOM{
+			Components: &[]cdx.Component{{
+				Name: "/home/work/test/build/webserver",
+				Type: cdx.ComponentTypeFile,
+				Components: &[]cdx.Component{{
+					Name:       "gcr.io/distroless/static:nonroot",
+					Type:       cdx.ComponentTypeContainer,
+					Version:    "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+					PackageURL: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+					Components: &[]cdx.Component{{
+						Name:    "ghcr.io/guacsec/guac/guacsec",
+						Type:    cdx.ComponentTypeLibrary,
+						Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+					}},
+				}},
+			}},
+		},
+		wantPurl: []string{
+			"pkg:guac/files/home/work/test/build/webserver",
+			"pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+			"pkg:guac/pkg/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -497,12 +561,17 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 			if err := c.getPackages(); err != nil {
 				t.Errorf("Failed to getTopLevelPackage %s", err)
 			}
-			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
-			if err != nil {
-				t.Errorf("Failed to parse purl %v %v", tt.wantPurl, err)
+			wantPackage := make([]*model.PkgInputSpec, len(tt.wantPurl))
+			for i, item := range tt.wantPurl {
+				pkg, err := asmhelpers.PurlToPkg(item)
+				if err != nil {
+					t.Errorf("Failed to parse purl %v %v", tt.wantPurl, err)
+				}
+				wantPackage[i] = pkg
 			}
+
 			for _, comp := range *tt.cdxBom.Components {
-				if d := cmp.Diff(*wantPackage, *c.packagePackages[comp.BOMRef][0]); len(d) != 0 {
+				if d := cmp.Diff(wantPackage, c.packagePackages[comp.BOMRef]); len(d) != 0 {
 					t.Errorf("addRootPackage failed to produce expected package for %v", tt.name)
 					t.Errorf("spdx.GetPredicate mismatch values (+got, -expected): %s", d)
 				}

@@ -62,7 +62,7 @@ func TestValidateGCSFlags(t *testing.T) {
 				t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "/path/to/creds.json")
 			}
 
-			o, err := validateGCSFlags("", "", "", tc.credentialsPath, false, false, false, false, tc.args)
+			o, err := validateGCSFlags("", "", "", tc.credentialsPath, false, false, false, false, false, false, tc.args)
 			if err != nil {
 				if tc.errorMsg != err.Error() {
 					t.Errorf("expected error message: %s, got: %s", tc.errorMsg, err.Error())

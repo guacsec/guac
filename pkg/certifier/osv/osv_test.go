@@ -16,14 +16,21 @@
 package osv
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 
@@ -180,6 +187,25 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				collectedDocs = append(collectedDocs, d)
 			}
 			if err == nil {
+				sort.Slice(collectedDocs, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(collectedDocs[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(collectedDocs[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				sort.Slice(tt.want, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(tt.want[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(tt.want[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				if len(collectedDocs) != len(tt.want) {
+					t.Errorf("collected docs does not match wanted")
+				}
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
 					if err != nil {
@@ -197,8 +223,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 func Test_createAttestation(t *testing.T) {
 	currentTime := time.Now()
 	type args struct {
-		packageNode root_package.PackageNode
-		vulns       []osv_scanner.MinimalVulnerability
+		purl  string
+		vulns []osv_scanner.MinimalVulnerability
 	}
 	tests := []struct {
 		name string
@@ -207,9 +233,7 @@ func Test_createAttestation(t *testing.T) {
 	}{{
 		name: "default",
 		args: args{
-			packageNode: root_package.PackageNode{
-				Purl: "",
-			},
+			purl: "",
 			vulns: []osv_scanner.MinimalVulnerability{
 				{
 					ID: "testId",
@@ -223,17 +247,14 @@ func Test_createAttestation(t *testing.T) {
 				Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 			},
 			Predicate: attestation_vuln.VulnerabilityPredicate{
-				Invocation: attestation_vuln.Invocation{
-					Uri:        INVOC_URI,
-					ProducerID: PRODUCER_ID,
-				},
 				Scanner: attestation_vuln.Scanner{
 					Uri:     URI,
 					Version: VERSION,
-					Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+					Result:  []attestation_vuln.Result{{Id: "testId"}},
 				},
 				Metadata: attestation_vuln.Metadata{
-					ScannedOn: &currentTime,
+					ScanStartedOn: &currentTime,
+					ScanFinishedOn: &currentTime,
 				},
 			},
 		},
@@ -241,7 +262,7 @@ func Test_createAttestation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			currentTime := time.Now()
-			got := CreateAttestation(&test.args.packageNode, test.args.vulns, currentTime)
+			got := createAttestation(test.args.purl, test.args.vulns, currentTime)
 			if !deepEqualIgnoreTimestamp(got, test.want) {
 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
 			}
@@ -253,9 +274,73 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 	// create a copy of a and b, and set the ScannedOn field to nil because the timestamps will be different
 	aCopy := a
 	bCopy := b
-	aCopy.Predicate.Metadata.ScannedOn = nil
-	bCopy.Predicate.Metadata.ScannedOn = nil
+	aCopy.Predicate.Metadata.ScanStartedOn = nil
+	bCopy.Predicate.Metadata.ScanStartedOn = nil
+	aCopy.Predicate.Metadata.ScanFinishedOn = nil
+	bCopy.Predicate.Metadata.ScanFinishedOn = nil
 
 	// use DeepEqual to compare the copies
 	return reflect.DeepEqual(aCopy, bCopy)
+}
+
+func TestOSVCertifierRateLimiter(t *testing.T) {
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
+	// Set up a mock OSV server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response := osv_scanner.BatchedResponse{
+			Results: []osv_scanner.MinimalResponse{
+				{
+					Vulns: []osv_scanner.MinimalVulnerability{
+						{
+							ID: "TestID",
+						},
+					},
+				},
+			},
+		}
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}))
+	defer server.Close()
+
+	oldRateLimit := rateLimit
+	rateLimit = 5
+	oldRateLimitInterval := rateLimitInterval
+	rateLimitInterval = time.Second
+	defer func() {
+		rateLimit = oldRateLimit
+		rateLimitInterval = oldRateLimitInterval
+	}()
+
+	cert := NewOSVCertificationParser()
+
+	// Make requests to the mock server
+	for i := 0; i < rateLimit+1; i++ {
+		req, err := http.NewRequestWithContext(ctx, "POST", server.URL, nil)
+		assert.NoError(t, err)
+
+		resp, err := cert.(*osvCertifier).osvHTTPClient.Do(req)
+		assert.NoError(t, err)
+		resp.Body.Close()
+	}
+
+	// Check if the log contains any rate limiting messages
+	logOutput := logBuffer.String()
+
+	assert.Contains(t, logOutput, "Rate limit exceeded")
 }

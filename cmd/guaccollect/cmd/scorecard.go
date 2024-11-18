@@ -46,8 +46,6 @@ type scorecardOptions struct {
 	interval time.Duration
 	// enable/disable message publish to queue
 	publishToQueue bool
-	// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
-	daysSinceLastScan int
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
@@ -81,7 +79,6 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("interval"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
-			viper.GetInt("last-scan"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 		)
@@ -120,7 +117,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		query, err := sc.NewCertifier(gqlclient, opts.daysSinceLastScan, opts.batchSize, opts.addedLatency)
+		query, err := sc.NewCertifier(gqlclient, opts.batchSize, opts.addedLatency)
 		if err != nil {
 			logger.Errorf("unable to create source query: %v\n", err)
 			os.Exit(1)
@@ -138,7 +135,6 @@ func validateScorecardFlags(
 	interval string,
 	poll bool,
 	pubToQueue bool,
-	daysSince int,
 	certifierLatencyStr string,
 	batchSize int) (scorecardOptions, error) {
 
@@ -156,7 +152,6 @@ func validateScorecardFlags(
 		return opts, fmt.Errorf("failed to parser duration with error: %w", err)
 	}
 	opts.interval = i
-	opts.daysSinceLastScan = daysSince
 
 	if certifierLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(certifierLatencyStr)
@@ -175,7 +170,7 @@ func validateScorecardFlags(
 
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
-		"last-scan", "header-file", "certifier-latency",
+		"header-file", "certifier-latency",
 		"certifier-batch-size"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

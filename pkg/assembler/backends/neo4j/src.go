@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -32,7 +33,7 @@ func (c *neo4jClient) SourcesList(ctx context.Context, sourceSpec model.SourceSp
 func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
-	fields := getPreloads(ctx)
+	fields := helper.GetPreloads(ctx)
 
 	nameRequired := false
 	namespaceRequired := false

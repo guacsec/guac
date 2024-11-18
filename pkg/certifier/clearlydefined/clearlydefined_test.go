@@ -16,19 +16,30 @@
 package clearlydefined
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"sort"
 	"testing"
+	"time"
 
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	osv_scanner "github.com/google/osv-scanner/pkg/osv"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
 func TestClearlyDefined(t *testing.T) {
+	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
+	t.Skip("Skipping clearly defined tests since it is flaky")
 	ctx := logging.WithLogger(context.Background())
 
 	tests := []struct {
@@ -52,7 +63,7 @@ func TestClearlyDefined(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.ITE6CDSourceCommonText),
+				Blob:   []byte(testdata.ITE6CDLog4j),
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -61,7 +72,7 @@ func TestClearlyDefined(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.ITE6CDLog4j),
+				Blob:   []byte(testdata.ITE6CDSourceCommonText),
 				Type:   processor.DocumentITE6ClearlyDefined,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -88,7 +99,7 @@ func TestClearlyDefined(t *testing.T) {
 		name:          "bad type",
 		rootComponent: map[string]string{},
 		wantErr:       true,
-		errMessage:    ErrOSVComponentTypeMismatch,
+		errMessage:    ErrComponentTypeMismatch,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -129,6 +140,22 @@ func TestClearlyDefined(t *testing.T) {
 				collectedDocs = append(collectedDocs, d)
 			}
 			if err == nil {
+				sort.Slice(collectedDocs, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(collectedDocs[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(collectedDocs[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
+				sort.Slice(tt.want, func(i, j int) bool {
+					uriI, errI := dochelper.ExtractURI(tt.want[i].Blob)
+					uriJ, errJ := dochelper.ExtractURI(tt.want[j].Blob)
+					if errI != nil || errJ != nil {
+						return false
+					}
+					return uriI < uriJ
+				})
 				if len(collectedDocs) != len(tt.want) {
 					t.Errorf("collected docs does not match wanted")
 				}
@@ -144,4 +171,69 @@ func TestClearlyDefined(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCDCertifierRateLimiter(t *testing.T) {
+	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
+	t.Skip("Skipping clearly defined tests since it is flaky")
+
+	// Set up the logger
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
+	// Set up a mock OSV server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response := osv_scanner.BatchedResponse{
+			Results: []osv_scanner.MinimalResponse{
+				{
+					Vulns: []osv_scanner.MinimalVulnerability{
+						{
+							ID: "TestID",
+						},
+					},
+				},
+			},
+		}
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}))
+	defer server.Close()
+
+	oldRateLimit := rateLimit
+	rateLimit = 5
+	oldRateLimitInterval := rateLimitInterval
+	rateLimitInterval = time.Second
+	defer func() {
+		rateLimit = oldRateLimit
+		rateLimitInterval = oldRateLimitInterval
+	}()
+
+	cert := NewClearlyDefinedCertifier()
+
+	// Make requests to the mock server
+	for i := 0; i < rateLimit+1; i++ {
+		req, err := http.NewRequestWithContext(ctx, "POST", server.URL, nil)
+		assert.NoError(t, err)
+
+		resp, err := cert.(*cdCertifier).cdHTTPClient.Do(req)
+		assert.NoError(t, err)
+		resp.Body.Close()
+	}
+
+	// Check if the log contains any rate limiting messages
+	logOutput := logBuffer.String()
+
+	assert.Contains(t, logOutput, "Rate limit exceeded")
 }

@@ -71,6 +71,9 @@ func init() {
 	// the ingestor will query and ingest clearly defined for licenses
 	set.Bool("add-license-on-ingest", false, "if enabled, the ingestor will query and ingest clearly defined for licenses. Warning: This will increase ingestion times")
 
+	// the ingestor will query and ingest endoflife.date for EOL
+	set.Bool("add-eol-on-ingest", false, "if enabled, the ingestor will query and ingest endoflife.date for EOL data. Warning: This will increase ingestion times")
+
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")
 	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
@@ -81,6 +84,7 @@ func init() {
 	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
 	set.Bool("db-debug", false, "enable debug logging for database queries")
 	set.Bool("db-migrate", true, "automatically run database migrations on start")
+	set.String("db-conn-time", "", "sets the maximum amount of time a connection may be reused in m, h, s, etc.")
 
 	set.String("arango-addr", "http://localhost:8529", "address to arango db")
 	set.String("arango-user", "", "arango user to connect to graph db")
@@ -117,7 +121,7 @@ func init() {
 
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
-	set.IntP("last-scan", "l", 0, "days since the last vulnerability scan was run. Default 0 means only run once")
+	set.IntP("last-scan", "l", 4, "hours since the last scan was run. If not set, run on all packages/sources")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")

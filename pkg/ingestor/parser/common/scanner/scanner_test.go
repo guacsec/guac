@@ -373,27 +373,6 @@ func TestPurlsLicenseScan(t *testing.T) {
 					Collector:         "clearlydefined",
 				},
 			},
-			{
-				Src: &generated.SourceInputSpec{
-					Type:      "sourcearchive",
-					Namespace: "org.apache.logging.log4j",
-					Name:      "log4j-core",
-					Tag:       ptrfrom.String("2.8.1"),
-				},
-				Declared: []generated.LicenseInputSpec{},
-				Discovered: []generated.LicenseInputSpec{
-					{Name: "Apache-2.0", ListVersion: &lvUnknown},
-					{Name: "NOASSERTION", ListVersion: &lvUnknown},
-				},
-				CertifyLegal: &generated.CertifyLegalInputSpec{
-					DiscoveredLicense: "Apache-2.0 AND NOASSERTION",
-					Attribution:       "Copyright 2005-2006 Tim Fennell,Copyright 1999-2012 Apache Software Foundation,Copyright 1999-2005 The Apache Software Foundation",
-					Justification:     "Retrieved from ClearlyDefined",
-					TimeScanned:       tm,
-					Origin:            "clearlydefined",
-					Collector:         "clearlydefined",
-				},
-			},
 		},
 		wantHSAs: []assembler.HasSourceAtIngest{
 			{
@@ -498,4 +477,201 @@ func TestPurlsLicenseScan(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPurlsEOLScan(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+
+	tests := []struct {
+		name    string
+		purls   []string
+		wantHM  func() []assembler.HasMetadataIngest
+		wantErr bool
+	}{
+		{
+			name:  "valid nodejs EOL data",
+			purls: []string{"pkg:npm/nodejs@14.17.0"},
+			wantHM: func() []assembler.HasMetadataIngest {
+				return []assembler.HasMetadataIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "npm",
+							Name:      "nodejs",
+							Version:   ptrfrom.String("14.17.0"),
+							Namespace: ptrfrom.String(""),
+							Subpath:   ptrfrom.String(""),
+						},
+						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata: &generated.HasMetadataInputSpec{
+							Key:           "endoflife",
+							Value:         "product:nodejs,cycle:14,version:14.17.0,isEOL:true,eolDate:2023-04-30,lts:true,latest:14.21.3,releaseDate:2020-04-21",
+							Justification: "Retrieved from endoflife.date",
+							Origin:        "GUAC EOL Certifier",
+							Collector:     "GUAC",
+						},
+					},
+				}
+			},
+			wantErr: false,
+		},
+		{
+			name:  "valid python EOL data",
+			purls: []string{"pkg:pypi/python@3.9.5"},
+			wantHM: func() []assembler.HasMetadataIngest {
+				return []assembler.HasMetadataIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "pypi",
+							Name:      "python",
+							Version:   ptrfrom.String("3.9.5"),
+							Namespace: ptrfrom.String(""),
+							Subpath:   ptrfrom.String(""),
+						},
+						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata: &generated.HasMetadataInputSpec{
+							Key:           "endoflife",
+							Value:         "product:python,cycle:3.13,version:3.9.5,isEOL:false,eolDate:2029-10-31,lts:false,latest:3.13.0,releaseDate:2024-10-07",
+							Justification: "Retrieved from endoflife.date",
+							Origin:        "GUAC EOL Certifier",
+							Collector:     "GUAC",
+						},
+					},
+				}
+			},
+			wantErr: false,
+		},
+		{
+			name:    "no purl",
+			purls:   []string{""},
+			wantHM:  func() []assembler.HasMetadataIngest { return nil },
+			wantErr: false,
+		},
+		{
+			name:    "skip guac purl",
+			purls:   []string{"pkg:guac/python@3.9.5"},
+			wantHM:  func() []assembler.HasMetadataIngest { return nil },
+			wantErr: false,
+		},
+		{
+			name:    "unsupported product",
+			purls:   []string{"pkg:npm/unsupported-product@1.0.0"},
+			wantHM:  func() []assembler.HasMetadataIngest { return nil },
+			wantErr: false,
+		},
+		{
+			name:  "multiple purls",
+			purls: []string{"pkg:npm/nodejs@14.17.0", "pkg:pypi/python@3.9.5"},
+			wantHM: func() []assembler.HasMetadataIngest {
+				return []assembler.HasMetadataIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "npm",
+							Name:      "nodejs",
+							Version:   ptrfrom.String("14.17.0"),
+							Namespace: ptrfrom.String(""),
+							Subpath:   ptrfrom.String(""),
+						},
+						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata: &generated.HasMetadataInputSpec{
+							Key:           "endoflife",
+							Value:         "product:nodejs,cycle:14,version:14.17.0,isEOL:true,eolDate:2023-04-30,lts:true,latest:14.21.3,releaseDate:2020-04-21",
+							Justification: "Retrieved from endoflife.date",
+							Origin:        "GUAC EOL Certifier",
+							Collector:     "GUAC",
+						},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "pypi",
+							Name:      "python",
+							Version:   ptrfrom.String("3.9.5"),
+							Namespace: ptrfrom.String(""),
+							Subpath:   ptrfrom.String(""),
+						},
+						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata: &generated.HasMetadataInputSpec{
+							Key:           "endoflife",
+							Value:         "product:python,cycle:3.13,version:3.9.5,isEOL:false,eolDate:2029-10-31,lts:false,latest:3.13.0,releaseDate:2024-10-07",
+							Justification: "Retrieved from endoflife.date",
+							Origin:        "GUAC EOL Certifier",
+							Collector:     "GUAC",
+						},
+					},
+				}
+			},
+			wantErr: false,
+		},
+	}
+
+	var ignoreMetadataTimestamp = cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".Timestamp", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+
+	var ignoreMetadataValue = cmp.FilterPath(func(p cmp.Path) bool {
+		return p.String() == "HasMetadata.Value"
+	}, cmp.Comparer(func(x, y string) bool {
+		return verifyEOLValue(x, y)
+	}))
+
+	hmSortOpt := cmp.Transformer("Sort", func(in []assembler.HasMetadataIngest) []assembler.HasMetadataIngest {
+		out := append([]assembler.HasMetadataIngest(nil), in...)
+		sort.Slice(out, func(i, j int) bool {
+			return strings.Compare(out[i].Pkg.Name, out[j].Pkg.Name) < 0
+		})
+		return out
+	})
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotHM, err := PurlsEOLScan(ctx, tt.purls)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PurlsEOLScan() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			wantHM := tt.wantHM()
+			if diff := cmp.Diff(wantHM, gotHM, hmSortOpt, ignoreMetadataTimestamp,
+				ignoreMetadataValue,
+				cmpopts.IgnoreFields(generated.HasMetadataInputSpec{}, "DocumentRef")); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// verifyEOLValue validates the EOL value string has correct format and expected fields
+func verifyEOLValue(got, want string) bool {
+	gotMap := parseEOLValue(got)
+	wantMap := parseEOLValue(want)
+
+	// Verify required fields exist
+	requiredFields := []string{"product", "cycle", "version", "eolDate", "releaseDate"}
+	for _, field := range requiredFields {
+		if gotMap[field] != wantMap[field] {
+			return false
+		}
+	}
+
+	// Verify boolean fields have valid values
+	boolFields := []string{"isEOL", "lts"}
+	for _, field := range boolFields {
+		gotVal := gotMap[field]
+		if gotVal != "true" && gotVal != "false" {
+			return false
+		}
+	}
+
+	return true
+}
+
+// parseEOLValue parses an EOL value string into a map
+func parseEOLValue(value string) map[string]string {
+	result := make(map[string]string)
+	for _, pair := range strings.Split(value, ",") {
+		parts := strings.Split(pair, ":")
+		if len(parts) == 2 {
+			result[parts[0]] = parts[1]
+		}
+	}
+	return result
 }

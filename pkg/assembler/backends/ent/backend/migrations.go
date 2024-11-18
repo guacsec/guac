@@ -19,6 +19,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -34,6 +35,9 @@ type BackendOptions struct {
 	Address     string
 	Debug       bool
 	AutoMigrate bool
+	// sets the maximum amount of time a connection may be reused.
+	// If nil, this is set to default of 0
+	ConnectionMaxLifeTime *time.Duration
 }
 
 // GetReadOnlyClient sets up the ent backend and returns a read-only client.
@@ -66,6 +70,11 @@ func SetupBackend(ctx context.Context, options *BackendOptions) (*ent.Client, er
 	db, err := sql.Open(driver, options.Address)
 	if err != nil {
 		return nil, fmt.Errorf("error opening db: %w", err)
+	}
+
+	if options.ConnectionMaxLifeTime != nil {
+		// set timeout limit for connections
+		db.SetConnMaxLifetime(*options.ConnectionMaxLifeTime)
 	}
 
 	client := ent.NewClient(ent.Driver(dialectsql.OpenDB(driver, db)))

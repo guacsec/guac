@@ -43,6 +43,8 @@ type ociOptions struct {
 	csubClientOptions       csub_client.CsubClientOptions
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 }
 
 var ociCmd = &cobra.Command{
@@ -58,6 +60,8 @@ var ociCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -90,8 +94,17 @@ var ociCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			_, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion)
-
+			_, err := ingestor.Ingest(
+				ctx,
+				d,
+				opts.graphqlEndpoint,
+				transport,
+				csubClient,
+				opts.queryVulnOnIngestion,
+				opts.queryLicenseOnIngestion,
+				opts.queryEOLOnIngestion,
+				opts.queryDepsDevOnIngestion,
+			)
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
@@ -121,12 +134,14 @@ var ociCmd = &cobra.Command{
 }
 
 func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (ociOptions, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, args []string) (ociOptions, error) {
 	var opts ociOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.headerFile = headerFile
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {

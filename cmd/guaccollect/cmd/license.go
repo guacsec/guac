@@ -23,13 +23,19 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/clearlydefined"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+)
+
+const (
+	cdQuerySize = 499
 )
 
 type cdOptions struct {
@@ -45,13 +51,13 @@ type cdOptions struct {
 	interval time.Duration
 	// enable/disable message publish to queue
 	publishToQueue bool
-	// days since the last vulnerability scan was run.
-	// 0 means only run once
-	daysSinceLastScan int
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// last time the scan was done in hours, if not set it will return
+	// all packages to check
+	lastScan *int
 }
 
 var cdCmd = &cobra.Command{
@@ -81,9 +87,9 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("interval"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
-			viper.GetInt("last-scan"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -102,7 +108,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		packageQueryFunc, err := getPackageQuery(gqlclient, opts.daysSinceLastScan, opts.batchSize, opts.addedLatency)
+		packageQueryFunc, err := getCDPackageQuery(gqlclient, opts.batchSize, opts.addedLatency, opts.lastScan)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -110,6 +116,13 @@ you have access to read and write to the respective blob store.`,
 
 		initializeNATsandCertifier(ctx, opts.blobAddr, opts.pubsubAddr, opts.poll, opts.publishToQueue, opts.interval, packageQueryFunc())
 	},
+}
+
+func getCDPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration, lastScan *int) (func() certifier.QueryComponents, error) {
+	return func() certifier.QueryComponents {
+		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeLicense, batchSize, cdQuerySize, addedLatency, lastScan)
+		return packageQuery
+	}, nil
 }
 
 func validateCDFlags(
@@ -120,9 +133,8 @@ func validateCDFlags(
 	interval string,
 	poll bool,
 	pubToQueue bool,
-	daysSince int,
 	certifierLatencyStr string,
-	batchSize int) (cdOptions, error) {
+	batchSize int, lastScan int) (cdOptions, error) {
 
 	var opts cdOptions
 
@@ -138,7 +150,6 @@ func validateCDFlags(
 		return opts, fmt.Errorf("failed to parser duration with error: %w", err)
 	}
 	opts.interval = i
-	opts.daysSinceLastScan = daysSince
 
 	if certifierLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(certifierLatencyStr)
@@ -151,14 +162,16 @@ func validateCDFlags(
 	}
 
 	opts.batchSize = batchSize
-
+	if lastScan != 0 {
+		opts.lastScan = &lastScan
+	}
 	return opts, nil
 }
 
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
-		"last-scan", "header-file", "certifier-latency",
-		"certifier-batch-size"})
+		"header-file", "certifier-latency",
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

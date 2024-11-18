@@ -23,15 +23,18 @@ import (
 	"sync"
 	"time"
 
-	pb "deps.dev/api/v3"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
+
+	pb "deps.dev/api/v3"
+
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/exp/maps"
 	"google.golang.org/grpc"
@@ -49,6 +52,8 @@ const (
 	GetProjectDurationHistogram = "http_deps_dev_project_duration"
 	GetVersionErrorsCounter     = "http_deps_dev_version_errors"
 	prometheusPrefix            = "deps_dev"
+	// RPS = rate per second
+	rateLimit = 150
 )
 
 type IsDepPackage struct {
@@ -92,16 +97,17 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		return nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
-	// Connect to the service using TLS.
+	// The rateLimitedClient is being passed in for testing purposes
 	creds := credentials.NewClientTLSFromCert(sysPool, "")
 	conn, err := grpc.NewClient("api.deps.dev:443",
 		grpc.WithTransportCredentials(creds),
-		grpc.WithUserAgent(version.UserAgent))
+		grpc.WithUserAgent(version.UserAgent),
+		// add the rate limit to the grpc client
+		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(rateLimit))),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}
-
-	// Create a new Insights Client.
 	client := pb.NewInsightsClient(conn)
 
 	// Initialize the Metrics collector
@@ -109,6 +115,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
 		return nil, fmt.Errorf("unable to register Metrics: %w", err)
 	}
+
 	return &depsCollector{
 		collectDataSource:    collectDataSource,
 		client:               client,
@@ -162,8 +169,7 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 		return nil
 	}
 
-	err = d.getAllDependencies(ctx, ds.PurlDataSources)
-	if err != nil {
+	if err := d.getAllDependencies(ctx, ds.PurlDataSources); err != nil {
 		return fmt.Errorf("failed to get all dependencies: %w", err)
 	}
 	for _, purl := range ds.PurlDataSources {
@@ -330,6 +336,13 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 	// TODO: Concurrently fetch the dependencies for each purl
 	for _, p := range purls {
 		purl := p.Value
+
+		// check if top level purl has already been queried
+		if _, ok := d.checkedPurls[purl]; ok {
+			logger.Infof("purl %s already queried", purl)
+			continue
+		}
+
 		packageInput, err := helpers.PurlToPkg(purl)
 		if err != nil {
 			logger.Infof("failed to parse purl to pkg: %s", purl)

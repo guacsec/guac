@@ -254,7 +254,7 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 	}
 	dependencyCreate.SetDependentPackageVersionID(depPkgVersionID)
 
-	isDependencyID, err := guacDependencyKey(ptrfrom.String(pkgVersionID.String()), nil, ptrfrom.String(depPkgVersionID.String()), *dep)
+	isDependencyID, err := guacDependencyKey(ptrfrom.String(pkgVersionID.String()), ptrfrom.String(depPkgVersionID.String()), *dep)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 	}
@@ -318,10 +318,20 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 		optionalPredicate(filter.DocumentRef, dependency.DocumentRef),
 	}
 	if filter.DependencyPackage != nil {
-		predicates = append(predicates, dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)))
+		if filter.DependencyPackage.ID != nil {
+			predicates = append(predicates, optionalPredicate(filter.DependencyPackage.ID, dependencyPackageIDEQ))
+		} else {
+			predicates = append(predicates,
+				dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)))
+		}
 	}
 	if filter.Package != nil {
-		predicates = append(predicates, dependency.HasPackageWith(packageVersionQuery(filter.Package)))
+		if filter.Package.ID != nil {
+			predicates = append(predicates, optionalPredicate(filter.Package.ID, packageIDEQ))
+		} else {
+			predicates = append(predicates,
+				dependency.HasPackageWith(packageVersionQuery(filter.Package)))
+		}
 	}
 
 	if filter.DependencyType != nil {
@@ -335,7 +345,7 @@ func canonicalDependencyString(dep model.IsDependencyInputSpec) string {
 	return fmt.Sprintf("%s::%s::%s::%s:%s", dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector, dep.DocumentRef)
 }
 
-func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersionID *string, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
+func guacDependencyKey(pkgVersionID *string, depPkgVersionID *string, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
 	if depPkgVersionID == nil {
 		return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 	}

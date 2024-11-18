@@ -59,11 +59,12 @@ const (
 	DocumentITE6SLSA    DocumentType = "SLSA"
 	DocumentITE6Generic DocumentType = "ITE6"
 	DocumentITE6Vul     DocumentType = "ITE6VUL"
+	DocumentITE6EOL     DocumentType = "ITE6EOL"
 	// ClearlyDefined
 	DocumentITE6ClearlyDefined DocumentType = "ITE6CD"
 	DocumentDSSE               DocumentType = "DSSE"
 	DocumentSPDX               DocumentType = "SPDX"
-	DocumentJsonLines          DocumentType = "JSON_LINES"
+	DocumentOpaque             DocumentType = "OPAQUE"
 	DocumentScorecard          DocumentType = "SCORECARD"
 	DocumentCycloneDX          DocumentType = "CycloneDX"
 	DocumentDepsDev            DocumentType = "DEPS_DEV"

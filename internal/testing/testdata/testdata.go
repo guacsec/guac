@@ -18,6 +18,7 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
+	"strings"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -76,6 +77,9 @@ var (
 
 	//go:embed exampledata/distroless-cyclonedx.json
 	CycloneDXDistrolessExample []byte
+
+	//go:embed exampledata/distroless-cyclonedx-invalid-version.json
+	CycloneDXDistrolessInvalidVersionExample []byte
 
 	//go:embed exampledata/busybox-cyclonedx.json
 	CycloneDXBusyboxExample []byte
@@ -190,6 +194,21 @@ var (
 
 	//go:embed exampledata/small-legal-cyclonedx.json
 	CycloneDXLegalExample []byte
+
+	//go:embed exampledata/small-legal-cyclonedx-no-inline.json
+	CycloneDXLegalNoInlineExample []byte
+
+	//go:embed exampledata/cyclonedx-components-nested.json
+	CycloneDXComponentsNested []byte
+
+	//go:embed exampledata/cyclonedx-components-flat.json
+	CycloneDXComponentsFlat []byte
+
+	//go:embed exampledata/eol-all.json
+	EOLAll []byte
+
+	//go:embed exampledata/eol-sapmachine.json
+	EOLSapMachine []byte
 
 	// json format
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -1068,6 +1087,8 @@ var (
 	// CycloneDX Testdata
 	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot")
 
+	cdxTopLevelInvalidVersionPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@nonroot")
+
 	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11")
 
 	cdxNetbasePack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11")
@@ -1107,7 +1128,6 @@ var (
 
 	CdxHasSBOM = []assembler.HasSBOMIngest{
 		{
-			Pkg: cdxTopLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
 				Algorithm:        "sha256",
@@ -1115,12 +1135,71 @@ var (
 				DownloadLocation: "TestSource",
 				KnownSince:       cdxTime,
 			},
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+			},
 		},
 	}
 
 	CdxIngestionPredicates = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: cdxTopLevelPack,
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+				},
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
 		IsDependency: CdxDeps,
 		HasSBOM:      CdxHasSBOM,
+	}
+
+	CdxHasSBOMInvalidVersion = []assembler.HasSBOMIngest{
+		{
+			Pkg: cdxTopLevelInvalidVersionPack,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
+				Algorithm:        "sha256",
+				Digest:           "cb3ea440e0529e8b07e0e1b694e96ec10149fd00d8b634a0027e5e15f11e3c9b",
+				DownloadLocation: "TestSource",
+				KnownSince:       cdxTime,
+			},
+		},
+	}
+
+	CdxInvalidVersionDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:    cdxTopLevelInvalidVersionPack,
+			DepPkg: cdxBasefilesPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopLevelInvalidVersionPack,
+			DepPkg: cdxNetbasePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    cdxTopLevelInvalidVersionPack,
+			DepPkg: cdxTzdataPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+	}
+
+	CdxIngestionInvalidVersionPredicates = assembler.IngestPredicates{
+		IsDependency: CdxInvalidVersionDeps,
+		HasSBOM:      CdxHasSBOMInvalidVersion,
 	}
 
 	cdxTopQuarkusPack, _ = asmhelpers.PurlToPkg("pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar")
@@ -1482,11 +1561,141 @@ var (
 		},
 	}
 
+	cdxLegalHasSBOMNoInLine = []assembler.HasSBOMIngest{
+		{
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
+				Algorithm:        "sha256",
+				Digest:           "09522e1c53eb2b919446c2e904f6517482de731dc6e61d7e7ad559675cb9355b",
+				DownloadLocation: "",
+				KnownSince:       cdxQuarkusTime,
+			},
+		},
+	}
+
 	CdxQuarkusLegalPredicates = assembler.IngestPredicates{
 		IsDependency: cdxLegalDeps,
 		IsOccurrence: cdxLegalOccurrence,
 		HasSBOM:      cdxLegalHasSBOM,
 		CertifyLegal: cdxLegalCertifyLegal,
+	}
+
+	CdxQuarkusLegalNoInlinePredicates = assembler.IngestPredicates{
+		IsDependency: cdxLegalDeps,
+		IsOccurrence: cdxLegalOccurrence,
+		HasSBOM:      cdxLegalHasSBOMNoInLine,
+		CertifyLegal: cdxLegalCertifyLegalNoInline,
+	}
+
+	cdxLegalCertifyLegalNoInline = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxNetbasePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND LicenseRef-a7fb6b15 AND LicenseRef-59a01e67",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxSmallRye,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "Apache-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "MIT",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "Apache-2.0 AND (MIT OR GPL-2.0-only)",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxTopQuarkusPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0",
+					ListVersion: &lvUnknown,
+				},
+				{
+					Name:        "LGPL-3.0-or-later",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "GPL-2.0 AND LGPL-3.0-or-later",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
+		{
+			Pkg: cdxMicroprofilePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:   "LicenseRef-a7fb6b15",
+					Inline: &customLincenseText,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "LicenseRef-a7fb6b15 AND LicenseRef-59a01e67",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxQuarkusTime,
+			},
+		},
 	}
 
 	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")
@@ -1562,6 +1771,123 @@ var (
 		CertifyLegal: quarkusParentPackageLegal,
 	}
 
+	NestedComponentsPredicates = assembler.IngestPredicates{
+		IsDependency: ociComponentsIsDependencyIngests,
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg:          ociMandrel,
+				Artifact:     ociMandrelArtifact,
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
+		HasSBOM: nestedComponentsHasSBOM,
+	}
+
+	FlatComponentsPredicates = assembler.IngestPredicates{
+		IsDependency: ociComponentsIsDependencyIngests,
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg:          ociMandrel,
+				Artifact:     ociMandrelArtifact,
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
+		HasSBOM: flatComponentsHasSBOM,
+	}
+
+	ociComponentsIsDependencyIngests = []assembler.IsDependencyIngest{
+		{
+			Pkg:    ociMandrel,
+			DepPkg: mavenCompiler,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: mavenCompiler,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: mavenCompiler,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: ociMandrel,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: abattisCantarellFonts,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeDirect,
+				Justification:  isCDXDepJustifyDependsJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: abattisCantarellFonts,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+		{
+			Pkg:    ociMandrel,
+			DepPkg: abattisCantarellFonts,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				Justification:  isDepJustifyTopPkgJustification,
+			},
+		},
+	}
+
+	ociMandrel, _            = asmhelpers.PurlToPkg("pkg:oci/mandrel-for-jdk-21-rhel8@sha256%3A41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04?arch=amd64&os=linux&tag=23.1-13.1724180416")
+	mavenCompiler, _         = asmhelpers.PurlToPkg("pkg:maven/compiler/compiler@23.1.4.0-1-redhat-00001?type=jar")
+	abattisCantarellFonts, _ = asmhelpers.PurlToPkg("pkg:rpm/redhat/abattis-cantarell-fonts@0.0.25-6.el8?arch=noarch")
+	ociMandrelArtifact       = &model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "41d92dafa5ccbf7f76fa81c5a0e7de83c51166f27bea9b98df018f644016bf04",
+	}
+
+	nestedComponentsHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Artifact: ociMandrelArtifact,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:        "urn:uuid:c096003c-c9fa-4d9e-9390-fefa51745fe1",
+				Algorithm:  "sha256",
+				Digest:     "6a9598f69e87d0c45f3dd4c5d69d8812b734b28f07506a9f7b6ada7e9696c5e5",
+				KnownSince: nestedComponentsTime,
+			},
+		},
+	}
+
+	flatComponentsHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Artifact: ociMandrelArtifact,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:        "urn:uuid:c096003c-c9fa-4d9e-9390-fefa51745fe1",
+				Algorithm:  "sha256",
+				Digest:     "1dedfbd09dbf68a29279395444e76f300285cf1731ad25f39252c4d689403531",
+				KnownSince: nestedComponentsTime,
+			},
+		},
+	}
+
+	nestedComponentsTime, _ = time.Parse(time.RFC3339, "2024-09-24T08:20:03Z")
+
 	// ceritifer testdata
 
 	Text4ShellVulAttestation = `{
@@ -1571,12 +1897,8 @@ var (
 			  "uri":"pkg:maven/org.apache.commons/commons-text@1.9"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner":{
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
@@ -1584,12 +1906,13 @@ var (
 			  },
 			  "result":[
 				 {
-					"vulnerability_id":"GHSA-599f-7c49-w659"
+					"id":"GHSA-599f-7c49-w659"
 				 }
 			  ]
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:18:58.063182-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+                          "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1600,19 +1923,15 @@ var (
 			  "uri":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner": {
 			"uri": "osv.dev",
-			"version": "0.0.14",
-			"db": {}
+			"version": "0.0.14"
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1623,19 +1942,15 @@ var (
 			  "uri":"pkg:oci/vul-image-latest?repository_url=gcr.io"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner": {
 			"uri": "osv.dev",
-			"version": "0.0.14",
-			"db": {}
+			"version": "0.0.14"
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1646,12 +1961,8 @@ var (
 			  "uri":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
 		   }
 		],
-		"predicate_type":"https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.1",
 		"predicate":{
-		   "invocation":{
-			  "uri":"guac",
-			  "producer_id":"guacsec/guac"
-		   },
 		   "scanner":{
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
@@ -1659,27 +1970,28 @@ var (
 			  },
 			  "result":[
 				 {
-					"vulnerability_id":"GHSA-7rjr-3q55-vv33"
+					"id":"GHSA-7rjr-3q55-vv33"
 				 },
 				 {
-					"vulnerability_id":"GHSA-8489-44mv-ggj8"
+					"id":"GHSA-8489-44mv-ggj8"
 				 },
 				 {
-					"vulnerability_id":"GHSA-fxph-q3j8-mv87"
+					"id":"GHSA-fxph-q3j8-mv87"
 				 },
 				 {
-					"vulnerability_id":"GHSA-jfh8-c2jp-5v3q"
+					"id":"GHSA-jfh8-c2jp-5v3q"
 				 },
 				 {
-					"vulnerability_id":"GHSA-p6xc-xr62-6r2g"
+					"id":"GHSA-p6xc-xr62-6r2g"
 				 },
 				 {
-					"vulnerability_id":"GHSA-vwqq-5vrc-xw9h"
+					"id":"GHSA-vwqq-5vrc-xw9h"
 				 }
 			  ]
 		   },
 		   "metadata":{
-			  "scannedOn":"2022-11-22T13:18:31.607996-05:00"
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 		   }
 		}
 	 }`
@@ -1707,19 +2019,15 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
-				"version": "0.0.14",
-				"db": {}
+				"version": "0.0.14"
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986308-08:00"
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 			}
 		}
 	}`
@@ -1731,19 +2039,15 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
-				"version": "0.0.14",
-				"db": {}
+				"version": "0.0.14"
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986401-08:00"
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 			}
 		}
 	}`
@@ -1755,19 +2059,15 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
-				"version": "0.0.14",
-				"db": {}
+				"version": "0.0.14"
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.98646-08:00"
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
 			}
 		}
 	}`
@@ -1779,24 +2079,20 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
 				"version": "0.0.14",
-				"db": {},
 				"result": [
 					{
-						"vulnerability_id": "GHSA-9ph3-v2vh-3qx7"
+						"id": "GHSA-9ph3-v2vh-3qx7"
 					}
 				]
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986506-08:00"
+				"scanStartedOn":"2023-02-15T11:10:08.986506-08:00",
+				"scanFinishedOn":"2023-02-15T11:10:08.986506-08:00"
 			}
 		}
 	}`
@@ -1808,24 +2104,20 @@ var (
 				"uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
 			}
 		],
-		"predicate_type": "https://in-toto.io/attestation/vuln/v0.1",
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
 		"predicate": {
-			"invocation": {
-				"uri": "guac",
-				"producer_id": "guacsec/guac"
-			},
 			"scanner": {
 				"uri": "osv.dev",
 				"version": "0.0.14",
-				"db": {},
 				"result": [
 					{
-						"vulnerability_id": "GHSA-53jx-vvf9-4x38"
+						"id": "GHSA-53jx-vvf9-4x38"
 					}
 				]
 			},
 			"metadata": {
-				"scannedOn": "2023-02-15T11:10:08.986592-08:00"
+				"scanStartedOn":"2023-02-15T11:10:08.986506-08:00",
+				"scanFinishedOn":"2023-02-15T11:10:08.986506-08:00"
 			}
 		}
 	}`
@@ -3278,8 +3570,14 @@ func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
 	return gLess(e1, e2)
 }
 
-func isDependencyLess(e1, e2 assembler.IsDependencyIngest) bool {
-	return gLess(e1, e2)
+func isDependencyLess(a, b assembler.IsDependencyIngest) bool {
+	if strings.Compare(a.Pkg.Name, b.Pkg.Name) != 0 {
+		return a.Pkg.Name < b.Pkg.Name
+	}
+	if d := strings.Compare(a.DepPkg.Name, b.DepPkg.Name); d != 0 {
+		return a.DepPkg.Name < b.DepPkg.Name
+	}
+	return false
 }
 
 func isOccurenceLess(e1, e2 assembler.IsOccurrenceIngest) bool {

@@ -52,6 +52,7 @@ type depsDevOptions struct {
 	headerFile              string
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
 	// sets artificial latency on the deps.dev collector (default to nil)
 	addedLatency *time.Duration
 }
@@ -87,7 +88,19 @@ var depsDevCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 
-			if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
+			if _, err := ingestor.Ingest(
+				ctx,
+				d,
+				opts.graphqlEndpoint,
+				transport,
+				csc,
+				opts.queryVulnOnIngestion,
+				opts.queryLicenseOnIngestion,
+				opts.queryEOLOnIngestion,
+				// since this is a deps.dev collector, by we don't query deps.dev on ingestion
+				/* queryDepsDevOnIngestion = */
+				false,
+			); err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
@@ -145,6 +158,7 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 		headerFile:              viper.GetString("header-file"),
 		queryVulnOnIngestion:    viper.GetBool("add-vuln-on-ingest"),
 		queryLicenseOnIngestion: viper.GetBool("add-license-on-ingest"),
+		queryEOLOnIngestion:     viper.GetBool("add-eol-on-ingest"),
 	}
 
 	addedLatencyStr := viper.GetString("deps-dev-latency")

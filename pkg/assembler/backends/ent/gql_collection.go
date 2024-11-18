@@ -2289,7 +2289,7 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, oneNode bool, o
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 
-		case "name":
+		case "namespaces":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)

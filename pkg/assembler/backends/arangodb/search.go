@@ -27,6 +27,30 @@ func (c *arangoClient) FindSoftwareList(ctx context.Context, searchText string, 
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }
 
+func (c *arangoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: QueryPackagesListForScan")
+}
+
+func (c *arangoClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: FindPackagesThatNeedScanning")
+}
+
+func (c *arangoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyVuln")
+}
+
+func (c *arangoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryPkgIDCertifyLegal")
+}
+
+func (c *arangoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQuerySubjectPkgDependency")
+}
+
+func (c *arangoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	return nil, fmt.Errorf("not implemented: BatchQueryDepPkgDependency")
+}
+
 // TODO(lumjjb): add source when it is implemented in arango backend
 func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 

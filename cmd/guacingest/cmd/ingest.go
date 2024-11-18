@@ -47,6 +47,8 @@ type options struct {
 	headerFile              string
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -60,6 +62,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		viper.GetBool("csub-tls-skip-verify"),
 		viper.GetBool("add-vuln-on-ingest"),
 		viper.GetBool("add-license-on-ingest"),
+		viper.GetBool("add-eol-on-ingest"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
@@ -99,7 +102,17 @@ func ingest(cmd *cobra.Command, args []string) {
 	defer csubClient.Close()
 
 	emit := func(d *processor.Document) error {
-		if _, err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion, opts.queryLicenseOnIngestion); err != nil {
+		if _, err := ingestor.Ingest(
+			ctx,
+			d,
+			opts.graphqlEndpoint,
+			transport,
+			csubClient,
+			opts.queryVulnOnIngestion,
+			opts.queryLicenseOnIngestion,
+			opts.queryEOLOnIngestion,
+			opts.queryDepsDevOnIngestion,
+		); err != nil {
 			var urlErr *url.Error
 			if errors.As(err, &urlErr) {
 				return fmt.Errorf("unable to ingest document due to connection error with graphQL %q : %w", d.SourceInformation.Source, urlErr)
@@ -130,7 +143,7 @@ func ingest(cmd *cobra.Command, args []string) {
 }
 
 func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, args []string) (options, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, args []string) (options, error) {
 	var opts options
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
@@ -143,6 +156,7 @@ func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile s
 	opts.headerFile = headerFile
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
+	opts.queryEOLOnIngestion = queryEOLIngestion
 
 	return opts, nil
 }

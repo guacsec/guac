@@ -165,14 +165,31 @@ func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
 	if filter.Subject != nil {
 		switch {
 		case filter.Subject.Artifact != nil:
-			predicates = append(predicates, hasmetadata.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+			if filter.Subject.Artifact.ID != nil {
+				predicates = append(predicates,
+					optionalPredicate(filter.Subject.Artifact.ID, artifactIDEQ))
+			} else {
+				predicates = append(predicates,
+					hasmetadata.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+			}
 		case filter.Subject.Package != nil:
-			predicates = append(predicates, hasmetadata.Or(
-				hasmetadata.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
-				hasmetadata.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
-			))
+			if filter.Subject.Package.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Package.ID, packageVersionOrNameIDEQ))
+			} else {
+				predicates = append(predicates, hasmetadata.Or(
+					hasmetadata.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
+					hasmetadata.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
+				))
+			}
+
 		case filter.Subject.Source != nil:
-			predicates = append(predicates, hasmetadata.HasSourceWith(sourceQuery(filter.Subject.Source)))
+			if filter.Subject.Source.ID != nil {
+				predicates = append(predicates,
+					optionalPredicate(filter.Subject.Source.ID, sourceIDEQ))
+			} else {
+				predicates = append(predicates,
+					hasmetadata.HasSourceWith(sourceQuery(filter.Subject.Source)))
+			}
 		}
 	}
 	return hasmetadata.And(predicates...)

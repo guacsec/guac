@@ -5,43 +5,28 @@
         "uri": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
       }
   ],
-  "predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+  "predicateType": "https://in-toto.io/attestation/vulns/v0.1",
   "predicate": {
-    "invocation": {
-      "parameters": [""],
-      "uri": "guac",
-      "event_id": "",
-      "producer_id": "guac"
-    },
     "scanner": {
       "uri": "osv.dev",
       "version": "0.0.14",
-      "db": {
-        "uri": "",
-        "version": ""
-      },
       "result": [{
-            "vulnerability_id": "GHSA-7rjr-3q55-vv33",
-            "aliases": [""]
+            "id": "GHSA-7rjr-3q55-vv33"
         }, {
-            "vulnerability_id": "GHSA-8489-44mv-ggj8",
-            "aliases": [""]
+            "id": "GHSA-8489-44mv-ggj8"
         }, {
-            "vulnerability_id": "GHSA-fxph-q3j8-mv87",
-            "aliases": [""]
+            "id": "GHSA-fxph-q3j8-mv87"
         }, {
-            "vulnerability_id": "GHSA-jfh8-c2jp-5v3q",
-            "aliases": [""]
+            "id": "GHSA-jfh8-c2jp-5v3q"
         }, {
-            "vulnerability_id": "GHSA-p6xc-xr62-6r2g",
-            "aliases": [""]
+            "id": "GHSA-p6xc-xr62-6r2g"
         }, {
-            "vulnerability_id": "GHSA-vwqq-5vrc-xw9h",
-            "aliases": [""]
+            "id": "GHSA-vwqq-5vrc-xw9h"
         }]
     },
     "metadata": {
-      "scannedOn": "2022-11-21T17:45:50.52Z"
+      "scanStartedOn": "2022-11-21T17:45:50.52Z",
+      "scanFinishedOn": "2022-11-21T17:45:50.52Z"
     }
   }
 }

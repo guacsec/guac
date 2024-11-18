@@ -16,6 +16,7 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
@@ -49,7 +50,7 @@ func (PackageVersion) Fields() []ent.Field {
 // Edges of the PackageVersion.
 func (PackageVersion) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("name", PackageName.Type).Required().Field("name_id").Ref("versions").Unique(),
+		edge.From("name", PackageName.Type).Required().Field("name_id").Ref("versions").Unique().Annotations(entgql.MapsTo("namespaces")),
 		edge.From("occurrences", Occurrence.Type).Ref("package"),
 		edge.From("sbom", BillOfMaterials.Type).Ref("package"),
 		edge.From("vuln", CertifyVuln.Type).Ref("package"),

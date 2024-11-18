@@ -357,6 +357,16 @@ func (ec *executionContext) _SoftwareEdge(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNQueryType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐQueryType(ctx context.Context, v interface{}) (model.QueryType, error) {
+	var res model.QueryType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNQueryType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐQueryType(ctx context.Context, sel ast.SelectionSet, v model.QueryType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNSoftwareEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSoftwareEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SoftwareEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

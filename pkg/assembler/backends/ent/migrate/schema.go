@@ -235,17 +235,17 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifylegal_source_id_declared_license_discovered_license_attribution_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
+				Name:    "certifylegal_source_id_declared_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyLegalsColumns[12], CertifyLegalsColumns[1], CertifyLegalsColumns[2], CertifyLegalsColumns[3], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
+				Columns: []*schema.Column{CertifyLegalsColumns[12], CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND source_id IS NOT NULL",
 				},
 			},
 			{
-				Name:    "certifylegal_package_id_declared_license_discovered_license_attribution_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
+				Name:    "certifylegal_package_id_declared_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[1], CertifyLegalsColumns[2], CertifyLegalsColumns[3], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
+				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND source_id IS NULL",
 				},
@@ -254,6 +254,14 @@ var (
 				Name:    "certifylegal_package_id",
 				Unique:  false,
 				Columns: []*schema.Column{CertifyLegalsColumns[11]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND source_id IS NULL",
+				},
+			},
+			{
+				Name:    "certifylegal_package_id_declared_licenses_hash_discovered_licenses_hash_time_scanned",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[9], CertifyLegalsColumns[10], CertifyLegalsColumns[5]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND source_id IS NULL",
 				},
@@ -397,6 +405,16 @@ var (
 				Name:    "certifyvuln_package_id",
 				Unique:  false,
 				Columns: []*schema.Column{CertifyVulnsColumns[10]},
+			},
+			{
+				Name:    "certifyvuln_vulnerability_id",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyVulnsColumns[9]},
+			},
+			{
+				Name:    "certifyvuln_vulnerability_id_package_id_time_scanned",
+				Unique:  false,
+				Columns: []*schema.Column{CertifyVulnsColumns[9], CertifyVulnsColumns[10], CertifyVulnsColumns[1]},
 			},
 		},
 	}

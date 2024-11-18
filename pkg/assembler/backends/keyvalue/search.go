@@ -17,14 +17,115 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/maps"
 )
+
+const guacType string = "guac"
 
 func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
 	return nil, fmt.Errorf("not implemented: FindSoftwareList")
+}
+
+func (c *demoClient) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	var collectedIsDep []*model.IsDependency
+	for _, pkgID := range pkgIDs {
+		isDep, err := c.IsDependency(ctx, &model.IsDependencySpec{Package: &model.PkgSpec{ID: &pkgID}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query IsDependency for pkgID: %s, with error: %w", pkgID, err)
+		}
+		collectedIsDep = append(collectedIsDep, isDep...)
+	}
+	return collectedIsDep, nil
+}
+
+func (c *demoClient) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	var collectedIsDep []*model.IsDependency
+	for _, pkgID := range pkgIDs {
+		isDep, err := c.IsDependency(ctx, &model.IsDependencySpec{DependencyPackage: &model.PkgSpec{ID: &pkgID}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query IsDependency for dependency pkgID: %s, with error: %w", pkgID, err)
+		}
+		collectedIsDep = append(collectedIsDep, isDep...)
+	}
+	return collectedIsDep, nil
+}
+
+func (c *demoClient) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	pkgCVs := make(map[string][]*model.CertifyVuln)
+	for _, pkgID := range pkgIDs {
+		certVuln, err := c.CertifyVuln(ctx, &model.CertifyVulnSpec{Package: &model.PkgSpec{ID: &pkgID}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query CertifyVuln for pkgID: %s, with error: %w", pkgID, err)
+		}
+		pkgCVs[pkgID] = append(pkgCVs[pkgID], certVuln...)
+	}
+
+	deduplicatedPkgCVs := make(map[string][]*model.CertifyVuln)
+	for _, certVulns := range pkgCVs {
+		pkgID := certVulns[0].Package.Namespaces[0].Names[0].Versions[0].ID
+		cvsByVulnID := make(map[string]*model.CertifyVuln)
+		for _, cv := range certVulns {
+			cv := cv
+			vulnID := cv.Vulnerability.VulnerabilityIDs[0].VulnerabilityID
+			if existing, ok := cvsByVulnID[vulnID]; ok {
+				if existing.Metadata.TimeScanned.After(cv.Metadata.TimeScanned) {
+					continue
+				}
+			}
+			cvsByVulnID[vulnID] = cv
+		}
+		deduplicatedPkgCVs[pkgID] = append(deduplicatedPkgCVs[pkgID], maps.Values(cvsByVulnID)...)
+	}
+
+	var filteredCertVulns []*model.CertifyVuln
+	for _, certVulns := range deduplicatedPkgCVs {
+		filteredCertVulns = append(filteredCertVulns, certVulns...)
+	}
+
+	return filteredCertVulns, nil
+}
+
+func (c *demoClient) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	pkgCLs := make(map[string][]*model.CertifyLegal)
+	for _, pkgID := range pkgIDs {
+		certLegal, err := c.CertifyLegal(ctx, &model.CertifyLegalSpec{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: &pkgID}}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query CertifyLegal for pkgID: %s, with error: %w", pkgID, err)
+		}
+		pkgCLs[pkgID] = append(pkgCLs[pkgID], certLegal...)
+	}
+
+	deduplicatedPkgCLs := make(map[string]*model.CertifyLegal)
+	for _, certLegals := range pkgCLs {
+		if pkg, ok := certLegals[0].Subject.(*model.Package); ok {
+			var latest time.Time
+			pkgID := pkg.Namespaces[0].Names[0].Versions[0].ID
+			for _, cl := range certLegals {
+				if cl.TimeScanned.After(latest) {
+					latestcl := cl
+					latest = cl.TimeScanned
+					deduplicatedPkgCLs[pkgID] = latestcl
+				}
+			}
+		} else {
+			continue
+		}
+	}
+
+	var filteredCertLegals []*model.CertifyLegal
+	for _, certLegal := range deduplicatedPkgCLs {
+		filteredCertLegals = append(filteredCertLegals, certLegal)
+	}
+
+	return filteredCertLegals, nil
 }
 
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
@@ -254,4 +355,158 @@ func (c *demoClient) searchPkgVersion(ctx context.Context, pkgNameNode *pkgName,
 	}
 
 	return pvs
+}
+
+func (c *demoClient) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	var pkgIDs []string
+	var done bool
+	scn := c.kv.Keys(pkgTypeCol)
+	for !done {
+		var typeKeys []string
+		var err error
+		typeKeys, done, err = scn.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		sort.Strings(typeKeys)
+
+		for _, tk := range typeKeys {
+			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+			if err != nil {
+				return nil, err
+			}
+			if pkgTypeNode.Type == guacType {
+				continue
+			}
+			for _, nsID := range pkgTypeNode.Namespaces {
+				pkgNS, err := byIDkv[*pkgNamespace](ctx, nsID, c)
+				if err != nil {
+					continue
+				}
+				for _, nameID := range pkgNS.Names {
+					pkgNameNode, err := byIDkv[*pkgName](ctx, nameID, c)
+					if err != nil {
+						continue
+					}
+					for _, verID := range pkgNameNode.Versions {
+						pkgVer, err := byIDkv[*pkgVersion](ctx, verID, c)
+						if err != nil {
+							continue
+						}
+						if queryType == model.QueryTypeVulnerability {
+							if len(pkgVer.CertifyVulnLinks) > 0 {
+								var timeScanned []time.Time
+								for _, certVulnID := range pkgVer.CertifyVulnLinks {
+									link, err := byIDkv[*certifyVulnerabilityLink](ctx, certVulnID, c)
+									if err != nil {
+										continue
+									}
+									timeScanned = append(timeScanned, link.TimeScanned)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pkgIDs = append(pkgIDs, pkgVer.ThisID)
+								}
+							} else {
+								pkgIDs = append(pkgIDs, pkgVer.ThisID)
+							}
+						} else if queryType == model.QueryTypeLicense {
+							if len(pkgVer.CertifyLegals) > 0 {
+								var timeScanned []time.Time
+								for _, certLegalID := range pkgVer.CertifyLegals {
+									link, err := byIDkv[*certifyLegalStruct](ctx, certLegalID, c)
+									if err != nil {
+										continue
+									}
+									timeScanned = append(timeScanned, link.TimeScanned)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pkgIDs = append(pkgIDs, pkgVer.ThisID)
+
+								}
+							} else {
+								pkgIDs = append(pkgIDs, pkgVer.ThisID)
+							}
+						} else { // queryType == model.QueryTypeEol via hasMetadataLink
+							if len(pkgVer.HasMetadataLinks) > 0 {
+								var timeScanned []time.Time
+								for _, hasMetadataLinkID := range pkgVer.HasMetadataLinks {
+									link, err := byIDkv[*hasMetadataLink](ctx, hasMetadataLinkID, c)
+									if err != nil {
+										continue
+									}
+									// only pick endoflife metadata
+									if link.MDKey != "endoflife" {
+										continue
+									}
+									timeScanned = append(timeScanned, link.Timestamp)
+								}
+								lastScanTime := latestTime(timeScanned)
+								lastIntervalTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
+								if lastScanTime.Before(lastIntervalTime) {
+									pkgIDs = append(pkgIDs, pkgVer.ThisID)
+								}
+							} else {
+								pkgIDs = append(pkgIDs, pkgVer.ThisID)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return pkgIDs, nil
+}
+
+func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	var edges []*model.PackageEdge
+	for _, pkgID := range pkgIDs {
+		p, err := c.buildPackageResponse(ctx, pkgID, nil)
+		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
+			return nil, err
+		}
+		edges = append(edges, &model.PackageEdge{
+			Cursor: p.ID,
+			Node:   p,
+		})
+	}
+
+	return &model.PackageConnection{
+		TotalCount: len(pkgIDs),
+		PageInfo: &model.PageInfo{
+			HasNextPage: false,
+			StartCursor: ptrfrom.String(pkgIDs[0]),
+			EndCursor:   ptrfrom.String(pkgIDs[len(pkgIDs)-1]),
+		},
+		Edges: edges,
+	}, nil
+}
+
+// Get the latest time from a slice of time.Time
+func latestTime(times []time.Time) time.Time {
+	if len(times) == 0 {
+		return time.Time{} // Return zero value of time.Time if slice is empty
+	}
+
+	latest := times[0] // Initialize with the first time in the slice
+	for _, t := range times {
+		if t.After(latest) {
+			latest = t
+		}
+	}
+	return latest
 }

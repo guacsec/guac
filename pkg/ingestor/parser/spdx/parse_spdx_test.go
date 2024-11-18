@@ -1447,6 +1447,375 @@ func Test_spdxParser(t *testing.T) {
 			wantErr:     false,
 			wantWarning: "Top-level unique artifact count (1) and top-level package count (2) are mismatched. SBOM ingestion may not be as expected.",
 		},
+		{
+			name: "SPDX with multiple referenceType=purl for a single package",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM"),
+			},
+			doc: &processor.Document{
+				Blob: []byte(`
+			{
+			"spdxVersion": "SPDX-2.3",
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"name":"openssl-3.0.7-18.el9_2",
+			"creationInfo": { "created": "2023-01-01T01:01:01.00Z" },
+			"packages":[
+				{
+					"SPDXID":"SPDXRef-SRPM",
+					"name":"openssl",
+					"versionInfo": "3.0.7-18.el9_2",
+					"packageFileName": "openssl-3.0.7-18.el9_2.src.rpm",
+					"externalRefs":[
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:rpm/redhat/openssl@3.0.7-18.el9_2?repository_id=rhel-9-baseos-eus",
+							"referenceType":"purl"
+						},
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:rpm/redhat/openssl@3.0.7-18.el9_2?repository_id=rhel-9-baseos-tus",
+							"referenceType":"purl"
+						}
+					]
+				}
+			],
+			"relationships":[
+				{
+					"spdxElementId":"SPDXRef-DOCUMENT",
+					"relationshipType":"PACKAGE_OF",
+					"relatedSpdxElement":"SPDXRef-SRPM"
+				}
+			]
+			}
+			`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				IsDependency: []assembler.IsDependencyIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: &packageOfns,
+							Name:      "openssl-3.0.7-18.el9_2",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						DepPkg: &generated.PkgInputSpec{
+							Type:      "rpm",
+							Namespace: ptrfrom.String("redhat"),
+							Name:      "openssl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{Key: "repository_id", Value: "rhel-9-baseos-eus"},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						IsDependency: &generated.IsDependencyInputSpec{
+							DependencyType: "UNKNOWN",
+							Justification:  "top-level package GUAC heuristic connecting to each file/package",
+						},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: &packageOfns,
+							Name:      "openssl-3.0.7-18.el9_2",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						DepPkg: &generated.PkgInputSpec{
+							Type:      "rpm",
+							Namespace: ptrfrom.String("redhat"),
+							Name:      "openssl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{Key: "repository_id", Value: "rhel-9-baseos-tus"},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						IsDependency: &generated.IsDependencyInputSpec{
+							DependencyType: "UNKNOWN",
+							Justification:  "top-level package GUAC heuristic connecting to each file/package",
+						},
+					},
+				},
+
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: &packageOfns,
+							Name:      "openssl-3.0.7-18.el9_2",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://anchore.com/syft/image/alpine-latest-e78eca08-d9f4-49c7-97e0-6d4b9bfa99c2",
+							Algorithm:        "sha256",
+							Digest:           "ba096464061993bbbdfc30a26b42cd8beb1bfff301726fe6c58cb45d468c7648",
+							DownloadLocation: "TestSource",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		}, {
+			name: "SPDX with GENERATED_FROM relationship",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM"),
+			},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+		"spdxVersion": "SPDX-2.3",
+		"SPDXID":"SPDXRef-DOCUMENT",
+		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+		"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
+		"packages":[
+			{
+			  "SPDXID": "SPDXRef-SRPM",
+			  "name": "openssl",
+			  "versionInfo": "3.0.7-18.el9_2",
+			  "downloadLocation": "NOASSERTION",
+			  "packageFileName": "openssl-3.0.7-18.el9_2.src.rpm",
+			  "checksums": [
+				{
+				  "algorithm": "SHA256",
+				  "checksumValue": "31b5079268339cff7ba65a0aee77930560c5adef4b1b3f8f5927a43ee46a56d9"
+				}
+			  ]
+			},
+			{
+			  "SPDXID": "SPDXRef-aarch64-openssl-perl",
+			  "name": "openssl-perl",
+			  "versionInfo": "3.0.7-18.el9_2",
+			  "downloadLocation": "NOASSERTION",
+			  "packageFileName": "openssl-perl-3.0.7-18.el9_2.aarch64.rpm",
+			  "checksums": [
+				{
+				  "algorithm": "SHA256",
+				  "checksumValue": "96e53b2da90ce5ad109ba659ce3ed1b5a819b108c95fc493f84847429898b2ed"
+				}
+			  ]
+			}
+		],
+		"relationships":[
+			{
+			  "spdxElementId": "SPDXRef-DOCUMENT",
+			  "relationshipType": "DESCRIBES",
+			  "relatedSpdxElement": "SPDXRef-SRPM"
+			},
+			{
+			  "spdxElementId": "SPDXRef-aarch64-openssl-perl",
+			  "relationshipType": "GENERATED_FROM",
+			  "relatedSpdxElement": "SPDXRef-SRPM"
+			}
+		]
+		}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				IsDependency: []assembler.IsDependencyIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl-perl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						DepPkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						IsDependency: &generated.IsDependencyInputSpec{
+							DependencyType: "UNKNOWN",
+							Justification:  "Derived from SPDX GENERATED_FROM relationship",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha256",
+							Digest:    "31b5079268339cff7ba65a0aee77930560c5adef4b1b3f8f5927a43ee46a56d9",
+						},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl-perl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha256",
+							Digest:    "96e53b2da90ce5ad109ba659ce3ed1b5a819b108c95fc493f84847429898b2ed",
+						},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+				},
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha256",
+							Digest:    "31b5079268339cff7ba65a0aee77930560c5adef4b1b3f8f5927a43ee46a56d9",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		}, {
+			name: "SPDX with GENERATES relationship",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM"),
+			},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+		"spdxVersion": "SPDX-2.3",
+		"SPDXID":"SPDXRef-DOCUMENT",
+		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+		"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
+		"packages":[
+			{
+			  "SPDXID": "SPDXRef-SRPM",
+			  "name": "openssl",
+			  "versionInfo": "3.0.7-18.el9_2",
+			  "downloadLocation": "NOASSERTION",
+			  "packageFileName": "openssl-3.0.7-18.el9_2.src.rpm",
+			  "checksums": [
+				{
+				  "algorithm": "SHA256",
+				  "checksumValue": "31b5079268339cff7ba65a0aee77930560c5adef4b1b3f8f5927a43ee46a56d9"
+				}
+			  ]
+			},
+			{
+			  "SPDXID": "SPDXRef-aarch64-openssl-perl",
+			  "name": "openssl-perl",
+			  "versionInfo": "3.0.7-18.el9_2",
+			  "downloadLocation": "NOASSERTION",
+			  "packageFileName": "openssl-perl-3.0.7-18.el9_2.aarch64.rpm",
+			  "checksums": [
+				{
+				  "algorithm": "SHA256",
+				  "checksumValue": "96e53b2da90ce5ad109ba659ce3ed1b5a819b108c95fc493f84847429898b2ed"
+				}
+			  ]
+			}
+		],
+		"relationships":[
+			{
+			  "spdxElementId": "SPDXRef-DOCUMENT",
+			  "relationshipType": "DESCRIBES",
+			  "relatedSpdxElement": "SPDXRef-SRPM"
+			},
+			{
+			  "spdxElementId": "SPDXRef-SRPM",
+			  "relationshipType": "GENERATES",
+			  "relatedSpdxElement": "SPDXRef-aarch64-openssl-perl"
+			}
+		]
+		}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				IsDependency: []assembler.IsDependencyIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl-perl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						DepPkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						IsDependency: &generated.IsDependencyInputSpec{
+							DependencyType: "UNKNOWN",
+							Justification:  "Derived from SPDX GENERATES relationship",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha256",
+							Digest:    "31b5079268339cff7ba65a0aee77930560c5adef4b1b3f8f5927a43ee46a56d9",
+						},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "openssl-perl",
+							Version:   ptrfrom.String("3.0.7-18.el9_2"),
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha256",
+							Digest:    "96e53b2da90ce5ad109ba659ce3ed1b5a819b108c95fc493f84847429898b2ed",
+						},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+				},
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha256",
+							Digest:    "31b5079268339cff7ba65a0aee77930560c5adef4b1b3f8f5927a43ee46a56d9",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

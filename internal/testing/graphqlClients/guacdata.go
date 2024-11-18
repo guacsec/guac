@@ -17,6 +17,7 @@ package clients
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -64,7 +65,7 @@ const (
 	defaultHasSlsaPredicateValue = "test-predicate-value"
 )
 
-// Defines the Guac graph, to test clients of the Graphql server.
+// GuacData Defines the Guac graph, to test clients of the Graphql server.
 //
 // This type, along with the Ingest function, is similar to the backend IngestPredicates
 // type and the corresponding assembler function, but allows for significantly less verbose
@@ -76,10 +77,11 @@ const (
 // could be added if needed.
 type GuacData struct {
 	/** the nouns need to be specified here in order to be referenced from a verb **/
-	Packages  []string // packages are specified by purl
-	Artifacts []string // artifacts are specified by digest
-	Sources   []string // sources are specified by the name in the SourceName node
-	Builders  []string // builders are specified by URI
+	Packages        []string // packages are specified by purl
+	Artifacts       []string // artifacts are specified by digest
+	Sources         []string // sources are specified by the name in the SourceName node
+	Builders        []string // builders are specified by URI
+	Vulnerabilities []string // vulnerabilities are specified by type and ID. The type and ID are separated by a "/".
 
 	/** verbs **/
 	HasSboms       []HasSbom
@@ -87,6 +89,7 @@ type GuacData struct {
 	IsDependencies []IsDependency
 	HashEquals     []HashEqual
 	HasSlsas       []HasSlsa
+	CertifyVulns   []CertifyVuln
 
 	// Other graphql verbs still need to be added here
 }
@@ -124,13 +127,19 @@ type HasSlsa struct {
 	Spec      *gql.SLSAInputSpec // if nil, a default will be used
 }
 
+type CertifyVuln struct {
+	Package       string
+	Vulnerability string
+	Metadata      *gql.ScanMetadataInput // if nil, a default will be used
+}
+
 // maintains the ids of nouns, to use when ingesting verbs
 type nounIds struct {
-	PackageIds  map[string]string // map from purls to IDs of PackageName nodes
-	ArtifactIds map[string]string // map from digest to IDs of Artifact nodes
-	SourceIds   map[string]string // map from source names to IDs of SourceName nodes
-	BuilderIds  map[string]string // map from URI to IDs of Builder nodes
-
+	PackageIds       map[string]string // map from purls to IDs of PackageName nodes
+	ArtifactIds      map[string]string // map from digest to IDs of Artifact nodes
+	SourceIds        map[string]string // map from source names to IDs of SourceName nodes
+	BuilderIds       map[string]string // map from URI to IDs of Builder nodes
+	VulnerabilityIds map[string]string // map from vulnerability type and ID to IDs of Vulnerability nodes
 }
 
 func Ingest(ctx context.Context, t *testing.T, gqlClient graphql.Client, data GuacData) nounIds {
@@ -154,11 +163,17 @@ func Ingest(ctx context.Context, t *testing.T, gqlClient graphql.Client, data Gu
 		builderIds[builder] = ingestBuilder(ctx, t, gqlClient, builder)
 	}
 
+	vulnerabilityIds := map[string]string{}
+	for _, vuln := range data.Vulnerabilities {
+		vulnerabilityIds[vuln] = ingestVulnerability(ctx, t, gqlClient, vuln)
+	}
+
 	i := nounIds{
-		PackageIds:  packageIds,
-		ArtifactIds: artifactIds,
-		SourceIds:   sourceIds,
-		BuilderIds:  builderIds,
+		PackageIds:       packageIds,
+		ArtifactIds:      artifactIds,
+		SourceIds:        sourceIds,
+		BuilderIds:       builderIds,
+		VulnerabilityIds: vulnerabilityIds,
 	}
 
 	for _, sbom := range data.HasSboms {
@@ -179,6 +194,10 @@ func Ingest(ctx context.Context, t *testing.T, gqlClient graphql.Client, data Gu
 
 	for _, hasSlsa := range data.HasSlsas {
 		i.ingestHasSlsa(ctx, t, gqlClient, hasSlsa)
+	}
+
+	for _, certifyVuln := range data.CertifyVulns {
+		i.ingestCertifyVuln(ctx, t, gqlClient, certifyVuln)
 	}
 
 	return i
@@ -437,4 +456,47 @@ func ingestBuilder(ctx context.Context, t *testing.T, gqlClient graphql.Client, 
 		t.Fatalf("Error ingesting builder when setting up test: %s", err)
 	}
 	return res.GetIngestBuilder()
+}
+
+func ingestVulnerability(ctx context.Context, t *testing.T, gqlClient graphql.Client, vuln string) string {
+	parts := strings.SplitN(vuln, "/", 2)
+	if len(parts) != 2 {
+		t.Fatalf("Invalid vulnerability format: %s", vuln)
+	}
+	vulnType, vulnID := parts[0], parts[1]
+
+	spec := gql.VulnerabilityInputSpec{
+		Type:            vulnType,
+		VulnerabilityID: vulnID,
+	}
+	idOrInputSpec := gql.IDorVulnerabilityInput{VulnerabilityInput: &spec}
+	res, err := gql.IngestVulnerability(ctx, gqlClient, idOrInputSpec)
+	if err != nil {
+		t.Fatalf("Error ingesting vulnerability when setting up test: %s", err)
+	}
+	return res.IngestVulnerability.VulnerabilityNodeID
+}
+
+func (i nounIds) ingestCertifyVuln(ctx context.Context, t *testing.T, gqlClient graphql.Client, certifyVuln CertifyVuln) {
+	spec := certifyVuln.Metadata
+	if spec == nil {
+		spec = &gql.ScanMetadataInput{}
+	}
+
+	packageId, ok := i.PackageIds[certifyVuln.Package]
+	if !ok {
+		t.Fatalf("The package %s has not been ingested", certifyVuln.Package)
+	}
+	pkgSpec := gql.IDorPkgInput{PackageVersionID: &packageId}
+
+	vulnerabilityId, ok := i.VulnerabilityIds[certifyVuln.Vulnerability]
+	if !ok {
+		t.Fatalf("The vulnerability %s has not been ingested", certifyVuln.Vulnerability)
+	}
+	vulnSpec := gql.IDorVulnerabilityInput{VulnerabilityNodeID: &vulnerabilityId}
+
+	_, err := gql.IngestCertifyVulnPkg(ctx, gqlClient, pkgSpec, vulnSpec, *spec)
+	if err != nil {
+		t.Fatalf("Error ingesting CertifyVuln when setting up test: %s", err)
+	}
 }

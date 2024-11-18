@@ -309,7 +309,7 @@ type CertifyGoodSpec struct {
 // SBOM or created by a collector/scanner.
 //
 // Discovered license is also known as Concluded. More information:
-// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+// https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 //
 // Attribution is also known as Copyright Text. It is what could be displayed to
 // comply with notice
@@ -2679,6 +2679,55 @@ func (e *PkgMatchType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PkgMatchType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// QueryType is used in conjunction with queryPackagesListForScan to
+// specify if the last time scanned is checked for either certifyVuln
+// or certifyLegal.
+type QueryType string
+
+const (
+	// direct dependency
+	QueryTypeVulnerability QueryType = "VULNERABILITY"
+	// indirect dependency
+	QueryTypeLicense QueryType = "LICENSE"
+	// indirect dependency
+	QueryTypeEol QueryType = "EOL"
+)
+
+var AllQueryType = []QueryType{
+	QueryTypeVulnerability,
+	QueryTypeLicense,
+	QueryTypeEol,
+}
+
+func (e QueryType) IsValid() bool {
+	switch e {
+	case QueryTypeVulnerability, QueryTypeLicense, QueryTypeEol:
+		return true
+	}
+	return false
+}
+
+func (e QueryType) String() string {
+	return string(e)
+}
+
+func (e *QueryType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QueryType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QueryType", str)
+	}
+	return nil
+}
+
+func (e QueryType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

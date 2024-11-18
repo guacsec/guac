@@ -602,6 +602,109 @@ func TestLegal(t *testing.T) {
 	}
 }
 
+func TestBatchQueryPkgIDCertifyLegal(t *testing.T) {
+	ctx := context.Background()
+	b := setupTest(t)
+	type call struct {
+		PkgSrc model.PackageOrSourceInputs
+		Dec    [][]*model.IDorLicenseInput
+		Dis    [][]*model.IDorLicenseInput
+		Legal  []*model.CertifyLegalInputSpec
+	}
+	tests := []struct {
+		Name     string
+		InPkg    []*model.PkgInputSpec
+		InSrc    []*model.SourceInputSpec
+		InLic    []*model.LicenseInputSpec
+		Calls    []call
+		ExpLegal []*model.CertifyLegal
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
+			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3, testdata.L4},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInputs{
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}, {PackageInput: testdata.P3}, {PackageInput: testdata.P4}},
+					},
+					Dec: [][]*model.IDorLicenseInput{{{LicenseInput: testdata.L1}}, {{LicenseInput: testdata.L2}}, {{LicenseInput: testdata.L3}}, {{LicenseInput: testdata.L4}}},
+					Dis: [][]*model.IDorLicenseInput{{{LicenseInput: testdata.L1}}, {{LicenseInput: testdata.L2}}, {}, {}},
+					Legal: []*model.CertifyLegalInputSpec{
+						{Justification: "test justification", TimeScanned: testdata.T1},
+						{Justification: "test justification", TimeScanned: testdata.T1},
+						{Justification: "test justification", TimeScanned: testdata.T1},
+						{Justification: "test justification", TimeScanned: testdata.T1},
+					},
+				},
+			},
+			ExpLegal: []*model.CertifyLegal{
+				{
+					Subject:            testdata.P1out,
+					DeclaredLicenses:   []*model.License{testdata.L1out},
+					DiscoveredLicenses: []*model.License{testdata.L1out},
+					Justification:      "test justification",
+					TimeScanned:        testdata.T1,
+				},
+				{
+					Subject:            testdata.P2out,
+					DeclaredLicenses:   []*model.License{testdata.L2out},
+					DiscoveredLicenses: []*model.License{testdata.L2out},
+					Justification:      "test justification",
+					TimeScanned:        testdata.T1,
+				},
+				{
+					Subject:          testdata.P3out,
+					DeclaredLicenses: []*model.License{testdata.L3out},
+					Justification:    "test justification",
+					TimeScanned:      testdata.T1,
+				},
+				{
+					Subject:          testdata.P4out,
+					DeclaredLicenses: []*model.License{testdata.L4out},
+					Justification:    "test justification",
+					TimeScanned:      testdata.T1,
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			var pkgIDs []string
+			for _, p := range test.InPkg {
+				if pkgID, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					pkgIDs = append(pkgIDs, pkgID.PackageVersionID)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InLic {
+				if _, err := b.IngestLicense(ctx, &model.IDorLicenseInput{LicenseInput: a}); err != nil {
+					t.Fatalf("Could not ingest license: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestCertifyLegals(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error: %v", err)
+				}
+			}
+			got, err := b.BatchQueryPkgIDCertifyLegal(ctx, pkgIDs)
+			if err != nil {
+				t.Fatalf("did not get expected query error: %v", err)
+			}
+			if diff := cmp.Diff(test.ExpLegal, got, commonOpts); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestLegals(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)

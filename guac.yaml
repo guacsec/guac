@@ -26,8 +26,10 @@ blob-addr: file:///tmp/blobstore?no_tmp_dir=true
 
 # certifier interval
 interval: 20m
-# days since the last vulnerability scan was run. 0 means only run once
-last-scan: 0
+
+# number of hours since the last scan was run. 0 means run on all packages/sources
+last-scan: 4
+
 # set the batch size for the package pagination query
 certifier-batch-size: 60000
 # add artificial latency to throttle the certifier
@@ -42,6 +44,9 @@ add-vuln-on-ingest: false
 
 # query licenses during ingestion
 add-license-on-ingest: false
+
+# query eol during ingestion
+add-eol-on-ingest: false
 
 # CSub setup
 csub-addr: localhost:2782

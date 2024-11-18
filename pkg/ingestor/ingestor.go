@@ -44,11 +44,13 @@ func Ingest(
 	csubClient csub_client.Client,
 	scanForVulns bool,
 	scanForLicense bool,
+	scanForEOL bool,
+	scanForDepsDev bool,
 ) (*helpers.AssemblerIngestedIDs, error) {
 	logger := d.ChildLogger
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
-	ingestorFunc := GetIngestor(ctx, scanForVulns, scanForLicense)
+	ingestorFunc := GetIngestor(ctx, scanForVulns, scanForLicense, scanForEOL, scanForDepsDev)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
 	assemblerFunc := GetAssembler(ctx, d.ChildLogger, graphqlEndpoint, transport)
 
@@ -87,11 +89,13 @@ func MergedIngest(
 	csubClient csub_client.Client,
 	scanForVulns bool,
 	scanForLicense bool,
+	scanForEOL bool,
+	scanForDepsDev bool,
 ) error {
 	logger := logging.FromContext(ctx)
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
-	ingestorFunc := GetIngestor(ctx, scanForVulns, scanForLicense)
+	ingestorFunc := GetIngestor(ctx, scanForVulns, scanForLicense, scanForEOL, scanForDepsDev)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
 	assemblerFunc := GetAssembler(ctx, logger, graphqlEndpoint, transport)
 
@@ -164,9 +168,9 @@ func GetProcessor(ctx context.Context) func(*processor.Document) (processor.Docu
 	}
 }
 
-func GetIngestor(ctx context.Context, scanForVulns bool, scanForLicense bool) func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
+func GetIngestor(ctx context.Context, scanForVulns bool, scanForLicense bool, scanForEOL bool, scanForDepsDev bool) func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
 	return func(doc processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
-		return parser.ParseDocumentTree(ctx, doc, scanForVulns, scanForLicense)
+		return parser.ParseDocumentTree(ctx, doc, scanForVulns, scanForLicense, scanForEOL, scanForDepsDev)
 	}
 }
 

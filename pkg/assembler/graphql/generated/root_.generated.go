@@ -529,59 +529,65 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts                 func(childComplexity int, artifactSpec model.ArtifactSpec) int
-		ArtifactsList             func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
-		Builders                  func(childComplexity int, builderSpec model.BuilderSpec) int
-		BuildersList              func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
-		CertifyBad                func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
-		CertifyBadList            func(childComplexity int, certifyBadSpec model.CertifyBadSpec, after *string, first *int) int
-		CertifyGood               func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
-		CertifyGoodList           func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) int
-		CertifyLegal              func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
-		CertifyLegalList          func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) int
-		CertifyVEXStatement       func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
-		CertifyVEXStatementList   func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) int
-		CertifyVuln               func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
-		CertifyVulnList           func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
-		FindSoftware              func(childComplexity int, searchText string) int
-		FindSoftwareList          func(childComplexity int, searchText string, after *string, first *int) int
-		HasMetadata               func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
-		HasMetadataList           func(childComplexity int, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) int
-		HasSBOMList               func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) int
-		HasSLSAList               func(childComplexity int, hasSLSASpec model.HasSLSASpec, after *string, first *int) int
-		HasSbom                   func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
-		HasSlsa                   func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
-		HasSourceAt               func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
-		HasSourceAtList           func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) int
-		HashEqual                 func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
-		HashEqualList             func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
-		IsDependency              func(childComplexity int, isDependencySpec model.IsDependencySpec) int
-		IsDependencyList          func(childComplexity int, isDependencySpec model.IsDependencySpec, after *string, first *int) int
-		IsOccurrence              func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
-		IsOccurrenceList          func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) int
-		LicenseList               func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
-		Licenses                  func(childComplexity int, licenseSpec model.LicenseSpec) int
-		Neighbors                 func(childComplexity int, node string, usingOnly []model.Edge) int
-		NeighborsList             func(childComplexity int, node string, usingOnly []model.Edge, after *string, first *int) int
-		Node                      func(childComplexity int, node string) int
-		Nodes                     func(childComplexity int, nodes []string) int
-		Packages                  func(childComplexity int, pkgSpec model.PkgSpec) int
-		PackagesList              func(childComplexity int, pkgSpec model.PkgSpec, after *string, first *int) int
-		Path                      func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
-		PkgEqual                  func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
-		PkgEqualList              func(childComplexity int, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) int
-		PointOfContact            func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
-		PointOfContactList        func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
-		Scorecards                func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
-		ScorecardsList            func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
-		Sources                   func(childComplexity int, sourceSpec model.SourceSpec) int
-		SourcesList               func(childComplexity int, sourceSpec model.SourceSpec, after *string, first *int) int
-		VulnEqual                 func(childComplexity int, vulnEqualSpec model.VulnEqualSpec) int
-		VulnEqualList             func(childComplexity int, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) int
-		Vulnerabilities           func(childComplexity int, vulnSpec model.VulnerabilitySpec) int
-		VulnerabilityList         func(childComplexity int, vulnSpec model.VulnerabilitySpec, after *string, first *int) int
-		VulnerabilityMetadata     func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) int
-		VulnerabilityMetadataList func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) int
+		Artifacts                      func(childComplexity int, artifactSpec model.ArtifactSpec) int
+		ArtifactsList                  func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
+		BatchQueryDepPkgDependency     func(childComplexity int, pkgIDs []string) int
+		BatchQueryPkgIDCertifyLegal    func(childComplexity int, pkgIDs []string) int
+		BatchQueryPkgIDCertifyVuln     func(childComplexity int, pkgIDs []string) int
+		BatchQuerySubjectPkgDependency func(childComplexity int, pkgIDs []string) int
+		Builders                       func(childComplexity int, builderSpec model.BuilderSpec) int
+		BuildersList                   func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
+		CertifyBad                     func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
+		CertifyBadList                 func(childComplexity int, certifyBadSpec model.CertifyBadSpec, after *string, first *int) int
+		CertifyGood                    func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
+		CertifyGoodList                func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) int
+		CertifyLegal                   func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
+		CertifyLegalList               func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) int
+		CertifyVEXStatement            func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
+		CertifyVEXStatementList        func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) int
+		CertifyVuln                    func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
+		CertifyVulnList                func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
+		FindPackagesThatNeedScanning   func(childComplexity int, queryType model.QueryType, lastScan *int) int
+		FindSoftware                   func(childComplexity int, searchText string) int
+		FindSoftwareList               func(childComplexity int, searchText string, after *string, first *int) int
+		HasMetadata                    func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
+		HasMetadataList                func(childComplexity int, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) int
+		HasSBOMList                    func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) int
+		HasSLSAList                    func(childComplexity int, hasSLSASpec model.HasSLSASpec, after *string, first *int) int
+		HasSbom                        func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
+		HasSlsa                        func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
+		HasSourceAt                    func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
+		HasSourceAtList                func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) int
+		HashEqual                      func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
+		HashEqualList                  func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
+		IsDependency                   func(childComplexity int, isDependencySpec model.IsDependencySpec) int
+		IsDependencyList               func(childComplexity int, isDependencySpec model.IsDependencySpec, after *string, first *int) int
+		IsOccurrence                   func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
+		IsOccurrenceList               func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) int
+		LicenseList                    func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
+		Licenses                       func(childComplexity int, licenseSpec model.LicenseSpec) int
+		Neighbors                      func(childComplexity int, node string, usingOnly []model.Edge) int
+		NeighborsList                  func(childComplexity int, node string, usingOnly []model.Edge, after *string, first *int) int
+		Node                           func(childComplexity int, node string) int
+		Nodes                          func(childComplexity int, nodes []string) int
+		Packages                       func(childComplexity int, pkgSpec model.PkgSpec) int
+		PackagesList                   func(childComplexity int, pkgSpec model.PkgSpec, after *string, first *int) int
+		Path                           func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
+		PkgEqual                       func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
+		PkgEqualList                   func(childComplexity int, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) int
+		PointOfContact                 func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
+		PointOfContactList             func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
+		QueryPackagesListForScan       func(childComplexity int, pkgIDs []string, after *string, first *int) int
+		Scorecards                     func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
+		ScorecardsList                 func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
+		Sources                        func(childComplexity int, sourceSpec model.SourceSpec) int
+		SourcesList                    func(childComplexity int, sourceSpec model.SourceSpec, after *string, first *int) int
+		VulnEqual                      func(childComplexity int, vulnEqualSpec model.VulnEqualSpec) int
+		VulnEqualList                  func(childComplexity int, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) int
+		Vulnerabilities                func(childComplexity int, vulnSpec model.VulnerabilitySpec) int
+		VulnerabilityList              func(childComplexity int, vulnSpec model.VulnerabilitySpec, after *string, first *int) int
+		VulnerabilityMetadata          func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) int
+		VulnerabilityMetadataList      func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) int
 	}
 
 	SLSA struct {
@@ -3059,6 +3065,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int)), true
 
+	case "Query.BatchQueryDepPkgDependency":
+		if e.complexity.Query.BatchQueryDepPkgDependency == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryDepPkgDependency_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryDepPkgDependency(childComplexity, args["pkgIDs"].([]string)), true
+
+	case "Query.BatchQueryPkgIDCertifyLegal":
+		if e.complexity.Query.BatchQueryPkgIDCertifyLegal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryPkgIDCertifyLegal(childComplexity, args["pkgIDs"].([]string)), true
+
+	case "Query.BatchQueryPkgIDCertifyVuln":
+		if e.complexity.Query.BatchQueryPkgIDCertifyVuln == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQueryPkgIDCertifyVuln(childComplexity, args["pkgIDs"].([]string)), true
+
+	case "Query.BatchQuerySubjectPkgDependency":
+		if e.complexity.Query.BatchQuerySubjectPkgDependency == nil {
+			break
+		}
+
+		args, err := ec.field_Query_BatchQuerySubjectPkgDependency_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BatchQuerySubjectPkgDependency(childComplexity, args["pkgIDs"].([]string)), true
+
 	case "Query.builders":
 		if e.complexity.Query.Builders == nil {
 			break
@@ -3202,6 +3256,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CertifyVulnList(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.findPackagesThatNeedScanning":
+		if e.complexity.Query.FindPackagesThatNeedScanning == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findPackagesThatNeedScanning_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindPackagesThatNeedScanning(childComplexity, args["queryType"].(model.QueryType), args["lastScan"].(*int)), true
 
 	case "Query.findSoftware":
 		if e.complexity.Query.FindSoftware == nil {
@@ -3550,6 +3616,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PointOfContactList(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.queryPackagesListForScan":
+		if e.complexity.Query.QueryPackagesListForScan == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryPackagesListForScan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryPackagesListForScan(childComplexity, args["pkgIDs"].([]string), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -5027,7 +5105,7 @@ The certification information is either copied from an attestation found in an
 SBOM or created by a collector/scanner.
 
 Discovered license is also known as Concluded. More information:
-https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 
 Attribution is also known as Copyright Text. It is what could be displayed to
 comply with notice
@@ -5131,6 +5209,8 @@ extend type Query {
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
   "Returns a paginated results via CertifyLegalConnection"
   CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
+  "Batch queries via pkgVersion IDs to find all CertifyLegal (latest timestamp)"
+  BatchQueryPkgIDCertifyLegal(pkgIDs: [ID!]!): [CertifyLegal!]!
 }
 
 extend type Mutation {
@@ -5624,6 +5704,8 @@ extend type Query {
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
   "Returns a paginated results via CertifyVulnConnection"
   CertifyVulnList(certifyVulnSpec: CertifyVulnSpec!, after: ID, first: Int): CertifyVulnConnection
+  "Batch queries via pkgVersion IDs to find all CertifyVulns (latest timestamp) that contain vulnerabilities"
+  BatchQueryPkgIDCertifyVuln(pkgIDs: [ID!]!): [CertifyVuln!]!
 }
 
 extend type Mutation {
@@ -6486,6 +6568,10 @@ extend type Query {
   IsDependency(isDependencySpec: IsDependencySpec!): [IsDependency!]!
   "Returns a paginated results via IsDependencyConnection"
   IsDependencyList(isDependencySpec: IsDependencySpec!, after: ID, first: Int): IsDependencyConnection
+  "Batch queries via pkgVersion IDs to find to find all isDependency nodes that have the subject pkg ID"
+  BatchQuerySubjectPkgDependency(pkgIDs: [ID!]!): [IsDependency!]!
+  "Batch queries via pkgVersion IDs to find to find all isDependency nodes that have the dependency pkg ID"
+  BatchQueryDepPkgDependency(pkgIDs: [ID!]!): [IsDependency!]!
 }
 
 extend type Mutation {
@@ -7574,6 +7660,20 @@ type SoftwareEdge {
   node: PackageSourceOrArtifact!
 }
 
+"""
+QueryType is used in conjunction with queryPackagesListForScan to
+specify if the last time scanned is checked for either certifyVuln
+or certifyLegal.
+"""
+enum QueryType {
+  "direct dependency"
+  VULNERABILITY
+  "indirect dependency"
+  LICENSE
+  "indirect dependency"
+  EOL
+}
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -7597,6 +7697,23 @@ extend type Query {
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
   "Returns a paginated results via CertifyBadConnection"
   findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
+  """
+  queryPackagesListForScan returns a paginated results via PackageConnection 
+  for all packages that need to be re-scanned based on the list of PkgIDs that
+  are found from findPackagesThatNeedScanning
+  """
+  queryPackagesListForScan(pkgIDs: [ID!]!, after: ID, first: Int): PackageConnection
+  """
+  findPackagesThatNeedScanning returns a list of package IDs
+  for all packages that need to be re-scanned (based on the last scan in hours)
+  or have never been scanned. By default it will filter out all packages that have
+  the type "GUAC" as those are internal packages and will not be found
+  by external service providers.
+
+  queryType is used to specify if the last time scanned is checked for either
+  certifyVuln or certifyLegal.
+  """
+  findPackagesThatNeedScanning(queryType: QueryType!, lastScan: Int): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#

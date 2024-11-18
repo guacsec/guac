@@ -26,7 +26,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/guacsec/guac/pkg/version"
+
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -34,10 +35,9 @@ import (
 	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
-	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
-	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/guacsec/guac/pkg/assembler/kv/redis"
+	"github.com/guacsec/guac/pkg/assembler/server"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
@@ -78,11 +78,13 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 
-	srv, err := getGraphqlServer(ctx)
+	backend, err := backends.Get(flags.backend, ctx, getOpts[flags.backend](ctx))
 	if err != nil {
-		logger.Errorf("unable to initialize graphql server: %v", err)
+		logger.Errorf("error creating %v backend: %w", flags.backend, err)
 		os.Exit(1)
 	}
+
+	srv := server.GetGraphqlServer(ctx, backend)
 
 	metric, err := setupPrometheus(ctx, "guacgql")
 	if err != nil {
@@ -101,6 +103,7 @@ func startServer(cmd *cobra.Command) {
 	}
 
 	http.HandleFunc("/healthz", healthHandler)
+	http.HandleFunc("/version", versionHandler)
 
 	http.Handle("/query", srvHandler)
 	proto := "http"
@@ -170,25 +173,15 @@ func validateFlags() error {
 	return nil
 }
 
-func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
-	var topResolver resolvers.Resolver
-
-	backend, err := backends.Get(flags.backend, ctx, getOpts[flags.backend](ctx))
-	if err != nil {
-		return nil, fmt.Errorf("Error creating %v backend: %w", flags.backend, err)
-	}
-	topResolver = resolvers.Resolver{Backend: backend}
-
-	config := generated.Config{Resolvers: &topResolver}
-	config.Directives.Filter = resolvers.Filter
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
-
-	return srv, nil
-}
-
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, "Server is healthy")
+}
+
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, version.Version)
 }
 
 func getArango(_ context.Context) backends.BackendArgs {

@@ -389,20 +389,36 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 	}
 
 	if filter.Artifact != nil {
-		predicates = append(predicates,
-			occurrence.HasArtifactWith(artifactQueryPredicates(filter.Artifact)),
-		)
+		if filter.Artifact.ID != nil {
+			predicates = append(predicates,
+				optionalPredicate(filter.Artifact.ID, artifactIDEQ))
+		} else {
+			predicates = append(predicates,
+				occurrence.HasArtifactWith(artifactQueryPredicates(filter.Artifact)),
+			)
+		}
 	}
 
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
-			predicates = append(predicates, occurrence.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+			if filter.Subject.Package.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Package.ID, packageIDEQ))
+				predicates = append(predicates, occurrence.SourceIDIsNil())
+			} else {
+				predicates = append(predicates,
+					occurrence.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+			}
 		} else if filter.Subject.Source != nil {
-			predicates = append(predicates,
-				occurrence.HasSourceWith(
-					sourceQuery(filter.Subject.Source),
-				),
-			)
+			if filter.Subject.Source.ID != nil {
+				predicates = append(predicates, optionalPredicate(filter.Subject.Source.ID, sourceIDEQ))
+				predicates = append(predicates, occurrence.PackageIDIsNil())
+			} else {
+				predicates = append(predicates,
+					occurrence.HasSourceWith(
+						sourceQuery(filter.Subject.Source),
+					),
+				)
+			}
 		}
 	}
 	return occurrence.And(predicates...)

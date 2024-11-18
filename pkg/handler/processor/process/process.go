@@ -39,6 +39,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/handler/processor/ite6"
+	"github.com/guacsec/guac/pkg/handler/processor/jsonlines"
 	"github.com/guacsec/guac/pkg/handler/processor/open_vex"
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
@@ -65,6 +66,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&scorecard.ScorecardProcessor{}, processor.DocumentScorecard)
 	_ = RegisterDocumentProcessor(&cyclonedx.CycloneDXProcessor{}, processor.DocumentCycloneDX)
 	_ = RegisterDocumentProcessor(&deps_dev.DepsDev{}, processor.DocumentDepsDev)
+	_ = RegisterDocumentProcessor(&jsonlines.JsonLinesProcessor{}, processor.DocumentOpaque)
 }
 
 func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {
@@ -234,6 +236,13 @@ func validateFormat(i *processor.Document) error {
 		if !json.Valid(i.Blob) {
 			return fmt.Errorf("invalid JSON document")
 		}
+	case processor.FormatJSONLines:
+		lines := bytes.Split(i.Blob, []byte("\n"))
+		for _, line := range lines {
+			if len(line) > 0 && !json.Valid(line) {
+				return fmt.Errorf("invalid JSON Lines document")
+			}
+		}
 	case processor.FormatXML:
 		if err := xml.Unmarshal(i.Blob, &struct{}{}); err != nil {
 			return fmt.Errorf("invalid XML document")
@@ -279,7 +288,7 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 			}
 		}
 	}
-	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
+	logger.Debugf("Decoding document with encoding:  %v", i.Encoding)
 	switch i.Encoding {
 	case processor.EncodingBzip2:
 		reader = bzip2.NewReader(bytes.NewReader(i.Blob))

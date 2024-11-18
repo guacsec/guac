@@ -20,13 +20,10 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
-  actions: read   # for detecting the Github Actions environment.
-  contents: write # To upload assets to release.
-  packages: write # To publish container images to GHCR
-  id-token: write # needed for signing the images with GitHub OIDC Token
+  actions: read # for detecting the Github Actions environment.
 
 jobs:
   goreleaser:
@@ -37,9 +34,10 @@ jobs:
       digest: ${{ steps.hash.outputs.digest }}
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -47,18 +45,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
         with:
-          go-version: '1.21'
+          go-version: "1.21"
       - name: Install cosign
-        uses:  sigstore/cosign-installer@4959ce089c160fddf62f7b42464195ba1a56d382 # main
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # main
       - name: Install syft
-        uses: anchore/sbom-action/download-syft@d94f46e13c6c62f59525ac9a1e147a99dc0b9bf5 # v0.17.0
+        uses: anchore/sbom-action/download-syft@fc46e51fd3cb168ffb36c6d1915723c47db58abb # v0.17.7
 
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         id: run-goreleaser-snapshot
-        uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
+        uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6.1.0
         with:
           distribution: goreleaser
           version: latest
@@ -70,12 +68,12 @@ jobs:
       - name: Run GoReleaser Release
         if: startsWith(github.ref, 'refs/tags/')
         id: run-goreleaser-release
-        uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
+        uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6.1.0
         with:
           distribution: goreleaser
           version: latest
           # use .goreleaser-nightly.yaml for nightly build; otherwise use the default
-          args: ${{ contains( github.ref, 'nightly' ) && 'release --clean -f .goreleaser-nightly.yaml' || 'release --clean' }} 
+          args: ${{ contains( github.ref, 'nightly' ) && 'release --clean -f .goreleaser-nightly.yaml' || 'release --clean' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_CONTEXT: default
@@ -87,7 +85,7 @@ jobs:
           ARTIFACTS: "${{ steps.run-goreleaser-release.outputs.artifacts }}"
         run: |
           set -euo pipefail
-  
+
           hashes=$(echo $ARTIFACTS | jq --raw-output '.[] | {name, "digest": (.extra.Digest // .extra.Checksum)} | select(.digest) | {digest} + {name} | join("  ") | sub("^sha256:";"")' | base64 -w0)
           if test "$hashes" = ""; then # goreleaser < v1.13.0
             checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
@@ -100,15 +98,48 @@ jobs:
           digest=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).extra.Digest')
           echo "digest=$digest" >> $GITHUB_OUTPUT
 
+  build-atlas:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push the Docker image
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
+        with:
+          context: ./pkg/assembler/backends/ent/migrate
+          push: true
+          tags: ghcr.io/${{ github.repository }}/atlas-migration:${{ github.ref_name }}
+
+      - name: Log out of GitHub Container Registry
+        run: docker logout ghcr.io
+
   sbom-container:
     # generate sbom for container as goreleaser can't - https://goreleaser.com/customization/sbom/#limitations
     name: generate sbom for container
     runs-on: ubuntu-latest
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      id-token: write # needed for signing the images with GitHub OIDC Token
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -116,13 +147,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Trivy in fs mode to generate SBOM
-        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # master
+        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # master
         with:
-          scan-type: 'fs'
-          format: 'spdx-json'
-          output: 'spdx.sbom.json'
+          scan-type: "fs"
+          format: "spdx-json"
+          output: "spdx.sbom.json"
       - name: Install cosign
-        uses: sigstore/cosign-installer@4959ce089c160fddf62f7b42464195ba1a56d382 # main
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash
@@ -159,9 +190,14 @@ jobs:
     name: generate compose tarball
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write # To upload assets to release.
+      packages: write # To publish container images to GHCR
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag=v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
       - name: Create and publish compose tarball
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

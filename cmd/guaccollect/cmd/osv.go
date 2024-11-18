@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
@@ -39,6 +40,10 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+)
+
+const (
+	osvQuerySize = 999
 )
 
 type osvOptions struct {
@@ -54,13 +59,13 @@ type osvOptions struct {
 	interval time.Duration
 	// enable/disable message publish to queue
 	publishToQueue bool
-	// days since the last vulnerability scan was run.
-	// 0 means only run once
-	daysSinceLastScan int
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// last time the scan was done in hours, if not set it will return
+	// all packages to check
+	lastScan *int
 }
 
 var osvCmd = &cobra.Command{
@@ -90,9 +95,9 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("interval"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
-			viper.GetInt("last-scan"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetInt("last-scan"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -111,7 +116,7 @@ you have access to read and write to the respective blob store.`,
 		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		packageQueryFunc, err := getPackageQuery(gqlclient, opts.daysSinceLastScan, opts.batchSize, opts.addedLatency)
+		packageQueryFunc, err := getOSVPackageQuery(gqlclient, opts.batchSize, opts.addedLatency, opts.lastScan)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -129,9 +134,8 @@ func validateOSVFlags(
 	interval string,
 	poll bool,
 	pubToQueue bool,
-	daysSince int,
 	certifierLatencyStr string,
-	batchSize int) (osvOptions, error) {
+	batchSize int, lastScan int) (osvOptions, error) {
 
 	var opts osvOptions
 
@@ -147,7 +151,6 @@ func validateOSVFlags(
 		return opts, fmt.Errorf("failed to parser duration with error: %w", err)
 	}
 	opts.interval = i
-	opts.daysSinceLastScan = daysSince
 
 	if certifierLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(certifierLatencyStr)
@@ -160,7 +163,9 @@ func validateOSVFlags(
 	}
 
 	opts.batchSize = batchSize
-
+	if lastScan != 0 {
+		opts.lastScan = &lastScan
+	}
 	return opts, nil
 }
 
@@ -170,9 +175,9 @@ func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 	}, nil
 }
 
-func getPackageQuery(client graphql.Client, daysSinceLastScan int, batchSize int, addedLatency *time.Duration) (func() certifier.QueryComponents, error) {
+func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time.Duration, lastScan *int) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, daysSinceLastScan, batchSize, addedLatency)
+		packageQuery := root_package.NewPackageQuery(client, generated.QueryTypeVulnerability, batchSize, osvQuerySize, addedLatency, lastScan)
 		return packageQuery
 	}, nil
 }
@@ -222,11 +227,10 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 	// Collect
 	errHandler := func(err error) bool {
 		if err == nil {
-			logger.Info("certifier ended gracefully")
 			return true
 		}
-		logger.Errorf("certifier ended with error: %v", err)
-		// Continue to emit any documents still in the docChan
+		logger.Errorf("certifier encountered an error: %v, continuing...", err)
+		// log the error but continue forward with the rest of the package processing
 		return true
 	}
 
@@ -255,8 +259,8 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
-		"last-scan", "header-file", "certifier-latency",
-		"certifier-batch-size"})
+		"header-file", "certifier-latency",
+		"certifier-batch-size", "last-scan"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

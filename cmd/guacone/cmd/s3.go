@@ -51,6 +51,8 @@ type s3Options struct {
 	csubClientOptions       csub_client.CsubClientOptions // options for the collectsub client
 	queryVulnOnIngestion    bool
 	queryLicenseOnIngestion bool
+	queryEOLOnIngestion     bool
+	queryDepsDevOnIngestion bool
 }
 
 var s3Cmd = &cobra.Command{
@@ -96,6 +98,8 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetBool("poll"),
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetBool("add-license-on-ingest"),
+			viper.GetBool("add-eol-on-ingest"),
+			viper.GetBool("add-depsdev-on-ingest"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -137,7 +141,17 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 		errFound := false
 
 		emit := func(d *processor.Document) error {
-			_, err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, transport, csubClient, s3Opts.queryVulnOnIngestion, s3Opts.queryLicenseOnIngestion)
+			_, err := ingestor.Ingest(
+				ctx,
+				d,
+				s3Opts.graphqlEndpoint,
+				transport,
+				csubClient,
+				s3Opts.queryVulnOnIngestion,
+				s3Opts.queryLicenseOnIngestion,
+				s3Opts.queryEOLOnIngestion,
+				s3Opts.queryDepsDevOnIngestion,
+			)
 
 			if err != nil {
 				errFound = true
@@ -184,7 +198,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 }
 
 func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, s3path, region, s3item, mp, mpEndpoint, queues string,
-	csubTls, csubTlsSkipVerify, poll bool, queryVulnIngestion bool, queryLicenseIngestion bool) (s3Options, error) {
+	csubTls, csubTlsSkipVerify, poll bool, queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevIngestion bool) (s3Options, error) {
 	var opts s3Options
 
 	if poll {
@@ -208,7 +222,7 @@ func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, s3pa
 	}
 
 	opts = s3Options{s3url, s3bucket, s3path, s3item, region, queues, mp, mpEndpoint, poll, graphqlEndpoint, headerFile,
-		csubClientOptions, queryVulnIngestion, queryLicenseIngestion}
+		csubClientOptions, queryVulnIngestion, queryLicenseIngestion, queryEOLIngestion, queryDepsDevIngestion}
 
 	return opts, nil
 }

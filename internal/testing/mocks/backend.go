@@ -70,6 +70,66 @@ func (mr *MockBackendMockRecorder) ArtifactsList(ctx, artifactSpec, after, first
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArtifactsList", reflect.TypeOf((*MockBackend)(nil).ArtifactsList), ctx, artifactSpec, after, first)
 }
 
+// BatchQueryDepPkgDependency mocks base method.
+func (m *MockBackend) BatchQueryDepPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQueryDepPkgDependency", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.IsDependency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQueryDepPkgDependency indicates an expected call of BatchQueryDepPkgDependency.
+func (mr *MockBackendMockRecorder) BatchQueryDepPkgDependency(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryDepPkgDependency", reflect.TypeOf((*MockBackend)(nil).BatchQueryDepPkgDependency), ctx, pkgIDs)
+}
+
+// BatchQueryPkgIDCertifyLegal mocks base method.
+func (m *MockBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []string) ([]*model.CertifyLegal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQueryPkgIDCertifyLegal", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.CertifyLegal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQueryPkgIDCertifyLegal indicates an expected call of BatchQueryPkgIDCertifyLegal.
+func (mr *MockBackendMockRecorder) BatchQueryPkgIDCertifyLegal(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryPkgIDCertifyLegal", reflect.TypeOf((*MockBackend)(nil).BatchQueryPkgIDCertifyLegal), ctx, pkgIDs)
+}
+
+// BatchQueryPkgIDCertifyVuln mocks base method.
+func (m *MockBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []string) ([]*model.CertifyVuln, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQueryPkgIDCertifyVuln", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.CertifyVuln)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQueryPkgIDCertifyVuln indicates an expected call of BatchQueryPkgIDCertifyVuln.
+func (mr *MockBackendMockRecorder) BatchQueryPkgIDCertifyVuln(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQueryPkgIDCertifyVuln", reflect.TypeOf((*MockBackend)(nil).BatchQueryPkgIDCertifyVuln), ctx, pkgIDs)
+}
+
+// BatchQuerySubjectPkgDependency mocks base method.
+func (m *MockBackend) BatchQuerySubjectPkgDependency(ctx context.Context, pkgIDs []string) ([]*model.IsDependency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchQuerySubjectPkgDependency", ctx, pkgIDs)
+	ret0, _ := ret[0].([]*model.IsDependency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchQuerySubjectPkgDependency indicates an expected call of BatchQuerySubjectPkgDependency.
+func (mr *MockBackendMockRecorder) BatchQuerySubjectPkgDependency(ctx, pkgIDs any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchQuerySubjectPkgDependency", reflect.TypeOf((*MockBackend)(nil).BatchQuerySubjectPkgDependency), ctx, pkgIDs)
+}
+
 // Builders mocks base method.
 func (m *MockBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	m.ctrl.T.Helper()
@@ -263,6 +323,21 @@ func (m *MockBackend) Delete(ctx context.Context, node string) (bool, error) {
 func (mr *MockBackendMockRecorder) Delete(ctx, node any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBackend)(nil).Delete), ctx, node)
+}
+
+// FindPackagesThatNeedScanning mocks base method.
+func (m *MockBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType model.QueryType, lastScan *int) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindPackagesThatNeedScanning", ctx, queryType, lastScan)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindPackagesThatNeedScanning indicates an expected call of FindPackagesThatNeedScanning.
+func (mr *MockBackendMockRecorder) FindPackagesThatNeedScanning(ctx, queryType, lastScan any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPackagesThatNeedScanning", reflect.TypeOf((*MockBackend)(nil).FindPackagesThatNeedScanning), ctx, queryType, lastScan)
 }
 
 // FindSoftware mocks base method.
@@ -1388,6 +1463,21 @@ func (m *MockBackend) PointOfContactList(ctx context.Context, pointOfContactSpec
 func (mr *MockBackendMockRecorder) PointOfContactList(ctx, pointOfContactSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PointOfContactList", reflect.TypeOf((*MockBackend)(nil).PointOfContactList), ctx, pointOfContactSpec, after, first)
+}
+
+// QueryPackagesListForScan mocks base method.
+func (m *MockBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryPackagesListForScan", ctx, pkgIDs, after, first)
+	ret0, _ := ret[0].(*model.PackageConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryPackagesListForScan indicates an expected call of QueryPackagesListForScan.
+func (mr *MockBackendMockRecorder) QueryPackagesListForScan(ctx, pkgIDs, after, first any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForScan", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForScan), ctx, pkgIDs, after, first)
 }
 
 // Scorecards mocks base method.

@@ -16,13 +16,14 @@
 package dochelper
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -141,6 +142,23 @@ func DocNode(v *processor.Document, children ...*processor.DocumentNode) *proces
 	}
 }
 
+type minimalDocument struct {
+	Subject []struct {
+		URI string `json:"uri"`
+	} `json:"subject"`
+}
+
+func ExtractURI(blob []byte) (string, error) {
+	var doc minimalDocument
+	if err := json.Unmarshal(blob, &doc); err != nil {
+		return "", err
+	}
+	if len(doc.Subject) == 0 {
+		return "", errors.New("no subject found in document")
+	}
+	return doc.Subject[0].URI, nil
+}
+
 func DocEqualWithTimestamp(gotDoc, wantDoc *processor.Document) (bool, error) {
 	var testTime = time.Unix(1597826280, 0)
 
@@ -155,8 +173,11 @@ func DocEqualWithTimestamp(gotDoc, wantDoc *processor.Document) (bool, error) {
 	}
 
 	// change the timestamp to match else it will fail to compare
-	want.Predicate.Metadata.ScannedOn = &testTime
-	got.Predicate.Metadata.ScannedOn = &testTime
+	want.Predicate.Metadata.ScanStartedOn = &testTime
+	got.Predicate.Metadata.ScanStartedOn = &testTime
+
+	want.Predicate.Metadata.ScanFinishedOn = &testTime
+	got.Predicate.Metadata.ScanFinishedOn = &testTime
 
 	return reflect.DeepEqual(want, got), nil
 }

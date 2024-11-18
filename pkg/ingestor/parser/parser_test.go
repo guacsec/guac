@@ -293,7 +293,7 @@ func TestParseDocumentTree(t *testing.T) {
 
 			_ = RegisterDocumentParser(f, test.registerDocType) // Ignoring error because it is mutating a global variable
 
-			got, got1, err := ParseDocumentTree(ctx, test.docTree, true, true)
+			got, got1, err := ParseDocumentTree(ctx, test.docTree, true, true, true, false)
 
 			if (err != nil) != test.wantErr {
 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, test.wantErr)

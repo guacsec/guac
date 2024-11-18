@@ -69,7 +69,7 @@ type vulnData struct {
 	vex          []assembler.VexIngest
 }
 
-var unsupportedLicenseVersionError error = errors.New("GUAC CycloneDX license ingestion currently only support CycloneDX v1.5")
+var errUnsupportedLicenseVersion error = errors.New("GUAC CycloneDX license ingestion currently only support CycloneDX v1.5")
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
@@ -210,8 +210,12 @@ func parseContainerType(name string, version string, topLevel bool) string {
 }
 
 func (c *cyclonedxParser) getPackages() error {
-	if c.cdxBom.Components != nil {
-		for _, comp := range *c.cdxBom.Components {
+	return traverseComponents(*c, c.cdxBom.Components)
+}
+
+func traverseComponents(c cyclonedxParser, components *[]cdx.Component) error {
+	if components != nil {
+		for _, comp := range *components {
 			// skipping over the "operating-system" type as it does not contain
 			// the required purl for package node. Currently there is no use-case
 			// to capture OS for GUAC.
@@ -234,7 +238,7 @@ func (c *cyclonedxParser) getPackages() error {
 				return err
 			}
 			c.packagePackages[comp.BOMRef] = append(c.packagePackages[comp.BOMRef], pkg)
-			c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, comp.PackageURL)
+			c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
 
 			// if checksums exists create an artifact for each of them
 			if comp.Hashes != nil {
@@ -249,6 +253,10 @@ func (c *cyclonedxParser) getPackages() error {
 			// get other component packages
 			if err := c.getLicenseInformation(comp); err != nil {
 				return fmt.Errorf("failed to get license information for component package with error: %w", err)
+			}
+
+			if err := traverseComponents(c, comp.Components); err != nil {
+				return err
 			}
 		}
 	}
@@ -294,7 +302,7 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 				// having multiple expressions is not valid per v1.5 so we currently do not support any
 				// version below it.
 				if compLicense.Expression != "" {
-					return unsupportedLicenseVersionError
+					return errUnsupportedLicenseVersion
 				}
 				// skip if the license is not set or the SPDX expression is not set
 				if compLicense.License == nil {
@@ -352,7 +360,21 @@ func ParseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 }
 
 func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	// filter our duplicate identifiers
+	common.RemoveDuplicateIdentifiers(c.identifierStrings)
 	return c.identifierStrings, nil
+}
+
+func getArtifactInput(subject string) (*model.ArtifactInputSpec, error) {
+	split := strings.Split(subject, ":")
+	if len(split) != 2 {
+		return nil, fmt.Errorf("failed to parse subject: %s. Needs to be in algorithm:digest form", subject)
+	}
+	artifactInput := &model.ArtifactInputSpec{
+		Algorithm: strings.ToLower(split[0]),
+		Digest:    strings.ToLower(split[1]),
+	}
+	return artifactInput, nil
 }
 
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
@@ -362,8 +384,26 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	var topLevelPkgs []*model.PkgInputSpec
 
 	if c.cdxBom.Metadata != nil && c.cdxBom.Metadata.Component != nil {
-		topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
-		topLevelPkgs = c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]
+		if c.cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
+			if pkgs, exists := c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]; exists {
+				topLevelPkgs = append(topLevelPkgs, pkgs...)
+			}
+
+			if topLevelPkgs[0].Version != nil && *topLevelPkgs[0].Version != "" {
+				artInput, err := getArtifactInput(*topLevelPkgs[0].Version)
+				if err != nil {
+					logger.Infof("CDX artifact was not parsable: %v", err)
+				} else {
+					topLevelArts = append(topLevelArts, artInput)
+					// append to packageArtifacts so that isOccurrence is created
+					c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef] = append(c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef], artInput)
+					logger.Infof("getArtInput %v", artInput)
+				}
+			}
+		} else {
+			topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
+			topLevelPkgs = c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]
+		}
 	}
 
 	// adding top level package edge manually for all depends on package

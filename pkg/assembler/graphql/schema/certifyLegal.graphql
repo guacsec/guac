@@ -24,7 +24,7 @@ The certification information is either copied from an attestation found in an
 SBOM or created by a collector/scanner.
 
 Discovered license is also known as Concluded. More information:
-https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+https://docs.clearlydefined.io/docs/curation/curation-guidelines#the-difference-between-declared-and-discovered-licenses
 
 Attribution is also known as Copyright Text. It is what could be displayed to
 comply with notice
@@ -128,6 +128,8 @@ extend type Query {
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
   "Returns a paginated results via CertifyLegalConnection"
   CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
+  "Batch queries via pkgVersion IDs to find all CertifyLegal (latest timestamp)"
+  BatchQueryPkgIDCertifyLegal(pkgIDs: [ID!]!): [CertifyLegal!]!
 }
 
 extend type Mutation {

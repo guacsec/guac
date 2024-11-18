@@ -18,12 +18,12 @@ package root_package
 import (
 	"context"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 const guacType string = "guac"
@@ -36,33 +36,46 @@ type PackageNode struct {
 
 type packageQuery struct {
 	client graphql.Client
-	// daysSinceLastScan sets the days since the last vulnerability scan was run
-	daysSinceLastScan int
 	// set the batch size for the package pagination query
 	batchSize int
+	// set the batch size for the service query (for example: 250 for CD and 1000 for osv)
+	serviceBatchSize int
 	// add artificial latency to throttle the pagination query
 	addedLatency *time.Duration
+	lastScan     *int
+	queryType    generated.QueryType
 }
 
-var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
-var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
+var getPackages func(ctx_ context.Context, client_ graphql.Client, pkgIDs []string, after *string, first *int) (*generated.QueryPackagesListForScanResponse, error)
+var findPackagesThatNeedScanning func(ctx_ context.Context, client_ graphql.Client, queryType generated.QueryType, lastScan *int) (*generated.FindPackagesThatNeedScanningResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphql.Client, daysSinceLastScan, batchSize int, addedLatency *time.Duration) certifier.QueryComponents {
-	getPackages = generated.PackagesList
-	getNeighbors = generated.Neighbors
+func NewPackageQuery(client graphql.Client, queryType generated.QueryType, batchSize, serviceBatchSize int, addedLatency *time.Duration, lastScan *int) certifier.QueryComponents {
+	getPackages = generated.QueryPackagesListForScan
+	findPackagesThatNeedScanning = generated.FindPackagesThatNeedScanning
 	return &packageQuery{
-		client:            client,
-		daysSinceLastScan: daysSinceLastScan,
-		batchSize:         batchSize,
-		addedLatency:      addedLatency,
+		client:           client,
+		batchSize:        batchSize,
+		serviceBatchSize: serviceBatchSize,
+		addedLatency:     addedLatency,
+		lastScan:         lastScan,
+		queryType:        queryType,
 	}
 }
 
-// GetComponents get all the packages that do not have a certify vulnerability attached or last scanned is more than daysSinceLastScan
+// GetComponents get all the packages
 func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
+	}
+
+	// logger
+	logger := logging.FromContext(ctx)
+	if p.lastScan != nil {
+		lastScanTime := time.Now().Add(time.Duration(-*p.lastScan) * time.Hour).UTC()
+		logger.Infof("last-scan set to: %d hours, last scan time set to: %v", *p.lastScan, lastScanTime)
+	} else {
+		logger.Infof("last-scan not set, running on full package list")
 	}
 
 	tickInterval := 5 * time.Second
@@ -91,7 +104,7 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 			}
 			ticker.Reset(tickInterval)
 		case d := <-nodeChan:
-			if len(packNodes) < 999 {
+			if len(packNodes) < p.serviceBatchSize {
 				packNodes = append(packNodes, d)
 			} else {
 				packNodes = append(packNodes, d)
@@ -111,7 +124,7 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 
 	for len(nodeChan) > 0 {
 		d := <-nodeChan
-		if len(packNodes) < 999 {
+		if len(packNodes) < p.serviceBatchSize {
 			packNodes = append(packNodes, d)
 		} else {
 			packNodes = append(packNodes, d)
@@ -131,16 +144,24 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 	var afterCursor *string
 
 	first := p.batchSize
-	//first := 60000
+
+	pkgScanResults, err := findPackagesThatNeedScanning(ctx, p.client, p.queryType, p.lastScan)
+	if err != nil {
+		return fmt.Errorf("findPackagesThatNeedScanning query failed with error: %w", err)
+	}
+
+	pkgIDs := pkgScanResults.FindPackagesThatNeedScanning
+
 	for {
-		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, afterCursor, &first)
+		pkgConn, err := getPackages(ctx, p.client, pkgIDs, afterCursor, &first)
 		if err != nil {
 			return fmt.Errorf("failed to query packages with error: %w", err)
 		}
-		if pkgConn == nil || pkgConn.PackagesList == nil {
-			continue
+
+		if pkgConn == nil || pkgConn.QueryPackagesListForScan == nil {
+			break
 		}
-		pkgEdges := pkgConn.PackagesList.Edges
+		pkgEdges := pkgConn.QueryPackagesListForScan.Edges
 
 		for _, pkgNode := range pkgEdges {
 			if pkgNode.Node.Type == guacType {
@@ -149,45 +170,18 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *Pac
 			for _, namespace := range pkgNode.Node.Namespaces {
 				for _, name := range namespace.Names {
 					for _, version := range name.Versions {
-						response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln})
-						if err != nil {
-							return fmt.Errorf("failed neighbors query: %w", err)
+						packNode := PackageNode{
+							Purl: version.Purl,
 						}
-						vulnList := []*generated.NeighborsNeighborsCertifyVuln{}
-						certifyVulnFound := false
-						for _, neighbor := range response.Neighbors {
-							if certifyVuln, ok := neighbor.(*generated.NeighborsNeighborsCertifyVuln); ok {
-								vulnList = append(vulnList, certifyVuln)
-							}
-						}
-						// collect all certifyVulnerability and then check timestamp else if not checking timestamp,
-						// if a certifyVulnerability is found break out
-						for _, vulns := range vulnList {
-							if p.daysSinceLastScan != 0 {
-								now := time.Now()
-								difference := vulns.Metadata.TimeScanned.Sub(now)
-								if math.Abs(difference.Hours()) < float64(p.daysSinceLastScan*24) {
-									certifyVulnFound = true
-								}
-							} else {
-								certifyVulnFound = true
-								break
-							}
-						}
-						if !certifyVulnFound {
-							packNode := PackageNode{
-								Purl: version.Purl,
-							}
-							nodeChan <- &packNode
-						}
+						nodeChan <- &packNode
 					}
 				}
 			}
 		}
-		if !pkgConn.PackagesList.PageInfo.HasNextPage {
+		if !pkgConn.QueryPackagesListForScan.PageInfo.HasNextPage {
 			break
 		}
-		afterCursor = pkgConn.PackagesList.PageInfo.EndCursor
+		afterCursor = pkgConn.QueryPackagesListForScan.PageInfo.EndCursor
 		// add artificial latency to throttle the pagination query
 		if p.addedLatency != nil {
 			time.Sleep(*p.addedLatency)

@@ -15,7 +15,7 @@
 
 // Package vuln attestation parser parses the attestation defined by by
 // the certifier using the predicate type
-// "https://in-toto.io/attestation/vuln/v0.1" Three different types of ingest
+// "https://in-toto.io/attestation/vulns/v0.1" Three different types of ingest
 // predicates are created.
 //
 // - IsOccurences are created mapping between any package
@@ -40,7 +40,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
@@ -74,7 +74,7 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	c.initializeVulnParser()
 	statement, err := parseVulnCertifyPredicate(doc.Blob)
 	if err != nil {
-		return fmt.Errorf("failed to parse slsa predicate: %w", err)
+		return fmt.Errorf("failed to parse vulns predicate: %w", err)
 	}
 	ps, err := parseSubject(statement)
 	if err != nil {
@@ -114,7 +114,7 @@ func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgI
 
 func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMetadataInput {
 	return &generated.ScanMetadataInput{
-		TimeScanned:    *s.Predicate.Metadata.ScannedOn,
+		TimeScanned:    *s.Predicate.Metadata.ScanFinishedOn,
 		DbUri:          s.Predicate.Scanner.Database.Uri,
 		DbVersion:      s.Predicate.Scanner.Database.Version,
 		ScannerUri:     s.Predicate.Scanner.Uri,
@@ -127,13 +127,13 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 	[]assembler.VulnEqualIngest, error) {
 	var vs []*generated.VulnerabilityInputSpec
 	var ivs []assembler.VulnEqualIngest
-	for _, id := range s.Predicate.Scanner.Result {
+	for _, res := range s.Predicate.Scanner.Result {
 		v := &generated.VulnerabilityInputSpec{
 			Type:            "osv",
-			VulnerabilityID: strings.ToLower(id.VulnerabilityId),
+			VulnerabilityID: strings.ToLower(res.Id),
 		}
 		vs = append(vs, v)
-		vuln, err := helpers.CreateVulnInput(id.VulnerabilityId)
+		vuln, err := helpers.CreateVulnInput(res.Id)
 		if err != nil {
 			return nil, nil, fmt.Errorf("createVulnInput failed with error: %w", err)
 		}
