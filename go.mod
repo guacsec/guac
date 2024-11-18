@@ -4,9 +4,11 @@ go 1.22.7
 
 require (
 	cloud.google.com/go/storage v1.46.0
+	github.com/dominikbraun/graph v0.23.0
 	github.com/fsouza/fake-gcs-server v1.50.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0
 	github.com/spf13/cobra v1.8.1
 	go.uber.org/zap v1.27.0
@@ -199,7 +201,6 @@ require (
 	github.com/nats-io/jwt/v2 v2.5.8 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d // indirect
 	github.com/onsi/ginkgo/v2 v2.13.1 // indirect
 	github.com/onsi/gomega v1.29.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
@@ -229,9 +230,8 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 // indirect
-	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
+	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -305,10 +305,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.36.1
 	github.com/cdevents/sdk-go v0.4.1
 	github.com/cloudevents/sdk-go/v2 v2.15.2
-
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getkin/kin-openapi v0.128.0
-
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-git/go-git/v5 v5.12.0
@@ -330,7 +328,6 @@ require (
 	github.com/nats-io/nats.go v1.37.0
 	github.com/oapi-codegen/oapi-codegen/v2 v2.3.1-0.20240823215434-d232e9efa9f5
 	github.com/oapi-codegen/runtime v1.1.1
-
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/openvex/go-vex v0.2.5
 	github.com/ossf/scorecard/v4 v4.13.1
@@ -343,7 +340,6 @@ require (
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.8.9
-
 	github.com/spdx/tools-golang v0.5.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
@@ -357,4 +353,14 @@ require (
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/time v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
+	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+)
+
+require (
+	github.com/gdamore/tcell/v2 v2.7.4
+	github.com/rivo/tview v0.0.0-20241103174730-c76f7879f592
 )

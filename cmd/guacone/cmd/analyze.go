@@ -111,25 +111,18 @@ var analyzeCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("compress graphs fail: %v", err)
 			}
-		
+
 			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(gOne, gTwo, analyzer.Difference)
 			if err != nil {
 				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
 
-			diffs, err:= analyzer.CompareAllPaths(analysisOne, analysisTwo)
+			diffs, err := analyzer.CompareAllPaths(analysisOne, analysisTwo)
 			if err != nil {
 				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
 
-	
-			
-
-			if err = analyzer.PrintDiffedNodeTable(diffs); err != nil {
-				logger.Fatalf("unable to print diff analysis: %v", err)
-			}
-
-			if err = analyzer.PrintDiffedPathTable(diffs); err != nil {
+			if err = analyzer.PrintAnalysis(diffs); err != nil {
 				logger.Fatalf("unable to print diff analysis: %v", err)
 			}
 
@@ -257,9 +250,6 @@ func init() {
 		"analyze-incl-deps",
 		"analyze-incl-occur",
 		"analyze-namespaces",
-		"analyze-output-dot",
-		"analyze-output-all",
-		"analyze-output-maxprint",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

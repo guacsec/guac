@@ -173,9 +173,6 @@ func init() {
 	set.Bool("analyze-incl-deps", false, "Compare Included Dependencies")
 	set.Bool("analyze-incl-occur", false, "Compare Included Occurrences")
 	set.Bool("analyze-namespaces", false, "Compare Package Namespaces")
-	set.Bool("analyze-output-dot", false, "create diff dot file")
-	set.Bool("analyze-output-all", false, " lists all")
-	set.Int("analyze-output-maxprint", 20, "max number of items to print")
 
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f

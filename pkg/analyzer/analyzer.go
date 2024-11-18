@@ -614,7 +614,7 @@ func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string)
 	return diffString
 }
 
-func FormatDiffs(diffs []diffmatchpatch.Diff) string {
+func FormatDiffsTableWriter(diffs []diffmatchpatch.Diff) string {
 
 	var parts []string
 	// Precompile color codes into variables
@@ -632,6 +632,30 @@ func FormatDiffs(diffs []diffmatchpatch.Diff) string {
 			prefix = colorRed + "-" + CheckEmptyTrim(diff.Text) + colorReset
 		case diffmatchpatch.DiffEqual:
 			prefix = colorWhite + " " + CheckEmptyTrim(diff.Text) + colorReset
+		}
+		parts = append(parts, prefix)
+	}
+	diffString := strings.Join(parts, "")
+	return diffString
+}
+
+func FormatDiffs(diffs []diffmatchpatch.Diff) string {
+
+	var parts []string
+	// Precompile color codes into variables
+	colorGreen := "[green]"
+	colorRed := "[red]"
+	colorWhite := "[white]"
+
+	for _, diff := range diffs {
+		var prefix string
+		switch diff.Type {
+		case diffmatchpatch.DiffInsert:
+			prefix = colorGreen + "+" + CheckEmptyTrim(diff.Text) 
+		case diffmatchpatch.DiffDelete:
+			prefix = colorRed + "-" + CheckEmptyTrim(diff.Text) 
+		case diffmatchpatch.DiffEqual:
+			prefix = colorWhite + " " + CheckEmptyTrim(diff.Text) 
 		}
 		parts = append(parts, prefix)
 	}
