@@ -43,13 +43,7 @@ const (
 	ColorWhite = "\033[37m"
 )
 
-var shaPatterns = []string{
-	`^[a-fA-F0-9]{40}$`,  // SHA-1
-	`^[a-fA-F0-9]{56}$`,  // SHA-224
-	`^[a-fA-F0-9]{64}$`,  // SHA-256
-	`^[a-fA-F0-9]{96}$`,  // SHA-384
-	`^[a-fA-F0-9]{128}$`, // SHA-512
-}
+
 
 const (
 	Pkg NodeType = iota
