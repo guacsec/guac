@@ -108,7 +108,6 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 		}
 	}
 
-
 	//REMOVE OUTGOING EDGES & REMOVE INCOMING EDGES & REMOVE NODES
 	for _, val := range nodesToRemove {
 

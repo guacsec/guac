@@ -3,6 +3,7 @@ package analyzer
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -128,56 +129,61 @@ func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 
 	rowIndex := 1 // Start adding rows below the header
 
-	// Add Analysis One Paths
-	for _, pathOne := range analysisOne {
-		columnIndex := 0
-		for _, nodeOne := range pathOne {
-			s, err := GetNodeString(*nodeOne)
-			if err != nil {
-				return fmt.Errorf("unable to process node: %v", err)
-			}
+	// Function to add paths to the table
+	addPathsToTable := func(paths [][]*Node, startRowIndex int) (int, error) {
+		rowIndex := startRowIndex
 
-			if columnIndex > 0 {
-				table.SetCell(rowIndex, columnIndex, tview.NewTableCell("--->").
-					SetTextColor(tcell.ColorWhite).
-					SetAlign(tview.AlignCenter).
-					SetSelectable(false))
+		for _, path := range paths {
+			columnIndex := 0
+			rowStart := rowIndex
+			for i, node := range path {
+				s, err := GetNodeString(*node)
+				if err != nil {
+					return rowIndex, fmt.Errorf("unable to process node: %v", err)
+				}
+
+				// Split the string by newline and handle tabs
+				lines := strings.Split(s, "\n")
+				for _, line := range lines {
+					// Replace tabs with spaces for better alignment
+					formattedLine := strings.ReplaceAll(line, "\t", "    ")
+					table.SetCell(rowIndex, columnIndex, tview.NewTableCell(formattedLine).
+						SetTextColor(tcell.ColorWhite).
+						SetAlign(tview.AlignLeft).
+						SetSelectable(true))
+					rowIndex++
+				}
+
+				if i != len(path)-1 {
+					table.SetCell(rowStart, columnIndex+1, tview.NewTableCell("--->").
+						SetTextColor(tcell.ColorWhite).
+						SetAlign(tview.AlignCenter).
+						SetSelectable(false))
+					columnIndex++
+				}
+
+				if i != len(path)-1 {
+					rowIndex = rowStart
+				}
+
 				columnIndex++
 			}
 
-			table.SetCell(rowIndex, columnIndex, tview.NewTableCell(s).
-				SetTextColor(tcell.ColorWhite).
-				SetAlign(tview.AlignLeft).
-				SetSelectable(true)) // Allow selection
-			columnIndex++
 		}
-		rowIndex++
+		return rowIndex, nil
+	}
+
+	// Add Analysis One Paths
+	var err error
+	rowIndex, err = addPathsToTable(analysisOne, rowIndex)
+	if err != nil {
+		return err
 	}
 
 	// Add Analysis Two Paths
-	for _, pathTwo := range analysisTwo {
-		columnIndex := 0
-		for _, nodeOne := range pathTwo {
-			s, err := GetNodeString(*nodeOne)
-			if err != nil {
-				return fmt.Errorf("unable to process node: %v", err)
-			}
-
-			if columnIndex > 0 {
-				table.SetCell(rowIndex, columnIndex, tview.NewTableCell("--->").
-					SetTextColor(tcell.ColorWhite).
-					SetAlign(tview.AlignCenter).
-					SetSelectable(false))
-				columnIndex++
-			}
-
-			table.SetCell(rowIndex, columnIndex, tview.NewTableCell(s).
-				SetTextColor(tcell.ColorWhite).
-				SetAlign(tview.AlignLeft).
-				SetSelectable(true)) // Allow selection
-			columnIndex++
-		}
-		rowIndex++
+	_, err = addPathsToTable(analysisTwo, rowIndex)
+	if err != nil {
+		return err
 	}
 
 	// Enable both horizontal and vertical scrolling
@@ -227,11 +233,54 @@ func PrintAnalysis(diffs DiffResult) error {
 				return fmt.Errorf("error processing node two: %v", err)
 			}
 
-			table.SetCell(rowIndex, 0, tview.NewTableCell(nodeOneStr).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignLeft))
-			table.SetCell(rowIndex, 1, tview.NewTableCell("<-->").SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
-			table.SetCell(rowIndex, 2, tview.NewTableCell(nodeTwoStr).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignLeft))
-			table.SetCell(rowIndex, 3, tview.NewTableCell(fmt.Sprintf("%v", diff.Count)).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
-			rowIndex++
+			nodeOneLines := strings.Split(nodeOneStr, "\n")
+			nodeTwoLines := strings.Split(nodeTwoStr, "\n")
+
+			// Determine the maximum lines for alignment
+			maxLines := len(nodeOneLines)
+			if len(nodeTwoLines) > maxLines {
+				maxLines = len(nodeTwoLines)
+			}
+
+			// Print each line, padding shorter sections with empty strings
+			for i := 0; i < maxLines; i++ {
+				// Get the current line or an empty string if out of bounds
+				nodeOneLine := ""
+				if i < len(nodeOneLines) {
+					nodeOneLine = strings.ReplaceAll(nodeOneLines[i], "\t", "    ")
+				}
+
+				nodeTwoLine := ""
+				if i < len(nodeTwoLines) {
+					nodeTwoLine = strings.ReplaceAll(nodeTwoLines[i], "\t", "    ")
+				}
+
+				// Add cells for the row
+				table.SetCell(rowIndex, 0, tview.NewTableCell(nodeOneLine).
+					SetTextColor(tcell.ColorWhite).
+					SetAlign(tview.AlignLeft).
+					SetSelectable(false))
+				if i == 0 {
+					table.SetCell(rowIndex, 1, tview.NewTableCell("<-->").
+						SetTextColor(tcell.ColorWhite).
+						SetAlign(tview.AlignCenter).
+						SetSelectable(false))
+				} else {
+					table.SetCell(rowIndex, 1, tview.NewTableCell("").
+						SetSelectable(false)) // Empty for alignment
+				}
+				table.SetCell(rowIndex, 2, tview.NewTableCell(nodeTwoLine).
+					SetTextColor(tcell.ColorWhite).
+					SetAlign(tview.AlignLeft).
+					SetSelectable(false))
+				rowIndex++
+			}
+
+			// Add the count on the same row as the connector, only once
+			table.SetCell(rowIndex-maxLines, 3, tview.NewTableCell(fmt.Sprintf("%v", diff.Count)).
+				SetTextColor(tcell.ColorWhite).
+				SetAlign(tview.AlignCenter).
+				SetSelectable(false))
 		}
 	}
 
@@ -249,23 +298,39 @@ func PrintAnalysis(diffs DiffResult) error {
 		// Add Path Differences Data
 		for _, diff := range diffs.Paths {
 			columnIndex := 0
-			for _, node := range diff.NodeDiffs {
+			rowStart := rowIndex
+
+			for i, node := range diff.NodeDiffs {
 				nodeStr, err := GetNodeString(node)
 				if err != nil {
 					return fmt.Errorf("error processing path node: %v", err)
 				}
 
-				table.SetCell(rowIndex, columnIndex, tview.NewTableCell(nodeStr).
-					SetTextColor(tcell.ColorWhite).
-					SetAlign(tview.AlignLeft).
-					SetSelectable(true))
-				table.SetCell(rowIndex, columnIndex+1, tview.NewTableCell("--->").
-					SetTextColor(tcell.ColorWhite).
-					SetAlign(tview.AlignLeft).
-					SetSelectable(false))
-				columnIndex += 2
+				// Split the content into lines
+				lines := strings.Split(nodeStr, "\n")
+				for _, line := range lines {
+					// Replace tabs with spaces
+					formattedLine := strings.ReplaceAll(line, "\t", "    ")
+					table.SetCell(rowIndex, columnIndex, tview.NewTableCell(formattedLine).
+						SetTextColor(tcell.ColorWhite).
+						SetAlign(tview.AlignLeft).
+						SetSelectable(true))
+					rowIndex++
+				}
+
+				// Reset row index after multi-line node content
+				if i != len(diff.NodeDiffs)-1 {
+					table.SetCell(rowStart, columnIndex+1, tview.NewTableCell("--->").
+						SetTextColor(tcell.ColorWhite).
+						SetAlign(tview.AlignCenter).
+						SetSelectable(false))
+					columnIndex++
+					rowIndex = rowStart
+				}
+				columnIndex++
 			}
-			rowIndex++
+
+			rowIndex++ // Move to the next row after the path
 		}
 	}
 
@@ -279,62 +344,6 @@ func PrintAnalysis(diffs DiffResult) error {
 	})
 
 	// Run the application
-	if err := app.SetRoot(table, true).Run(); err != nil {
-		return fmt.Errorf("error running table application: %v", err)
-	}
-
-	return nil
-}
-
-func PrintAnalyzedPathTable(diffs DiffResult) error {
-	if len(diffs.Paths) == 0 {
-		return nil
-	}
-
-	app := tview.NewApplication()
-
-	// Create a scrollable Table
-	table := tview.NewTable().
-		SetBorders(true) // Add borders to the table for readability
-
-	// Add Header Row
-	table.SetCell(0, 0, tview.NewTableCell("Path Nodes").
-		SetTextColor(tcell.ColorYellow).
-		SetAlign(tview.AlignCenter).
-		SetSelectable(false)) // Header is not selectable
-
-	// Add Path Data (Rows for each diff.NodeDiffs)
-	for rowIndex, diff := range diffs.Paths {
-		columnIndex := 0
-		for _, node := range diff.NodeDiffs {
-			nodeStr, err := GetNodeString(node)
-			if err != nil {
-				return fmt.Errorf("unable to print diffs: %v", err)
-			}
-
-			// Add the multi-line content directly to the table cell
-			table.SetCell(rowIndex+1, columnIndex, tview.NewTableCell(nodeStr).
-				SetTextColor(tcell.ColorWhite).
-				SetAlign(tview.AlignLeft).
-				SetSelectable(true)) // Allow selection
-			columnIndex++
-		}
-	}
-
-	// Enable both horizontal and vertical scrolling
-	table.SetFixed(1, 0)            // Keep the header fixed during scrolling
-	table.SetSelectable(true, true) // Enable row and column selection
-
-	// Handle quit events
-	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyEsc, tcell.KeyCtrlC: // Exit on Esc or Ctrl+C
-			app.Stop()
-		}
-		return event
-	})
-
-	// Set up the application root with the table
 	if err := app.SetRoot(table, true).Run(); err != nil {
 		return fmt.Errorf("error running table application: %v", err)
 	}

@@ -603,8 +603,6 @@ func DiffMissingNamespace(dmp *diffmatchpatch.DiffMatchPatch, namespace model.Al
 	return namespace
 }
 
-
-
 func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string) string {
 
 	// Enable line mode for faster processing on large texts
@@ -631,7 +629,7 @@ func FormatDiffsTableWriter(diffs []diffmatchpatch.Diff) string {
 		case diffmatchpatch.DiffDelete:
 			prefix = colorRed + "-" + CheckEmptyTrim(diff.Text) + colorReset
 		case diffmatchpatch.DiffEqual:
-			prefix = colorWhite + " " + CheckEmptyTrim(diff.Text) + colorReset
+			prefix = colorWhite + CheckEmptyTrim(diff.Text) + colorReset
 		}
 		parts = append(parts, prefix)
 	}
@@ -651,11 +649,11 @@ func FormatDiffs(diffs []diffmatchpatch.Diff) string {
 		var prefix string
 		switch diff.Type {
 		case diffmatchpatch.DiffInsert:
-			prefix = colorGreen + "+" + CheckEmptyTrim(diff.Text) 
+			prefix = colorGreen + "+" + CheckEmptyTrim(diff.Text)
 		case diffmatchpatch.DiffDelete:
-			prefix = colorRed + "-" + CheckEmptyTrim(diff.Text) 
+			prefix = colorRed + "-" + CheckEmptyTrim(diff.Text)
 		case diffmatchpatch.DiffEqual:
-			prefix = colorWhite + " " + CheckEmptyTrim(diff.Text) 
+			prefix = colorWhite + CheckEmptyTrim(diff.Text)
 		}
 		parts = append(parts, prefix)
 	}
