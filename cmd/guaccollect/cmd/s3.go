@@ -7,13 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/s3"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // s3Options flags for configuring the command
@@ -85,7 +86,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetString("s3-queues"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetBool("poll"),
+			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
 		)
 		if err != nil {
