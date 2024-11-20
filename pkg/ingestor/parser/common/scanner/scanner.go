@@ -61,6 +61,14 @@ func PurlsVulnScan(ctx context.Context, purls []string) ([]assembler.VulnEqualIn
 // PurlsLicenseScan takes a slice of purls and queries clearly defined (skipping purls that start with "pkg:guac").
 // Once the query returns, an attestation is generated and passed to the clearly defined parser for ingestion
 func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {
+	// default to using a client with the UA transport
+	return purlsLicenseScanWithClient(ctx, &http.Client{Transport: version.UATransport}, purls)
+}
+
+// purlsLicenseScanWithClient is a helper function that allows for the injection of a client for testing purposes
+func purlsLicenseScanWithClient(
+	ctx context.Context, client *http.Client, purls []string,
+) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {
 	// use the existing clearly defined parser to parse and obtain certifyLegal
 	cdParser := clearlydefined.NewLegalCertificationParser()
 	var certLegalIngest []assembler.CertifyLegalIngest
@@ -76,7 +84,7 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 				i++
 			} else {
 				batchPurls = append(batchPurls, purl)
-				batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, batchPurls)
+				batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, client, cdParser, batchPurls)
 				if err != nil {
 					return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
 				}
@@ -87,7 +95,7 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 			}
 		}
 		if len(batchPurls) > 0 {
-			batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, batchPurls)
+			batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, client, cdParser, batchPurls)
 			if err != nil {
 				return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
 			}
@@ -95,7 +103,7 @@ func PurlsLicenseScan(ctx context.Context, purls []string) ([]assembler.CertifyL
 			hasSourceAtIngest = append(hasSourceAtIngest, batchedHSA...)
 		}
 	} else {
-		batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, cdParser, purls)
+		batchedCL, batchedHSA, err := runQueryOnBatchedPurls(ctx, client, cdParser, purls)
 		if err != nil {
 			return nil, nil, fmt.Errorf("runQueryOnBatchedPurls failed with error: %w", err)
 		}
@@ -112,12 +120,11 @@ func PurlsDepsDevScan(ctx context.Context, purls []string) ([]assembler.CertifyS
 
 // runQueryOnBatchedPurls runs EvaluateClearlyDefinedDefinition from the clearly defined
 // certifier to evaluate the batched purls for license information
-func runQueryOnBatchedPurls(ctx context.Context, cdParser common.DocumentParser, batchPurls []string) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {
+func runQueryOnBatchedPurls(ctx context.Context, client *http.Client, cdParser common.DocumentParser, batchPurls []string) ([]assembler.CertifyLegalIngest, []assembler.HasSourceAtIngest, error) {
 	var certLegalIngest []assembler.CertifyLegalIngest
 	var hasSourceAtIngest []assembler.HasSourceAtIngest
-	if cdProcessorDocs, err := cd_certifier.EvaluateClearlyDefinedDefinition(ctx, &http.Client{
-		Transport: version.UATransport,
-	}, batchPurls, nil, false); err != nil {
+
+	if cdProcessorDocs, err := cd_certifier.EvaluateClearlyDefinedDefinition(ctx, client, batchPurls, nil, false); err != nil {
 		return nil, nil, fmt.Errorf("failed get definition from clearly defined with error: %w", err)
 	} else {
 		for _, doc := range cdProcessorDocs {

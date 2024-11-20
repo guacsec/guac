@@ -2012,6 +2012,24 @@ var (
 		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
 	}
 
+	//go:embed exampledata/cd-mock/cd-maven-apachecommons-text4shell.json
+	CDApacheCommonsText4ShellResponse []byte
+
+	//go:embed exampledata/cd-mock/cd-maven-commons-text4shell.json
+	CDMavenCommonsText4ShellResponse []byte
+
+	//go:embed exampledata/cd-mock/cd-maven-log4j.json
+	CDMavenLog4JResponse []byte
+
+	//go:embed exampledata/cd-mock/cd-sourcearchive-log4j.json
+	CDSourceArchiveLog4JResponse []byte
+
+	//go:embed exampledata/cd-mock/cd-sourcearchive-text4shell.json
+	CDSourceArchiveText4ShellResponse []byte
+
+	//go:embed exampledata/cd-mock/cd-maven-iovertx.json
+	CDMavenIOVertxResponse []byte
+
 	VertxWebCommonAttestation = `{
 		"type": "https://in-toto.io/Statement/v1",
 		"subject": [

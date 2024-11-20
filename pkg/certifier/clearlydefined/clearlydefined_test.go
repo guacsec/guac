@@ -31,6 +31,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	mockclearlydefined "github.com/guacsec/guac/internal/testing/mockClearlyDefined"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -38,72 +39,94 @@ import (
 )
 
 func TestClearlyDefined(t *testing.T) {
-	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
-	t.Skip("Skipping clearly defined tests since it is flaky")
 	ctx := logging.WithLogger(context.Background())
 
 	tests := []struct {
-		name          string
-		rootComponent interface{}
-		want          []*processor.Document
-		wantErr       bool
-		errMessage    error
-	}{{
-		name: "query and generate attestation from clearly defined",
-		//
-		rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.Log4JPackage, &testdata.RootPackage},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.ITE6CDCommonText),
-				Type:   processor.DocumentITE6ClearlyDefined,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: CDCollector,
-					Source:    CDCollector,
+		name              string
+		rootComponent     interface{}
+		serverDefinitions map[string][]byte // maps coordinates to definitions directly
+		want              []*processor.Document
+		wantErr           bool
+		errMessage        error
+	}{
+		{
+			name:          "query and generate attestation from clearly defined",
+			rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.Log4JPackage, &testdata.RootPackage},
+			serverDefinitions: map[string][]byte{
+				"maven/mavencentral/org.apache.commons/commons-text/1.9":               testdata.CDApacheCommonsText4ShellResponse,
+				"maven/mavencentral/org.apache.logging.log4j/log4j-core/2.8.1":         testdata.CDMavenLog4JResponse,
+				"sourcearchive/mavencentral/org.apache.commons/commons-text/1.9":       testdata.CDSourceArchiveText4ShellResponse,
+				"sourcearchive/mavencentral/org.apache.logging.log4j/log4j-core/2.8.1": testdata.CDSourceArchiveLog4JResponse,
+			},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.ITE6CDCommonText),
+					Type:   processor.DocumentITE6ClearlyDefined,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: CDCollector,
+						Source:    CDCollector,
+					},
+				},
+				{
+					Blob:   []byte(testdata.ITE6CDLog4j),
+					Type:   processor.DocumentITE6ClearlyDefined,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: CDCollector,
+						Source:    CDCollector,
+					},
+				},
+				{
+					Blob:   []byte(testdata.ITE6CDSourceCommonText),
+					Type:   processor.DocumentITE6ClearlyDefined,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: CDCollector,
+						Source:    CDCollector,
+					},
+				},
+				{
+					Blob:   []byte(testdata.ITE6CDSourceLog4j),
+					Type:   processor.DocumentITE6ClearlyDefined,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: CDCollector,
+						Source:    CDCollector,
+					},
 				},
 			},
-			{
-				Blob:   []byte(testdata.ITE6CDLog4j),
-				Type:   processor.DocumentITE6ClearlyDefined,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: CDCollector,
-					Source:    CDCollector,
-				},
-			},
-			{
-				Blob:   []byte(testdata.ITE6CDSourceCommonText),
-				Type:   processor.DocumentITE6ClearlyDefined,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: CDCollector,
-					Source:    CDCollector,
-				},
-			},
-			{
-				Blob:   []byte(testdata.ITE6CDSourceLog4j),
-				Type:   processor.DocumentITE6ClearlyDefined,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: CDCollector,
-					Source:    CDCollector,
-				},
-			},
+			wantErr: false,
 		},
-		wantErr: false,
-	}, {
-		name:          "unknown purl",
-		rootComponent: []*root_package.PackageNode{{Purl: "pkg:maven/commons/commons12text@1.9"}},
-		wantErr:       false,
-	}, {
-		name:          "bad type",
-		rootComponent: map[string]string{},
-		wantErr:       true,
-		errMessage:    ErrComponentTypeMismatch,
-	}}
+		{
+			name:          "unknown purl",
+			rootComponent: []*root_package.PackageNode{{Purl: "pkg:maven/commons/commons12text@1.9"}},
+			serverDefinitions: map[string][]byte{
+				"maven/mavencentral/commons/commons12text/1.9": testdata.CDMavenCommonsText4ShellResponse,
+			},
+			wantErr: false,
+		},
+		{
+			name:              "bad type",
+			rootComponent:     map[string]string{},
+			serverDefinitions: map[string][]byte{},
+			wantErr:           true,
+			errMessage:        ErrComponentTypeMismatch,
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			mockCD := mockclearlydefined.NewMockClearlyDefined()
+			defer mockCD.Close()
+			if err := mockCD.SetDefinitions(tt.serverDefinitions); err != nil {
+				t.Error(err)
+			}
+
 			c := NewClearlyDefinedCertifier()
+			c.(*cdCertifier).cdHTTPClient = &http.Client{
+				Transport: mockCD.GetTransport(),
+			}
+
 			collectedDocs := []*processor.Document{}
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
@@ -174,9 +197,6 @@ func TestClearlyDefined(t *testing.T) {
 }
 
 func TestCDCertifierRateLimiter(t *testing.T) {
-	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
-	t.Skip("Skipping clearly defined tests since it is flaky")
-
 	// Set up the logger
 	var logBuffer bytes.Buffer
 	encoderConfig := zap.NewProductionEncoderConfig()
