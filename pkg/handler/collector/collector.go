@@ -63,22 +63,15 @@ var (
 )
 
 func RegisterDocumentCollector(c Collector, collectorType string) error {
-	if _, ok := documentCollectors[collectorType]; ok {
-		// do not overwrite the collector
-		documentCollectors[collectorType] = c
-		return fmt.Errorf("%w: %s", ErrCollectorOverwrite, collectorType)
+	if existingCollector, ok := documentCollectors[collectorType]; ok && existingCollector != nil {
+		return ErrCollectorOverwrite
 	}
 	documentCollectors[collectorType] = c
-
 	return nil
 }
 
-func DeregisterDocumentCollector(collectorType string) error {
-	if _, ok := documentCollectors[collectorType]; !ok {
-		return fmt.Errorf("the document collector %s does not exist", collectorType)
-	}
+func DeregisterDocumentCollector(collectorType string) {
 	delete(documentCollectors, collectorType)
-	return nil
 }
 
 func AddChildLogger(logger *zap.SugaredLogger, d *processor.Document) {

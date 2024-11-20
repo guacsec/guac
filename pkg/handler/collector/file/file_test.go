@@ -108,6 +108,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
+			collector.DeregisterDocumentCollector(FileCollector)
 			if err := collector.RegisterDocumentCollector(f, FileCollector); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {
 				t.Fatalf("could not register collector: %v", err)
