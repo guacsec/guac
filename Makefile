@@ -16,14 +16,17 @@ all: test cover fmt lint build generate
 
 # Run the unit tests
 .PHONY: test
-test: generate
-	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
+test: generate check-gotestsum-tool-check
+	echo 'mode: atomic' > coverage.txt
+	gotestsum --format=standard-verbose -- \
+	 -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
 # Run the integration tests. Requires github token for scorecard (GITHUB_AUTH_TOKEN=<your token>)
 # To run it locally you can run the following command: make start-integration-service
 .PHONY: integration-test
-integration-test: generate check-env
-	go test -tags=integration ./...
+integration-test: generate check-env check-gotestsum-tool-check
+	gotestsum --format=standard-verbose -- \
+	 -tags=integration ./...
 
 # Runs the integration tests locally using docker-compose to start the dependencies and cleans up after itself.
 .PHONY: integration-test-local
@@ -308,6 +311,12 @@ check-atlas-tool-check:
 		exit 1; \
 	fi
 
+.PHONY: check-gotestsum-tool-check
+check-gotestsum-tool-check:
+	@if ! command -v gotestsum >/dev/null 2>&1; then \
+		echo "gotestsum is not installed. Installing gotestsum..."; \
+		go install gotest.tools/gotestsum@latest; \
+	fi
 
 # Check that all the tools are installed.
 .PHONY: check-tools
