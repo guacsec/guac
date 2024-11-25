@@ -26,46 +26,23 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/guacsec/guac/pkg/version"
+	// import all known backends
+	_ "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/neptune"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/guacsec/guac/pkg/assembler/backends"
-	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
-	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
-	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
-	"github.com/guacsec/guac/pkg/assembler/kv"
-	"github.com/guacsec/guac/pkg/assembler/kv/redis"
 	"github.com/guacsec/guac/pkg/assembler/server"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/exp/maps"
 )
-
-const (
-	arango   = "arango"
-	neo4js   = "neo4j"
-	ent      = "ent"
-	neptunes = "neptune"
-	keyvalue = "keyvalue"
-)
-
-type optsFunc func(context.Context) backends.BackendArgs
-
-var getOpts map[string]optsFunc
-
-func init() {
-	if getOpts == nil {
-		getOpts = make(map[string]optsFunc)
-	}
-	getOpts[arango] = getArango
-	getOpts[neo4js] = getNeo4j
-	getOpts[neptunes] = getNeptune
-	getOpts[keyvalue] = getKeyValue
-}
 
 func startServer(cmd *cobra.Command) {
 	var srvHandler http.Handler
@@ -78,9 +55,15 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 
-	backend, err := backends.Get(flags.backend, ctx, getOpts[flags.backend](ctx))
+	backendArgs, err := backends.GetBackendArgs(ctx, flags.backend)
 	if err != nil {
-		logger.Errorf("error creating %v backend: %w", flags.backend, err)
+		logger.Errorf("failed to parse backend flags with error: %v", err)
+		os.Exit(1)
+	}
+
+	backend, err := backends.Get(flags.backend, ctx, backendArgs)
+	if err != nil {
+		logger.Errorf("Error creating %v backend: %v", flags.backend, err)
 		os.Exit(1)
 	}
 
@@ -161,14 +144,8 @@ func setupPrometheus(ctx context.Context, name string) (metrics.MetricCollector,
 }
 
 func validateFlags() error {
-	if !slices.Contains(maps.Keys(getOpts), flags.backend) {
-		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
-	}
 	if !slices.Contains(backends.List(), flags.backend) {
 		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
-	}
-	if !slices.Contains([]string{"memmap", "redis", "tikv"}, flags.kvStore) {
-		return fmt.Errorf("invalid kv store specified: %v", flags.kvStore)
 	}
 	return nil
 }
@@ -182,58 +159,4 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, version.Version)
-}
-
-func getArango(_ context.Context) backends.BackendArgs {
-	return &arangodb.ArangoConfig{
-		User:   flags.arangoUser,
-		Pass:   flags.arangoPass,
-		DBAddr: flags.arangoAddr,
-	}
-}
-
-func getNeo4j(_ context.Context) backends.BackendArgs {
-	return &neo4j.Neo4jConfig{
-		User:   flags.nUser,
-		Pass:   flags.nPass,
-		Realm:  flags.nRealm,
-		DBAddr: flags.nAddr,
-	}
-}
-
-var tikvGS func(context.Context, string) (kv.Store, error)
-
-func getKeyValue(ctx context.Context) backends.BackendArgs {
-	logger := logging.FromContext(ctx)
-	switch flags.kvStore {
-	case "memmap":
-		// default is memmap
-		return nil
-	case "redis":
-		s, err := redis.GetStore(flags.kvRedis)
-		if err != nil {
-			logger.Fatalf("error with Redis: %v", err)
-		}
-		return s
-	case "tikv":
-		if tikvGS == nil {
-			logger.Fatal("TiKV not supported on 32-bit")
-		}
-		s, err := tikvGS(ctx, flags.kvTiKV)
-		if err != nil {
-			logger.Fatalf("error with TiKV: %v", err)
-		}
-		return s
-	}
-	return nil
-}
-
-func getNeptune(_ context.Context) backends.BackendArgs {
-	return &neptune.NeptuneConfig{
-		Endpoint: flags.neptuneEndpoint,
-		Port:     flags.neptunePort,
-		Region:   flags.neptuneRegion,
-		User:     flags.neptuneUser,
-		Realm:    flags.neptuneRealm,
-	}
 }
