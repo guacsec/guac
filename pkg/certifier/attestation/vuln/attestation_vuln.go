@@ -39,7 +39,7 @@ type VulnerabilityStatement struct {
 
 // Metadata defines when the last scan was done
 type Metadata struct {
-	ScanStartedOn *time.Time `json:"scanStartedOn,omitempty"`
+	ScanStartedOn  *time.Time `json:"scanStartedOn,omitempty"`
 	ScanFinishedOn *time.Time `json:"scanFinishedOn,omitempty"`
 }
 
@@ -49,10 +49,11 @@ type Metadata struct {
 // the example json in the spec since that seems to be what 2 examples we've seen
 // are using. Tracking https://github.com/in-toto/attestation/issues/391
 type Result struct {
-	Id string `json:"id,omitempty"`
+	Id       string     `json:"id,omitempty"`
 	Severity []Severity `json:"severity,omitempty"`
 }
 
+// Severity describes the severity of a vulnerability using one or more quantitative scoring method.
 type Severity struct {
 	// required
 	Method string `json:"method,omitempty"`
@@ -74,17 +75,17 @@ type DB struct {
 // Scanner defines the scanner that was used to scan the artifacts and
 // the resulting vulnerabilities found
 type Scanner struct {
-	Uri      string   `json:"uri,omitempty"`
-	Version  string   `json:"version,omitempty"`
-	Database DB       `json:"db,omitempty"`
+	Uri      string `json:"uri,omitempty"`
+	Version  string `json:"version,omitempty"`
+	Database DB     `json:"db,omitempty"`
 	// required
-	Result   []Result `json:"result,omitempty"`
+	Result []Result `json:"result,omitempty"`
 }
 
 // VulnerabilityPredicate defines predicate definition of the vulnerability attestation
 type VulnerabilityPredicate struct {
 	// required
-	Scanner    Scanner    `json:"scanner,omitempty"`
+	Scanner Scanner `json:"scanner,omitempty"`
 	// required
-	Metadata   Metadata   `json:"metadata,omitempty"`
+	Metadata Metadata `json:"metadata,omitempty"`
 }

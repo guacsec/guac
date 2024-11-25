@@ -92,7 +92,7 @@ services:
   osv-certifier:
     networks: [ frontend ]
     image: $GUAC_IMAGE
-    command: "/opt/guac/guacone certifier osv"
+    command: "/opt/guac/guacone certifier osv --add-vuln-metadata"
     working_dir: /guac
     restart: on-failure
     depends_on:

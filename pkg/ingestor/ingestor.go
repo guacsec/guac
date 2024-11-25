@@ -101,7 +101,7 @@ func MergedIngest(
 
 	start := time.Now()
 
-	var predicates = make([]assembler.IngestPredicates, 1)
+	predicates := make([]assembler.IngestPredicates, 1)
 	totalPredicates := 0
 	var idstrings []*parser_common.IdentifierStrings
 	for _, d := range docs {

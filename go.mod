@@ -206,7 +206,6 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
-	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
@@ -332,6 +331,7 @@ require (
 	github.com/openvex/go-vex v0.2.5
 	github.com/ossf/scorecard/v4 v4.13.1
 	github.com/package-url/packageurl-go v0.1.3
+	github.com/pandatix/go-cvss v0.6.2
 	github.com/pitabwire/natspubsub v0.1.7
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.20.5
