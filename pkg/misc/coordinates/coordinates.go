@@ -236,9 +236,9 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "go",
 			Provider:       pkg.Type,
-			Namespace:      pkg.Namespace,
+			Namespace:      strings.ReplaceAll(pkg.Namespace, "/", "%2f"),
 			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Revision:       "v" + pkg.Version,
 		}, nil
 	case "maven":
 		// maven is a unique case where it can have 3 Providers

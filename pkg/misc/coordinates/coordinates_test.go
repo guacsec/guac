@@ -150,13 +150,13 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 			wantErr: false,
 		}, {
 			Name:    "golang",
-			purlUri: "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c#api",
+			purlUri: "pkg:golang/cloud.google.com/go/compute@1.23.0",
 			want: &Coordinate{
 				CoordinateType: "go",
 				Provider:       "golang",
-				Namespace:      "github.com/gorilla",
-				Name:           "context",
-				Revision:       "234fd47e07d1004f0aed9c",
+				Namespace:      "cloud.google.com%2fgo",
+				Name:           "compute",
+				Revision:       "v1.23.0",
 			},
 			wantErr: false,
 		}, {
