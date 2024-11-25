@@ -42,6 +42,9 @@ deps-dev-latency: ""
 # query vulnerability during ingestion
 add-vuln-on-ingest: false
 
+# add metadata to vulnerabilities during ingestion
+add-vuln-metadata: false
+
 # query licenses during ingestion
 add-license-on-ingest: false
 

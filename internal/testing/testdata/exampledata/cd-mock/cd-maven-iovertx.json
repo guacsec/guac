@@ -1,0 +1,247 @@
+{
+  "described": {
+    "releaseDate": "2022-12-20",
+    "sourceLocation": {
+      "type": "sourcearchive",
+      "provider": "mavencentral",
+      "namespace": "io.vertx",
+      "name": "vertx-web-common",
+      "revision": "4.3.7",
+      "url": "https://search.maven.org/remotecontent?filepath=io/vertx/vertx-web-common/4.3.7/vertx-web-common-4.3.7-sources.jar"
+    },
+    "urls": {
+      "registry": "https://repo1.maven.org/maven2/io/vertx/vertx-web-common",
+      "version": "https://repo1.maven.org/maven2/io/vertx/vertx-web-common/4.3.7",
+      "download": "https://repo1.maven.org/maven2/io/vertx/vertx-web-common/4.3.7/vertx-web-common-4.3.7.jar"
+    },
+    "hashes": {
+      "sha1": "76b12e2b58b790a2b99de7afc3fb81e9b948f60e",
+      "sha256": "b1f999a608c78404734c606cb3c0a03ff7d3fa925640b340e3cd8ec955ab2c6d"
+    },
+    "files": 23,
+    "tools": [
+      "clearlydefined/1.5.0",
+      "reuse/1.3.0",
+      "licensee/9.14.0",
+      "scancode/30.3.0"
+    ],
+    "toolScore": {
+      "total": 100,
+      "date": 30,
+      "source": 70
+    },
+    "score": {
+      "total": 100,
+      "date": 30,
+      "source": 70
+    }
+  },
+  "files": [
+    {
+      "path": "io/vertx/ext/web/codec/BodyCodec.class",
+      "hashes": {
+        "sha1": "4f450bbdd51ea5d3876b095542ec49b342376c64",
+        "sha256": "f2e098fe0ea7b59d25b74da71f8d7dc4ec06385b24e52fb9bdaa38028832ed5e"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/package-info.class",
+      "hashes": {
+        "sha1": "dfa87e04f9fda57265b565c0c46cf9f86565709f",
+        "sha256": "732173dc085a82c693ec20ceb3fbb9319f48c19ec0fd770baff275223f478dc5"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/impl/BodyCodecImpl$1.class",
+      "hashes": {
+        "sha1": "b53f401fe153a79f49d717627d61b108c08b48ba",
+        "sha256": "36366cdcba7cecb2c81720a9d6abd542e66730670507e6bdb7d522dbb1fa0fb2"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/impl/BodyCodecImpl.class",
+      "hashes": {
+        "sha1": "6d4e3730dd5e9b0eaa7534e2a32a72a15e7f877b",
+        "sha256": "70e8c95f377ba2563a38dee72e0a5a5fc5f73a1ca9727510fab2905f7c729e36"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/impl/JsonStreamBodyCodec$1.class",
+      "hashes": {
+        "sha1": "252fe6ce7ccd687fb8835ab2dceeac5427cee1c1",
+        "sha256": "dd5920d93a5755f90a0fb197088f69625fd4db6fd365f41a69dfec7188145d23"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/impl/JsonStreamBodyCodec.class",
+      "hashes": {
+        "sha1": "2f54daf35cb6fb5f5fd1bbbec9eecb2764e6cef9",
+        "sha256": "36eaceb9123a7e39b5706f53550b93552094e19faaaa7a8039887db372a14780"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/impl/StreamingBodyCodec$1.class",
+      "hashes": {
+        "sha1": "52c7f063e54181a1d9bb26ecb821ce3e9d49175e",
+        "sha256": "267189255837b0704ad512414a68026225f58c6f086e0a42158bb10a4ec36211"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/impl/StreamingBodyCodec.class",
+      "hashes": {
+        "sha1": "ccf90a63cc5a321810d5a4ed4aa9f9f6f8c56009",
+        "sha256": "3d635a171e813f2dd7a7ccbe4f9f3b427782badd619b6431eb5a6920b7c01083"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/codec/spi/BodyStream.class",
+      "hashes": {
+        "sha1": "a0fa4aa7803e8bed5d2d782c144ebd93eab0fbe4",
+        "sha256": "e43a31d655d30c380b20989f6d4e538823b75ef30568d76557ee5f90c7b5fc73"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/common/package-info.class",
+      "hashes": {
+        "sha1": "39414984dbfb3cba0c6f95db6060099367885331",
+        "sha256": "53de41620714579cdecf791de8bdba8b42cfa89417f1179397fbddc60ca91c79"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/common/WebEnvironment.class",
+      "hashes": {
+        "sha1": "e1a98634a33475909b40219921c1cdbc47fbee40",
+        "sha256": "b6be4bdf6bc09d07153b0d7f545f7dd875103751debe91e96a40709a96713fcb"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/common/template/CachingTemplateEngine.class",
+      "hashes": {
+        "sha1": "750ac05059c9235260b3f31aa07bd79318b1482d",
+        "sha256": "0efeaf78a1403703cdf15e6fdb247c247501627cafb2c381337f94befb702537"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/common/template/TemplateEngine.class",
+      "hashes": {
+        "sha1": "410e7107caaf09707d284463031f99cd07709947",
+        "sha256": "5fdb05c99c24e8b29c94c8b04eea41ae7cd8fc7c031858d8ad94052305f8bac9"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/common/template/impl/TemplateHolder.class",
+      "hashes": {
+        "sha1": "9da00cde85ff3fdbd12084a01b111f3b8cc59492",
+        "sha256": "cb3ae610f5e01c5a9c41789b05a4aa00c528c8feb05a99329cbda6caf8f32279"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/multipart/FormDataPart.class",
+      "hashes": {
+        "sha1": "4920d89336588b84f2e6c657a566f6c3d73bea80",
+        "sha256": "76c9f6089b458c537c386ec5630e4f8113ba221a468b11f8ce1632fabfe45f29"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/multipart/MultipartForm.class",
+      "hashes": {
+        "sha1": "cea4a4403a178ec394fceaa58e0941c2f506f771",
+        "sha256": "154dc26cb4b5cdd19bf95f4134018fde2602312b2e9b3d54bb3fdc3c47299e43"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/multipart/package-info.class",
+      "hashes": {
+        "sha1": "1c8e421135d08d439d0795afb9c688294e31c93f",
+        "sha256": "190fe0b2a34357cb51428527b7a8533eeca7db0a4609f081104fa0b3d0d13fd8"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/multipart/impl/FormDataPartImpl.class",
+      "hashes": {
+        "sha1": "718e4b2e7f2ccf58992fb441eb3dcc5f428d36be",
+        "sha256": "9143fb9384382fd6f8ededf31b59197ac0cad81b4f45d98acf018efb18accaaf"
+      }
+    },
+    {
+      "path": "io/vertx/ext/web/multipart/impl/MultipartFormImpl.class",
+      "hashes": {
+        "sha1": "e4a6ae2d39f04f2a4138cf326fdeadd8d6384c9a",
+        "sha256": "223cb2307831f11db9731675cebd2302183718c42d9f91a87b21c8ec82b8527d"
+      }
+    },
+    {
+      "path": "META-INF/INDEX.LIST",
+      "hashes": {
+        "sha1": "8e7c02f4694b12206222470457618c92a5a8f045",
+        "sha256": "b60a3855c5a7905b0e6f6b023432f96ef1d1bc934e2da104040aece463fbea65"
+      }
+    },
+    {
+      "path": "META-INF/MANIFEST.MF",
+      "hashes": {
+        "sha1": "6f41a2eba6044469e6dbee45dd65f62acd142295",
+        "sha256": "80a7d5e0f06bc7ba0d4a7d5c64508ea6f64342dd19620e9774582798ada57884"
+      }
+    },
+    {
+      "path": "META-INF/maven/io.vertx/vertx-web-common/pom.properties",
+      "hashes": {
+        "sha1": "abf822c077207115fa9a124982181ed5c5d4777d",
+        "sha256": "747e89a2cdeab1777cf5323603a429055cc57e96fd7776b8a7c27f0f5c9c46a0"
+      }
+    },
+    {
+      "path": "META-INF/maven/io.vertx/vertx-web-common/pom.xml",
+      "hashes": {
+        "sha1": "1b37339dbd2c8cdd11600e3cbd073a0d5414384a",
+        "sha256": "afa1264789bf91a807bcdac53fcf3cda298fb4868d061d2b4516a0a5a0c517cf"
+      }
+    }
+  ],
+  "licensed": {
+    "declared": "Apache-2.0",
+    "toolScore": {
+      "total": 60,
+      "declared": 30,
+      "discovered": 0,
+      "consistency": 15,
+      "spdx": 15,
+      "texts": 0
+    },
+    "facets": {
+      "core": {
+        "attribution": {
+          "unknown": 23
+        },
+        "discovered": {
+          "unknown": 23
+        },
+        "files": 23
+      }
+    },
+    "score": {
+      "total": 60,
+      "declared": 30,
+      "discovered": 0,
+      "consistency": 15,
+      "spdx": 15,
+      "texts": 0
+    }
+  },
+  "coordinates": {
+    "type": "maven",
+    "provider": "mavencentral",
+    "namespace": "io.vertx",
+    "name": "vertx-web-common",
+    "revision": "4.3.7"
+  },
+  "_meta": {
+    "schemaVersion": "1.7.0",
+    "updated": "2024-10-31T02:04:28.284Z"
+  },
+  "scores": {
+    "effective": 80,
+    "tool": 80
+  }
+}
