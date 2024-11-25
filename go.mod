@@ -1,8 +1,7 @@
 module github.com/guacsec/guac
 
 go 1.22.8
-
-toolchain go1.22.9
+toolchain go1.23.3
 
 require (
 	cloud.google.com/go/storage v1.46.0
@@ -292,7 +291,7 @@ require (
 require (
 	deps.dev/api/v3 v3.0.0-20241010035105-b3ba03369df1
 	entgo.io/contrib v0.6.0
-	entgo.io/ent v0.14.0
+	entgo.io/ent v0.14.1
 	github.com/99designs/gqlgen v0.17.56
 	github.com/CycloneDX/cyclonedx-go v0.9.1
 	github.com/Khan/genqlient v0.7.0
