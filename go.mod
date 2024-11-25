@@ -1,6 +1,7 @@
 module github.com/guacsec/guac
 
-go 1.22.7
+go 1.22.8
+
 toolchain go1.22.9
 
 require (
