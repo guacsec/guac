@@ -236,7 +236,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "go",
 			Provider:       pkg.Type,
-			Namespace:      strings.ReplaceAll(pkg.Namespace, "/", "%2f"),
+			Namespace:      emptyToHyphen(strings.ReplaceAll(pkg.Namespace, "/", "%2f")),
 			Name:           pkg.Name,
 			Revision:       "v" + pkg.Version,
 		}, nil

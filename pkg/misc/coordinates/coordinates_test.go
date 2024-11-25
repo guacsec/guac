@@ -180,7 +180,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Provider:       "golang",
 				Namespace:      "-",
 				Name:           "context",
-				Revision:       "234fd47e07d1004f0aed9c",
+				Revision:       "v234fd47e07d1004f0aed9c",
 			},
 			wantErr: false,
 		}, {
