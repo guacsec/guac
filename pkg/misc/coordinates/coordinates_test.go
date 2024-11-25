@@ -148,6 +148,18 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "244fd47e07d1004",
 			},
 			wantErr: false,
+		},
+		{
+			Name:    "github",
+			purlUri: "pkg:github/purl-spec@244fd47e07d1004#everybody/loves/dogs",
+			want: &Coordinate{
+				CoordinateType: "git",
+				Provider:       "github",
+				Namespace:      "-",
+				Name:           "purl-spec",
+				Revision:       "244fd47e07d1004",
+			},
+			wantErr: false,
 		}, {
 			Name:    "golang",
 			purlUri: "pkg:golang/cloud.google.com/go/compute@1.23.0",
@@ -157,6 +169,18 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Namespace:      "cloud.google.com%2fgo",
 				Name:           "compute",
 				Revision:       "v1.23.0",
+			},
+			wantErr: false,
+		},
+		{
+			Name:    "golang",
+			purlUri: "pkg:golang/context@234fd47e07d1004f0aed9c#api",
+			want: &Coordinate{
+				CoordinateType: "go",
+				Provider:       "golang",
+				Namespace:      "-",
+				Name:           "context",
+				Revision:       "v234fd47e07d1004f0aed9c",
 			},
 			wantErr: false,
 		}, {

@@ -126,7 +126,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "pod",
 			Provider:       "cocoapods",
-			Namespace:      "-",
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -134,7 +134,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "crate",
 			Provider:       "cratesio",
-			Namespace:      "-",
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -142,7 +142,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "packagist",
-			Namespace:      pkg.Namespace,
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -174,9 +174,9 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		}
 
 		// subdir is the associated platform
-		var Namespace string
+		var namespace string
 		if subdir, ok := qualifiers["subdir"]; ok {
-			Namespace = subdir
+			namespace = subdir
 		} else {
 			return nil, fmt.Errorf("failed to find subdir for conda")
 		}
@@ -184,7 +184,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       Provider,
-			Namespace:      Namespace,
+			Namespace:      emptyToHyphen(namespace),
 			Name:           pkg.Name,
 			Revision:       Revision,
 		}, nil
@@ -220,7 +220,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "rubygems",
-			Namespace:      "-",
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -228,7 +228,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "git",
 			Provider:       pkg.Type,
-			Namespace:      pkg.Namespace,
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -236,7 +236,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "go",
 			Provider:       pkg.Type,
-			Namespace:      strings.ReplaceAll(pkg.Namespace, "/", "%2f"),
+			Namespace:      emptyToHyphen(strings.ReplaceAll(pkg.Namespace, "/", "%2f")),
 			Name:           pkg.Name,
 			Revision:       "v" + pkg.Version,
 		}, nil
@@ -256,7 +256,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "maven",
 			Provider:       Provider,
-			Namespace:      pkg.Namespace,
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -264,7 +264,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "npmjs",
-			Namespace:      pkg.Namespace,
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -272,7 +272,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "nuget",
-			Namespace:      "-",
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -284,7 +284,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "pypi",
-			Namespace:      "-",
+			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
@@ -297,5 +297,13 @@ func (c *Coordinate) ToString() string {
 		return fmt.Sprintf("%s/%s/%s/%s/%22%22", c.CoordinateType, c.Provider, c.Namespace, c.Name)
 	} else {
 		return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, c.Namespace, c.Name, c.Revision)
+	}
+}
+
+func emptyToHyphen(namespace string) string {
+	if namespace == "" {
+		return "-"
+	} else {
+		return namespace
 	}
 }
