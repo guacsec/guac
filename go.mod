@@ -356,3 +356,5 @@ require (
 	golang.org/x/time v0.8.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+replace nhooyr.io/websocket => github.com/coder/websocket v1.8.7
