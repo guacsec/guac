@@ -24,6 +24,7 @@ on:
 
 permissions:
   actions: read # for detecting the Github Actions environment.
+  packages: read # for reading from GHCR
 
 jobs:
   goreleaser:
@@ -32,6 +33,9 @@ jobs:
       hashes: ${{ steps.hash.outputs.hashes }}
       image: ${{ steps.hash.outputs.image }}
       digest: ${{ steps.hash.outputs.digest }}
+    permissions:
+      packages: write # To publish container images to GHCR
+      id-token: write # To use our OIDC token
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -101,6 +105,9 @@ jobs:
   build-atlas:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      packages: write # To publish container images to GHCR
+      id-token: write # To use our OIDC token
     steps:
       - name: Check out the code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -177,6 +184,8 @@ jobs:
     name: generate provenance for container
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      id-token: write # To use our GitHub token
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0 # must use semver here
     with:
       image: ${{ needs.goreleaser.outputs.image }}
@@ -193,6 +202,7 @@ jobs:
     permissions:
       contents: write # To upload assets to release.
       packages: write # To publish container images to GHCR
+      id-token: write # To use our GitHub token
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
