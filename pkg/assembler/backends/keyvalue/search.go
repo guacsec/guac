@@ -469,6 +469,11 @@ func (c *demoClient) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 	c.m.RLock()
 	defer c.m.RUnlock()
 
+	// return nothing if empty pkgIDs slice is passed
+	if len(pkgIDs) == 0 {
+		return nil, nil
+	}
+
 	var edges []*model.PackageEdge
 	for _, pkgID := range pkgIDs {
 		p, err := c.buildPackageResponse(ctx, pkgID, nil)
