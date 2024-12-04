@@ -17,6 +17,7 @@ package scanner
 
 import (
 	"context"
+	"net/http"
 	"sort"
 	"strings"
 	"testing"
@@ -24,7 +25,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	mockclearlydefined "github.com/guacsec/guac/internal/testing/mockClearlyDefined"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
@@ -341,132 +344,152 @@ func TestPurlsToScan(t *testing.T) {
 }
 
 func TestPurlsLicenseScan(t *testing.T) {
-	// skip tests because of flake: https://github.com/guacsec/guac/issues/2290
-	t.Skip("Skipping clearly defined tests since it is flaky")
 	lvUnknown := "UNKNOWN"
 	ctx := logging.WithLogger(context.Background())
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	tests := []struct {
-		name     string
-		purls    []string
-		wantCLs  []assembler.CertifyLegalIngest
-		wantHSAs []assembler.HasSourceAtIngest
-		wantErr  bool
-	}{{
-		name:  "valid log4j",
-		purls: []string{"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"},
-		wantCLs: []assembler.CertifyLegalIngest{
-			{
-				Pkg: &generated.PkgInputSpec{
-					Type:      "maven",
-					Namespace: ptrfrom.String("org.apache.logging.log4j"),
-					Name:      "log4j-core",
-					Version:   ptrfrom.String("2.8.1"),
-					Subpath:   ptrfrom.String(""),
-				},
-				Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
-				Discovered: []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
-				CertifyLegal: &generated.CertifyLegalInputSpec{
-					DiscoveredLicense: "Apache-2.0",
-					DeclaredLicense:   "Apache-2.0",
-					Justification:     "Retrieved from ClearlyDefined",
-					TimeScanned:       tm,
-					Origin:            "clearlydefined",
-					Collector:         "clearlydefined",
+		name              string
+		purls             []string
+		serverDefinitions map[string][]byte // maps coordinates to definitions directly
+		wantCLs           []assembler.CertifyLegalIngest
+		wantHSAs          []assembler.HasSourceAtIngest
+		wantErr           bool
+	}{
+		{
+			name:  "valid log4j",
+			purls: []string{"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"},
+			serverDefinitions: map[string][]byte{
+				"maven/mavencentral/org.apache.logging.log4j/log4j-core/2.8.1": testdata.CDMavenLog4JResponse,
+			},
+			wantCLs: []assembler.CertifyLegalIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:      "maven",
+						Namespace: ptrfrom.String("org.apache.logging.log4j"),
+						Name:      "log4j-core",
+						Version:   ptrfrom.String("2.8.1"),
+						Subpath:   ptrfrom.String(""),
+					},
+					Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
+					Discovered: []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
+					CertifyLegal: &generated.CertifyLegalInputSpec{
+						DiscoveredLicense: "Apache-2.0",
+						DeclaredLicense:   "Apache-2.0",
+						Justification:     "Retrieved from ClearlyDefined",
+						TimeScanned:       tm,
+						Origin:            "clearlydefined",
+						Collector:         "clearlydefined",
+					},
 				},
 			},
-		},
-		wantHSAs: []assembler.HasSourceAtIngest{
-			{
-				Pkg: &generated.PkgInputSpec{
-					Type:      "maven",
-					Namespace: ptrfrom.String("org.apache.logging.log4j"),
-					Name:      "log4j-core",
-					Version:   ptrfrom.String("2.8.1"),
-					Subpath:   ptrfrom.String(""),
-				},
-				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
-				Src: &generated.SourceInputSpec{
-					Type:      "sourcearchive",
-					Namespace: "org.apache.logging.log4j",
-					Name:      "log4j-core",
-					Tag:       ptrfrom.String("2.8.1"),
-				},
-				HasSourceAt: &generated.HasSourceAtInputSpec{
-					KnownSince:    tm,
-					Justification: "Retrieved from ClearlyDefined",
-					Origin:        "clearlydefined",
-					Collector:     "clearlydefined",
-				},
-			},
-		},
-		wantErr: false,
-	}, {
-		name:  "valid maven package",
-		purls: []string{"pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"},
-		wantCLs: []assembler.CertifyLegalIngest{
-			{
-				Pkg: &generated.PkgInputSpec{
-					Type:       "maven",
-					Namespace:  ptrfrom.String("io.vertx"),
-					Name:       "vertx-web-common",
-					Version:    ptrfrom.String("4.3.7"),
-					Subpath:    ptrfrom.String(""),
-					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "type", Value: "jar"}},
-				},
-				Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
-				Discovered: []generated.LicenseInputSpec{},
-				CertifyLegal: &generated.CertifyLegalInputSpec{
-					DeclaredLicense: "Apache-2.0",
-					Justification:   "Retrieved from ClearlyDefined",
-					TimeScanned:     tm,
-					Origin:          "clearlydefined",
-					Collector:       "clearlydefined",
+			wantHSAs: []assembler.HasSourceAtIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:      "maven",
+						Namespace: ptrfrom.String("org.apache.logging.log4j"),
+						Name:      "log4j-core",
+						Version:   ptrfrom.String("2.8.1"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
+					Src: &generated.SourceInputSpec{
+						Type:      "sourcearchive",
+						Namespace: "org.apache.logging.log4j",
+						Name:      "log4j-core",
+						Tag:       ptrfrom.String("2.8.1"),
+					},
+					HasSourceAt: &generated.HasSourceAtInputSpec{
+						KnownSince:    tm,
+						Justification: "Retrieved from ClearlyDefined",
+						Origin:        "clearlydefined",
+						Collector:     "clearlydefined",
+					},
 				},
 			},
+			wantErr: false,
 		},
-		wantHSAs: []assembler.HasSourceAtIngest{
-			{
-				Pkg: &generated.PkgInputSpec{
-					Type:       "maven",
-					Namespace:  ptrfrom.String("io.vertx"),
-					Name:       "vertx-web-common",
-					Version:    ptrfrom.String("4.3.7"),
-					Subpath:    ptrfrom.String(""),
-					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "type", Value: "jar"}},
-				},
-				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
-				Src: &generated.SourceInputSpec{
-					Type:      "sourcearchive",
-					Namespace: "io.vertx",
-					Name:      "vertx-web-common",
-					Tag:       ptrfrom.String("4.3.7"),
-				},
-				HasSourceAt: &generated.HasSourceAtInputSpec{
-					KnownSince:    tm,
-					Justification: "Retrieved from ClearlyDefined",
-					Origin:        "clearlydefined",
-					Collector:     "clearlydefined",
+		{
+			name:  "valid maven package",
+			purls: []string{"pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"},
+			serverDefinitions: map[string][]byte{
+				"maven/mavencentral/io.vertx/vertx-web-common/4.3.7": testdata.CDMavenIOVertxResponse,
+			},
+			wantCLs: []assembler.CertifyLegalIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:       "maven",
+						Namespace:  ptrfrom.String("io.vertx"),
+						Name:       "vertx-web-common",
+						Version:    ptrfrom.String("4.3.7"),
+						Subpath:    ptrfrom.String(""),
+						Qualifiers: []generated.PackageQualifierInputSpec{{Key: "type", Value: "jar"}},
+					},
+					Declared:   []generated.LicenseInputSpec{{Name: "Apache-2.0", ListVersion: &lvUnknown}},
+					Discovered: []generated.LicenseInputSpec{},
+					CertifyLegal: &generated.CertifyLegalInputSpec{
+						DeclaredLicense: "Apache-2.0",
+						Justification:   "Retrieved from ClearlyDefined",
+						TimeScanned:     tm,
+						Origin:          "clearlydefined",
+						Collector:       "clearlydefined",
+					},
 				},
 			},
+			wantHSAs: []assembler.HasSourceAtIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:       "maven",
+						Namespace:  ptrfrom.String("io.vertx"),
+						Name:       "vertx-web-common",
+						Version:    ptrfrom.String("4.3.7"),
+						Subpath:    ptrfrom.String(""),
+						Qualifiers: []generated.PackageQualifierInputSpec{{Key: "type", Value: "jar"}},
+					},
+					PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
+					Src: &generated.SourceInputSpec{
+						Type:      "sourcearchive",
+						Namespace: "io.vertx",
+						Name:      "vertx-web-common",
+						Tag:       ptrfrom.String("4.3.7"),
+					},
+					HasSourceAt: &generated.HasSourceAtInputSpec{
+						KnownSince:    tm,
+						Justification: "Retrieved from ClearlyDefined",
+						Origin:        "clearlydefined",
+						Collector:     "clearlydefined",
+					},
+				},
+			},
+			wantErr: false,
 		},
-		wantErr: false,
-	}, {
-		name:     "no purl",
-		purls:    []string{""},
-		wantCLs:  nil,
-		wantHSAs: nil,
-		wantErr:  false,
-	}, {
-		name:     "skip guac purl",
-		purls:    []string{"pkg:guac/io.vertx/vertx-web-common@4.3.7?type=jar"},
-		wantCLs:  nil,
-		wantHSAs: nil,
-		wantErr:  false,
-	}}
+		{
+			name:              "no purl",
+			purls:             []string{""},
+			serverDefinitions: map[string][]byte{},
+			wantCLs:           nil,
+			wantHSAs:          nil,
+			wantErr:           false,
+		},
+		{
+			name:  "skip guac purl",
+			purls: []string{"pkg:guac/io.vertx/vertx-web-common@4.3.7?type=jar"},
+			serverDefinitions: map[string][]byte{
+				"maven/mavencentral/io.vertx/vertx-web-common/4.3.7": testdata.CDMavenIOVertxResponse,
+			},
+			wantCLs:  nil,
+			wantHSAs: nil,
+			wantErr:  false,
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCLs, gotHSAs, err := PurlsLicenseScan(ctx, tt.purls)
+			mockCD := mockclearlydefined.NewMockClearlyDefined()
+			defer mockCD.Close()
+			if err := mockCD.SetDefinitions(tt.serverDefinitions); err != nil {
+				t.Error(err)
+			}
+			mockClient := &http.Client{Transport: mockCD.GetTransport()}
+			gotCLs, gotHSAs, err := purlsLicenseScanWithClient(ctx, mockClient, tt.purls)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PurlsToScan() error = %v, wantErr %v", err, tt.wantErr)
 				return

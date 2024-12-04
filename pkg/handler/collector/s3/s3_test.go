@@ -119,6 +119,7 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 		Poll:          true,
 	})
 
+	collector.DeregisterDocumentCollector(S3CollectorType)
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
 		!errors.Is(err, collector.ErrCollectorOverwrite) {
 		t.Fatalf("could not register collector: %v", err)
@@ -180,6 +181,7 @@ func testNoPolling(t *testing.T, ctx context.Context) {
 		Poll:          false,
 	})
 
+	collector.DeregisterDocumentCollector(S3CollectorType)
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
 		!errors.Is(err, collector.ErrCollectorOverwrite) {
 		t.Fatalf("could not register collector: %v", err)

@@ -362,6 +362,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				defer cancel()
 			}
 
+			collector.DeregisterDocumentCollector(OCICollector)
 			if err := collector.RegisterDocumentCollector(g, OCICollector); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {
 				t.Fatalf("could not register collector: %v", err)

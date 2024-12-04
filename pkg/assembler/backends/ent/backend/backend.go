@@ -18,9 +18,12 @@ package backend
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	// Import regular postgres driver
@@ -36,6 +39,50 @@ var Errorf = gqlerror.Errorf
 
 type EntBackend struct {
 	client *ent.Client
+}
+
+// flags holds the command-line flags for Ent configuration
+var flags = struct {
+	dbAddress  string
+	dbDriver   string
+	dbDebug    bool
+	dbMigrate  bool
+	dbConnTime string
+}{}
+
+// registerFlags registers Ent-specific command line flags
+func registerFlags(cmd *cobra.Command) error {
+	flagSet := cmd.Flags()
+	flagSet.StringVar(&flags.dbAddress, "db-address", "postgres://guac:guac@0.0.0.0:5432/guac?sslmode=disable", "Full URL of database to connect to")
+	flagSet.StringVar(&flags.dbDriver, "db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
+	flagSet.BoolVar(&flags.dbDebug, "db-debug", false, "enable debug logging for database queries")
+	flagSet.BoolVar(&flags.dbMigrate, "db-migrate", true, "automatically run database migrations on start")
+	flagSet.StringVar(&flags.dbConnTime, "db-conn-time", "", "sets the maximum amount of time a connection may be reused in m, h, s, etc.")
+
+	if err := viper.BindPFlags(flagSet); err != nil {
+		return fmt.Errorf("failed to bind flags: %w", err)
+	}
+
+	return nil
+}
+
+// parseFlags returns the Ent configuration from parsed flags
+func parseFlags(ctx context.Context) (backends.BackendArgs, error) {
+	var connTimeout *time.Duration
+	if flags.dbConnTime != "" {
+		if timeout, err := time.ParseDuration(flags.dbConnTime); err == nil {
+			connTimeout = &timeout
+		} else {
+			return nil, fmt.Errorf("failed to parse duration with error: %w", err)
+		}
+	}
+	return &BackendOptions{
+		DriverName:            flags.dbDriver,
+		Address:               flags.dbAddress,
+		Debug:                 flags.dbDebug,
+		AutoMigrate:           flags.dbMigrate,
+		ConnectionMaxLifeTime: connTimeout,
+	}, nil
 }
 
 func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {

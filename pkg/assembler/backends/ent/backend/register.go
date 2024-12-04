@@ -20,5 +20,5 @@ package backend
 import "github.com/guacsec/guac/pkg/assembler/backends"
 
 func init() {
-	backends.Register("ent", getBackend)
+	backends.Register("ent", getBackend, registerFlags, parseFlags)
 }

@@ -23,6 +23,8 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -42,6 +44,13 @@ type ArangoConfig struct {
 	TestData bool
 }
 
+// flags holds the command-line flags for ArangoDB configuration
+var flags = struct {
+	addr string
+	user string
+	pass string
+}{}
+
 type arangoQueryBuilder struct {
 	query strings.Builder
 }
@@ -59,7 +68,7 @@ type index struct {
 }
 
 func init() {
-	backends.Register("arango", getBackend)
+	backends.Register("arango", getBackend, registerFlags, parseFlags)
 }
 
 func initIndex(name string, fields []string, unique bool) index {
@@ -115,6 +124,29 @@ func DeleteDatabase(ctx context.Context, args backends.BackendArgs) error {
 		}
 	}
 	return nil
+}
+
+// registerFlags registers ArangoDB-specific command line flags
+func registerFlags(cmd *cobra.Command) error {
+	flagSet := cmd.Flags()
+	flagSet.StringVar(&flags.addr, "arango-addr", "http://localhost:8529", "address to arango db")
+	flagSet.StringVar(&flags.user, "arango-user", "", "arango user to connect to graph db")
+	flagSet.StringVar(&flags.pass, "arango-pass", "", "arango password to connect to graph db")
+
+	if err := viper.BindPFlags(flagSet); err != nil {
+		return fmt.Errorf("failed to bind flags: %w", err)
+	}
+
+	return nil
+}
+
+// parseFlags returns the ArangoDB configuration from parsed flags
+func parseFlags(ctx context.Context) (backends.BackendArgs, error) {
+	return &ArangoConfig{
+		DBAddr: flags.addr,
+		User:   flags.user,
+		Pass:   flags.pass,
+	}, nil
 }
 
 func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {

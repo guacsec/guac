@@ -66,6 +66,8 @@ type osvOptions struct {
 	// last time the scan was done in hours, if not set it will return
 	// all packages to check
 	lastScan *int
+	// adds metadata to vulnerabities during collection
+	addVulnMetadata bool
 }
 
 var osvCmd = &cobra.Command{
@@ -98,6 +100,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
+			viper.GetBool("add-vuln-metadata"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -108,7 +111,13 @@ you have access to read and write to the respective blob store.`,
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		if err := certify.RegisterCertifier(func() certifier.Certifier {
+			certifierOpts := []osv.CertifierOpts{}
+			if opts.addVulnMetadata {
+				certifierOpts = append(certifierOpts, osv.WithVulnerabilityMetadata())
+			}
+			return osv.NewOSVCertificationParser(certifierOpts...)
+		}, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -135,8 +144,9 @@ func validateOSVFlags(
 	poll bool,
 	pubToQueue bool,
 	certifierLatencyStr string,
-	batchSize int, lastScan int) (osvOptions, error) {
-
+	batchSize int, lastScan int,
+	addVulnMetadata bool,
+) (osvOptions, error) {
 	var opts osvOptions
 
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -145,6 +155,7 @@ func validateOSVFlags(
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
+	opts.addVulnMetadata = addVulnMetadata
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -183,8 +194,8 @@ func getOSVPackageQuery(client graphql.Client, batchSize int, addedLatency *time
 }
 
 func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string,
-	poll, publishToQueue bool, interval time.Duration, query certifier.QueryComponents) {
-
+	poll, publishToQueue bool, interval time.Duration, query certifier.QueryComponents,
+) {
 	logger := logging.FromContext(ctx)
 
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
@@ -258,9 +269,12 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"interval",
+	set, err := cli.BuildFlags([]string{
+		"interval",
 		"header-file", "certifier-latency",
-		"certifier-batch-size", "last-scan"})
+		"certifier-batch-size", "last-scan",
+		"add-vuln-metadata",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

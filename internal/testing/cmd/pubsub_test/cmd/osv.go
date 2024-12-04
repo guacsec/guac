@@ -57,14 +57,15 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		if err := certify.RegisterCertifier(func() certifier.Certifier {
+			return osv.NewOSVCertificationParser()
+		}, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 

@@ -62,6 +62,8 @@ type osvOptions struct {
 	// last time the scan was done in hours, if not set it will return
 	// all packages to check
 	lastScan *int
+	// addVulnMetadata enriches vulnerabilities with metadata during fetch
+	addVulnMetadata bool
 }
 
 var osvCmd = &cobra.Command{
@@ -83,6 +85,7 @@ var osvCmd = &cobra.Command{
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
+			viper.GetBool("add-vuln-metadata"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -94,7 +97,13 @@ var osvCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		if err := certify.RegisterCertifier(func() certifier.Certifier {
+			certifierOpts := []osv.CertifierOpts{}
+			if opts.addVulnMetadata {
+				certifierOpts = append(certifierOpts, osv.WithVulnerabilityMetadata())
+			}
+			return osv.NewOSVCertificationParser(certifierOpts...)
+		}, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -281,6 +290,7 @@ func validateOSVFlags(
 	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
+	addVulnMetadata bool,
 ) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -322,8 +332,11 @@ func validateOSVFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"certifier-latency",
-		"certifier-batch-size", "last-scan"})
+	set, err := cli.BuildFlags([]string{
+		"certifier-latency",
+		"certifier-batch-size", "last-scan",
+		"add-vuln-metadata",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

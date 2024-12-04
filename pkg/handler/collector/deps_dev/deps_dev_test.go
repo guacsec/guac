@@ -238,8 +238,8 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				return
 			}
 
-			if err := collector.RegisterDocumentCollector(c, DepsCollector); err != nil &&
-				!errors.Is(err, collector.ErrCollectorOverwrite) {
+			collector.DeregisterDocumentCollector(DepsCollector)
+			if err := collector.RegisterDocumentCollector(c, DepsCollector); err != nil {
 				t.Fatalf("could not register collector: %v", err)
 			}
 			var collectedDocs []*processor.Document
@@ -349,7 +349,6 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			var ctx context.Context
 			var cancel context.CancelFunc
 			if tt.poll {
@@ -368,8 +367,8 @@ func TestPerformanceDepsCollector(t *testing.T) {
 				return
 			}
 
-			if err := collector.RegisterDocumentCollector(c, DepsCollector); err != nil &&
-				!errors.Is(err, collector.ErrCollectorOverwrite) {
+			collector.DeregisterDocumentCollector(DepsCollector)
+			if err := collector.RegisterDocumentCollector(c, DepsCollector); err != nil {
 				t.Fatalf("could not register collector: %v", err)
 			}
 			var collectedDocs []*processor.Document

@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
@@ -34,35 +35,6 @@ var flags = struct {
 	tlsKeyFile  string
 	debug       bool
 	tracegql    bool
-
-	// Needed only if using neo4j backend
-	nAddr  string
-	nUser  string
-	nPass  string
-	nRealm string
-
-	// Needed only if using ent backend
-	dbAddress  string
-	dbDriver   string
-	dbDebug    bool
-	dbMigrate  bool
-	dbConnTime string
-
-	// Needed only if using arangodb backend
-	arangoAddr string
-	arangoUser string
-	arangoPass string
-
-	// Needed only if using neptune backend
-	neptuneEndpoint string
-	neptunePort     int
-	neptuneRegion   string
-	neptuneUser     string
-	neptuneRealm    string
-
-	kvStore string
-	kvRedis string
-	kvTiKV  string
 }{}
 
 var rootCmd = &cobra.Command{
@@ -77,31 +49,6 @@ var rootCmd = &cobra.Command{
 		flags.debug = viper.GetBool("gql-debug")
 		flags.tracegql = viper.GetBool("gql-trace")
 
-		flags.nUser = viper.GetString("neo4j-user")
-		flags.nPass = viper.GetString("neo4j-pass")
-		flags.nAddr = viper.GetString("neo4j-addr")
-		flags.nRealm = viper.GetString("neo4j-realm")
-
-		// Needed only if using ent backend
-		flags.dbAddress = viper.GetString("db-address")
-		flags.dbDriver = viper.GetString("db-driver")
-		flags.dbDebug = viper.GetBool("db-debug")
-		flags.dbMigrate = viper.GetBool("db-migrate")
-		flags.dbConnTime = viper.GetString("db-conn-time")
-
-		flags.arangoUser = viper.GetString("arango-user")
-		flags.arangoPass = viper.GetString("arango-pass")
-		flags.arangoAddr = viper.GetString("arango-addr")
-
-		flags.neptuneEndpoint = viper.GetString("neptune-endpoint")
-		flags.neptunePort = viper.GetInt("neptune-port")
-		flags.neptuneRegion = viper.GetString("neptune-region")
-		flags.neptuneUser = viper.GetString("neptune-user")
-		flags.neptuneRealm = viper.GetString("neptune-realm")
-
-		flags.kvStore = viper.GetString("kv-store")
-		flags.kvRedis = viper.GetString("kv-redis")
-		flags.kvTiKV = viper.GetString("kv-tikv")
 		startServer(cmd)
 	},
 }
@@ -109,19 +56,29 @@ var rootCmd = &cobra.Command{
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
+	// Register common flags
 	set, err := cli.BuildFlags([]string{
-		"arango-addr", "arango-user", "arango-pass",
-		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
-		"neptune-endpoint", "neptune-port", "neptune-region", "neptune-user", "neptune-realm",
-		"gql-listen-port", "gql-tls-cert-file", "gql-tls-key-file", "gql-debug", "gql-backend", "gql-trace",
-		"db-address", "db-driver", "db-debug", "db-migrate", "db-conn-time",
-		"kv-store", "kv-redis", "kv-tikv", "enable-prometheus",
+		"gql-listen-port",
+		"gql-tls-cert-file",
+		"gql-tls-key-file",
+		"gql-debug",
+		"gql-backend",
+		"gql-trace",
+		"enable-prometheus",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
 	rootCmd.Flags().AddFlagSet(set)
+
+	// Register backend-specific flags
+	err = backends.RegisterFlags(rootCmd)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to register backend flags: %v", err)
+		os.Exit(1)
+	}
+
 	if err := viper.BindPFlags(rootCmd.Flags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)

@@ -29,15 +29,13 @@ import (
 	v4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const neptuneServiceName = "neptune-db"
-
-func init() {
-	backends.Register("neptune", getBackend)
-}
 
 type NeptuneConfig struct {
 	Endpoint string
@@ -45,6 +43,46 @@ type NeptuneConfig struct {
 	Region   string
 	User     string
 	Realm    string
+}
+
+// flags holds the command-line flags for Neptune configuration
+var flags = struct {
+	endpoint string
+	port     int
+	region   string
+	user     string
+	realm    string
+}{}
+
+func init() {
+	backends.Register("neptune", getBackend, registerFlags, parseFlags)
+}
+
+// registerFlags registers Neptune-specific command line flags
+func registerFlags(cmd *cobra.Command) error {
+	flagSet := cmd.Flags()
+	flagSet.StringVar(&flags.endpoint, "neptune-endpoint", "localhost", "address to neptune db")
+	flagSet.IntVar(&flags.port, "neptune-port", 8182, "port used for neptune db connection")
+	flagSet.StringVar(&flags.region, "neptune-region", "us-east-1", "region to connect to neptune db")
+	flagSet.StringVar(&flags.user, "neptune-user", "", "neptune user credential to connect to graph db")
+	flagSet.StringVar(&flags.realm, "neptune-realm", "neptune", "realm to connect to graph db")
+
+	if err := viper.BindPFlags(flagSet); err != nil {
+		return fmt.Errorf("failed to bind flags: %w", err)
+	}
+
+	return nil
+}
+
+// parseFlags returns the Neptune configuration from parsed flags
+func parseFlags(ctx context.Context) (backends.BackendArgs, error) {
+	return &NeptuneConfig{
+		Endpoint: flags.endpoint,
+		Port:     flags.port,
+		Region:   flags.region,
+		User:     flags.user,
+		Realm:    flags.realm,
+	}, nil
 }
 
 func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {

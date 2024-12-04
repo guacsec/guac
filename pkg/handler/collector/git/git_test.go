@@ -82,6 +82,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			os.RemoveAll(tt.fields.dir)
 			g := NewGitDocumentCollector(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
 
+			collector.DeregisterDocumentCollector(CollectorGitDocument)
 			if err := collector.RegisterDocumentCollector(g, CollectorGitDocument); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {
 				t.Fatalf("could not register collector: %v", err)

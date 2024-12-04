@@ -167,15 +167,11 @@ func TestOCIRegistryCollectionPipeline(t *testing.T) {
 	// Create and register collector
 	g := NewOCIRegistryCollector(ctx, ds, false, 0, rcOpts...)
 
+	collector.DeregisterDocumentCollector(OCIRegistryCollector)
 	if err := collector.RegisterDocumentCollector(g, OCIRegistryCollector); err != nil &&
 		!errors.Is(err, collector.ErrCollectorOverwrite) {
 		t.Fatalf("could not register collector: %v", err)
 	}
-	defer func() {
-		if err := collector.DeregisterDocumentCollector(OCIRegistryCollector); err != nil {
-			t.Fatalf("could not deregister collector: %v", err)
-		}
-	}()
 
 	// Run collection with timeout
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)

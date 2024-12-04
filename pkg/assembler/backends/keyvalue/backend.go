@@ -31,10 +31,62 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/guacsec/guac/pkg/assembler/kv/memmap"
+	"github.com/guacsec/guac/pkg/assembler/kv/redis"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
+// flags holds the command-line flags for KeyValue configuration
+var flags = struct {
+	kvStore string
+	kvRedis string
+	kvTiKV  string
+}{}
+
+// registerFlags registers KeyValue-specific command line flags
+func registerFlags(cmd *cobra.Command) error {
+	flagSet := cmd.Flags()
+	flagSet.StringVar(&flags.kvStore, "kv-store", "memmap", "Which keyvalue store to use: memmap, redis, tikv.")
+	flagSet.StringVar(&flags.kvRedis, "kv-redis", "redis://user@localhost:6379/0", "Experimental: Redis connection string for keyvalue backend")
+	flagSet.StringVar(&flags.kvTiKV, "kv-tikv", "127.0.0.1:2379", "Experimental: TiKV address and port")
+
+	if err := viper.BindPFlags(flagSet); err != nil {
+		return fmt.Errorf("failed to bind flags: %w", err)
+	}
+
+	return nil
+}
+
+var tikvGS func(context.Context, string) (kv.Store, error)
+
+// parseFlags returns the KeyValue store configuration from parsed flags
+func parseFlags(ctx context.Context) (backends.BackendArgs, error) {
+	switch flags.kvStore {
+	case "memmap":
+		// default is memmap
+		return nil, nil
+	case "redis":
+		s, err := redis.GetStore(flags.kvRedis)
+		if err != nil {
+			return nil, fmt.Errorf("error with Redis: %w", err)
+		}
+		return s, nil
+	case "tikv":
+		if tikvGS == nil {
+			return nil, fmt.Errorf("TiKV not supported on 32-bit")
+		}
+		s, err := tikvGS(ctx, flags.kvTiKV)
+		if err != nil {
+			return nil, fmt.Errorf("error with TiKV: %w", err)
+		}
+		return s, nil
+	}
+	// default is memmap
+	return nil, fmt.Errorf("invalid kv store specified: %v", flags.kvStore)
+}
+
 func init() {
-	backends.Register("keyvalue", getBackend)
+	backends.Register("keyvalue", getBackend, registerFlags, parseFlags)
 }
 
 // node is the common interface of all backend nodes.

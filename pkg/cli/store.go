@@ -51,11 +51,6 @@ func init() {
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
 	set.Bool("gql-trace", false, "flag which enables tracing of graphQL requests and responses on the console")
 
-	set.String("neo4j-addr", "neo4j://localhost:7687", "address to neo4j db")
-	set.String("neo4j-user", "", "neo4j user credential to connect to graph db")
-	set.String("neo4j-pass", "", "neo4j password credential to connect to graph db")
-	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
-
 	// blob store address
 	set.String("blob-addr", "file:///tmp/blobstore?no_tmp_dir=true", "gocloud connection string for blob store configured via https://gocloud.dev/howto/blob/ (default: filesystem)")
 
@@ -67,28 +62,13 @@ func init() {
 
 	// the ingestor will query and ingest OSV for vulnerabilities
 	set.Bool("add-vuln-on-ingest", false, "if enabled, the ingestor will query and ingest OSV for vulnerabilities. Warning: This will increase ingestion times")
+	set.Bool("add-vuln-metadata", false, "if enabled, the osv certifier will add metadata to vulnerabilities from OSV")
 
 	// the ingestor will query and ingest clearly defined for licenses
 	set.Bool("add-license-on-ingest", false, "if enabled, the ingestor will query and ingest clearly defined for licenses. Warning: This will increase ingestion times")
 
 	// the ingestor will query and ingest endoflife.date for EOL
 	set.Bool("add-eol-on-ingest", false, "if enabled, the ingestor will query and ingest endoflife.date for EOL data. Warning: This will increase ingestion times")
-
-	set.String("neptune-endpoint", "localhost", "address to neptune db")
-	set.Int("neptune-port", 8182, "port used for neptune db connection")
-	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
-	set.String("neptune-user", "", "neptune user credential to connect to graph db")
-	set.String("neptune-realm", "neptune", "realm to connect to graph db")
-
-	set.String("db-address", "postgres://guac:guac@0.0.0.0:5432/guac?sslmode=disable", "Full URL of database to connect to")
-	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
-	set.Bool("db-debug", false, "enable debug logging for database queries")
-	set.Bool("db-migrate", true, "automatically run database migrations on start")
-	set.String("db-conn-time", "", "sets the maximum amount of time a connection may be reused in m, h, s, etc.")
-
-	set.String("arango-addr", "http://localhost:8529", "address to arango db")
-	set.String("arango-user", "", "arango user to connect to graph db")
-	set.String("arango-pass", "", "arango password to connect to graph db")
 
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
@@ -149,11 +129,6 @@ func init() {
 	set.String("s3-mp-endpoint", "", "endpoint for the message provider")
 	set.String("s3-queues", "", "comma-separated list of queue/topic names")
 	set.String("s3-region", "us-east-1", "aws region")
-
-	// KeyValue Backend Store options.
-	set.String("kv-store", "memmap", "Which keyvalue store to use: memmap, redis, tikv.")
-	set.String("kv-redis", "redis://user@localhost:6379/0", "Experimental: Redis connection string for keyvalue backend")
-	set.String("kv-tikv", "127.0.0.1:2379", "Experimental: TiKV address and port")
 
 	// GitHub collector options
 	set.String("github-mode", "release", "mode to run github collector in: [release | workflow]")

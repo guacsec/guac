@@ -147,6 +147,7 @@ var scorecardCmd = &cobra.Command{
 				opts.queryEOLOnIngestion,
 				opts.queryDepsDevOnIngestion,
 			)
+
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
 			}

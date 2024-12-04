@@ -112,6 +112,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				lastDownload: tt.fields.lastDownload,
 				poll:         tt.fields.poll,
 			}
+			collector.DeregisterDocumentCollector(CollectorGCS)
 			if err := collector.RegisterDocumentCollector(g, CollectorGCS); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {
 				t.Fatalf("could not register collector: %v", err)

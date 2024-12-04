@@ -254,3 +254,34 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 	}
 	return nil
 }
+
+func TestRegisterDocumentCollector(t *testing.T) {
+	// Create a mock collector for testing
+	ctx := logging.WithLogger(context.Background())
+	mockCollector := file.NewFileCollector(ctx, "./testdata", false, time.Second)
+	collectorType := "mock"
+
+	// Ensure the collector map is empty
+	documentCollectors = map[string]Collector{}
+
+	// Register the collector for the first time (should succeed)
+	err := RegisterDocumentCollector(mockCollector, collectorType)
+	if err != nil {
+		t.Errorf("expected no error, got: %v", err)
+	}
+
+	// Attempt to register again (should fail because existing collector is non-nil)
+	err = RegisterDocumentCollector(mockCollector, collectorType)
+	if err != ErrCollectorOverwrite {
+		t.Errorf("expected error when registering existing collector, got nil")
+	}
+
+	// Set the existing collector to nil
+	documentCollectors[collectorType] = nil
+
+	// Attempt to register when existing collector is nil (should succeed)
+	err = RegisterDocumentCollector(mockCollector, collectorType)
+	if err != nil {
+		t.Errorf("expected no error when existing collector is nil, got: %v", err)
+	}
+}
