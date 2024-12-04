@@ -61,6 +61,8 @@ paths:
       description: >
         If a partial purl, pkg:foo/bar is passed in, then it would find all purls 
         associated with the given purl, such as pkg:foo/bar@1.0, and pkg:foo/bar@2.0.
+        Searching via qualifiers is similar. If searching for pkg:foo/bar@a=b 
+        the endpoint will return both pkg:foo/bar@a=b and pkg:foo/bar@c=d&a=b.
       operationId: getPackagePurls
       parameters:
         - name: purl
@@ -82,12 +84,9 @@ paths:
     get:
       summary: Get vulnerabilities for a Package URL (purl)
       description: >
-        If a partial purl is passed in, then it will find all associated purls 
-        and find vulnerabilities of those. For example, if the partial purl 
-        pkg:foo/bar is passed in, it would find all purls associated with 
-        pkg:foo/bar, such as pkg:foo/bar@1.0, and pkg:foo/bar@2.0. This endpoint 
-        will then find all vulnerabilities for these purls. If the `includeDependencies`
-        flag is set to true, it will also include vulnerabilities of the dependencies.
+        This endpoint will find all vulnerabilities for the purl passed in. 
+        If the `includeDependencies` flag is set to true, it will also include 
+        vulnerabilities of the dependencies of the purl passed in.
       operationId: getPackageVulns
       parameters:
         - name: purl
@@ -119,11 +118,7 @@ paths:
     get:
       summary: Get dependencies for a specific Package URL (purl)
       description: >
-        If a partial purl is passed in, then it will find all associated purls 
-        and find the dependencies of those. For example, if the partial purl 
-        pkg:foo/bar is passed in, it would find all purls associated with 
-        pkg:foo/bar, such as pkg:foo/bar@1.0, and pkg:foo/bar@2.0. This endpoint 
-        will then find all dependencies for these purls.
+        This endpoint will find all dependencies of the purl passed in.
       operationId: getPackageDeps
       parameters:
         - name: purl
@@ -143,7 +138,7 @@ paths:
           $ref: "#/components/responses/BadGateway"
   "/v0/artifact/{digest}/vulns":
     get:
-      summary: Get vulnerabilities for a specific digest
+      summary: Get vulnerabilities for an artifact, identified by a digest
       operationId: getArtifactVulns
       parameters:
         - name: digest
@@ -163,7 +158,7 @@ paths:
           $ref: "#/components/responses/BadGateway"
   "/v0/artifact/{digest}/dependencies":
     get:
-      summary: Get dependencies for a specific digest
+      summary: Get dependencies for an artifact, identified by a digest
       operationId: getArtifactDeps
       parameters:
         - name: digest

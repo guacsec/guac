@@ -22,10 +22,10 @@ type ServerInterface interface {
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(w http.ResponseWriter, r *http.Request)
-	// Get dependencies for a specific digest
+	// Get dependencies for an artifact, identified by a digest
 	// (GET /v0/artifact/{digest}/dependencies)
 	GetArtifactDeps(w http.ResponseWriter, r *http.Request, digest string)
-	// Get vulnerabilities for a specific digest
+	// Get vulnerabilities for an artifact, identified by a digest
 	// (GET /v0/artifact/{digest}/vulns)
 	GetArtifactVulns(w http.ResponseWriter, r *http.Request, digest string)
 	// Get all purls related to the given purl
@@ -55,13 +55,13 @@ func (_ Unimplemented) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get dependencies for a specific digest
+// Get dependencies for an artifact, identified by a digest
 // (GET /v0/artifact/{digest}/dependencies)
 func (_ Unimplemented) GetArtifactDeps(w http.ResponseWriter, r *http.Request, digest string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get vulnerabilities for a specific digest
+// Get vulnerabilities for an artifact, identified by a digest
 // (GET /v0/artifact/{digest}/vulns)
 func (_ Unimplemented) GetArtifactVulns(w http.ResponseWriter, r *http.Request, digest string) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -741,10 +741,10 @@ type StrictServerInterface interface {
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(ctx context.Context, request HealthCheckRequestObject) (HealthCheckResponseObject, error)
-	// Get dependencies for a specific digest
+	// Get dependencies for an artifact, identified by a digest
 	// (GET /v0/artifact/{digest}/dependencies)
 	GetArtifactDeps(ctx context.Context, request GetArtifactDepsRequestObject) (GetArtifactDepsResponseObject, error)
-	// Get vulnerabilities for a specific digest
+	// Get vulnerabilities for an artifact, identified by a digest
 	// (GET /v0/artifact/{digest}/vulns)
 	GetArtifactVulns(ctx context.Context, request GetArtifactVulnsRequestObject) (GetArtifactVulnsResponseObject, error)
 	// Get all purls related to the given purl

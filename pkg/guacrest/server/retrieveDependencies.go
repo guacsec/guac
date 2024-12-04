@@ -18,8 +18,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"net/url"
-
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	assembler_helpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/guacrest/helpers"
@@ -43,7 +41,7 @@ type edgeGen interface {
 	getEquivalentNodes(ctx context.Context, v node) ([]node, error)
 }
 
-// byDigest is a edgeGen that observes relationships between noun when they are
+// byDigest is an edgeGen that observes relationships between nouns when they are
 // linked by digest.
 //
 // The dependency edges are:
@@ -355,11 +353,7 @@ func GetDepsForPackage(
 	purl string,
 ) (map[string]string, error) {
 	// Find the start node
-	unescapedPurl, err := url.QueryUnescape(purl)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unescape package url: %w", err)
-	}
-	pkg, err := helpers.FindPackageWithPurl(ctx, gqlClient, unescapedPurl)
+	pkg, err := helpers.FindPackageWithPurl(ctx, gqlClient, purl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find package with purl: %w", err)
 	}
@@ -387,11 +381,7 @@ func GetDepsForArtifact(
 	digest string,
 ) (map[string]string, error) {
 	// Find the start node
-	unescapedDigest, err := url.QueryUnescape(digest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unescape digest: %w", err)
-	}
-	art, err := helpers.FindArtifactWithDigest(ctx, gqlClient, unescapedDigest)
+	art, err := helpers.FindArtifactWithDigest(ctx, gqlClient, digest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find digest: %w", err)
 	}

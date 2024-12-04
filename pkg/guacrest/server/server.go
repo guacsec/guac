@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -109,15 +110,20 @@ func (s *DefaultServer) GetPackageVulns(ctx context.Context, request gen.GetPack
 }
 
 func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPackageDepsRequestObject) (gen.GetPackageDepsResponseObject, error) {
-	purls, err := GetDepsForPackage(ctx, s.gqlClient, request.Purl)
+	unescapedPurl, err := url.PathUnescape(request.Purl)
 	if err != nil {
-		err, ok := handleErr(ctx, err, GetPackageDeps).(gen.GetPackageDepsResponseObject)
+		return nil, fmt.Errorf("failed to unescape package url: %w", err)
+	}
+
+	purls, err := GetDepsForPackage(ctx, s.gqlClient, unescapedPurl)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetPackageDeps).(gen.GetPackageDepsResponseObject)
 		if ok {
-			return err, nil
+			return errResp, nil
 		} else {
 			return gen.GetPackageDeps400JSONResponse{
 				BadRequestJSONResponse: gen.BadRequestJSONResponse{
-					Message: "Error handling failed",
+					Message: err.Error(),
 				},
 			}, nil
 		}
@@ -137,15 +143,20 @@ func (s *DefaultServer) GetArtifactVulns(ctx context.Context, request gen.GetArt
 }
 
 func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArtifactDepsRequestObject) (gen.GetArtifactDepsResponseObject, error) {
-	purls, err := GetDepsForArtifact(ctx, s.gqlClient, request.Digest)
+	unescapedDigest, err := url.PathUnescape(request.Digest)
 	if err != nil {
-		err, ok := handleErr(ctx, err, GetArtifactDeps).(gen.GetArtifactDepsResponseObject)
+		return nil, fmt.Errorf("failed to unescape digest: %w", err)
+	}
+
+	purls, err := GetDepsForArtifact(ctx, s.gqlClient, unescapedDigest)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetArtifactDeps).(gen.GetArtifactDepsResponseObject)
 		if ok {
-			return err, nil
+			return errResp, nil
 		} else {
 			return gen.GetArtifactDeps400JSONResponse{
 				BadRequestJSONResponse: gen.BadRequestJSONResponse{
-					Message: "Error handling failed",
+					Message: err.Error(),
 				},
 			}, nil
 		}
