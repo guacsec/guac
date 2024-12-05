@@ -176,8 +176,9 @@ jobs:
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
-      contents: read
-      id-token: write
+      id-token: write # To sign the provenance
+      contents: write # To upload assets to release
+      actions: read # To read the workflow path
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0 # must use semver here
     with:
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
@@ -188,8 +189,9 @@ jobs:
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
-      contents: read
-      id-token: write # To use our GitHub token
+      id-token: write # To sign the provenance
+      contents: write # To upload assets to release
+      actions: read # To read the workflow path
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0 # must use semver here
     with:
       image: ${{ needs.goreleaser.outputs.image }}
