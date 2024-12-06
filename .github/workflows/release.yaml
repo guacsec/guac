@@ -191,6 +191,7 @@ jobs:
     permissions:
       id-token: write # To sign the provenance
       contents: write # To upload assets to release
+      packages: write # To publish container images to GHCR
       actions: read # To read the workflow path
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0 # must use semver here
     with:
