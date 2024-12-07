@@ -9,6 +9,7 @@ require (
 	github.com/fsouza/fake-gcs-server v1.50.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0
 	github.com/spf13/cobra v1.8.1
 	go.uber.org/zap v1.27.0
@@ -202,7 +203,6 @@ require (
 	github.com/nats-io/jwt/v2 v2.5.8 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/onsi/ginkgo/v2 v2.13.1 // indirect
 	github.com/onsi/gomega v1.29.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
@@ -232,7 +232,7 @@ require (
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 // indirect
-	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
+	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -355,4 +355,15 @@ require (
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
 	golang.org/x/time v0.8.0
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
+	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+)
+
+require (
+	github.com/dominikbraun/graph v0.23.0
+	github.com/gdamore/tcell/v2 v2.7.4
+	github.com/rivo/tview v0.0.0-20241103174730-c76f7879f592
 )
