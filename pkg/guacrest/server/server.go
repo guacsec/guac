@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -98,4 +99,74 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 	default:
 		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
 	}
+}
+
+func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPackagePurlsRequestObject) (gen.GetPackagePurlsResponseObject, error) {
+	return gen.GetPackagePurls200JSONResponse{}, nil
+}
+
+func (s *DefaultServer) GetPackageVulns(ctx context.Context, request gen.GetPackageVulnsRequestObject) (gen.GetPackageVulnsResponseObject, error) {
+	return gen.GetPackageVulns200JSONResponse{}, nil
+}
+
+func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPackageDepsRequestObject) (gen.GetPackageDepsResponseObject, error) {
+	unescapedPurl, err := url.PathUnescape(request.Purl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unescape package url: %w", err)
+	}
+
+	purls, err := GetDepsForPackage(ctx, s.gqlClient, unescapedPurl)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetPackageDeps).(gen.GetPackageDepsResponseObject)
+		if ok {
+			return errResp, nil
+		} else {
+			return gen.GetPackageDeps400JSONResponse{
+				BadRequestJSONResponse: gen.BadRequestJSONResponse{
+					Message: err.Error(),
+				},
+			}, nil
+		}
+	}
+
+	result := gen.GetPackageDeps200JSONResponse{}
+
+	for _, depPurl := range purls {
+		result.PurlList = append(result.PurlList, depPurl)
+	}
+
+	return result, nil
+}
+
+func (s *DefaultServer) GetArtifactVulns(ctx context.Context, request gen.GetArtifactVulnsRequestObject) (gen.GetArtifactVulnsResponseObject, error) {
+	return gen.GetArtifactVulns200JSONResponse{}, nil
+}
+
+func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArtifactDepsRequestObject) (gen.GetArtifactDepsResponseObject, error) {
+	unescapedDigest, err := url.PathUnescape(request.Digest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unescape digest: %w", err)
+	}
+
+	purls, err := GetDepsForArtifact(ctx, s.gqlClient, unescapedDigest)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetArtifactDeps).(gen.GetArtifactDepsResponseObject)
+		if ok {
+			return errResp, nil
+		} else {
+			return gen.GetArtifactDeps400JSONResponse{
+				BadRequestJSONResponse: gen.BadRequestJSONResponse{
+					Message: err.Error(),
+				},
+			}, nil
+		}
+	}
+
+	result := gen.GetArtifactDeps200JSONResponse{}
+
+	for _, depPurl := range purls {
+		result.PurlList = append(result.PurlList, depPurl)
+	}
+
+	return result, nil
 }
