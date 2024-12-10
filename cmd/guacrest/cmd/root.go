@@ -24,6 +24,10 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	// to register the ent backend flag defaults, i.e. --db-driver and --db-address
+	"github.com/guacsec/guac/pkg/assembler/backends"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 )
 
 var flags = struct {
@@ -81,8 +85,6 @@ func init() {
 
 		// configuration of direct database connection
 		"db-direct-connection",
-		"db-driver",
-		"db-address",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flags: %v", err)
@@ -92,6 +94,12 @@ func init() {
 	rootCmd.Flags().AddFlagSet(set)
 	if err := viper.BindPFlags(rootCmd.Flags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+
+	// Register backend-specific flags
+	if err := backends.RegisterFlags(rootCmd); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to register backend flags: %v", err)
 		os.Exit(1)
 	}
 
