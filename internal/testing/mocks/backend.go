@@ -21,6 +21,7 @@ import (
 type MockBackend struct {
 	ctrl     *gomock.Controller
 	recorder *MockBackendMockRecorder
+	isgomock struct{}
 }
 
 // MockBackendMockRecorder is the mock recorder for MockBackend.
@@ -1634,6 +1635,7 @@ func (mr *MockBackendMockRecorder) VulnerabilityMetadataList(ctx, vulnerabilityM
 type MockBackendArgs struct {
 	ctrl     *gomock.Controller
 	recorder *MockBackendArgsMockRecorder
+	isgomock struct{}
 }
 
 // MockBackendArgsMockRecorder is the mock recorder for MockBackendArgs.
