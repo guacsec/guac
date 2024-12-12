@@ -65,6 +65,11 @@ var queryBadCmd = &cobra.Command{
 			logger.Fatalf("error querying for package: %v", err)
 		}
 
+		if len(certifyBadResponse.CertifyBad) == 0 {
+			fmt.Println("No CertifyBad nodes found!")
+			return
+		}
+
 		mapCertifyBad := map[string][]model.CertifyBadCertifyBad{}
 		for _, certifyBad := range certifyBadResponse.CertifyBad {
 			switch subject := certifyBad.Subject.(type) {
