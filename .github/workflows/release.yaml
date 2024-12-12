@@ -143,6 +143,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
       id-token: write # needed for signing the images with GitHub OIDC Token
+      packages: write # needed to upload signatures
+      contents: write # To upload assets to release
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
