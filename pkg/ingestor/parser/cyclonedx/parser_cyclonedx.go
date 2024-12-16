@@ -171,8 +171,10 @@ func (c *cyclonedxParser) getTopLevelPackage() error {
 		}
 
 		// get top level licenses
-		if err := c.getLicenseInformation(*c.cdxBom.Metadata.Component); err != nil {
-			return fmt.Errorf("failed to get license information for top level package with error: %w", err)
+		if c.cdxBom.Metadata.Component != nil {
+			if err := c.getLicenseInformation(*c.cdxBom.Metadata.Component); err != nil {
+				return fmt.Errorf("failed to get license information for top level package with error: %w", err)
+			}
 		}
 		return nil
 	} else {
@@ -597,40 +599,57 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 			}
 		}
 
-		for _, affect := range *vulnerability.Affects {
-			vi, err := c.getAffectedPackages(ctx, vuln, vd, affect)
-			if vi == nil || err != nil {
-				return fmt.Errorf("failed to get affected packages for vulnerability %s - %v", vulnerability.ID, err)
+		var foundVexIngest []assembler.VexIngest
+		if vulnerability.Affects != nil {
+			for _, affect := range *vulnerability.Affects {
+				vi, err := c.getAffectedPackages(ctx, vuln, vd, affect)
+				if vi == nil || err != nil {
+					return fmt.Errorf("failed to get affected packages for vulnerability %s - %v", vulnerability.ID, err)
+				}
+				foundVexIngest = append(foundVexIngest, vi...)
 			}
-			c.vulnData.vex = append(c.vulnData.vex, *vi...)
-
-			for _, v := range *vi {
-				if v.VexData.Status == model.VexStatusAffected || v.VexData.Status == model.VexStatusUnderInvestigation {
-					cv := assembler.CertifyVulnIngest{
-						Vulnerability: vuln,
-						VulnData: &model.ScanMetadataInput{
-							TimeScanned: v.VexData.KnownSince,
-						},
-						Pkg: v.Pkg,
-					}
-					c.vulnData.certifyVuln = append(c.vulnData.certifyVuln, cv)
+		} else {
+			if strings.Contains(vulnerability.BOMRef, "pkg:") {
+				for _, foundPkgElement := range c.packagePackages[vulnerability.BOMRef] {
+					foundVexIngest = append(foundVexIngest, assembler.VexIngest{VexData: &vd, Vulnerability: vuln, Pkg: foundPkgElement})
 				}
 			}
 		}
 
-		for _, vulnRating := range *vulnerability.Ratings {
-			if vulnRating.Method != "" {
-				vm := assembler.VulnMetadataIngest{
+		c.vulnData.vex = append(c.vulnData.vex, foundVexIngest...)
+
+		for _, v := range foundVexIngest {
+			if v.VexData.Status == model.VexStatusAffected || v.VexData.Status == model.VexStatusUnderInvestigation {
+				cv := assembler.CertifyVulnIngest{
 					Vulnerability: vuln,
-					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
-						ScoreType:  model.VulnerabilityScoreType(vulnRating.Method),
-						ScoreValue: *vulnRating.Score,
-						Timestamp:  publishedTime,
+					VulnData: &model.ScanMetadataInput{
+						TimeScanned: v.VexData.KnownSince,
 					},
+					Pkg: v.Pkg,
 				}
-				c.vulnData.vulnMetadata = append(c.vulnData.vulnMetadata, vm)
-			} else {
-				logger.Debugf("vulnerability method not specified in cdx sbom: %s, skipping", c.doc.SourceInformation.DocumentRef)
+				c.vulnData.certifyVuln = append(c.vulnData.certifyVuln, cv)
+			}
+		}
+
+		if vulnerability.Ratings != nil {
+			for _, vulnRating := range *vulnerability.Ratings {
+				if vulnRating.Method != "" {
+					var score float64 = 0
+					if vulnRating.Score != nil {
+						score = *vulnRating.Score
+					}
+					vm := assembler.VulnMetadataIngest{
+						Vulnerability: vuln,
+						VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+							ScoreType:  model.VulnerabilityScoreType(vulnRating.Method),
+							ScoreValue: score,
+							Timestamp:  publishedTime,
+						},
+					}
+					c.vulnData.vulnMetadata = append(c.vulnData.vulnMetadata, vm)
+				} else {
+					logger.Debugf("vulnerability method not specified in cdx sbom: %s, skipping", c.doc.SourceInformation.DocumentRef)
+				}
 			}
 		}
 	}
@@ -638,7 +657,7 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 }
 
 // Get package name and range versions to create package input spec for the affected packages.
-func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *model.VulnerabilityInputSpec, vexData model.VexStatementInputSpec, affectsObj cdx.Affects) (*[]assembler.VexIngest, error) {
+func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *model.VulnerabilityInputSpec, vexData model.VexStatementInputSpec, affectsObj cdx.Affects) ([]assembler.VexIngest, error) {
 	logger := logging.FromContext(ctx)
 	pkgRef := affectsObj.Ref
 
@@ -649,7 +668,7 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	}
 
 	if len(foundVexIngest) > 0 {
-		return &foundVexIngest, nil
+		return foundVexIngest, nil
 	}
 
 	// split ref using # as delimiter.
@@ -666,7 +685,7 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 			return nil, fmt.Errorf("unable to create package input spec: %v", err)
 		}
 		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkdIdentifier)
-		return &[]assembler.VexIngest{{VexData: &vexData, Vulnerability: vulnInput, Pkg: pkg}}, nil
+		return []assembler.VexIngest{{VexData: &vexData, Vulnerability: vulnInput, Pkg: pkg}}, nil
 	}
 
 	if affectsObj.Range == nil {
@@ -674,32 +693,34 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	}
 
 	var viList []assembler.VexIngest
-	for _, affect := range *affectsObj.Range {
-		// TODO: Handle package range versions (see - https://github.com/CycloneDX/bom-examples/blob/master/VEX/CISA-Use-Cases/Case-8/vex.json#L42)
-		if affect.Range != "" {
-			logger.Debugf("[cdx vex] package range versions not supported yet: %q", affect.Range)
-			continue
-		}
-		if affect.Version == "" {
-			return nil, fmt.Errorf("no version found for package ref %q", pkgRef)
-		}
-		vi := &assembler.VexIngest{
-			VexData:       &vexData,
-			Vulnerability: vulnInput,
-		}
+	if affectsObj.Range != nil {
+		for _, affect := range *affectsObj.Range {
+			// TODO: Handle package range versions (see - https://github.com/CycloneDX/bom-examples/blob/master/VEX/CISA-Use-Cases/Case-8/vex.json#L42)
+			if affect.Range != "" {
+				logger.Debugf("[cdx vex] package range versions not supported yet: %q", affect.Range)
+				continue
+			}
+			if affect.Version == "" {
+				return nil, fmt.Errorf("no version found for package ref %q", pkgRef)
+			}
+			vi := &assembler.VexIngest{
+				VexData:       &vexData,
+				Vulnerability: vulnInput,
+			}
 
-		// create guac specific identifier string using affected package name and version.
-		pkgID := guacCDXPkgPurl(pkdIdentifier, affect.Version, "", false)
-		pkg, err := asmhelpers.PurlToPkg(pkgID)
-		if err != nil {
-			return nil, fmt.Errorf("unable to create package input spec from guac pkg purl: %v", err)
+			// create guac specific identifier string using affected package name and version.
+			pkgID := guacCDXPkgPurl(pkdIdentifier, affect.Version, "", false)
+			pkg, err := asmhelpers.PurlToPkg(pkgID)
+			if err != nil {
+				return nil, fmt.Errorf("unable to create package input spec from guac pkg purl: %v", err)
+			}
+			vi.Pkg = pkg
+			viList = append(viList, *vi)
+			c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgID)
 		}
-		vi.Pkg = pkg
-		viList = append(viList, *vi)
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgID)
 	}
 
-	return &viList, nil
+	return viList, nil
 }
 
 func guacCDXFilePurl(fileName string, version string, topLevel bool) string {
