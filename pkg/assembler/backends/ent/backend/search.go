@@ -328,6 +328,9 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		return nil, nil
 	}
 
+	// Calculate the cutoff time for the last day
+	cutoffTime := time.Now().Add(-24 * time.Hour)
+
 	// static ID for noVuln that is generated from type = novuln and vulnid = ""
 	// this is generated via:
 	vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&model.VulnerabilityInputSpec{Type: NoVuln, VulnerabilityID: ""}, helpers.VulnServerKey)
@@ -343,31 +346,33 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		queryList = append(queryList, convertedID)
 	}
 
-	var cvLatestScan []struct {
+	type cvLatestScan struct {
 		PkgID          uuid.UUID `json:"package_id"`
 		VulnID         uuid.UUID `json:"vulnerability_id"`
 		LastScanTimeDB time.Time `json:"max"`
 	}
+
+	var cvLatestScans []cvLatestScan
 
 	var aggPredicates []predicate.CertifyVuln
 	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
 
 	// aggregate to find the latest timescanned for certifyVulns for list of packages
 	err := b.client.CertifyVuln.Query().
-		Where(certifyvuln.And(aggPredicates...)).
+		Where(certifyvuln.And(aggPredicates...), certifyvuln.And(certifyvuln.TimeScannedGT(cutoffTime))).
 		GroupBy(certifyvuln.FieldPackageID, certifyvuln.FieldVulnerabilityID). // Group by Package ID
 		Aggregate(func(s *sql.Selector) string {
 			t := sql.Table(certifyvuln.Table)
 			return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
 		}).
-		Scan(ctx, &cvLatestScan)
+		Scan(ctx, &cvLatestScans)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed aggregate certifyVuln based on packageIDs with error: %w", err)
 	}
 
 	var predicates []predicate.CertifyVuln
-	for _, record := range cvLatestScan {
+	for _, record := range cvLatestScans {
 		predicates = append(predicates,
 			certifyvuln.And(
 				certifyvuln.VulnerabilityID(record.VulnID),
