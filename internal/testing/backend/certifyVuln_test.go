@@ -21,7 +21,6 @@ import (
 	"context"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -1517,11 +1516,6 @@ func TestIngestCertifyVulns(t *testing.T) {
 	}
 }
 
-var ignoreTimeStamp = cmp.FilterPath(func(p cmp.Path) bool {
-	// Match if the path is "Metadata.TimeScanned"
-	return p.String() == "Metadata.TimeScanned"
-}, cmp.Ignore())
-
 func TestBatchQueryPkgIDCertifyVuln(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
@@ -1553,7 +1547,7 @@ func TestBatchQueryPkgIDCertifyVuln(t *testing.T) {
 							ScannerURI:     "test scanner uri",
 							DbVersion:      "2023.01.01",
 							DbURI:          "test db uri",
-							TimeScanned:    time.Now().UTC(),
+							TimeScanned:    testdata.T1,
 						},
 						{
 							Collector:      "test collector",
@@ -1562,7 +1556,7 @@ func TestBatchQueryPkgIDCertifyVuln(t *testing.T) {
 							ScannerURI:     "test scanner uri",
 							DbVersion:      "2023.01.01",
 							DbURI:          "test db uri",
-							TimeScanned:    time.Now().UTC(),
+							TimeScanned:    testdata.T1,
 						},
 						{
 							Collector:      "test collector",
@@ -1571,7 +1565,7 @@ func TestBatchQueryPkgIDCertifyVuln(t *testing.T) {
 							ScannerURI:     "test scanner uri",
 							DbVersion:      "2023.01.01",
 							DbURI:          "test db uri",
-							TimeScanned:    time.Now().UTC(),
+							TimeScanned:    testdata.T1,
 						},
 						{
 							Collector:      "test collector",
@@ -1580,7 +1574,7 @@ func TestBatchQueryPkgIDCertifyVuln(t *testing.T) {
 							ScannerURI:     "test scanner uri",
 							DbVersion:      "2023.01.01",
 							DbURI:          "test db uri",
-							TimeScanned:    time.Now().UTC(),
+							TimeScanned:    testdata.T1,
 						},
 					},
 				},
@@ -1653,7 +1647,7 @@ func TestBatchQueryPkgIDCertifyVuln(t *testing.T) {
 
 			}
 
-			if diff := cmp.Diff(test.ExpVuln, got, commonOpts, ignoreTimeStamp); diff != "" {
+			if diff := cmp.Diff(test.ExpVuln, got, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

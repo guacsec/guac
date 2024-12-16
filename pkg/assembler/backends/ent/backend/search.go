@@ -36,7 +36,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -328,13 +327,6 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		return nil, nil
 	}
 
-	// Calculate the cutoff time for the last day
-	cutoffTime := time.Now().Add(-24 * time.Hour)
-
-	// static ID for noVuln that is generated from type = novuln and vulnid = ""
-	// this is generated via:
-	vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&model.VulnerabilityInputSpec{Type: NoVuln, VulnerabilityID: ""}, helpers.VulnServerKey)
-	noVulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
 	var queryList []uuid.UUID
 
 	for _, id := range pkgIDs {
@@ -355,11 +347,11 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 	var cvLatestScans []cvLatestScan
 
 	var aggPredicates []predicate.CertifyVuln
-	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
+	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...))
 
 	// aggregate to find the latest timescanned for certifyVulns for list of packages
 	err := b.client.CertifyVuln.Query().
-		Where(certifyvuln.And(aggPredicates...), certifyvuln.And(certifyvuln.TimeScannedGT(cutoffTime))).
+		Where(certifyvuln.And(aggPredicates...)).
 		GroupBy(certifyvuln.FieldPackageID, certifyvuln.FieldVulnerabilityID). // Group by Package ID
 		Aggregate(func(s *sql.Selector) string {
 			t := sql.Table(certifyvuln.Table)
