@@ -44,8 +44,6 @@ func certifyVexConflictColumns() []string {
 	return []string{
 		certifyvex.FieldKnownSince,
 		certifyvex.FieldStatus,
-		certifyvex.FieldStatement,
-		certifyvex.FieldStatusNotes,
 		certifyvex.FieldJustification,
 		certifyvex.FieldOrigin,
 		certifyvex.FieldCollector,
