@@ -347,7 +347,7 @@ var (
 			{
 				Name:    "vex_artifact_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[3], CertifyVexesColumns[4], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[8], CertifyVexesColumns[11], CertifyVexesColumns[9]},
+				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[8], CertifyVexesColumns[11], CertifyVexesColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "artifact_id IS NULL",
 				},
@@ -355,7 +355,7 @@ var (
 			{
 				Name:    "vex_package_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[3], CertifyVexesColumns[4], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[8], CertifyVexesColumns[11], CertifyVexesColumns[10]},
+				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[8], CertifyVexesColumns[11], CertifyVexesColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL",
 				},
