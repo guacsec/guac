@@ -37,7 +37,7 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-var zeroTime = time.Unix(0, 0)
+var zeroTime = time.Unix(0, 0).UTC()
 
 var vexStatusMap = map[cdx.ImpactAnalysisState]model.VexStatus{
 	cdx.IASResolved:    model.VexStatusFixed,
@@ -554,7 +554,7 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 			return fmt.Errorf("failed to create vuln input spec %v", err)
 		}
 		var vd model.VexStatementInputSpec
-		publishedTime := time.Unix(0, 0)
+		publishedTime := zeroTime
 		if vulnerability.Analysis != nil {
 			if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
 				vd.Status = vexStatus

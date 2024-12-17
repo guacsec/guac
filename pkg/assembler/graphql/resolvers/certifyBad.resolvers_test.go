@@ -28,7 +28,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-var ZeroTime = time.Unix(0, 0)
+var ZeroTime = time.Unix(0, 0).UTC()
 
 func TestIngestCertifyBad(t *testing.T) {
 	type call struct {

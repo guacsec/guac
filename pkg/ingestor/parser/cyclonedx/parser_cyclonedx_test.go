@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/google/go-cmp/cmp"
@@ -187,6 +186,15 @@ func Test_cyclonedxParser(t *testing.T) {
 			Type:   processor.DocumentCycloneDX,
 		},
 		wantPredicates: &testdata.FlatComponentsPredicates,
+		wantErr:        false,
+	}, {
+		name: "CycloneDX Xray SBOM with Vulns",
+		doc: &processor.Document{
+			Blob:   testdata.CyloneDXXRAYExampleVulns,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.XraySBOMVulnsPredicates,
 		wantErr:        false,
 	}}
 	for _, tt := range tests {
@@ -608,14 +616,14 @@ func affectedVexPredicates() *assembler.IngestPredicates {
 				Pkg:           guacPkgHelper("product-ABC", "2.4"),
 				Vulnerability: testdata.VulnSpecAffected,
 				VulnData: &model.ScanMetadataInput{
-					TimeScanned: time.Unix(0, 0),
+					TimeScanned: zeroTime,
 				},
 			},
 			{
 				Pkg:           guacPkgHelper("product-ABC", "2.6"),
 				Vulnerability: testdata.VulnSpecAffected,
 				VulnData: &model.ScanMetadataInput{
-					TimeScanned: time.Unix(0, 0),
+					TimeScanned: zeroTime,
 				},
 			},
 		},
@@ -643,14 +651,14 @@ func noAnalysisVexPredicates() *assembler.IngestPredicates {
 				Pkg:           guacPkgHelper("product-ABC", "2.4"),
 				Vulnerability: testdata.VulnSpecAffected,
 				VulnData: &model.ScanMetadataInput{
-					TimeScanned: time.Unix(0, 0),
+					TimeScanned: zeroTime,
 				},
 			},
 			{
 				Pkg:           guacPkgHelper("product-ABC", "2.6"),
 				Vulnerability: testdata.VulnSpecAffected,
 				VulnData: &model.ScanMetadataInput{
-					TimeScanned: time.Unix(0, 0),
+					TimeScanned: zeroTime,
 				},
 			},
 		},

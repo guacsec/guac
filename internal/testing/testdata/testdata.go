@@ -123,6 +123,9 @@ var (
 	//go:embed exampledata/cyclonedx-vex.xml
 	CyloneDXVEXExampleXML []byte
 
+	//go:embed exampledata/xray-cdx-vulns.json
+	CyloneDXXRAYExampleVulns []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
@@ -272,14 +275,14 @@ var (
 		VexJustification: generated.VexJustificationNotProvided,
 		Statement:        "",
 		StatusNotes:      "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
-		KnownSince:       time.Unix(0, 0),
+		KnownSince:       time.Unix(0, 0).UTC(),
 	}
 	VexDataNoAnalysis = &generated.VexStatementInputSpec{
 		Status:           generated.VexStatusAffected,
 		VexJustification: generated.VexJustificationNotProvided,
 		Statement:        "com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.",
 		StatusNotes:      "",
-		KnownSince:       time.Unix(0, 0),
+		KnownSince:       time.Unix(0, 0).UTC(),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
 		{
@@ -287,7 +290,7 @@ var (
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
-				Timestamp:  time.Unix(0, 0),
+				Timestamp:  time.Unix(0, 0).UTC(),
 			},
 		},
 	}
@@ -297,7 +300,7 @@ var (
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
-				Timestamp:  time.Unix(0, 0),
+				Timestamp:  time.Unix(0, 0).UTC(),
 			},
 		},
 	}
@@ -1793,6 +1796,127 @@ var (
 			},
 		},
 		HasSBOM: flatComponentsHasSBOM,
+	}
+
+	XRayComponentsTime, _ = time.Parse(time.RFC3339, "2024-12-11T10:06:41+00:00")
+
+	XraySBOMVulnsPredicates = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "guac",
+					Namespace: ptrfrom.String("cdx/library"),
+					Name:      "maven",
+					Version:   ptrfrom.String("sha256__09c4bf58d7e7e31bdc1ab73ef10349b3a47c9a814e715e409034fb3293253ce2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "deb",
+					Namespace: ptrfrom.String(""),
+					Name:      "debian:buster:apt",
+					Version:   ptrfrom.String("1.8.2.2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					DependencyType: model.DependencyTypeUnknown,
+					Justification:  isDepJustifyTopPkgJustification,
+				},
+			},
+		},
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "deb",
+					Namespace: ptrfrom.String(""),
+					Name:      "debian:buster:apt",
+					Version:   ptrfrom.String("1.8.2.2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha-256",
+					Digest:    "db5c8bd205d41e520f615251ae97c9610a0fb312841428a7a25072831f6bee83",
+				},
+				IsOccurrence: isOccurrenceJustifyTopPkg,
+			},
+		},
+		HasSBOM: []assembler.HasSBOMIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "guac",
+					Namespace: ptrfrom.String("cdx/library"),
+					Name:      "maven",
+					Version:   ptrfrom.String("sha256__09c4bf58d7e7e31bdc1ab73ef10349b3a47c9a814e715e409034fb3293253ce2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				HasSBOM: &model.HasSBOMInputSpec{
+					Uri:        "urn:uuid:e8300d83-d8d8-4e91-63e7-3d95b8900f45",
+					Algorithm:  "sha256",
+					Digest:     "5b43f9ae2939c3ce859a1beda091d699d05853f76ed2843e021c24e266dbbc4d",
+					KnownSince: XRayComponentsTime,
+				},
+			},
+		},
+		CertifyVuln: []assembler.CertifyVulnIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "deb",
+					Namespace: ptrfrom.String(""),
+					Name:      "debian:buster:apt",
+					Version:   ptrfrom.String("1.8.2.2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &model.VulnerabilityInputSpec{
+					Type:            "cve",
+					VulnerabilityID: "cve-2011-3374",
+				},
+				VulnData: &model.ScanMetadataInput{
+					TimeScanned: time.Unix(0, 0).UTC(),
+				},
+			},
+		},
+		Vex: []assembler.VexIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "deb",
+					Namespace: ptrfrom.String(""),
+					Name:      "debian:buster:apt",
+					Version:   ptrfrom.String("1.8.2.2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &model.VulnerabilityInputSpec{
+					Type:            "cve",
+					VulnerabilityID: "cve-2011-3374",
+				},
+				VexData: &model.VexStatementInputSpec{
+					Status:           model.VexStatusUnderInvestigation,
+					VexJustification: model.VexJustificationNotProvided,
+					StatusNotes:      "There are no applicability scanners for this specific CVE\n##### Deployment mitigations\n\nClient-side mitigation: In case a repository is cloned/pulled with no intention of pushing anything, the `git sparse-checkout` feature can be enabled to avoid pulling the `.gitattributes` file. It can be performed as follows:\r\n```\r\ngit clone \u003cREPOSITORY URL\u003e --no-checkout\r\ncd \u003cREPOSITORY NAME\u003e\r\ngit sparse-checkout init\r\ngit sparse-checkout set --no-cone '/*' '!.gitattributes'\r\ngit checkout\r\n```\n\n##### Deployment mitigations\n\nAlthough the issue resides on the Git client's side, Git servers can also avoid infection by malicious actors from their side as well. Here is a git hook that will run after each push to check the size of the `.gitattributes` file can prevent from this vulnerability. The hook should be in the `/path/to/repository.git/hooks/` folder under the name of `pre-receive`:\r\n```\r\n#!/bin/sh\r\n# pre-receive hook to prevent oversized .gitattributes files from being pushed\r\n\r\n# 1GB of maximum allowed size for .gitattributes file (in bytes)\r\nmax_size=1048576\r\n\r\n# check each pushed file\r\nwhile read oldrev newrev refname; do\r\n    # check for .gitattributes file\r\n    if [ \"$(git rev-parse --verify $newrev:.gitattributes 2\u003e /dev/null)\" != \"\" ]; then\r\n        # check file size\r\n        size=$(git cat-file -s $newrev:.gitattributes)\r\n        if [ $size -gt $max_size ]; then\r\n            echo \"Error: .gitattributes file exceeds maximum allowed size of $max_size bytes.\"\r\n            exit 1\r\n        fi\r\n    fi\r\ndone\r\n\r\nexit 0\r\n```",
+					KnownSince:       time.Unix(0, 0).UTC(),
+				},
+			},
+		},
+		CertifyLegal: []assembler.CertifyLegalIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "deb",
+					Namespace: ptrfrom.String(""),
+					Name:      "debian:buster:apt",
+					Version:   ptrfrom.String("1.8.2.2"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Declared: []model.LicenseInputSpec{
+					{
+						Name:        "GPL-2.0-only",
+						ListVersion: ptrfrom.String("UNKNOWN"),
+					},
+				},
+				CertifyLegal: &model.CertifyLegalInputSpec{
+					DeclaredLicense: "GPL-2.0-only",
+					Justification:   "Found in CycloneDX document",
+					TimeScanned:     XRayComponentsTime,
+				},
+			},
+		},
 	}
 
 	ociComponentsIsDependencyIngests = []assembler.IsDependencyIngest{
