@@ -579,7 +579,7 @@ func TestVEX(t *testing.T) {
 					},
 					Vuln: testdata.C1,
 					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
+						VexJustification: "test justification with status note one",
 						KnownSince:       time.Unix(1e9, 0),
 						StatusNotes:      "status one",
 					},
@@ -590,7 +590,7 @@ func TestVEX(t *testing.T) {
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
+						VexJustification: "test justification with status note two",
 						KnownSince:       time.Unix(1e9, 0),
 						StatusNotes:      "status two",
 					},
@@ -606,7 +606,7 @@ func TestVEX(t *testing.T) {
 						Type:             "cve",
 						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
 					},
-					VexJustification: "test justification",
+					VexJustification: "test justification with status note one",
 					KnownSince:       time.Unix(1e9, 0),
 					StatusNotes:      "status one",
 				},
@@ -623,7 +623,7 @@ func TestVEX(t *testing.T) {
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
+						VexJustification: "test justification with statement one",
 						KnownSince:       time.Unix(1e9, 0),
 						Statement:        "statement one",
 					},
@@ -634,7 +634,7 @@ func TestVEX(t *testing.T) {
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
+						VexJustification: "test justification with statement two",
 						KnownSince:       time.Unix(1e9, 0),
 						Statement:        "statement two",
 					},
@@ -650,7 +650,7 @@ func TestVEX(t *testing.T) {
 						Type:             "osv",
 						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
 					},
-					VexJustification: "test justification",
+					VexJustification: "test justification with statement two",
 					KnownSince:       time.Unix(1e9, 0),
 					Statement:        "statement two",
 				},
