@@ -1,0 +1,58 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "serialNumber": "urn:uuid:e8300d83-d8d8-4e91-63e7-3d95b8900f45",
+    "version": 1,
+    "metadata": {
+      "timestamp": "2024-12-11T10:06:41Z",
+      "tools": [
+        {
+          "vendor": "JFrog Inc.",
+          "name": "Xray",
+          "version": "3.103.6"
+        }
+      ],
+      "component": {
+        "type": "container",
+        "name": "library/maven",
+        "version": "sha256__09c4bf58d7e7e31bdc1ab73ef10349b3a47c9a814e715e409034fb3293253ce2"
+      }
+    },
+    "components": [
+      {
+        "bom-ref": "pkg:deb/debian:buster:apt@1.8.2.2",
+        "type": "application",
+        "name": "debian:buster:apt",
+        "version": "1.8.2.2",
+        "hashes": [
+          {
+            "alg": "SHA-256",
+            "content": "db5c8bd205d41e520f615251ae97c9610a0fb312841428a7a25072831f6bee83"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "GPL-2.0-only",
+              "url": "http://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+            }
+          }
+        ],
+        "purl": "pkg:deb/debian:buster:apt@1.8.2.2"
+      }
+    ],
+    "dependencies": [],
+    "vulnerabilities": [
+      {
+        "bom-ref": "pkg:deb/debian:buster:apt@1.8.2.2",
+        "id": "CVE-2011-3374",
+        "analysis": {
+          "state": "in_triage",
+          "response": [
+            "workaround_available"
+          ],
+          "detail": "There are no applicability scanners for this specific CVE\n##### Deployment mitigations\n\nClient-side mitigation: In case a repository is cloned/pulled with no intention of pushing anything, the `git sparse-checkout` feature can be enabled to avoid pulling the `.gitattributes` file. It can be performed as follows:\r\n```\r\ngit clone \u003cREPOSITORY URL\u003e --no-checkout\r\ncd \u003cREPOSITORY NAME\u003e\r\ngit sparse-checkout init\r\ngit sparse-checkout set --no-cone '/*' '!.gitattributes'\r\ngit checkout\r\n```\n\n##### Deployment mitigations\n\nAlthough the issue resides on the Git client's side, Git servers can also avoid infection by malicious actors from their side as well. Here is a git hook that will run after each push to check the size of the `.gitattributes` file can prevent from this vulnerability. The hook should be in the `/path/to/repository.git/hooks/` folder under the name of `pre-receive`:\r\n```\r\n#!/bin/sh\r\n# pre-receive hook to prevent oversized .gitattributes files from being pushed\r\n\r\n# 1GB of maximum allowed size for .gitattributes file (in bytes)\r\nmax_size=1048576\r\n\r\n# check each pushed file\r\nwhile read oldrev newrev refname; do\r\n    # check for .gitattributes file\r\n    if [ \"$(git rev-parse --verify $newrev:.gitattributes 2\u003e /dev/null)\" != \"\" ]; then\r\n        # check file size\r\n        size=$(git cat-file -s $newrev:.gitattributes)\r\n        if [ $size -gt $max_size ]; then\r\n            echo \"Error: .gitattributes file exceeds maximum allowed size of $max_size bytes.\"\r\n            exit 1\r\n        fi\r\n    fi\r\ndone\r\n\r\nexit 0\r\n```"
+        }
+      }
+    ]
+}

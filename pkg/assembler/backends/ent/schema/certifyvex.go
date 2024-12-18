@@ -62,9 +62,9 @@ func (CertifyVex) Edges() []ent.Edge {
 // Indexes of the VEX.
 func (CertifyVex) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("known_since", "justification", "status", "statement", "status_notes", "origin", "collector", "document_ref").
+		index.Fields("known_since", "justification", "status", "origin", "collector", "document_ref").
 			Edges("vulnerability", "package").Unique().Annotations(entsql.IndexWhere("artifact_id IS NULL")).StorageKey("vex_artifact_id"),
-		index.Fields("known_since", "justification", "status", "statement", "status_notes", "origin", "collector", "document_ref").
-		Edges("vulnerability", "artifact").Unique().Annotations(entsql.IndexWhere("package_id IS NULL")).StorageKey("vex_package_id"),
+		index.Fields("known_since", "justification", "status", "origin", "collector", "document_ref").
+			Edges("vulnerability", "artifact").Unique().Annotations(entsql.IndexWhere("package_id IS NULL")).StorageKey("vex_package_id"),
 	}
 }
