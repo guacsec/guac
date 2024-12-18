@@ -700,3 +700,315 @@ func parseEOLValue(value string) map[string]string {
 	}
 	return result
 }
+
+func TestPurlsDepsDevScan(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	tests := []struct {
+		name     string
+		purls    []string
+		wantCSs  []assembler.CertifyScorecardIngest
+		wantHSAs []assembler.HasSourceAtIngest
+		wantErr  bool
+	}{
+		{
+			name:     "no purl",
+			purls:    []string{""},
+			wantCSs:  []assembler.CertifyScorecardIngest{},
+			wantHSAs: []assembler.HasSourceAtIngest{},
+			wantErr:  false,
+		},
+		{
+			name:  "valid maven/org.webjars.npm/a",
+			purls: []string{"pkg:maven/org.webjars.npm/a@2.1.2"},
+			wantCSs: []assembler.CertifyScorecardIngest{
+				{
+					Source: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/alfateam",
+						Name:      "a",
+					},
+					Scorecard: &generated.ScorecardInputSpec{
+						// Not including all checks since they are not stable for testing
+						// and are not used anyway. As long as its a non-empty list.
+						Checks: []generated.ScorecardCheckInputSpec{
+							{
+								Check: "Pinned-Dependencies",
+								Score: -1,
+							},
+							{
+								Check: "Token-Permissions",
+								Score: -1,
+							},
+							{
+								Check: "Maintained",
+								Score: 0,
+							},
+							{
+								Check: "Binary-Artifacts",
+								Score: 10,
+							},
+						},
+						AggregateScore:   3.0999999046325684,
+						TimeScanned:      tm,
+						ScorecardVersion: "v5.0.0-94-g51f31c98",
+						ScorecardCommit:  "51f31c9882b6e5998e0df571096147a99842092b",
+						Origin:           "deps.dev",
+						Collector:        "ingest_depsdev_scanner",
+					},
+				},
+			},
+			wantHSAs: []assembler.HasSourceAtIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:      "maven",
+						Namespace: ptrfrom.String("org.webjars.npm"),
+						Name:      "a",
+						Version:   ptrfrom.String("2.1.2"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: generated.MatchFlags{Pkg: "ALL_VERSIONS"},
+					Src: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/alfateam",
+						Name:      "a",
+					},
+					HasSourceAt: &generated.HasSourceAtInputSpec{
+						KnownSince:    tm,
+						Justification: "collected via deps.dev",
+						Origin:        "deps.dev",
+						Collector:     "ingest_depsdev_scanner",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:     "non-existent purl",
+			purls:    []string{"pkg:notexist/ns/a@1.2"},
+			wantCSs:  []assembler.CertifyScorecardIngest{},
+			wantHSAs: []assembler.HasSourceAtIngest{},
+			wantErr:  false,
+		},
+		{
+			name:     "malformed purl",
+			purls:    []string{"not-a-purl"},
+			wantCSs:  []assembler.CertifyScorecardIngest{},
+			wantHSAs: []assembler.HasSourceAtIngest{},
+			wantErr:  false,
+		},
+		{
+			name:  "valid pypi/wheel-axle-runtime",
+			purls: []string{"pkg:pypi/wheel-axle-runtime@0.0.4"},
+			wantCSs: []assembler.CertifyScorecardIngest{
+				{
+					Source: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/karellen",
+						Name:      "wheel-axle-runtime",
+					},
+					Scorecard: &generated.ScorecardInputSpec{
+						// Not including all checks since they are not stable for testing
+						// and are not used anyway. As long as its a non-empty list.
+						Checks: []generated.ScorecardCheckInputSpec{
+							{
+								Check: "Pinned-Dependencies",
+								Score: 0,
+							},
+							{
+								Check: "Token-Permissions",
+								Score: 8,
+							},
+							{
+								Check: "Maintained",
+								Score: 1,
+							},
+							{
+								Check: "Binary-Artifacts",
+								Score: 8,
+							},
+						},
+						AggregateScore:   3.700000047683716,
+						TimeScanned:      tm,
+						ScorecardVersion: "v5.0.0-94-g51f31c98",
+						ScorecardCommit:  "51f31c9882b6e5998e0df571096147a99842092b",
+						Origin:           "deps.dev",
+						Collector:        "ingest_depsdev_scanner",
+					},
+				},
+			},
+			wantHSAs: []assembler.HasSourceAtIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:      "pypi",
+						Namespace: ptrfrom.String(""),
+						Name:      "wheel-axle-runtime",
+						Version:   ptrfrom.String("0.0.4"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: generated.MatchFlags{Pkg: "ALL_VERSIONS"},
+					Src: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/karellen",
+						Name:      "wheel-axle-runtime",
+					},
+					HasSourceAt: &generated.HasSourceAtInputSpec{
+						KnownSince:    tm,
+						Justification: "collected via deps.dev",
+						Origin:        "deps.dev",
+						Collector:     "ingest_depsdev_scanner",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "multiple valid PURLs",
+			purls: []string{
+				"pkg:maven/org.webjars.npm/a@2.1.2",
+				"pkg:pypi/wheel-axle-runtime@0.0.4",
+			},
+			wantCSs: []assembler.CertifyScorecardIngest{
+				{
+					Source: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/alfateam",
+						Name:      "a",
+					},
+					Scorecard: &generated.ScorecardInputSpec{
+						// Not including all checks since they are not stable for testing
+						// and are not used anyway. As long as its a non-empty list.
+						Checks: []generated.ScorecardCheckInputSpec{
+							{
+								Check: "Pinned-Dependencies",
+								Score: -1,
+							},
+							{
+								Check: "Token-Permissions",
+								Score: -1,
+							},
+							{
+								Check: "Maintained",
+								Score: 0,
+							},
+							{
+								Check: "Binary-Artifacts",
+								Score: 10,
+							},
+						},
+						AggregateScore:   3.0999999046325684,
+						TimeScanned:      tm,
+						ScorecardVersion: "v5.0.0-94-g51f31c98",
+						ScorecardCommit:  "51f31c9882b6e5998e0df571096147a99842092b",
+						Origin:           "deps.dev",
+						Collector:        "ingest_depsdev_scanner",
+					},
+				},
+				{
+					Source: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/karellen",
+						Name:      "wheel-axle-runtime",
+					},
+					Scorecard: &generated.ScorecardInputSpec{
+						// Not including all checks since they are not stable for testing
+						// and are not used anyway. As long as its a non-empty list.
+						Checks: []generated.ScorecardCheckInputSpec{
+							{
+								Check: "Pinned-Dependencies",
+								Score: 0,
+							},
+							{
+								Check: "Token-Permissions",
+								Score: 8,
+							},
+							{
+								Check: "Maintained",
+								Score: 1,
+							},
+							{
+								Check: "Binary-Artifacts",
+								Score: 8,
+							},
+						},
+						AggregateScore:   3.700000047683716,
+						TimeScanned:      tm,
+						ScorecardVersion: "v5.0.0-94-g51f31c98",
+						ScorecardCommit:  "51f31c9882b6e5998e0df571096147a99842092b",
+						Origin:           "deps.dev",
+						Collector:        "ingest_depsdev_scanner",
+					},
+				},
+			},
+			wantHSAs: []assembler.HasSourceAtIngest{
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:      "maven",
+						Namespace: ptrfrom.String("org.webjars.npm"),
+						Name:      "a",
+						Version:   ptrfrom.String("2.1.2"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: generated.MatchFlags{Pkg: "ALL_VERSIONS"},
+					Src: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/alfateam",
+						Name:      "a",
+					},
+					HasSourceAt: &generated.HasSourceAtInputSpec{
+						KnownSince:    tm,
+						Justification: "collected via deps.dev",
+						Origin:        "deps.dev",
+						Collector:     "ingest_depsdev_scanner",
+					},
+				},
+				{
+					Pkg: &generated.PkgInputSpec{
+						Type:      "pypi",
+						Namespace: ptrfrom.String(""),
+						Name:      "wheel-axle-runtime",
+						Version:   ptrfrom.String("0.0.4"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: generated.MatchFlags{Pkg: "ALL_VERSIONS"},
+					Src: &generated.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/karellen",
+						Name:      "wheel-axle-runtime",
+					},
+					HasSourceAt: &generated.HasSourceAtInputSpec{
+						KnownSince:    tm,
+						Justification: "collected via deps.dev",
+						Origin:        "deps.dev",
+						Collector:     "ingest_depsdev_scanner",
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCSs, gotHSAs, err := PurlsDepsDevScan(ctx, tt.purls)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PurlsToScan() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(
+				tt.wantCSs,
+				gotCSs,
+				cmpopts.IgnoreFields(generated.ScorecardInputSpec{},
+					"AggregateScore", "TimeScanned",
+					"ScorecardVersion", "ScorecardCommit", "DocumentRef"),
+				cmpopts.IgnoreTypes(generated.ScorecardCheckInputSpec{}),
+			); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+			if diff := cmp.Diff(tt.wantHSAs, gotHSAs,
+				cmpopts.IgnoreFields(generated.HasSourceAtInputSpec{}, "KnownSince", "DocumentRef"),
+			); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
