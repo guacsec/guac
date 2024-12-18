@@ -36,7 +36,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -328,10 +327,6 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		return nil, nil
 	}
 
-	// static ID for noVuln that is generated from type = novuln and vulnid = ""
-	// this is generated via:
-	vulnIDs := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&model.VulnerabilityInputSpec{Type: NoVuln, VulnerabilityID: ""}, helpers.VulnServerKey)
-	noVulnID := generateUUIDKey([]byte(vulnIDs.VulnerabilityID))
 	var queryList []uuid.UUID
 
 	for _, id := range pkgIDs {
@@ -343,14 +338,16 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		queryList = append(queryList, convertedID)
 	}
 
-	var cvLatestScan []struct {
+	type cvLatestScan struct {
 		PkgID          uuid.UUID `json:"package_id"`
 		VulnID         uuid.UUID `json:"vulnerability_id"`
 		LastScanTimeDB time.Time `json:"max"`
 	}
 
+	var cvLatestScans []cvLatestScan
+
 	var aggPredicates []predicate.CertifyVuln
-	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...), certifyvuln.VulnerabilityIDNEQ(noVulnID))
+	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...))
 
 	// aggregate to find the latest timescanned for certifyVulns for list of packages
 	err := b.client.CertifyVuln.Query().
@@ -360,14 +357,14 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 			t := sql.Table(certifyvuln.Table)
 			return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
 		}).
-		Scan(ctx, &cvLatestScan)
+		Scan(ctx, &cvLatestScans)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed aggregate certifyVuln based on packageIDs with error: %w", err)
 	}
 
 	var predicates []predicate.CertifyVuln
-	for _, record := range cvLatestScan {
+	for _, record := range cvLatestScans {
 		predicates = append(predicates,
 			certifyvuln.And(
 				certifyvuln.VulnerabilityID(record.VulnID),
