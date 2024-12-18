@@ -18,7 +18,7 @@ package deps_dev
 import (
 	"fmt"
 
-	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
+	ddc "github.com/guacsec/guac/internal/client/depsdevclient"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -49,8 +49,8 @@ func (d *DepsDev) Unpack(i *processor.Document) ([]*processor.Document, error) {
 	return []*processor.Document{}, nil
 }
 
-func parseDepsDev(p []byte) (*deps_dev.PackageComponent, error) {
-	packageComponent := deps_dev.PackageComponent{}
+func parseDepsDev(p []byte) (*ddc.PackageComponent, error) {
+	packageComponent := ddc.PackageComponent{}
 	if err := json.Unmarshal(p, &packageComponent); err != nil {
 		return nil, err
 	}

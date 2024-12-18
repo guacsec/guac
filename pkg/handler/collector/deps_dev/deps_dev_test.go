@@ -16,27 +16,21 @@
 package deps_dev
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"strings"
 	"testing"
 	"time"
 
+	ddc "github.com/guacsec/guac/internal/client/depsdevclient"
 	"github.com/guacsec/guac/internal/testing/dochelper"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/logging"
 
-	pb "deps.dev/api/v3"
 	"github.com/google/go-cmp/cmp"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 func TestNewDepsCollector(t *testing.T) {
@@ -417,7 +411,7 @@ func normalizeTimeStampAndScorecard(blob []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	packageComponent := &PackageComponent{}
+	packageComponent := &ddc.PackageComponent{}
 	if err := json.Unmarshal(blob, packageComponent); err != nil {
 		return nil, err
 	}
@@ -458,105 +452,4 @@ func toPurlSource(purlValues []string) datasource.CollectSource {
 		panic(err)
 	}
 	return ds
-}
-
-func TestProjectKey(t *testing.T) {
-	testCases := []struct {
-		name     string
-		links    []*pb.Link
-		expected *pb.ProjectKey
-	}{
-		{
-			name: "source repo link exists",
-			links: []*pb.Link{
-				{Label: "SOURCE_REPO", Url: "https://github.com/org/repo"},
-			},
-			expected: &pb.ProjectKey{Id: "github.com/org/repo"},
-		},
-		{
-			name: "no source repo link",
-			links: []*pb.Link{
-				{Label: "DOCS", Url: "https://docs.example.com"},
-			},
-			expected: nil,
-		},
-		{
-			name: "source repo link with .git suffix",
-			links: []*pb.Link{
-				{Label: "SOURCE_REPO", Url: "https://github.com/org/repo.git"},
-			},
-			expected: &pb.ProjectKey{Id: "github.com/org/repo"},
-		},
-	}
-
-	for _, tc := range testCases {
-		d := &depsCollector{}
-		t.Run(tc.name, func(t *testing.T) {
-			version := &pb.Version{Links: tc.links}
-			key := d.projectKey(version)
-			if key.GetId() != tc.expected.GetId() {
-				t.Errorf("Expected %v, got %v", tc.expected, key)
-			}
-		})
-	}
-}
-
-func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
-	tests := []struct {
-		testName     string
-		pkgType      string
-		namespace    *string
-		name         string
-		version      *string
-		pkgComponent *PackageComponent
-		wantLog      string
-	}{
-		{
-			testName:     "golang package without .git suffix",
-			pkgType:      "golang",
-			namespace:    ptrfrom.String("github.com/google"),
-			name:         "wire",
-			version:      ptrfrom.String("v0.5.0"),
-			pkgComponent: &PackageComponent{},
-			wantLog:      "The project key was not found in the map: id:\"github.com/google/wire\"",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.testName, func(t *testing.T) {
-			ctx := context.Background()
-
-			// Create a buffer to capture logs
-			var logBuffer bytes.Buffer
-			encoderConfig := zap.NewDevelopmentEncoderConfig()
-			core := zapcore.NewCore(
-				zapcore.NewConsoleEncoder(encoderConfig),
-				zapcore.AddSync(&logBuffer),
-				zapcore.DebugLevel,
-			)
-			zapLogger := zap.New(core)
-			logger := zapLogger.Sugar()
-
-			// Temporarily replace the global logger in the logging package
-			logging.SetLogger(t, logger)
-
-			// Set the logger in the context
-			ctx = logging.WithLogger(ctx)
-
-			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second, nil)
-			if err != nil {
-				t.Errorf("NewDepsCollector() error = %v", err)
-				return
-			}
-
-			_ = c.collectAdditionalMetadata(ctx, tt.pkgType, tt.namespace, tt.name, tt.version, tt.pkgComponent)
-
-			t.Logf(logBuffer.String())
-
-			// Check if the log contains the expected log message
-			if !strings.Contains(logBuffer.String(), tt.wantLog) {
-				t.Errorf("Expected log to contain %q, but got %q", tt.wantLog, logBuffer.String())
-			}
-		})
-	}
 }
