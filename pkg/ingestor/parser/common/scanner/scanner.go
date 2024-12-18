@@ -19,8 +19,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
+	deps_dev_client "github.com/guacsec/guac/internal/client/depsdevclient"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	cd_certifier "github.com/guacsec/guac/pkg/certifier/clearlydefined"
 	eol_certifier "github.com/guacsec/guac/pkg/certifier/eol"
 	osv_certifier "github.com/guacsec/guac/pkg/certifier/osv"
@@ -114,8 +117,68 @@ func purlsLicenseScanWithClient(
 	return certLegalIngest, hasSourceAtIngest, nil
 }
 
+// PurlDepsDevScan scans the purls and returns for metadata linked to the repository
+// and returns the list of scorecards and sources associations it finds from Deps.dev
+// This generally takes about 300ms - 600ms. With tests including 1-30 PURLs.
 func PurlsDepsDevScan(ctx context.Context, purls []string) ([]assembler.CertifyScorecardIngest, []assembler.HasSourceAtIngest, error) {
-	return nil, nil, fmt.Errorf("Unimplemented")
+	certifyScorecards := []assembler.CertifyScorecardIngest{}
+	hasSourceAts := []assembler.HasSourceAtIngest{}
+
+	ddc, err := deps_dev_client.NewDepsClient(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to initialize deps.dev client: %w", err)
+
+	}
+
+	ddc.RetrieveVersionsAndProjects(ctx, purls)
+	components, err := ddc.GetMetadata(ctx, purls)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to get metadata for purls in deps.dev: %w", err)
+	}
+
+	for _, c := range components {
+		hasSourceAt := createDepsDevHasSourceAtIngest(c.CurrentPackage, c.Source, c.UpdateTime.UTC())
+		scorecard := createDepsDevScorecardIngest(c.Source, c.Scorecard)
+		if hasSourceAt != nil {
+			hasSourceAts = append(hasSourceAts, *hasSourceAt)
+		}
+		if scorecard != nil {
+			certifyScorecards = append(certifyScorecards, *scorecard)
+		}
+	}
+	return certifyScorecards, hasSourceAts, nil
+}
+
+func createDepsDevHasSourceAtIngest(pkg *generated.PkgInputSpec, src *generated.SourceInputSpec, knownSince time.Time) *assembler.HasSourceAtIngest {
+	if pkg != nil && src != nil {
+		return &assembler.HasSourceAtIngest{
+			Pkg: pkg,
+			PkgMatchFlag: generated.MatchFlags{
+				Pkg: generated.PkgMatchTypeAllVersions,
+			},
+			Src: src,
+			HasSourceAt: &generated.HasSourceAtInputSpec{
+				KnownSince:    knownSince,
+				Justification: "collected via deps.dev",
+				Collector:     "ingest_depsdev_scanner",
+				Origin:        "deps.dev",
+			},
+		}
+	}
+	return nil
+}
+
+func createDepsDevScorecardIngest(src *generated.SourceInputSpec, scorecard *generated.ScorecardInputSpec) *assembler.CertifyScorecardIngest {
+	if src != nil && scorecard != nil {
+		scorecard.Origin = "deps.dev"
+		scorecard.Collector = "ingest_depsdev_scanner"
+
+		return &assembler.CertifyScorecardIngest{
+			Source:    src,
+			Scorecard: scorecard,
+		}
+	}
+	return nil
 }
 
 // runQueryOnBatchedPurls runs EvaluateClearlyDefinedDefinition from the clearly defined
