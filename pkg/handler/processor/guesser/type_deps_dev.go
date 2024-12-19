@@ -16,14 +16,14 @@
 package guesser
 
 import (
-	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
+	ddc "github.com/guacsec/guac/internal/client/depsdevclient"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 type depsDevTypeGuesser struct{}
 
 func (_ *depsDevTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	packageComponent := deps_dev.PackageComponent{}
+	packageComponent := ddc.PackageComponent{}
 	if json.Unmarshal(blob, &packageComponent) == nil && format == processor.FormatJSON && packageComponent.CurrentPackage != nil {
 		return processor.DocumentDepsDev
 	}

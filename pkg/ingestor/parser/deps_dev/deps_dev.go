@@ -22,10 +22,10 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	ddc "github.com/guacsec/guac/internal/client/depsdevclient"
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
@@ -34,7 +34,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type depsDevParser struct {
 	doc           *processor.Document
-	packComponent *deps_dev.PackageComponent
+	packComponent *ddc.PackageComponent
 }
 
 func NewDepsDevParser() common.DocumentParser {
@@ -58,8 +58,8 @@ func (d *depsDevParser) Parse(ctx context.Context, doc *processor.Document) erro
 	return nil
 }
 
-func parseDepsDevBlob(p []byte) (*deps_dev.PackageComponent, error) {
-	packageComponent := deps_dev.PackageComponent{}
+func parseDepsDevBlob(p []byte) (*ddc.PackageComponent, error) {
+	packageComponent := ddc.PackageComponent{}
 	if err := json.Unmarshal(p, &packageComponent); err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 	return preds
 }
 
-func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler.IngestPredicates) {
+func appendPredicates(packComponent *ddc.PackageComponent, preds *assembler.IngestPredicates) {
 	hasSourceAt := createHasSourceAtIngest(packComponent.CurrentPackage, packComponent.Source, packComponent.UpdateTime.UTC())
 	scorecard := createScorecardIngest(packComponent.Source, packComponent.Scorecard)
 	if hasSourceAt != nil {
