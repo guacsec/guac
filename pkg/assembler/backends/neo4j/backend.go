@@ -76,6 +76,12 @@ func registerFlags(cmd *cobra.Command) error {
 		return fmt.Errorf("failed to bind flags: %w", err)
 	}
 
+	// set values from guac.yaml if present
+	flags.user = viper.GetString("neo4j-user")
+	flags.pass = viper.GetString("neo4j-pass")
+	flags.addr = viper.GetString("neo4j-addr")
+	flags.realm = viper.GetString("neo4j-realm")
+
 	return nil
 }
 

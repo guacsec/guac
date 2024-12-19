@@ -137,6 +137,11 @@ func registerFlags(cmd *cobra.Command) error {
 		return fmt.Errorf("failed to bind flags: %w", err)
 	}
 
+	// set values from guac.yaml if present
+	flags.user = viper.GetString("arango-user")
+	flags.pass = viper.GetString("arango-pass")
+	flags.addr = viper.GetString("arango-addr")
+
 	return nil
 }
 

@@ -54,6 +54,11 @@ func registerFlags(cmd *cobra.Command) error {
 		return fmt.Errorf("failed to bind flags: %w", err)
 	}
 
+	// set values from guac.yaml if present
+	flags.kvStore = viper.GetString("kv-store")
+	flags.kvRedis = viper.GetString("kv-redis")
+	flags.kvTiKV = viper.GetString("kv-tikv")
+
 	return nil
 }
 
