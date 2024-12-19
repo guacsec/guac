@@ -71,6 +71,13 @@ func registerFlags(cmd *cobra.Command) error {
 		return fmt.Errorf("failed to bind flags: %w", err)
 	}
 
+	// set values from guac.yaml if present
+	flags.endpoint = viper.GetString("neptune-endpoint")
+	flags.port = viper.GetInt("neptune-port")
+	flags.region = viper.GetString("neptune-region")
+	flags.user = viper.GetString("neptune-user")
+	flags.realm = viper.GetString("neptune-realm")
+
 	return nil
 }
 

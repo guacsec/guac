@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 )
@@ -48,10 +49,10 @@ func Register(name string, gb GBFunc, fr FlagRegistrarFunc, fp FlagParserFunc) {
 
 // RegisterFlags registers all backend-specific flags to the given command
 func RegisterFlags(cmd *cobra.Command) error {
-	var err error
+	// initialize viper to read in guac.yaml configuration file
+	cli.InitConfig()
 	for _, register := range flagRegistrar {
-		err = register(cmd)
-		if err != nil {
+		if err := register(cmd); err != nil {
 			return err
 		}
 	}

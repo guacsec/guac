@@ -63,6 +63,13 @@ func registerFlags(cmd *cobra.Command) error {
 		return fmt.Errorf("failed to bind flags: %w", err)
 	}
 
+	// set values from guac.yaml if present
+	flags.dbAddress = viper.GetString("db-address")
+	flags.dbDriver = viper.GetString("db-driver")
+	flags.dbDebug = viper.GetBool("db-debug")
+	flags.dbMigrate = viper.GetBool("db-migrate")
+	flags.dbConnTime = viper.GetString("db-conn-time")
+
 	return nil
 }
 
