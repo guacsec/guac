@@ -70,6 +70,9 @@ func init() {
 	// the ingestor will query and ingest endoflife.date for EOL
 	set.Bool("add-eol-on-ingest", false, "if enabled, the ingestor will query and ingest endoflife.date for EOL data. Warning: This will increase ingestion times")
 
+	// the ingestor will query and ingest deps.dev data for scorecards and source association
+	set.Bool("add-depsdev-on-ingest", false, "if enabled, the ingestor will query and ingest deps.dev scorecards and source association data. Warning: This will increase ingestion times")
+
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
 	set.String("rest-api-server-port", "8081", "port to serve the REST API from")
