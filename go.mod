@@ -338,7 +338,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/redis/go-redis/v9 v9.6.1
-	github.com/regclient/regclient v0.7.2
+	github.com/regclient/regclient v0.8.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.8.10
