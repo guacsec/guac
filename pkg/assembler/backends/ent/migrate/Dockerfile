@@ -1,4 +1,4 @@
-FROM arigaio/atlas:latest-alpine@sha256:3b0d8fb84be09b4f597f87bdc233c39f73d52082041e0d0432e40005cc6f25b2
+FROM arigaio/atlas:latest-alpine@sha256:913917f0e1fe85ce7d3fa786debe5c1f214e90ac394faa511ca2b97b9ee7681e
 
 WORKDIR /app
 
