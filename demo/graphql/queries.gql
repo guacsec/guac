@@ -292,3 +292,16 @@ query CertifyLegalQ1 {
         ...allCertifyLegalTree
     }
 }
+
+query EndOfLifeQ1 {
+    # TODO: pkg:maven/org.apache.logging.log4j/log4j-api@2.8.1
+    HasMetadata(hasMetadataSpec: {subject: {package: {type: "maven", namespace: "org.apache.logging.log4j", name: "log4j-api", version: "2.8.1"}}}) @filter(key: "endoflife") {
+        subject {
+            ...allPkgTree
+        }
+        metadata {
+            key
+            value
+        }
+    }
+}
