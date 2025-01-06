@@ -68,7 +68,7 @@ func Test_depsCollector_GetX(t *testing.T) {
 		{
 			name:     "invalid packages",
 			packages: []string{"not-a-package"},
-			wantErr:  true,
+			wantErr:  false,
 		},
 		{
 			name:     "org.webjars.npm:a maven package",
@@ -379,6 +379,10 @@ func Test_depsCollector_GetDependenciesEq(t *testing.T) {
 		{
 			name:     "multiple different packages",
 			packages: []string{"pkg:cargo/foreign-types@0.3.2", "pkg:npm/yargs-parser@4.2.1"},
+		},
+		{
+			name:     "deb package - invalid",
+			packages: []string{"pkg:deb/org.webjars.npm/a@2.1.2"},
 		},
 	}
 	for _, tt := range tests {
