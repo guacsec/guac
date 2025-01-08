@@ -65,7 +65,7 @@ type ociRegistryOptions struct {
 var ociCmd = &cobra.Command{
 	Use:   "image [flags] image_path1 image_path2...",
 	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph, this command talks directly to the graphQL endpoint",
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		opts, csubClient, err := validateOCIFlags(
 			viper.GetString("gql-addr"),
@@ -331,6 +331,23 @@ func validateOCIRegistryFlags(gqlEndpoint, headerFile, csubAddr string, csubTls,
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"use-csub"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+
+	ociCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(ociCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	collectCmd.AddCommand(ociCmd)
+
+	ociRegistryCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(ociRegistryCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	collectCmd.AddCommand(ociRegistryCmd)
 }
