@@ -35,6 +35,7 @@ var flags = struct {
 	tlsKeyFile  string
 	debug       bool
 	tracegql    bool
+	enableOtel  bool
 }{}
 
 var rootCmd = &cobra.Command{
@@ -48,6 +49,7 @@ var rootCmd = &cobra.Command{
 		flags.tlsKeyFile = viper.GetString("gql-tls-key-file")
 		flags.debug = viper.GetBool("gql-debug")
 		flags.tracegql = viper.GetBool("gql-trace")
+		flags.enableOtel = viper.GetBool("enable-otel")
 
 		startServer(cmd)
 	},
@@ -65,6 +67,7 @@ func init() {
 		"gql-backend",
 		"gql-trace",
 		"enable-prometheus",
+		"enable-otel",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

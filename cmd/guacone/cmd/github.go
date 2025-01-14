@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
+	"github.com/guacsec/guac/pkg/metrics"
 
 	"os/signal"
 
@@ -71,6 +72,7 @@ type githubOptions struct {
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
+	enableOtel              bool
 }
 
 var githubCmd = &cobra.Command{
@@ -95,6 +97,7 @@ var githubCmd = &cobra.Command{
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetBool("add-eol-on-ingest"),
 			viper.GetBool("add-depsdev-on-ingest"),
+			viper.GetBool("enable-otel"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -105,6 +108,15 @@ var githubCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		var shutdown func(context.Context) error = func(context.Context) error { return nil }
+		if opts.enableOtel {
+			var err error
+			shutdown, err = metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+		}
 
 		// GITHUB_TOKEN is the default token name
 		ghc, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_TOKEN"))
@@ -210,6 +222,7 @@ var githubCmd = &cobra.Command{
 			logger.Info("Collector finished")
 		}
 
+		shutdown(ctx)
 		wg.Wait()
 		logger.Info("Shutdown complete")
 
@@ -221,8 +234,16 @@ var githubCmd = &cobra.Command{
 	},
 }
 
-func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls,
-	csubTlsSkipVerify, useCsub, poll bool, queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, args []string) (githubOptions, error) {
+func validateGithubFlags(
+	graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string,
+	csubTls, csubTlsSkipVerify, useCsub, poll bool,
+	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
+	queryEOLIngestion bool,
+	queryDepsDevOnIngestion bool,
+	enableOtel bool,
+	args []string,
+) (githubOptions, error) {
 	var opts githubOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
@@ -234,6 +255,7 @@ func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, work
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	opts.queryEOLOnIngestion = queryEOLIngestion
 	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
+	opts.enableOtel = enableOtel
 
 	if useCsub {
 		csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -289,7 +311,14 @@ func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, work
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{githubMode, githubSbom, githubWorkflowFile, "use-csub", "poll"})
+	set, err := cli.BuildFlags([]string{
+		githubMode,
+		githubSbom,
+		githubWorkflowFile,
+		"use-csub",
+		"poll",
+		"enable-otel",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

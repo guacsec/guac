@@ -35,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -49,6 +50,7 @@ type options struct {
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
+	enableOtel              bool
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -63,6 +65,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		viper.GetBool("add-vuln-on-ingest"),
 		viper.GetBool("add-license-on-ingest"),
 		viper.GetBool("add-eol-on-ingest"),
+		viper.GetBool("enable-otel"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
@@ -73,6 +76,15 @@ func ingest(cmd *cobra.Command, args []string) {
 	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 	logger := logging.FromContext(ctx)
 	transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+	var shutdown func(context.Context) error = func(context.Context) error { return nil }
+	if opts.enableOtel {
+		var err error
+		shutdown, err = metrics.SetupOTelSDK(ctx)
+		if err != nil {
+			logger.Fatalf("Error setting up Otel: %v", err)
+		}
+	}
 
 	if strings.HasPrefix(opts.pubsubAddr, "nats://") {
 		// initialize jetstream
@@ -138,12 +150,20 @@ func ingest(cmd *cobra.Command, args []string) {
 	s := <-sigs
 	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
 	cf()
+	shutdown(ctx)
 
 	wg.Wait()
 }
 
-func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, args []string) (options, error) {
+func validateFlags(
+	pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile string,
+	csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
+	queryEOLIngestion bool,
+	enableOtel bool,
+	args []string,
+) (options, error) {
 	var opts options
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
@@ -157,6 +177,7 @@ func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile s
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.enableOtel = enableOtel
 
 	return opts, nil
 }

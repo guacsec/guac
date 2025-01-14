@@ -36,6 +36,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,6 +54,7 @@ type eolOptions struct {
 	addedLatency      *time.Duration
 	batchSize         int
 	lastScan          *int
+	enableOtel        bool
 }
 
 var eolCmd = &cobra.Command{
@@ -70,6 +72,7 @@ var eolCmd = &cobra.Command{
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
+			viper.GetBool("enable-otel"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -80,6 +83,15 @@ var eolCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		var shutdown func(context.Context) error = func(context.Context) error { return nil }
+		if opts.enableOtel {
+			var err error
+			shutdown, err = metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+		}
 
 		if err := certify.RegisterCertifier(eol.NewEOLCertifier, eol.EOLCollector); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
@@ -202,6 +214,7 @@ var eolCmd = &cobra.Command{
 			logger.Infof("All certifiers completed")
 		}
 		ingestionStop <- true
+		shutdown(ctx)
 		wg.Wait()
 		cf()
 
@@ -223,11 +236,13 @@ func validateEOLFlags(
 	csubTlsSkipVerify bool,
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
+	enableOtel bool,
 ) (eolOptions, error) {
 	var opts eolOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
 	opts.poll = poll
+	opts.enableOtel = enableOtel
 
 	if interval == "" {
 		// 14 days by default

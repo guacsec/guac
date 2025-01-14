@@ -35,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/ingestor/verifier/sigstore_verifier"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -55,6 +56,7 @@ type fileOptions struct {
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
+	enableOtel              bool
 }
 
 var filesCmd = &cobra.Command{
@@ -73,6 +75,7 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetBool("add-eol-on-ingest"),
 			viper.GetBool("add-depsdev-on-ingest"),
+			viper.GetBool("enable-otel"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -83,6 +86,15 @@ var filesCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		var shutdown func(context.Context) error = func(context.Context) error { return nil }
+		if opts.enableOtel {
+			var err error
+			shutdown, err = metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+		}
 
 		// Register Keystore
 		inmemory := inmemory.NewInmemoryProvider()
@@ -172,14 +184,23 @@ var filesCmd = &cobra.Command{
 		} else {
 			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
 		}
+		shutdown(ctx)
 	},
 }
 
-func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, args []string) (fileOptions, error) {
+func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string,
+	csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
+	queryEOLIngestion bool,
+	queryDepsDevOnIngestion bool,
+	enableOtel bool,
+	args []string,
+) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
+	opts.enableOtel = enableOtel
 
 	if keyPath != "" {
 		if strings.HasSuffix(keyPath, "pem") {
@@ -210,7 +231,11 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"verifier-key-path", "verifier-key-id"})
+	set, err := cli.BuildFlags([]string{
+		"verifier-key-path",
+		"verifier-key-id",
+		"enable-otel",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

@@ -31,7 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 
 	pb "deps.dev/api/v3"
-
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -97,6 +97,7 @@ func NewDepsClient(ctx context.Context) (*DepsClient, error) {
 		grpc.WithUserAgent(version.UserAgent),
 		// add the rate limit to the grpc client
 		grpc.WithUnaryInterceptor(clients.UnaryClientInterceptor(clients.NewLimiter(rateLimit))),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
