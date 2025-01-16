@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,6 +54,8 @@ type depsDevOptions struct {
 	publishToQueue bool
 	// sets artificial latency on the deps.dev collector (default to nil)
 	addedLatency *time.Duration
+	// enable otel
+	enableOtel bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -90,6 +93,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetInt("prometheus-port"),
 			viper.GetBool("publish-to-queue"),
 			viper.GetString("deps-dev-latency"),
+			viper.GetBool("enable-otel"),
 			args,
 		)
 		if err != nil {
@@ -97,6 +101,19 @@ you have access to read and write to the respective blob store.`,
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
+
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency)
 		if err != nil {
@@ -133,6 +150,7 @@ func validateDepsDevFlags(
 	prometheusPort int,
 	pubToQueue bool,
 	addedLatencyStr string,
+	enableOtel bool,
 	args []string,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
@@ -143,6 +161,7 @@ func validateDepsDevFlags(
 	opts.enablePrometheus = enablePrometheus
 	opts.prometheusPort = prometheusPort
 	opts.publishToQueue = pubToQueue
+	opts.enableOtel = enableOtel
 
 	if addedLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(addedLatencyStr)

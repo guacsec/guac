@@ -17,17 +17,17 @@ package backend
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect"
+	dialectsql "entgo.io/ent/dialect/sql"
+	"github.com/XSAM/otelsql"
+
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hook"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/migrate"
 	"github.com/guacsec/guac/pkg/logging"
-
-	dialectsql "entgo.io/ent/dialect/sql"
 )
 
 type BackendOptions struct {
@@ -67,9 +67,12 @@ func SetupBackend(ctx context.Context, options *BackendOptions) (*ent.Client, er
 		return nil, fmt.Errorf("only postgres is supported at this time")
 	}
 
-	db, err := sql.Open(driver, options.Address)
+	db, err := otelsql.Open(driver, options.Address)
 	if err != nil {
 		return nil, fmt.Errorf("error opening db: %w", err)
+	}
+	if err := otelsql.RegisterDBStatsMetrics(db); err != nil {
+		return nil, fmt.Errorf("error registering db metrics: %w", err)
 	}
 
 	if options.ConnectionMaxLifeTime != nil {

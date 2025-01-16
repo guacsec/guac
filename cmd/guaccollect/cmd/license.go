@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -58,6 +59,8 @@ type cdOptions struct {
 	// last time the scan was done in hours, if not set it will return
 	// all packages to check
 	lastScan *int
+	// enable otel
+	enableOtel bool
 }
 
 var cdCmd = &cobra.Command{
@@ -90,6 +93,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
+			viper.GetBool("enable-otel"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -99,6 +103,18 @@ you have access to read and write to the respective blob store.`,
 
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
 
 		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
@@ -134,7 +150,10 @@ func validateCDFlags(
 	poll bool,
 	pubToQueue bool,
 	certifierLatencyStr string,
-	batchSize int, lastScan int) (cdOptions, error) {
+	batchSize int,
+	lastScan int,
+	enableOtel bool,
+) (cdOptions, error) {
 
 	var opts cdOptions
 
@@ -144,6 +163,7 @@ func validateCDFlags(
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
+	opts.enableOtel = enableOtel
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {

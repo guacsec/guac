@@ -26,22 +26,23 @@ import (
 	"syscall"
 	"time"
 
-	// import all known backends
-	_ "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/neptune"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/arangodb"
-
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
 	"github.com/guacsec/guac/pkg/assembler/backends"
+	// import all known backends
+	_ "github.com/guacsec/guac/pkg/assembler/backends/arangodb"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/neptune"
 	"github.com/guacsec/guac/pkg/assembler/server"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func startServer(cmd *cobra.Command) {
@@ -78,6 +79,21 @@ func startServer(cmd *cobra.Command) {
 		srvHandler = metric.MeasureGraphQLResponseDuration(srv)
 	} else {
 		srvHandler = srv
+	}
+
+	if flags.enableOtel {
+		shutdown, err := metrics.SetupOTelSDK(ctx)
+		if err != nil {
+			logger.Fatalf("Error setting up Otel: %v", err)
+		}
+
+		srvHandler = otelhttp.NewHandler(srvHandler, "/")
+
+		defer func() {
+			if err := shutdown(ctx); err != nil {
+				logger.Errorf("Error on Otel shutdown: %v", err)
+			}
+		}()
 	}
 
 	if flags.tracegql {

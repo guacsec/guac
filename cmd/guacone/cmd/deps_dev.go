@@ -38,6 +38,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 type depsDevOptions struct {
@@ -55,6 +56,7 @@ type depsDevOptions struct {
 	queryEOLOnIngestion     bool
 	// sets artificial latency on the deps.dev collector (default to nil)
 	addedLatency *time.Duration
+	enableOtel   bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -71,6 +73,18 @@ var depsDevCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
 
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second, opts.addedLatency)
@@ -126,7 +140,7 @@ var depsDevCmd = &cobra.Command{
 		go func() {
 			defer wg.Done()
 			if err := collector.Collect(ctx, emit, errHandler); err != nil {
-				logger.Fatal(err)
+				logger.Errorf("collector exited with error: %v", err)
 			}
 			done <- true
 		}()
@@ -143,7 +157,7 @@ var depsDevCmd = &cobra.Command{
 		wg.Wait()
 
 		if gotErr {
-			logger.Fatalf("completed ingestion with error, %v of %v were successful", totalSuccess, totalNum)
+			logger.Errorf("completed ingestion with error, %v of %v were successful", totalSuccess, totalNum)
 		} else {
 			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
 		}
@@ -159,6 +173,7 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 		queryVulnOnIngestion:    viper.GetBool("add-vuln-on-ingest"),
 		queryLicenseOnIngestion: viper.GetBool("add-license-on-ingest"),
 		queryEOLOnIngestion:     viper.GetBool("add-eol-on-ingest"),
+		enableOtel:              viper.GetBool("enable-otel"),
 	}
 
 	addedLatencyStr := viper.GetString("deps-dev-latency")
@@ -214,7 +229,13 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"poll", "retrieve-dependencies", "use-csub", "deps-dev-latency"})
+	set, err := cli.BuildFlags([]string{
+		"poll",
+		"retrieve-dependencies",
+		"use-csub",
+		"deps-dev-latency",
+		"enable-otel",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

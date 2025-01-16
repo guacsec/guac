@@ -35,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/ingestor/verifier/sigstore_verifier"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -55,6 +56,7 @@ type fileOptions struct {
 	queryLicenseOnIngestion bool
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
+	enableOtel              bool
 }
 
 var filesCmd = &cobra.Command{
@@ -73,6 +75,7 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("add-license-on-ingest"),
 			viper.GetBool("add-eol-on-ingest"),
 			viper.GetBool("add-depsdev-on-ingest"),
+			viper.GetBool("enable-otel"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -83,6 +86,18 @@ var filesCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
 
 		// Register Keystore
 		inmemory := inmemory.NewInmemoryProvider()
@@ -163,11 +178,11 @@ var filesCmd = &cobra.Command{
 		}
 
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
-			logger.Fatal(err)
+			logger.Errorf("collector exited with error: %v", err)
 		}
 
 		if gotErr {
-			logger.Fatalf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v",
+			logger.Errorf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v",
 				totalSuccess, totalNum, strings.Join(filesWithErrors, " "))
 		} else {
 			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
@@ -175,11 +190,19 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, args []string) (fileOptions, error) {
+func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string,
+	csubTls, csubTlsSkipVerify bool,
+	queryVulnIngestion bool,
+	queryLicenseIngestion bool,
+	queryEOLIngestion bool,
+	queryDepsDevOnIngestion bool,
+	enableOtel bool,
+	args []string,
+) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
+	opts.enableOtel = enableOtel
 
 	if keyPath != "" {
 		if strings.HasSuffix(keyPath, "pem") {
@@ -210,7 +233,11 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"verifier-key-path", "verifier-key-id"})
+	set, err := cli.BuildFlags([]string{
+		"verifier-key-path",
+		"verifier-key-id",
+		"enable-otel",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

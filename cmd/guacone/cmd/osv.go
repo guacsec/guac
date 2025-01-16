@@ -37,6 +37,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -64,6 +65,7 @@ type osvOptions struct {
 	lastScan *int
 	// addVulnMetadata enriches vulnerabilities with metadata during fetch
 	addVulnMetadata bool
+	enableOtel      bool
 }
 
 var osvCmd = &cobra.Command{
@@ -86,6 +88,7 @@ var osvCmd = &cobra.Command{
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
 			viper.GetBool("add-vuln-metadata"),
+			viper.GetBool("enable-otel"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -96,6 +99,18 @@ var osvCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
 
 		if err := certify.RegisterCertifier(func() certifier.Certifier {
 			certifierOpts := []osv.CertifierOpts{}
@@ -125,6 +140,7 @@ var osvCmd = &cobra.Command{
 		ingestionStop := make(chan bool, 1)
 		tickInterval := 30 * time.Second
 		ticker := time.NewTicker(tickInterval)
+		ctx, cf := context.WithCancel(ctx)
 
 		var gotErr int32
 		var wg sync.WaitGroup
@@ -245,7 +261,6 @@ var osvCmd = &cobra.Command{
 			return true
 		}
 
-		ctx, cf := context.WithCancel(ctx)
 		done := make(chan bool, 1)
 		wg.Add(1)
 		go func() {
@@ -291,6 +306,7 @@ func validateOSVFlags(
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
 	addVulnMetadata bool,
+	enableOtel bool,
 ) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -301,6 +317,7 @@ func validateOSVFlags(
 		return opts, err
 	}
 	opts.interval = i
+	opts.enableOtel = enableOtel
 
 	if certifierLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(certifierLatencyStr)

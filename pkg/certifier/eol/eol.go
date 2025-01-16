@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	"golang.org/x/time/rate"
 )
@@ -175,7 +176,7 @@ type EOLData = []CycleData
 func NewEOLCertifier() certifier.Certifier {
 	limiter := rate.NewLimiter(rate.Every(time.Second/time.Duration(rateLimit)), rateLimitBurst)
 	client := &http.Client{
-		Transport: clients.NewRateLimitedTransport(http.DefaultTransport, limiter),
+		Transport: clients.NewRateLimitedTransport(version.UATransport, limiter),
 	}
 	return &eolCertifier{client: client}
 }

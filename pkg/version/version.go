@@ -18,6 +18,8 @@ package version
 import (
 	"fmt"
 	"net/http"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var (
@@ -33,7 +35,8 @@ type uat struct {
 
 func init() {
 	UserAgent = fmt.Sprintf("GUAC/%s", Version)
-	UATransport = uat{tr: http.DefaultTransport}
+	otelTransport := otelhttp.NewTransport(http.DefaultTransport)
+	UATransport = uat{tr: otelTransport}
 }
 
 func (u uat) RoundTrip(r *http.Request) (*http.Response, error) {

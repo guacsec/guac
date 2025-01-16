@@ -30,7 +30,7 @@ var certifierCmd = &cobra.Command{
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"poll", "interval"})
+	set, err := cli.BuildFlags([]string{"poll", "interval", "enable-otel"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

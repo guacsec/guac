@@ -25,6 +25,7 @@ import (
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/metrics"
 
 	"github.com/guacsec/guac/pkg/cli"
 
@@ -62,6 +63,8 @@ type githubOptions struct {
 	ownerRepoName string
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// enable otel
+	enableOtel bool
 }
 
 var githubCmd = &cobra.Command{
@@ -102,11 +105,24 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetBool("enable-otel"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
+		}
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		// GITHUB_TOKEN is the default token name
@@ -169,6 +185,7 @@ func validateGithubFlags(
 	useCsub,
 	poll bool,
 	pubToQueue bool,
+	enableOtel bool,
 	args []string,
 ) (githubOptions, error) {
 	var opts githubOptions
@@ -179,6 +196,7 @@ func validateGithubFlags(
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
 	opts.publishToQueue = pubToQueue
+	opts.enableOtel = enableOtel
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

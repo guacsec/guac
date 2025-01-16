@@ -37,6 +37,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -61,7 +62,8 @@ type cdOptions struct {
 	batchSize int
 	// last time the scan was done in hours, if not set it will return
 	// all packages to check
-	lastScan *int
+	lastScan   *int
+	enableOtel bool
 }
 
 var cdCmd = &cobra.Command{
@@ -83,6 +85,7 @@ var cdCmd = &cobra.Command{
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
+			viper.GetBool("enable-otel"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -93,6 +96,18 @@ var cdCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
 
 		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
@@ -116,6 +131,7 @@ var cdCmd = &cobra.Command{
 		ingestionStop := make(chan bool, 1)
 		tickInterval := 30 * time.Second
 		ticker := time.NewTicker(tickInterval)
+		ctx, cf := context.WithCancel(ctx)
 
 		var gotErr int32
 		var wg sync.WaitGroup
@@ -233,7 +249,6 @@ var cdCmd = &cobra.Command{
 			return true
 		}
 
-		ctx, cf := context.WithCancel(ctx)
 		done := make(chan bool, 1)
 		wg.Add(1)
 		go func() {
@@ -278,6 +293,7 @@ func validateCDFlags(
 	queryDepsDevIngestion bool,
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
+	enableOtel bool,
 ) (cdOptions, error) {
 	var opts cdOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -288,6 +304,7 @@ func validateCDFlags(
 		return opts, err
 	}
 	opts.interval = i
+	opts.enableOtel = enableOtel
 
 	if certifierLatencyStr != "" {
 		addedLatency, err := time.ParseDuration(certifierLatencyStr)

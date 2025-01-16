@@ -38,6 +38,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -68,6 +69,8 @@ type osvOptions struct {
 	lastScan *int
 	// adds metadata to vulnerabities during collection
 	addVulnMetadata bool
+	// enable otel
+	enableOtel bool
 }
 
 var osvCmd = &cobra.Command{
@@ -101,6 +104,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
 			viper.GetBool("add-vuln-metadata"),
+			viper.GetBool("enable-otel"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -110,6 +114,18 @@ you have access to read and write to the respective blob store.`,
 
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
+
+		if opts.enableOtel {
+			shutdown, err := metrics.SetupOTelSDK(ctx)
+			if err != nil {
+				logger.Fatalf("Error setting up Otel: %v", err)
+			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
+		}
 
 		if err := certify.RegisterCertifier(func() certifier.Certifier {
 			certifierOpts := []osv.CertifierOpts{}
@@ -146,6 +162,7 @@ func validateOSVFlags(
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
 	addVulnMetadata bool,
+	enableOtel bool,
 ) (osvOptions, error) {
 	var opts osvOptions
 
@@ -156,6 +173,7 @@ func validateOSVFlags(
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
 	opts.addVulnMetadata = addVulnMetadata
+	opts.enableOtel = enableOtel
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {

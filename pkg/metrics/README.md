@@ -1,10 +1,51 @@
 # Metrics
 
-## Usage
+## Otel metrics
 
-This package provides a set of interfaces and implementations for collecting and exposing metrics in your application. The main interfaces are `MetricCollector`, `Observable`, and `Counter` which are defined in `metrics.go`. The `prometheus.go` file provides an implementation of these interfaces using the Prometheus monitoring system.
+GUAC is using Otel instrumented libraries for the following parts:
 
-This package is easy to test as it is based on interfaces. You can create mock implementations of the `MetricCollector`, `Observable`, and `Counter` interfaces for testing purposes.
+- HTTP GQL server in `guacgql`
+- SQL library underneath the Ent/Postgres backend
+- HTTP client for: OSV, ClearlyDefined, GitHub, EoL
+- GRPC client for Deps.dev.
+
+Any cli that runs one of the above will have the `enable-otel` cli option
+available to setup the defult metric and trace providers. These are configured
+to connect to an Otel collector over GRPC. Config uses the below defualt env
+vars:
+
+- `OTEL_EXPORTER_OTLP_ENDPOINT`: Address of Otel collector to connect to
+- `OTEL_EXPORTER_OTLP_INSECURE`: If true, don't use TLS (local collector).
+- `OTEL_SERVICE_NAME`: Service name attached to metrics
+
+More details are available here:
+
+- https://pkg.go.dev/go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc
+- https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_traces_sampler
+
+> Note: GUAC is not set up to define and publish custom metrics to
+> Otel. I.e. the `MetricCollector` interface defined in this package does not
+> (yet) support Otel metrics.
+
+## Prometheus metrics
+
+Prometheus metrics are available on many cli tools using the
+`enable-prometheus` option. This starts an http server (if not already started)
+and serves metrics on the `/metrics` endpoint. Custom metrics are available for
+those GUAC packages that are manaully instrumented. The instructions for adding
+manual instrumentation to other GUAC packages is described below:
+
+### Usage
+
+This package provides a set of interfaces and implementations for collecting
+and exposing metrics in your application. The main interfaces are
+`MetricCollector`, `Observable`, and `Counter` which are defined in
+`metrics.go`. The `prometheus.go` file provides an implementation of these
+interfaces using the Prometheus monitoring system.
+
+This package is easy to test as it is based on interfaces. You can create mock
+implementations of the `MetricCollector`, `Observable`, and `Counter`
+interfaces for testing purposes.
 
 ### For New Packages
 
