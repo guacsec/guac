@@ -115,13 +115,16 @@ you have access to read and write to the respective blob store.`,
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		var shutdown func(context.Context) error = func(context.Context) error { return nil }
 		if opts.enableOtel {
-			var err error
-			shutdown, err = metrics.SetupOTelSDK(ctx)
+			shutdown, err := metrics.SetupOTelSDK(ctx)
 			if err != nil {
 				logger.Fatalf("Error setting up Otel: %v", err)
 			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		if err := certify.RegisterCertifier(func() certifier.Certifier {
@@ -145,7 +148,6 @@ you have access to read and write to the respective blob store.`,
 		}
 
 		initializeNATsandCertifier(ctx, opts.blobAddr, opts.pubsubAddr, opts.poll, opts.publishToQueue, opts.interval, packageQueryFunc())
-		shutdown(ctx)
 	},
 }
 

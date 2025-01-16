@@ -87,13 +87,16 @@ var filesCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		var shutdown func(context.Context) error = func(context.Context) error { return nil }
 		if opts.enableOtel {
-			var err error
-			shutdown, err = metrics.SetupOTelSDK(ctx)
+			shutdown, err := metrics.SetupOTelSDK(ctx)
 			if err != nil {
 				logger.Fatalf("Error setting up Otel: %v", err)
 			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		// Register Keystore
@@ -175,16 +178,15 @@ var filesCmd = &cobra.Command{
 		}
 
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
-			logger.Fatal(err)
+			logger.Errorf("collector exited with error: %v", err)
 		}
 
 		if gotErr {
-			logger.Fatalf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v",
+			logger.Errorf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v",
 				totalSuccess, totalNum, strings.Join(filesWithErrors, " "))
 		} else {
 			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
 		}
-		shutdown(ctx)
 	},
 }
 

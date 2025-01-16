@@ -73,17 +73,20 @@ func ingest(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
+	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 	transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-	var shutdown func(context.Context) error = func(context.Context) error { return nil }
 	if opts.enableOtel {
-		var err error
-		shutdown, err = metrics.SetupOTelSDK(ctx)
+		shutdown, err := metrics.SetupOTelSDK(ctx)
 		if err != nil {
 			logger.Fatalf("Error setting up Otel: %v", err)
 		}
+		defer func() {
+			if err := shutdown(ctx); err != nil {
+				logger.Errorf("Error on Otel shutdown: %v", err)
+			}
+		}()
 	}
 
 	if strings.HasPrefix(opts.pubsubAddr, "nats://") {
@@ -113,6 +116,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	}
 	defer csubClient.Close()
 
+	ctx, cf := context.WithCancel(ctx)
 	emit := func(d *processor.Document) error {
 		if _, err := ingestor.Ingest(
 			ctx,
@@ -150,7 +154,6 @@ func ingest(cmd *cobra.Command, args []string) {
 	s := <-sigs
 	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
 	cf()
-	shutdown(ctx)
 
 	wg.Wait()
 }

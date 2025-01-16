@@ -100,13 +100,16 @@ var osvCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		var shutdown func(context.Context) error = func(context.Context) error { return nil }
 		if opts.enableOtel {
-			var err error
-			shutdown, err = metrics.SetupOTelSDK(ctx)
+			shutdown, err := metrics.SetupOTelSDK(ctx)
 			if err != nil {
 				logger.Fatalf("Error setting up Otel: %v", err)
 			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		if err := certify.RegisterCertifier(func() certifier.Certifier {
@@ -137,6 +140,7 @@ var osvCmd = &cobra.Command{
 		ingestionStop := make(chan bool, 1)
 		tickInterval := 30 * time.Second
 		ticker := time.NewTicker(tickInterval)
+		ctx, cf := context.WithCancel(ctx)
 
 		var gotErr int32
 		var wg sync.WaitGroup
@@ -257,7 +261,6 @@ var osvCmd = &cobra.Command{
 			return true
 		}
 
-		ctx, cf := context.WithCancel(ctx)
 		done := make(chan bool, 1)
 		wg.Add(1)
 		go func() {
@@ -277,7 +280,6 @@ var osvCmd = &cobra.Command{
 			logger.Infof("All certifiers completed")
 		}
 		ingestionStop <- true
-		shutdown(ctx)
 		wg.Wait()
 		cf()
 

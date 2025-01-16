@@ -81,14 +81,19 @@ func startServer(cmd *cobra.Command) {
 		srvHandler = srv
 	}
 
-	var shutdown func(context.Context) error = func(context.Context) error { return nil }
 	if flags.enableOtel {
-		var err error
-		shutdown, err = metrics.SetupOTelSDK(ctx)
+		shutdown, err := metrics.SetupOTelSDK(ctx)
 		if err != nil {
 			logger.Fatalf("Error setting up Otel: %v", err)
 		}
+
 		srvHandler = otelhttp.NewHandler(srvHandler, "/")
+
+		defer func() {
+			if err := shutdown(ctx); err != nil {
+				logger.Errorf("Error on Otel shutdown: %v", err)
+			}
+		}()
 	}
 
 	if flags.tracegql {
@@ -126,7 +131,6 @@ func startServer(cmd *cobra.Command) {
 	ctx, cf := context.WithCancel(ctx)
 	go func() {
 		_ = server.Shutdown(ctx)
-		_ = shutdown(ctx)
 		done <- true
 	}()
 	select {

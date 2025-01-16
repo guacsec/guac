@@ -113,13 +113,16 @@ you have access to read and write to the respective blob store.`,
 			os.Exit(1)
 		}
 
-		var shutdown func(context.Context) error = func(context.Context) error { return nil }
 		if opts.enableOtel {
-			var err error
-			shutdown, err = metrics.SetupOTelSDK(ctx)
+			shutdown, err := metrics.SetupOTelSDK(ctx)
 			if err != nil {
 				logger.Fatalf("Error setting up Otel: %v", err)
 			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		// GITHUB_TOKEN is the default token name
@@ -167,7 +170,6 @@ you have access to read and write to the respective blob store.`,
 		}
 
 		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
-		shutdown(ctx)
 	},
 }
 

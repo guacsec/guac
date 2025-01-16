@@ -84,13 +84,16 @@ var eolCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		var shutdown func(context.Context) error = func(context.Context) error { return nil }
 		if opts.enableOtel {
-			var err error
-			shutdown, err = metrics.SetupOTelSDK(ctx)
+			shutdown, err := metrics.SetupOTelSDK(ctx)
 			if err != nil {
 				logger.Fatalf("Error setting up Otel: %v", err)
 			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		if err := certify.RegisterCertifier(eol.NewEOLCertifier, eol.EOLCollector); err != nil {
@@ -214,7 +217,6 @@ var eolCmd = &cobra.Command{
 			logger.Infof("All certifiers completed")
 		}
 		ingestionStop <- true
-		shutdown(ctx)
 		wg.Wait()
 		cf()
 

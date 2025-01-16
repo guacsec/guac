@@ -109,19 +109,22 @@ var githubCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
-		var shutdown func(context.Context) error = func(context.Context) error { return nil }
 		if opts.enableOtel {
-			var err error
-			shutdown, err = metrics.SetupOTelSDK(ctx)
+			shutdown, err := metrics.SetupOTelSDK(ctx)
 			if err != nil {
 				logger.Fatalf("Error setting up Otel: %v", err)
 			}
+			defer func() {
+				if err := shutdown(ctx); err != nil {
+					logger.Errorf("Error on Otel shutdown: %v", err)
+				}
+			}()
 		}
 
 		// GITHUB_TOKEN is the default token name
 		ghc, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_TOKEN"))
 		if err != nil {
-			logger.Errorf("unable to create github client: %v", err)
+			logger.Fatalf("unable to create github client: %v", err)
 		}
 
 		// Register collector
@@ -141,11 +144,11 @@ var githubCmd = &cobra.Command{
 		}
 		if opts.ownerRepoName != "" {
 			if !strings.Contains(opts.ownerRepoName, "/") {
-				logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+				logger.Fatalf("owner-repo flag must be in the format <owner>/<repo>")
 			} else {
 				ownerRepoName := strings.Split(opts.ownerRepoName, "/")
 				if len(ownerRepoName) != 2 {
-					logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+					logger.Fatalf("owner-repo flag must be in the format <owner>/<repo>")
 				}
 				collectorOpts = append(collectorOpts, github.WithOwner(ownerRepoName[0]))
 				collectorOpts = append(collectorOpts, github.WithRepo(ownerRepoName[1]))
@@ -153,11 +156,11 @@ var githubCmd = &cobra.Command{
 		}
 		githubCollector, err := github.NewGithubCollector(collectorOpts...)
 		if err != nil {
-			logger.Errorf("unable to create Github collector: %v", err)
+			logger.Fatalf("unable to create Github collector: %v", err)
 		}
 		err = collector.RegisterDocumentCollector(githubCollector, github.GithubCollector)
 		if err != nil {
-			logger.Errorf("unable to register Github collector: %v", err)
+			logger.Fatalf("unable to register Github collector: %v", err)
 		}
 
 		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
@@ -169,6 +172,9 @@ var githubCmd = &cobra.Command{
 		}
 
 		var errFound bool
+
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
 
 		emit := func(d *processor.Document) error {
 			_, err := ingestor.Ingest(
@@ -194,12 +200,10 @@ var githubCmd = &cobra.Command{
 				logger.Info("collector ended gracefully")
 				return true
 			}
+			errFound = true
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
-
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
 
 		sigs := make(chan os.Signal, 1)
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -210,7 +214,7 @@ var githubCmd = &cobra.Command{
 		go func() {
 			defer wg.Done()
 			if err := collector.Collect(ctx, emit, errHandler); err != nil {
-				logger.Fatal(err)
+				logger.Errorf("collector exited with error: %v", err)
 			}
 		}()
 
@@ -222,12 +226,11 @@ var githubCmd = &cobra.Command{
 			logger.Info("Collector finished")
 		}
 
-		shutdown(ctx)
 		wg.Wait()
 		logger.Info("Shutdown complete")
 
 		if errFound {
-			logger.Fatalf("completed ingestion with error")
+			logger.Errorf("completed ingestion with error")
 		} else {
 			logger.Infof("completed ingestion")
 		}
