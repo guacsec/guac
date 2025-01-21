@@ -31,6 +31,8 @@ but cannot perform the actual release due to lack of permissions.
   - [ ] List of contributors to the release
   - [ ] List of commits between last release and this one (use the Github
     generate release notes function to help with this)
+- [ ] If the GraphQL schema changes, open an issue against [guac-visualizer](https://github.com/guacsec/guac-visualizer)
+- [ ] Update the [Helm chart](https://github.com/kusaridev/helm-charts/blob/main/charts/guac/Chart.yaml)
 
 The release template is as follows:
 
