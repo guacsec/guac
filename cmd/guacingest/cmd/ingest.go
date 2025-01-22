@@ -65,6 +65,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		viper.GetBool("add-vuln-on-ingest"),
 		viper.GetBool("add-license-on-ingest"),
 		viper.GetBool("add-eol-on-ingest"),
+		viper.GetBool("add-depsdev-on-ingest"),
 		viper.GetBool("enable-otel"),
 		args)
 	if err != nil {
@@ -164,6 +165,7 @@ func validateFlags(
 	queryVulnIngestion bool,
 	queryLicenseIngestion bool,
 	queryEOLIngestion bool,
+	queryDepsDevIngestion bool,
 	enableOtel bool,
 	args []string,
 ) (options, error) {
@@ -180,6 +182,7 @@ func validateFlags(
 	opts.queryVulnOnIngestion = queryVulnIngestion
 	opts.queryLicenseOnIngestion = queryLicenseIngestion
 	opts.queryEOLOnIngestion = queryEOLIngestion
+	opts.queryDepsDevOnIngestion = queryDepsDevIngestion
 	opts.enableOtel = enableOtel
 
 	return opts, nil
