@@ -65,8 +65,6 @@ func certifyVulnConflictColumns() []string {
 		certifyvuln.FieldOrigin,
 		certifyvuln.FieldDbURI,
 		certifyvuln.FieldDbVersion,
-		certifyvuln.FieldTimeScanned,
-		certifyvuln.FieldDocumentRef,
 	}
 }
 
@@ -86,7 +84,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			UpdateNewValues().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert certify Vuln statement node")
 		} else {
@@ -205,7 +203,7 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			UpdateNewValues().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert certifyVuln node")

@@ -397,9 +397,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyvuln_db_uri_db_version_scanner_uri_scanner_version_origin_collector_time_scanned_document_ref_vulnerability_id_package_id",
+				Name:    "certifyvuln_package_id_vulnerability_id_collector_scanner_uri_scanner_version_origin_db_uri_db_version",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[1], CertifyVulnsColumns[8], CertifyVulnsColumns[9], CertifyVulnsColumns[10]},
+				Columns: []*schema.Column{CertifyVulnsColumns[10], CertifyVulnsColumns[9], CertifyVulnsColumns[7], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[2], CertifyVulnsColumns[3]},
 			},
 			{
 				Name:    "certifyvuln_package_id",
