@@ -130,9 +130,10 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		LastScanTimeDB time.Time `json:"max"`
 	}
 
-	if lastScan == nil {
+	if queryType == model.QueryTypeVulnerability {
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
+			WithName(func(q *ent.PackageNameQuery) {}).
 			GroupBy(packageversion.FieldID). // Group by Package ID
 			Aggregate(func(s *sql.Selector) string {
 				t := sql.Table(certifyvuln.Table)
@@ -144,75 +145,56 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		if err != nil {
 			return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 		}
+	} else if queryType == model.QueryTypeLicense {
+		err := b.client.PackageVersion.Query().
+			Where(notGUACTypePackagePredicates()).
+			WithName(func(q *ent.PackageNameQuery) {}).
+			GroupBy(packageversion.FieldID). // Group by Package ID
+			Aggregate(func(s *sql.Selector) string {
+				t := sql.Table(certifylegal.Table)
+				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
+				return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
+			}).
+			Scan(ctx, &pkgLatestScan)
 
-		var packagesThatNeedScanning []string
+		if err != nil {
+			return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
+		}
+	} else { // queryType == model.QueryTypeEol via hasMetadata
+		err := b.client.PackageVersion.Query().
+			Where(notGUACTypePackagePredicates()).
+			WithName(func(q *ent.PackageNameQuery) {}).
+			GroupBy(packageversion.FieldID). // Group by Package ID
+			Aggregate(func(s *sql.Selector) string {
+				t := sql.Table(hasmetadata.Table)
+				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(hasmetadata.FieldPackageVersionID))
+				s.Where(sql.And(
+					sql.NotNull(t.C(hasmetadata.FieldTimestamp)),
+					sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"),
+				))
+				return sql.As(sql.Max(t.C(hasmetadata.FieldTimestamp)), "max")
+			}).
+			Scan(ctx, &pkgLatestScan)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed aggregate packages based on hasMetadata with error: %w", err)
+		}
+	}
+
+	var packagesThatNeedScanning []string
+	if lastScan == nil {
 		for _, record := range pkgLatestScan {
 			packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
 		}
-
-		return packagesThatNeedScanning, nil
 	} else {
-
-		if queryType == model.QueryTypeVulnerability {
-			err := b.client.PackageVersion.Query().
-				Where(notGUACTypePackagePredicates()).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(certifyvuln.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
-					return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
-			}
-		} else if queryType == model.QueryTypeLicense {
-			err := b.client.PackageVersion.Query().
-				Where(notGUACTypePackagePredicates()).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(certifylegal.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
-					return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
-			}
-		} else { // queryType == model.QueryTypeEol via hasMetadata
-			err := b.client.PackageVersion.Query().
-				Where(notGUACTypePackagePredicates()).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(hasmetadata.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(hasmetadata.FieldPackageVersionID))
-					s.Where(sql.And(
-						sql.NotNull(t.C(hasmetadata.FieldTimestamp)),
-						sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"),
-					))
-					return sql.As(sql.Max(t.C(hasmetadata.FieldTimestamp)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed aggregate packages based on hasMetadata with error: %w", err)
-			}
-		}
-
 		lastScanTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
-		var packagesThatNeedScanning []string
 		for _, record := range pkgLatestScan {
 			if record.LastScanTimeDB.Before(lastScanTime) {
 				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
 			}
 		}
-		return packagesThatNeedScanning, nil
 	}
+	return packagesThatNeedScanning, nil
 }
 
 func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
