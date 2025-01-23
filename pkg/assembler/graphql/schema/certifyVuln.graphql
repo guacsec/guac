@@ -129,7 +129,7 @@ extend type Query {
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
   "Returns a paginated results via CertifyVulnConnection"
   CertifyVulnList(certifyVulnSpec: CertifyVulnSpec!, after: ID, first: Int): CertifyVulnConnection
-  "Batch queries via pkgVersion IDs to find all CertifyVulns (latest timestamp, including any `novuln`)"
+  "Batch queries via pkgVersion IDs to find all CertifyVulns (including any `novuln`)"
   BatchQueryPkgIDCertifyVuln(pkgIDs: [ID!]!): [CertifyVuln!]!
 }
 

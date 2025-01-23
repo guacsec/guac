@@ -359,7 +359,6 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 	}
 
 	var aggPredicates []predicate.CertifyLegal
-	// aggregate to find the latest timescanned for certifyLegals for list of packages
 	aggPredicates = append(aggPredicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
 
 	var collectedCertLegal []*model.CertifyLegal
