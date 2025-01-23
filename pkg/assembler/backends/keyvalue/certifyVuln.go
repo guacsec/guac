@@ -50,14 +50,12 @@ func (n *certifyVulnerabilityLink) Key() string {
 	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.VulnerabilityID,
-		timeKey(n.TimeScanned),
 		n.DBURI,
 		n.DBVersion,
 		n.ScannerURI,
 		n.ScannerVersion,
 		n.Origin,
 		n.Collector,
-		n.DocumentRef,
 	}, ":"))
 }
 

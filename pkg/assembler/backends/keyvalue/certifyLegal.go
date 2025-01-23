@@ -19,11 +19,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"slices"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
@@ -59,10 +60,8 @@ func (n *certifyLegalStruct) Key() string {
 		fmt.Sprint(n.DiscoveredLicenses),
 		n.Attribution,
 		n.Justification,
-		timeKey(n.TimeScanned),
 		n.Origin,
 		n.Collector,
-		n.DocumentRef,
 	}, ":"))
 }
 
@@ -551,7 +550,7 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 				if legal == nil {
 					continue
 				}
-				
+
 				out = append(out, legal)
 			}
 		}
