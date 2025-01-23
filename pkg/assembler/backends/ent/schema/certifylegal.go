@@ -63,14 +63,14 @@ func (CertifyLegal) Edges() []ent.Edge {
 
 func (CertifyLegal) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source_id", "declared_license", "justification", "time_scanned",
-			"origin", "collector", "document_ref", "declared_licenses_hash", "discovered_licenses_hash").
+		index.Fields("declared_license", "justification",
+			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash", "source_id").
 			Unique().
-			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")),
-		index.Fields("package_id", "declared_license", "justification", "time_scanned",
-			"origin", "collector", "document_ref", "declared_licenses_hash", "discovered_licenses_hash").
+			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("cl_source_id"),
+		index.Fields("declared_license", "justification",
+			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash", "package_id").
 			Unique().
-			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")),
+			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("cl_pkg_id"),
 		index.Fields("package_id").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")),                                                                       // query when subject is package ID
 		index.Fields("package_id", "declared_licenses_hash", "discovered_licenses_hash", "time_scanned").Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")), // index on for batch query
 	}
