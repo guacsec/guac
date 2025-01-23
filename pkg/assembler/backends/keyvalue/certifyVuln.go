@@ -122,6 +122,10 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 
 	out, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, in.Key(), c)
 	if err == nil {
+		in.ThisID = out.ThisID
+		if err := setkv(ctx, cVulnCol, in, c); err != nil {
+			return "", err
+		}
 		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {

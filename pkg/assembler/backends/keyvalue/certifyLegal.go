@@ -173,6 +173,10 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 
 	out, err := byKeykv[*certifyLegalStruct](ctx, clCol, in.Key(), c)
 	if err == nil {
+		in.ThisID = out.ThisID
+		if err := setkv(ctx, clCol, in, c); err != nil {
+			return "", err
+		}
 		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
@@ -550,7 +554,6 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 				if legal == nil {
 					continue
 				}
-
 				out = append(out, legal)
 			}
 		}

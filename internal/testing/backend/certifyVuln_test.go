@@ -844,22 +844,6 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 						ScannerURI:     "test scanner uri",
 						DbVersion:      "2023.08.01",
 						DbURI:          "test db uri",
-						TimeScanned:    testdata.T1,
-					},
-				},
-				{
-					Package: testdata.P2out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "ghsa",
-						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
-					},
-					Metadata: &model.ScanMetadata{
-						Collector:      "test collector",
-						Origin:         "test origin",
-						ScannerVersion: "v1.0.0",
-						ScannerURI:     "test scanner uri",
-						DbVersion:      "2023.08.01",
-						DbURI:          "test db uri",
 						TimeScanned:    testTime,
 					},
 				},
