@@ -130,9 +130,10 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		LastScanTimeDB time.Time `json:"max"`
 	}
 
-	if lastScan == nil {
+	if queryType == model.QueryTypeVulnerability {
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
+			WithName(func(q *ent.PackageNameQuery) {}).
 			GroupBy(packageversion.FieldID). // Group by Package ID
 			Aggregate(func(s *sql.Selector) string {
 				t := sql.Table(certifyvuln.Table)
@@ -144,75 +145,56 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		if err != nil {
 			return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 		}
+	} else if queryType == model.QueryTypeLicense {
+		err := b.client.PackageVersion.Query().
+			Where(notGUACTypePackagePredicates()).
+			WithName(func(q *ent.PackageNameQuery) {}).
+			GroupBy(packageversion.FieldID). // Group by Package ID
+			Aggregate(func(s *sql.Selector) string {
+				t := sql.Table(certifylegal.Table)
+				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
+				return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
+			}).
+			Scan(ctx, &pkgLatestScan)
 
-		var packagesThatNeedScanning []string
+		if err != nil {
+			return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
+		}
+	} else { // queryType == model.QueryTypeEol via hasMetadata
+		err := b.client.PackageVersion.Query().
+			Where(notGUACTypePackagePredicates()).
+			WithName(func(q *ent.PackageNameQuery) {}).
+			GroupBy(packageversion.FieldID). // Group by Package ID
+			Aggregate(func(s *sql.Selector) string {
+				t := sql.Table(hasmetadata.Table)
+				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(hasmetadata.FieldPackageVersionID))
+				s.Where(sql.And(
+					sql.NotNull(t.C(hasmetadata.FieldTimestamp)),
+					sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"),
+				))
+				return sql.As(sql.Max(t.C(hasmetadata.FieldTimestamp)), "max")
+			}).
+			Scan(ctx, &pkgLatestScan)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed aggregate packages based on hasMetadata with error: %w", err)
+		}
+	}
+
+	var packagesThatNeedScanning []string
+	if lastScan == nil {
 		for _, record := range pkgLatestScan {
 			packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
 		}
-
-		return packagesThatNeedScanning, nil
 	} else {
-
-		if queryType == model.QueryTypeVulnerability {
-			err := b.client.PackageVersion.Query().
-				Where(notGUACTypePackagePredicates()).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(certifyvuln.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifyvuln.PackageColumn))
-					return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
-			}
-		} else if queryType == model.QueryTypeLicense {
-			err := b.client.PackageVersion.Query().
-				Where(notGUACTypePackagePredicates()).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(certifylegal.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(certifylegal.PackageColumn))
-					return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
-			}
-		} else { // queryType == model.QueryTypeEol via hasMetadata
-			err := b.client.PackageVersion.Query().
-				Where(notGUACTypePackagePredicates()).
-				WithName(func(q *ent.PackageNameQuery) {}).
-				GroupBy(packageversion.FieldID). // Group by Package ID
-				Aggregate(func(s *sql.Selector) string {
-					t := sql.Table(hasmetadata.Table)
-					s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(hasmetadata.FieldPackageVersionID))
-					s.Where(sql.And(
-						sql.NotNull(t.C(hasmetadata.FieldTimestamp)),
-						sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"),
-					))
-					return sql.As(sql.Max(t.C(hasmetadata.FieldTimestamp)), "max")
-				}).
-				Scan(ctx, &pkgLatestScan)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed aggregate packages based on hasMetadata with error: %w", err)
-			}
-		}
-
 		lastScanTime := time.Now().Add(time.Duration(-*lastScan) * time.Hour).UTC()
-		var packagesThatNeedScanning []string
 		for _, record := range pkgLatestScan {
 			if record.LastScanTimeDB.Before(lastScanTime) {
 				packagesThatNeedScanning = append(packagesThatNeedScanning, record.ID.String()) // Add the package ID
 			}
 		}
-		return packagesThatNeedScanning, nil
 	}
+	return packagesThatNeedScanning, nil
 }
 
 func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []string, after *string, first *int) (*model.PackageConnection, error) {
@@ -338,56 +320,22 @@ func (b *EntBackend) BatchQueryPkgIDCertifyVuln(ctx context.Context, pkgIDs []st
 		queryList = append(queryList, convertedID)
 	}
 
-	type cvLatestScan struct {
-		PkgID          uuid.UUID `json:"package_id"`
-		VulnID         uuid.UUID `json:"vulnerability_id"`
-		LastScanTimeDB time.Time `json:"max"`
-	}
-
-	var cvLatestScans []cvLatestScan
-
 	var aggPredicates []predicate.CertifyVuln
 	aggPredicates = append(aggPredicates, certifyvuln.PackageIDIn(queryList...))
 
-	// aggregate to find the latest timescanned for certifyVulns for list of packages
-	err := b.client.CertifyVuln.Query().
+	var collectedCertVuln []*model.CertifyVuln
+	certVulnConn, err := b.client.CertifyVuln.Query().
 		Where(certifyvuln.And(aggPredicates...)).
-		GroupBy(certifyvuln.FieldPackageID, certifyvuln.FieldVulnerabilityID). // Group by Package ID
-		Aggregate(func(s *sql.Selector) string {
-			t := sql.Table(certifyvuln.Table)
-			return sql.As(sql.Max(t.C(certifyvuln.FieldTimeScanned)), "max")
-		}).
-		Scan(ctx, &cvLatestScans)
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).All(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed aggregate certifyVuln based on packageIDs with error: %w", err)
+		return nil, fmt.Errorf("failed certifyVuln query based on package IDs with error: %w", err)
 	}
-
-	var predicates []predicate.CertifyVuln
-	for _, record := range cvLatestScans {
-		predicates = append(predicates,
-			certifyvuln.And(
-				certifyvuln.VulnerabilityID(record.VulnID),
-				certifyvuln.PackageID(record.PkgID),
-				certifyvuln.TimeScannedEQ(record.LastScanTimeDB),
-			))
-	}
-
-	var collectedCertVuln []*model.CertifyVuln
-	if len(predicates) > 0 {
-		certVulnConn, err := b.client.CertifyVuln.Query().
-			Where(certifyvuln.Or(predicates...)).
-			WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
-			WithPackage(func(q *ent.PackageVersionQuery) {
-				q.WithName(func(q *ent.PackageNameQuery) {})
-			}).All(ctx)
-
-		if err != nil {
-			return nil, fmt.Errorf("failed certifyVuln query based on package IDs with error: %w", err)
-		}
-		for _, entCertVuln := range certVulnConn {
-			collectedCertVuln = append(collectedCertVuln, toModelCertifyVulnerability(entCertVuln))
-		}
+	for _, entCertVuln := range certVulnConn {
+		collectedCertVuln = append(collectedCertVuln, toModelCertifyVulnerability(entCertVuln))
 	}
 	return collectedCertVuln, nil
 }
@@ -410,59 +358,26 @@ func (b *EntBackend) BatchQueryPkgIDCertifyLegal(ctx context.Context, pkgIDs []s
 		queryList = append(queryList, convertedID)
 	}
 
-	var clLatestScan []struct {
-		PkgID             uuid.UUID `json:"package_id"`
-		DeclaredLicense   string    `json:"declared_licenses_hash"`
-		DiscoveredLicense string    `json:"discovered_licenses_hash"`
-		LastScanTimeDB    time.Time `json:"max"`
-	}
-
 	var aggPredicates []predicate.CertifyLegal
 	// aggregate to find the latest timescanned for certifyLegals for list of packages
 	aggPredicates = append(aggPredicates, certifylegal.PackageIDIn(queryList...), certifylegal.SourceIDIsNil())
-	err := b.client.CertifyLegal.Query().
-		Where(certifylegal.And(aggPredicates...)).
-		GroupBy(certifylegal.FieldPackageID, certifylegal.FieldDeclaredLicensesHash, certifylegal.FieldDiscoveredLicensesHash). // Group by certifylegal ID
-		Aggregate(func(s *sql.Selector) string {
-			t := sql.Table(certifylegal.Table)
-			return sql.As(sql.Max(t.C(certifylegal.FieldTimeScanned)), "max")
-		}).
-		Scan(ctx, &clLatestScan)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed aggregate certifylegal based on packageIDs with error: %w", err)
-	}
-
-	var predicates []predicate.CertifyLegal
-	for _, record := range clLatestScan {
-		predicates = append(predicates,
-			certifylegal.And(
-				certifylegal.PackageID(record.PkgID),
-				certifylegal.SourceIDIsNil(),
-				certifylegal.DeclaredLicensesHashEQ(record.DeclaredLicense),
-				certifylegal.DiscoveredLicensesHashEQ(record.DiscoveredLicense),
-				certifylegal.TimeScannedEQ(record.LastScanTimeDB),
-			))
-	}
 
 	var collectedCertLegal []*model.CertifyLegal
 
-	if len(predicates) > 0 {
-		certLegalConn, err := b.client.CertifyLegal.Query().
-			Where(certifylegal.Or(predicates...)).
-			WithPackage(func(q *ent.PackageVersionQuery) {
-				q.WithName(func(q *ent.PackageNameQuery) {})
-			}).
-			WithDeclaredLicenses().
-			WithDiscoveredLicenses().All(ctx)
+	certLegalConn, err := b.client.CertifyLegal.Query().
+		Where(certifylegal.And(aggPredicates...)).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithDeclaredLicenses().
+		WithDiscoveredLicenses().All(ctx)
 
-		if err != nil {
-			return nil, fmt.Errorf("failed certifyLegal query based on package IDs with error: %w", err)
-		}
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyLegal query based on package IDs with error: %w", err)
+	}
 
-		for _, entCertLegal := range certLegalConn {
-			collectedCertLegal = append(collectedCertLegal, toModelCertifyLegal(entCertLegal))
-		}
+	for _, entCertLegal := range certLegalConn {
+		collectedCertLegal = append(collectedCertLegal, toModelCertifyLegal(entCertLegal))
 	}
 
 	return collectedCertLegal, nil
