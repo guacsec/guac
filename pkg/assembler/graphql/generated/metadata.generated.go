@@ -42,7 +42,7 @@ func (ec *executionContext) _HasMetadata_id(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _HasMetadata_subject(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
 	})
@@ -124,7 +124,7 @@ func (ec *executionContext) _HasMetadata_key(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key, nil
 	})
@@ -165,7 +165,7 @@ func (ec *executionContext) _HasMetadata_value(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Value, nil
 	})
@@ -206,7 +206,7 @@ func (ec *executionContext) _HasMetadata_timestamp(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Timestamp, nil
 	})
@@ -247,7 +247,7 @@ func (ec *executionContext) _HasMetadata_justification(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -288,7 +288,7 @@ func (ec *executionContext) _HasMetadata_origin(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -329,7 +329,7 @@ func (ec *executionContext) _HasMetadata_collector(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -370,7 +370,7 @@ func (ec *executionContext) _HasMetadata_documentRef(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -411,7 +411,7 @@ func (ec *executionContext) _HasMetadataConnection_totalCount(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -452,7 +452,7 @@ func (ec *executionContext) _HasMetadataConnection_pageInfo(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -501,7 +501,7 @@ func (ec *executionContext) _HasMetadataConnection_edges(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -548,7 +548,7 @@ func (ec *executionContext) _HasMetadataEdge_cursor(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -589,7 +589,7 @@ func (ec *executionContext) _HasMetadataEdge_node(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -642,10 +642,10 @@ func (ec *executionContext) fieldContext_HasMetadataEdge_node(_ context.Context,
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputHasMetadataInputSpec(ctx context.Context, obj interface{}) (model.HasMetadataInputSpec, error) {
+func (ec *executionContext) unmarshalInputHasMetadataInputSpec(ctx context.Context, obj any) (model.HasMetadataInputSpec, error) {
 	var it model.HasMetadataInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -711,10 +711,10 @@ func (ec *executionContext) unmarshalInputHasMetadataInputSpec(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputHasMetadataSpec(ctx context.Context, obj interface{}) (model.HasMetadataSpec, error) {
+func (ec *executionContext) unmarshalInputHasMetadataSpec(ctx context.Context, obj any) (model.HasMetadataSpec, error) {
 	var it model.HasMetadataSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1086,13 +1086,13 @@ func (ec *executionContext) marshalNHasMetadataEdge2ᚖgithubᚗcomᚋguacsecᚋ
 	return ec._HasMetadataEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx context.Context, v interface{}) (model.HasMetadataInputSpec, error) {
+func (ec *executionContext) unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx context.Context, v any) (model.HasMetadataInputSpec, error) {
 	res, err := ec.unmarshalInputHasMetadataInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.HasMetadataInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ(ctx context.Context, v any) ([]*model.HasMetadataInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1108,12 +1108,12 @@ func (ec *executionContext) unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNHasMetadataInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx context.Context, v interface{}) (*model.HasMetadataInputSpec, error) {
+func (ec *executionContext) unmarshalNHasMetadataInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx context.Context, v any) (*model.HasMetadataInputSpec, error) {
 	res, err := ec.unmarshalInputHasMetadataInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx context.Context, v interface{}) (model.HasMetadataSpec, error) {
+func (ec *executionContext) unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx context.Context, v any) (model.HasMetadataSpec, error) {
 	res, err := ec.unmarshalInputHasMetadataSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

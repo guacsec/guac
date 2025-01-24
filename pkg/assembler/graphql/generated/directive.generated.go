@@ -17,9 +17,9 @@ import (
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.dir_filter_argsKeyName(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -39,13 +39,9 @@ func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[str
 }
 func (ec *executionContext) dir_filter_argsKeyName(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["keyName"]
-	if !ok {
+	if _, ok := rawArgs["keyName"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -61,13 +57,9 @@ func (ec *executionContext) dir_filter_argsKeyName(
 
 func (ec *executionContext) dir_filter_argsOperation(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*model.FilterOperation, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["operation"]
-	if !ok {
+	if _, ok := rawArgs["operation"]; !ok {
 		var zeroVal *model.FilterOperation
 		return zeroVal, nil
 	}
@@ -83,13 +75,9 @@ func (ec *executionContext) dir_filter_argsOperation(
 
 func (ec *executionContext) dir_filter_argsValue(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["value"]
-	if !ok {
+	if _, ok := rawArgs["value"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -107,7 +95,7 @@ func (ec *executionContext) dir_filter_argsValue(
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) interface{} {
+func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) any {
 	fc := graphql.GetFieldContext(ctx)
 	for _, d := range fc.Field.Directives {
 		switch d.Name {
@@ -119,7 +107,7 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{
 				return nil
 			}
 			n := next
-			next = func(ctx context.Context) (interface{}, error) {
+			next = func(ctx context.Context) (any, error) {
 				if ec.directives.Filter == nil {
 					return nil, errors.New("directive filter is not implemented")
 				}
@@ -155,7 +143,7 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation(ctx context.Context, v interface{}) (*model.FilterOperation, error) {
+func (ec *executionContext) unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation(ctx context.Context, v any) (*model.FilterOperation, error) {
 	if v == nil {
 		return nil, nil
 	}

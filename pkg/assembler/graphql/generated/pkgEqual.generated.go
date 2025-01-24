@@ -41,7 +41,7 @@ func (ec *executionContext) _PkgEqual_id(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _PkgEqual_packages(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Packages, nil
 	})
@@ -131,7 +131,7 @@ func (ec *executionContext) _PkgEqual_justification(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -172,7 +172,7 @@ func (ec *executionContext) _PkgEqual_origin(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -213,7 +213,7 @@ func (ec *executionContext) _PkgEqual_collector(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -254,7 +254,7 @@ func (ec *executionContext) _PkgEqual_documentRef(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -295,7 +295,7 @@ func (ec *executionContext) _PkgEqualConnection_totalCount(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -336,7 +336,7 @@ func (ec *executionContext) _PkgEqualConnection_pageInfo(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -385,7 +385,7 @@ func (ec *executionContext) _PkgEqualConnection_edges(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -432,7 +432,7 @@ func (ec *executionContext) _PkgEqualEdge_cursor(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -473,7 +473,7 @@ func (ec *executionContext) _PkgEqualEdge_node(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -520,10 +520,10 @@ func (ec *executionContext) fieldContext_PkgEqualEdge_node(_ context.Context, fi
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputPkgEqualInputSpec(ctx context.Context, obj interface{}) (model.PkgEqualInputSpec, error) {
+func (ec *executionContext) unmarshalInputPkgEqualInputSpec(ctx context.Context, obj any) (model.PkgEqualInputSpec, error) {
 	var it model.PkgEqualInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -568,10 +568,10 @@ func (ec *executionContext) unmarshalInputPkgEqualInputSpec(ctx context.Context,
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPkgEqualSpec(ctx context.Context, obj interface{}) (model.PkgEqualSpec, error) {
+func (ec *executionContext) unmarshalInputPkgEqualSpec(ctx context.Context, obj any) (model.PkgEqualSpec, error) {
 	var it model.PkgEqualSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -907,13 +907,13 @@ func (ec *executionContext) marshalNPkgEqualEdge2ᚖgithubᚗcomᚋguacsecᚋgua
 	return ec._PkgEqualEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx context.Context, v interface{}) (model.PkgEqualInputSpec, error) {
+func (ec *executionContext) unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx context.Context, v any) (model.PkgEqualInputSpec, error) {
 	res, err := ec.unmarshalInputPkgEqualInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.PkgEqualInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ(ctx context.Context, v any) ([]*model.PkgEqualInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -929,12 +929,12 @@ func (ec *executionContext) unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋgua
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNPkgEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx context.Context, v interface{}) (*model.PkgEqualInputSpec, error) {
+func (ec *executionContext) unmarshalNPkgEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx context.Context, v any) (*model.PkgEqualInputSpec, error) {
 	res, err := ec.unmarshalInputPkgEqualInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx context.Context, v interface{}) (model.PkgEqualSpec, error) {
+func (ec *executionContext) unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx context.Context, v any) (model.PkgEqualSpec, error) {
 	res, err := ec.unmarshalInputPkgEqualSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

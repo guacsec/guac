@@ -133,9 +133,9 @@ type QueryResolver interface {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_delete_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_delete_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_delete_argsNode(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -145,13 +145,9 @@ func (ec *executionContext) field_Mutation_delete_args(ctx context.Context, rawA
 }
 func (ec *executionContext) field_Mutation_delete_argsNode(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["node"]
-	if !ok {
+	if _, ok := rawArgs["node"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -165,9 +161,9 @@ func (ec *executionContext) field_Mutation_delete_argsNode(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestArtifact_argsArtifact(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -177,13 +173,9 @@ func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Conte
 }
 func (ec *executionContext) field_Mutation_ingestArtifact_argsArtifact(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifact"]
-	if !ok {
+	if _, ok := rawArgs["artifact"]; !ok {
 		var zeroVal *model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -197,9 +189,9 @@ func (ec *executionContext) field_Mutation_ingestArtifact_argsArtifact(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestArtifacts_argsArtifacts(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -209,13 +201,9 @@ func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Cont
 }
 func (ec *executionContext) field_Mutation_ingestArtifacts_argsArtifacts(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifacts"]
-	if !ok {
+	if _, ok := rawArgs["artifacts"]; !ok {
 		var zeroVal []*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -229,9 +217,9 @@ func (ec *executionContext) field_Mutation_ingestArtifacts_argsArtifacts(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestBuilder_argsBuilder(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -241,13 +229,9 @@ func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Contex
 }
 func (ec *executionContext) field_Mutation_ingestBuilder_argsBuilder(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*model.IDorBuilderInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builder"]
-	if !ok {
+	if _, ok := rawArgs["builder"]; !ok {
 		var zeroVal *model.IDorBuilderInput
 		return zeroVal, nil
 	}
@@ -261,9 +245,9 @@ func (ec *executionContext) field_Mutation_ingestBuilder_argsBuilder(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestBuilders_argsBuilders(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -273,13 +257,9 @@ func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Conte
 }
 func (ec *executionContext) field_Mutation_ingestBuilders_argsBuilders(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorBuilderInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builders"]
-	if !ok {
+	if _, ok := rawArgs["builders"]; !ok {
 		var zeroVal []*model.IDorBuilderInput
 		return zeroVal, nil
 	}
@@ -293,9 +273,9 @@ func (ec *executionContext) field_Mutation_ingestBuilders_argsBuilders(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestBulkHasMetadata_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -315,13 +295,9 @@ func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx contex
 }
 func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInputs
 		return zeroVal, nil
 	}
@@ -337,13 +313,9 @@ func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -359,13 +331,9 @@ func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsPkgMatchTyp
 
 func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsHasMetadataList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.HasMetadataInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasMetadataList"]
-	if !ok {
+	if _, ok := rawArgs["hasMetadataList"]; !ok {
 		var zeroVal []*model.HasMetadataInputSpec
 		return zeroVal, nil
 	}
@@ -379,9 +347,9 @@ func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_argsHasMetadata
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilities(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -396,13 +364,9 @@ func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(
 }
 func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilities(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilities"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilities"]; !ok {
 		var zeroVal []*model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -418,13 +382,9 @@ func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_argsV
 
 func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_argsVulnerabilityMetadataList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.VulnerabilityMetadataInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilityMetadataList"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilityMetadataList"]; !ok {
 		var zeroVal []*model.VulnerabilityMetadataInputSpec
 		return zeroVal, nil
 	}
@@ -438,9 +398,9 @@ func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_argsV
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyBad_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -460,13 +420,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Con
 }
 func (ec *executionContext) field_Mutation_ingestCertifyBad_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInput
 		return zeroVal, nil
 	}
@@ -482,13 +438,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestCertifyBad_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -504,13 +456,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestCertifyBad_argsCertifyBad(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyBadInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyBad"]
-	if !ok {
+	if _, ok := rawArgs["certifyBad"]; !ok {
 		var zeroVal model.CertifyBadInputSpec
 		return zeroVal, nil
 	}
@@ -524,9 +472,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_argsCertifyBad(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyBads_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -546,13 +494,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Co
 }
 func (ec *executionContext) field_Mutation_ingestCertifyBads_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInputs
 		return zeroVal, nil
 	}
@@ -568,13 +512,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestCertifyBads_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -590,13 +530,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestCertifyBads_argsCertifyBads(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.CertifyBadInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyBads"]
-	if !ok {
+	if _, ok := rawArgs["certifyBads"]; !ok {
 		var zeroVal []*model.CertifyBadInputSpec
 		return zeroVal, nil
 	}
@@ -610,9 +546,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_argsCertifyBads(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyGood_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -632,13 +568,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Co
 }
 func (ec *executionContext) field_Mutation_ingestCertifyGood_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInput
 		return zeroVal, nil
 	}
@@ -654,13 +586,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestCertifyGood_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -676,13 +604,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestCertifyGood_argsCertifyGood(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyGoodInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyGood"]
-	if !ok {
+	if _, ok := rawArgs["certifyGood"]; !ok {
 		var zeroVal model.CertifyGoodInputSpec
 		return zeroVal, nil
 	}
@@ -696,9 +620,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_argsCertifyGood(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyGoods_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -718,13 +642,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.C
 }
 func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInputs
 		return zeroVal, nil
 	}
@@ -740,13 +660,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -762,13 +678,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsCertifyGoods(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.CertifyGoodInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyGoods"]
-	if !ok {
+	if _, ok := rawArgs["certifyGoods"]; !ok {
 		var zeroVal []*model.CertifyGoodInputSpec
 		return zeroVal, nil
 	}
@@ -782,9 +694,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_argsCertifyGoods(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyLegal_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -809,13 +721,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.C
 }
 func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageOrSourceInput
 		return zeroVal, nil
 	}
@@ -831,13 +739,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsDeclaredLicenses(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorLicenseInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["declaredLicenses"]
-	if !ok {
+	if _, ok := rawArgs["declaredLicenses"]; !ok {
 		var zeroVal []*model.IDorLicenseInput
 		return zeroVal, nil
 	}
@@ -853,13 +757,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsDeclaredLicens
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsDiscoveredLicenses(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorLicenseInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["discoveredLicenses"]
-	if !ok {
+	if _, ok := rawArgs["discoveredLicenses"]; !ok {
 		var zeroVal []*model.IDorLicenseInput
 		return zeroVal, nil
 	}
@@ -875,13 +775,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsDiscoveredLice
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsCertifyLegal(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyLegalInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyLegal"]
-	if !ok {
+	if _, ok := rawArgs["certifyLegal"]; !ok {
 		var zeroVal model.CertifyLegalInputSpec
 		return zeroVal, nil
 	}
@@ -895,9 +791,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_argsCertifyLegal(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyLegals_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -922,13 +818,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.
 }
 func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrSourceInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageOrSourceInputs
 		return zeroVal, nil
 	}
@@ -944,13 +836,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsDeclaredLicensesList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([][]*model.IDorLicenseInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["declaredLicensesList"]
-	if !ok {
+	if _, ok := rawArgs["declaredLicensesList"]; !ok {
 		var zeroVal [][]*model.IDorLicenseInput
 		return zeroVal, nil
 	}
@@ -966,13 +854,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsDeclaredLicen
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsDiscoveredLicensesList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([][]*model.IDorLicenseInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["discoveredLicensesList"]
-	if !ok {
+	if _, ok := rawArgs["discoveredLicensesList"]; !ok {
 		var zeroVal [][]*model.IDorLicenseInput
 		return zeroVal, nil
 	}
@@ -988,13 +872,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsDiscoveredLic
 
 func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsCertifyLegals(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.CertifyLegalInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyLegals"]
-	if !ok {
+	if _, ok := rawArgs["certifyLegals"]; !ok {
 		var zeroVal []*model.CertifyLegalInputSpec
 		return zeroVal, nil
 	}
@@ -1008,9 +888,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_argsCertifyLegals
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyVuln_argsPkg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1030,13 +910,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Co
 }
 func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsPkg(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkg"]
-	if !ok {
+	if _, ok := rawArgs["pkg"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1052,13 +928,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsPkg(
 
 func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsVulnerability(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerability"]
-	if !ok {
+	if _, ok := rawArgs["vulnerability"]; !ok {
 		var zeroVal model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -1074,13 +946,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsVulnerability(
 
 func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsCertifyVuln(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.ScanMetadataInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyVuln"]
-	if !ok {
+	if _, ok := rawArgs["certifyVuln"]; !ok {
 		var zeroVal model.ScanMetadataInput
 		return zeroVal, nil
 	}
@@ -1094,9 +962,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_argsCertifyVuln(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestCertifyVulns_argsPkgs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1116,13 +984,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.C
 }
 func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsPkgs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgs"]
-	if !ok {
+	if _, ok := rawArgs["pkgs"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1138,13 +1002,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsPkgs(
 
 func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsVulnerabilities(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilities"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilities"]; !ok {
 		var zeroVal []*model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -1160,13 +1020,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsVulnerabilitie
 
 func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsCertifyVulns(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.ScanMetadataInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyVulns"]
-	if !ok {
+	if _, ok := rawArgs["certifyVulns"]; !ok {
 		var zeroVal []*model.ScanMetadataInput
 		return zeroVal, nil
 	}
@@ -1180,9 +1036,9 @@ func (ec *executionContext) field_Mutation_ingestCertifyVulns_argsCertifyVulns(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestDependencies_argsPkgs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1202,13 +1058,9 @@ func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.C
 }
 func (ec *executionContext) field_Mutation_ingestDependencies_argsPkgs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgs"]
-	if !ok {
+	if _, ok := rawArgs["pkgs"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1224,13 +1076,9 @@ func (ec *executionContext) field_Mutation_ingestDependencies_argsPkgs(
 
 func (ec *executionContext) field_Mutation_ingestDependencies_argsDepPkgs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["depPkgs"]
-	if !ok {
+	if _, ok := rawArgs["depPkgs"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1246,13 +1094,9 @@ func (ec *executionContext) field_Mutation_ingestDependencies_argsDepPkgs(
 
 func (ec *executionContext) field_Mutation_ingestDependencies_argsDependencies(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IsDependencyInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["dependencies"]
-	if !ok {
+	if _, ok := rawArgs["dependencies"]; !ok {
 		var zeroVal []*model.IsDependencyInputSpec
 		return zeroVal, nil
 	}
@@ -1266,9 +1110,9 @@ func (ec *executionContext) field_Mutation_ingestDependencies_argsDependencies(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestDependency_argsPkg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1288,13 +1132,9 @@ func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Con
 }
 func (ec *executionContext) field_Mutation_ingestDependency_argsPkg(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkg"]
-	if !ok {
+	if _, ok := rawArgs["pkg"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1310,13 +1150,9 @@ func (ec *executionContext) field_Mutation_ingestDependency_argsPkg(
 
 func (ec *executionContext) field_Mutation_ingestDependency_argsDepPkg(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["depPkg"]
-	if !ok {
+	if _, ok := rawArgs["depPkg"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1332,13 +1168,9 @@ func (ec *executionContext) field_Mutation_ingestDependency_argsDepPkg(
 
 func (ec *executionContext) field_Mutation_ingestDependency_argsDependency(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IsDependencyInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["dependency"]
-	if !ok {
+	if _, ok := rawArgs["dependency"]; !ok {
 		var zeroVal model.IsDependencyInputSpec
 		return zeroVal, nil
 	}
@@ -1352,9 +1184,9 @@ func (ec *executionContext) field_Mutation_ingestDependency_argsDependency(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHasMetadata_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1374,13 +1206,9 @@ func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Co
 }
 func (ec *executionContext) field_Mutation_ingestHasMetadata_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInput
 		return zeroVal, nil
 	}
@@ -1396,13 +1224,9 @@ func (ec *executionContext) field_Mutation_ingestHasMetadata_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestHasMetadata_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -1418,13 +1242,9 @@ func (ec *executionContext) field_Mutation_ingestHasMetadata_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestHasMetadata_argsHasMetadata(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasMetadataInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasMetadata"]
-	if !ok {
+	if _, ok := rawArgs["hasMetadata"]; !ok {
 		var zeroVal model.HasMetadataInputSpec
 		return zeroVal, nil
 	}
@@ -1438,9 +1258,9 @@ func (ec *executionContext) field_Mutation_ingestHasMetadata_argsHasMetadata(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHasSBOM_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1460,13 +1280,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Contex
 }
 func (ec *executionContext) field_Mutation_ingestHasSBOM_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageOrArtifactInput
 		return zeroVal, nil
 	}
@@ -1482,13 +1298,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOM_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestHasSBOM_argsHasSbom(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSBOMInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSBOM"]
-	if !ok {
+	if _, ok := rawArgs["hasSBOM"]; !ok {
 		var zeroVal model.HasSBOMInputSpec
 		return zeroVal, nil
 	}
@@ -1504,13 +1316,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOM_argsHasSbom(
 
 func (ec *executionContext) field_Mutation_ingestHasSBOM_argsIncludes(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSBOMIncludesInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includes"]
-	if !ok {
+	if _, ok := rawArgs["includes"]; !ok {
 		var zeroVal model.HasSBOMIncludesInputSpec
 		return zeroVal, nil
 	}
@@ -1524,9 +1332,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOM_argsIncludes(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHasSBOMs_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1546,13 +1354,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Conte
 }
 func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrArtifactInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageOrArtifactInputs
 		return zeroVal, nil
 	}
@@ -1568,13 +1372,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsHasSBOMs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.HasSBOMInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSBOMs"]
-	if !ok {
+	if _, ok := rawArgs["hasSBOMs"]; !ok {
 		var zeroVal []*model.HasSBOMInputSpec
 		return zeroVal, nil
 	}
@@ -1590,13 +1390,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsHasSBOMs(
 
 func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsIncludes(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.HasSBOMIncludesInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includes"]
-	if !ok {
+	if _, ok := rawArgs["includes"]; !ok {
 		var zeroVal []*model.HasSBOMIncludesInputSpec
 		return zeroVal, nil
 	}
@@ -1610,9 +1406,9 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_argsIncludes(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHasSourceAt_argsPkg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1637,13 +1433,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Co
 }
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsPkg(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkg"]
-	if !ok {
+	if _, ok := rawArgs["pkg"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1659,13 +1451,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsPkg(
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -1681,13 +1469,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsSource(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["source"]
-	if !ok {
+	if _, ok := rawArgs["source"]; !ok {
 		var zeroVal model.IDorSourceInput
 		return zeroVal, nil
 	}
@@ -1703,13 +1487,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsSource(
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsHasSourceAt(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSourceAtInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSourceAt"]
-	if !ok {
+	if _, ok := rawArgs["hasSourceAt"]; !ok {
 		var zeroVal model.HasSourceAtInputSpec
 		return zeroVal, nil
 	}
@@ -1723,9 +1503,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_argsHasSourceAt(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHasSourceAts_argsPkgs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1750,13 +1530,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.C
 }
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsPkgs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgs"]
-	if !ok {
+	if _, ok := rawArgs["pkgs"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -1772,13 +1548,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsPkgs(
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -1794,13 +1566,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsPkgMatchType(
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsSources(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["sources"]
-	if !ok {
+	if _, ok := rawArgs["sources"]; !ok {
 		var zeroVal []*model.IDorSourceInput
 		return zeroVal, nil
 	}
@@ -1816,13 +1584,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsSources(
 
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsHasSourceAts(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.HasSourceAtInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSourceAts"]
-	if !ok {
+	if _, ok := rawArgs["hasSourceAts"]; !ok {
 		var zeroVal []*model.HasSourceAtInputSpec
 		return zeroVal, nil
 	}
@@ -1836,9 +1600,9 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_argsHasSourceAts(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHashEqual_argsArtifact(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1858,13 +1622,9 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Cont
 }
 func (ec *executionContext) field_Mutation_ingestHashEqual_argsArtifact(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifact"]
-	if !ok {
+	if _, ok := rawArgs["artifact"]; !ok {
 		var zeroVal model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -1880,13 +1640,9 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_argsArtifact(
 
 func (ec *executionContext) field_Mutation_ingestHashEqual_argsOtherArtifact(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["otherArtifact"]
-	if !ok {
+	if _, ok := rawArgs["otherArtifact"]; !ok {
 		var zeroVal model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -1902,13 +1658,9 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_argsOtherArtifact(
 
 func (ec *executionContext) field_Mutation_ingestHashEqual_argsHashEqual(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HashEqualInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hashEqual"]
-	if !ok {
+	if _, ok := rawArgs["hashEqual"]; !ok {
 		var zeroVal model.HashEqualInputSpec
 		return zeroVal, nil
 	}
@@ -1922,9 +1674,9 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_argsHashEqual(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestHashEquals_argsArtifacts(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1944,13 +1696,9 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Con
 }
 func (ec *executionContext) field_Mutation_ingestHashEquals_argsArtifacts(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifacts"]
-	if !ok {
+	if _, ok := rawArgs["artifacts"]; !ok {
 		var zeroVal []*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -1966,13 +1714,9 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_argsArtifacts(
 
 func (ec *executionContext) field_Mutation_ingestHashEquals_argsOtherArtifacts(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["otherArtifacts"]
-	if !ok {
+	if _, ok := rawArgs["otherArtifacts"]; !ok {
 		var zeroVal []*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -1988,13 +1732,9 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_argsOtherArtifacts(
 
 func (ec *executionContext) field_Mutation_ingestHashEquals_argsHashEquals(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.HashEqualInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hashEquals"]
-	if !ok {
+	if _, ok := rawArgs["hashEquals"]; !ok {
 		var zeroVal []*model.HashEqualInputSpec
 		return zeroVal, nil
 	}
@@ -2008,9 +1748,9 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_argsHashEquals(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestLicense_argsLicense(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2020,13 +1760,9 @@ func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Contex
 }
 func (ec *executionContext) field_Mutation_ingestLicense_argsLicense(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*model.IDorLicenseInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["license"]
-	if !ok {
+	if _, ok := rawArgs["license"]; !ok {
 		var zeroVal *model.IDorLicenseInput
 		return zeroVal, nil
 	}
@@ -2040,9 +1776,9 @@ func (ec *executionContext) field_Mutation_ingestLicense_argsLicense(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestLicenses_argsLicenses(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2052,13 +1788,9 @@ func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Conte
 }
 func (ec *executionContext) field_Mutation_ingestLicenses_argsLicenses(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorLicenseInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["licenses"]
-	if !ok {
+	if _, ok := rawArgs["licenses"]; !ok {
 		var zeroVal []*model.IDorLicenseInput
 		return zeroVal, nil
 	}
@@ -2072,9 +1804,9 @@ func (ec *executionContext) field_Mutation_ingestLicenses_argsLicenses(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestOccurrence_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2094,13 +1826,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Con
 }
 func (ec *executionContext) field_Mutation_ingestOccurrence_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageOrSourceInput
 		return zeroVal, nil
 	}
@@ -2116,13 +1844,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestOccurrence_argsArtifact(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifact"]
-	if !ok {
+	if _, ok := rawArgs["artifact"]; !ok {
 		var zeroVal model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -2138,13 +1862,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_argsArtifact(
 
 func (ec *executionContext) field_Mutation_ingestOccurrence_argsOccurrence(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IsOccurrenceInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["occurrence"]
-	if !ok {
+	if _, ok := rawArgs["occurrence"]; !ok {
 		var zeroVal model.IsOccurrenceInputSpec
 		return zeroVal, nil
 	}
@@ -2158,9 +1878,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_argsOccurrence(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestOccurrences_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2180,13 +1900,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Co
 }
 func (ec *executionContext) field_Mutation_ingestOccurrences_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrSourceInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageOrSourceInputs
 		return zeroVal, nil
 	}
@@ -2202,13 +1918,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestOccurrences_argsArtifacts(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifacts"]
-	if !ok {
+	if _, ok := rawArgs["artifacts"]; !ok {
 		var zeroVal []*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -2224,13 +1936,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_argsArtifacts(
 
 func (ec *executionContext) field_Mutation_ingestOccurrences_argsOccurrences(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IsOccurrenceInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["occurrences"]
-	if !ok {
+	if _, ok := rawArgs["occurrences"]; !ok {
 		var zeroVal []*model.IsOccurrenceInputSpec
 		return zeroVal, nil
 	}
@@ -2244,9 +1952,9 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_argsOccurrences(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestPackage_argsPkg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2256,13 +1964,9 @@ func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Contex
 }
 func (ec *executionContext) field_Mutation_ingestPackage_argsPkg(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkg"]
-	if !ok {
+	if _, ok := rawArgs["pkg"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -2276,9 +1980,9 @@ func (ec *executionContext) field_Mutation_ingestPackage_argsPkg(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestPackages_argsPkgs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2288,13 +1992,9 @@ func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Conte
 }
 func (ec *executionContext) field_Mutation_ingestPackages_argsPkgs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgs"]
-	if !ok {
+	if _, ok := rawArgs["pkgs"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -2308,9 +2008,9 @@ func (ec *executionContext) field_Mutation_ingestPackages_argsPkgs(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestPkgEqual_argsPkg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2330,13 +2030,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Conte
 }
 func (ec *executionContext) field_Mutation_ingestPkgEqual_argsPkg(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkg"]
-	if !ok {
+	if _, ok := rawArgs["pkg"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -2352,13 +2048,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_argsPkg(
 
 func (ec *executionContext) field_Mutation_ingestPkgEqual_argsOtherPackage(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["otherPackage"]
-	if !ok {
+	if _, ok := rawArgs["otherPackage"]; !ok {
 		var zeroVal model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -2374,13 +2066,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_argsOtherPackage(
 
 func (ec *executionContext) field_Mutation_ingestPkgEqual_argsPkgEqual(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PkgEqualInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgEqual"]
-	if !ok {
+	if _, ok := rawArgs["pkgEqual"]; !ok {
 		var zeroVal model.PkgEqualInputSpec
 		return zeroVal, nil
 	}
@@ -2394,9 +2082,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_argsPkgEqual(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestPkgEquals_argsPkgs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2416,13 +2104,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Cont
 }
 func (ec *executionContext) field_Mutation_ingestPkgEquals_argsPkgs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgs"]
-	if !ok {
+	if _, ok := rawArgs["pkgs"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -2438,13 +2122,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEquals_argsPkgs(
 
 func (ec *executionContext) field_Mutation_ingestPkgEquals_argsOtherPackages(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorPkgInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["otherPackages"]
-	if !ok {
+	if _, ok := rawArgs["otherPackages"]; !ok {
 		var zeroVal []*model.IDorPkgInput
 		return zeroVal, nil
 	}
@@ -2460,13 +2140,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEquals_argsOtherPackages(
 
 func (ec *executionContext) field_Mutation_ingestPkgEquals_argsPkgEquals(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.PkgEqualInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgEquals"]
-	if !ok {
+	if _, ok := rawArgs["pkgEquals"]; !ok {
 		var zeroVal []*model.PkgEqualInputSpec
 		return zeroVal, nil
 	}
@@ -2480,9 +2156,9 @@ func (ec *executionContext) field_Mutation_ingestPkgEquals_argsPkgEquals(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestPointOfContact_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2502,13 +2178,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context
 }
 func (ec *executionContext) field_Mutation_ingestPointOfContact_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInput
 		return zeroVal, nil
 	}
@@ -2524,13 +2196,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestPointOfContact_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -2546,13 +2214,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_argsPkgMatchType
 
 func (ec *executionContext) field_Mutation_ingestPointOfContact_argsPointOfContact(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PointOfContactInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pointOfContact"]
-	if !ok {
+	if _, ok := rawArgs["pointOfContact"]; !ok {
 		var zeroVal model.PointOfContactInputSpec
 		return zeroVal, nil
 	}
@@ -2566,9 +2230,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_argsPointOfConta
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestPointOfContacts_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2588,13 +2252,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx contex
 }
 func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageSourceOrArtifactInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageSourceOrArtifactInputs
 		return zeroVal, nil
 	}
@@ -2610,13 +2270,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsPkgMatchType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.MatchFlags, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgMatchType"]
-	if !ok {
+	if _, ok := rawArgs["pkgMatchType"]; !ok {
 		var zeroVal model.MatchFlags
 		return zeroVal, nil
 	}
@@ -2632,13 +2288,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsPkgMatchTyp
 
 func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsPointOfContacts(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.PointOfContactInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pointOfContacts"]
-	if !ok {
+	if _, ok := rawArgs["pointOfContacts"]; !ok {
 		var zeroVal []*model.PointOfContactInputSpec
 		return zeroVal, nil
 	}
@@ -2652,9 +2304,9 @@ func (ec *executionContext) field_Mutation_ingestPointOfContacts_argsPointOfCont
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestSLSA_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2679,13 +2331,9 @@ func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, 
 }
 func (ec *executionContext) field_Mutation_ingestSLSA_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -2701,13 +2349,9 @@ func (ec *executionContext) field_Mutation_ingestSLSA_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestSLSA_argsBuiltFrom(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builtFrom"]
-	if !ok {
+	if _, ok := rawArgs["builtFrom"]; !ok {
 		var zeroVal []*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -2723,13 +2367,9 @@ func (ec *executionContext) field_Mutation_ingestSLSA_argsBuiltFrom(
 
 func (ec *executionContext) field_Mutation_ingestSLSA_argsBuiltBy(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorBuilderInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builtBy"]
-	if !ok {
+	if _, ok := rawArgs["builtBy"]; !ok {
 		var zeroVal model.IDorBuilderInput
 		return zeroVal, nil
 	}
@@ -2745,13 +2385,9 @@ func (ec *executionContext) field_Mutation_ingestSLSA_argsBuiltBy(
 
 func (ec *executionContext) field_Mutation_ingestSLSA_argsSlsa(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.SLSAInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["slsa"]
-	if !ok {
+	if _, ok := rawArgs["slsa"]; !ok {
 		var zeroVal model.SLSAInputSpec
 		return zeroVal, nil
 	}
@@ -2765,9 +2401,9 @@ func (ec *executionContext) field_Mutation_ingestSLSA_argsSlsa(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestSLSAs_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2792,13 +2428,9 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context,
 }
 func (ec *executionContext) field_Mutation_ingestSLSAs_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal []*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -2814,13 +2446,9 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestSLSAs_argsBuiltFromList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([][]*model.IDorArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builtFromList"]
-	if !ok {
+	if _, ok := rawArgs["builtFromList"]; !ok {
 		var zeroVal [][]*model.IDorArtifactInput
 		return zeroVal, nil
 	}
@@ -2836,13 +2464,9 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_argsBuiltFromList(
 
 func (ec *executionContext) field_Mutation_ingestSLSAs_argsBuiltByList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorBuilderInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builtByList"]
-	if !ok {
+	if _, ok := rawArgs["builtByList"]; !ok {
 		var zeroVal []*model.IDorBuilderInput
 		return zeroVal, nil
 	}
@@ -2858,13 +2482,9 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_argsBuiltByList(
 
 func (ec *executionContext) field_Mutation_ingestSLSAs_argsSlsaList(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.SLSAInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["slsaList"]
-	if !ok {
+	if _, ok := rawArgs["slsaList"]; !ok {
 		var zeroVal []*model.SLSAInputSpec
 		return zeroVal, nil
 	}
@@ -2878,9 +2498,9 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_argsSlsaList(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestScorecard_argsSource(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2895,13 +2515,9 @@ func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Cont
 }
 func (ec *executionContext) field_Mutation_ingestScorecard_argsSource(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["source"]
-	if !ok {
+	if _, ok := rawArgs["source"]; !ok {
 		var zeroVal model.IDorSourceInput
 		return zeroVal, nil
 	}
@@ -2917,13 +2533,9 @@ func (ec *executionContext) field_Mutation_ingestScorecard_argsSource(
 
 func (ec *executionContext) field_Mutation_ingestScorecard_argsScorecard(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.ScorecardInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["scorecard"]
-	if !ok {
+	if _, ok := rawArgs["scorecard"]; !ok {
 		var zeroVal model.ScorecardInputSpec
 		return zeroVal, nil
 	}
@@ -2937,9 +2549,9 @@ func (ec *executionContext) field_Mutation_ingestScorecard_argsScorecard(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestScorecards_argsSources(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2954,13 +2566,9 @@ func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Con
 }
 func (ec *executionContext) field_Mutation_ingestScorecards_argsSources(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["sources"]
-	if !ok {
+	if _, ok := rawArgs["sources"]; !ok {
 		var zeroVal []*model.IDorSourceInput
 		return zeroVal, nil
 	}
@@ -2976,13 +2584,9 @@ func (ec *executionContext) field_Mutation_ingestScorecards_argsSources(
 
 func (ec *executionContext) field_Mutation_ingestScorecards_argsScorecards(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.ScorecardInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["scorecards"]
-	if !ok {
+	if _, ok := rawArgs["scorecards"]; !ok {
 		var zeroVal []*model.ScorecardInputSpec
 		return zeroVal, nil
 	}
@@ -2996,9 +2600,9 @@ func (ec *executionContext) field_Mutation_ingestScorecards_argsScorecards(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestSource_argsSource(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3008,13 +2612,9 @@ func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context
 }
 func (ec *executionContext) field_Mutation_ingestSource_argsSource(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["source"]
-	if !ok {
+	if _, ok := rawArgs["source"]; !ok {
 		var zeroVal model.IDorSourceInput
 		return zeroVal, nil
 	}
@@ -3028,9 +2628,9 @@ func (ec *executionContext) field_Mutation_ingestSource_argsSource(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestSources_argsSources(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3040,13 +2640,9 @@ func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Contex
 }
 func (ec *executionContext) field_Mutation_ingestSources_argsSources(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorSourceInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["sources"]
-	if !ok {
+	if _, ok := rawArgs["sources"]; !ok {
 		var zeroVal []*model.IDorSourceInput
 		return zeroVal, nil
 	}
@@ -3060,9 +2656,9 @@ func (ec *executionContext) field_Mutation_ingestSources_argsSources(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVEXStatement_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3082,13 +2678,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 }
 func (ec *executionContext) field_Mutation_ingestVEXStatement_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrArtifactInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal model.PackageOrArtifactInput
 		return zeroVal, nil
 	}
@@ -3104,13 +2696,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_argsSubject(
 
 func (ec *executionContext) field_Mutation_ingestVEXStatement_argsVulnerability(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerability"]
-	if !ok {
+	if _, ok := rawArgs["vulnerability"]; !ok {
 		var zeroVal model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3126,13 +2714,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_argsVulnerability(
 
 func (ec *executionContext) field_Mutation_ingestVEXStatement_argsVexStatement(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VexStatementInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vexStatement"]
-	if !ok {
+	if _, ok := rawArgs["vexStatement"]; !ok {
 		var zeroVal model.VexStatementInputSpec
 		return zeroVal, nil
 	}
@@ -3146,9 +2730,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_argsVexStatement(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVEXStatements_argsSubjects(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3168,13 +2752,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.
 }
 func (ec *executionContext) field_Mutation_ingestVEXStatements_argsSubjects(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PackageOrArtifactInputs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subjects"]
-	if !ok {
+	if _, ok := rawArgs["subjects"]; !ok {
 		var zeroVal model.PackageOrArtifactInputs
 		return zeroVal, nil
 	}
@@ -3190,13 +2770,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_argsSubjects(
 
 func (ec *executionContext) field_Mutation_ingestVEXStatements_argsVulnerabilities(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilities"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilities"]; !ok {
 		var zeroVal []*model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3212,13 +2788,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_argsVulnerabiliti
 
 func (ec *executionContext) field_Mutation_ingestVEXStatements_argsVexStatements(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.VexStatementInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vexStatements"]
-	if !ok {
+	if _, ok := rawArgs["vexStatements"]; !ok {
 		var zeroVal []*model.VexStatementInputSpec
 		return zeroVal, nil
 	}
@@ -3232,9 +2804,9 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_argsVexStatements
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVulnEqual_argsVulnerability(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3254,13 +2826,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Cont
 }
 func (ec *executionContext) field_Mutation_ingestVulnEqual_argsVulnerability(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerability"]
-	if !ok {
+	if _, ok := rawArgs["vulnerability"]; !ok {
 		var zeroVal model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3276,13 +2844,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_argsVulnerability(
 
 func (ec *executionContext) field_Mutation_ingestVulnEqual_argsOtherVulnerability(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["otherVulnerability"]
-	if !ok {
+	if _, ok := rawArgs["otherVulnerability"]; !ok {
 		var zeroVal model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3298,13 +2862,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_argsOtherVulnerabilit
 
 func (ec *executionContext) field_Mutation_ingestVulnEqual_argsVulnEqual(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnEqualInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnEqual"]
-	if !ok {
+	if _, ok := rawArgs["vulnEqual"]; !ok {
 		var zeroVal model.VulnEqualInputSpec
 		return zeroVal, nil
 	}
@@ -3318,9 +2878,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_argsVulnEqual(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVulnEquals_argsVulnerabilities(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3340,13 +2900,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Con
 }
 func (ec *executionContext) field_Mutation_ingestVulnEquals_argsVulnerabilities(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilities"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilities"]; !ok {
 		var zeroVal []*model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3362,13 +2918,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEquals_argsVulnerabilities(
 
 func (ec *executionContext) field_Mutation_ingestVulnEquals_argsOtherVulnerabilities(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["otherVulnerabilities"]
-	if !ok {
+	if _, ok := rawArgs["otherVulnerabilities"]; !ok {
 		var zeroVal []*model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3384,13 +2936,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEquals_argsOtherVulnerabili
 
 func (ec *executionContext) field_Mutation_ingestVulnEquals_argsVulnEquals(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.VulnEqualInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnEquals"]
-	if !ok {
+	if _, ok := rawArgs["vulnEquals"]; !ok {
 		var zeroVal []*model.VulnEqualInputSpec
 		return zeroVal, nil
 	}
@@ -3404,9 +2952,9 @@ func (ec *executionContext) field_Mutation_ingestVulnEquals_argsVulnEquals(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVulnerabilities_argsVulns(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3416,13 +2964,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx contex
 }
 func (ec *executionContext) field_Mutation_ingestVulnerabilities_argsVulns(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulns"]
-	if !ok {
+	if _, ok := rawArgs["vulns"]; !ok {
 		var zeroVal []*model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3436,9 +2980,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilities_argsVulns(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVulnerabilityMetadata_argsVulnerability(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3453,13 +2997,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx 
 }
 func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_argsVulnerability(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerability"]
-	if !ok {
+	if _, ok := rawArgs["vulnerability"]; !ok {
 		var zeroVal model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3475,13 +3015,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_argsVulne
 
 func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_argsVulnerabilityMetadata(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnerabilityMetadataInputSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilityMetadata"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilityMetadata"]; !ok {
 		var zeroVal model.VulnerabilityMetadataInputSpec
 		return zeroVal, nil
 	}
@@ -3495,9 +3031,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_argsVulne
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Mutation_ingestVulnerability_argsVuln(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3507,13 +3043,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 }
 func (ec *executionContext) field_Mutation_ingestVulnerability_argsVuln(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IDorVulnerabilityInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vuln"]
-	if !ok {
+	if _, ok := rawArgs["vuln"]; !ok {
 		var zeroVal model.IDorVulnerabilityInput
 		return zeroVal, nil
 	}
@@ -3527,9 +3059,9 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_argsVuln(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_BatchQueryDepPkgDependency_argsPkgIDs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3539,13 +3071,9 @@ func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_args(ctx cont
 }
 func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_argsPkgIDs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgIDs"]
-	if !ok {
+	if _, ok := rawArgs["pkgIDs"]; !ok {
 		var zeroVal []string
 		return zeroVal, nil
 	}
@@ -3559,9 +3087,9 @@ func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_argsPkgIDs(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_argsPkgIDs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3571,13 +3099,9 @@ func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_args(ctx con
 }
 func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_argsPkgIDs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgIDs"]
-	if !ok {
+	if _, ok := rawArgs["pkgIDs"]; !ok {
 		var zeroVal []string
 		return zeroVal, nil
 	}
@@ -3591,9 +3115,9 @@ func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_argsPkgIDs(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_argsPkgIDs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3603,13 +3127,9 @@ func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_args(ctx cont
 }
 func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_argsPkgIDs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgIDs"]
-	if !ok {
+	if _, ok := rawArgs["pkgIDs"]; !ok {
 		var zeroVal []string
 		return zeroVal, nil
 	}
@@ -3623,9 +3143,9 @@ func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_argsPkgIDs(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_BatchQuerySubjectPkgDependency_argsPkgIDs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3635,13 +3155,9 @@ func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_args(ctx 
 }
 func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_argsPkgIDs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgIDs"]
-	if !ok {
+	if _, ok := rawArgs["pkgIDs"]; !ok {
 		var zeroVal []string
 		return zeroVal, nil
 	}
@@ -3655,9 +3171,9 @@ func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_argsPkgID
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyBadList_argsCertifyBadSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3677,13 +3193,9 @@ func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context,
 }
 func (ec *executionContext) field_Query_CertifyBadList_argsCertifyBadSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyBadSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyBadSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyBadSpec"]; !ok {
 		var zeroVal model.CertifyBadSpec
 		return zeroVal, nil
 	}
@@ -3699,13 +3211,9 @@ func (ec *executionContext) field_Query_CertifyBadList_argsCertifyBadSpec(
 
 func (ec *executionContext) field_Query_CertifyBadList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -3721,13 +3229,9 @@ func (ec *executionContext) field_Query_CertifyBadList_argsAfter(
 
 func (ec *executionContext) field_Query_CertifyBadList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -3741,9 +3245,9 @@ func (ec *executionContext) field_Query_CertifyBadList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyBad_argsCertifyBadSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3753,13 +3257,9 @@ func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, raw
 }
 func (ec *executionContext) field_Query_CertifyBad_argsCertifyBadSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyBadSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyBadSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyBadSpec"]; !ok {
 		var zeroVal model.CertifyBadSpec
 		return zeroVal, nil
 	}
@@ -3773,9 +3273,9 @@ func (ec *executionContext) field_Query_CertifyBad_argsCertifyBadSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyGoodList_argsCertifyGoodSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3795,13 +3295,9 @@ func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context
 }
 func (ec *executionContext) field_Query_CertifyGoodList_argsCertifyGoodSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyGoodSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyGoodSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyGoodSpec"]; !ok {
 		var zeroVal model.CertifyGoodSpec
 		return zeroVal, nil
 	}
@@ -3817,13 +3313,9 @@ func (ec *executionContext) field_Query_CertifyGoodList_argsCertifyGoodSpec(
 
 func (ec *executionContext) field_Query_CertifyGoodList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -3839,13 +3331,9 @@ func (ec *executionContext) field_Query_CertifyGoodList_argsAfter(
 
 func (ec *executionContext) field_Query_CertifyGoodList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -3859,9 +3347,9 @@ func (ec *executionContext) field_Query_CertifyGoodList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyGood_argsCertifyGoodSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3871,13 +3359,9 @@ func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_CertifyGood_argsCertifyGoodSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyGoodSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyGoodSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyGoodSpec"]; !ok {
 		var zeroVal model.CertifyGoodSpec
 		return zeroVal, nil
 	}
@@ -3891,9 +3375,9 @@ func (ec *executionContext) field_Query_CertifyGood_argsCertifyGoodSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyLegalList_argsCertifyLegalSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3913,13 +3397,9 @@ func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Contex
 }
 func (ec *executionContext) field_Query_CertifyLegalList_argsCertifyLegalSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyLegalSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyLegalSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyLegalSpec"]; !ok {
 		var zeroVal model.CertifyLegalSpec
 		return zeroVal, nil
 	}
@@ -3935,13 +3415,9 @@ func (ec *executionContext) field_Query_CertifyLegalList_argsCertifyLegalSpec(
 
 func (ec *executionContext) field_Query_CertifyLegalList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -3957,13 +3433,9 @@ func (ec *executionContext) field_Query_CertifyLegalList_argsAfter(
 
 func (ec *executionContext) field_Query_CertifyLegalList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -3977,9 +3449,9 @@ func (ec *executionContext) field_Query_CertifyLegalList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyLegal_argsCertifyLegalSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3989,13 +3461,9 @@ func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_CertifyLegal_argsCertifyLegalSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyLegalSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyLegalSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyLegalSpec"]; !ok {
 		var zeroVal model.CertifyLegalSpec
 		return zeroVal, nil
 	}
@@ -4009,9 +3477,9 @@ func (ec *executionContext) field_Query_CertifyLegal_argsCertifyLegalSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyVEXStatementList_argsCertifyVEXStatementSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4031,13 +3499,9 @@ func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context
 }
 func (ec *executionContext) field_Query_CertifyVEXStatementList_argsCertifyVEXStatementSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyVEXStatementSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyVEXStatementSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyVEXStatementSpec"]; !ok {
 		var zeroVal model.CertifyVEXStatementSpec
 		return zeroVal, nil
 	}
@@ -4053,13 +3517,9 @@ func (ec *executionContext) field_Query_CertifyVEXStatementList_argsCertifyVEXSt
 
 func (ec *executionContext) field_Query_CertifyVEXStatementList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4075,13 +3535,9 @@ func (ec *executionContext) field_Query_CertifyVEXStatementList_argsAfter(
 
 func (ec *executionContext) field_Query_CertifyVEXStatementList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4095,9 +3551,9 @@ func (ec *executionContext) field_Query_CertifyVEXStatementList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyVEXStatement_argsCertifyVEXStatementSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4107,13 +3563,9 @@ func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Con
 }
 func (ec *executionContext) field_Query_CertifyVEXStatement_argsCertifyVEXStatementSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyVEXStatementSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyVEXStatementSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyVEXStatementSpec"]; !ok {
 		var zeroVal model.CertifyVEXStatementSpec
 		return zeroVal, nil
 	}
@@ -4127,9 +3579,9 @@ func (ec *executionContext) field_Query_CertifyVEXStatement_argsCertifyVEXStatem
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyVulnList_argsCertifyVulnSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4149,13 +3601,9 @@ func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context
 }
 func (ec *executionContext) field_Query_CertifyVulnList_argsCertifyVulnSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyVulnSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyVulnSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyVulnSpec"]; !ok {
 		var zeroVal model.CertifyVulnSpec
 		return zeroVal, nil
 	}
@@ -4171,13 +3619,9 @@ func (ec *executionContext) field_Query_CertifyVulnList_argsCertifyVulnSpec(
 
 func (ec *executionContext) field_Query_CertifyVulnList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4193,13 +3637,9 @@ func (ec *executionContext) field_Query_CertifyVulnList_argsAfter(
 
 func (ec *executionContext) field_Query_CertifyVulnList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4213,9 +3653,9 @@ func (ec *executionContext) field_Query_CertifyVulnList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_CertifyVuln_argsCertifyVulnSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4225,13 +3665,9 @@ func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_CertifyVuln_argsCertifyVulnSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyVulnSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["certifyVulnSpec"]
-	if !ok {
+	if _, ok := rawArgs["certifyVulnSpec"]; !ok {
 		var zeroVal model.CertifyVulnSpec
 		return zeroVal, nil
 	}
@@ -4245,9 +3681,9 @@ func (ec *executionContext) field_Query_CertifyVuln_argsCertifyVulnSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasMetadataList_argsHasMetadataSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4267,13 +3703,9 @@ func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context
 }
 func (ec *executionContext) field_Query_HasMetadataList_argsHasMetadataSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasMetadataSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasMetadataSpec"]
-	if !ok {
+	if _, ok := rawArgs["hasMetadataSpec"]; !ok {
 		var zeroVal model.HasMetadataSpec
 		return zeroVal, nil
 	}
@@ -4289,13 +3721,9 @@ func (ec *executionContext) field_Query_HasMetadataList_argsHasMetadataSpec(
 
 func (ec *executionContext) field_Query_HasMetadataList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4311,13 +3739,9 @@ func (ec *executionContext) field_Query_HasMetadataList_argsAfter(
 
 func (ec *executionContext) field_Query_HasMetadataList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4331,9 +3755,9 @@ func (ec *executionContext) field_Query_HasMetadataList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasMetadata_argsHasMetadataSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4343,13 +3767,9 @@ func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_HasMetadata_argsHasMetadataSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasMetadataSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasMetadataSpec"]
-	if !ok {
+	if _, ok := rawArgs["hasMetadataSpec"]; !ok {
 		var zeroVal model.HasMetadataSpec
 		return zeroVal, nil
 	}
@@ -4363,9 +3783,9 @@ func (ec *executionContext) field_Query_HasMetadata_argsHasMetadataSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasSBOMList_argsHasSBOMSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4385,13 +3805,9 @@ func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_HasSBOMList_argsHasSBOMSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSBOMSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSBOMSpec"]
-	if !ok {
+	if _, ok := rawArgs["hasSBOMSpec"]; !ok {
 		var zeroVal model.HasSBOMSpec
 		return zeroVal, nil
 	}
@@ -4407,13 +3823,9 @@ func (ec *executionContext) field_Query_HasSBOMList_argsHasSBOMSpec(
 
 func (ec *executionContext) field_Query_HasSBOMList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4429,13 +3841,9 @@ func (ec *executionContext) field_Query_HasSBOMList_argsAfter(
 
 func (ec *executionContext) field_Query_HasSBOMList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4449,9 +3857,9 @@ func (ec *executionContext) field_Query_HasSBOMList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasSBOM_argsHasSBOMSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4461,13 +3869,9 @@ func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArg
 }
 func (ec *executionContext) field_Query_HasSBOM_argsHasSBOMSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSBOMSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSBOMSpec"]
-	if !ok {
+	if _, ok := rawArgs["hasSBOMSpec"]; !ok {
 		var zeroVal model.HasSBOMSpec
 		return zeroVal, nil
 	}
@@ -4481,9 +3885,9 @@ func (ec *executionContext) field_Query_HasSBOM_argsHasSBOMSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasSLSAList_argsHasSLSASpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4503,13 +3907,9 @@ func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_HasSLSAList_argsHasSLSASpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSLSASpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSLSASpec"]
-	if !ok {
+	if _, ok := rawArgs["hasSLSASpec"]; !ok {
 		var zeroVal model.HasSLSASpec
 		return zeroVal, nil
 	}
@@ -4525,13 +3925,9 @@ func (ec *executionContext) field_Query_HasSLSAList_argsHasSLSASpec(
 
 func (ec *executionContext) field_Query_HasSLSAList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4547,13 +3943,9 @@ func (ec *executionContext) field_Query_HasSLSAList_argsAfter(
 
 func (ec *executionContext) field_Query_HasSLSAList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4567,9 +3959,9 @@ func (ec *executionContext) field_Query_HasSLSAList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasSLSA_argsHasSLSASpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4579,13 +3971,9 @@ func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArg
 }
 func (ec *executionContext) field_Query_HasSLSA_argsHasSLSASpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSLSASpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSLSASpec"]
-	if !ok {
+	if _, ok := rawArgs["hasSLSASpec"]; !ok {
 		var zeroVal model.HasSLSASpec
 		return zeroVal, nil
 	}
@@ -4599,9 +3987,9 @@ func (ec *executionContext) field_Query_HasSLSA_argsHasSLSASpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasSourceAtList_argsHasSourceAtSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4621,13 +4009,9 @@ func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context
 }
 func (ec *executionContext) field_Query_HasSourceAtList_argsHasSourceAtSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSourceAtSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSourceAtSpec"]
-	if !ok {
+	if _, ok := rawArgs["hasSourceAtSpec"]; !ok {
 		var zeroVal model.HasSourceAtSpec
 		return zeroVal, nil
 	}
@@ -4643,13 +4027,9 @@ func (ec *executionContext) field_Query_HasSourceAtList_argsHasSourceAtSpec(
 
 func (ec *executionContext) field_Query_HasSourceAtList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4665,13 +4045,9 @@ func (ec *executionContext) field_Query_HasSourceAtList_argsAfter(
 
 func (ec *executionContext) field_Query_HasSourceAtList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4685,9 +4061,9 @@ func (ec *executionContext) field_Query_HasSourceAtList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HasSourceAt_argsHasSourceAtSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4697,13 +4073,9 @@ func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_HasSourceAt_argsHasSourceAtSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HasSourceAtSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hasSourceAtSpec"]
-	if !ok {
+	if _, ok := rawArgs["hasSourceAtSpec"]; !ok {
 		var zeroVal model.HasSourceAtSpec
 		return zeroVal, nil
 	}
@@ -4717,9 +4089,9 @@ func (ec *executionContext) field_Query_HasSourceAt_argsHasSourceAtSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HashEqualList_argsHashEqualSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4739,13 +4111,9 @@ func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, 
 }
 func (ec *executionContext) field_Query_HashEqualList_argsHashEqualSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HashEqualSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hashEqualSpec"]
-	if !ok {
+	if _, ok := rawArgs["hashEqualSpec"]; !ok {
 		var zeroVal model.HashEqualSpec
 		return zeroVal, nil
 	}
@@ -4761,13 +4129,9 @@ func (ec *executionContext) field_Query_HashEqualList_argsHashEqualSpec(
 
 func (ec *executionContext) field_Query_HashEqualList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4783,13 +4147,9 @@ func (ec *executionContext) field_Query_HashEqualList_argsAfter(
 
 func (ec *executionContext) field_Query_HashEqualList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4803,9 +4163,9 @@ func (ec *executionContext) field_Query_HashEqualList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_HashEqual_argsHashEqualSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4815,13 +4175,9 @@ func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawA
 }
 func (ec *executionContext) field_Query_HashEqual_argsHashEqualSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.HashEqualSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["hashEqualSpec"]
-	if !ok {
+	if _, ok := rawArgs["hashEqualSpec"]; !ok {
 		var zeroVal model.HashEqualSpec
 		return zeroVal, nil
 	}
@@ -4835,9 +4191,9 @@ func (ec *executionContext) field_Query_HashEqual_argsHashEqualSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_IsDependencyList_argsIsDependencySpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4857,13 +4213,9 @@ func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Contex
 }
 func (ec *executionContext) field_Query_IsDependencyList_argsIsDependencySpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IsDependencySpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["isDependencySpec"]
-	if !ok {
+	if _, ok := rawArgs["isDependencySpec"]; !ok {
 		var zeroVal model.IsDependencySpec
 		return zeroVal, nil
 	}
@@ -4879,13 +4231,9 @@ func (ec *executionContext) field_Query_IsDependencyList_argsIsDependencySpec(
 
 func (ec *executionContext) field_Query_IsDependencyList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -4901,13 +4249,9 @@ func (ec *executionContext) field_Query_IsDependencyList_argsAfter(
 
 func (ec *executionContext) field_Query_IsDependencyList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -4921,9 +4265,9 @@ func (ec *executionContext) field_Query_IsDependencyList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_IsDependency_argsIsDependencySpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4933,13 +4277,9 @@ func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_IsDependency_argsIsDependencySpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IsDependencySpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["isDependencySpec"]
-	if !ok {
+	if _, ok := rawArgs["isDependencySpec"]; !ok {
 		var zeroVal model.IsDependencySpec
 		return zeroVal, nil
 	}
@@ -4953,9 +4293,9 @@ func (ec *executionContext) field_Query_IsDependency_argsIsDependencySpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_IsOccurrenceList_argsIsOccurrenceSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4975,13 +4315,9 @@ func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Contex
 }
 func (ec *executionContext) field_Query_IsOccurrenceList_argsIsOccurrenceSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IsOccurrenceSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["isOccurrenceSpec"]
-	if !ok {
+	if _, ok := rawArgs["isOccurrenceSpec"]; !ok {
 		var zeroVal model.IsOccurrenceSpec
 		return zeroVal, nil
 	}
@@ -4997,13 +4333,9 @@ func (ec *executionContext) field_Query_IsOccurrenceList_argsIsOccurrenceSpec(
 
 func (ec *executionContext) field_Query_IsOccurrenceList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5019,13 +4351,9 @@ func (ec *executionContext) field_Query_IsOccurrenceList_argsAfter(
 
 func (ec *executionContext) field_Query_IsOccurrenceList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5039,9 +4367,9 @@ func (ec *executionContext) field_Query_IsOccurrenceList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_IsOccurrence_argsIsOccurrenceSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5051,13 +4379,9 @@ func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_IsOccurrence_argsIsOccurrenceSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.IsOccurrenceSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["isOccurrenceSpec"]
-	if !ok {
+	if _, ok := rawArgs["isOccurrenceSpec"]; !ok {
 		var zeroVal model.IsOccurrenceSpec
 		return zeroVal, nil
 	}
@@ -5071,9 +4395,9 @@ func (ec *executionContext) field_Query_IsOccurrence_argsIsOccurrenceSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_PkgEqualList_argsPkgEqualSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5093,13 +4417,9 @@ func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_PkgEqualList_argsPkgEqualSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PkgEqualSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgEqualSpec"]
-	if !ok {
+	if _, ok := rawArgs["pkgEqualSpec"]; !ok {
 		var zeroVal model.PkgEqualSpec
 		return zeroVal, nil
 	}
@@ -5115,13 +4435,9 @@ func (ec *executionContext) field_Query_PkgEqualList_argsPkgEqualSpec(
 
 func (ec *executionContext) field_Query_PkgEqualList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5137,13 +4453,9 @@ func (ec *executionContext) field_Query_PkgEqualList_argsAfter(
 
 func (ec *executionContext) field_Query_PkgEqualList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5157,9 +4469,9 @@ func (ec *executionContext) field_Query_PkgEqualList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_PkgEqual_argsPkgEqualSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5169,13 +4481,9 @@ func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawAr
 }
 func (ec *executionContext) field_Query_PkgEqual_argsPkgEqualSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PkgEqualSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgEqualSpec"]
-	if !ok {
+	if _, ok := rawArgs["pkgEqualSpec"]; !ok {
 		var zeroVal model.PkgEqualSpec
 		return zeroVal, nil
 	}
@@ -5189,9 +4497,9 @@ func (ec *executionContext) field_Query_PkgEqual_argsPkgEqualSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_PointOfContactList_argsPointOfContactSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5211,13 +4519,9 @@ func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Cont
 }
 func (ec *executionContext) field_Query_PointOfContactList_argsPointOfContactSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PointOfContactSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pointOfContactSpec"]
-	if !ok {
+	if _, ok := rawArgs["pointOfContactSpec"]; !ok {
 		var zeroVal model.PointOfContactSpec
 		return zeroVal, nil
 	}
@@ -5233,13 +4537,9 @@ func (ec *executionContext) field_Query_PointOfContactList_argsPointOfContactSpe
 
 func (ec *executionContext) field_Query_PointOfContactList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5255,13 +4555,9 @@ func (ec *executionContext) field_Query_PointOfContactList_argsAfter(
 
 func (ec *executionContext) field_Query_PointOfContactList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5275,9 +4571,9 @@ func (ec *executionContext) field_Query_PointOfContactList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_PointOfContact_argsPointOfContactSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5287,13 +4583,9 @@ func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context,
 }
 func (ec *executionContext) field_Query_PointOfContact_argsPointOfContactSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PointOfContactSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pointOfContactSpec"]
-	if !ok {
+	if _, ok := rawArgs["pointOfContactSpec"]; !ok {
 		var zeroVal model.PointOfContactSpec
 		return zeroVal, nil
 	}
@@ -5307,9 +4599,9 @@ func (ec *executionContext) field_Query_PointOfContact_argsPointOfContactSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5319,13 +4611,9 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 }
 func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -5339,9 +4627,9 @@ func (ec *executionContext) field_Query___type_argsName(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_artifactsList_argsArtifactSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5361,13 +4649,9 @@ func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, 
 }
 func (ec *executionContext) field_Query_artifactsList_argsArtifactSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.ArtifactSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifactSpec"]
-	if !ok {
+	if _, ok := rawArgs["artifactSpec"]; !ok {
 		var zeroVal model.ArtifactSpec
 		return zeroVal, nil
 	}
@@ -5383,13 +4667,9 @@ func (ec *executionContext) field_Query_artifactsList_argsArtifactSpec(
 
 func (ec *executionContext) field_Query_artifactsList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5405,13 +4685,9 @@ func (ec *executionContext) field_Query_artifactsList_argsAfter(
 
 func (ec *executionContext) field_Query_artifactsList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5425,9 +4701,9 @@ func (ec *executionContext) field_Query_artifactsList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_artifacts_argsArtifactSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5437,13 +4713,9 @@ func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawA
 }
 func (ec *executionContext) field_Query_artifacts_argsArtifactSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.ArtifactSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["artifactSpec"]
-	if !ok {
+	if _, ok := rawArgs["artifactSpec"]; !ok {
 		var zeroVal model.ArtifactSpec
 		return zeroVal, nil
 	}
@@ -5457,9 +4729,9 @@ func (ec *executionContext) field_Query_artifacts_argsArtifactSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_buildersList_argsBuilderSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5479,13 +4751,9 @@ func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_buildersList_argsBuilderSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.BuilderSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builderSpec"]
-	if !ok {
+	if _, ok := rawArgs["builderSpec"]; !ok {
 		var zeroVal model.BuilderSpec
 		return zeroVal, nil
 	}
@@ -5501,13 +4769,9 @@ func (ec *executionContext) field_Query_buildersList_argsBuilderSpec(
 
 func (ec *executionContext) field_Query_buildersList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5523,13 +4787,9 @@ func (ec *executionContext) field_Query_buildersList_argsAfter(
 
 func (ec *executionContext) field_Query_buildersList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5543,9 +4803,9 @@ func (ec *executionContext) field_Query_buildersList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_builders_argsBuilderSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5555,13 +4815,9 @@ func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawAr
 }
 func (ec *executionContext) field_Query_builders_argsBuilderSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.BuilderSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["builderSpec"]
-	if !ok {
+	if _, ok := rawArgs["builderSpec"]; !ok {
 		var zeroVal model.BuilderSpec
 		return zeroVal, nil
 	}
@@ -5575,9 +4831,9 @@ func (ec *executionContext) field_Query_builders_argsBuilderSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_findPackagesThatNeedScanning_argsQueryType(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5592,13 +4848,9 @@ func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx co
 }
 func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsQueryType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.QueryType, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["queryType"]
-	if !ok {
+	if _, ok := rawArgs["queryType"]; !ok {
 		var zeroVal model.QueryType
 		return zeroVal, nil
 	}
@@ -5614,13 +4866,9 @@ func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsQueryTy
 
 func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsLastScan(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["lastScan"]
-	if !ok {
+	if _, ok := rawArgs["lastScan"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5634,9 +4882,9 @@ func (ec *executionContext) field_Query_findPackagesThatNeedScanning_argsLastSca
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_findSoftwareList_argsSearchText(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5656,13 +4904,9 @@ func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Contex
 }
 func (ec *executionContext) field_Query_findSoftwareList_argsSearchText(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["searchText"]
-	if !ok {
+	if _, ok := rawArgs["searchText"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -5678,13 +4922,9 @@ func (ec *executionContext) field_Query_findSoftwareList_argsSearchText(
 
 func (ec *executionContext) field_Query_findSoftwareList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5700,13 +4940,9 @@ func (ec *executionContext) field_Query_findSoftwareList_argsAfter(
 
 func (ec *executionContext) field_Query_findSoftwareList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5720,9 +4956,9 @@ func (ec *executionContext) field_Query_findSoftwareList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_findSoftware_argsSearchText(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5732,13 +4968,9 @@ func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_findSoftware_argsSearchText(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["searchText"]
-	if !ok {
+	if _, ok := rawArgs["searchText"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -5752,9 +4984,9 @@ func (ec *executionContext) field_Query_findSoftware_argsSearchText(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_licenseList_argsLicenseSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5774,13 +5006,9 @@ func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_licenseList_argsLicenseSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.LicenseSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["licenseSpec"]
-	if !ok {
+	if _, ok := rawArgs["licenseSpec"]; !ok {
 		var zeroVal model.LicenseSpec
 		return zeroVal, nil
 	}
@@ -5796,13 +5024,9 @@ func (ec *executionContext) field_Query_licenseList_argsLicenseSpec(
 
 func (ec *executionContext) field_Query_licenseList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5818,13 +5042,9 @@ func (ec *executionContext) field_Query_licenseList_argsAfter(
 
 func (ec *executionContext) field_Query_licenseList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5838,9 +5058,9 @@ func (ec *executionContext) field_Query_licenseList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_licenses_argsLicenseSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5850,13 +5070,9 @@ func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawAr
 }
 func (ec *executionContext) field_Query_licenses_argsLicenseSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.LicenseSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["licenseSpec"]
-	if !ok {
+	if _, ok := rawArgs["licenseSpec"]; !ok {
 		var zeroVal model.LicenseSpec
 		return zeroVal, nil
 	}
@@ -5870,9 +5086,9 @@ func (ec *executionContext) field_Query_licenses_argsLicenseSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_neighborsList_argsNode(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5897,13 +5113,9 @@ func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, 
 }
 func (ec *executionContext) field_Query_neighborsList_argsNode(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["node"]
-	if !ok {
+	if _, ok := rawArgs["node"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -5919,13 +5131,9 @@ func (ec *executionContext) field_Query_neighborsList_argsNode(
 
 func (ec *executionContext) field_Query_neighborsList_argsUsingOnly(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]model.Edge, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["usingOnly"]
-	if !ok {
+	if _, ok := rawArgs["usingOnly"]; !ok {
 		var zeroVal []model.Edge
 		return zeroVal, nil
 	}
@@ -5941,13 +5149,9 @@ func (ec *executionContext) field_Query_neighborsList_argsUsingOnly(
 
 func (ec *executionContext) field_Query_neighborsList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -5963,13 +5167,9 @@ func (ec *executionContext) field_Query_neighborsList_argsAfter(
 
 func (ec *executionContext) field_Query_neighborsList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -5983,9 +5183,9 @@ func (ec *executionContext) field_Query_neighborsList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_neighbors_argsNode(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6000,13 +5200,9 @@ func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawA
 }
 func (ec *executionContext) field_Query_neighbors_argsNode(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["node"]
-	if !ok {
+	if _, ok := rawArgs["node"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -6022,13 +5218,9 @@ func (ec *executionContext) field_Query_neighbors_argsNode(
 
 func (ec *executionContext) field_Query_neighbors_argsUsingOnly(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]model.Edge, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["usingOnly"]
-	if !ok {
+	if _, ok := rawArgs["usingOnly"]; !ok {
 		var zeroVal []model.Edge
 		return zeroVal, nil
 	}
@@ -6042,9 +5234,9 @@ func (ec *executionContext) field_Query_neighbors_argsUsingOnly(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_node_argsNode(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6054,13 +5246,9 @@ func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs m
 }
 func (ec *executionContext) field_Query_node_argsNode(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["node"]
-	if !ok {
+	if _, ok := rawArgs["node"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -6074,9 +5262,9 @@ func (ec *executionContext) field_Query_node_argsNode(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_nodes_argsNodes(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6086,13 +5274,9 @@ func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs 
 }
 func (ec *executionContext) field_Query_nodes_argsNodes(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["nodes"]
-	if !ok {
+	if _, ok := rawArgs["nodes"]; !ok {
 		var zeroVal []string
 		return zeroVal, nil
 	}
@@ -6106,9 +5290,9 @@ func (ec *executionContext) field_Query_nodes_argsNodes(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_packagesList_argsPkgSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6128,13 +5312,9 @@ func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, r
 }
 func (ec *executionContext) field_Query_packagesList_argsPkgSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PkgSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgSpec"]
-	if !ok {
+	if _, ok := rawArgs["pkgSpec"]; !ok {
 		var zeroVal model.PkgSpec
 		return zeroVal, nil
 	}
@@ -6150,13 +5330,9 @@ func (ec *executionContext) field_Query_packagesList_argsPkgSpec(
 
 func (ec *executionContext) field_Query_packagesList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6172,13 +5348,9 @@ func (ec *executionContext) field_Query_packagesList_argsAfter(
 
 func (ec *executionContext) field_Query_packagesList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6192,9 +5364,9 @@ func (ec *executionContext) field_Query_packagesList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_packages_argsPkgSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6204,13 +5376,9 @@ func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawAr
 }
 func (ec *executionContext) field_Query_packages_argsPkgSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.PkgSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgSpec"]
-	if !ok {
+	if _, ok := rawArgs["pkgSpec"]; !ok {
 		var zeroVal model.PkgSpec
 		return zeroVal, nil
 	}
@@ -6224,9 +5392,9 @@ func (ec *executionContext) field_Query_packages_argsPkgSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_path_argsSubject(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6251,13 +5419,9 @@ func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs m
 }
 func (ec *executionContext) field_Query_path_argsSubject(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["subject"]
-	if !ok {
+	if _, ok := rawArgs["subject"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -6273,13 +5437,9 @@ func (ec *executionContext) field_Query_path_argsSubject(
 
 func (ec *executionContext) field_Query_path_argsTarget(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["target"]
-	if !ok {
+	if _, ok := rawArgs["target"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -6295,13 +5455,9 @@ func (ec *executionContext) field_Query_path_argsTarget(
 
 func (ec *executionContext) field_Query_path_argsMaxPathLength(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["maxPathLength"]
-	if !ok {
+	if _, ok := rawArgs["maxPathLength"]; !ok {
 		var zeroVal int
 		return zeroVal, nil
 	}
@@ -6317,13 +5473,9 @@ func (ec *executionContext) field_Query_path_argsMaxPathLength(
 
 func (ec *executionContext) field_Query_path_argsUsingOnly(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]model.Edge, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["usingOnly"]
-	if !ok {
+	if _, ok := rawArgs["usingOnly"]; !ok {
 		var zeroVal []model.Edge
 		return zeroVal, nil
 	}
@@ -6337,9 +5489,9 @@ func (ec *executionContext) field_Query_path_argsUsingOnly(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_queryPackagesListForScan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_queryPackagesListForScan_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_queryPackagesListForScan_argsPkgIDs(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6359,13 +5511,9 @@ func (ec *executionContext) field_Query_queryPackagesListForScan_args(ctx contex
 }
 func (ec *executionContext) field_Query_queryPackagesListForScan_argsPkgIDs(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["pkgIDs"]
-	if !ok {
+	if _, ok := rawArgs["pkgIDs"]; !ok {
 		var zeroVal []string
 		return zeroVal, nil
 	}
@@ -6381,13 +5529,9 @@ func (ec *executionContext) field_Query_queryPackagesListForScan_argsPkgIDs(
 
 func (ec *executionContext) field_Query_queryPackagesListForScan_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6403,13 +5547,9 @@ func (ec *executionContext) field_Query_queryPackagesListForScan_argsAfter(
 
 func (ec *executionContext) field_Query_queryPackagesListForScan_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6423,9 +5563,9 @@ func (ec *executionContext) field_Query_queryPackagesListForScan_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_scorecardsList_argsScorecardSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6445,13 +5585,9 @@ func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context,
 }
 func (ec *executionContext) field_Query_scorecardsList_argsScorecardSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyScorecardSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["scorecardSpec"]
-	if !ok {
+	if _, ok := rawArgs["scorecardSpec"]; !ok {
 		var zeroVal model.CertifyScorecardSpec
 		return zeroVal, nil
 	}
@@ -6467,13 +5603,9 @@ func (ec *executionContext) field_Query_scorecardsList_argsScorecardSpec(
 
 func (ec *executionContext) field_Query_scorecardsList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6489,13 +5621,9 @@ func (ec *executionContext) field_Query_scorecardsList_argsAfter(
 
 func (ec *executionContext) field_Query_scorecardsList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6509,9 +5637,9 @@ func (ec *executionContext) field_Query_scorecardsList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_scorecards_argsScorecardSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6521,13 +5649,9 @@ func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, raw
 }
 func (ec *executionContext) field_Query_scorecards_argsScorecardSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.CertifyScorecardSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["scorecardSpec"]
-	if !ok {
+	if _, ok := rawArgs["scorecardSpec"]; !ok {
 		var zeroVal model.CertifyScorecardSpec
 		return zeroVal, nil
 	}
@@ -6541,9 +5665,9 @@ func (ec *executionContext) field_Query_scorecards_argsScorecardSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_sourcesList_argsSourceSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6563,13 +5687,9 @@ func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, ra
 }
 func (ec *executionContext) field_Query_sourcesList_argsSourceSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.SourceSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["sourceSpec"]
-	if !ok {
+	if _, ok := rawArgs["sourceSpec"]; !ok {
 		var zeroVal model.SourceSpec
 		return zeroVal, nil
 	}
@@ -6585,13 +5705,9 @@ func (ec *executionContext) field_Query_sourcesList_argsSourceSpec(
 
 func (ec *executionContext) field_Query_sourcesList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6607,13 +5723,9 @@ func (ec *executionContext) field_Query_sourcesList_argsAfter(
 
 func (ec *executionContext) field_Query_sourcesList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6627,9 +5739,9 @@ func (ec *executionContext) field_Query_sourcesList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_sources_argsSourceSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6639,13 +5751,9 @@ func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArg
 }
 func (ec *executionContext) field_Query_sources_argsSourceSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.SourceSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["sourceSpec"]
-	if !ok {
+	if _, ok := rawArgs["sourceSpec"]; !ok {
 		var zeroVal model.SourceSpec
 		return zeroVal, nil
 	}
@@ -6659,9 +5767,9 @@ func (ec *executionContext) field_Query_sources_argsSourceSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_vulnEqualList_argsVulnEqualSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6681,13 +5789,9 @@ func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, 
 }
 func (ec *executionContext) field_Query_vulnEqualList_argsVulnEqualSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnEqualSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnEqualSpec"]
-	if !ok {
+	if _, ok := rawArgs["vulnEqualSpec"]; !ok {
 		var zeroVal model.VulnEqualSpec
 		return zeroVal, nil
 	}
@@ -6703,13 +5807,9 @@ func (ec *executionContext) field_Query_vulnEqualList_argsVulnEqualSpec(
 
 func (ec *executionContext) field_Query_vulnEqualList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6725,13 +5825,9 @@ func (ec *executionContext) field_Query_vulnEqualList_argsAfter(
 
 func (ec *executionContext) field_Query_vulnEqualList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6745,9 +5841,9 @@ func (ec *executionContext) field_Query_vulnEqualList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_vulnEqual_argsVulnEqualSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6757,13 +5853,9 @@ func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawA
 }
 func (ec *executionContext) field_Query_vulnEqual_argsVulnEqualSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnEqualSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnEqualSpec"]
-	if !ok {
+	if _, ok := rawArgs["vulnEqualSpec"]; !ok {
 		var zeroVal model.VulnEqualSpec
 		return zeroVal, nil
 	}
@@ -6777,9 +5869,9 @@ func (ec *executionContext) field_Query_vulnEqual_argsVulnEqualSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_vulnerabilities_argsVulnSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6789,13 +5881,9 @@ func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context
 }
 func (ec *executionContext) field_Query_vulnerabilities_argsVulnSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnerabilitySpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnSpec"]
-	if !ok {
+	if _, ok := rawArgs["vulnSpec"]; !ok {
 		var zeroVal model.VulnerabilitySpec
 		return zeroVal, nil
 	}
@@ -6809,9 +5897,9 @@ func (ec *executionContext) field_Query_vulnerabilities_argsVulnSpec(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_vulnerabilityList_argsVulnSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6831,13 +5919,9 @@ func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Conte
 }
 func (ec *executionContext) field_Query_vulnerabilityList_argsVulnSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnerabilitySpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnSpec"]
-	if !ok {
+	if _, ok := rawArgs["vulnSpec"]; !ok {
 		var zeroVal model.VulnerabilitySpec
 		return zeroVal, nil
 	}
@@ -6853,13 +5937,9 @@ func (ec *executionContext) field_Query_vulnerabilityList_argsVulnSpec(
 
 func (ec *executionContext) field_Query_vulnerabilityList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6875,13 +5955,9 @@ func (ec *executionContext) field_Query_vulnerabilityList_argsAfter(
 
 func (ec *executionContext) field_Query_vulnerabilityList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6895,9 +5971,9 @@ func (ec *executionContext) field_Query_vulnerabilityList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_vulnerabilityMetadataList_argsVulnerabilityMetadataSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6917,13 +5993,9 @@ func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx conte
 }
 func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsVulnerabilityMetadataSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnerabilityMetadataSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilityMetadataSpec"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilityMetadataSpec"]; !ok {
 		var zeroVal model.VulnerabilityMetadataSpec
 		return zeroVal, nil
 	}
@@ -6939,13 +6011,9 @@ func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsVulnerabil
 
 func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsAfter(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -6961,13 +6029,9 @@ func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsAfter(
 
 func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsFirst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -6981,9 +6045,9 @@ func (ec *executionContext) field_Query_vulnerabilityMetadataList_argsFirst(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_vulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_vulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_vulnerabilityMetadata_argsVulnerabilityMetadataSpec(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -6993,13 +6057,9 @@ func (ec *executionContext) field_Query_vulnerabilityMetadata_args(ctx context.C
 }
 func (ec *executionContext) field_Query_vulnerabilityMetadata_argsVulnerabilityMetadataSpec(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (model.VulnerabilityMetadataSpec, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["vulnerabilityMetadataSpec"]
-	if !ok {
+	if _, ok := rawArgs["vulnerabilityMetadataSpec"]; !ok {
 		var zeroVal model.VulnerabilityMetadataSpec
 		return zeroVal, nil
 	}
@@ -7033,7 +6093,7 @@ func (ec *executionContext) _Artifact_id(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -7074,7 +6134,7 @@ func (ec *executionContext) _Artifact_algorithm(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Algorithm, nil
 	})
@@ -7115,7 +6175,7 @@ func (ec *executionContext) _Artifact_digest(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Digest, nil
 	})
@@ -7156,7 +6216,7 @@ func (ec *executionContext) _ArtifactConnection_totalCount(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -7197,7 +6257,7 @@ func (ec *executionContext) _ArtifactConnection_pageInfo(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -7246,7 +6306,7 @@ func (ec *executionContext) _ArtifactConnection_edges(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -7293,7 +6353,7 @@ func (ec *executionContext) _ArtifactEdge_cursor(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -7334,7 +6394,7 @@ func (ec *executionContext) _ArtifactEdge_node(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -7383,7 +6443,7 @@ func (ec *executionContext) _Mutation_ingestArtifact(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestArtifact(rctx, fc.Args["artifact"].(*model.IDorArtifactInput))
 	})
@@ -7435,7 +6495,7 @@ func (ec *executionContext) _Mutation_ingestArtifacts(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestArtifacts(rctx, fc.Args["artifacts"].([]*model.IDorArtifactInput))
 	})
@@ -7487,7 +6547,7 @@ func (ec *executionContext) _Mutation_ingestBuilder(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestBuilder(rctx, fc.Args["builder"].(*model.IDorBuilderInput))
 	})
@@ -7539,7 +6599,7 @@ func (ec *executionContext) _Mutation_ingestBuilders(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestBuilders(rctx, fc.Args["builders"].([]*model.IDorBuilderInput))
 	})
@@ -7591,7 +6651,7 @@ func (ec *executionContext) _Mutation_ingestCertifyBad(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyBad(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBad"].(model.CertifyBadInputSpec))
 	})
@@ -7643,7 +6703,7 @@ func (ec *executionContext) _Mutation_ingestCertifyBads(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyBads(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
 	})
@@ -7695,7 +6755,7 @@ func (ec *executionContext) _Mutation_ingestCertifyGood(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyGood(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGood"].(model.CertifyGoodInputSpec))
 	})
@@ -7747,7 +6807,7 @@ func (ec *executionContext) _Mutation_ingestCertifyGoods(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyGoods(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
 	})
@@ -7799,7 +6859,7 @@ func (ec *executionContext) _Mutation_ingestCertifyLegal(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyLegal(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["declaredLicenses"].([]*model.IDorLicenseInput), fc.Args["discoveredLicenses"].([]*model.IDorLicenseInput), fc.Args["certifyLegal"].(model.CertifyLegalInputSpec))
 	})
@@ -7851,7 +6911,7 @@ func (ec *executionContext) _Mutation_ingestCertifyLegals(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyLegals(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["declaredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["discoveredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["certifyLegals"].([]*model.CertifyLegalInputSpec))
 	})
@@ -7903,7 +6963,7 @@ func (ec *executionContext) _Mutation_ingestScorecard(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestScorecard(rctx, fc.Args["source"].(model.IDorSourceInput), fc.Args["scorecard"].(model.ScorecardInputSpec))
 	})
@@ -7955,7 +7015,7 @@ func (ec *executionContext) _Mutation_ingestScorecards(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestScorecards(rctx, fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["scorecards"].([]*model.ScorecardInputSpec))
 	})
@@ -8007,7 +7067,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
 	})
@@ -8059,7 +7119,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatements(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVEXStatements(rctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vexStatements"].([]*model.VexStatementInputSpec))
 	})
@@ -8111,7 +7171,7 @@ func (ec *executionContext) _Mutation_ingestCertifyVuln(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyVuln(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["certifyVuln"].(model.ScanMetadataInput))
 	})
@@ -8163,7 +7223,7 @@ func (ec *executionContext) _Mutation_ingestCertifyVulns(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestCertifyVulns(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["certifyVulns"].([]*model.ScanMetadataInput))
 	})
@@ -8215,7 +7275,7 @@ func (ec *executionContext) _Mutation_ingestPointOfContact(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestPointOfContact(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContact"].(model.PointOfContactInputSpec))
 	})
@@ -8267,7 +7327,7 @@ func (ec *executionContext) _Mutation_ingestPointOfContacts(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestPointOfContacts(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContacts"].([]*model.PointOfContactInputSpec))
 	})
@@ -8319,7 +7379,7 @@ func (ec *executionContext) _Mutation_delete(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Delete(rctx, fc.Args["node"].(string))
 	})
@@ -8371,7 +7431,7 @@ func (ec *executionContext) _Mutation_ingestHasSBOM(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHasSbom(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec), fc.Args["includes"].(model.HasSBOMIncludesInputSpec))
 	})
@@ -8423,7 +7483,7 @@ func (ec *executionContext) _Mutation_ingestHasSBOMs(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHasSBOMs(rctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["hasSBOMs"].([]*model.HasSBOMInputSpec), fc.Args["includes"].([]*model.HasSBOMIncludesInputSpec))
 	})
@@ -8475,7 +7535,7 @@ func (ec *executionContext) _Mutation_ingestSLSA(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestSlsa(rctx, fc.Args["subject"].(model.IDorArtifactInput), fc.Args["builtFrom"].([]*model.IDorArtifactInput), fc.Args["builtBy"].(model.IDorBuilderInput), fc.Args["slsa"].(model.SLSAInputSpec))
 	})
@@ -8527,7 +7587,7 @@ func (ec *executionContext) _Mutation_ingestSLSAs(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestSLSAs(rctx, fc.Args["subjects"].([]*model.IDorArtifactInput), fc.Args["builtFromList"].([][]*model.IDorArtifactInput), fc.Args["builtByList"].([]*model.IDorBuilderInput), fc.Args["slsaList"].([]*model.SLSAInputSpec))
 	})
@@ -8579,7 +7639,7 @@ func (ec *executionContext) _Mutation_ingestHasSourceAt(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHasSourceAt(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["source"].(model.IDorSourceInput), fc.Args["hasSourceAt"].(model.HasSourceAtInputSpec))
 	})
@@ -8631,7 +7691,7 @@ func (ec *executionContext) _Mutation_ingestHasSourceAts(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHasSourceAts(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["hasSourceAts"].([]*model.HasSourceAtInputSpec))
 	})
@@ -8683,7 +7743,7 @@ func (ec *executionContext) _Mutation_ingestHashEqual(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHashEqual(rctx, fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["otherArtifact"].(model.IDorArtifactInput), fc.Args["hashEqual"].(model.HashEqualInputSpec))
 	})
@@ -8735,7 +7795,7 @@ func (ec *executionContext) _Mutation_ingestHashEquals(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHashEquals(rctx, fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["otherArtifacts"].([]*model.IDorArtifactInput), fc.Args["hashEquals"].([]*model.HashEqualInputSpec))
 	})
@@ -8787,7 +7847,7 @@ func (ec *executionContext) _Mutation_ingestDependency(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestDependency(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["depPkg"].(model.IDorPkgInput), fc.Args["dependency"].(model.IsDependencyInputSpec))
 	})
@@ -8839,7 +7899,7 @@ func (ec *executionContext) _Mutation_ingestDependencies(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestDependencies(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["depPkgs"].([]*model.IDorPkgInput), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
 	})
@@ -8891,7 +7951,7 @@ func (ec *executionContext) _Mutation_ingestOccurrence(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestOccurrence(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
 	})
@@ -8943,7 +8003,7 @@ func (ec *executionContext) _Mutation_ingestOccurrences(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestOccurrences(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
 	})
@@ -8995,7 +8055,7 @@ func (ec *executionContext) _Mutation_ingestLicense(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestLicense(rctx, fc.Args["license"].(*model.IDorLicenseInput))
 	})
@@ -9047,7 +8107,7 @@ func (ec *executionContext) _Mutation_ingestLicenses(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestLicenses(rctx, fc.Args["licenses"].([]*model.IDorLicenseInput))
 	})
@@ -9099,7 +8159,7 @@ func (ec *executionContext) _Mutation_ingestHasMetadata(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestHasMetadata(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadata"].(model.HasMetadataInputSpec))
 	})
@@ -9151,7 +8211,7 @@ func (ec *executionContext) _Mutation_ingestBulkHasMetadata(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestBulkHasMetadata(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadataList"].([]*model.HasMetadataInputSpec))
 	})
@@ -9203,7 +8263,7 @@ func (ec *executionContext) _Mutation_ingestPackage(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(model.IDorPkgInput))
 	})
@@ -9265,7 +8325,7 @@ func (ec *executionContext) _Mutation_ingestPackages(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestPackages(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput))
 	})
@@ -9327,7 +8387,7 @@ func (ec *executionContext) _Mutation_ingestPkgEqual(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestPkgEqual(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["otherPackage"].(model.IDorPkgInput), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
 	})
@@ -9379,7 +8439,7 @@ func (ec *executionContext) _Mutation_ingestPkgEquals(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestPkgEquals(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["otherPackages"].([]*model.IDorPkgInput), fc.Args["pkgEquals"].([]*model.PkgEqualInputSpec))
 	})
@@ -9431,7 +8491,7 @@ func (ec *executionContext) _Mutation_ingestSource(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestSource(rctx, fc.Args["source"].(model.IDorSourceInput))
 	})
@@ -9491,7 +8551,7 @@ func (ec *executionContext) _Mutation_ingestSources(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestSources(rctx, fc.Args["sources"].([]*model.IDorSourceInput))
 	})
@@ -9551,7 +8611,7 @@ func (ec *executionContext) _Mutation_ingestVulnEqual(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVulnEqual(rctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["otherVulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
 	})
@@ -9603,7 +8663,7 @@ func (ec *executionContext) _Mutation_ingestVulnEquals(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVulnEquals(rctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["otherVulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnEquals"].([]*model.VulnEqualInputSpec))
 	})
@@ -9655,7 +8715,7 @@ func (ec *executionContext) _Mutation_ingestVulnerabilityMetadata(ctx context.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVulnerabilityMetadata(rctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
 	})
@@ -9707,7 +8767,7 @@ func (ec *executionContext) _Mutation_ingestBulkVulnerabilityMetadata(ctx contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestBulkVulnerabilityMetadata(rctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec))
 	})
@@ -9759,7 +8819,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["vuln"].(model.IDorVulnerabilityInput))
 	})
@@ -9817,7 +8877,7 @@ func (ec *executionContext) _Mutation_ingestVulnerabilities(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().IngestVulnerabilities(rctx, fc.Args["vulns"].([]*model.IDorVulnerabilityInput))
 	})
@@ -9875,7 +8935,7 @@ func (ec *executionContext) _Query_artifacts(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Artifacts(rctx, fc.Args["artifactSpec"].(model.ArtifactSpec))
 	})
@@ -9935,7 +8995,7 @@ func (ec *executionContext) _Query_artifactsList(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ArtifactsList(rctx, fc.Args["artifactSpec"].(model.ArtifactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -9992,7 +9052,7 @@ func (ec *executionContext) _Query_builders(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Builders(rctx, fc.Args["builderSpec"].(model.BuilderSpec))
 	})
@@ -10050,7 +9110,7 @@ func (ec *executionContext) _Query_buildersList(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().BuildersList(rctx, fc.Args["builderSpec"].(model.BuilderSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10107,7 +9167,7 @@ func (ec *executionContext) _Query_CertifyBad(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyBad(rctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec))
 	})
@@ -10175,7 +9235,7 @@ func (ec *executionContext) _Query_CertifyBadList(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyBadList(rctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10232,7 +9292,7 @@ func (ec *executionContext) _Query_CertifyGood(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyGood(rctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec))
 	})
@@ -10300,7 +9360,7 @@ func (ec *executionContext) _Query_CertifyGoodList(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyGoodList(rctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10357,7 +9417,7 @@ func (ec *executionContext) _Query_CertifyLegal(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyLegal(rctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec))
 	})
@@ -10435,7 +9495,7 @@ func (ec *executionContext) _Query_CertifyLegalList(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyLegalList(rctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10492,7 +9552,7 @@ func (ec *executionContext) _Query_BatchQueryPkgIDCertifyLegal(ctx context.Conte
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().BatchQueryPkgIDCertifyLegal(rctx, fc.Args["pkgIDs"].([]string))
 	})
@@ -10570,7 +9630,7 @@ func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Scorecards(rctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec))
 	})
@@ -10630,7 +9690,7 @@ func (ec *executionContext) _Query_scorecardsList(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ScorecardsList(rctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10687,7 +9747,7 @@ func (ec *executionContext) _Query_CertifyVEXStatement(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyVEXStatement(rctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec))
 	})
@@ -10763,7 +9823,7 @@ func (ec *executionContext) _Query_CertifyVEXStatementList(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyVEXStatementList(rctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10820,7 +9880,7 @@ func (ec *executionContext) _Query_CertifyVuln(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyVuln(rctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec))
 	})
@@ -10882,7 +9942,7 @@ func (ec *executionContext) _Query_CertifyVulnList(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CertifyVulnList(rctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -10939,7 +9999,7 @@ func (ec *executionContext) _Query_BatchQueryPkgIDCertifyVuln(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().BatchQueryPkgIDCertifyVuln(rctx, fc.Args["pkgIDs"].([]string))
 	})
@@ -11001,7 +10061,7 @@ func (ec *executionContext) _Query_PointOfContact(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PointOfContact(rctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec))
 	})
@@ -11073,7 +10133,7 @@ func (ec *executionContext) _Query_PointOfContactList(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PointOfContactList(rctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -11130,7 +10190,7 @@ func (ec *executionContext) _Query_HasSBOM(ctx context.Context, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasSbom(rctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec))
 	})
@@ -11210,7 +10270,7 @@ func (ec *executionContext) _Query_HasSBOMList(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasSBOMList(rctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -11267,7 +10327,7 @@ func (ec *executionContext) _Query_HasSLSA(ctx context.Context, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasSlsa(rctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec))
 	})
@@ -11327,7 +10387,7 @@ func (ec *executionContext) _Query_HasSLSAList(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasSLSAList(rctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -11384,7 +10444,7 @@ func (ec *executionContext) _Query_HasSourceAt(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasSourceAt(rctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec))
 	})
@@ -11454,7 +10514,7 @@ func (ec *executionContext) _Query_HasSourceAtList(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasSourceAtList(rctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -11511,7 +10571,7 @@ func (ec *executionContext) _Query_HashEqual(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HashEqual(rctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec))
 	})
@@ -11577,7 +10637,7 @@ func (ec *executionContext) _Query_HashEqualList(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HashEqualList(rctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -11634,7 +10694,7 @@ func (ec *executionContext) _Query_IsDependency(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().IsDependency(rctx, fc.Args["isDependencySpec"].(model.IsDependencySpec))
 	})
@@ -11704,7 +10764,7 @@ func (ec *executionContext) _Query_IsDependencyList(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().IsDependencyList(rctx, fc.Args["isDependencySpec"].(model.IsDependencySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -11761,7 +10821,7 @@ func (ec *executionContext) _Query_BatchQuerySubjectPkgDependency(ctx context.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().BatchQuerySubjectPkgDependency(rctx, fc.Args["pkgIDs"].([]string))
 	})
@@ -11831,7 +10891,7 @@ func (ec *executionContext) _Query_BatchQueryDepPkgDependency(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().BatchQueryDepPkgDependency(rctx, fc.Args["pkgIDs"].([]string))
 	})
@@ -11901,7 +10961,7 @@ func (ec *executionContext) _Query_IsOccurrence(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().IsOccurrence(rctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec))
 	})
@@ -11969,7 +11029,7 @@ func (ec *executionContext) _Query_IsOccurrenceList(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().IsOccurrenceList(rctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12026,7 +11086,7 @@ func (ec *executionContext) _Query_licenses(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Licenses(rctx, fc.Args["licenseSpec"].(model.LicenseSpec))
 	})
@@ -12088,7 +11148,7 @@ func (ec *executionContext) _Query_licenseList(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().LicenseList(rctx, fc.Args["licenseSpec"].(model.LicenseSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12145,7 +11205,7 @@ func (ec *executionContext) _Query_HasMetadata(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasMetadata(rctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec))
 	})
@@ -12217,7 +11277,7 @@ func (ec *executionContext) _Query_HasMetadataList(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().HasMetadataList(rctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12274,7 +11334,7 @@ func (ec *executionContext) _Query_packages(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Packages(rctx, fc.Args["pkgSpec"].(model.PkgSpec))
 	})
@@ -12334,7 +11394,7 @@ func (ec *executionContext) _Query_packagesList(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PackagesList(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12391,7 +11451,7 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Path(rctx, fc.Args["subject"].(string), fc.Args["target"].(string), fc.Args["maxPathLength"].(int), fc.Args["usingOnly"].([]model.Edge))
 	})
@@ -12443,7 +11503,7 @@ func (ec *executionContext) _Query_neighbors(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Neighbors(rctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge))
 	})
@@ -12495,7 +11555,7 @@ func (ec *executionContext) _Query_neighborsList(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().NeighborsList(rctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12552,7 +11612,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Node(rctx, fc.Args["node"].(string))
 	})
@@ -12604,7 +11664,7 @@ func (ec *executionContext) _Query_nodes(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Nodes(rctx, fc.Args["nodes"].([]string))
 	})
@@ -12656,7 +11716,7 @@ func (ec *executionContext) _Query_PkgEqual(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PkgEqual(rctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec))
 	})
@@ -12722,7 +11782,7 @@ func (ec *executionContext) _Query_PkgEqualList(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PkgEqualList(rctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12779,7 +11839,7 @@ func (ec *executionContext) _Query_findSoftware(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().FindSoftware(rctx, fc.Args["searchText"].(string))
 	})
@@ -12831,7 +11891,7 @@ func (ec *executionContext) _Query_findSoftwareList(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().FindSoftwareList(rctx, fc.Args["searchText"].(string), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12888,7 +11948,7 @@ func (ec *executionContext) _Query_queryPackagesListForScan(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().QueryPackagesListForScan(rctx, fc.Args["pkgIDs"].([]string), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -12945,7 +12005,7 @@ func (ec *executionContext) _Query_findPackagesThatNeedScanning(ctx context.Cont
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().FindPackagesThatNeedScanning(rctx, fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int))
 	})
@@ -12997,7 +12057,7 @@ func (ec *executionContext) _Query_sources(ctx context.Context, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Sources(rctx, fc.Args["sourceSpec"].(model.SourceSpec))
 	})
@@ -13057,7 +12117,7 @@ func (ec *executionContext) _Query_sourcesList(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().SourcesList(rctx, fc.Args["sourceSpec"].(model.SourceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -13114,7 +12174,7 @@ func (ec *executionContext) _Query_vulnEqual(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().VulnEqual(rctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec))
 	})
@@ -13180,7 +12240,7 @@ func (ec *executionContext) _Query_vulnEqualList(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().VulnEqualList(rctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -13237,7 +12297,7 @@ func (ec *executionContext) _Query_vulnerabilityMetadata(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().VulnerabilityMetadata(rctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec))
 	})
@@ -13307,7 +12367,7 @@ func (ec *executionContext) _Query_vulnerabilityMetadataList(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().VulnerabilityMetadataList(rctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -13364,7 +12424,7 @@ func (ec *executionContext) _Query_vulnerabilities(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Vulnerabilities(rctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec))
 	})
@@ -13424,7 +12484,7 @@ func (ec *executionContext) _Query_vulnerabilityList(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().VulnerabilityList(rctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
@@ -13481,7 +12541,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectType(fc.Args["name"].(string))
 	})
@@ -13552,7 +12612,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectSchema()
 	})
@@ -13596,10 +12656,10 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context, obj interface{}) (model.ArtifactInputSpec, error) {
+func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context, obj any) (model.ArtifactInputSpec, error) {
 	var it model.ArtifactInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -13630,10 +12690,10 @@ func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context,
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj interface{}) (model.ArtifactSpec, error) {
+func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj any) (model.ArtifactSpec, error) {
 	var it model.ArtifactSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -13671,10 +12731,10 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputIDorArtifactInput(ctx context.Context, obj interface{}) (model.IDorArtifactInput, error) {
+func (ec *executionContext) unmarshalInputIDorArtifactInput(ctx context.Context, obj any) (model.IDorArtifactInput, error) {
 	var it model.IDorArtifactInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -15608,23 +14668,23 @@ func (ec *executionContext) marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋgua
 	return ec._ArtifactEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (model.ArtifactSpec, error) {
+func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v any) (model.ArtifactSpec, error) {
 	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (*model.ArtifactSpec, error) {
+func (ec *executionContext) unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v any) (*model.ArtifactSpec, error) {
 	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (model.IDorArtifactInput, error) {
+func (ec *executionContext) unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v any) (model.IDorArtifactInput, error) {
 	res, err := ec.unmarshalInputIDorArtifactInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v interface{}) ([][]*model.IDorArtifactInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([][]*model.IDorArtifactInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -15640,8 +14700,8 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorArtifactInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -15657,7 +14717,7 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋgua
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (*model.IDorArtifactInput, error) {
+func (ec *executionContext) unmarshalNIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v any) (*model.IDorArtifactInput, error) {
 	res, err := ec.unmarshalInputIDorArtifactInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -15669,7 +14729,7 @@ func (ec *executionContext) marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsec
 	return ec._ArtifactConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {
+func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v any) (*model.ArtifactInputSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -15677,11 +14737,11 @@ func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacse
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) ([]*model.ArtifactSpec, error) {
+func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v any) ([]*model.ArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -15697,11 +14757,11 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsec�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpecᚄ(ctx context.Context, v interface{}) ([]*model.ArtifactSpec, error) {
+func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpecᚄ(ctx context.Context, v any) ([]*model.ArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -15717,7 +14777,7 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsec�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (*model.ArtifactSpec, error) {
+func (ec *executionContext) unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v any) (*model.ArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -15725,11 +14785,11 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorArtifactInput, error) {
+func (ec *executionContext) unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -15745,7 +14805,7 @@ func (ec *executionContext) unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋgua
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (*model.IDorArtifactInput, error) {
+func (ec *executionContext) unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v any) (*model.IDorArtifactInput, error) {
 	if v == nil {
 		return nil, nil
 	}

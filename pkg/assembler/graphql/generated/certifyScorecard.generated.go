@@ -42,7 +42,7 @@ func (ec *executionContext) _CertifyScorecard_id(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _CertifyScorecard_source(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Source, nil
 	})
@@ -132,7 +132,7 @@ func (ec *executionContext) _CertifyScorecard_scorecard(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Scorecard, nil
 	})
@@ -191,7 +191,7 @@ func (ec *executionContext) _CertifyScorecardConnection_totalCount(ctx context.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -232,7 +232,7 @@ func (ec *executionContext) _CertifyScorecardConnection_pageInfo(ctx context.Con
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -281,7 +281,7 @@ func (ec *executionContext) _CertifyScorecardConnection_edges(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -328,7 +328,7 @@ func (ec *executionContext) _CertifyScorecardEdge_cursor(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -369,7 +369,7 @@ func (ec *executionContext) _CertifyScorecardEdge_node(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -418,7 +418,7 @@ func (ec *executionContext) _Scorecard_checks(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Checks, nil
 	})
@@ -465,7 +465,7 @@ func (ec *executionContext) _Scorecard_aggregateScore(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.AggregateScore, nil
 	})
@@ -506,7 +506,7 @@ func (ec *executionContext) _Scorecard_timeScanned(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TimeScanned, nil
 	})
@@ -547,7 +547,7 @@ func (ec *executionContext) _Scorecard_scorecardVersion(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ScorecardVersion, nil
 	})
@@ -588,7 +588,7 @@ func (ec *executionContext) _Scorecard_scorecardCommit(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ScorecardCommit, nil
 	})
@@ -629,7 +629,7 @@ func (ec *executionContext) _Scorecard_origin(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -670,7 +670,7 @@ func (ec *executionContext) _Scorecard_collector(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -711,7 +711,7 @@ func (ec *executionContext) _Scorecard_documentRef(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -752,7 +752,7 @@ func (ec *executionContext) _ScorecardCheck_check(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Check, nil
 	})
@@ -793,7 +793,7 @@ func (ec *executionContext) _ScorecardCheck_score(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Score, nil
 	})
@@ -826,15 +826,15 @@ func (ec *executionContext) fieldContext_ScorecardCheck_score(_ context.Context,
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCertifyScorecardSpec(ctx context.Context, obj interface{}) (model.CertifyScorecardSpec, error) {
+func (ec *executionContext) unmarshalInputCertifyScorecardSpec(ctx context.Context, obj any) (model.CertifyScorecardSpec, error) {
 	var it model.CertifyScorecardSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	if _, present := asMap["checks"]; !present {
-		asMap["checks"] = []interface{}{}
+		asMap["checks"] = []any{}
 	}
 
 	fieldsInOrder := [...]string{"id", "source", "timeScanned", "aggregateScore", "checks", "scorecardVersion", "scorecardCommit", "origin", "collector", "documentRef"}
@@ -920,10 +920,10 @@ func (ec *executionContext) unmarshalInputCertifyScorecardSpec(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputScorecardCheckInputSpec(ctx context.Context, obj interface{}) (model.ScorecardCheckInputSpec, error) {
+func (ec *executionContext) unmarshalInputScorecardCheckInputSpec(ctx context.Context, obj any) (model.ScorecardCheckInputSpec, error) {
 	var it model.ScorecardCheckInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -954,10 +954,10 @@ func (ec *executionContext) unmarshalInputScorecardCheckInputSpec(ctx context.Co
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputScorecardCheckSpec(ctx context.Context, obj interface{}) (model.ScorecardCheckSpec, error) {
+func (ec *executionContext) unmarshalInputScorecardCheckSpec(ctx context.Context, obj any) (model.ScorecardCheckSpec, error) {
 	var it model.ScorecardCheckSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -988,10 +988,10 @@ func (ec *executionContext) unmarshalInputScorecardCheckSpec(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputScorecardInputSpec(ctx context.Context, obj interface{}) (model.ScorecardInputSpec, error) {
+func (ec *executionContext) unmarshalInputScorecardInputSpec(ctx context.Context, obj any) (model.ScorecardInputSpec, error) {
 	var it model.ScorecardInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1444,7 +1444,7 @@ func (ec *executionContext) marshalNCertifyScorecardEdge2ᚖgithubᚗcomᚋguacs
 	return ec._CertifyScorecardEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx context.Context, v interface{}) (model.CertifyScorecardSpec, error) {
+func (ec *executionContext) unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx context.Context, v any) (model.CertifyScorecardSpec, error) {
 	res, err := ec.unmarshalInputCertifyScorecardSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1513,8 +1513,8 @@ func (ec *executionContext) marshalNScorecardCheck2ᚖgithubᚗcomᚋguacsecᚋg
 	return ec._ScorecardCheck(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.ScorecardCheckInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpecᚄ(ctx context.Context, v any) ([]*model.ScorecardCheckInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1530,23 +1530,23 @@ func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚕᚖgithubᚗcom
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpec(ctx context.Context, v interface{}) (*model.ScorecardCheckInputSpec, error) {
+func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpec(ctx context.Context, v any) (*model.ScorecardCheckInputSpec, error) {
 	res, err := ec.unmarshalInputScorecardCheckInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNScorecardCheckSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckSpec(ctx context.Context, v interface{}) (*model.ScorecardCheckSpec, error) {
+func (ec *executionContext) unmarshalNScorecardCheckSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckSpec(ctx context.Context, v any) (*model.ScorecardCheckSpec, error) {
 	res, err := ec.unmarshalInputScorecardCheckSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx context.Context, v interface{}) (model.ScorecardInputSpec, error) {
+func (ec *executionContext) unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx context.Context, v any) (model.ScorecardInputSpec, error) {
 	res, err := ec.unmarshalInputScorecardInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.ScorecardInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ(ctx context.Context, v any) ([]*model.ScorecardInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1562,12 +1562,12 @@ func (ec *executionContext) unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋgu
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNScorecardInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx context.Context, v interface{}) (*model.ScorecardInputSpec, error) {
+func (ec *executionContext) unmarshalNScorecardInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx context.Context, v any) (*model.ScorecardInputSpec, error) {
 	res, err := ec.unmarshalInputScorecardInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v any) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1589,11 +1589,11 @@ func (ec *executionContext) marshalOCertifyScorecardConnection2ᚖgithubᚗcom�
 	return ec._CertifyScorecardConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOScorecardCheckSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckSpecᚄ(ctx context.Context, v interface{}) ([]*model.ScorecardCheckSpec, error) {
+func (ec *executionContext) unmarshalOScorecardCheckSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckSpecᚄ(ctx context.Context, v any) ([]*model.ScorecardCheckSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1609,7 +1609,7 @@ func (ec *executionContext) unmarshalOScorecardCheckSpec2ᚕᚖgithubᚗcomᚋgu
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v any) (*time.Time, error) {
 	if v == nil {
 		return nil, nil
 	}

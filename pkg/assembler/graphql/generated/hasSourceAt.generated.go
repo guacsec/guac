@@ -42,7 +42,7 @@ func (ec *executionContext) _HasSourceAt_id(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _HasSourceAt_package(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Package, nil
 	})
@@ -132,7 +132,7 @@ func (ec *executionContext) _HasSourceAt_source(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Source, nil
 	})
@@ -181,7 +181,7 @@ func (ec *executionContext) _HasSourceAt_knownSince(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.KnownSince, nil
 	})
@@ -222,7 +222,7 @@ func (ec *executionContext) _HasSourceAt_justification(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -263,7 +263,7 @@ func (ec *executionContext) _HasSourceAt_origin(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -304,7 +304,7 @@ func (ec *executionContext) _HasSourceAt_collector(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -345,7 +345,7 @@ func (ec *executionContext) _HasSourceAt_documentRef(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -386,7 +386,7 @@ func (ec *executionContext) _HasSourceAtConnection_totalCount(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -427,7 +427,7 @@ func (ec *executionContext) _HasSourceAtConnection_pageInfo(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -476,7 +476,7 @@ func (ec *executionContext) _HasSourceAtConnection_edges(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -523,7 +523,7 @@ func (ec *executionContext) _HasSourceAtEdge_cursor(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -564,7 +564,7 @@ func (ec *executionContext) _HasSourceAtEdge_node(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -615,10 +615,10 @@ func (ec *executionContext) fieldContext_HasSourceAtEdge_node(_ context.Context,
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputHasSourceAtInputSpec(ctx context.Context, obj interface{}) (model.HasSourceAtInputSpec, error) {
+func (ec *executionContext) unmarshalInputHasSourceAtInputSpec(ctx context.Context, obj any) (model.HasSourceAtInputSpec, error) {
 	var it model.HasSourceAtInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -670,10 +670,10 @@ func (ec *executionContext) unmarshalInputHasSourceAtInputSpec(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, obj interface{}) (model.HasSourceAtSpec, error) {
+func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, obj any) (model.HasSourceAtSpec, error) {
 	var it model.HasSourceAtSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1033,13 +1033,13 @@ func (ec *executionContext) marshalNHasSourceAtEdge2ᚖgithubᚗcomᚋguacsecᚋ
 	return ec._HasSourceAtEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx context.Context, v interface{}) (model.HasSourceAtInputSpec, error) {
+func (ec *executionContext) unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx context.Context, v any) (model.HasSourceAtInputSpec, error) {
 	res, err := ec.unmarshalInputHasSourceAtInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.HasSourceAtInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ(ctx context.Context, v any) ([]*model.HasSourceAtInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1055,12 +1055,12 @@ func (ec *executionContext) unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNHasSourceAtInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx context.Context, v interface{}) (*model.HasSourceAtInputSpec, error) {
+func (ec *executionContext) unmarshalNHasSourceAtInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx context.Context, v any) (*model.HasSourceAtInputSpec, error) {
 	res, err := ec.unmarshalInputHasSourceAtInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx context.Context, v interface{}) (model.HasSourceAtSpec, error) {
+func (ec *executionContext) unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx context.Context, v any) (model.HasSourceAtSpec, error) {
 	res, err := ec.unmarshalInputHasSourceAtSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

@@ -42,7 +42,7 @@ func (ec *executionContext) _CertifyVEXStatement_id(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _CertifyVEXStatement_subject(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
 	})
@@ -124,7 +124,7 @@ func (ec *executionContext) _CertifyVEXStatement_vulnerability(ctx context.Conte
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Vulnerability, nil
 	})
@@ -173,7 +173,7 @@ func (ec *executionContext) _CertifyVEXStatement_status(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
 	})
@@ -214,7 +214,7 @@ func (ec *executionContext) _CertifyVEXStatement_vexJustification(ctx context.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.VexJustification, nil
 	})
@@ -255,7 +255,7 @@ func (ec *executionContext) _CertifyVEXStatement_statement(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Statement, nil
 	})
@@ -296,7 +296,7 @@ func (ec *executionContext) _CertifyVEXStatement_statusNotes(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.StatusNotes, nil
 	})
@@ -337,7 +337,7 @@ func (ec *executionContext) _CertifyVEXStatement_knownSince(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.KnownSince, nil
 	})
@@ -378,7 +378,7 @@ func (ec *executionContext) _CertifyVEXStatement_origin(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -419,7 +419,7 @@ func (ec *executionContext) _CertifyVEXStatement_collector(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -460,7 +460,7 @@ func (ec *executionContext) _CertifyVEXStatement_documentRef(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -501,7 +501,7 @@ func (ec *executionContext) _VEXConnection_totalCount(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -542,7 +542,7 @@ func (ec *executionContext) _VEXConnection_pageInfo(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -591,7 +591,7 @@ func (ec *executionContext) _VEXConnection_edges(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -638,7 +638,7 @@ func (ec *executionContext) _VEXEdge_cursor(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -679,7 +679,7 @@ func (ec *executionContext) _VEXEdge_node(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -736,10 +736,10 @@ func (ec *executionContext) fieldContext_VEXEdge_node(_ context.Context, field g
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Context, obj interface{}) (model.CertifyVEXStatementSpec, error) {
+func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Context, obj any) (model.CertifyVEXStatementSpec, error) {
 	var it model.CertifyVEXStatementSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -833,10 +833,10 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageOrArtifactInput(ctx context.Context, obj interface{}) (model.PackageOrArtifactInput, error) {
+func (ec *executionContext) unmarshalInputPackageOrArtifactInput(ctx context.Context, obj any) (model.PackageOrArtifactInput, error) {
 	var it model.PackageOrArtifactInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -867,10 +867,10 @@ func (ec *executionContext) unmarshalInputPackageOrArtifactInput(ctx context.Con
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageOrArtifactInputs(ctx context.Context, obj interface{}) (model.PackageOrArtifactInputs, error) {
+func (ec *executionContext) unmarshalInputPackageOrArtifactInputs(ctx context.Context, obj any) (model.PackageOrArtifactInputs, error) {
 	var it model.PackageOrArtifactInputs
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -901,10 +901,10 @@ func (ec *executionContext) unmarshalInputPackageOrArtifactInputs(ctx context.Co
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageOrArtifactSpec(ctx context.Context, obj interface{}) (model.PackageOrArtifactSpec, error) {
+func (ec *executionContext) unmarshalInputPackageOrArtifactSpec(ctx context.Context, obj any) (model.PackageOrArtifactSpec, error) {
 	var it model.PackageOrArtifactSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -935,10 +935,10 @@ func (ec *executionContext) unmarshalInputPackageOrArtifactSpec(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputVexStatementInputSpec(ctx context.Context, obj interface{}) (model.VexStatementInputSpec, error) {
+func (ec *executionContext) unmarshalInputVexStatementInputSpec(ctx context.Context, obj any) (model.VexStatementInputSpec, error) {
 	var it model.VexStatementInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1282,7 +1282,7 @@ func (ec *executionContext) marshalNCertifyVEXStatement2ᚖgithubᚗcomᚋguacse
 	return ec._CertifyVEXStatement(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx context.Context, v interface{}) (model.CertifyVEXStatementSpec, error) {
+func (ec *executionContext) unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx context.Context, v any) (model.CertifyVEXStatementSpec, error) {
 	res, err := ec.unmarshalInputCertifyVEXStatementSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1341,17 +1341,17 @@ func (ec *executionContext) marshalNPackageOrArtifact2ᚕgithubᚗcomᚋguacsec�
 	return ret
 }
 
-func (ec *executionContext) unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx context.Context, v interface{}) (model.PackageOrArtifactInput, error) {
+func (ec *executionContext) unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx context.Context, v any) (model.PackageOrArtifactInput, error) {
 	res, err := ec.unmarshalInputPackageOrArtifactInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx context.Context, v interface{}) (model.PackageOrArtifactInputs, error) {
+func (ec *executionContext) unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx context.Context, v any) (model.PackageOrArtifactInputs, error) {
 	res, err := ec.unmarshalInputPackageOrArtifactInputs(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageOrArtifactSpec, error) {
+func (ec *executionContext) unmarshalNPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v any) (*model.PackageOrArtifactSpec, error) {
 	res, err := ec.unmarshalInputPackageOrArtifactSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1410,7 +1410,7 @@ func (ec *executionContext) marshalNVEXEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 	return ec._VEXEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v interface{}) (model.VexJustification, error) {
+func (ec *executionContext) unmarshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v any) (model.VexJustification, error) {
 	var res model.VexJustification
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1420,13 +1420,13 @@ func (ec *executionContext) marshalNVexJustification2githubᚗcomᚋguacsecᚋgu
 	return v
 }
 
-func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v interface{}) (model.VexStatementInputSpec, error) {
+func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v any) (model.VexStatementInputSpec, error) {
 	res, err := ec.unmarshalInputVexStatementInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.VexStatementInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx context.Context, v any) ([]*model.VexStatementInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1442,12 +1442,12 @@ func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v interface{}) (*model.VexStatementInputSpec, error) {
+func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v any) (*model.VexStatementInputSpec, error) {
 	res, err := ec.unmarshalInputVexStatementInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v interface{}) (model.VexStatus, error) {
+func (ec *executionContext) unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v any) (model.VexStatus, error) {
 	var res model.VexStatus
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1457,11 +1457,11 @@ func (ec *executionContext) marshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpk
 	return v
 }
 
-func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageOrArtifactSpec, error) {
+func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpecᚄ(ctx context.Context, v any) ([]*model.PackageOrArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1477,7 +1477,7 @@ func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageOrArtifactSpec, error) {
+func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v any) (*model.PackageOrArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1492,7 +1492,7 @@ func (ec *executionContext) marshalOVEXConnection2ᚖgithubᚗcomᚋguacsecᚋgu
 	return ec._VEXConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOVexJustification2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v interface{}) (*model.VexJustification, error) {
+func (ec *executionContext) unmarshalOVexJustification2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v any) (*model.VexJustification, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1508,7 +1508,7 @@ func (ec *executionContext) marshalOVexJustification2ᚖgithubᚗcomᚋguacsec�
 	return v
 }
 
-func (ec *executionContext) unmarshalOVexStatus2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v interface{}) (*model.VexStatus, error) {
+func (ec *executionContext) unmarshalOVexStatus2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v any) (*model.VexStatus, error) {
 	if v == nil {
 		return nil, nil
 	}

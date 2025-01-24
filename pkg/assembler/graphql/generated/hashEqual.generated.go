@@ -41,7 +41,7 @@ func (ec *executionContext) _HashEqual_id(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _HashEqual_artifacts(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Artifacts, nil
 	})
@@ -131,7 +131,7 @@ func (ec *executionContext) _HashEqual_justification(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -172,7 +172,7 @@ func (ec *executionContext) _HashEqual_origin(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -213,7 +213,7 @@ func (ec *executionContext) _HashEqual_collector(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -254,7 +254,7 @@ func (ec *executionContext) _HashEqual_documentRef(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -295,7 +295,7 @@ func (ec *executionContext) _HashEqualConnection_totalCount(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -336,7 +336,7 @@ func (ec *executionContext) _HashEqualConnection_pageInfo(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -385,7 +385,7 @@ func (ec *executionContext) _HashEqualConnection_edges(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -432,7 +432,7 @@ func (ec *executionContext) _HashEqualEdge_cursor(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -473,7 +473,7 @@ func (ec *executionContext) _HashEqualEdge_node(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -520,10 +520,10 @@ func (ec *executionContext) fieldContext_HashEqualEdge_node(_ context.Context, f
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context, obj interface{}) (model.HashEqualInputSpec, error) {
+func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context, obj any) (model.HashEqualInputSpec, error) {
 	var it model.HashEqualInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -568,10 +568,10 @@ func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj interface{}) (model.HashEqualSpec, error) {
+func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj any) (model.HashEqualSpec, error) {
 	var it model.HashEqualSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -907,13 +907,13 @@ func (ec *executionContext) marshalNHashEqualEdge2ᚖgithubᚗcomᚋguacsecᚋgu
 	return ec._HashEqualEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx context.Context, v interface{}) (model.HashEqualInputSpec, error) {
+func (ec *executionContext) unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx context.Context, v any) (model.HashEqualInputSpec, error) {
 	res, err := ec.unmarshalInputHashEqualInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.HashEqualInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ(ctx context.Context, v any) ([]*model.HashEqualInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -929,12 +929,12 @@ func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋgu
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx context.Context, v interface{}) (*model.HashEqualInputSpec, error) {
+func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx context.Context, v any) (*model.HashEqualInputSpec, error) {
 	res, err := ec.unmarshalInputHashEqualInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx context.Context, v interface{}) (model.HashEqualSpec, error) {
+func (ec *executionContext) unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx context.Context, v any) (model.HashEqualSpec, error) {
 	res, err := ec.unmarshalInputHashEqualSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

@@ -42,7 +42,7 @@ func (ec *executionContext) _HasSLSA_id(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _HasSLSA_subject(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
 	})
@@ -132,7 +132,7 @@ func (ec *executionContext) _HasSLSA_slsa(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Slsa, nil
 	})
@@ -195,7 +195,7 @@ func (ec *executionContext) _HasSLSAConnection_totalCount(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -236,7 +236,7 @@ func (ec *executionContext) _HasSLSAConnection_pageInfo(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -285,7 +285,7 @@ func (ec *executionContext) _HasSLSAConnection_edges(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -332,7 +332,7 @@ func (ec *executionContext) _HasSLSAEdge_cursor(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -373,7 +373,7 @@ func (ec *executionContext) _HasSLSAEdge_node(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -422,7 +422,7 @@ func (ec *executionContext) _SLSA_builtFrom(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.BuiltFrom, nil
 	})
@@ -471,7 +471,7 @@ func (ec *executionContext) _SLSA_builtBy(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.BuiltBy, nil
 	})
@@ -518,7 +518,7 @@ func (ec *executionContext) _SLSA_buildType(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.BuildType, nil
 	})
@@ -559,7 +559,7 @@ func (ec *executionContext) _SLSA_slsaPredicate(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SlsaPredicate, nil
 	})
@@ -606,7 +606,7 @@ func (ec *executionContext) _SLSA_slsaVersion(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SlsaVersion, nil
 	})
@@ -647,7 +647,7 @@ func (ec *executionContext) _SLSA_startedOn(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.StartedOn, nil
 	})
@@ -685,7 +685,7 @@ func (ec *executionContext) _SLSA_finishedOn(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.FinishedOn, nil
 	})
@@ -723,7 +723,7 @@ func (ec *executionContext) _SLSA_origin(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -764,7 +764,7 @@ func (ec *executionContext) _SLSA_collector(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -805,7 +805,7 @@ func (ec *executionContext) _SLSA_documentRef(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -846,7 +846,7 @@ func (ec *executionContext) _SLSAPredicate_key(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key, nil
 	})
@@ -887,7 +887,7 @@ func (ec *executionContext) _SLSAPredicate_value(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Value, nil
 	})
@@ -920,15 +920,15 @@ func (ec *executionContext) fieldContext_SLSAPredicate_value(_ context.Context, 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj interface{}) (model.HasSLSASpec, error) {
+func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj any) (model.HasSLSASpec, error) {
 	var it model.HasSLSASpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	if _, present := asMap["predicate"]; !present {
-		asMap["predicate"] = []interface{}{}
+		asMap["predicate"] = []any{}
 	}
 
 	fieldsInOrder := [...]string{"id", "subject", "builtFrom", "builtBy", "buildType", "predicate", "slsaVersion", "startedOn", "finishedOn", "origin", "collector", "documentRef"}
@@ -1028,10 +1028,10 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj interface{}) (model.SLSAInputSpec, error) {
+func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj any) (model.SLSAInputSpec, error) {
 	var it model.SLSAInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1104,10 +1104,10 @@ func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSLSAPredicateInputSpec(ctx context.Context, obj interface{}) (model.SLSAPredicateInputSpec, error) {
+func (ec *executionContext) unmarshalInputSLSAPredicateInputSpec(ctx context.Context, obj any) (model.SLSAPredicateInputSpec, error) {
 	var it model.SLSAPredicateInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1138,10 +1138,10 @@ func (ec *executionContext) unmarshalInputSLSAPredicateInputSpec(ctx context.Con
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSLSAPredicateSpec(ctx context.Context, obj interface{}) (model.SLSAPredicateSpec, error) {
+func (ec *executionContext) unmarshalInputSLSAPredicateSpec(ctx context.Context, obj any) (model.SLSAPredicateSpec, error) {
 	var it model.SLSAPredicateSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1556,7 +1556,7 @@ func (ec *executionContext) marshalNHasSLSAEdge2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._HasSLSAEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx context.Context, v interface{}) (model.HasSLSASpec, error) {
+func (ec *executionContext) unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx context.Context, v any) (model.HasSLSASpec, error) {
 	res, err := ec.unmarshalInputHasSLSASpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1571,13 +1571,13 @@ func (ec *executionContext) marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg�
 	return ec._SLSA(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (model.SLSAInputSpec, error) {
+func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v any) (model.SLSAInputSpec, error) {
 	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx context.Context, v any) ([]*model.SLSAInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1593,7 +1593,7 @@ func (ec *executionContext) unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsec
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNSLSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (*model.SLSAInputSpec, error) {
+func (ec *executionContext) unmarshalNSLSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v any) (*model.SLSAInputSpec, error) {
 	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1652,8 +1652,8 @@ func (ec *executionContext) marshalNSLSAPredicate2ᚖgithubᚗcomᚋguacsecᚋgu
 	return ec._SLSAPredicate(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAPredicateInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpecᚄ(ctx context.Context, v any) ([]*model.SLSAPredicateInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1669,12 +1669,12 @@ func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpec(ctx context.Context, v interface{}) (*model.SLSAPredicateInputSpec, error) {
+func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpec(ctx context.Context, v any) (*model.SLSAPredicateInputSpec, error) {
 	res, err := ec.unmarshalInputSLSAPredicateInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNSLSAPredicateSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpec(ctx context.Context, v interface{}) (*model.SLSAPredicateSpec, error) {
+func (ec *executionContext) unmarshalNSLSAPredicateSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpec(ctx context.Context, v any) (*model.SLSAPredicateSpec, error) {
 	res, err := ec.unmarshalInputSLSAPredicateSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1686,11 +1686,11 @@ func (ec *executionContext) marshalOHasSLSAConnection2ᚖgithubᚗcomᚋguacsec�
 	return ec._HasSLSAConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSLSAPredicateSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAPredicateSpec, error) {
+func (ec *executionContext) unmarshalOSLSAPredicateSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpecᚄ(ctx context.Context, v any) ([]*model.SLSAPredicateSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}

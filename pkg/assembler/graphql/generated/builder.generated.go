@@ -41,7 +41,7 @@ func (ec *executionContext) _Builder_id(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _Builder_uri(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.URI, nil
 	})
@@ -123,7 +123,7 @@ func (ec *executionContext) _BuilderConnection_totalCount(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -164,7 +164,7 @@ func (ec *executionContext) _BuilderConnection_pageInfo(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -213,7 +213,7 @@ func (ec *executionContext) _BuilderConnection_edges(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -260,7 +260,7 @@ func (ec *executionContext) _BuilderEdge_cursor(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -301,7 +301,7 @@ func (ec *executionContext) _BuilderEdge_node(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -340,10 +340,10 @@ func (ec *executionContext) fieldContext_BuilderEdge_node(_ context.Context, fie
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputBuilderInputSpec(ctx context.Context, obj interface{}) (model.BuilderInputSpec, error) {
+func (ec *executionContext) unmarshalInputBuilderInputSpec(ctx context.Context, obj any) (model.BuilderInputSpec, error) {
 	var it model.BuilderInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -367,10 +367,10 @@ func (ec *executionContext) unmarshalInputBuilderInputSpec(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj interface{}) (model.BuilderSpec, error) {
+func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj any) (model.BuilderSpec, error) {
 	var it model.BuilderSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -401,10 +401,10 @@ func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputIDorBuilderInput(ctx context.Context, obj interface{}) (model.IDorBuilderInput, error) {
+func (ec *executionContext) unmarshalInputIDorBuilderInput(ctx context.Context, obj any) (model.IDorBuilderInput, error) {
 	var it model.IDorBuilderInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -692,18 +692,18 @@ func (ec *executionContext) marshalNBuilderEdge2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._BuilderEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v interface{}) (model.BuilderSpec, error) {
+func (ec *executionContext) unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v any) (model.BuilderSpec, error) {
 	res, err := ec.unmarshalInputBuilderSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v interface{}) (model.IDorBuilderInput, error) {
+func (ec *executionContext) unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v any) (model.IDorBuilderInput, error) {
 	res, err := ec.unmarshalInputIDorBuilderInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorBuilderInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx context.Context, v any) ([]*model.IDorBuilderInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -719,7 +719,7 @@ func (ec *executionContext) unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguac
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v interface{}) (*model.IDorBuilderInput, error) {
+func (ec *executionContext) unmarshalNIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v any) (*model.IDorBuilderInput, error) {
 	res, err := ec.unmarshalInputIDorBuilderInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -731,7 +731,7 @@ func (ec *executionContext) marshalOBuilderConnection2ᚖgithubᚗcomᚋguacsec�
 	return ec._BuilderConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx context.Context, v interface{}) (*model.BuilderInputSpec, error) {
+func (ec *executionContext) unmarshalOBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx context.Context, v any) (*model.BuilderInputSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -739,7 +739,7 @@ func (ec *executionContext) unmarshalOBuilderInputSpec2ᚖgithubᚗcomᚋguacsec
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v interface{}) (*model.BuilderSpec, error) {
+func (ec *executionContext) unmarshalOBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v any) (*model.BuilderSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -747,7 +747,7 @@ func (ec *executionContext) unmarshalOBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋgu
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v interface{}) (*model.IDorBuilderInput, error) {
+func (ec *executionContext) unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v any) (*model.IDorBuilderInput, error) {
 	if v == nil {
 		return nil, nil
 	}

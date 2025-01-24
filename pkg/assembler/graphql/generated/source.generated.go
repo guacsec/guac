@@ -41,7 +41,7 @@ func (ec *executionContext) _Source_id(ctx context.Context, field graphql.Collec
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _Source_type(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
 	})
@@ -123,7 +123,7 @@ func (ec *executionContext) _Source_namespaces(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespaces, nil
 	})
@@ -172,7 +172,7 @@ func (ec *executionContext) _SourceConnection_totalCount(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -213,7 +213,7 @@ func (ec *executionContext) _SourceConnection_pageInfo(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -262,7 +262,7 @@ func (ec *executionContext) _SourceConnection_edges(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -309,7 +309,7 @@ func (ec *executionContext) _SourceEdge_cursor(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -350,7 +350,7 @@ func (ec *executionContext) _SourceEdge_node(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -399,7 +399,7 @@ func (ec *executionContext) _SourceIDs_sourceTypeID(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SourceTypeID, nil
 	})
@@ -440,7 +440,7 @@ func (ec *executionContext) _SourceIDs_sourceNamespaceID(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SourceNamespaceID, nil
 	})
@@ -481,7 +481,7 @@ func (ec *executionContext) _SourceIDs_sourceNameID(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SourceNameID, nil
 	})
@@ -522,7 +522,7 @@ func (ec *executionContext) _SourceName_id(ctx context.Context, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -563,7 +563,7 @@ func (ec *executionContext) _SourceName_name(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -604,7 +604,7 @@ func (ec *executionContext) _SourceName_tag(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Tag, nil
 	})
@@ -642,7 +642,7 @@ func (ec *executionContext) _SourceName_commit(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Commit, nil
 	})
@@ -680,7 +680,7 @@ func (ec *executionContext) _SourceNamespace_id(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -721,7 +721,7 @@ func (ec *executionContext) _SourceNamespace_namespace(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespace, nil
 	})
@@ -762,7 +762,7 @@ func (ec *executionContext) _SourceNamespace_names(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Names, nil
 	})
@@ -805,10 +805,10 @@ func (ec *executionContext) fieldContext_SourceNamespace_names(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputIDorSourceInput(ctx context.Context, obj interface{}) (model.IDorSourceInput, error) {
+func (ec *executionContext) unmarshalInputIDorSourceInput(ctx context.Context, obj any) (model.IDorSourceInput, error) {
 	var it model.IDorSourceInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -853,10 +853,10 @@ func (ec *executionContext) unmarshalInputIDorSourceInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, obj interface{}) (model.SourceInputSpec, error) {
+func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, obj any) (model.SourceInputSpec, error) {
 	var it model.SourceInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -915,10 +915,10 @@ func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj interface{}) (model.SourceSpec, error) {
+func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj any) (model.SourceSpec, error) {
 	var it model.SourceSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1277,13 +1277,13 @@ func (ec *executionContext) _SourceNamespace(ctx context.Context, sel ast.Select
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v interface{}) (model.IDorSourceInput, error) {
+func (ec *executionContext) unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v any) (model.IDorSourceInput, error) {
 	res, err := ec.unmarshalInputIDorSourceInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorSourceInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v any) ([]*model.IDorSourceInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1299,7 +1299,7 @@ func (ec *executionContext) unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacs
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v interface{}) (*model.IDorSourceInput, error) {
+func (ec *executionContext) unmarshalNIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v any) (*model.IDorSourceInput, error) {
 	res, err := ec.unmarshalInputIDorSourceInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1578,16 +1578,16 @@ func (ec *executionContext) marshalNSourceNamespace2ᚖgithubᚗcomᚋguacsecᚋ
 	return ec._SourceNamespace(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx context.Context, v interface{}) (model.SourceSpec, error) {
+func (ec *executionContext) unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx context.Context, v any) (model.SourceSpec, error) {
 	res, err := ec.unmarshalInputSourceSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorSourceInput, error) {
+func (ec *executionContext) unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v any) ([]*model.IDorSourceInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1603,7 +1603,7 @@ func (ec *executionContext) unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacs
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v interface{}) (*model.IDorSourceInput, error) {
+func (ec *executionContext) unmarshalOIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v any) (*model.IDorSourceInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1618,7 +1618,7 @@ func (ec *executionContext) marshalOSourceConnection2ᚖgithubᚗcomᚋguacsec�
 	return ec._SourceConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v interface{}) (*model.SourceInputSpec, error) {
+func (ec *executionContext) unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v any) (*model.SourceInputSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1626,7 +1626,7 @@ func (ec *executionContext) unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsec�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx context.Context, v interface{}) (*model.SourceSpec, error) {
+func (ec *executionContext) unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx context.Context, v any) (*model.SourceSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
