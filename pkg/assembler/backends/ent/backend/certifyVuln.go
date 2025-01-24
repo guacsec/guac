@@ -65,8 +65,6 @@ func certifyVulnConflictColumns() []string {
 		certifyvuln.FieldOrigin,
 		certifyvuln.FieldDbURI,
 		certifyvuln.FieldDbVersion,
-		certifyvuln.FieldTimeScanned,
-		certifyvuln.FieldDocumentRef,
 	}
 }
 
@@ -76,8 +74,9 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 		tx := ent.TxFromContext(ctx)
 
 		conflictColumns := certifyVulnConflictColumns()
+		seen := make(map[string]bool)
 
-		insert, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln)
+		insert, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln, seen)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 		}
@@ -86,7 +85,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			UpdateNewValues().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert certify Vuln statement node")
 		} else {
@@ -117,7 +116,7 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 	return bulkCertifyVulnGlobalID(*ids), nil
 }
 
-func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
+func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput, seen map[string]bool) (*ent.CertifyVulnCreate, error) {
 
 	certifyVulnCreate := tx.CertifyVuln.Create()
 
@@ -168,6 +167,15 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	}
 	certifyVulnCreate.SetPackageID(pkgVersionID)
 
+	certifyVulnKey := guacCertifyVulnKey(pkgVersionID.String(), vulnID.String(), certifyVuln)
+
+	if _, exists := seen[certifyVulnKey.String()]; !exists {
+		seen[certifyVulnKey.String()] = true
+	} else {
+		// if duplicate entry is found, we will ignore it as it is exactly the same
+		return nil, nil
+	}
+
 	certifyVulnCreate.
 		SetCollector(certifyVuln.Collector).
 		SetDbURI(certifyVuln.DbURI).
@@ -181,6 +189,18 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	return certifyVulnCreate, nil
 }
 
+func canonicalCertifyVulnString(cv *model.ScanMetadataInput) string {
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s", cv.DbURI, cv.DbVersion, cv.ScannerURI, cv.ScannerVersion, cv.Origin, cv.Collector)
+}
+
+// guacCertifyVulnKey generates an uuid based on the hash of the inputspec and inputs.
+// This is used to ensure that no duplicates are added into bulk ingestion causing a failure
+func guacCertifyVulnKey(pkgVersionID string, vulnID string, cvInput *model.ScanMetadataInput) uuid.UUID {
+	clIDString := fmt.Sprintf("%s::%s::%s?", pkgVersionID, vulnID, canonicalCertifyVulnString(cvInput))
+	clID := generateUUIDKey([]byte(clIDString))
+	return clID
+}
+
 func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) (*[]string, error) {
 	ids := make([]string, 0)
 
@@ -190,13 +210,16 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 
 	index := 0
 	for _, vulns := range batches {
-		creates := make([]*ent.CertifyVulnCreate, len(vulns))
-		for i, vuln := range vulns {
+		var creates []*ent.CertifyVulnCreate
+		seen := make(map[string]bool)
+		for _, vuln := range vulns {
 			vuln := vuln
-			var err error
-			creates[i], err = generateCertifyVulnCreate(ctx, tx, pkgs[index], vulnerabilities[index], vuln)
+			cv, err := generateCertifyVulnCreate(ctx, tx, pkgs[index], vulnerabilities[index], vuln, seen)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
+			}
+			if cv != nil {
+				creates = append(creates, cv)
 			}
 			index++
 		}
@@ -205,7 +228,7 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			UpdateNewValues().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert certifyVuln node")

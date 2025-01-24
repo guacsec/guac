@@ -235,17 +235,17 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifylegal_source_id_declared_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
+				Name:    "cl_source_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyLegalsColumns[12], CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
+				Columns: []*schema.Column{CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[9], CertifyLegalsColumns[10], CertifyLegalsColumns[12]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND source_id IS NOT NULL",
 				},
 			},
 			{
-				Name:    "certifylegal_package_id_declared_license_justification_time_scanned_origin_collector_document_ref_declared_licenses_hash_discovered_licenses_hash",
+				Name:    "cl_pkg_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9], CertifyLegalsColumns[10]},
+				Columns: []*schema.Column{CertifyLegalsColumns[1], CertifyLegalsColumns[4], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[9], CertifyLegalsColumns[10], CertifyLegalsColumns[11]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND source_id IS NULL",
 				},
@@ -397,9 +397,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyvuln_db_uri_db_version_scanner_uri_scanner_version_origin_collector_time_scanned_document_ref_vulnerability_id_package_id",
+				Name:    "certifyvuln_package_id_vulnerability_id_collector_scanner_uri_scanner_version_origin_db_uri_db_version",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[1], CertifyVulnsColumns[8], CertifyVulnsColumns[9], CertifyVulnsColumns[10]},
+				Columns: []*schema.Column{CertifyVulnsColumns[10], CertifyVulnsColumns[9], CertifyVulnsColumns[7], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[2], CertifyVulnsColumns[3]},
 			},
 			{
 				Name:    "certifyvuln_package_id",

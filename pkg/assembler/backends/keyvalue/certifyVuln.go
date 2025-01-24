@@ -50,14 +50,12 @@ func (n *certifyVulnerabilityLink) Key() string {
 	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.VulnerabilityID,
-		timeKey(n.TimeScanned),
 		n.DBURI,
 		n.DBVersion,
 		n.ScannerURI,
 		n.ScannerVersion,
 		n.Origin,
 		n.Collector,
-		n.DocumentRef,
 	}, ":"))
 }
 
@@ -124,6 +122,10 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 
 	out, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, in.Key(), c)
 	if err == nil {
+		in.ThisID = out.ThisID
+		if err := setkv(ctx, cVulnCol, in, c); err != nil {
+			return "", err
+		}
 		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {

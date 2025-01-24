@@ -387,7 +387,7 @@ func TestLegal(t *testing.T) {
 						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
-						Attribution: "Copyright Jeff",
+						Attribution: "Copyright Bob",
 					},
 				},
 				{
@@ -395,7 +395,7 @@ func TestLegal(t *testing.T) {
 						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
-						Attribution: "Copyright Bob",
+						Attribution: "Copyright Jeff",
 					},
 				},
 			},

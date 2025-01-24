@@ -143,10 +143,8 @@ func certifyLegalConflictColumns() []string {
 	return []string{
 		certifylegal.FieldDeclaredLicense,
 		certifylegal.FieldJustification,
-		certifylegal.FieldTimeScanned,
 		certifylegal.FieldOrigin,
 		certifylegal.FieldCollector,
-		certifylegal.FieldDocumentRef,
 		certifylegal.FieldDeclaredLicensesHash,
 		certifylegal.FieldDiscoveredLicensesHash,
 	}
@@ -176,7 +174,8 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			return nil, gqlerror.Errorf("%v :: %s", "IngestCertifyLegal", "subject must be either a package or source")
 		}
 
-		certifyLegalCreate, err := generateCertifyLegalCreate(ctx, tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses)
+		seen := make(map[string]bool)
+		certifyLegalCreate, err := generateCertifyLegalCreate(ctx, tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses, seen)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 		}
@@ -186,7 +185,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			UpdateNewValues().
 			ID(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "upsert certify legal node")
@@ -201,7 +200,9 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 	return certifyLegalGlobalID(*recordID), nil
 }
 
-func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {
+func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput,
+	declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, seen map[string]bool) (*ent.CertifyLegalCreate, error) {
+
 	certifyLegalCreate := tx.CertifyLegal.Create().
 		SetDeclaredLicense(cl.DeclaredLicense).
 		SetDiscoveredLicense(cl.DiscoveredLicense).
@@ -296,6 +297,14 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		if err != nil {
 			return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
 		}
+
+		if _, exists := seen[certifyLegalID.String()]; !exists {
+			seen[certifyLegalID.String()] = true
+		} else {
+			// if duplicate entry is found, we will ignore it as it is exactly the same
+			return nil, nil
+		}
+
 		certifyLegalCreate.SetID(*certifyLegalID)
 	} else if src != nil {
 		var sourceID uuid.UUID
@@ -318,7 +327,17 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		if err != nil {
 			return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
 		}
+
+		if _, exists := seen[certifyLegalID.String()]; !exists {
+			seen[certifyLegalID.String()] = true
+		} else {
+			// if duplicate entry is found, we will ignore it as it is exactly the same
+			return nil, nil
+		}
+
 		certifyLegalCreate.SetID(*certifyLegalID)
+	} else {
+		return nil, fmt.Errorf("pkg or source not specified for certifyLegal")
 	}
 
 	return certifyLegalCreate, nil
@@ -351,20 +370,26 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 
 	index := 0
 	for _, cls := range batches {
-		creates := make([]*ent.CertifyLegalCreate, len(cls))
-		for i, cl := range cls {
+		var creates []*ent.CertifyLegalCreate
+		seen := make(map[string]bool)
+		for _, cl := range cls {
 			cl := cl
-			var err error
 			if len(subjects.Packages) > 0 {
-				creates[i], err = generateCertifyLegalCreate(ctx, tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index])
+				pkgCL, err := generateCertifyLegalCreate(ctx, tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index], seen)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 				}
+				if pkgCL != nil {
+					creates = append(creates, pkgCL)
+				}
 
 			} else if len(subjects.Sources) > 0 {
-				creates[i], err = generateCertifyLegalCreate(ctx, tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index])
+				srcCL, err := generateCertifyLegalCreate(ctx, tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index], seen)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
+				}
+				if srcCL != nil {
+					creates = append(creates, srcCL)
 				}
 			} else {
 				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkCertifyLegal", "subject must be either a package or source")
@@ -377,7 +402,7 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			UpdateNewValues().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert certifyLegal node")
@@ -445,7 +470,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 }
 
 func canonicalCertifyLegalString(cl *model.CertifyLegalInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector, cl.DocumentRef)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.Origin, cl.Collector)
 }
 
 // guacCertifyLegalKey generates an uuid based on the hash of the inputspec and inputs. certifyLegal ID has to be set for bulk ingestion
