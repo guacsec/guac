@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- Drop index "license_name_inline_list_version" from table: "licenses"
 DROP INDEX "license_name_inline_list_version";
 -- Modify "licenses" table
