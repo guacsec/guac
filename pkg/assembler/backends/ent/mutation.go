@@ -12252,6 +12252,8 @@ type LicenseMutation struct {
 	name                                *string
 	inline                              *string
 	list_version                        *string
+	inline_hash                         *string
+	list_version_hash                   *string
 	clearedFields                       map[string]struct{}
 	declared_in_certify_legals          map[uuid.UUID]struct{}
 	removeddeclared_in_certify_legals   map[uuid.UUID]struct{}
@@ -12502,6 +12504,104 @@ func (m *LicenseMutation) ResetListVersion() {
 	delete(m.clearedFields, license.FieldListVersion)
 }
 
+// SetInlineHash sets the "inline_hash" field.
+func (m *LicenseMutation) SetInlineHash(s string) {
+	m.inline_hash = &s
+}
+
+// InlineHash returns the value of the "inline_hash" field in the mutation.
+func (m *LicenseMutation) InlineHash() (r string, exists bool) {
+	v := m.inline_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInlineHash returns the old "inline_hash" field's value of the License entity.
+// If the License object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LicenseMutation) OldInlineHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInlineHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInlineHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInlineHash: %w", err)
+	}
+	return oldValue.InlineHash, nil
+}
+
+// ClearInlineHash clears the value of the "inline_hash" field.
+func (m *LicenseMutation) ClearInlineHash() {
+	m.inline_hash = nil
+	m.clearedFields[license.FieldInlineHash] = struct{}{}
+}
+
+// InlineHashCleared returns if the "inline_hash" field was cleared in this mutation.
+func (m *LicenseMutation) InlineHashCleared() bool {
+	_, ok := m.clearedFields[license.FieldInlineHash]
+	return ok
+}
+
+// ResetInlineHash resets all changes to the "inline_hash" field.
+func (m *LicenseMutation) ResetInlineHash() {
+	m.inline_hash = nil
+	delete(m.clearedFields, license.FieldInlineHash)
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (m *LicenseMutation) SetListVersionHash(s string) {
+	m.list_version_hash = &s
+}
+
+// ListVersionHash returns the value of the "list_version_hash" field in the mutation.
+func (m *LicenseMutation) ListVersionHash() (r string, exists bool) {
+	v := m.list_version_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldListVersionHash returns the old "list_version_hash" field's value of the License entity.
+// If the License object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LicenseMutation) OldListVersionHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldListVersionHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldListVersionHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldListVersionHash: %w", err)
+	}
+	return oldValue.ListVersionHash, nil
+}
+
+// ClearListVersionHash clears the value of the "list_version_hash" field.
+func (m *LicenseMutation) ClearListVersionHash() {
+	m.list_version_hash = nil
+	m.clearedFields[license.FieldListVersionHash] = struct{}{}
+}
+
+// ListVersionHashCleared returns if the "list_version_hash" field was cleared in this mutation.
+func (m *LicenseMutation) ListVersionHashCleared() bool {
+	_, ok := m.clearedFields[license.FieldListVersionHash]
+	return ok
+}
+
+// ResetListVersionHash resets all changes to the "list_version_hash" field.
+func (m *LicenseMutation) ResetListVersionHash() {
+	m.list_version_hash = nil
+	delete(m.clearedFields, license.FieldListVersionHash)
+}
+
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by ids.
 func (m *LicenseMutation) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) {
 	if m.declared_in_certify_legals == nil {
@@ -12644,7 +12744,7 @@ func (m *LicenseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LicenseMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, license.FieldName)
 	}
@@ -12653,6 +12753,12 @@ func (m *LicenseMutation) Fields() []string {
 	}
 	if m.list_version != nil {
 		fields = append(fields, license.FieldListVersion)
+	}
+	if m.inline_hash != nil {
+		fields = append(fields, license.FieldInlineHash)
+	}
+	if m.list_version_hash != nil {
+		fields = append(fields, license.FieldListVersionHash)
 	}
 	return fields
 }
@@ -12668,6 +12774,10 @@ func (m *LicenseMutation) Field(name string) (ent.Value, bool) {
 		return m.Inline()
 	case license.FieldListVersion:
 		return m.ListVersion()
+	case license.FieldInlineHash:
+		return m.InlineHash()
+	case license.FieldListVersionHash:
+		return m.ListVersionHash()
 	}
 	return nil, false
 }
@@ -12683,6 +12793,10 @@ func (m *LicenseMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldInline(ctx)
 	case license.FieldListVersion:
 		return m.OldListVersion(ctx)
+	case license.FieldInlineHash:
+		return m.OldInlineHash(ctx)
+	case license.FieldListVersionHash:
+		return m.OldListVersionHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown License field %s", name)
 }
@@ -12712,6 +12826,20 @@ func (m *LicenseMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetListVersion(v)
+		return nil
+	case license.FieldInlineHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInlineHash(v)
+		return nil
+	case license.FieldListVersionHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetListVersionHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown License field %s", name)
@@ -12749,6 +12877,12 @@ func (m *LicenseMutation) ClearedFields() []string {
 	if m.FieldCleared(license.FieldListVersion) {
 		fields = append(fields, license.FieldListVersion)
 	}
+	if m.FieldCleared(license.FieldInlineHash) {
+		fields = append(fields, license.FieldInlineHash)
+	}
+	if m.FieldCleared(license.FieldListVersionHash) {
+		fields = append(fields, license.FieldListVersionHash)
+	}
 	return fields
 }
 
@@ -12769,6 +12903,12 @@ func (m *LicenseMutation) ClearField(name string) error {
 	case license.FieldListVersion:
 		m.ClearListVersion()
 		return nil
+	case license.FieldInlineHash:
+		m.ClearInlineHash()
+		return nil
+	case license.FieldListVersionHash:
+		m.ClearListVersionHash()
+		return nil
 	}
 	return fmt.Errorf("unknown License nullable field %s", name)
 }
@@ -12785,6 +12925,12 @@ func (m *LicenseMutation) ResetField(name string) error {
 		return nil
 	case license.FieldListVersion:
 		m.ResetListVersion()
+		return nil
+	case license.FieldInlineHash:
+		m.ResetInlineHash()
+		return nil
+	case license.FieldListVersionHash:
+		m.ResetListVersionHash()
 		return nil
 	}
 	return fmt.Errorf("unknown License field %s", name)

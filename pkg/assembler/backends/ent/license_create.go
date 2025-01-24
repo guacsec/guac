@@ -58,6 +58,34 @@ func (lc *LicenseCreate) SetNillableListVersion(s *string) *LicenseCreate {
 	return lc
 }
 
+// SetInlineHash sets the "inline_hash" field.
+func (lc *LicenseCreate) SetInlineHash(s string) *LicenseCreate {
+	lc.mutation.SetInlineHash(s)
+	return lc
+}
+
+// SetNillableInlineHash sets the "inline_hash" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableInlineHash(s *string) *LicenseCreate {
+	if s != nil {
+		lc.SetInlineHash(*s)
+	}
+	return lc
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (lc *LicenseCreate) SetListVersionHash(s string) *LicenseCreate {
+	lc.mutation.SetListVersionHash(s)
+	return lc
+}
+
+// SetNillableListVersionHash sets the "list_version_hash" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableListVersionHash(s *string) *LicenseCreate {
+	if s != nil {
+		lc.SetListVersionHash(*s)
+	}
+	return lc
+}
+
 // SetID sets the "id" field.
 func (lc *LicenseCreate) SetID(u uuid.UUID) *LicenseCreate {
 	lc.mutation.SetID(u)
@@ -201,6 +229,14 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 		_spec.SetField(license.FieldListVersion, field.TypeString, value)
 		_node.ListVersion = value
 	}
+	if value, ok := lc.mutation.InlineHash(); ok {
+		_spec.SetField(license.FieldInlineHash, field.TypeString, value)
+		_node.InlineHash = value
+	}
+	if value, ok := lc.mutation.ListVersionHash(); ok {
+		_spec.SetField(license.FieldListVersionHash, field.TypeString, value)
+		_node.ListVersionHash = value
+	}
 	if nodes := lc.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -333,6 +369,42 @@ func (u *LicenseUpsert) ClearListVersion() *LicenseUpsert {
 	return u
 }
 
+// SetInlineHash sets the "inline_hash" field.
+func (u *LicenseUpsert) SetInlineHash(v string) *LicenseUpsert {
+	u.Set(license.FieldInlineHash, v)
+	return u
+}
+
+// UpdateInlineHash sets the "inline_hash" field to the value that was provided on create.
+func (u *LicenseUpsert) UpdateInlineHash() *LicenseUpsert {
+	u.SetExcluded(license.FieldInlineHash)
+	return u
+}
+
+// ClearInlineHash clears the value of the "inline_hash" field.
+func (u *LicenseUpsert) ClearInlineHash() *LicenseUpsert {
+	u.SetNull(license.FieldInlineHash)
+	return u
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (u *LicenseUpsert) SetListVersionHash(v string) *LicenseUpsert {
+	u.Set(license.FieldListVersionHash, v)
+	return u
+}
+
+// UpdateListVersionHash sets the "list_version_hash" field to the value that was provided on create.
+func (u *LicenseUpsert) UpdateListVersionHash() *LicenseUpsert {
+	u.SetExcluded(license.FieldListVersionHash)
+	return u
+}
+
+// ClearListVersionHash clears the value of the "list_version_hash" field.
+func (u *LicenseUpsert) ClearListVersionHash() *LicenseUpsert {
+	u.SetNull(license.FieldListVersionHash)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -434,6 +506,48 @@ func (u *LicenseUpsertOne) UpdateListVersion() *LicenseUpsertOne {
 func (u *LicenseUpsertOne) ClearListVersion() *LicenseUpsertOne {
 	return u.Update(func(s *LicenseUpsert) {
 		s.ClearListVersion()
+	})
+}
+
+// SetInlineHash sets the "inline_hash" field.
+func (u *LicenseUpsertOne) SetInlineHash(v string) *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.SetInlineHash(v)
+	})
+}
+
+// UpdateInlineHash sets the "inline_hash" field to the value that was provided on create.
+func (u *LicenseUpsertOne) UpdateInlineHash() *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.UpdateInlineHash()
+	})
+}
+
+// ClearInlineHash clears the value of the "inline_hash" field.
+func (u *LicenseUpsertOne) ClearInlineHash() *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.ClearInlineHash()
+	})
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (u *LicenseUpsertOne) SetListVersionHash(v string) *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.SetListVersionHash(v)
+	})
+}
+
+// UpdateListVersionHash sets the "list_version_hash" field to the value that was provided on create.
+func (u *LicenseUpsertOne) UpdateListVersionHash() *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.UpdateListVersionHash()
+	})
+}
+
+// ClearListVersionHash clears the value of the "list_version_hash" field.
+func (u *LicenseUpsertOne) ClearListVersionHash() *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.ClearListVersionHash()
 	})
 }
 
@@ -705,6 +819,48 @@ func (u *LicenseUpsertBulk) UpdateListVersion() *LicenseUpsertBulk {
 func (u *LicenseUpsertBulk) ClearListVersion() *LicenseUpsertBulk {
 	return u.Update(func(s *LicenseUpsert) {
 		s.ClearListVersion()
+	})
+}
+
+// SetInlineHash sets the "inline_hash" field.
+func (u *LicenseUpsertBulk) SetInlineHash(v string) *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.SetInlineHash(v)
+	})
+}
+
+// UpdateInlineHash sets the "inline_hash" field to the value that was provided on create.
+func (u *LicenseUpsertBulk) UpdateInlineHash() *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.UpdateInlineHash()
+	})
+}
+
+// ClearInlineHash clears the value of the "inline_hash" field.
+func (u *LicenseUpsertBulk) ClearInlineHash() *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.ClearInlineHash()
+	})
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (u *LicenseUpsertBulk) SetListVersionHash(v string) *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.SetListVersionHash(v)
+	})
+}
+
+// UpdateListVersionHash sets the "list_version_hash" field to the value that was provided on create.
+func (u *LicenseUpsertBulk) UpdateListVersionHash() *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.UpdateListVersionHash()
+	})
+}
+
+// ClearListVersionHash clears the value of the "list_version_hash" field.
+func (u *LicenseUpsertBulk) ClearListVersionHash() *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.ClearListVersionHash()
 	})
 }
 

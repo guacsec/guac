@@ -23,6 +23,10 @@ type License struct {
 	Inline string `json:"inline,omitempty"`
 	// ListVersion holds the value of the "list_version" field.
 	ListVersion string `json:"list_version,omitempty"`
+	// An opaque hash on the linline text
+	InlineHash string `json:"inline_hash,omitempty"`
+	// An opaque hash on the list_version text
+	ListVersionHash string `json:"list_version_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LicenseQuery when eager-loading is set.
 	Edges        LicenseEdges `json:"edges"`
@@ -68,7 +72,7 @@ func (*License) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case license.FieldName, license.FieldInline, license.FieldListVersion:
+		case license.FieldName, license.FieldInline, license.FieldListVersion, license.FieldInlineHash, license.FieldListVersionHash:
 			values[i] = new(sql.NullString)
 		case license.FieldID:
 			values[i] = new(uuid.UUID)
@@ -110,6 +114,18 @@ func (l *License) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field list_version", values[i])
 			} else if value.Valid {
 				l.ListVersion = value.String
+			}
+		case license.FieldInlineHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field inline_hash", values[i])
+			} else if value.Valid {
+				l.InlineHash = value.String
+			}
+		case license.FieldListVersionHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field list_version_hash", values[i])
+			} else if value.Valid {
+				l.ListVersionHash = value.String
 			}
 		default:
 			l.selectValues.Set(columns[i], values[i])
@@ -165,6 +181,12 @@ func (l *License) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("list_version=")
 	builder.WriteString(l.ListVersion)
+	builder.WriteString(", ")
+	builder.WriteString("inline_hash=")
+	builder.WriteString(l.InlineHash)
+	builder.WriteString(", ")
+	builder.WriteString("list_version_hash=")
+	builder.WriteString(l.ListVersionHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

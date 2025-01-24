@@ -647,6 +647,8 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "inline", Type: field.TypeString, Nullable: true},
 		{Name: "list_version", Type: field.TypeString, Nullable: true},
+		{Name: "inline_hash", Type: field.TypeString, Nullable: true},
+		{Name: "list_version_hash", Type: field.TypeString, Nullable: true},
 	}
 	// LicensesTable holds the schema information for the "licenses" table.
 	LicensesTable = &schema.Table{
@@ -655,9 +657,9 @@ var (
 		PrimaryKey: []*schema.Column{LicensesColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "license_name_inline_list_version",
+				Name:    "license_name_inline_hash_list_version_hash",
 				Unique:  true,
-				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2], LicensesColumns[3]},
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[4], LicensesColumns[5]},
 			},
 		},
 	}
