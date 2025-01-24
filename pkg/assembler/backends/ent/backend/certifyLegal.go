@@ -175,7 +175,6 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		}
 
 		seen := make(map[string]bool)
-
 		certifyLegalCreate, err := generateCertifyLegalCreate(ctx, tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses, seen)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
@@ -337,6 +336,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		}
 
 		certifyLegalCreate.SetID(*certifyLegalID)
+	} else {
+		return nil, fmt.Errorf("pkg or source not specified for certifyLegal")
 	}
 
 	return certifyLegalCreate, nil
@@ -469,7 +470,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 }
 
 func canonicalCertifyLegalString(cl *model.CertifyLegalInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector, cl.DocumentRef)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.Origin, cl.Collector)
 }
 
 // guacCertifyLegalKey generates an uuid based on the hash of the inputspec and inputs. certifyLegal ID has to be set for bulk ingestion

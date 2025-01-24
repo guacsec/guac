@@ -190,7 +190,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 }
 
 func canonicalCertifyVulnString(cv *model.ScanMetadataInput) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", cv.TimeScanned.UTC(), cv.DbURI, cv.DbVersion, cv.ScannerURI, cv.ScannerVersion, cv.Origin, cv.Collector, cv.DocumentRef)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s", cv.DbURI, cv.DbVersion, cv.ScannerURI, cv.ScannerVersion, cv.Origin, cv.Collector)
 }
 
 // guacCertifyVulnKey generates an uuid based on the hash of the inputspec and inputs.
