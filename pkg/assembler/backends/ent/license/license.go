@@ -19,6 +19,10 @@ const (
 	FieldInline = "inline"
 	// FieldListVersion holds the string denoting the list_version field in the database.
 	FieldListVersion = "list_version"
+	// FieldInlineHash holds the string denoting the inline_hash field in the database.
+	FieldInlineHash = "inline_hash"
+	// FieldListVersionHash holds the string denoting the list_version_hash field in the database.
+	FieldListVersionHash = "list_version_hash"
 	// EdgeDeclaredInCertifyLegals holds the string denoting the declared_in_certify_legals edge name in mutations.
 	EdgeDeclaredInCertifyLegals = "declared_in_certify_legals"
 	// EdgeDiscoveredInCertifyLegals holds the string denoting the discovered_in_certify_legals edge name in mutations.
@@ -43,6 +47,8 @@ var Columns = []string{
 	FieldName,
 	FieldInline,
 	FieldListVersion,
+	FieldInlineHash,
+	FieldListVersionHash,
 }
 
 var (
@@ -92,6 +98,16 @@ func ByInline(opts ...sql.OrderTermOption) OrderOption {
 // ByListVersion orders the results by the list_version field.
 func ByListVersion(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldListVersion, opts...).ToFunc()
+}
+
+// ByInlineHash orders the results by the inline_hash field.
+func ByInlineHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInlineHash, opts...).ToFunc()
+}
+
+// ByListVersionHash orders the results by the list_version_hash field.
+func ByListVersionHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldListVersionHash, opts...).ToFunc()
 }
 
 // ByDeclaredInCertifyLegalsCount orders the results by declared_in_certify_legals count.

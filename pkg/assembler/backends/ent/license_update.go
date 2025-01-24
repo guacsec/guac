@@ -83,6 +83,46 @@ func (lu *LicenseUpdate) ClearListVersion() *LicenseUpdate {
 	return lu
 }
 
+// SetInlineHash sets the "inline_hash" field.
+func (lu *LicenseUpdate) SetInlineHash(s string) *LicenseUpdate {
+	lu.mutation.SetInlineHash(s)
+	return lu
+}
+
+// SetNillableInlineHash sets the "inline_hash" field if the given value is not nil.
+func (lu *LicenseUpdate) SetNillableInlineHash(s *string) *LicenseUpdate {
+	if s != nil {
+		lu.SetInlineHash(*s)
+	}
+	return lu
+}
+
+// ClearInlineHash clears the value of the "inline_hash" field.
+func (lu *LicenseUpdate) ClearInlineHash() *LicenseUpdate {
+	lu.mutation.ClearInlineHash()
+	return lu
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (lu *LicenseUpdate) SetListVersionHash(s string) *LicenseUpdate {
+	lu.mutation.SetListVersionHash(s)
+	return lu
+}
+
+// SetNillableListVersionHash sets the "list_version_hash" field if the given value is not nil.
+func (lu *LicenseUpdate) SetNillableListVersionHash(s *string) *LicenseUpdate {
+	if s != nil {
+		lu.SetListVersionHash(*s)
+	}
+	return lu
+}
+
+// ClearListVersionHash clears the value of the "list_version_hash" field.
+func (lu *LicenseUpdate) ClearListVersionHash() *LicenseUpdate {
+	lu.mutation.ClearListVersionHash()
+	return lu
+}
+
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
 func (lu *LicenseUpdate) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
 	lu.mutation.AddDeclaredInCertifyLegalIDs(ids...)
@@ -223,6 +263,18 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if lu.mutation.ListVersionCleared() {
 		_spec.ClearField(license.FieldListVersion, field.TypeString)
+	}
+	if value, ok := lu.mutation.InlineHash(); ok {
+		_spec.SetField(license.FieldInlineHash, field.TypeString, value)
+	}
+	if lu.mutation.InlineHashCleared() {
+		_spec.ClearField(license.FieldInlineHash, field.TypeString)
+	}
+	if value, ok := lu.mutation.ListVersionHash(); ok {
+		_spec.SetField(license.FieldListVersionHash, field.TypeString, value)
+	}
+	if lu.mutation.ListVersionHashCleared() {
+		_spec.ClearField(license.FieldListVersionHash, field.TypeString)
 	}
 	if lu.mutation.DeclaredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -385,6 +437,46 @@ func (luo *LicenseUpdateOne) SetNillableListVersion(s *string) *LicenseUpdateOne
 // ClearListVersion clears the value of the "list_version" field.
 func (luo *LicenseUpdateOne) ClearListVersion() *LicenseUpdateOne {
 	luo.mutation.ClearListVersion()
+	return luo
+}
+
+// SetInlineHash sets the "inline_hash" field.
+func (luo *LicenseUpdateOne) SetInlineHash(s string) *LicenseUpdateOne {
+	luo.mutation.SetInlineHash(s)
+	return luo
+}
+
+// SetNillableInlineHash sets the "inline_hash" field if the given value is not nil.
+func (luo *LicenseUpdateOne) SetNillableInlineHash(s *string) *LicenseUpdateOne {
+	if s != nil {
+		luo.SetInlineHash(*s)
+	}
+	return luo
+}
+
+// ClearInlineHash clears the value of the "inline_hash" field.
+func (luo *LicenseUpdateOne) ClearInlineHash() *LicenseUpdateOne {
+	luo.mutation.ClearInlineHash()
+	return luo
+}
+
+// SetListVersionHash sets the "list_version_hash" field.
+func (luo *LicenseUpdateOne) SetListVersionHash(s string) *LicenseUpdateOne {
+	luo.mutation.SetListVersionHash(s)
+	return luo
+}
+
+// SetNillableListVersionHash sets the "list_version_hash" field if the given value is not nil.
+func (luo *LicenseUpdateOne) SetNillableListVersionHash(s *string) *LicenseUpdateOne {
+	if s != nil {
+		luo.SetListVersionHash(*s)
+	}
+	return luo
+}
+
+// ClearListVersionHash clears the value of the "list_version_hash" field.
+func (luo *LicenseUpdateOne) ClearListVersionHash() *LicenseUpdateOne {
+	luo.mutation.ClearListVersionHash()
 	return luo
 }
 
@@ -558,6 +650,18 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 	}
 	if luo.mutation.ListVersionCleared() {
 		_spec.ClearField(license.FieldListVersion, field.TypeString)
+	}
+	if value, ok := luo.mutation.InlineHash(); ok {
+		_spec.SetField(license.FieldInlineHash, field.TypeString, value)
+	}
+	if luo.mutation.InlineHashCleared() {
+		_spec.ClearField(license.FieldInlineHash, field.TypeString)
+	}
+	if value, ok := luo.mutation.ListVersionHash(); ok {
+		_spec.SetField(license.FieldListVersionHash, field.TypeString, value)
+	}
+	if luo.mutation.ListVersionHashCleared() {
+		_spec.ClearField(license.FieldListVersionHash, field.TypeString)
 	}
 	if luo.mutation.DeclaredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

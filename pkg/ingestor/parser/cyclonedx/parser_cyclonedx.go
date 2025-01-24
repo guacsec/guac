@@ -332,6 +332,7 @@ func getLicenseFromName(c *cyclonedxParser, compLicense cdx.LicenseChoice) strin
 	if compLicense.License.Name != "" && compLicense.License.Name != "UNKNOWN" {
 		if compLicense.License.Text != nil {
 			license = common.HashLicense(compLicense.License.Name)
+
 			c.licenseInLine[license] = compLicense.License.Text.Content
 		} else if compLicense.License.BOMRef != "" {
 			license = compLicense.License.BOMRef

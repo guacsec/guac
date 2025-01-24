@@ -16,7 +16,9 @@
 package backend
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
 	stdsql "database/sql"
 	"fmt"
 
@@ -166,8 +168,8 @@ func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.I
 			OnConflict(
 				sql.ConflictColumns(
 					license.FieldName,
-					license.FieldInline,
-					license.FieldListVersion,
+					license.FieldInlineHash,
+					license.FieldListVersionHash,
 				),
 			).
 			DoNothing().
@@ -180,12 +182,24 @@ func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.I
 	return &ids, nil
 }
 
+// hashLicenseText is used to create a hash of the license text to compare to the index
+func hashLicenseText(text string) string {
+	hash := sha1.New()
+	content := bytes.NewBuffer(nil)
+	content.WriteString(text)
+
+	hash.Write(content.Bytes())
+	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
 func generateLicenseCreate(tx *ent.Tx, licenseID *uuid.UUID, licInput *model.LicenseInputSpec) *ent.LicenseCreate {
 	return tx.License.Create().
 		SetID(*licenseID).
 		SetName(licInput.Name).
 		SetInline(stringOrEmpty(licInput.Inline)).
-		SetListVersion(stringOrEmpty(licInput.ListVersion))
+		SetListVersion(stringOrEmpty(licInput.ListVersion)).
+		SetInlineHash(hashLicenseText(stringOrEmpty(licInput.Inline))).
+		SetListVersionHash(hashLicenseText(stringOrEmpty(licInput.ListVersion)))
 }
 
 func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
@@ -195,8 +209,8 @@ func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec)
 		OnConflict(
 			sql.ConflictColumns(
 				license.FieldName,
-				license.FieldInline,
-				license.FieldListVersion,
+				license.FieldInlineHash,
+				license.FieldListVersionHash,
 			),
 		).
 		DoNothing().

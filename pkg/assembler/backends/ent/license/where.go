@@ -69,6 +69,16 @@ func ListVersion(v string) predicate.License {
 	return predicate.License(sql.FieldEQ(FieldListVersion, v))
 }
 
+// InlineHash applies equality check predicate on the "inline_hash" field. It's identical to InlineHashEQ.
+func InlineHash(v string) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldInlineHash, v))
+}
+
+// ListVersionHash applies equality check predicate on the "list_version_hash" field. It's identical to ListVersionHashEQ.
+func ListVersionHash(v string) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldListVersionHash, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.License {
 	return predicate.License(sql.FieldEQ(FieldName, v))
@@ -282,6 +292,156 @@ func ListVersionEqualFold(v string) predicate.License {
 // ListVersionContainsFold applies the ContainsFold predicate on the "list_version" field.
 func ListVersionContainsFold(v string) predicate.License {
 	return predicate.License(sql.FieldContainsFold(FieldListVersion, v))
+}
+
+// InlineHashEQ applies the EQ predicate on the "inline_hash" field.
+func InlineHashEQ(v string) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldInlineHash, v))
+}
+
+// InlineHashNEQ applies the NEQ predicate on the "inline_hash" field.
+func InlineHashNEQ(v string) predicate.License {
+	return predicate.License(sql.FieldNEQ(FieldInlineHash, v))
+}
+
+// InlineHashIn applies the In predicate on the "inline_hash" field.
+func InlineHashIn(vs ...string) predicate.License {
+	return predicate.License(sql.FieldIn(FieldInlineHash, vs...))
+}
+
+// InlineHashNotIn applies the NotIn predicate on the "inline_hash" field.
+func InlineHashNotIn(vs ...string) predicate.License {
+	return predicate.License(sql.FieldNotIn(FieldInlineHash, vs...))
+}
+
+// InlineHashGT applies the GT predicate on the "inline_hash" field.
+func InlineHashGT(v string) predicate.License {
+	return predicate.License(sql.FieldGT(FieldInlineHash, v))
+}
+
+// InlineHashGTE applies the GTE predicate on the "inline_hash" field.
+func InlineHashGTE(v string) predicate.License {
+	return predicate.License(sql.FieldGTE(FieldInlineHash, v))
+}
+
+// InlineHashLT applies the LT predicate on the "inline_hash" field.
+func InlineHashLT(v string) predicate.License {
+	return predicate.License(sql.FieldLT(FieldInlineHash, v))
+}
+
+// InlineHashLTE applies the LTE predicate on the "inline_hash" field.
+func InlineHashLTE(v string) predicate.License {
+	return predicate.License(sql.FieldLTE(FieldInlineHash, v))
+}
+
+// InlineHashContains applies the Contains predicate on the "inline_hash" field.
+func InlineHashContains(v string) predicate.License {
+	return predicate.License(sql.FieldContains(FieldInlineHash, v))
+}
+
+// InlineHashHasPrefix applies the HasPrefix predicate on the "inline_hash" field.
+func InlineHashHasPrefix(v string) predicate.License {
+	return predicate.License(sql.FieldHasPrefix(FieldInlineHash, v))
+}
+
+// InlineHashHasSuffix applies the HasSuffix predicate on the "inline_hash" field.
+func InlineHashHasSuffix(v string) predicate.License {
+	return predicate.License(sql.FieldHasSuffix(FieldInlineHash, v))
+}
+
+// InlineHashIsNil applies the IsNil predicate on the "inline_hash" field.
+func InlineHashIsNil() predicate.License {
+	return predicate.License(sql.FieldIsNull(FieldInlineHash))
+}
+
+// InlineHashNotNil applies the NotNil predicate on the "inline_hash" field.
+func InlineHashNotNil() predicate.License {
+	return predicate.License(sql.FieldNotNull(FieldInlineHash))
+}
+
+// InlineHashEqualFold applies the EqualFold predicate on the "inline_hash" field.
+func InlineHashEqualFold(v string) predicate.License {
+	return predicate.License(sql.FieldEqualFold(FieldInlineHash, v))
+}
+
+// InlineHashContainsFold applies the ContainsFold predicate on the "inline_hash" field.
+func InlineHashContainsFold(v string) predicate.License {
+	return predicate.License(sql.FieldContainsFold(FieldInlineHash, v))
+}
+
+// ListVersionHashEQ applies the EQ predicate on the "list_version_hash" field.
+func ListVersionHashEQ(v string) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldListVersionHash, v))
+}
+
+// ListVersionHashNEQ applies the NEQ predicate on the "list_version_hash" field.
+func ListVersionHashNEQ(v string) predicate.License {
+	return predicate.License(sql.FieldNEQ(FieldListVersionHash, v))
+}
+
+// ListVersionHashIn applies the In predicate on the "list_version_hash" field.
+func ListVersionHashIn(vs ...string) predicate.License {
+	return predicate.License(sql.FieldIn(FieldListVersionHash, vs...))
+}
+
+// ListVersionHashNotIn applies the NotIn predicate on the "list_version_hash" field.
+func ListVersionHashNotIn(vs ...string) predicate.License {
+	return predicate.License(sql.FieldNotIn(FieldListVersionHash, vs...))
+}
+
+// ListVersionHashGT applies the GT predicate on the "list_version_hash" field.
+func ListVersionHashGT(v string) predicate.License {
+	return predicate.License(sql.FieldGT(FieldListVersionHash, v))
+}
+
+// ListVersionHashGTE applies the GTE predicate on the "list_version_hash" field.
+func ListVersionHashGTE(v string) predicate.License {
+	return predicate.License(sql.FieldGTE(FieldListVersionHash, v))
+}
+
+// ListVersionHashLT applies the LT predicate on the "list_version_hash" field.
+func ListVersionHashLT(v string) predicate.License {
+	return predicate.License(sql.FieldLT(FieldListVersionHash, v))
+}
+
+// ListVersionHashLTE applies the LTE predicate on the "list_version_hash" field.
+func ListVersionHashLTE(v string) predicate.License {
+	return predicate.License(sql.FieldLTE(FieldListVersionHash, v))
+}
+
+// ListVersionHashContains applies the Contains predicate on the "list_version_hash" field.
+func ListVersionHashContains(v string) predicate.License {
+	return predicate.License(sql.FieldContains(FieldListVersionHash, v))
+}
+
+// ListVersionHashHasPrefix applies the HasPrefix predicate on the "list_version_hash" field.
+func ListVersionHashHasPrefix(v string) predicate.License {
+	return predicate.License(sql.FieldHasPrefix(FieldListVersionHash, v))
+}
+
+// ListVersionHashHasSuffix applies the HasSuffix predicate on the "list_version_hash" field.
+func ListVersionHashHasSuffix(v string) predicate.License {
+	return predicate.License(sql.FieldHasSuffix(FieldListVersionHash, v))
+}
+
+// ListVersionHashIsNil applies the IsNil predicate on the "list_version_hash" field.
+func ListVersionHashIsNil() predicate.License {
+	return predicate.License(sql.FieldIsNull(FieldListVersionHash))
+}
+
+// ListVersionHashNotNil applies the NotNil predicate on the "list_version_hash" field.
+func ListVersionHashNotNil() predicate.License {
+	return predicate.License(sql.FieldNotNull(FieldListVersionHash))
+}
+
+// ListVersionHashEqualFold applies the EqualFold predicate on the "list_version_hash" field.
+func ListVersionHashEqualFold(v string) predicate.License {
+	return predicate.License(sql.FieldEqualFold(FieldListVersionHash, v))
+}
+
+// ListVersionHashContainsFold applies the ContainsFold predicate on the "list_version_hash" field.
+func ListVersionHashContainsFold(v string) predicate.License {
+	return predicate.License(sql.FieldContainsFold(FieldListVersionHash, v))
 }
 
 // HasDeclaredInCertifyLegals applies the HasEdge predicate on the "declared_in_certify_legals" edge.

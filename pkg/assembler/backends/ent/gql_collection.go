@@ -1938,6 +1938,16 @@ func (l *LicenseQuery) collectField(ctx context.Context, oneNode bool, opCtx *gr
 				selectedFields = append(selectedFields, license.FieldListVersion)
 				fieldSeen[license.FieldListVersion] = struct{}{}
 			}
+		case "inlineHash":
+			if _, ok := fieldSeen[license.FieldInlineHash]; !ok {
+				selectedFields = append(selectedFields, license.FieldInlineHash)
+				fieldSeen[license.FieldInlineHash] = struct{}{}
+			}
+		case "listVersionHash":
+			if _, ok := fieldSeen[license.FieldListVersionHash]; !ok {
+				selectedFields = append(selectedFields, license.FieldListVersionHash)
+				fieldSeen[license.FieldListVersionHash] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
