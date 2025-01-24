@@ -41,7 +41,7 @@ func (ec *executionContext) _IsDependency_id(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _IsDependency_package(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Package, nil
 	})
@@ -131,7 +131,7 @@ func (ec *executionContext) _IsDependency_dependencyPackage(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DependencyPackage, nil
 	})
@@ -180,7 +180,7 @@ func (ec *executionContext) _IsDependency_dependencyType(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DependencyType, nil
 	})
@@ -221,7 +221,7 @@ func (ec *executionContext) _IsDependency_justification(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -262,7 +262,7 @@ func (ec *executionContext) _IsDependency_origin(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -303,7 +303,7 @@ func (ec *executionContext) _IsDependency_collector(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -344,7 +344,7 @@ func (ec *executionContext) _IsDependency_documentRef(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -385,7 +385,7 @@ func (ec *executionContext) _IsDependencyConnection_totalCount(ctx context.Conte
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -426,7 +426,7 @@ func (ec *executionContext) _IsDependencyConnection_pageInfo(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -475,7 +475,7 @@ func (ec *executionContext) _IsDependencyConnection_edges(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -522,7 +522,7 @@ func (ec *executionContext) _IsDependencyEdge_cursor(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -563,7 +563,7 @@ func (ec *executionContext) _IsDependencyEdge_node(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -614,10 +614,10 @@ func (ec *executionContext) fieldContext_IsDependencyEdge_node(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Context, obj interface{}) (model.IsDependencyInputSpec, error) {
+func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Context, obj any) (model.IsDependencyInputSpec, error) {
 	var it model.IsDependencyInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -669,10 +669,10 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, obj interface{}) (model.IsDependencySpec, error) {
+func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, obj any) (model.IsDependencySpec, error) {
 	var it model.IsDependencySpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -924,7 +924,7 @@ func (ec *executionContext) _IsDependencyEdge(ctx context.Context, sel ast.Selec
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNDependencyType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx context.Context, v interface{}) (model.DependencyType, error) {
+func (ec *executionContext) unmarshalNDependencyType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx context.Context, v any) (model.DependencyType, error) {
 	var res model.DependencyType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1042,13 +1042,13 @@ func (ec *executionContext) marshalNIsDependencyEdge2ᚖgithubᚗcomᚋguacsec�
 	return ec._IsDependencyEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx context.Context, v interface{}) (model.IsDependencyInputSpec, error) {
+func (ec *executionContext) unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx context.Context, v any) (model.IsDependencyInputSpec, error) {
 	res, err := ec.unmarshalInputIsDependencyInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.IsDependencyInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx context.Context, v any) ([]*model.IsDependencyInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1064,22 +1064,22 @@ func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx context.Context, v interface{}) (*model.IsDependencyInputSpec, error) {
+func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx context.Context, v any) (*model.IsDependencyInputSpec, error) {
 	res, err := ec.unmarshalInputIsDependencyInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (model.IsDependencySpec, error) {
+func (ec *executionContext) unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v any) (model.IsDependencySpec, error) {
 	res, err := ec.unmarshalInputIsDependencySpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (*model.IsDependencySpec, error) {
+func (ec *executionContext) unmarshalNIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v any) (*model.IsDependencySpec, error) {
 	res, err := ec.unmarshalInputIsDependencySpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx context.Context, v interface{}) (*model.DependencyType, error) {
+func (ec *executionContext) unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx context.Context, v any) (*model.DependencyType, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1102,11 +1102,11 @@ func (ec *executionContext) marshalOIsDependencyConnection2ᚖgithubᚗcomᚋgua
 	return ec._IsDependencyConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpecᚄ(ctx context.Context, v interface{}) ([]*model.IsDependencySpec, error) {
+func (ec *executionContext) unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpecᚄ(ctx context.Context, v any) ([]*model.IsDependencySpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}

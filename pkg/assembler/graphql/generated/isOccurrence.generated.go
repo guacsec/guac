@@ -41,7 +41,7 @@ func (ec *executionContext) _IsOccurrence_id(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _IsOccurrence_subject(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
 	})
@@ -123,7 +123,7 @@ func (ec *executionContext) _IsOccurrence_artifact(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Artifact, nil
 	})
@@ -172,7 +172,7 @@ func (ec *executionContext) _IsOccurrence_justification(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -213,7 +213,7 @@ func (ec *executionContext) _IsOccurrence_origin(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -254,7 +254,7 @@ func (ec *executionContext) _IsOccurrence_collector(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -295,7 +295,7 @@ func (ec *executionContext) _IsOccurrence_documentRef(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -336,7 +336,7 @@ func (ec *executionContext) _IsOccurrenceConnection_totalCount(ctx context.Conte
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -377,7 +377,7 @@ func (ec *executionContext) _IsOccurrenceConnection_pageInfo(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -426,7 +426,7 @@ func (ec *executionContext) _IsOccurrenceConnection_edges(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -473,7 +473,7 @@ func (ec *executionContext) _IsOccurrenceEdge_cursor(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -514,7 +514,7 @@ func (ec *executionContext) _IsOccurrenceEdge_node(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -563,10 +563,10 @@ func (ec *executionContext) fieldContext_IsOccurrenceEdge_node(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputIsOccurrenceInputSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceInputSpec, error) {
+func (ec *executionContext) unmarshalInputIsOccurrenceInputSpec(ctx context.Context, obj any) (model.IsOccurrenceInputSpec, error) {
 	var it model.IsOccurrenceInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -611,10 +611,10 @@ func (ec *executionContext) unmarshalInputIsOccurrenceInputSpec(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceSpec, error) {
+func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, obj any) (model.IsOccurrenceSpec, error) {
 	var it model.IsOccurrenceSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -680,10 +680,10 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageOrSourceInput(ctx context.Context, obj interface{}) (model.PackageOrSourceInput, error) {
+func (ec *executionContext) unmarshalInputPackageOrSourceInput(ctx context.Context, obj any) (model.PackageOrSourceInput, error) {
 	var it model.PackageOrSourceInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -714,10 +714,10 @@ func (ec *executionContext) unmarshalInputPackageOrSourceInput(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageOrSourceInputs(ctx context.Context, obj interface{}) (model.PackageOrSourceInputs, error) {
+func (ec *executionContext) unmarshalInputPackageOrSourceInputs(ctx context.Context, obj any) (model.PackageOrSourceInputs, error) {
 	var it model.PackageOrSourceInputs
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -748,10 +748,10 @@ func (ec *executionContext) unmarshalInputPackageOrSourceInputs(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageOrSourceSpec(ctx context.Context, obj interface{}) (model.PackageOrSourceSpec, error) {
+func (ec *executionContext) unmarshalInputPackageOrSourceSpec(ctx context.Context, obj any) (model.PackageOrSourceSpec, error) {
 	var it model.PackageOrSourceSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1087,13 +1087,13 @@ func (ec *executionContext) marshalNIsOccurrenceEdge2ᚖgithubᚗcomᚋguacsec�
 	return ec._IsOccurrenceEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx context.Context, v interface{}) (model.IsOccurrenceInputSpec, error) {
+func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx context.Context, v any) (model.IsOccurrenceInputSpec, error) {
 	res, err := ec.unmarshalInputIsOccurrenceInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.IsOccurrenceInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx context.Context, v any) ([]*model.IsOccurrenceInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1109,17 +1109,17 @@ func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx context.Context, v interface{}) (*model.IsOccurrenceInputSpec, error) {
+func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx context.Context, v any) (*model.IsOccurrenceInputSpec, error) {
 	res, err := ec.unmarshalInputIsOccurrenceInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v interface{}) (model.IsOccurrenceSpec, error) {
+func (ec *executionContext) unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v any) (model.IsOccurrenceSpec, error) {
 	res, err := ec.unmarshalInputIsOccurrenceSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v interface{}) (*model.IsOccurrenceSpec, error) {
+func (ec *executionContext) unmarshalNIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v any) (*model.IsOccurrenceSpec, error) {
 	res, err := ec.unmarshalInputIsOccurrenceSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1134,12 +1134,12 @@ func (ec *executionContext) marshalNPackageOrSource2githubᚗcomᚋguacsecᚋgua
 	return ec._PackageOrSource(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx context.Context, v interface{}) (model.PackageOrSourceInput, error) {
+func (ec *executionContext) unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx context.Context, v any) (model.PackageOrSourceInput, error) {
 	res, err := ec.unmarshalInputPackageOrSourceInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx context.Context, v interface{}) (model.PackageOrSourceInputs, error) {
+func (ec *executionContext) unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx context.Context, v any) (model.PackageOrSourceInputs, error) {
 	res, err := ec.unmarshalInputPackageOrSourceInputs(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1151,11 +1151,11 @@ func (ec *executionContext) marshalOIsOccurrenceConnection2ᚖgithubᚗcomᚋgua
 	return ec._IsOccurrenceConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpecᚄ(ctx context.Context, v interface{}) ([]*model.IsOccurrenceSpec, error) {
+func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpecᚄ(ctx context.Context, v any) ([]*model.IsOccurrenceSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1171,7 +1171,7 @@ func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguac
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPackageOrSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceSpec(ctx context.Context, v interface{}) (*model.PackageOrSourceSpec, error) {
+func (ec *executionContext) unmarshalOPackageOrSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceSpec(ctx context.Context, v any) (*model.PackageOrSourceSpec, error) {
 	if v == nil {
 		return nil, nil
 	}

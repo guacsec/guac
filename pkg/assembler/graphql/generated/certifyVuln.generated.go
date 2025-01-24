@@ -42,7 +42,7 @@ func (ec *executionContext) _CertifyVuln_id(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _CertifyVuln_package(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Package, nil
 	})
@@ -132,7 +132,7 @@ func (ec *executionContext) _CertifyVuln_vulnerability(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Vulnerability, nil
 	})
@@ -181,7 +181,7 @@ func (ec *executionContext) _CertifyVuln_metadata(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Metadata, nil
 	})
@@ -240,7 +240,7 @@ func (ec *executionContext) _CertifyVulnConnection_totalCount(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -281,7 +281,7 @@ func (ec *executionContext) _CertifyVulnConnection_pageInfo(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -330,7 +330,7 @@ func (ec *executionContext) _CertifyVulnConnection_edges(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -377,7 +377,7 @@ func (ec *executionContext) _CertifyVulnEdge_cursor(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -418,7 +418,7 @@ func (ec *executionContext) _CertifyVulnEdge_node(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -469,7 +469,7 @@ func (ec *executionContext) _ScanMetadata_timeScanned(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TimeScanned, nil
 	})
@@ -510,7 +510,7 @@ func (ec *executionContext) _ScanMetadata_dbUri(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DbURI, nil
 	})
@@ -551,7 +551,7 @@ func (ec *executionContext) _ScanMetadata_dbVersion(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DbVersion, nil
 	})
@@ -592,7 +592,7 @@ func (ec *executionContext) _ScanMetadata_scannerUri(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ScannerURI, nil
 	})
@@ -633,7 +633,7 @@ func (ec *executionContext) _ScanMetadata_scannerVersion(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ScannerVersion, nil
 	})
@@ -674,7 +674,7 @@ func (ec *executionContext) _ScanMetadata_origin(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -715,7 +715,7 @@ func (ec *executionContext) _ScanMetadata_collector(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -756,7 +756,7 @@ func (ec *executionContext) _ScanMetadata_documentRef(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -789,10 +789,10 @@ func (ec *executionContext) fieldContext_ScanMetadata_documentRef(_ context.Cont
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, obj interface{}) (model.CertifyVulnSpec, error) {
+func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, obj any) (model.CertifyVulnSpec, error) {
 	var it model.CertifyVulnSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -886,10 +886,10 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context, obj interface{}) (model.ScanMetadataInput, error) {
+func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context, obj any) (model.ScanMetadataInput, error) {
 	var it model.ScanMetadataInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1303,7 +1303,7 @@ func (ec *executionContext) marshalNCertifyVulnEdge2ᚖgithubᚗcomᚋguacsecᚋ
 	return ec._CertifyVulnEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v interface{}) (model.CertifyVulnSpec, error) {
+func (ec *executionContext) unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v any) (model.CertifyVulnSpec, error) {
 	res, err := ec.unmarshalInputCertifyVulnSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1318,13 +1318,13 @@ func (ec *executionContext) marshalNScanMetadata2ᚖgithubᚗcomᚋguacsecᚋgua
 	return ec._ScanMetadata(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v interface{}) (model.ScanMetadataInput, error) {
+func (ec *executionContext) unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v any) (model.ScanMetadataInput, error) {
 	res, err := ec.unmarshalInputScanMetadataInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ(ctx context.Context, v interface{}) ([]*model.ScanMetadataInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ(ctx context.Context, v any) ([]*model.ScanMetadataInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1340,7 +1340,7 @@ func (ec *executionContext) unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋgua
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNScanMetadataInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v interface{}) (*model.ScanMetadataInput, error) {
+func (ec *executionContext) unmarshalNScanMetadataInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v any) (*model.ScanMetadataInput, error) {
 	res, err := ec.unmarshalInputScanMetadataInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }

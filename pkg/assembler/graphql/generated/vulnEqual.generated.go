@@ -41,7 +41,7 @@ func (ec *executionContext) _VulnEqual_id(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _VulnEqual_vulnerabilities(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Vulnerabilities, nil
 	})
@@ -131,7 +131,7 @@ func (ec *executionContext) _VulnEqual_justification(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -172,7 +172,7 @@ func (ec *executionContext) _VulnEqual_origin(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -213,7 +213,7 @@ func (ec *executionContext) _VulnEqual_collector(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -254,7 +254,7 @@ func (ec *executionContext) _VulnEqual_documentRef(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -295,7 +295,7 @@ func (ec *executionContext) _VulnEqualConnection_totalCount(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -336,7 +336,7 @@ func (ec *executionContext) _VulnEqualConnection_pageInfo(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -385,7 +385,7 @@ func (ec *executionContext) _VulnEqualConnection_edges(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -432,7 +432,7 @@ func (ec *executionContext) _VulnEqualEdge_cursor(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -473,7 +473,7 @@ func (ec *executionContext) _VulnEqualEdge_node(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -520,10 +520,10 @@ func (ec *executionContext) fieldContext_VulnEqualEdge_node(_ context.Context, f
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputVulnEqualInputSpec(ctx context.Context, obj interface{}) (model.VulnEqualInputSpec, error) {
+func (ec *executionContext) unmarshalInputVulnEqualInputSpec(ctx context.Context, obj any) (model.VulnEqualInputSpec, error) {
 	var it model.VulnEqualInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -568,10 +568,10 @@ func (ec *executionContext) unmarshalInputVulnEqualInputSpec(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputVulnEqualSpec(ctx context.Context, obj interface{}) (model.VulnEqualSpec, error) {
+func (ec *executionContext) unmarshalInputVulnEqualSpec(ctx context.Context, obj any) (model.VulnEqualSpec, error) {
 	var it model.VulnEqualSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -907,13 +907,13 @@ func (ec *executionContext) marshalNVulnEqualEdge2ᚖgithubᚗcomᚋguacsecᚋgu
 	return ec._VulnEqualEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx context.Context, v interface{}) (model.VulnEqualInputSpec, error) {
+func (ec *executionContext) unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx context.Context, v any) (model.VulnEqualInputSpec, error) {
 	res, err := ec.unmarshalInputVulnEqualInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.VulnEqualInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx context.Context, v any) ([]*model.VulnEqualInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -929,12 +929,12 @@ func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋgu
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx context.Context, v interface{}) (*model.VulnEqualInputSpec, error) {
+func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx context.Context, v any) (*model.VulnEqualInputSpec, error) {
 	res, err := ec.unmarshalInputVulnEqualInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx context.Context, v interface{}) (model.VulnEqualSpec, error) {
+func (ec *executionContext) unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx context.Context, v any) (model.VulnEqualSpec, error) {
 	res, err := ec.unmarshalInputVulnEqualSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

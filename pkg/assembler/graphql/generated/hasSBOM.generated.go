@@ -42,7 +42,7 @@ func (ec *executionContext) _HasSBOM_id(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
 	})
@@ -124,7 +124,7 @@ func (ec *executionContext) _HasSBOM_uri(ctx context.Context, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.URI, nil
 	})
@@ -165,7 +165,7 @@ func (ec *executionContext) _HasSBOM_algorithm(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Algorithm, nil
 	})
@@ -206,7 +206,7 @@ func (ec *executionContext) _HasSBOM_digest(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Digest, nil
 	})
@@ -247,7 +247,7 @@ func (ec *executionContext) _HasSBOM_downloadLocation(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DownloadLocation, nil
 	})
@@ -288,7 +288,7 @@ func (ec *executionContext) _HasSBOM_knownSince(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.KnownSince, nil
 	})
@@ -329,7 +329,7 @@ func (ec *executionContext) _HasSBOM_origin(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -370,7 +370,7 @@ func (ec *executionContext) _HasSBOM_collector(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -411,7 +411,7 @@ func (ec *executionContext) _HasSBOM_documentRef(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -452,7 +452,7 @@ func (ec *executionContext) _HasSBOM_includedSoftware(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IncludedSoftware, nil
 	})
@@ -493,7 +493,7 @@ func (ec *executionContext) _HasSBOM_includedDependencies(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IncludedDependencies, nil
 	})
@@ -552,7 +552,7 @@ func (ec *executionContext) _HasSBOM_includedOccurrences(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IncludedOccurrences, nil
 	})
@@ -609,7 +609,7 @@ func (ec *executionContext) _HasSBOMConnection_totalCount(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -650,7 +650,7 @@ func (ec *executionContext) _HasSBOMConnection_pageInfo(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -699,7 +699,7 @@ func (ec *executionContext) _HasSBOMConnection_edges(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -746,7 +746,7 @@ func (ec *executionContext) _HasSBOMEdge_cursor(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -787,7 +787,7 @@ func (ec *executionContext) _HasSBOMEdge_node(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -848,10 +848,10 @@ func (ec *executionContext) fieldContext_HasSBOMEdge_node(_ context.Context, fie
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.Context, obj interface{}) (model.HasSBOMIncludesInputSpec, error) {
+func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.Context, obj any) (model.HasSBOMIncludesInputSpec, error) {
 	var it model.HasSBOMIncludesInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -896,10 +896,10 @@ func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.C
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, obj interface{}) (model.HasSBOMInputSpec, error) {
+func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, obj any) (model.HasSBOMInputSpec, error) {
 	var it model.HasSBOMInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -972,10 +972,10 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj interface{}) (model.HasSBOMSpec, error) {
+func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj any) (model.HasSBOMSpec, error) {
 	var it model.HasSBOMSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1395,13 +1395,13 @@ func (ec *executionContext) marshalNHasSBOMEdge2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._HasSBOMEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx context.Context, v interface{}) (model.HasSBOMIncludesInputSpec, error) {
+func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx context.Context, v any) (model.HasSBOMIncludesInputSpec, error) {
 	res, err := ec.unmarshalInputHasSBOMIncludesInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.HasSBOMIncludesInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx context.Context, v any) ([]*model.HasSBOMIncludesInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1417,18 +1417,18 @@ func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗco
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx context.Context, v interface{}) (*model.HasSBOMIncludesInputSpec, error) {
+func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx context.Context, v any) (*model.HasSBOMIncludesInputSpec, error) {
 	res, err := ec.unmarshalInputHasSBOMIncludesInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx context.Context, v interface{}) (model.HasSBOMInputSpec, error) {
+func (ec *executionContext) unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx context.Context, v any) (model.HasSBOMInputSpec, error) {
 	res, err := ec.unmarshalInputHasSBOMInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.HasSBOMInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ(ctx context.Context, v any) ([]*model.HasSBOMInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1444,12 +1444,12 @@ func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguac
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx context.Context, v interface{}) (*model.HasSBOMInputSpec, error) {
+func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx context.Context, v any) (*model.HasSBOMInputSpec, error) {
 	res, err := ec.unmarshalInputHasSBOMInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (model.HasSBOMSpec, error) {
+func (ec *executionContext) unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v any) (model.HasSBOMSpec, error) {
 	res, err := ec.unmarshalInputHasSBOMSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

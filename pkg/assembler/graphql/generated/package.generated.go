@@ -45,7 +45,7 @@ func (ec *executionContext) _Package_id(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -86,7 +86,7 @@ func (ec *executionContext) _Package_type(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
 	})
@@ -127,7 +127,7 @@ func (ec *executionContext) _Package_namespaces(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Package().Namespaces(rctx, obj)
 	})
@@ -176,7 +176,7 @@ func (ec *executionContext) _PackageConnection_totalCount(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -217,7 +217,7 @@ func (ec *executionContext) _PackageConnection_pageInfo(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -266,7 +266,7 @@ func (ec *executionContext) _PackageConnection_edges(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -313,7 +313,7 @@ func (ec *executionContext) _PackageEdge_cursor(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -354,7 +354,7 @@ func (ec *executionContext) _PackageEdge_node(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -403,7 +403,7 @@ func (ec *executionContext) _PackageIDs_packageTypeID(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PackageTypeID, nil
 	})
@@ -444,7 +444,7 @@ func (ec *executionContext) _PackageIDs_packageNamespaceID(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PackageNamespaceID, nil
 	})
@@ -485,7 +485,7 @@ func (ec *executionContext) _PackageIDs_packageNameID(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PackageNameID, nil
 	})
@@ -526,7 +526,7 @@ func (ec *executionContext) _PackageIDs_packageVersionID(ctx context.Context, fi
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PackageVersionID, nil
 	})
@@ -567,7 +567,7 @@ func (ec *executionContext) _PackageName_id(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -608,7 +608,7 @@ func (ec *executionContext) _PackageName_name(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -649,7 +649,7 @@ func (ec *executionContext) _PackageName_versions(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Versions, nil
 	})
@@ -702,7 +702,7 @@ func (ec *executionContext) _PackageNamespace_id(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -743,7 +743,7 @@ func (ec *executionContext) _PackageNamespace_namespace(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespace, nil
 	})
@@ -784,7 +784,7 @@ func (ec *executionContext) _PackageNamespace_names(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Names, nil
 	})
@@ -833,7 +833,7 @@ func (ec *executionContext) _PackageQualifier_key(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key, nil
 	})
@@ -874,7 +874,7 @@ func (ec *executionContext) _PackageQualifier_value(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Value, nil
 	})
@@ -915,7 +915,7 @@ func (ec *executionContext) _PackageVersion_id(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -956,7 +956,7 @@ func (ec *executionContext) _PackageVersion_purl(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Purl, nil
 	})
@@ -997,7 +997,7 @@ func (ec *executionContext) _PackageVersion_version(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Version, nil
 	})
@@ -1038,7 +1038,7 @@ func (ec *executionContext) _PackageVersion_qualifiers(ctx context.Context, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Qualifiers, nil
 	})
@@ -1085,7 +1085,7 @@ func (ec *executionContext) _PackageVersion_subpath(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subpath, nil
 	})
@@ -1118,10 +1118,10 @@ func (ec *executionContext) fieldContext_PackageVersion_subpath(_ context.Contex
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputIDorPkgInput(ctx context.Context, obj interface{}) (model.IDorPkgInput, error) {
+func (ec *executionContext) unmarshalInputIDorPkgInput(ctx context.Context, obj any) (model.IDorPkgInput, error) {
 	var it model.IDorPkgInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1173,10 +1173,10 @@ func (ec *executionContext) unmarshalInputIDorPkgInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageQualifierInputSpec(ctx context.Context, obj interface{}) (model.PackageQualifierInputSpec, error) {
+func (ec *executionContext) unmarshalInputPackageQualifierInputSpec(ctx context.Context, obj any) (model.PackageQualifierInputSpec, error) {
 	var it model.PackageQualifierInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1207,10 +1207,10 @@ func (ec *executionContext) unmarshalInputPackageQualifierInputSpec(ctx context.
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageQualifierSpec(ctx context.Context, obj interface{}) (model.PackageQualifierSpec, error) {
+func (ec *executionContext) unmarshalInputPackageQualifierSpec(ctx context.Context, obj any) (model.PackageQualifierSpec, error) {
 	var it model.PackageQualifierSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1241,10 +1241,10 @@ func (ec *executionContext) unmarshalInputPackageQualifierSpec(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj interface{}) (model.PkgInputSpec, error) {
+func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj any) (model.PkgInputSpec, error) {
 	var it model.PkgInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1255,7 +1255,7 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 		asMap["version"] = ""
 	}
 	if _, present := asMap["qualifiers"]; !present {
-		asMap["qualifiers"] = []interface{}{}
+		asMap["qualifiers"] = []any{}
 	}
 	if _, present := asMap["subpath"]; !present {
 		asMap["subpath"] = ""
@@ -1316,15 +1316,15 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj interface{}) (model.PkgSpec, error) {
+func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj any) (model.PkgSpec, error) {
 	var it model.PkgSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	if _, present := asMap["qualifiers"]; !present {
-		asMap["qualifiers"] = []interface{}{}
+		asMap["qualifiers"] = []any{}
 	}
 	if _, present := asMap["matchOnlyEmptyQualifiers"]; !present {
 		asMap["matchOnlyEmptyQualifiers"] = false
@@ -1839,13 +1839,13 @@ func (ec *executionContext) _PackageVersion(ctx context.Context, sel ast.Selecti
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx context.Context, v interface{}) (model.IDorPkgInput, error) {
+func (ec *executionContext) unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx context.Context, v any) (model.IDorPkgInput, error) {
 	res, err := ec.unmarshalInputIDorPkgInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorPkgInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1861,7 +1861,7 @@ func (ec *executionContext) unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsec�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx context.Context, v interface{}) (*model.IDorPkgInput, error) {
+func (ec *executionContext) unmarshalNIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx context.Context, v any) (*model.IDorPkgInput, error) {
 	res, err := ec.unmarshalInputIDorPkgInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -2194,12 +2194,12 @@ func (ec *executionContext) marshalNPackageQualifier2ᚖgithubᚗcomᚋguacsec�
 	return ec._PackageQualifier(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPackageQualifierInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpec(ctx context.Context, v interface{}) (*model.PackageQualifierInputSpec, error) {
+func (ec *executionContext) unmarshalNPackageQualifierInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpec(ctx context.Context, v any) (*model.PackageQualifierInputSpec, error) {
 	res, err := ec.unmarshalInputPackageQualifierInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPackageQualifierSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierSpec(ctx context.Context, v interface{}) (*model.PackageQualifierSpec, error) {
+func (ec *executionContext) unmarshalNPackageQualifierSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierSpec(ctx context.Context, v any) (*model.PackageQualifierSpec, error) {
 	res, err := ec.unmarshalInputPackageQualifierSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -2258,16 +2258,16 @@ func (ec *executionContext) marshalNPackageVersion2ᚖgithubᚗcomᚋguacsecᚋg
 	return ec._PackageVersion(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v interface{}) (model.PkgSpec, error) {
+func (ec *executionContext) unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v any) (model.PkgSpec, error) {
 	res, err := ec.unmarshalInputPkgSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorPkgInput, error) {
+func (ec *executionContext) unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -2283,7 +2283,7 @@ func (ec *executionContext) unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsec�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx context.Context, v interface{}) (*model.IDorPkgInput, error) {
+func (ec *executionContext) unmarshalOIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx context.Context, v any) (*model.IDorPkgInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -2298,11 +2298,11 @@ func (ec *executionContext) marshalOPackageConnection2ᚖgithubᚗcomᚋguacsec�
 	return ec._PackageConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageQualifierInputSpec, error) {
+func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpecᚄ(ctx context.Context, v any) ([]*model.PackageQualifierInputSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -2318,11 +2318,11 @@ func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗc
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPackageQualifierSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageQualifierSpec, error) {
+func (ec *executionContext) unmarshalOPackageQualifierSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierSpecᚄ(ctx context.Context, v any) ([]*model.PackageQualifierSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -2338,7 +2338,7 @@ func (ec *executionContext) unmarshalOPackageQualifierSpec2ᚕᚖgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx context.Context, v interface{}) (*model.PkgInputSpec, error) {
+func (ec *executionContext) unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx context.Context, v any) (*model.PkgInputSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -2346,11 +2346,11 @@ func (ec *executionContext) unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOPkgSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v interface{}) ([]*model.PkgSpec, error) {
+func (ec *executionContext) unmarshalOPkgSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v any) ([]*model.PkgSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -2366,7 +2366,7 @@ func (ec *executionContext) unmarshalOPkgSpec2ᚕᚖgithubᚗcomᚋguacsecᚋgua
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v interface{}) (*model.PkgSpec, error) {
+func (ec *executionContext) unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v any) (*model.PkgSpec, error) {
 	if v == nil {
 		return nil, nil
 	}

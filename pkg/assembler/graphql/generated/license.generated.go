@@ -41,7 +41,7 @@ func (ec *executionContext) _License_id(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -82,7 +82,7 @@ func (ec *executionContext) _License_name(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -123,7 +123,7 @@ func (ec *executionContext) _License_inline(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Inline, nil
 	})
@@ -161,7 +161,7 @@ func (ec *executionContext) _License_listVersion(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ListVersion, nil
 	})
@@ -199,7 +199,7 @@ func (ec *executionContext) _LicenseConnection_totalCount(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -240,7 +240,7 @@ func (ec *executionContext) _LicenseConnection_pageInfo(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -289,7 +289,7 @@ func (ec *executionContext) _LicenseConnection_edges(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -336,7 +336,7 @@ func (ec *executionContext) _LicenseEdge_cursor(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -377,7 +377,7 @@ func (ec *executionContext) _LicenseEdge_node(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -420,10 +420,10 @@ func (ec *executionContext) fieldContext_LicenseEdge_node(_ context.Context, fie
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputIDorLicenseInput(ctx context.Context, obj interface{}) (model.IDorLicenseInput, error) {
+func (ec *executionContext) unmarshalInputIDorLicenseInput(ctx context.Context, obj any) (model.IDorLicenseInput, error) {
 	var it model.IDorLicenseInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -454,10 +454,10 @@ func (ec *executionContext) unmarshalInputIDorLicenseInput(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputLicenseInputSpec(ctx context.Context, obj interface{}) (model.LicenseInputSpec, error) {
+func (ec *executionContext) unmarshalInputLicenseInputSpec(ctx context.Context, obj any) (model.LicenseInputSpec, error) {
 	var it model.LicenseInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -495,10 +495,10 @@ func (ec *executionContext) unmarshalInputLicenseInputSpec(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputLicenseSpec(ctx context.Context, obj interface{}) (model.LicenseSpec, error) {
+func (ec *executionContext) unmarshalInputLicenseSpec(ctx context.Context, obj any) (model.LicenseSpec, error) {
 	var it model.LicenseSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -696,8 +696,8 @@ func (ec *executionContext) _LicenseEdge(ctx context.Context, sel ast.SelectionS
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx context.Context, v interface{}) ([][]*model.IDorLicenseInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx context.Context, v any) ([][]*model.IDorLicenseInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -713,8 +713,8 @@ func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋg
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorLicenseInput, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx context.Context, v any) ([]*model.IDorLicenseInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -730,7 +730,7 @@ func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguac
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx context.Context, v interface{}) (*model.IDorLicenseInput, error) {
+func (ec *executionContext) unmarshalNIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx context.Context, v any) (*model.IDorLicenseInput, error) {
 	res, err := ec.unmarshalInputIDorLicenseInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -843,17 +843,17 @@ func (ec *executionContext) marshalNLicenseEdge2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._LicenseEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx context.Context, v interface{}) (model.LicenseSpec, error) {
+func (ec *executionContext) unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx context.Context, v any) (model.LicenseSpec, error) {
 	res, err := ec.unmarshalInputLicenseSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNLicenseSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx context.Context, v interface{}) (*model.LicenseSpec, error) {
+func (ec *executionContext) unmarshalNLicenseSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx context.Context, v any) (*model.LicenseSpec, error) {
 	res, err := ec.unmarshalInputLicenseSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx context.Context, v interface{}) (*model.IDorLicenseInput, error) {
+func (ec *executionContext) unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx context.Context, v any) (*model.IDorLicenseInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -868,7 +868,7 @@ func (ec *executionContext) marshalOLicenseConnection2ᚖgithubᚗcomᚋguacsec�
 	return ec._LicenseConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOLicenseInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpec(ctx context.Context, v interface{}) (*model.LicenseInputSpec, error) {
+func (ec *executionContext) unmarshalOLicenseInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpec(ctx context.Context, v any) (*model.LicenseInputSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -876,11 +876,11 @@ func (ec *executionContext) unmarshalOLicenseInputSpec2ᚖgithubᚗcomᚋguacsec
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOLicenseSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpecᚄ(ctx context.Context, v interface{}) ([]*model.LicenseSpec, error) {
+func (ec *executionContext) unmarshalOLicenseSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpecᚄ(ctx context.Context, v any) ([]*model.LicenseSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []interface{}
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}

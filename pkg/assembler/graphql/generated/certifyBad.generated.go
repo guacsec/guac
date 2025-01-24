@@ -42,7 +42,7 @@ func (ec *executionContext) _CertifyBad_id(ctx context.Context, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _CertifyBad_subject(ctx context.Context, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
 	})
@@ -124,7 +124,7 @@ func (ec *executionContext) _CertifyBad_justification(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Justification, nil
 	})
@@ -165,7 +165,7 @@ func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.KnownSince, nil
 	})
@@ -206,7 +206,7 @@ func (ec *executionContext) _CertifyBad_origin(ctx context.Context, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -247,7 +247,7 @@ func (ec *executionContext) _CertifyBad_collector(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -288,7 +288,7 @@ func (ec *executionContext) _CertifyBad_documentRef(ctx context.Context, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -329,7 +329,7 @@ func (ec *executionContext) _CertifyBadConnection_totalCount(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -370,7 +370,7 @@ func (ec *executionContext) _CertifyBadConnection_pageInfo(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -419,7 +419,7 @@ func (ec *executionContext) _CertifyBadConnection_edges(ctx context.Context, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -466,7 +466,7 @@ func (ec *executionContext) _CertifyBadEdge_cursor(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -507,7 +507,7 @@ func (ec *executionContext) _CertifyBadEdge_node(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -556,10 +556,10 @@ func (ec *executionContext) fieldContext_CertifyBadEdge_node(_ context.Context, 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Context, obj interface{}) (model.CertifyBadInputSpec, error) {
+func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Context, obj any) (model.CertifyBadInputSpec, error) {
 	var it model.CertifyBadInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -611,10 +611,10 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, obj interface{}) (model.CertifyBadSpec, error) {
+func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, obj any) (model.CertifyBadSpec, error) {
 	var it model.CertifyBadSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -680,10 +680,10 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputMatchFlags(ctx context.Context, obj interface{}) (model.MatchFlags, error) {
+func (ec *executionContext) unmarshalInputMatchFlags(ctx context.Context, obj any) (model.MatchFlags, error) {
 	var it model.MatchFlags
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -707,10 +707,10 @@ func (ec *executionContext) unmarshalInputMatchFlags(ctx context.Context, obj in
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactInput, error) {
+func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx context.Context, obj any) (model.PackageSourceOrArtifactInput, error) {
 	var it model.PackageSourceOrArtifactInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -748,10 +748,10 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactInputs, error) {
+func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx context.Context, obj any) (model.PackageSourceOrArtifactInputs, error) {
 	var it model.PackageSourceOrArtifactInputs
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -789,10 +789,10 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactSpec, error) {
+func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx context.Context, obj any) (model.PackageSourceOrArtifactSpec, error) {
 	var it model.PackageSourceOrArtifactSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1142,13 +1142,13 @@ func (ec *executionContext) marshalNCertifyBadEdge2ᚖgithubᚗcomᚋguacsecᚋg
 	return ec._CertifyBadEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx context.Context, v interface{}) (model.CertifyBadInputSpec, error) {
+func (ec *executionContext) unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx context.Context, v any) (model.CertifyBadInputSpec, error) {
 	res, err := ec.unmarshalInputCertifyBadInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.CertifyBadInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx context.Context, v any) ([]*model.CertifyBadInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1164,17 +1164,17 @@ func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋg
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx context.Context, v interface{}) (*model.CertifyBadInputSpec, error) {
+func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx context.Context, v any) (*model.CertifyBadInputSpec, error) {
 	res, err := ec.unmarshalInputCertifyBadInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v interface{}) (model.CertifyBadSpec, error) {
+func (ec *executionContext) unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v any) (model.CertifyBadSpec, error) {
 	res, err := ec.unmarshalInputCertifyBadSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx context.Context, v interface{}) (model.MatchFlags, error) {
+func (ec *executionContext) unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx context.Context, v any) (model.MatchFlags, error) {
 	res, err := ec.unmarshalInputMatchFlags(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -1233,17 +1233,17 @@ func (ec *executionContext) marshalNPackageSourceOrArtifact2ᚕgithubᚗcomᚋgu
 	return ret
 }
 
-func (ec *executionContext) unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx context.Context, v interface{}) (model.PackageSourceOrArtifactInput, error) {
+func (ec *executionContext) unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx context.Context, v any) (model.PackageSourceOrArtifactInput, error) {
 	res, err := ec.unmarshalInputPackageSourceOrArtifactInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx context.Context, v interface{}) (model.PackageSourceOrArtifactInputs, error) {
+func (ec *executionContext) unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx context.Context, v any) (model.PackageSourceOrArtifactInputs, error) {
 	res, err := ec.unmarshalInputPackageSourceOrArtifactInputs(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPkgMatchType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgMatchType(ctx context.Context, v interface{}) (model.PkgMatchType, error) {
+func (ec *executionContext) unmarshalNPkgMatchType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgMatchType(ctx context.Context, v any) (model.PkgMatchType, error) {
 	var res model.PkgMatchType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1260,7 +1260,7 @@ func (ec *executionContext) marshalOCertifyBadConnection2ᚖgithubᚗcomᚋguacs
 	return ec._CertifyBadConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactSpec, error) {
+func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v any) (*model.PackageSourceOrArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}

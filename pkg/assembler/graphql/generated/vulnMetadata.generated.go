@@ -42,7 +42,7 @@ func (ec *executionContext) _VulnerabilityMetadata_id(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
 	})
@@ -83,7 +83,7 @@ func (ec *executionContext) _VulnerabilityMetadata_vulnerability(ctx context.Con
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Vulnerability, nil
 	})
@@ -132,7 +132,7 @@ func (ec *executionContext) _VulnerabilityMetadata_scoreType(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ScoreType, nil
 	})
@@ -173,7 +173,7 @@ func (ec *executionContext) _VulnerabilityMetadata_scoreValue(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ScoreValue, nil
 	})
@@ -214,7 +214,7 @@ func (ec *executionContext) _VulnerabilityMetadata_timestamp(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Timestamp, nil
 	})
@@ -255,7 +255,7 @@ func (ec *executionContext) _VulnerabilityMetadata_origin(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Origin, nil
 	})
@@ -296,7 +296,7 @@ func (ec *executionContext) _VulnerabilityMetadata_collector(ctx context.Context
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Collector, nil
 	})
@@ -337,7 +337,7 @@ func (ec *executionContext) _VulnerabilityMetadata_documentRef(ctx context.Conte
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentRef, nil
 	})
@@ -378,7 +378,7 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_totalCount(ctx cont
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TotalCount, nil
 	})
@@ -419,7 +419,7 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_pageInfo(ctx contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PageInfo, nil
 	})
@@ -468,7 +468,7 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_edges(ctx context.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Edges, nil
 	})
@@ -515,7 +515,7 @@ func (ec *executionContext) _VulnerabilityMetadataEdge_cursor(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cursor, nil
 	})
@@ -556,7 +556,7 @@ func (ec *executionContext) _VulnerabilityMetadataEdge_node(ctx context.Context,
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Node, nil
 	})
@@ -607,10 +607,10 @@ func (ec *executionContext) fieldContext_VulnerabilityMetadataEdge_node(_ contex
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx context.Context, obj interface{}) (model.VulnerabilityMetadataInputSpec, error) {
+func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx context.Context, obj any) (model.VulnerabilityMetadataInputSpec, error) {
 	var it model.VulnerabilityMetadataInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -669,10 +669,10 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.Context, obj interface{}) (model.VulnerabilityMetadataSpec, error) {
+func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.Context, obj any) (model.VulnerabilityMetadataSpec, error) {
 	var it model.VulnerabilityMetadataSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1039,13 +1039,13 @@ func (ec *executionContext) marshalNVulnerabilityMetadataEdge2ᚖgithubᚗcomᚋ
 	return ec._VulnerabilityMetadataEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx context.Context, v interface{}) (model.VulnerabilityMetadataInputSpec, error) {
+func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx context.Context, v any) (model.VulnerabilityMetadataInputSpec, error) {
 	res, err := ec.unmarshalInputVulnerabilityMetadataInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.VulnerabilityMetadataInputSpec, error) {
-	var vSlice []interface{}
+func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx context.Context, v any) ([]*model.VulnerabilityMetadataInputSpec, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -1061,17 +1061,17 @@ func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithu
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx context.Context, v interface{}) (*model.VulnerabilityMetadataInputSpec, error) {
+func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx context.Context, v any) (*model.VulnerabilityMetadataInputSpec, error) {
 	res, err := ec.unmarshalInputVulnerabilityMetadataInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx context.Context, v interface{}) (model.VulnerabilityMetadataSpec, error) {
+func (ec *executionContext) unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx context.Context, v any) (model.VulnerabilityMetadataSpec, error) {
 	res, err := ec.unmarshalInputVulnerabilityMetadataSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, v interface{}) (model.VulnerabilityScoreType, error) {
+func (ec *executionContext) unmarshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, v any) (model.VulnerabilityScoreType, error) {
 	var res model.VulnerabilityScoreType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1081,7 +1081,7 @@ func (ec *executionContext) marshalNVulnerabilityScoreType2githubᚗcomᚋguacse
 	return v
 }
 
-func (ec *executionContext) unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx context.Context, v interface{}) (*model.Comparator, error) {
+func (ec *executionContext) unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx context.Context, v any) (*model.Comparator, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1104,7 +1104,7 @@ func (ec *executionContext) marshalOVulnerabilityMetadataConnection2ᚖgithubᚗ
 	return ec._VulnerabilityMetadataConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOVulnerabilityScoreType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, v interface{}) (*model.VulnerabilityScoreType, error) {
+func (ec *executionContext) unmarshalOVulnerabilityScoreType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, v any) (*model.VulnerabilityScoreType, error) {
 	if v == nil {
 		return nil, nil
 	}

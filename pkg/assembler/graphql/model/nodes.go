@@ -2314,7 +2314,7 @@ func (e Comparator) String() string {
 	return string(e)
 }
 
-func (e *Comparator) UnmarshalGQL(v interface{}) error {
+func (e *Comparator) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2361,7 +2361,7 @@ func (e DependencyType) String() string {
 	return string(e)
 }
 
-func (e *DependencyType) UnmarshalGQL(v interface{}) error {
+func (e *DependencyType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2581,7 +2581,7 @@ func (e Edge) String() string {
 	return string(e)
 }
 
-func (e *Edge) UnmarshalGQL(v interface{}) error {
+func (e *Edge) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2622,7 +2622,7 @@ func (e FilterOperation) String() string {
 	return string(e)
 }
 
-func (e *FilterOperation) UnmarshalGQL(v interface{}) error {
+func (e *FilterOperation) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2665,7 +2665,7 @@ func (e PkgMatchType) String() string {
 	return string(e)
 }
 
-func (e *PkgMatchType) UnmarshalGQL(v interface{}) error {
+func (e *PkgMatchType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2714,7 +2714,7 @@ func (e QueryType) String() string {
 	return string(e)
 }
 
-func (e *QueryType) UnmarshalGQL(v interface{}) error {
+func (e *QueryType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2764,7 +2764,7 @@ func (e VexJustification) String() string {
 	return string(e)
 }
 
-func (e *VexJustification) UnmarshalGQL(v interface{}) error {
+func (e *VexJustification) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2810,7 +2810,7 @@ func (e VexStatus) String() string {
 	return string(e)
 }
 
-func (e *VexStatus) UnmarshalGQL(v interface{}) error {
+func (e *VexStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2864,7 +2864,7 @@ func (e VulnerabilityScoreType) String() string {
 	return string(e)
 }
 
-func (e *VulnerabilityScoreType) UnmarshalGQL(v interface{}) error {
+func (e *VulnerabilityScoreType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
