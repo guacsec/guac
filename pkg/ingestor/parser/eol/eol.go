@@ -117,9 +117,22 @@ func (e *parser) parseSubject(s *attestation.EOLStatement) error {
 }
 
 // parseEOL parses the attestation to collect the EOL information
-func (e *parser) parseEOL(_ context.Context, s *attestation.EOLStatement) error {
+func (e *parser) parseEOL(ctx context.Context, s *attestation.EOLStatement) error {
+	logger := logging.FromContext(ctx)
 	if e.pkg == nil {
 		return fmt.Errorf("package not specified for EOL information")
+	}
+
+	// parse the eol date
+	timestamp := time.Unix(0, 0)
+	if s.Predicate.EOLDate != "" {
+		t, err := time.Parse("2006-01-02", s.Predicate.EOLDate)
+		if err != nil {
+			// log but continue
+			logger.Warnf("failed to parse EOL date: %s with error: %v", s.Predicate.EOLDate, err)
+		} else {
+			timestamp = t
+		}
 	}
 
 	// Create metadata for EOL status
@@ -128,7 +141,8 @@ func (e *parser) parseEOL(_ context.Context, s *attestation.EOLStatement) error 
 		PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
 		HasMetadata: &generated.HasMetadataInputSpec{
 			Key: "endoflife",
-			Value: fmt.Sprintf("product:%s,cycle:%s,version:%s,isEOL:%v,eolDate:%s,lts:%v,latest:%s,releaseDate:%s",
+			Value: fmt.Sprintf(
+				"product:%s,cycle:%s,version:%s,isEOL:%v,eolDate:%s,lts:%v,latest:%s,releaseDate:%s",
 				s.Predicate.Product,
 				s.Predicate.Cycle,
 				s.Predicate.Version,
@@ -136,8 +150,9 @@ func (e *parser) parseEOL(_ context.Context, s *attestation.EOLStatement) error 
 				s.Predicate.EOLDate,
 				s.Predicate.LTS,
 				s.Predicate.Latest,
-				s.Predicate.ReleaseDate),
-			Timestamp:     e.timeScanned,
+				s.Predicate.ReleaseDate,
+			),
+			Timestamp:     timestamp,
 			Justification: justification,
 			Origin:        "GUAC EOL Certifier",
 			Collector:     "GUAC",
