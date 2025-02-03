@@ -301,7 +301,7 @@ require (
 	github.com/ProtonMail/gluon v0.17.0
 	github.com/XSAM/otelsql v0.36.0
 	github.com/arangodb/go-driver v1.6.4
-	github.com/aws/aws-sdk-go v1.55.5
+	github.com/aws/aws-sdk-go v1.55.6
 	github.com/aws/aws-sdk-go-v2 v1.34.0
 	github.com/aws/aws-sdk-go-v2/config v1.29.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.73.2
