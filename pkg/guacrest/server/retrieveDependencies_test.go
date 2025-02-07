@@ -16,8 +16,9 @@ package server_test
 import (
 	stdcmp "cmp"
 	"context"
-	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"testing"
+
+	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 
 	. "github.com/guacsec/guac/internal/testing/graphqlClients"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
@@ -76,7 +77,7 @@ func Test_RetrieveDependencies_ByPurl(t *testing.T) {
 			data: GuacData{
 				Packages:      []string{"pkg:guac/foo", "pkg:guac/bar"},
 				Artifacts:     []string{"sha-xyz"},
-				HasSboms:      []HasSbom{{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}}},
+				HasSboms:      []HasSbom{{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}}},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-xyz"}},
 			},
 			purl:           "pkg:guac/foo",
@@ -239,7 +240,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 		expectedByDigest []string
 	}{
 		{
-			name: "Artifact -> SBOM -> package",
+			name: "Digest -> SBOM -> package",
 			data: GuacData{
 				Packages:  []string{"pkg:guac/bar"},
 				Artifacts: []string{"sha-xyz"},
@@ -299,7 +300,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
-			name: "Artifact -> hashEqual -> digest, digest",
+			name: "Artifact -> hashEqual -> artifact, artifact",
 			data: GuacData{
 				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
 				Artifacts: []string{"sha-123", "sha-456", "sha-789"},
@@ -316,7 +317,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
 		},
 		{
-			name: "digest -> SLSA -> digest -> occurrence -> package",
+			name: "artifact -> SLSA -> artifact -> occurrence -> package",
 			data: GuacData{
 				Packages:      []string{"pkg:guac/foo"},
 				Artifacts:     []string{"sha-123", "sha-xyz"},
@@ -328,7 +329,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
-			name: "digest -> SLSA -> digest, digest",
+			name: "artifact -> SLSA -> artifact, artifact",
 			data: GuacData{
 				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
 				Artifacts: []string{"sha-123", "sha-xyz", "sha-abc"},
@@ -492,6 +493,9 @@ func Test_ClientErrorsForArtifact(t *testing.T) {
 		digest: "sha-abc",
 	}, {
 		name: "Neither Purl nor Digest provided",
+	}, {
+		name:   "Badly formatted digest - missing algorithm prefix",
+		digest: "abcdef123456", // Missing sha256: or similar prefix
 	}}
 
 	for _, tt := range tests {
@@ -502,12 +506,11 @@ func Test_ClientErrorsForArtifact(t *testing.T) {
 
 			res, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{Digest: tt.digest})
 			if err != nil {
-				t.Fatalf("RetrieveDependencies returned unexpected error: %v", err)
+				t.Fatalf("GetArtifactDeps returned unexpected error: %v", err)
 			}
 			if _, ok := res.(gen.GetArtifactDeps400JSONResponse); !ok {
-				t.Fatalf("Did not receive a 400 Response: recieved %v of type %T", res, res)
+				t.Fatalf("Did not receive a 400 Response: received %v of type %T", res, res)
 			}
-
 		})
 	}
 }

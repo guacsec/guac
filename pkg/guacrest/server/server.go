@@ -102,11 +102,19 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 }
 
 func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPackagePurlsRequestObject) (gen.GetPackagePurlsResponseObject, error) {
-	return gen.GetPackagePurls200JSONResponse{}, nil
+	return gen.GetPackagePurls500JSONResponse{
+		InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+			Message: "GetPackagePurls not implemented",
+		},
+	}, nil
 }
 
 func (s *DefaultServer) GetPackageVulns(ctx context.Context, request gen.GetPackageVulnsRequestObject) (gen.GetPackageVulnsResponseObject, error) {
-	return gen.GetPackageVulns200JSONResponse{}, nil
+	return gen.GetPackageVulns500JSONResponse{
+		InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+			Message: "GetPackageVulns not implemented",
+		},
+	}, nil
 }
 
 func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPackageDepsRequestObject) (gen.GetPackageDepsResponseObject, error) {
@@ -139,7 +147,11 @@ func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPacka
 }
 
 func (s *DefaultServer) GetArtifactVulns(ctx context.Context, request gen.GetArtifactVulnsRequestObject) (gen.GetArtifactVulnsResponseObject, error) {
-	return gen.GetArtifactVulns200JSONResponse{}, nil
+	return gen.GetArtifactVulns500JSONResponse{
+		InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+			Message: "GetArtifactVulns not implemented",
+		},
+	}, nil
 }
 
 func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArtifactDepsRequestObject) (gen.GetArtifactDepsResponseObject, error) {

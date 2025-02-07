@@ -118,7 +118,9 @@ paths:
     get:
       summary: Get dependencies for a specific Package URL (purl)
       description: >
-        This endpoint will find all dependencies of the purl passed in.
+        This endpoint will find all dependencies of the purl passed in, including both direct 
+        and indirect (transitive) dependencies. For example, if package A depends on B, and B 
+        depends on C, then requesting dependencies for A will return both B and C.
       operationId: getPackageDeps
       parameters:
         - name: purl
