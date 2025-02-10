@@ -74,7 +74,7 @@ require (
 	github.com/IBM/sarama v1.43.3 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/ProtonMail/go-crypto v1.0.0 // indirect
+	github.com/ProtonMail/go-crypto v1.1.5 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/agnivade/levenshtein v1.2.0 // indirect
 	github.com/alexflint/go-arg v1.4.2 // indirect
@@ -119,7 +119,7 @@ require (
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.5 // indirect
+	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dghubble/trie v0.1.0 // indirect
@@ -139,7 +139,7 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
-	github.com/go-git/go-billy/v5 v5.6.0 // indirect
+	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.2 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -215,7 +215,7 @@ require (
 	github.com/pingcap/failpoint v0.0.0-20220801062533-2eaa32854a6c // indirect
 	github.com/pingcap/kvproto v0.0.0-20230904082117-ecdbf1f8c130 // indirect
 	github.com/pingcap/log v1.1.1-0.20221110025148-ca232912c9f3 // indirect
-	github.com/pjbgf/sha1cd v0.3.0 // indirect
+	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -236,7 +236,7 @@ require (
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/skeema/knownhosts v1.2.2 // indirect
+	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spdx/gordf v0.0.0-20221230105357-b735bd5aac89 // indirect
@@ -312,7 +312,7 @@ require (
 	github.com/getkin/kin-openapi v0.128.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.2.0
-	github.com/go-git/go-git/v5 v5.12.0
+	github.com/go-git/go-git/v5 v5.13.2
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/go-github/v50 v50.2.0
