@@ -17,17 +17,21 @@ package oci
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
 	"sync"
 	"time"
 
+	attestation "github.com/guacsec/guac/pkg/certifier/attestation/reference"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
+	attestationv1 "github.com/in-toto/attestation/go/v1"
+	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/types/descriptor"
@@ -322,7 +326,7 @@ func (o *ociCollector) fetchFallbackArtifacts(ctx context.Context, repo string, 
 		// check to see if the digest + suffix has already been collected
 		if !o.isDigestCollected(repo, digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
-			err := fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel)
+			err := fetchOCIArtifactBlobs(ctx, rc, image, imageTag, "unknown", docChannel)
 			if err != nil {
 				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
@@ -365,7 +369,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 				if !o.isDigestCollected(repo, referrerDescDigest) {
 					logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
 					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
-					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
+					e := fetchOCIArtifactBlobs(ctx, rc, image, referrerDigest, referrerDesc.ArtifactType, docChannel)
 					if e != nil {
 						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
 						cancel()
@@ -403,6 +407,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 func fetchOCIArtifactBlobs(
 	ctx context.Context,
 	rc *regclient.RegClient,
+	image ref.Ref,
 	artifact,
 	artifactType string,
 	docChannel chan<- *processor.Document,
@@ -458,6 +463,12 @@ func fetchOCIArtifactBlobs(
 			}
 		}
 
+		err = checkIfImageIsCopy(image, artifact, btr1, docChannel)
+		if err != nil {
+			// log error and continue
+			logger.Errorf("failed to check if blob is occurrence: %v", err)
+		}
+
 		doc := &processor.Document{
 			Blob:   btr1,
 			Type:   docType,
@@ -470,6 +481,64 @@ func fetchOCIArtifactBlobs(
 		}
 		docChannel <- doc
 	}
+
+	return nil
+}
+
+func checkIfImageIsCopy(
+	image ref.Ref,
+	artifact string,
+	blob []byte,
+	docChannel chan<- *processor.Document,
+) error {
+	spdxDigest := digest.FromBytes(blob)
+	imagePurl := fmt.Sprintf("pkg:oci/%s/%s@%s", image.Registry, image.Repository, image.Digest)
+
+	artifactSyncMockAttesterID := "https://artifact-sync.azure.com/v1"
+	referenceStatement := &attestation.ReferenceStatement{
+		Statement: attestationv1.Statement{
+			Type:          attestationv1.StatementTypeUri,
+			PredicateType: attestation.PredicateReference,
+			Subject: []*attestationv1.ResourceDescriptor{{
+				Uri: imagePurl,
+				Digest: map[string]string{
+					"sha256": image.Digest,
+				},
+			}},
+		},
+		Predicate: attestation.ReferencePredicate{
+			Attester: attestation.ReferenceAttester{
+				ID: artifactSyncMockAttesterID,
+			},
+			References: []attestation.ReferenceItem{
+				{
+					DownloadLocation: artifact,
+					Digest: attestation.ReferenceDigestItem{
+						SHA256: spdxDigest.String(),
+					},
+					MediaType: SpdxJson,
+				},
+			},
+		},
+	}
+
+	// marshall the reference statement
+	referenceStatementBytes, err := json.Marshal(referenceStatement)
+	if err != nil {
+		return fmt.Errorf("failed to marshal reference statement: %w", err)
+	}
+
+	doc := &processor.Document{
+		Blob:   referenceStatementBytes,
+		Type:   processor.DocumentITE6Reference,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector:   string(OCICollector),
+			Source:      artifact,
+			DocumentRef: events.GetDocRef(referenceStatementBytes),
+		},
+	}
+	docChannel <- doc
 
 	return nil
 }
