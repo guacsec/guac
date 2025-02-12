@@ -23,12 +23,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	"golang.org/x/time/rate"
@@ -199,6 +202,8 @@ func (e *eolCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 }
 
 func EvaluateEOLResponse(ctx context.Context, client *http.Client, purls []string, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
+	logger := logging.FromContext(ctx)
+
 	packMap := map[string]bool{}
 	var generatedEOLDocs []*processor.Document
 
@@ -215,8 +220,15 @@ func EvaluateEOLResponse(ctx context.Context, client *http.Client, purls []strin
 			continue
 		}
 
-		product, found := findMatchingProduct(purl, products)
+		pkgInput, err := helpers.PurlToPkg(purl)
+		if err != nil {
+			logger.Debugf("failed to convert PURL to PkgInput: %v", err)
+			continue
+		}
+
+		product, found := findMatchingProduct(pkgInput, products)
 		if !found {
+			logger.Debugf("no matching product found for %s", purl)
 			continue
 		}
 
@@ -225,69 +237,72 @@ func EvaluateEOLResponse(ctx context.Context, client *http.Client, purls []strin
 			return nil, fmt.Errorf("failed to fetch EOL data for %s: %w", product, err)
 		}
 
-		cycle, version := extractCycleAndVersion(purl)
+		if pkgInput.Version == nil || *pkgInput.Version == "" {
+			logger.Debugf("no version found for %s", purl)
+			continue
+		}
+		version := *pkgInput.Version
+
 		var relevantCycle *CycleData
 		for i := range eolData {
-			if eolData[i].Cycle == cycle {
+			// assuming the version might contain other modifiers in addition to the cycle (e.g. "1.1.1n-0+deb11u3" for cycle "1.1.1")
+			if strings.HasPrefix(version, eolData[i].Cycle) {
 				relevantCycle = &eolData[i]
 				break
 			}
 		}
 
-		if relevantCycle == nil && len(eolData) > 0 {
-			// If no matching cycle is found, use the latest (first in the list)
-			relevantCycle = &eolData[0]
+		if relevantCycle == nil {
+			logger.Debugf("no cycle found for %s", purl)
+			continue
 		}
 
-		if relevantCycle != nil {
-			currentTime := time.Now()
+		// Get EOL status and date
+		isEOL := relevantCycle.EOL.Bool()
+		eolDateStr := relevantCycle.EOL.String()
 
-			// Get EOL status and date
-			isEOL := relevantCycle.EOL.Bool()
-			eolDateStr := relevantCycle.EOL.String()
-
-			statement := &attestation.EOLStatement{
-				Statement: attestationv1.Statement{
-					Type:          attestationv1.StatementTypeUri,
-					PredicateType: attestation.PredicateEOL,
-					Subject:       []*attestationv1.ResourceDescriptor{{Uri: purl}},
+		currentTime := time.Now().UTC()
+		statement := &attestation.EOLStatement{
+			Statement: attestationv1.Statement{
+				Type:          attestationv1.StatementTypeUri,
+				PredicateType: attestation.PredicateEOL,
+				Subject:       []*attestationv1.ResourceDescriptor{{Uri: purl}},
+			},
+			Predicate: attestation.EOLPredicate{
+				Product:     product,
+				Cycle:       relevantCycle.Cycle,
+				Version:     version,
+				IsEOL:       isEOL,
+				EOLDate:     eolDateStr,
+				LTS:         relevantCycle.LTS.Bool(),
+				Latest:      relevantCycle.Latest,
+				ReleaseDate: relevantCycle.ReleaseDate,
+				Metadata: attestation.EOLMetadata{
+					ScannedOn: &currentTime,
 				},
-				Predicate: attestation.EOLPredicate{
-					Product:     product,
-					Cycle:       relevantCycle.Cycle,
-					Version:     version,
-					IsEOL:       isEOL,
-					EOLDate:     eolDateStr,
-					LTS:         relevantCycle.LTS.Bool(),
-					Latest:      relevantCycle.Latest,
-					ReleaseDate: relevantCycle.ReleaseDate,
-					Metadata: attestation.EOLMetadata{
-						ScannedOn: &currentTime,
-					},
-				},
-			}
-
-			payload, err := json.Marshal(statement)
-			if err != nil {
-				return nil, fmt.Errorf("unable to marshal attestation: %w", err)
-			}
-
-			doc := &processor.Document{
-				Blob:   payload,
-				Type:   processor.DocumentITE6EOL,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector:   EOLCollector,
-					Source:      EOLCollector,
-					DocumentRef: events.GetDocRef(payload),
-				},
-			}
-
-			if docChannel != nil {
-				docChannel <- doc
-			}
-			generatedEOLDocs = append(generatedEOLDocs, doc)
+			},
 		}
+
+		payload, err := json.Marshal(statement)
+		if err != nil {
+			return nil, fmt.Errorf("unable to marshal attestation: %w", err)
+		}
+
+		doc := &processor.Document{
+			Blob:   payload,
+			Type:   processor.DocumentITE6EOL,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector:   EOLCollector,
+				Source:      EOLCollector,
+				DocumentRef: events.GetDocRef(payload),
+			},
+		}
+
+		if docChannel != nil {
+			docChannel <- doc
+		}
+		generatedEOLDocs = append(generatedEOLDocs, doc)
 
 		packMap[purl] = true
 	}
@@ -393,36 +408,14 @@ func fetchProductEOL(ctx context.Context, client *http.Client, product string) (
 	return eolData, nil
 }
 
-func findMatchingProduct(purl string, products []string) (string, bool) {
-	parts := strings.Split(purl, "/")
-	if len(parts) < 2 {
-		return "", false
-	}
-
-	packageName := strings.Split(parts[1], "@")[0]
-	packageName = strings.ToLower(packageName)
+func findMatchingProduct(pkgInput *generated.PkgInputSpec, products []string) (string, bool) {
+	packageName := strings.ToLower(pkgInput.Name)
 
 	for _, product := range products {
-		if strings.Contains(packageName, product) || strings.Contains(product, packageName) {
+		if product == packageName {
 			return product, true
 		}
 	}
 
 	return "", false
-}
-
-func extractCycleAndVersion(purl string) (string, string) {
-	parts := strings.Split(purl, "@")
-	if len(parts) < 2 {
-		return "", ""
-	}
-
-	version := parts[1]
-	versionParts := strings.Split(version, ".")
-
-	if len(versionParts) > 0 {
-		return versionParts[0], version
-	}
-
-	return "", version
 }
