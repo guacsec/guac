@@ -475,6 +475,7 @@ type ComplexityRoot struct {
 		ID         func(childComplexity int) int
 		Purl       func(childComplexity int) int
 		Qualifiers func(childComplexity int) int
+		ReleasedAt func(childComplexity int) int
 		Subpath    func(childComplexity int) int
 		Version    func(childComplexity int) int
 	}
@@ -2830,6 +2831,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PackageVersion.Qualifiers(childComplexity), true
+
+	case "PackageVersion.releasedAt":
+		if e.complexity.PackageVersion.ReleasedAt == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.ReleasedAt(childComplexity), true
 
 	case "PackageVersion.subpath":
 		if e.complexity.PackageVersion.Subpath == nil {
@@ -7098,6 +7106,7 @@ type PackageVersion {
   id: ID!
   purl: String!
   version: String!
+  releasedAt: Time
   qualifiers: [PackageQualifier!]!
   subpath: String!
 }
@@ -7181,6 +7190,7 @@ input PkgInputSpec {
   namespace: String = ""
   name: String!
   version: String = ""
+  releasedAt: Time
   qualifiers: [PackageQualifierInputSpec!] = []
   subpath: String = ""
 }

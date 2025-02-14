@@ -5583,6 +5583,7 @@ type AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion 
 	Id         string                                                                                                 `json:"id"`
 	Purl       string                                                                                                 `json:"purl"`
 	Version    string                                                                                                 `json:"version"`
+	ReleasedAt *time.Time                                                                                             `json:"releasedAt"`
 	Qualifiers []AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
 	Subpath    string                                                                                                 `json:"subpath"`
 }
@@ -5600,6 +5601,11 @@ func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVers
 // GetVersion returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
 func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
 	return v.Version
+}
+
+// GetReleasedAt returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.ReleasedAt, and is useful for accessing the field via an interface.
+func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetReleasedAt() *time.Time {
+	return v.ReleasedAt
 }
 
 // GetQualifiers returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
@@ -23094,6 +23100,7 @@ func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNam
 type PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
 	Id         string                                                                                                                     `json:"id"`
 	Version    string                                                                                                                     `json:"version"`
+	ReleasedAt *time.Time                                                                                                                 `json:"releasedAt"`
 	Qualifiers []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
 	Subpath    string                                                                                                                     `json:"subpath"`
 }
@@ -23106,6 +23113,11 @@ func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNam
 // GetVersion returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
 func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
 	return v.Version
+}
+
+// GetReleasedAt returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.ReleasedAt, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetReleasedAt() *time.Time {
+	return v.ReleasedAt
 }
 
 // GetQualifiers returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
@@ -26727,6 +26739,7 @@ type PkgInputSpec struct {
 	Namespace  *string                     `json:"namespace"`
 	Name       string                      `json:"name"`
 	Version    *string                     `json:"version"`
+	ReleasedAt *time.Time                  `json:"releasedAt"`
 	Qualifiers []PackageQualifierInputSpec `json:"qualifiers"`
 	Subpath    *string                     `json:"subpath"`
 }
@@ -26742,6 +26755,9 @@ func (v *PkgInputSpec) GetName() string { return v.Name }
 
 // GetVersion returns PkgInputSpec.Version, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetVersion() *string { return v.Version }
+
+// GetReleasedAt returns PkgInputSpec.ReleasedAt, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetReleasedAt() *time.Time { return v.ReleasedAt }
 
 // GetQualifiers returns PkgInputSpec.Qualifiers, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetQualifiers() []PackageQualifierInputSpec { return v.Qualifiers }
@@ -31745,6 +31761,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -31851,6 +31868,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -31950,6 +31968,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32056,6 +32075,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32161,6 +32181,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32274,6 +32295,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32373,6 +32395,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32467,6 +32490,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32582,6 +32606,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32663,6 +32688,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32768,6 +32794,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32865,6 +32892,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -32973,6 +33001,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -33104,6 +33133,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -33250,6 +33280,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -33518,6 +33549,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -33613,6 +33645,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -36512,6 +36545,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -36990,6 +37024,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -37466,6 +37501,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -37899,6 +37935,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -37997,6 +38034,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -38188,6 +38226,7 @@ query PackageVersions ($filter: PkgSpec!) {
 				versions {
 					id
 					version
+					releasedAt
 					qualifiers {
 						key
 						value
@@ -38246,6 +38285,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -38314,6 +38354,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -38447,6 +38488,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -38877,6 +38919,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -38947,6 +38990,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -39036,6 +39080,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -39137,6 +39182,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -39224,6 +39270,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -39580,6 +39627,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value
@@ -39676,6 +39724,7 @@ fragment AllPkgTree on Package {
 				id
 				purl
 				version
+				releasedAt
 				qualifiers {
 					key
 					value

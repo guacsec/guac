@@ -96,6 +96,7 @@ type PackageVersion {
   id: ID!
   purl: String!
   version: String!
+  releasedAt: Time
   qualifiers: [PackageQualifier!]!
   subpath: String!
 }
@@ -179,6 +180,7 @@ input PkgInputSpec {
   namespace: String = ""
   name: String!
   version: String = ""
+  releasedAt: Time
   qualifiers: [PackageQualifierInputSpec!] = []
   subpath: String = ""
 }

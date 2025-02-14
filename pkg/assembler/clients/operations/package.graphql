@@ -108,6 +108,7 @@ query PackageVersions($filter: PkgSpec!) {
         versions {
           id
           version
+          releasedAt
           qualifiers {
             key
             value

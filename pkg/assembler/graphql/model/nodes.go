@@ -1464,6 +1464,7 @@ type PackageVersion struct {
 	ID         string              `json:"id"`
 	Purl       string              `json:"purl"`
 	Version    string              `json:"version"`
+	ReleasedAt *time.Time          `json:"releasedAt,omitempty"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
 	Subpath    string              `json:"subpath"`
 }
@@ -1554,6 +1555,7 @@ type PkgInputSpec struct {
 	Namespace  *string                      `json:"namespace,omitempty"`
 	Name       string                       `json:"name"`
 	Version    *string                      `json:"version,omitempty"`
+	ReleasedAt *time.Time                   `json:"releasedAt,omitempty"`
 	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers,omitempty"`
 	Subpath    *string                      `json:"subpath,omitempty"`
 }

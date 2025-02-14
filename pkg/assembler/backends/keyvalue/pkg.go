@@ -23,6 +23,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -59,6 +60,7 @@ type pkgVersion struct {
 	ThisID              string
 	Parent              string
 	Version             string
+	ReleasedAt          time.Time
 	Subpath             string
 	Qualifiers          map[string]string
 	SrcMapLinks         []string
@@ -467,6 +469,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 		Parent:     outName.ThisID,
 		Version:    nilToEmpty(input.PackageInput.Version),
 		Subpath:    nilToEmpty(input.PackageInput.Subpath),
+		ReleasedAt: *input.PackageInput.ReleasedAt,
 		Qualifiers: getQualifiersFromInput(input.PackageInput.Qualifiers),
 	}
 	c.m.RLock()
@@ -866,6 +869,7 @@ func (c *demoClient) buildPkgVersion(ctx context.Context, pkgNameNode *pkgName, 
 				ID:         pkgVer.ThisID,
 				Version:    pkgVer.Version,
 				Subpath:    pkgVer.Subpath,
+				ReleasedAt: &pkgVer.ReleasedAt,
 				Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
 			})
 		}
@@ -889,6 +893,7 @@ func (c *demoClient) buildPkgVersion(ctx context.Context, pkgNameNode *pkgName, 
 		pvs = append(pvs, &model.PackageVersion{
 			ID:         pkgVer.ThisID,
 			Version:    pkgVer.Version,
+			ReleasedAt: &pkgVer.ReleasedAt,
 			Subpath:    pkgVer.Subpath,
 			Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
 		})
@@ -919,6 +924,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 		pvl = append(pvl, &model.PackageVersion{
 			ID:         versionNode.ThisID,
 			Version:    versionNode.Version,
+			ReleasedAt: &versionNode.ReleasedAt,
 			Subpath:    versionNode.Subpath,
 			Qualifiers: getCollectedPackageQualifiers(versionNode.Qualifiers),
 		})
@@ -1016,6 +1022,7 @@ func (c *demoClient) getPackageVerFromInput(ctx context.Context, input model.Pkg
 		Parent:     pkgN.ThisID,
 		Version:    nilToEmpty(input.Version),
 		Subpath:    nilToEmpty(input.Subpath),
+		ReleasedAt: *input.ReleasedAt,
 		Qualifiers: getQualifiersFromInput(input.Qualifiers),
 	}
 	pkgVer, err := byKeykv[*pkgVersion](ctx, pkgVerCol, inVer.Key(), c)

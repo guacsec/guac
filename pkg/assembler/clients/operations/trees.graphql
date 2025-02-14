@@ -32,6 +32,7 @@ fragment AllPkgTree on Package {
         id
         purl
         version
+        releasedAt
         qualifiers {
           key
           value
