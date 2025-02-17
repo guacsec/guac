@@ -122,7 +122,7 @@ jobs:
       - name: Install atlas
         uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@051d91933864810ecd5e2ea2cfd98f6a5bca5347 # tag=v3.2.0
+        uses: golangci/golangci-lint-action@2226d7cb06a077cd73e56eedd38eecad18e5d837 # tag=v3.2.0
         with:
           only-new-issues: true
           skip-cache: true
