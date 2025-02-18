@@ -756,8 +756,10 @@ github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa h1:jozR3igKlnYCj
 github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa/go.mod h1:hAF0iLZy4td2EX+/8Tw+4nodhlMrwN3HupfaXj3zkGo=
 github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a h1:KikTa6HtAK8cS1qjvUvvq4QO21QnwC+EfvB+OAuZ/ZU=
 github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a/go.mod h1:AuYgA5Kyo4c7HfUmvRGs/6rGlMMV/6B1bVnB9JxJEEg=
-github.com/sigstore/sigstore v1.8.12 h1:S8xMVZbE2z9ZBuQUEG737pxdLjnbOIcFi5v9UFfkJFc=
-github.com/sigstore/sigstore v1.8.12/go.mod h1:+PYQAa8rfw0QdPpBcT+Gl3egKD9c+TUgAlF12H3Nmjo=
+github.com/sigstore/protobuf-specs v0.4.0 h1:yoZbdh0kZYKOSiVbYyA8J3f2wLh5aUk2SQB7LgAfIdU=
+github.com/sigstore/protobuf-specs v0.4.0/go.mod h1:FKW5NYhnnFQ/Vb9RKtQk91iYd0MKJ9AxyqInEwU6+OI=
+github.com/sigstore/sigstore v1.8.14 h1:JqDkQ7PQCiCOerPRSkYr57Rj9sZO59fOcXDxvLsbNQw=
+github.com/sigstore/sigstore v1.8.14/go.mod h1:2lXojNsjZjkqu1//FWxq7qUcPB8Lq1KsR5hc+GkcC/4=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/sirupsen/logrus v1.7.0/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
