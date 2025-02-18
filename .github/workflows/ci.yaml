@@ -128,14 +128,6 @@ jobs:
           skip-cache: true
       - name: Check markdown format
         run: make format
-      - name: MM debug
-        run: git status -s
-      - name: MM debug
-        run: atlas version
-      - name: Check that all linted text is up to date
-        run: make generated_up_to_date || true
-      - name: MM debug
-        run: git status -s
       - name: Check that all linted text is up to date
         run: make generated_up_to_date
       - name: Run atlas Lint
