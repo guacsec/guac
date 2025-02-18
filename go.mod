@@ -299,7 +299,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/ProtonMail/gluon v0.17.0
 	github.com/XSAM/otelsql v0.36.0
-	github.com/arangodb/go-driver v1.6.4
+	github.com/arangodb/go-driver v1.6.5
 	github.com/aws/aws-sdk-go v1.55.6
 	github.com/aws/aws-sdk-go-v2 v1.36.1
 	github.com/aws/aws-sdk-go-v2/config v1.29.2
