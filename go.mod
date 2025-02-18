@@ -342,7 +342,7 @@ require (
 	github.com/regclient/regclient v0.8.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sigstore/sigstore v1.8.12
+	github.com/sigstore/sigstore v1.8.14
 	github.com/spdx/tools-golang v0.5.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
@@ -363,5 +363,6 @@ require (
 require (
 	github.com/oasdiff/yaml v0.0.0-20241210131133-6b86fb107d80 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349 // indirect
+	github.com/sigstore/protobuf-specs v0.4.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 )
