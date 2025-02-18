@@ -105,8 +105,8 @@ github.com/ProtonMail/go-crypto v1.1.5/go.mod h1:rA3QumHc/FZ8pAHreoekgiAbzpNsfQA
 github.com/PuerkitoBio/goquery v1.9.3 h1:mpJr/ikUA9/GNJB/DBZcGeFDXUtosHRyRrwh7KGdTG0=
 github.com/PuerkitoBio/goquery v1.9.3/go.mod h1:1ndLHPdTz+DyQPICCWYlYQMPl0oXZj0G6D4LCYA6u4U=
 github.com/RaveNoX/go-jsoncommentstrip v1.0.0/go.mod h1:78ihd09MekBnJnxpICcwzCMzGrKSKYe4AqU6PDYYpjk=
-github.com/XSAM/otelsql v0.36.0 h1:SvrlOd/Hp0ttvI9Hu0FUWtISTTDNhQYwxe8WB4J5zxo=
-github.com/XSAM/otelsql v0.36.0/go.mod h1:fo4M8MU+fCn/jDfu+JwTQ0n6myv4cZ+FU5VxrllIlxY=
+github.com/XSAM/otelsql v0.37.0 h1:ya5RNw028JW0eJW8Ma4AmoKxAYsJSGuNVbC7F1J457A=
+github.com/XSAM/otelsql v0.37.0/go.mod h1:LHbCu49iU8p255nCn1oi04oX2UjSoRcUMiKEHo2a5qM=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agnivade/levenshtein v1.2.0 h1:U9L4IOT0Y3i0TIlUIDJ7rVUziKi/zPbrJGaFrtYH3SY=
