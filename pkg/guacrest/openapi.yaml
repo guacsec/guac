@@ -28,50 +28,6 @@ paths:
             application/json:
               schema:
                 type: string
-  "/query/dependencies":
-    get:
-      summary: Retrieve transitive dependencies 
-      description: > 
-        Find the transitive dependencies of the input. The HasSBOM and HasSLSA
-        predicates are used as the dependency relationship and the IsOccurrence and 
-        PkgEqual predicates are used to find consider equivalent packages.
-      operationId: retrieveDependencies
-      parameters:
-        - $ref: "#/components/parameters/PaginationSpec"
-        - name: linkCondition
-          description: > 
-            Whether links between nouns must be made by digest or if they 
-            can be made just by name (i.e. purl). Specify 'name' to allow using
-            SBOMs that don't provide the digest of the subject. The default is 
-            'digest'. To search by purl, 'name' must be specified.
-          in: query
-          required: false
-          schema:
-            type: string 
-            enum: 
-              - digest
-              - name
-        - name: purl
-          description: The purl of the dependent package.
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: digest
-          description: The digest of the dependent package.
-          in: query
-          required: false
-          schema:
-            type: string
-      responses:
-        "200":
-          $ref: "#/components/responses/PurlList"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-        "502":
-          $ref: "#/components/responses/BadGateway"
   "/analysis/dependencies":
     get:
       summary: Identify the most important dependencies
@@ -99,7 +55,129 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
-
+  "/v0/package/{purl}":
+    get:
+      summary: Get all purls related to the given purl
+      description: >
+        If a partial purl, pkg:foo/bar is passed in, then it would find all purls 
+        associated with the given purl, such as pkg:foo/bar@1.0, and pkg:foo/bar@2.0.
+        Searching via qualifiers is similar. If searching for pkg:foo/bar@a=b 
+        the endpoint will return both pkg:foo/bar@a=b and pkg:foo/bar@c=d&a=b.
+      operationId: getPackagePurls
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (purl)
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/v0/package/{purl}/vulns":
+    get:
+      summary: Get vulnerabilities for a Package URL (purl)
+      description: >
+        This endpoint will find all vulnerabilities for the purl passed in. 
+        If the `includeDependencies` flag is set to true, it will also include 
+        vulnerabilities of the dependencies of the purl passed in.
+      operationId: getPackageVulns
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (purl)
+          schema:
+            type: string
+        - name: includeDependencies
+          in: query
+          required: false
+          description: >
+            A flag to include vulnerabilities of the dependencies. If true, the 
+            response will include vulnerabilities for the purl and its dependencies 
+            instead of the vulnerabilities of just the purl.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/v0/package/{purl}/dependencies":
+    get:
+      summary: Get dependencies for a specific Package URL (purl)
+      description: >
+        This endpoint will find all dependencies of the purl passed in, including both direct 
+        and indirect (transitive) dependencies. For example, if package A depends on B, and B 
+        depends on C, then requesting dependencies for A will return both B and C.
+      operationId: getPackageDeps
+      parameters:
+        - name: purl
+          in: path
+          required: true
+          description: URL-encoded Package URL (purl)
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/v0/artifact/{digest}/vulns":
+    get:
+      summary: Get vulnerabilities for an artifact, identified by a digest
+      operationId: getArtifactVulns
+      parameters:
+        - name: digest
+          in: path
+          required: true
+          description: Digest, the second part from artifact identifier in the format <algorithm:digest>
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/v0/artifact/{digest}/dependencies":
+    get:
+      summary: Get dependencies for an artifact, identified by a digest
+      operationId: getArtifactDeps
+      parameters:
+        - name: digest
+          in: path
+          required: true
+          description: Digest, the second part from artifact identifier in the format <algorithm:digest>
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
 
 components:
   parameters:
@@ -148,6 +226,51 @@ components:
           $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
+    Vulnerability:
+      type: object
+      required:
+        - package
+        - vulnerability
+        - metadata
+      properties:
+        package:
+          type: string
+        vulnerability:
+          $ref: '#/components/schemas/VulnerabilityDetails'
+        metadata:
+          $ref: '#/components/schemas/ScanMetadata'
+    VulnerabilityDetails:
+      type: object
+      required:
+        - vulnerabilityIDs
+      properties:
+        type:
+          type: string
+        vulnerabilityIDs:
+          type: array
+          items:
+            type: string
+          description: >
+            A list of vulnerability identifiers. These can be CVE IDs or other 
+            formats used to identify vulnerabilities.
+    ScanMetadata:
+      type: object
+      properties:
+        dbUri:
+          type: string
+        dbVersion:
+          type: string
+        scannerUri:
+          type: string
+        scannerVersion:
+          type: string
+        timeScanned:
+          type: string
+          format: date-time
+        origin:
+          type: string
+        collector:
+          type: string
   responses:
     # for code 200
     PurlList:
@@ -174,6 +297,22 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/PackageName"
+    VulnerabilityList:
+      description: A list of vulnerabilities associated with the package or artifact
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Vulnerability"
+    DependencyList:
+      description: A list of dependencies associated with the package or artifact
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
     # intended for code 400, client side error
     BadRequest:
       description: Bad request, such as from invalid or missing parameters
