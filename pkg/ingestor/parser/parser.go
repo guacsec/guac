@@ -32,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/eol"
 	"github.com/guacsec/guac/pkg/ingestor/parser/opaque"
 	"github.com/guacsec/guac/pkg/ingestor/parser/open_vex"
+	"github.com/guacsec/guac/pkg/ingestor/parser/reference"
 	"github.com/guacsec/guac/pkg/ingestor/parser/scorecard"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
@@ -50,6 +51,7 @@ func init() {
 	_ = RegisterDocumentParser(csaf.NewCsafParser, processor.DocumentCsaf)
 	_ = RegisterDocumentParser(open_vex.NewOpenVEXParser, processor.DocumentOpenVEX)
 	_ = RegisterDocumentParser(eol.NewEOLCertificationParser, processor.DocumentITE6EOL)
+	_ = RegisterDocumentParser(reference.NewReferenceParser, processor.DocumentITE6Reference)
 	_ = RegisterDocumentParser(opaque.NewOpaqueParser, processor.DocumentOpaque)
 }
 
