@@ -292,3 +292,14 @@ query CertifyLegalQ1 {
         ...allCertifyLegalTree
     }
 }
+
+
+query EndOfLifeQ1 {
+    HasMetadata(hasMetadataSpec: {subject: {package: {type: "deb", namespace: "debian", name: "openssl", version: "1.1.1n-0+deb11u3"}}}) @filter(keyName: "key", operation: CONTAINS, value: "endoflife") {
+        subject {
+            ...allPkgTree
+        }
+    		key
+    		value
+    }
+}

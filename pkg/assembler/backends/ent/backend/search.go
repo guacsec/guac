@@ -168,10 +168,8 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 			Aggregate(func(s *sql.Selector) string {
 				t := sql.Table(hasmetadata.Table)
 				s.LeftJoin(t).On(s.C(packageversion.FieldID), t.C(hasmetadata.FieldPackageVersionID))
-				s.Where(sql.And(
-					sql.NotNull(t.C(hasmetadata.FieldTimestamp)),
-					sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"),
-				))
+				// only consider "endoflife" metadata
+				s.Where(sql.EQ(t.C(hasmetadata.FieldKey), "endoflife"))
 				return sql.As(sql.Max(t.C(hasmetadata.FieldTimestamp)), "max")
 			}).
 			Scan(ctx, &pkgLatestScan)
