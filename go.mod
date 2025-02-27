@@ -47,7 +47,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.25.1-0.20240717145915-af51d3945208 // indirect
+	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83 // indirect
 	cel.dev/expr v0.19.1 // indirect
 	cloud.google.com/go/auth v0.14.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
@@ -274,9 +274,9 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.34.0
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/mod v0.22.0 // indirect
+	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/term v0.29.0 // indirect
-	golang.org/x/tools v0.27.0 // indirect
+	golang.org/x/tools v0.30.0 // indirect
 	golang.org/x/vuln v1.0.4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250124145028-65684f501c47 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250207221924-e9438ea467c6 // indirect
@@ -292,7 +292,7 @@ require (
 require (
 	deps.dev/api/v3 v3.0.0-20250121055735-18bf0292bfe2
 	entgo.io/contrib v0.6.0
-	entgo.io/ent v0.14.1
+	entgo.io/ent v0.14.3
 	github.com/99designs/gqlgen v0.17.64
 	github.com/CycloneDX/cyclonedx-go v0.9.2
 	github.com/Khan/genqlient v0.7.0
@@ -361,8 +361,10 @@ require (
 )
 
 require (
+	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/oasdiff/yaml v0.0.0-20241210131133-6b86fb107d80 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349 // indirect
 	github.com/sigstore/protobuf-specs v0.4.0 // indirect
+	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 )
