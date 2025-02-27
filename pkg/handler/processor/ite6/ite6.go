@@ -35,7 +35,8 @@ func (e *ITE6Processor) ValidateSchema(i *processor.Document) error {
 		i.Type != processor.DocumentITE6SLSA &&
 		i.Type != processor.DocumentITE6Vul &&
 		i.Type != processor.DocumentITE6ClearlyDefined &&
-		i.Type != processor.DocumentITE6EOL {
+		i.Type != processor.DocumentITE6EOL &&
+		i.Type != processor.DocumentITE6Reference {
 		return fmt.Errorf("expected ITE6 document type, actual document type: %v", i.Type)
 	}
 

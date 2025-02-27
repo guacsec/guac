@@ -608,3 +608,81 @@ var ITE6EOLPython = []byte(`{
         }
     }
 }`)
+
+// ITE6ReferenceSingle is a test document for the Reference ingestor with a single reference
+var ITE6ReferenceSingle = []byte(`{
+    "type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "uri": "pkg:npm/example-pkg@1.0.0"
+        }
+    ],
+    "predicateType": "https://in-toto.io/attestation/reference/v0.1",
+    "predicate": {
+        "attester": {
+            "id": "attester-123"
+        },
+        "references": [
+            {
+                "downloadLocation": "https://example.com/downloads/pkg.tar.gz",
+                "digest": {
+                    "sha256": "abcd1234..."
+                },
+                "mediaType": "application/x-tar"
+            }
+        ]
+    }
+}`)
+
+// ITE6ReferenceMultiple is a test document for the Reference ingestor with multiple references
+var ITE6ReferenceMultiple = []byte(`{
+    "type": "https://in-toto.io/Statement/v1",
+    "subject": [
+        {
+            "uri": "pkg:pypi/example-python@3.9.0"
+        }
+    ],
+    "predicateType": "https://in-toto.io/attestation/reference/v0.1",
+    "predicate": {
+        "attester": {
+            "id": "attester-xyz"
+        },
+        "references": [
+            {
+                "downloadLocation": "https://example.com/artifacts/python-ref1.tgz",
+                "digest": {
+                    "sha256": "aa1111111111111111111111111111111111111111111111111111111111111111"
+                },
+                "mediaType": "application/octet-stream"
+            },
+            {
+                "downloadLocation": "https://example.com/artifacts/python-ref2.whl",
+                "digest": {
+                    "sha256": "bb2222222222222222222222222222222222222222222222222222222222222222"
+                },
+                "mediaType": "application/zip"
+            }
+        ]
+    }
+}`)
+
+// ITE6ReferenceNoSubject is a test document for the Reference ingestor with no subject provided
+var ITE6ReferenceNoSubject = []byte(`{
+    "type": "https://in-toto.io/Statement/v1",
+    "subject": [],
+    "predicateType": "https://in-toto.io/attestation/reference/v0.1",
+    "predicate": {
+        "attester": {
+            "id": "attester-nobody"
+        },
+        "references": [
+            {
+                "downloadLocation": "https://example.com/artifacts/no-subject.tgz",
+                "digest": {
+                    "sha256": "no-subject-digest"
+                },
+                "mediaType": "application/octet-stream"
+            }
+        ]
+    }
+}`)
