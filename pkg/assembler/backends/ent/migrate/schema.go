@@ -1329,21 +1329,16 @@ func init() {
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
-	BillOfMaterialsIncludedSoftwarePackagesTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
-	BillOfMaterialsIncludedSoftwareArtifactsTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[1].RefTable = DependenciesTable
-	BillOfMaterialsIncludedDependenciesTable.Annotation = &entsql.Annotation{}
 	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[1].RefTable = OccurrencesTable
-	BillOfMaterialsIncludedOccurrencesTable.Annotation = &entsql.Annotation{}
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
-	SlsaAttestationBuiltFromTable.Annotation = &entsql.Annotation{}
 }
