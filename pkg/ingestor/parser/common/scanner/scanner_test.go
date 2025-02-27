@@ -555,7 +555,7 @@ func TestPurlsEOLScan(t *testing.T) {
 						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
 						HasMetadata: &generated.HasMetadataInputSpec{
 							Key:           "endoflife",
-							Value:         "product:python,cycle:3.13,version:3.9.5,isEOL:false,eolDate:2029-10-31,lts:false,latest:3.13.0,releaseDate:2024-10-07",
+							Value:         "product:python,cycle:3.9,version:3.9.5,isEOL:false,eolDate:2025-10-31,lts:false,latest:3.9.21,releaseDate:2020-10-05",
 							Justification: "Retrieved from endoflife.date",
 							Origin:        "GUAC EOL Certifier",
 							Collector:     "GUAC",
@@ -616,7 +616,7 @@ func TestPurlsEOLScan(t *testing.T) {
 						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
 						HasMetadata: &generated.HasMetadataInputSpec{
 							Key:           "endoflife",
-							Value:         "product:python,cycle:3.13,version:3.9.5,isEOL:false,eolDate:2029-10-31,lts:false,latest:3.13.0,releaseDate:2024-10-07",
+							Value:         "product:python,cycle:3.9,version:3.9.5,isEOL:false,eolDate:2025-10-31,lts:false,latest:3.9.21,releaseDate:2020-10-05",
 							Justification: "Retrieved from endoflife.date",
 							Origin:        "GUAC EOL Certifier",
 							Collector:     "GUAC",
