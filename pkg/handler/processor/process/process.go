@@ -60,6 +60,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Vul)
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6ClearlyDefined)
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6EOL)
+	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Reference)
 	_ = RegisterDocumentProcessor(&dsse.DSSEProcessor{}, processor.DocumentDSSE)
 	_ = RegisterDocumentProcessor(&spdx.SPDXProcessor{}, processor.DocumentSPDX)
 	_ = RegisterDocumentProcessor(&csaf.CSAFProcessor{}, processor.DocumentCsaf)
