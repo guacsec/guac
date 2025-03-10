@@ -6,7 +6,7 @@ toolchain go1.23.5
 
 require (
 	cloud.google.com/go/storage v1.50.0
-	github.com/fsouza/fake-gcs-server v1.52.1
+	github.com/fsouza/fake-gcs-server v1.52.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
 	github.com/secure-systems-lab/go-securesystemslib v0.9.0
