@@ -337,7 +337,7 @@ require (
 	github.com/pandatix/go-cvss v0.6.2
 	github.com/pitabwire/natspubsub v0.1.7
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/client_golang v1.21.1
 	github.com/redis/go-redis/v9 v9.7.1
 	github.com/regclient/regclient v0.8.2
 	github.com/segmentio/kafka-go v0.4.47
