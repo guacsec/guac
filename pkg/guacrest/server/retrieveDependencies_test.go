@@ -1,18 +1,16 @@
-//
 // Copyright 2024 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package server_test
 
 import (
@@ -20,38 +18,26 @@ import (
 	"context"
 	"testing"
 
-	cmp "github.com/google/go-cmp/cmp"
+	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 
-	"github.com/google/go-cmp/cmp/cmpopts"
 	. "github.com/guacsec/guac/internal/testing/graphqlClients"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
-	api "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/server"
 	"github.com/guacsec/guac/pkg/logging"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-// Tests the edges in ByName that are not in ByDigest
-func Test_RetrieveDependencies(t *testing.T) {
+// Tests the dependencies retrieval by package purl.
+func Test_RetrieveDependencies_ByPurl(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name string
-		data GuacData
-
-		// Only specify Purl or Digest. The test will set linkCondition, because both are tested
-		input api.RetrieveDependenciesParams
-
-		expectedByName   []string
-		expectedByDigest []string
+		name           string
+		data           GuacData
+		purl           string
+		expectedByName []string
 	}{
-		/*******
-		 * Tests of specific edges.
-		 *
-		 * The test case name is the edge or edges intended to be tested, not necessarily all
-		 * of the edges in the graph. Equivalence edges (e.g. IsOccurrence) can't be
-		 * tested without some dependency edges, so some edges / graphs can't be tested in
-		 * isolation.
-		 *******/
 		{
 			name: "Package -> SBOM -> package",
 			data: GuacData{
@@ -60,9 +46,8 @@ func Test_RetrieveDependencies(t *testing.T) {
 					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
 				},
 			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar"},
-			expectedByDigest: []string{},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar"},
 		},
 		{
 			name: "Package -> SBOM -> package, package",
@@ -72,22 +57,8 @@ func Test_RetrieveDependencies(t *testing.T) {
 					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar", "pkg:guac/baz"}},
 				},
 			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar", "pkg:guac/baz"},
-			expectedByDigest: []string{},
-		},
-		{
-			name: "Artifact -> SBOM -> package",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/bar"},
-				Artifacts: []string{"sha-xyz"},
-				HasSboms: []HasSbom{
-					{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-xyz")},
-			expectedByName:   []string{"pkg:guac/bar"},
-			expectedByDigest: []string{"pkg:guac/bar"},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar", "pkg:guac/baz"},
 		},
 		{
 			name: "Package -> SBOM -> package -> SBOM -> package",
@@ -98,64 +69,22 @@ func Test_RetrieveDependencies(t *testing.T) {
 					{Subject: "pkg:guac/bar", IncludedSoftware: []string{"pkg:guac/baz"}},
 				},
 			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar", "pkg:guac/baz"},
-			expectedByDigest: []string{},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar", "pkg:guac/baz"},
 		},
 		{
-			name: "Artifact -> SBOM -> artifact -> SBOM -> package",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/foo"},
-				Artifacts: []string{"sha-xyz", "sha-123"},
-				HasSboms: []HasSbom{
-					{Subject: "sha-xyz", IncludedSoftware: []string{"sha-123"}},
-					{Subject: "sha-123", IncludedSoftware: []string{"pkg:guac/foo"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-xyz")},
-			expectedByName:   []string{"pkg:guac/foo"},
-			expectedByDigest: []string{"pkg:guac/foo"},
-		},
-		{
-			name: "Artifact -> SBOM -> package -> SBOM -> package",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
-				Artifacts: []string{"sha-xyz"},
-				HasSboms: []HasSbom{
-					{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}},
-					{Subject: "pkg:guac/bar", IncludedSoftware: []string{"pkg:guac/foo"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-xyz")},
-			expectedByName:   []string{"pkg:guac/foo", "pkg:guac/bar"},
-			expectedByDigest: []string{"pkg:guac/bar"},
-		},
-		{
-			name: "artifact -> occurrence -> package",
-			data: GuacData{
-				Packages:      []string{"pkg:guac/bar"},
-				Artifacts:     []string{"sha-123", "sha-xyz"},
-				HasSboms:      []HasSbom{{Subject: "sha-xyz", IncludedSoftware: []string{"sha-123"}}},
-				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
-			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-xyz")},
-			expectedByName:   []string{"pkg:guac/bar"},
-			expectedByDigest: []string{"pkg:guac/bar"},
-		},
-		{
-			name: "Package -> occurrence -> artifact",
+			name: "Package -> occurrence -> digest",
 			data: GuacData{
 				Packages:      []string{"pkg:guac/foo", "pkg:guac/bar"},
 				Artifacts:     []string{"sha-xyz"},
-				HasSboms:      []HasSbom{{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}}},
+				HasSboms:      []HasSbom{{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}}},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-xyz"}},
 			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar"},
-			expectedByDigest: []string{},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar"},
 		},
 		{
-			name: "package -> occurrence -> artifact, artifact",
+			name: "package -> occurrence -> digest, digest",
 			data: GuacData{
 				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
 				Artifacts: []string{"sha-xyz", "sha-123"},
@@ -168,20 +97,206 @@ func Test_RetrieveDependencies(t *testing.T) {
 					{Subject: "pkg:guac/foo", Artifact: "sha-123"},
 				},
 			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar", "pkg:guac/baz"},
-			expectedByDigest: []string{},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar", "pkg:guac/baz"},
 		},
 		{
-			name: "Artifact -> hashEqual -> artifact",
+			name: "Dependent is not considered a dependency",
+			data: GuacData{
+				Packages: []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
+				HasSboms: []HasSbom{
+					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
+					{Subject: "pkg:guac/baz", IncludedSoftware: []string{"pkg:guac/bar"}},
+				},
+			},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar"},
+		},
+		{
+			name: "Transitive dependents are not considered dependencies",
+			data: GuacData{
+				Packages: []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
+				HasSboms: []HasSbom{
+					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
+					{Subject: "pkg:guac/bar", IncludedSoftware: []string{"pkg:guac/baz"}},
+				},
+			},
+			purl:           "pkg:guac/baz",
+			expectedByName: []string{},
+		},
+		{
+			name: "Packages with same names but different digests",
+			data: GuacData{
+				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
+				Artifacts: []string{"sha-123", "sha-xyz"},
+				HasSboms: []HasSbom{
+					{
+						Subject:               "pkg:guac/foo",
+						IncludedSoftware:      []string{"pkg:guac/bar"},
+						IncludedIsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
+					},
+					{
+						Subject:          "sha-xyz",
+						IncludedSoftware: []string{"pkg:guac/baz"},
+					},
+				},
+				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-xyz"}},
+			},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar", "pkg:guac/baz"},
+		},
+		{
+			name: "Package IsOccurrence is not considered a dependency",
+			data: GuacData{
+				Packages:      []string{"pkg:guac/foo"},
+				Artifacts:     []string{"sha-123"},
+				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-123"}},
+			},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{},
+		},
+		{
+			name: "Package with version is not confused for package without version",
+			data: GuacData{
+				Packages: []string{"pkg:guac/foo", "pkg:guac/foo@v1", "pkg:guac/bar", "pkg:guac/bar@v1"},
+				HasSboms: []HasSbom{
+					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar@v1"}},
+					{Subject: "pkg:guac/foo@v1", IncludedSoftware: []string{"pkg:guac/bar"}},
+				},
+			},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar@v1"},
+		},
+		{
+			name: "Package without version is not confused for package with version",
+			data: GuacData{
+				Packages: []string{"pkg:guac/foo", "pkg:guac/foo@v1", "pkg:guac/bar", "pkg:guac/bar@v1"},
+				HasSboms: []HasSbom{
+					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
+					{Subject: "pkg:guac/foo@v1", IncludedSoftware: []string{"pkg:guac/bar@v1"}},
+				},
+			},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:guac/bar"},
+		},
+		{
+			name: "Endpoint works for OCI purl",
+			data: GuacData{
+				Packages: []string{
+					"pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+					"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest",
+				},
+				HasSboms: []HasSbom{{
+					Subject:          "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+					IncludedSoftware: []string{"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
+				}},
+			},
+			purl:           "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+			expectedByName: []string{"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
+		},
+		{
+			name: "Non-canonical purl may not round trip",
+			data: GuacData{
+				Packages: []string{"pkg:guac/foo", "pkg:github/Package-url/purl-Spec"},
+				HasSboms: []HasSbom{{
+					Subject:          "pkg:guac/foo",
+					IncludedSoftware: []string{"pkg:github/Package-url/purl-Spec"},
+				}},
+			},
+			purl:           "pkg:guac/foo",
+			expectedByName: []string{"pkg:github/package-url/purl-spec"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gqlClient := SetupTest(t)
+			Ingest(ctx, t, gqlClient, tt.data)
+
+			resByName, err := server.GetDepsForPackage(ctx, gqlClient, tt.purl)
+			if err != nil {
+				t.Fatalf("Endpoint returned unexpected error: %v", err)
+			}
+
+			// Check the output
+			var purls []string
+			for _, purl := range resByName {
+				purls = append(purls, purl)
+			}
+			if !cmp.Equal(purls, tt.expectedByName, cmpopts.EquateEmpty(), cmpopts.SortSlices(stdcmp.Less[string])) {
+				t.Errorf("RetrieveDependencies with byName returned %v, but wanted %v", purls, tt.expectedByName)
+			}
+		})
+	}
+}
+
+// Tests the dependencies retrieval by artifact digest.
+func Test_RetrieveDependencies_ByDigest(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	tests := []struct {
+		name             string
+		data             GuacData
+		digest           string
+		expectedByDigest []string
+	}{
+		{
+			name: "Digest -> SBOM -> package",
+			data: GuacData{
+				Packages:  []string{"pkg:guac/bar"},
+				Artifacts: []string{"sha-xyz"},
+				HasSboms: []HasSbom{
+					{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}},
+				},
+			},
+			digest:           "sha-xyz",
+			expectedByDigest: []string{"pkg:guac/bar"},
+		},
+		{
+			name: "Artifact -> SBOM -> digest -> SBOM -> package",
+			data: GuacData{
+				Packages:  []string{"pkg:guac/foo"},
+				Artifacts: []string{"sha-xyz", "sha-123"},
+				HasSboms: []HasSbom{
+					{Subject: "sha-xyz", IncludedSoftware: []string{"sha-123"}},
+					{Subject: "sha-123", IncludedSoftware: []string{"pkg:guac/foo"}},
+				},
+			},
+			digest:           "sha-xyz",
+			expectedByDigest: []string{"pkg:guac/foo"},
+		},
+		{
+			name: "Artifact -> SBOM -> package -> SBOM -> package",
+			data: GuacData{
+				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
+				Artifacts: []string{"sha-xyz"},
+				HasSboms: []HasSbom{
+					{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}},
+					{Subject: "pkg:guac/bar", IncludedSoftware: []string{"pkg:guac/foo"}},
+				},
+			},
+			digest:           "sha-xyz",
+			expectedByDigest: []string{"pkg:guac/bar"},
+		},
+		{
+			name: "digest -> occurrence -> package",
+			data: GuacData{
+				Packages:      []string{"pkg:guac/bar"},
+				Artifacts:     []string{"sha-123", "sha-xyz"},
+				HasSboms:      []HasSbom{{Subject: "sha-xyz", IncludedSoftware: []string{"sha-123"}}},
+				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
+			},
+			digest:           "sha-xyz",
+			expectedByDigest: []string{"pkg:guac/bar"},
+		},
+		{
+			name: "Artifact -> hashEqual -> digest",
 			data: GuacData{
 				Packages:   []string{"pkg:guac/foo"},
 				Artifacts:  []string{"sha-123", "sha-456"},
 				HasSboms:   []HasSbom{{Subject: "sha-456", IncludedSoftware: []string{"pkg:guac/foo"}}},
 				HashEquals: []HashEqual{{ArtifactA: "sha-123", ArtifactB: "sha-456"}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo"},
+			digest:           "sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -198,26 +313,7 @@ func Test_RetrieveDependencies(t *testing.T) {
 					{ArtifactA: "sha-123", ArtifactB: "sha-789"},
 				},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo", "pkg:guac/bar"},
-			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
-		},
-		{
-			name: "Artifact -> hashEqual -> artifact -> hashEqual -> artifact",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
-				Artifacts: []string{"sha-123", "sha-456", "sha-789"},
-				HasSboms: []HasSbom{
-					{Subject: "sha-456", IncludedSoftware: []string{"pkg:guac/foo"}},
-					{Subject: "sha-789", IncludedSoftware: []string{"pkg:guac/bar"}},
-				},
-				HashEquals: []HashEqual{
-					{ArtifactA: "sha-123", ArtifactB: "sha-456"},
-					{ArtifactA: "sha-456", ArtifactB: "sha-789"},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo", "pkg:guac/bar"},
+			digest:           "sha-123",
 			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
 		},
 		{
@@ -229,8 +325,7 @@ func Test_RetrieveDependencies(t *testing.T) {
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-xyz"}},
 				HasSlsas:      []HasSlsa{{Subject: "sha-123", BuiltBy: "GHA", BuiltFrom: []string{"sha-xyz"}}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo"},
+			digest:           "sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -245,15 +340,11 @@ func Test_RetrieveDependencies(t *testing.T) {
 				},
 				HasSlsas: []HasSlsa{{Subject: "sha-123", BuiltBy: "GHA", BuiltFrom: []string{"sha-xyz", "sha-abc"}}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo", "pkg:guac/bar"},
+			digest:           "sha-123",
 			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
 		},
-		/*******
-		 * Test some edge cases
-		 *******/
 		{
-			name: "Both Package and occurrence artifact in SBOM does not lead to duplicate packages",
+			name: "Both Package and occurrence digest in SBOM does not lead to duplicate packages",
 			data: GuacData{
 				Packages:  []string{"pkg:guac/bar"},
 				Artifacts: []string{"sha-123", "sha-xyz"},
@@ -263,89 +354,8 @@ func Test_RetrieveDependencies(t *testing.T) {
 					IncludedIsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
 				}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-xyz")},
-			expectedByName:   []string{"pkg:guac/bar"},
+			digest:           "sha-xyz",
 			expectedByDigest: []string{"pkg:guac/bar"},
-		},
-		{
-			name: "Dependent is not considered a dependency",
-			data: GuacData{
-				Packages: []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
-				HasSboms: []HasSbom{
-					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
-					{Subject: "pkg:guac/baz", IncludedSoftware: []string{"pkg:guac/bar"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar"},
-			expectedByDigest: []string{},
-		},
-		{
-			name: "Transitive dependents are not considered dependencies",
-			data: GuacData{
-				Packages: []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
-				HasSboms: []HasSbom{
-					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
-					{Subject: "pkg:guac/bar", IncludedSoftware: []string{"pkg:guac/baz"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/baz")},
-			expectedByName:   []string{},
-			expectedByDigest: []string{},
-		},
-		{
-			name: "Packages with same names but different digests",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
-				Artifacts: []string{"sha-123", "sha-xyz"},
-				HasSboms: []HasSbom{
-					// foo's sbom contains bar with a digest of sha-123
-					{
-						Subject:               "pkg:guac/foo",
-						IncludedSoftware:      []string{"pkg:guac/bar"},
-						IncludedIsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
-					},
-					// an artifact with digest sha-xyz depends on baz
-					{
-						Subject:          "sha-xyz",
-						IncludedSoftware: []string{"pkg:guac/baz"},
-					},
-				},
-				// sha-xyz is an occurrence of bar
-				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-xyz"}},
-			},
-			input: api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			// foo depends on baz
-			expectedByName:   []string{"pkg:guac/bar", "pkg:guac/baz"},
-			expectedByDigest: []string{},
-		},
-		/*******
-		 * Test that equivalent packages aren't considered to be dependencies
-		 *******/
-		{
-			name: "Package IsOccurrence is not considered a dependency",
-			data: GuacData{
-				Packages:      []string{"pkg:guac/foo"},
-				Artifacts:     []string{"sha-123"},
-				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-123"}},
-			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{},
-			expectedByDigest: []string{},
-		},
-		{
-			name: "Artifact IsOccurrence is not considered a dependency",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
-				Artifacts: []string{"sha-123"},
-				IsOccurrences: []IsOccurrence{
-					{Subject: "pkg:guac/foo", Artifact: "sha-123"},
-					{Subject: "pkg:guac/bar", Artifact: "sha-123"},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{},
-			expectedByDigest: []string{},
 		},
 		{
 			name: "Artifact HashEqual is not considered a dependency",
@@ -355,13 +365,9 @@ func Test_RetrieveDependencies(t *testing.T) {
 				HashEquals:    []HashEqual{{ArtifactA: "sha-123", ArtifactB: "sha-456"}},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-456"}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{},
+			digest:           "sha-123",
 			expectedByDigest: []string{},
 		},
-		/*******
-		 * Test that cycles in the graph are handled correctly
-		 *******/
 		{
 			name: "Equivalence cycle including start node",
 			data: GuacData{
@@ -374,8 +380,7 @@ func Test_RetrieveDependencies(t *testing.T) {
 				},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-789"}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{},
+			digest:           "sha-123",
 			expectedByDigest: []string{},
 		},
 		{
@@ -390,8 +395,7 @@ func Test_RetrieveDependencies(t *testing.T) {
 				},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-789"}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo"},
+			digest:           "sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -406,175 +410,58 @@ func Test_RetrieveDependencies(t *testing.T) {
 				},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-789"}},
 			},
-			input:            api.RetrieveDependenciesParams{Digest: ptrfrom.String("sha-123")},
-			expectedByName:   []string{"pkg:guac/foo"},
+			digest:           "sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
-		},
-		/*******
-		 * Test packages with versions
-		 *******/
-		{
-			name: "Package with version is not confused for package without version",
-			data: GuacData{
-				Packages: []string{"pkg:guac/foo", "pkg:guac/foo@v1", "pkg:guac/bar", "pkg:guac/bar@v1"},
-				HasSboms: []HasSbom{
-					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar@v1"}},
-					{Subject: "pkg:guac/foo@v1", IncludedSoftware: []string{"pkg:guac/bar"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar@v1"},
-			expectedByDigest: []string{},
-		},
-		{
-			name: "Package without version is not confused for package with version",
-			data: GuacData{
-				Packages: []string{"pkg:guac/foo", "pkg:guac/foo@v1", "pkg:guac/bar", "pkg:guac/bar@v1"},
-				HasSboms: []HasSbom{
-					{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar"}},
-					{Subject: "pkg:guac/foo@v1", IncludedSoftware: []string{"pkg:guac/bar@v1"}},
-				},
-			},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:guac/bar"},
-			expectedByDigest: []string{},
-		},
-		/*******
-		 * Test that the Guac purl special-casing is handled correctly
-		 *******/
-		{
-			name: "Endpoint works for OCI purl",
-			data: GuacData{
-				Packages: []string{
-					"pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
-					"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest",
-				},
-				HasSboms: []HasSbom{{
-					Subject:          "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
-					IncludedSoftware: []string{"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"}},
-				}},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye")},
-			expectedByName:   []string{"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
-			expectedByDigest: []string{},
-		},
-		/*******
-		 * A test to record that purls are canonicalized upon ingestion, and so they
-		 * may not round-trip.
-		 *******/
-		{
-			name: "Non-canonical purl may not round trip",
-			data: GuacData{
-				Packages: []string{"pkg:guac/foo", "pkg:github/Package-url/purl-Spec"},
-				HasSboms: []HasSbom{{
-					Subject:          "pkg:guac/foo",
-					IncludedSoftware: []string{"pkg:github/Package-url/purl-Spec"}},
-				}},
-			input:            api.RetrieveDependenciesParams{Purl: ptrfrom.String("pkg:guac/foo")},
-			expectedByName:   []string{"pkg:github/package-url/purl-spec"}, // lowercased
-			expectedByDigest: []string{},
 		},
 	}
 
 	for _, tt := range tests {
-
 		t.Run(tt.name, func(t *testing.T) {
-			/******** set up the test ********/
 			gqlClient := SetupTest(t)
 			Ingest(ctx, t, gqlClient, tt.data)
 
-			restApi := server.NewDefaultServer(gqlClient)
-
-			/******** call the endpoint with byName link condition ********/
-			inputByName := tt.input
-			inputByName.LinkCondition = ptrfrom.Any(api.Name)
-			resByName, err := restApi.RetrieveDependencies(ctx, api.RetrieveDependenciesRequestObject{Params: inputByName})
+			resByDigest, err := server.GetDepsForArtifact(ctx, gqlClient, tt.digest)
 			if err != nil {
 				t.Fatalf("Endpoint returned unexpected error: %v", err)
 			}
-			/******** check the output ********/
-			switch v := resByName.(type) {
-			case api.RetrieveDependencies200JSONResponse:
-				if !cmp.Equal(v.PurlList, tt.expectedByName, cmpopts.EquateEmpty(), cmpopts.SortSlices(stdcmp.Less[string])) {
-					t.Errorf("RetrieveDependencies with byName returned %v, but wanted %v", v.PurlList, tt.expectedByName)
-				}
-			default:
-				t.Errorf("RetrieveDependencies with byName returned unexpected error: %v", v)
-			}
 
-			/******** call the endpoint with byDigest link condition ********/
-			inputByDigest := tt.input
-			inputByDigest.LinkCondition = ptrfrom.Any(api.Digest)
-			resByDigest, err := restApi.RetrieveDependencies(ctx, api.RetrieveDependenciesRequestObject{Params: inputByDigest})
-			if err != nil {
-				t.Fatalf("Endpoint returned unexpected error: %v", err)
+			// Check the output
+			var artifacts []string
+			for _, artifact := range resByDigest {
+				artifacts = append(artifacts, artifact)
 			}
-			/******** check the output ********/
-			switch v := resByDigest.(type) {
-			case api.RetrieveDependencies200JSONResponse:
-				if !cmp.Equal(v.PurlList, tt.expectedByDigest, cmpopts.EquateEmpty(), cmpopts.SortSlices(stdcmp.Less[string])) {
-					t.Errorf("RetrieveDependencies with byDigest returned %v, but wanted %v", v.PurlList, tt.expectedByDigest)
-				}
-			default:
-				t.Errorf("RetrieveDependencies with byDigest returned unexpected error: %v", v)
+			if !cmp.Equal(artifacts, tt.expectedByDigest, cmpopts.EquateEmpty(), cmpopts.SortSlices(stdcmp.Less[string])) {
+				t.Errorf("RetrieveDependencies with byDigest returned %v, but wanted %v", artifacts, tt.expectedByDigest)
 			}
 		})
 	}
 }
 
-func Test_ClientErrors(t *testing.T) {
+func Test_ClientErrorsForPurl(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name  string
-		data  GuacData
-		input api.RetrieveDependenciesParams
+		name string
+		data GuacData
+		purl string
 	}{{
 		name: "Package not found",
-		input: api.RetrieveDependenciesParams{
-			Purl:          ptrfrom.String("pkg:guac/foo"),
-			LinkCondition: ptrfrom.Any(api.Name),
-		},
+		purl: "pkg:guac/foo",
 	}, {
 		name: "Package not found because version was specified",
 		data: GuacData{Packages: []string{"pkg:guac/foo"}},
-		input: api.RetrieveDependenciesParams{
-			Purl:          ptrfrom.String("pkg:guac/foo@v1"),
-			LinkCondition: ptrfrom.Any(api.Name),
-		},
+		purl: "pkg:guac/foo@v1",
 	}, {
 		name: "Package not found because version was not specified",
 		data: GuacData{Packages: []string{"pkg:guac/foo@v1"}},
-		input: api.RetrieveDependenciesParams{
-			Purl:          ptrfrom.String("pkg:guac/foo"),
-			LinkCondition: ptrfrom.Any(api.Name),
-		},
+		purl: "pkg:guac/foo",
 	}, {
 		name: "Package not found due to missing qualifiers",
 		data: GuacData{Packages: []string{"pkg:guac/foo?a=b"}},
-		input: api.RetrieveDependenciesParams{
-			Purl:          ptrfrom.String("pkg:guac/foo"),
-			LinkCondition: ptrfrom.Any(api.Name),
-		},
+		purl: "pkg:guac/foo",
 	}, {
 		name: "Package not found due to providing qualifiers",
 		data: GuacData{Packages: []string{"pkg:guac/foo"}},
-		input: api.RetrieveDependenciesParams{
-			Purl:          ptrfrom.String("pkg:guac/foo?a=b"),
-			LinkCondition: ptrfrom.Any(api.Name),
-		},
-	}, {
-		name: "Artifact not found because version was not specified",
-		input: api.RetrieveDependenciesParams{
-			Digest:        ptrfrom.String("sha-abc"),
-			LinkCondition: ptrfrom.Any(api.Name),
-		},
-	}, {
-		name: "Neither Purl nor Digest provided",
-	}, {
-		name: "Unrecognized link condition",
-		input: api.RetrieveDependenciesParams{
-			Digest:        ptrfrom.String("sha-abc"),
-			LinkCondition: ptrfrom.Any(api.RetrieveDependenciesParamsLinkCondition("foo")),
-		},
+		purl: "pkg:guac/foo?a=b",
 	}}
 
 	for _, tt := range tests {
@@ -583,11 +470,11 @@ func Test_ClientErrors(t *testing.T) {
 			Ingest(ctx, t, gqlClient, tt.data)
 			restApi := server.NewDefaultServer(gqlClient)
 
-			res, err := restApi.RetrieveDependencies(ctx, api.RetrieveDependenciesRequestObject{Params: tt.input})
+			res, err := restApi.GetPackageDeps(ctx, gen.GetPackageDepsRequestObject{Purl: tt.purl})
 			if err != nil {
 				t.Fatalf("RetrieveDependencies returned unexpected error: %v", err)
 			}
-			if _, ok := res.(api.RetrieveDependencies400JSONResponse); !ok {
+			if _, ok := res.(gen.GetPackageDeps400JSONResponse); !ok {
 				t.Fatalf("Did not receive a 400 Response: recieved %v of type %T", res, res)
 			}
 
@@ -595,38 +482,35 @@ func Test_ClientErrors(t *testing.T) {
 	}
 }
 
-func Test_DefaultLinkCondition(t *testing.T) {
-	/******** set up the test ********/
+func Test_ClientErrorsForArtifact(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	gqlClient := SetupTest(t)
-	restApi := server.NewDefaultServer(gqlClient)
-	data := GuacData{
-		Packages: []string{"pkg:guac/foo", "pkg:guac/bar"},
-		HasSboms: []HasSbom{{
-			Subject:          "pkg:guac/foo",
-			IncludedSoftware: []string{"pkg:guac/bar"}},
-		}}
-	Ingest(ctx, t, gqlClient, data)
+	tests := []struct {
+		name   string
+		data   GuacData
+		digest string
+	}{{
+		name:   "Artifact not found because version was not specified",
+		digest: "sha-abc",
+	}, {
+		name: "Neither Purl nor Digest provided",
+	}, {
+		name:   "Badly formatted digest - missing algorithm prefix",
+		digest: "abcdef123456", // Missing sha256: or similar prefix
+	}}
 
-	input := api.RetrieveDependenciesParams{
-		Purl: ptrfrom.String("pkg:guac/foo"),
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gqlClient := SetupTest(t)
+			Ingest(ctx, t, gqlClient, tt.data)
+			restApi := server.NewDefaultServer(gqlClient)
+
+			res, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{Digest: tt.digest})
+			if err != nil {
+				t.Fatalf("GetArtifactDeps returned unexpected error: %v", err)
+			}
+			if _, ok := res.(gen.GetArtifactDeps400JSONResponse); !ok {
+				t.Fatalf("Did not receive a 400 Response: received %v of type %T", res, res)
+			}
+		})
 	}
-
-	/******** call the endpoint ********/
-	res, err := restApi.RetrieveDependencies(ctx, api.RetrieveDependenciesRequestObject{Params: input})
-	if err != nil {
-		t.Fatalf("RetrieveDependencies returned unexpected error: %v", err)
-	}
-
-	/******** check the output ********/
-	switch v := res.(type) {
-	case api.RetrieveDependencies200JSONResponse:
-		// that the default is byDigest is tested by asserting that no edges only in byName are used
-		if len(v.PurlList) != 0 {
-			t.Errorf("RetrieveDependencies returned %v, but no dependencies were expected", v)
-		}
-	default:
-		t.Errorf("RetrieveDependencies returned unexpected error: %v", v)
-	}
-
 }
