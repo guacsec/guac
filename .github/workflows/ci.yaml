@@ -42,7 +42,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # tag=v3.2.1
         with:
-          go-version: '1.21'
+          go-version: '1.23'
       - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/go/pkg/mod
@@ -75,7 +75,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # tag=v3.2.1
         with:
-          go-version: '1.21'
+          go-version: '1.23'
       - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/go/pkg/mod
@@ -98,7 +98,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # tag=v3.2.1
         with:
-          go-version: '1.21'
+          go-version: '1.23'
       - name: Install atlas
         uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: Install formatter
@@ -118,7 +118,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # tag=v5.3.0
         with:
-          go-version: '1.21'
+          go-version: '1.23'
       - name: Install atlas
         uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: golangci-lint
@@ -244,7 +244,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # tag=v3.2.1
         with:
-          go-version: '1.21'
+          go-version: '1.23'
       - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/go/pkg/mod
