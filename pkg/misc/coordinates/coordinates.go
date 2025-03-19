@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	purl "github.com/package-url/packageurl-go"
+	"golang.org/x/mod/semver"
 )
 
 type Coordinate struct {
@@ -238,7 +239,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 			Provider:       pkg.Type,
 			Namespace:      emptyToHyphen(strings.ReplaceAll(pkg.Namespace, "/", "%2f")),
 			Name:           pkg.Name,
-			Revision:       "v" + pkg.Version,
+			Revision:       ensureSemverPrefixGolang(pkg.Version),
 		}, nil
 	case "maven":
 		// maven is a unique case where it can have 3 Providers
@@ -306,4 +307,19 @@ func emptyToHyphen(namespace string) string {
 	} else {
 		return namespace
 	}
+}
+
+// ensureSemverPrefixGolang checks if the version string is valid SemVer and ensures it starts with "v" for golang version
+func ensureSemverPrefixGolang(version string) string {
+	if semver.IsValid(version) {
+		return version
+	}
+
+	vPrefixed := "v" + version
+	if semver.IsValid(vPrefixed) {
+		return vPrefixed
+	}
+
+	// If not a valid SemVer, return as-is
+	return version
 }
