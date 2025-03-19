@@ -160,7 +160,8 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "244fd47e07d1004",
 			},
 			wantErr: false,
-		}, {
+		},
+		{
 			Name:    "golang",
 			purlUri: "pkg:golang/cloud.google.com/go/compute@1.23.0",
 			want: &Coordinate{
@@ -174,13 +175,25 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 		},
 		{
 			Name:    "golang",
+			purlUri: "pkg:golang/github.com/aws/aws-lambda-go@v1.46.0",
+			want: &Coordinate{
+				CoordinateType: "go",
+				Provider:       "golang",
+				Namespace:      "github.com%2faws",
+				Name:           "aws-lambda-go",
+				Revision:       "v1.46.0",
+			},
+			wantErr: false,
+		},
+		{
+			Name:    "golang",
 			purlUri: "pkg:golang/context@234fd47e07d1004f0aed9c#api",
 			want: &Coordinate{
 				CoordinateType: "go",
 				Provider:       "golang",
 				Namespace:      "-",
 				Name:           "context",
-				Revision:       "v234fd47e07d1004f0aed9c",
+				Revision:       "234fd47e07d1004f0aed9c",
 			},
 			wantErr: false,
 		}, {
