@@ -34,7 +34,6 @@ type kubescapeOptions struct {
 	pubSubAddr        string
 	blobAddr          string
 	csubClientOptions csub_client.CsubClientOptions
-	bucket            string
 	collConfig        kubescape.Config
 	// enable/disable message publish to queue
 	publishToQueue bool
