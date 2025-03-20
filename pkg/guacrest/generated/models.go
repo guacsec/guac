@@ -38,7 +38,6 @@ type ScanMetadata struct {
 	Collector      *string    `json:"collector,omitempty"`
 	DbUri          *string    `json:"dbUri,omitempty"`
 	DbVersion      *string    `json:"dbVersion,omitempty"`
-	Origin         *string    `json:"origin,omitempty"`
 	ScannerUri     *string    `json:"scannerUri,omitempty"`
 	ScannerVersion *string    `json:"scannerVersion,omitempty"`
 	TimeScanned    *time.Time `json:"timeScanned,omitempty"`
