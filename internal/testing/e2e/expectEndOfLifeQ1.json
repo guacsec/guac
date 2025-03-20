@@ -1,0 +1,72 @@
+{
+  "HasMetadata": [
+    {
+      "subject": {
+        "type": "deb",
+        "namespaces": [
+          {
+            "namespace": "debian",
+            "names": [
+              {
+                "name": "openssl",
+                "versions": [
+                  {
+                    "purl": "pkg:deb/debian/openssl@1.1.1n-0%2Bdeb11u3?arch=amd64&distro=debian-11",
+                    "version": "1.1.1n-0+deb11u3",
+                    "qualifiers": [
+                      {
+                        "key": "arch",
+                        "value": "amd64"
+                      },
+                      {
+                        "key": "distro",
+                        "value": "debian-11"
+                      }
+                    ],
+                    "subpath": ""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "key": "endoflife",
+      "value": "product:openssl,cycle:1.1.1,version:1.1.1n-0+deb11u3,isEOL:true,eolDate:2023-09-11,lts:true,latest:1.1.1w,releaseDate:2018-09-11"
+    },
+    {
+      "subject": {
+        "type": "deb",
+        "namespaces": [
+          {
+            "namespace": "debian",
+            "names": [
+              {
+                "name": "openssl",
+                "versions": [
+                  {
+                    "purl": "pkg:deb/debian/openssl@1.1.1n-0%2Bdeb11u3?arch=arm64&distro=debian-11",
+                    "version": "1.1.1n-0+deb11u3",
+                    "qualifiers": [
+                      {
+                        "key": "arch",
+                        "value": "arm64"
+                      },
+                      {
+                        "key": "distro",
+                        "value": "debian-11"
+                      }
+                    ],
+                    "subpath": ""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "key": "endoflife",
+      "value": "product:openssl,cycle:1.1.1,version:1.1.1n-0+deb11u3,isEOL:true,eolDate:2023-09-11,lts:true,latest:1.1.1w,releaseDate:2018-09-11"
+    }
+  ]
+}
