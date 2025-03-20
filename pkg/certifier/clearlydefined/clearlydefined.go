@@ -89,7 +89,7 @@ func getDefinitions(ctx context.Context, client *http.Client, purls []string, co
 		return nil, fmt.Errorf("error marshalling coordinates: %w", err)
 	}
 
-	// retries if a 429 is encountered
+	// retries if a 429, 408, 504 or 524 is encountered
 	backoffOperation := func() (*http.Response, error) {
 		return client.Post("https://api.clearlydefined.io/definitions", "application/json", bytes.NewBuffer(jsonData))
 	}
@@ -304,7 +304,9 @@ func retryWithBackoff(ctx context.Context, operation retryFunc) retryFunc {
 				return nil, fmt.Errorf("error making POST request: %w", err)
 			}
 			if resp.StatusCode != http.StatusOK {
-				if resp.StatusCode != http.StatusTooManyRequests {
+				if resp.StatusCode != http.StatusTooManyRequests && resp.StatusCode != http.StatusRequestTimeout &&
+					resp.StatusCode != http.StatusGatewayTimeout && resp.StatusCode != 524 {
+					// 524 is a timeout error that occurs when a web server takes too long to respond to a request
 					// otherwise return an error
 					return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 				} else {
