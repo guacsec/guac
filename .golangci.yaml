@@ -2,7 +2,7 @@ run:
   timeout: 6m
   build-tags:
     - integration
-linters:
+formatters:
   enable:
     - forcetypeassert
 issues:
