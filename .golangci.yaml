@@ -3,7 +3,7 @@ run:
   timeout: 6m
   build-tags:
     - integration
-formatters:
+linters:
   enable:
     - forcetypeassert
   exclusions:
@@ -11,7 +11,6 @@ formatters:
       - ".*\\.pb\\.go$"
       - "pkg/assembler/generated/.*"
       - "resolvers/schema\\.resolvers\\.go"
-linters:
   exclusions:
     rules:
       - path: _test\.go
