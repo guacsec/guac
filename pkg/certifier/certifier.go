@@ -51,4 +51,5 @@ const (
 	CertifierClearlyDefined CertifierType = "CD"
 	CertifierScorecard      CertifierType = "scorecard"
 	CertifierEOL            CertifierType = "EOL"
+	CertifierDatadogMalware CertifierType = "DATADOG_MALWARE"
 )
