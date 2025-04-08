@@ -157,7 +157,7 @@ jobs:
     - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34
       with:
         go-version: '~1.21'
-    - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
+    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
       with:
         python-version: '3.10'
     - name: Install PostgreSQL client tools
