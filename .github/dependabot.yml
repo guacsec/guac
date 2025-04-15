@@ -5,6 +5,15 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      gomod:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "golang.org/x/*"
+      golang-x:
+        patterns:
+          - "golang.org/x/*"
 
   # Maintain dependencies for GitHub Actions.
   - package-ecosystem: "github-actions"
