@@ -1,0 +1,208 @@
+#
+# Copyright 2025 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: ci
+
+on:
+  workflow_dispatch: # testing only, trigger manually to test it works
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  test-integration:
+    runs-on: ubuntu-latest
+    name: CI for integration tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
+      - name: setup-go
+        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # tag=v3.2.1
+        with:
+          go-version: '1.23'
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Install atlas
+        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
+      - name: Setup the project
+        run: go mod download
+      - name: Run backends
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd internal/testing/backend
+          docker compose up -d
+          sleep 10
+          echo "backends started"
+      - name: Run integration tests
+        env:
+            ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'
+        run: make integration-test
+
+  end-to-end:
+    name: E2E
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: guac
+          POSTGRES_PASSWORD: guac
+          POSTGRES_DB: guac
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U guac -d guac"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        persist-credentials: false
+    - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b
+      with:
+        go-version: '~1.21'
+    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+      with:
+        python-version: '3.10'
+    - name: Install PostgreSQL client tools
+      run: |
+        sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client-15
+    - name: Set up NATS Server with JetStream
+      run: |
+        docker run -d --name nats-server -p 4222:4222 -p 8222:8222 nats:2.9.17 -js
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        until pg_isready -h localhost -p 5432 -U guac -d guac; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 5
+        done
+    - name: Run e2e tests
+      run: |
+        ./internal/testing/e2e/e2e
+      env:
+        POSTGRES_USER: guac
+        POSTGRES_PASSWORD: guac
+        POSTGRES_DB: guac
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        PGPASSWORD: guac
+        GUAC_DIR: /home/runner/work/guac/guac
+
+  tilt-ci:
+    name: Run 'tilt ci'
+    runs-on:
+      labels: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Fix flakiness with tilt-ci that may be potentially related to https://github.com/tilt-dev/tilt/issues/2079
+      - name: Increase inotify max user watches
+        shell: bash
+        run: |
+          sudo sysctl fs.inotify.max_user_watches=524288 && sudo sysctl -p
+      - name: Install tools
+        shell: bash
+        run: |
+          sudo apt-get install -y git uuid-runtime
+
+          # tilt -- https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh
+          case $(uname -m) in
+              aarch64) ARCH=arm64;;
+              armv7l)  ARCH=arm;;
+              *)       ARCH=$(uname -m);;
+          esac
+          VERSION=0.32.0
+          curl -fsSL https://github.com/tilt-dev/tilt/releases/download/v$VERSION/tilt.$VERSION.linux.$ARCH.tar.gz | tar -xzvC /usr/local/bin tilt
+
+          # helm
+          case $(uname -m) in
+              aarch64) ARCH=arm64;;
+              armv7l)  ARCH=arm;;
+              x86_64)  ARCH=amd64;;
+              *)       ARCH=$(uname -m);;
+          esac
+          VERSION=3.12.0
+          curl -fsSL https://get.helm.sh/helm-v$VERSION-linux-$ARCH.tar.gz | tar --strip-components=1 -xzvC /usr/local/bin linux-$ARCH/helm
+
+          # ctlptl - https://github.com/tilt-dev/ctlptl/blob/main/INSTALL.md
+          CTLPTL_VERSION="0.8.19"
+          curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v$CTLPTL_VERSION/ctlptl.$CTLPTL_VERSION.linux.x86_64.tar.gz | sudo tar -xzv -C /usr/local/bin ctlptl
+
+          # kind - https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+          # For AMD64 / x86_64
+          [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.19.0/kind-linux-amd64
+          # For ARM64
+          [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.19.0/kind-linux-arm64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+        with:
+          install-only: true
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
+        with:
+          persist-credentials: false
+      - name: setup-go
+        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # tag=v3.2.1
+        with:
+          go-version: '1.23'
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Setup the project
+        run: go mod download
+      - name: Setup kind cluster
+        shell: bash
+        run: |
+          ctlptl create cluster kind --registry=ctlptl-registry
+      - name: Run 'tilt ci'
+        shell: bash
+        run: |
+          tilt ci
+      - name: Diag after failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+            echo "K8S CLUSTER STATUS"
+            kubectl get all
+
+            echo ""
+
+            for pod in $(kubectl get pod | awk '$1 != "NAME" { print $1; }')
+            do
+                echo ""
+                echo "=== DIAG POD ${pod} ==="
+                echo ""
+                kubectl describe "pod/${pod#pod/}" | sed 's,^,    ,'
+            done
