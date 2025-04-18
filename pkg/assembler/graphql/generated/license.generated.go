@@ -698,9 +698,7 @@ func (ec *executionContext) _LicenseEdge(ctx context.Context, sel ast.SelectionS
 
 func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx context.Context, v any) ([][]*model.IDorLicenseInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([][]*model.IDorLicenseInput, len(vSlice))
 	for i := range vSlice {
@@ -715,9 +713,7 @@ func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋg
 
 func (ec *executionContext) unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx context.Context, v any) ([]*model.IDorLicenseInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorLicenseInput, len(vSlice))
 	for i := range vSlice {
@@ -881,9 +877,7 @@ func (ec *executionContext) unmarshalOLicenseSpec2ᚕᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.LicenseSpec, len(vSlice))
 	for i := range vSlice {

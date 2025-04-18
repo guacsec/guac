@@ -914,9 +914,7 @@ func (ec *executionContext) unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsec�
 
 func (ec *executionContext) unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ(ctx context.Context, v any) ([]*model.PkgEqualInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PkgEqualInputSpec, len(vSlice))
 	for i := range vSlice {

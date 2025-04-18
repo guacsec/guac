@@ -914,9 +914,7 @@ func (ec *executionContext) unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsec�
 
 func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx context.Context, v any) ([]*model.VulnEqualInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.VulnEqualInputSpec, len(vSlice))
 	for i := range vSlice {

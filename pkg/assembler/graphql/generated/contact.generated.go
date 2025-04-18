@@ -1093,9 +1093,7 @@ func (ec *executionContext) unmarshalNPointOfContactInputSpec2githubᚗcomᚋgua
 
 func (ec *executionContext) unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ(ctx context.Context, v any) ([]*model.PointOfContactInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PointOfContactInputSpec, len(vSlice))
 	for i := range vSlice {

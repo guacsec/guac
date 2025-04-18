@@ -14687,9 +14687,7 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2githubᚗcomᚋguacsec�
 
 func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([][]*model.IDorArtifactInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([][]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {
@@ -14704,9 +14702,7 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋ
 
 func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {
@@ -14744,9 +14740,7 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.ArtifactSpec, len(vSlice))
 	for i := range vSlice {
@@ -14764,9 +14758,7 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.ArtifactSpec, len(vSlice))
 	for i := range vSlice {
@@ -14792,9 +14784,7 @@ func (ec *executionContext) unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋgua
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {

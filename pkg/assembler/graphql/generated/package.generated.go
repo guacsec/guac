@@ -1846,9 +1846,7 @@ func (ec *executionContext) unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguac
 
 func (ec *executionContext) unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorPkgInput, len(vSlice))
 	for i := range vSlice {
@@ -2268,9 +2266,7 @@ func (ec *executionContext) unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorPkgInput, len(vSlice))
 	for i := range vSlice {
@@ -2303,9 +2299,7 @@ func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗc
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PackageQualifierInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -2323,9 +2317,7 @@ func (ec *executionContext) unmarshalOPackageQualifierSpec2ᚕᚖgithubᚗcomᚋ
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PackageQualifierSpec, len(vSlice))
 	for i := range vSlice {
@@ -2351,9 +2343,7 @@ func (ec *executionContext) unmarshalOPkgSpec2ᚕᚖgithubᚗcomᚋguacsecᚋgua
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PkgSpec, len(vSlice))
 	for i := range vSlice {
