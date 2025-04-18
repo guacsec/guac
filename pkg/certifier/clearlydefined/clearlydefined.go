@@ -44,8 +44,12 @@ import (
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
-var rateLimit = 250
-var rateLimitInterval = 30 * time.Second
+
+// Rate limits: https://docs.clearlydefined.io/docs/get-involved/using-data#production-instance-rate-limits
+var (
+	rateLimit         = 250
+	rateLimitInterval = time.Minute / time.Duration(rateLimit)
+)
 
 const (
 	PRODUCER_ID string = "guacsec/guac"
