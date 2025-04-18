@@ -790,13 +790,6 @@ func (ec *executionContext) _PackageOrSource(ctx context.Context, sel ast.Select
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Package(ctx, sel, obj)
 	case model.Source:
 		return ec._Source(ctx, sel, &obj)
 	case *model.Source:
@@ -804,6 +797,13 @@ func (ec *executionContext) _PackageOrSource(ctx context.Context, sel ast.Select
 			return graphql.Null
 		}
 		return ec._Source(ctx, sel, obj)
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -1094,9 +1094,7 @@ func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacs
 
 func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx context.Context, v any) ([]*model.IsOccurrenceInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IsOccurrenceInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1156,9 +1154,7 @@ func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguac
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IsOccurrenceSpec, len(vSlice))
 	for i := range vSlice {

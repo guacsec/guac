@@ -969,9 +969,7 @@ func (ec *executionContext) unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacse
 
 func (ec *executionContext) unmarshalNCertifyGoodInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpecᚄ(ctx context.Context, v any) ([]*model.CertifyGoodInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.CertifyGoodInputSpec, len(vSlice))
 	for i := range vSlice {

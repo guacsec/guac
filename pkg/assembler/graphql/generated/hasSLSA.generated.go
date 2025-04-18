@@ -1578,9 +1578,7 @@ func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋgua
 
 func (ec *executionContext) unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx context.Context, v any) ([]*model.SLSAInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.SLSAInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1654,9 +1652,7 @@ func (ec *executionContext) marshalNSLSAPredicate2ᚖgithubᚗcomᚋguacsecᚋgu
 
 func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpecᚄ(ctx context.Context, v any) ([]*model.SLSAPredicateInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.SLSAPredicateInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1691,9 +1687,7 @@ func (ec *executionContext) unmarshalOSLSAPredicateSpec2ᚕᚖgithubᚗcomᚋgua
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.SLSAPredicateSpec, len(vSlice))
 	for i := range vSlice {

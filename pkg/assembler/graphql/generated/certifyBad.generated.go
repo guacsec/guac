@@ -838,13 +838,6 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Package(ctx, sel, obj)
 	case model.Source:
 		return ec._Source(ctx, sel, &obj)
 	case *model.Source:
@@ -852,6 +845,13 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 			return graphql.Null
 		}
 		return ec._Source(ctx, sel, obj)
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
 	case model.Artifact:
 		return ec._Artifact(ctx, sel, &obj)
 	case *model.Artifact:
@@ -1149,9 +1149,7 @@ func (ec *executionContext) unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsec
 
 func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx context.Context, v any) ([]*model.CertifyBadInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.CertifyBadInputSpec, len(vSlice))
 	for i := range vSlice {

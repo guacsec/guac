@@ -1325,9 +1325,7 @@ func (ec *executionContext) unmarshalNScanMetadataInput2githubᚗcomᚋguacsec�
 
 func (ec *executionContext) unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ(ctx context.Context, v any) ([]*model.ScanMetadataInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.ScanMetadataInput, len(vSlice))
 	for i := range vSlice {

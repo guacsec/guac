@@ -1040,9 +1040,7 @@ func (ec *executionContext) unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacse
 
 func (ec *executionContext) unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ(ctx context.Context, v any) ([]*model.HasSourceAtInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.HasSourceAtInputSpec, len(vSlice))
 	for i := range vSlice {

@@ -914,9 +914,7 @@ func (ec *executionContext) unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsec�
 
 func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ(ctx context.Context, v any) ([]*model.HashEqualInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.HashEqualInputSpec, len(vSlice))
 	for i := range vSlice {

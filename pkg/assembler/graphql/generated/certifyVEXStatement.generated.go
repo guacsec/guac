@@ -1427,9 +1427,7 @@ func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacs
 
 func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx context.Context, v any) ([]*model.VexStatementInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.VexStatementInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1462,9 +1460,7 @@ func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcom�
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PackageOrArtifactSpec, len(vSlice))
 	for i := range vSlice {

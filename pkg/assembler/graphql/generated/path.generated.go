@@ -260,34 +260,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
+	case model.VulnerabilityMetadata:
+		return ec._VulnerabilityMetadata(ctx, sel, &obj)
+	case *model.VulnerabilityMetadata:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._Package(ctx, sel, obj)
-	case model.Source:
-		return ec._Source(ctx, sel, &obj)
-	case *model.Source:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Source(ctx, sel, obj)
-	case model.Artifact:
-		return ec._Artifact(ctx, sel, &obj)
-	case *model.Artifact:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Artifact(ctx, sel, obj)
-	case model.Builder:
-		return ec._Builder(ctx, sel, &obj)
-	case *model.Builder:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Builder(ctx, sel, obj)
+		return ec._VulnerabilityMetadata(ctx, sel, obj)
 	case model.Vulnerability:
 		return ec._Vulnerability(ctx, sel, &obj)
 	case *model.Vulnerability:
@@ -295,6 +274,48 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Vulnerability(ctx, sel, obj)
+	case model.VulnEqual:
+		return ec._VulnEqual(ctx, sel, &obj)
+	case *model.VulnEqual:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VulnEqual(ctx, sel, obj)
+	case model.Source:
+		return ec._Source(ctx, sel, &obj)
+	case *model.Source:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Source(ctx, sel, obj)
+	case model.PointOfContact:
+		return ec._PointOfContact(ctx, sel, &obj)
+	case *model.PointOfContact:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PointOfContact(ctx, sel, obj)
+	case model.PkgEqual:
+		return ec._PkgEqual(ctx, sel, &obj)
+	case *model.PkgEqual:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PkgEqual(ctx, sel, obj)
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
+	case model.License:
+		return ec._License(ctx, sel, &obj)
+	case *model.License:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._License(ctx, sel, obj)
 	case model.IsOccurrence:
 		return ec._IsOccurrence(ctx, sel, &obj)
 	case *model.IsOccurrence:
@@ -309,20 +330,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._IsDependency(ctx, sel, obj)
-	case model.VulnEqual:
-		return ec._VulnEqual(ctx, sel, &obj)
-	case *model.VulnEqual:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._VulnEqual(ctx, sel, obj)
-	case model.CertifyVEXStatement:
-		return ec._CertifyVEXStatement(ctx, sel, &obj)
-	case *model.CertifyVEXStatement:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyVEXStatement(ctx, sel, obj)
 	case model.HashEqual:
 		return ec._HashEqual(ctx, sel, &obj)
 	case *model.HashEqual:
@@ -330,41 +337,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HashEqual(ctx, sel, obj)
-	case model.CertifyBad:
-		return ec._CertifyBad(ctx, sel, &obj)
-	case *model.CertifyBad:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyBad(ctx, sel, obj)
-	case model.CertifyGood:
-		return ec._CertifyGood(ctx, sel, &obj)
-	case *model.CertifyGood:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyGood(ctx, sel, obj)
-	case model.PkgEqual:
-		return ec._PkgEqual(ctx, sel, &obj)
-	case *model.PkgEqual:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PkgEqual(ctx, sel, obj)
-	case model.CertifyScorecard:
-		return ec._CertifyScorecard(ctx, sel, &obj)
-	case *model.CertifyScorecard:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyScorecard(ctx, sel, obj)
-	case model.CertifyVuln:
-		return ec._CertifyVuln(ctx, sel, &obj)
-	case *model.CertifyVuln:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyVuln(ctx, sel, obj)
 	case model.HasSourceAt:
 		return ec._HasSourceAt(ctx, sel, &obj)
 	case *model.HasSourceAt:
@@ -372,13 +344,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasSourceAt(ctx, sel, obj)
-	case model.HasSbom:
-		return ec._HasSBOM(ctx, sel, &obj)
-	case *model.HasSbom:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._HasSBOM(ctx, sel, obj)
 	case model.HasSlsa:
 		return ec._HasSLSA(ctx, sel, &obj)
 	case *model.HasSlsa:
@@ -386,6 +351,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasSLSA(ctx, sel, obj)
+	case model.HasSbom:
+		return ec._HasSBOM(ctx, sel, &obj)
+	case *model.HasSbom:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HasSBOM(ctx, sel, obj)
 	case model.HasMetadata:
 		return ec._HasMetadata(ctx, sel, &obj)
 	case *model.HasMetadata:
@@ -393,27 +365,27 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasMetadata(ctx, sel, obj)
-	case model.PointOfContact:
-		return ec._PointOfContact(ctx, sel, &obj)
-	case *model.PointOfContact:
+	case model.CertifyVuln:
+		return ec._CertifyVuln(ctx, sel, &obj)
+	case *model.CertifyVuln:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._PointOfContact(ctx, sel, obj)
-	case model.VulnerabilityMetadata:
-		return ec._VulnerabilityMetadata(ctx, sel, &obj)
-	case *model.VulnerabilityMetadata:
+		return ec._CertifyVuln(ctx, sel, obj)
+	case model.CertifyVEXStatement:
+		return ec._CertifyVEXStatement(ctx, sel, &obj)
+	case *model.CertifyVEXStatement:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._VulnerabilityMetadata(ctx, sel, obj)
-	case model.License:
-		return ec._License(ctx, sel, &obj)
-	case *model.License:
+		return ec._CertifyVEXStatement(ctx, sel, obj)
+	case model.CertifyScorecard:
+		return ec._CertifyScorecard(ctx, sel, &obj)
+	case *model.CertifyScorecard:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._License(ctx, sel, obj)
+		return ec._CertifyScorecard(ctx, sel, obj)
 	case model.CertifyLegal:
 		return ec._CertifyLegal(ctx, sel, &obj)
 	case *model.CertifyLegal:
@@ -421,6 +393,34 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._CertifyLegal(ctx, sel, obj)
+	case model.CertifyGood:
+		return ec._CertifyGood(ctx, sel, &obj)
+	case *model.CertifyGood:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CertifyGood(ctx, sel, obj)
+	case model.CertifyBad:
+		return ec._CertifyBad(ctx, sel, &obj)
+	case *model.CertifyBad:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CertifyBad(ctx, sel, obj)
+	case model.Builder:
+		return ec._Builder(ctx, sel, &obj)
+	case *model.Builder:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Builder(ctx, sel, obj)
+	case model.Artifact:
+		return ec._Artifact(ctx, sel, &obj)
+	case *model.Artifact:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Artifact(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -539,9 +539,7 @@ func (ec *executionContext) marshalNEdge2githubᚗcomᚋguacsecᚋguacᚋpkgᚋa
 
 func (ec *executionContext) unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx context.Context, v any) ([]model.Edge, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]model.Edge, len(vSlice))
 	for i := range vSlice {

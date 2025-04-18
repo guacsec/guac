@@ -1285,9 +1285,7 @@ func (ec *executionContext) unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacs
 
 func (ec *executionContext) unmarshalNCertifyLegalInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpecᚄ(ctx context.Context, v any) ([]*model.CertifyLegalInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.CertifyLegalInputSpec, len(vSlice))
 	for i := range vSlice {

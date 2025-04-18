@@ -1093,9 +1093,7 @@ func (ec *executionContext) unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacse
 
 func (ec *executionContext) unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ(ctx context.Context, v any) ([]*model.HasMetadataInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.HasMetadataInputSpec, len(vSlice))
 	for i := range vSlice {

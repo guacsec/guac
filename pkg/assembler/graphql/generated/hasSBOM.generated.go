@@ -1402,9 +1402,7 @@ func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋgu
 
 func (ec *executionContext) unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx context.Context, v any) ([]*model.HasSBOMIncludesInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.HasSBOMIncludesInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1429,9 +1427,7 @@ func (ec *executionContext) unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋ
 
 func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ(ctx context.Context, v any) ([]*model.HasSBOMInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.HasSBOMInputSpec, len(vSlice))
 	for i := range vSlice {

@@ -1046,9 +1046,7 @@ func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2githubᚗco
 
 func (ec *executionContext) unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx context.Context, v any) ([]*model.VulnerabilityMetadataInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.VulnerabilityMetadataInputSpec, len(vSlice))
 	for i := range vSlice {

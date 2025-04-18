@@ -704,9 +704,7 @@ func (ec *executionContext) unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋ
 
 func (ec *executionContext) unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx context.Context, v any) ([]*model.IDorBuilderInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorBuilderInput, len(vSlice))
 	for i := range vSlice {
