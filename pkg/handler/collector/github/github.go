@@ -37,7 +37,7 @@ const (
 )
 
 func defaultAssetSuffixes() []string {
-	return []string{".jsonl"}
+	return []string{".jsonl", ".json"}
 }
 
 // TagOrLatest is either a tag or if it's the empty string "" then it should be considered latest

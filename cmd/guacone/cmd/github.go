@@ -21,8 +21,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
-	"syscall"
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
@@ -30,8 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/metrics"
-
-	"os/signal"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
@@ -171,13 +167,15 @@ var githubCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		var errFound bool
+		totalNum := 0
+		totalSuccess := 0
+		var filesWithErrors []string
 
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
+		gotErr := false
 
 		emit := func(d *processor.Document) error {
-			_, err := ingestor.Ingest(
+			totalNum += 1
+			if _, err := ingestor.Ingest(
 				ctx,
 				d,
 				opts.graphqlEndpoint,
@@ -187,52 +185,34 @@ var githubCmd = &cobra.Command{
 				opts.queryLicenseOnIngestion,
 				opts.queryEOLOnIngestion,
 				opts.queryDepsDevOnIngestion,
-			)
-			if err != nil {
-				errFound = true
+			); err != nil {
+				gotErr = true
+				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
+			totalSuccess += 1
 			return nil
 		}
 
+		// Collect
 		errHandler := func(err error) bool {
 			if err == nil {
 				logger.Info("collector ended gracefully")
 				return true
 			}
-			errFound = true
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
 
-		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
-		// Use a wait group to wait for the collector to finish
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := collector.Collect(ctx, emit, errHandler); err != nil {
-				logger.Errorf("collector exited with error: %v", err)
-			}
-		}()
-
-		select {
-		case <-sigs:
-			logger.Info("Signal received, shutting down gracefully")
-			cancel()
-		case <-ctx.Done():
-			logger.Info("Collector finished")
+		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+			logger.Errorf("collector exited with error: %v", err)
 		}
 
-		wg.Wait()
-		logger.Info("Shutdown complete")
-
-		if errFound {
-			logger.Errorf("completed ingestion with error")
+		if gotErr {
+			logger.Errorf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v",
+				totalSuccess, totalNum, strings.Join(filesWithErrors, " "))
 		} else {
-			logger.Infof("completed ingestion")
+			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
 		}
 	},
 }
