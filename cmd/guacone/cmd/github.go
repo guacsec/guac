@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/metrics"
@@ -72,7 +71,7 @@ type githubOptions struct {
 }
 
 var githubCmd = &cobra.Command{
-	Use:   "github if <github-mode> is \"release\" then [flags] release_url1 release_url2..., otherwise if <github-mode> is \"workflow\" then [flags] <owner>/<repo>",
+	Use:   "github if <github-mode> is \"release\" then [flags] release_url1 release_url2..., otherwise if <github-mode> is \"workflow\" then [flags] <owner>/<repo>. Set --use-csub=false",
 	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.",
 	Long: `Takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.
   if <github-mode> is "release" then [flags] release_url1 release_url2..., otherwise if <github-mode> is "workflow" then [flags] <owner>/<repo>.`,
@@ -240,18 +239,19 @@ func validateGithubFlags(
 	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 	opts.enableOtel = enableOtel
 
-	if useCsub {
-		csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
-		if err != nil {
-			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
-		}
-		c, err := csub_client.NewClient(csubOpts)
-		if err != nil {
-			return opts, err
-		}
-		opts.dataSource, err = csubsource.NewCsubDatasource(c, 10*time.Second)
-		return opts, err
-	}
+	// commenting out csub usage for now as it is not part of V1 release
+	// if useCsub {
+	// 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	// 	if err != nil {
+	// 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	// 	}
+	// 	c, err := csub_client.NewClient(csubOpts)
+	// 	if err != nil {
+	// 		return opts, err
+	// 	}
+	// 	opts.dataSource, err = csubsource.NewCsubDatasource(c, 10*time.Second)
+	// 	return opts, err
+	// }
 
 	// Otherwise direct CLI call
 
