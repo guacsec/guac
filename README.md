@@ -142,4 +142,5 @@ GUAC-Maintainers@lists.openssf.org.
 
 ## Governance
 
-Information about governance can be found [here](GOVERNANCE.md).
+Information about governance, including the project charter, can be found in the
+[guacsec/governance repo](https://github.com/guacsec/governance).
