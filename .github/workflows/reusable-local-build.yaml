@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: reusable-local-build 
+name: reusable-local-build
 
 on:
   workflow_call:
@@ -47,11 +47,11 @@ jobs:
       - run: |
           #!/usr/bin/env bash
           set -euo pipefail
-  
+
           # a hack to workaround docker context show being not available
           sed -i -E '/--builder/d' .goreleaser.yaml
           sed -i -E '/DOCKER_CONTEXT/d' Makefile
-          
+
           make build
           make build_local_container
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-local-organic-guac-amd64 local-organic-guac
