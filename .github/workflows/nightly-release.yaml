@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This workflow requires a GitHub App to be registered and installed at the 
+# This workflow requires a GitHub App to be registered and installed at the
 # GitHub Org or personal account level which provides the permissions needed
-# to trigger nightly releases. See details at 
+# to trigger nightly releases. See details at
 # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow.
 # Note that the GitHub App must grant read/write permissions on Contents.
 # This is needed because the inbuilt GITHUB_TOKEN will not trigger a new workflow
@@ -31,13 +31,13 @@ on:
 
 env:
   NIGHTLY_RELEASE_TAG: v0-nightly   #goreleaser enforces semver on tags
-  # Note that the container tag (per .goreleaser-nightly.yaml) 
+  # Note that the container tag (per .goreleaser-nightly.yaml)
   # is simply 'nightly' without semver prefix
 
 jobs:
   refresh-nightly-tag:
     runs-on: ubuntu-latest
-    name: trigger nightly build 
+    name: trigger nightly build
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v3
@@ -59,25 +59,25 @@ jobs:
 
             const { owner, repo } = context.repo
 
-            try { 
+            try {
               console.log('Deleting release')
-              const { data: { id } } = await github.rest.repos.getReleaseByTag({ 
-                owner, 
-                repo, 
+              const { data: { id } } = await github.rest.repos.getReleaseByTag({
+                owner,
+                repo,
                 tag: "${{ env.NIGHTLY_RELEASE_TAG }}"
               })
-              const result = await github.rest.repos.deleteRelease({ 
-                owner, 
-                repo, 
-                release_id: id 
+              const result = await github.rest.repos.deleteRelease({
+                owner,
+                repo,
+                release_id: id
               })
               console.log(result)
-            } catch (error) { 
+            } catch (error) {
               // ignore error in case release doesn't exist
               console.log(error)
             }
 
-            try { 
+            try {
               console.log('Deleting tag')
               const result = github.rest.git.deleteRef({
                 owner: owner,
@@ -89,10 +89,10 @@ jobs:
               // ignore error in case tag doesn't exist
               console.log(error)
             }
- 
+
             // sleep to make sure the delete ops above are propagated in github
             await new Promise(r => setTimeout(r, 3000));
-        
+
             console.log('Creating tag to trigger build')
             const result = github.rest.git.createRef({
               owner: owner,
