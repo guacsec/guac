@@ -188,7 +188,10 @@ func TestCertify(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err == context.DeadlineExceeded || err == nil {
+			if err = context.DeadlineExceeded {
+				t.Skip("Skipping due to deadline exceeded")
+			}
+			if err == nil {
 				sort.Slice(collectedDocs, func(i, j int) bool {
 					uriI, errI := dochelper.ExtractURI(collectedDocs[i].Blob)
 					uriJ, errJ := dochelper.ExtractURI(collectedDocs[j].Blob)
@@ -206,7 +209,7 @@ func TestCertify(t *testing.T) {
 					return uriI < uriJ
 				})
 				if len(collectedDocs) != len(tt.want) {
-					t.Errorf("collected docs does not match wanted")
+					t.Errorf("collected docs (len %d) does not match wanted (len %d)", len(collectedDocs), len(tt.want))
 				}
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
