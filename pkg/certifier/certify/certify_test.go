@@ -188,7 +188,7 @@ func TestCertify(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err = context.DeadlineExceeded {
+			if errors.Is(err, context.DeadlineExceeded) {
 				t.Skip("Skipping due to deadline exceeded")
 			}
 			if err == nil {
