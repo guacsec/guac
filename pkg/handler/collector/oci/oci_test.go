@@ -368,6 +368,10 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				t.Fatalf("could not register collector: %v", err)
 			}
 
+			if g.Type() != OCICollector {
+				t.Errorf("g.Type() = %s, want %s", g.Type(), OCICollector)
+			}
+
 			var collectedDocs []*processor.Document
 			em := func(d *processor.Document) error {
 				collectedDocs = append(collectedDocs, d)
@@ -388,10 +392,14 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				t.Fatalf("Collector error handler error: %v", err)
 			}
 
+			if len(collectedDocs) != len(tt.want) {
+				t.Fatalf("g.RetrieveArtifacts() = %v, want %v", len(collectedDocs), len(tt.want))
+			}
+
 			for i := range tt.want {
 				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
 				if collectedDoc == nil {
-					t.Fatalf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
+					t.Fatalf("[at %d] g.RetrieveArtifacts() = %v, want %v", i, nil, tt.want[i])
 					return // Do this so that linter passes
 				}
 
@@ -399,16 +407,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					t.Errorf("[at %d] g.RetrieveArtifacts() = %v, want %v", i, string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 				}
-			}
-
-			if len(collectedDocs) != len(tt.want) {
-				t.Fatalf("g.RetrieveArtifacts() = %v, want %v", len(collectedDocs), len(tt.want))
-			}
-
-			if g.Type() != OCICollector {
-				t.Errorf("g.Type() = %s, want %s", g.Type(), OCICollector)
 			}
 
 		})
