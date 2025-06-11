@@ -145,13 +145,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [db-performance]
     steps:
-      - uses: cloudposse/github-action-matrix-outputs-read@67f4a3fe62553bdff3a5a4eb5e9ff4567b25d113 # main
+      - uses: cloudposse/github-action-matrix-outputs-read@1a06ab7fa9e7d63aed10846aed9fcea3be31f6e0 # main
         id: ingestion
         with:
           matrix-step-name: run_test
       - run: |
           echo "result: ${{ steps.ingestion.outputs.result }}"
-      - uses: cloudposse/github-action-matrix-outputs-read@67f4a3fe62553bdff3a5a4eb5e9ff4567b25d113 # main
+      - uses: cloudposse/github-action-matrix-outputs-read@1a06ab7fa9e7d63aed10846aed9fcea3be31f6e0 # main
         id: query
         with:
           matrix-step-name: query_test
