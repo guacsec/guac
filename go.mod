@@ -295,7 +295,7 @@ require (
 	github.com/XSAM/otelsql v0.37.0
 	github.com/anchore/syft v1.21.0
 	github.com/arangodb/go-driver v1.6.6
-	github.com/aws/aws-sdk-go v1.55.6
+	github.com/aws/aws-sdk-go v1.55.7
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
