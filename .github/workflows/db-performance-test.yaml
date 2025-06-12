@@ -111,7 +111,7 @@ jobs:
           printf "%-15s%-20s%-15s%s seconds\n" "Ingestion" "${{ matrix.database }}" "$elapsed_time"
           echo "elapsed_time=$elapsed_time" >> $GITHUB_OUTPUT
       ## Write for matrix outputs workaround
-      - uses: cloudposse/github-action-matrix-outputs-write@65a4012225eb616bb2a3c330f505c70182a8b2b3 # main
+      - uses: cloudposse/github-action-matrix-outputs-write@368a4214b2675d7617a9c1626ef473c006a462ec # main
         id: out-ingestion
         with:
           matrix-step-name: run_test
@@ -133,7 +133,7 @@ jobs:
           printf "%-15s%-20s%-15s%s seconds\n" "Query" "${{ matrix.database }}" "$query_time"
           echo "query_time=$query_time" >> $GITHUB_OUTPUT
       ## Write for matrix outputs workaround
-      - uses: cloudposse/github-action-matrix-outputs-write@65a4012225eb616bb2a3c330f505c70182a8b2b3 # main
+      - uses: cloudposse/github-action-matrix-outputs-write@368a4214b2675d7617a9c1626ef473c006a462ec # main
         id: out-query
         with:
           matrix-step-name: query_test
