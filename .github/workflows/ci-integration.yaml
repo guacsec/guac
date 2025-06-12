@@ -99,7 +99,7 @@ jobs:
         sudo apt-get install -y postgresql-client-15
     - name: Set up NATS Server with JetStream
       run: |
-        docker run -d --name nats-server -p 4222:4222 -p 8222:8222 nats:2.9.17 -js
+        docker run -d --name nats-server -p 4222:4222 -p 8222:8222 nats:2.11.4 -js
     - name: Wait for PostgreSQL to be ready
       run: |
         until pg_isready -h localhost -p 5432 -U guac -d guac; do
