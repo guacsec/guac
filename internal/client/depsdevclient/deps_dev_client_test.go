@@ -95,10 +95,10 @@ func Test_depsCollector_GetX(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "github.com/makenowjust/heredoc go package",
-			packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
+			name:     "github.com/spdx/tools-golang go package",
+			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
 			want: []*PackageComponent{
-				toPackageComponent([]byte(testdata.CollectedGoLangMakeNowJust)),
+				toPackageComponent([]byte(testdata.CollectedGoLangSpdxToolsGolang)),
 			},
 			wantErr: false,
 		},
@@ -361,8 +361,8 @@ func Test_depsCollector_GetDependenciesEq(t *testing.T) {
 			packages: []string{"pkg:npm/react@17.0.0"},
 		},
 		{
-			name:     "github.com/makenowjust/heredoc go package",
-			packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
+			name:     "github.com/spdx/tools-golang go package",
+			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
 		},
 		{
 			name:     "yargs-parser package npm package",
@@ -452,8 +452,8 @@ func Test_depsCollector_GetMetadataEq(t *testing.T) {
 			packages: []string{"pkg:npm/react@17.0.0"},
 		},
 		{
-			name:     "github.com/makenowjust/heredoc go package",
-			packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
+			name:     "github.com/spdx/tools-golang go package",
+			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
 		},
 		{
 			name:     "yargs-parser package npm package",
