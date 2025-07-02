@@ -1049,9 +1049,7 @@ func (ec *executionContext) unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacs
 
 func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx context.Context, v any) ([]*model.IsDependencyInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IsDependencyInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1107,9 +1105,7 @@ func (ec *executionContext) unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguac
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IsDependencySpec, len(vSlice))
 	for i := range vSlice {

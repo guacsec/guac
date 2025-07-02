@@ -1284,9 +1284,7 @@ func (ec *executionContext) unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋg
 
 func (ec *executionContext) unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v any) ([]*model.IDorSourceInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorSourceInput, len(vSlice))
 	for i := range vSlice {
@@ -1588,9 +1586,7 @@ func (ec *executionContext) unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacs
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorSourceInput, len(vSlice))
 	for i := range vSlice {
