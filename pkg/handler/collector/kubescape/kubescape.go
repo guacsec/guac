@@ -27,7 +27,7 @@ import (
 	"github.com/anchore/syft/syft/format"
 	"github.com/anchore/syft/syft/format/cyclonedxjson"
 	"github.com/anchore/syft/syft/sbom"
-	scv1beta1 "github.com/kubescape/storage/pkg/apis/softwarecomposition/v1beta1"
+	scv1beta1 "github.com/kubescape/storage/pkg/apis/softwarecomposition"
 	kssc "github.com/kubescape/storage/pkg/generated/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
