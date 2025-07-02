@@ -2591,88 +2591,215 @@ var (
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
-	CollectedGoLangMakeNowJust = `{
-		"CurrentPackage":{
-		   "name":"heredoc",
-		   "namespace":"github.com/makenowjust",
-		   "qualifiers":null,
-		   "subpath":"",
-		   "type":"golang",
-		   "version":"v1.0.0"
+	CollectedGoLangSpdxToolsGolang = `{
+	"CurrentPackage": {
+		"type": "golang",
+		"namespace": "github.com/spdx",
+		"name": "tools-golang",
+		"version": "v0.1.0",
+		"qualifiers": null,
+		"subpath": ""
+	},
+	"Source": {
+		"type": "git",
+		"namespace": "github.com/spdx",
+		"name": "tools-golang",
+		"tag": null,
+		"commit": null
+	},
+	"Scorecard": {
+		"checks": [
+		{
+			"check": "Dangerous-Workflow",
+			"score": 10
 		},
-		"DepPackages":null,
-		"IsDepPackages":null,
-		"Scorecard":{
-		   "aggregateScore":4.300000190734863,
-		   "checks":[
-			  {
-				 "check":"Maintained",
-				 "score":0
-			  },
-			  {
-				 "check":"CII-Best-Practices",
-				 "score":0
-			  },
-			  {
-				 "check":"License",
-				 "score":10
-			  },
-			  {
-				 "check":"Signed-Releases",
-				 "score":-1
-			  },
-			  {
-				 "check":"Binary-Artifacts",
-				 "score":10
-			  },
-			  {
-				 "check":"Packaging",
-				 "score":-1
-			  },
-			  {
-				 "check":"Token-Permissions",
-				 "score":0
-			  },
-			  {
-				 "check":"Dangerous-Workflow",
-				 "score":10
-			  },
-			  {
-				 "check":"Branch-Protection",
-				 "score":0
-			  },
-			  {
-				 "check":"Pinned-Dependencies",
-				 "score":9
-			  },
-			  {
-				 "check":"Vulnerabilities",
-				 "score":10
-			  },
-			  {
-				 "check":"Fuzzing",
-				 "score":0
-			  },
-			  {
-				 "check":"Security-Policy",
-				 "score":0
-			  }
-		   ],
-		   "collector":"",
-		   "origin":"",
-		   "scorecardCommit":"1c441f3773712e6d12de6b353c25b4c093c11015",
-		   "scorecardVersion":"v4.10.5-58-g1c441f3",
-		   "timeScanned":"2022-11-21T17:45:50.52Z"
+		{
+			"check": "Security-Policy",
+			"score": 3
 		},
-		"Source":{
-		   "commit":null,
-		   "name":"heredoc",
-		   "namespace":"github.com/makenowjust",
-		   "tag":null,
-		   "type":"git"
+		{
+			"check": "Packaging",
+			"score": -1
 		},
-		"UpdateTime":"2022-11-21T17:45:50.52Z"
-	 }`
+		{
+			"check": "Maintained",
+			"score": 0
+		},
+		{
+			"check": "Token-Permissions",
+			"score": 0
+		},
+		{
+			"check": "Code-Review",
+			"score": 7
+		},
+		{
+			"check": "Binary-Artifacts",
+			"score": 10
+		},
+		{
+			"check": "Pinned-Dependencies",
+			"score": 0
+		},
+		{
+			"check": "CII-Best-Practices",
+			"score": 2
+		},
+		{
+			"check": "Fuzzing",
+			"score": 10
+		},
+		{
+			"check": "License",
+			"score": 9
+		},
+		{
+			"check": "Signed-Releases",
+			"score": -1
+		},
+		{
+			"check": "Branch-Protection",
+			"score": -1
+		},
+		{
+			"check": "Vulnerabilities",
+			"score": 10
+		},
+		{
+			"check": "SAST",
+			"score": 0
+		}
+		],
+		"aggregateScore": 5.400000095367432,
+		"timeScanned": "2025-06-23T00:00:00Z",
+		"scorecardVersion": "v5.2.1-9-g59ed1b6b",
+		"scorecardCommit": "59ed1b6b04d3ba5a721d494d4a277cdca33659e1",
+		"origin": "",
+		"collector": "",
+		"documentRef": ""
+	},
+	"IsDepPackages": [
+		{
+		"CurrentPackageInput": {
+			"type": "golang",
+			"namespace": "github.com/spdx",
+			"name": "tools-golang",
+			"version": "v0.1.0",
+			"qualifiers": null,
+			"subpath": ""
+		},
+		"DepPackageInput": {
+			"type": "golang",
+			"namespace": "github.com/spdx",
+			"name": "gordf",
+			"version": "v0.0.0-20201111095634-7098f93598fb",
+			"qualifiers": null,
+			"subpath": ""
+		},
+		"IsDependency": {
+			"dependencyType": "DIRECT",
+			"justification": "dependency data collected via deps.dev",
+			"origin": "",
+			"collector": "",
+			"documentRef": ""
+		}
+		}
+	],
+	"DepPackages": [
+		{
+		"CurrentPackage": {
+			"type": "golang",
+			"namespace": "github.com/spdx",
+			"name": "gordf",
+			"version": "v0.0.0-20201111095634-7098f93598fb",
+			"qualifiers": null,
+			"subpath": ""
+		},
+		"Source": {
+			"type": "git",
+			"namespace": "github.com/spdx",
+			"name": "gordf",
+			"tag": null,
+			"commit": null
+		},
+		"Scorecard": {
+			"checks": [
+			{
+				"check": "Packaging",
+				"score": -1
+			},
+			{
+				"check": "Binary-Artifacts",
+				"score": 10
+			},
+			{
+				"check": "Dangerous-Workflow",
+				"score": 10
+			},
+			{
+				"check": "Code-Review",
+				"score": 0
+			},
+			{
+				"check": "Maintained",
+				"score": 0
+			},
+			{
+				"check": "Token-Permissions",
+				"score": 0
+			},
+			{
+				"check": "CII-Best-Practices",
+				"score": 0
+			},
+			{
+				"check": "Pinned-Dependencies",
+				"score": 2
+			},
+			{
+				"check": "Security-Policy",
+				"score": 0
+			},
+			{
+				"check": "Fuzzing",
+				"score": 0
+			},
+			{
+				"check": "License",
+				"score": 10
+			},
+			{
+				"check": "Signed-Releases",
+				"score": -1
+			},
+			{
+				"check": "Branch-Protection",
+				"score": 0
+			},
+			{
+				"check": "SAST",
+				"score": 0
+			},
+			{
+				"check": "Vulnerabilities",
+				"score": 10
+			}
+			],
+			"aggregateScore": 3.5999999046325684,
+			"timeScanned": "2025-06-23T00:00:00Z",
+			"scorecardVersion": "v5.2.1-9-g59ed1b6b",
+			"scorecardCommit": "59ed1b6b04d3ba5a721d494d4a277cdca33659e1",
+			"origin": "",
+			"collector": "",
+			"documentRef": ""
+		},
+		"IsDepPackages": null,
+		"DepPackages": null,
+		"UpdateTime": "2025-07-01T18:23:19.225447Z"
+		}
+	],
+	"UpdateTime": "2025-07-01T18:23:19.225376Z"
+	}`
 
 	CollectedForeignTypesNoDeps = `{
 		"CurrentPackage":{

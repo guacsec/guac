@@ -126,11 +126,11 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "github.com/makenowjust/heredoc go package",
-			packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
+			name:     "github.com/spdx/tools-golang go package",
+			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
 			want: []*processor.Document{
 				{
-					Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
+					Blob:   []byte(testdata.CollectedGoLangSpdxToolsGolang),
 					Type:   processor.DocumentDepsDev,
 					Format: processor.FormatJSON,
 					SourceInformation: processor.SourceInformation{
