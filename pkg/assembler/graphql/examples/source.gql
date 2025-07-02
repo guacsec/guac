@@ -98,8 +98,8 @@ mutation SrcM1 {
   ingestSource(
     source: {
       type: "git"
-      namespace: "github"
-      name: "github.com/tensorflow/tensorflow"
+      namespace: "github.com/tensorflow"
+      name: "tensorflow"
     }
   )
 }
@@ -108,8 +108,8 @@ mutation SrcM2 {
   ingestSource(
     source: {
       type: "git"
-      namespace: "github"
-      name: "github.com/tensorflow/tensorflow"
+      namespace: "github.com/tensorflow"
+      name: "tensorflow"
       commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609"
     }
   )
@@ -119,8 +119,8 @@ mutation SrcM3 {
   ingestSource(
     source: {
       type: "git"
-      namespace: "github"
-      name: "github.com/tensorflow/tensorflow"
+      namespace: "github.com/tensorflow"
+      name: "tensorflow"
       tag: "v2.12.0"
     }
   )
@@ -131,8 +131,8 @@ mutation SrcM4 {
   ingestSource(
     source: {
       type: "git"
-      namespace: "github"
-      name: "github.com/tensorflow/tensorflow"
+      namespace: "github.com/tensorflow"
+      name: "tensorflow"
       commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609"
       tag: "2.12.0"
     }
@@ -143,8 +143,8 @@ mutation SrcM5 {
   ingestSource(
     source: {
       type: "git"
-      namespace: "github"
-      name: "github.com/tensorflow/tensorflow"
+      namespace: "github.com/tensorflow"
+      name: "tensorflow"
       tag: "v2.12.0"
     }
   )
@@ -155,8 +155,8 @@ mutation SrcM6 {
   ingestSource(
     source: {
       type: "git"
-      namespace: "github"
-      name: "github.com/tensorflow/tensorflow"
+      namespace: "github.com/tensorflow"
+      name: "tensorflow"
       commit: ""
       tag: "v2.12.0"
     }
