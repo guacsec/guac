@@ -68,7 +68,7 @@ query ScorecardQ2 {
 
 query ScorecardQ3 {
   scorecards(
-    scorecardSpec: { source: { name: "github.com/tensorflow/tensorflow" } }
+    scorecardSpec: { source: { name: "tensorflow" } }
   ) {
     ...allCertifyScorecardTree
   }

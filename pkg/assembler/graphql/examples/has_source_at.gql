@@ -85,7 +85,7 @@ query HasSourceAtQ3 {
 
 query HasSourceAtQ4 {
   HasSourceAt(
-    hasSourceAtSpec: { source: { name: "https://github.com/django/django" } }
+    hasSourceAtSpec: { source: { namespace: "github.com/django", name: "django" } }
   ) {
     ...allHasSourceAtTree
   }
@@ -100,7 +100,7 @@ query HasSourceAtQ5 {
 query HasSourceAtQ6 {
   HasSourceAt(
     hasSourceAtSpec: {
-      source: { name: "https://github.com/vapor-ware/kubetest" }
+      source: { namespace: "github.com/vapor-ware", name: "kubetest" }
     }
   ) {
     ...allHasSourceAtTree
