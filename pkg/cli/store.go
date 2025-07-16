@@ -143,6 +143,18 @@ func init() {
 	set.String("kubescape-namespace", "kubescape", "Kubernetes namespace to get/watch sboms from.")
 	set.Bool("kubescape-filtered", false, "If false: get/watch \"sbomsyfts\", if true: get/watch \"sbomsyftfiltereds\"")
 
+	// SBOM Analyzer flags
+	set.StringSlice("analyze-sboms", []string{}, "two sboms to analyze")
+	set.StringSlice("analyze-slsa", []string{}, "two slsa to analyze")
+	set.Bool("analyze-uri-input", false, "input is a URI")
+	set.Bool("analyze-purl-input", false, "input is a pURL")
+	set.Bool("analyze-id-input", false, "input is an Id")
+	set.Bool("analyze-metadata", false, "Compare SBOM metadata")
+	set.Bool("analyze-incl-soft", false, "Compare Included Softwares")
+	set.Bool("analyze-incl-deps", false, "Compare Included Dependencies")
+	set.Bool("analyze-incl-occur", false, "Compare Included Occurrences")
+	set.Bool("analyze-namespaces", false, "Compare Package Namespaces")
+	
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})
