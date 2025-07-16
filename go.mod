@@ -354,6 +354,8 @@ require (
 	k8s.io/client-go v0.32.3
 )
 
+require github.com/gdamore/encoding v1.0.1 // indirect
+
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
@@ -379,11 +381,13 @@ require (
 	github.com/containers/common v0.60.4 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
+	github.com/dominikbraun/graph v0.23.0
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.3 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
 	github.com/facebookincubator/nvdtools v0.1.5 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
+	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/github/go-spdx/v2 v2.3.3 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/gohugoio/hashstructure v0.5.0 // indirect
@@ -403,6 +407,7 @@ require (
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/opencontainers/runtime-spec v1.2.0 // indirect
+	github.com/rivo/tview v0.0.0-20250625164341-a4a78f1e05cb
 	github.com/scylladb/go-set v1.0.3-0.20200225121959-cc7b2070d91e // indirect
 	github.com/seccomp/libseccomp-golang v0.10.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
