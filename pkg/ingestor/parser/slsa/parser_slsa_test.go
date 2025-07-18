@@ -17,14 +17,10 @@ package slsa
 
 import (
 	"context"
+	slsa01 "github.com/in-toto/attestation/go/predicates/provenance/v01"
 	"reflect"
 	"testing"
 	"time"
-
-	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
-	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
-
-	"github.com/in-toto/in-toto-golang/in_toto"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -32,6 +28,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func Test_slsaParser(t *testing.T) {
@@ -85,9 +82,11 @@ func Test_slsaParser(t *testing.T) {
 func Test_fillSLSA01(t *testing.T) {
 	startTime := time.Now()
 	endTime := time.Now()
+	startTimePB := timestamppb.New(startTime)
+	endTimePB := timestamppb.New(endTime)
 	type args struct {
 		inp  *model.SLSAInputSpec
-		stmt *in_toto.ProvenanceStatementSLSA01
+		stmt *slsa01.Provenance
 	}
 	tests := []struct {
 		name string
@@ -98,15 +97,13 @@ func Test_fillSLSA01(t *testing.T) {
 			name: "default",
 			args: args{
 				inp: &model.SLSAInputSpec{},
-				stmt: &in_toto.ProvenanceStatementSLSA01{
-					Predicate: slsa01.ProvenancePredicate{
-						Metadata: &slsa01.ProvenanceMetadata{
-							BuildStartedOn:  &startTime,
-							BuildFinishedOn: &endTime,
-						},
-						Recipe: slsa01.ProvenanceRecipe{
-							Type: "test",
-						},
+				stmt: &slsa01.Provenance{
+					Metadata: &slsa01.Metadata{
+						BuildStartedOn:  startTimePB,
+						BuildFinishedOn: endTimePB,
+					},
+					Recipe: &slsa01.Recipe{
+						Type: "test",
 					},
 				},
 			},
@@ -115,14 +112,14 @@ func Test_fillSLSA01(t *testing.T) {
 			name: "stmt predicate metadata is nil",
 			args: args{
 				inp:  &model.SLSAInputSpec{},
-				stmt: &in_toto.ProvenanceStatementSLSA01{},
+				stmt: &slsa01.Provenance{},
 			},
 			err: ErrMetadataNil,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := fillSLSA01(test.args.inp, &test.args.stmt.Predicate)
+			err := fillSLSA01(test.args.inp, test.args.stmt)
 			if err != test.err {
 				t.Fatalf("fillSLSA01() error = %v, expected error %v", err, test.err)
 			}
@@ -133,14 +130,20 @@ func Test_fillSLSA01(t *testing.T) {
 				return
 			}
 
-			if test.args.inp.BuildType != test.args.stmt.Predicate.Recipe.Type {
-				t.Errorf("fillSLSA01() inp.BuildType not equal to stmt.Predicate.Recipe.Type")
+			if test.args.inp.BuildType != test.args.stmt.Recipe.Type {
+				t.Errorf("fillSLSA01() inp.BuildType not equal to stmt.Recipe.Type")
 			}
-			if test.args.inp.StartedOn != test.args.stmt.Predicate.Metadata.BuildStartedOn {
-				t.Errorf("fillSLSA01() inp.BuildStartedOn not equal to stmt.Predicate.Metadata.BuildStartedOn")
+			if test.args.stmt.Metadata != nil && test.args.stmt.Metadata.BuildStartedOn != nil {
+				expectedStartTime := time.Unix(test.args.stmt.Metadata.BuildStartedOn.GetSeconds(), int64(test.args.stmt.Metadata.BuildStartedOn.GetNanos()))
+				if test.args.inp.StartedOn != nil && !test.args.inp.StartedOn.Equal(expectedStartTime) {
+					t.Errorf("fillSLSA01() inp.StartedOn not equal to expected time")
+				}
 			}
-			if test.args.inp.FinishedOn != test.args.stmt.Predicate.Metadata.BuildFinishedOn {
-				t.Errorf("fillSLSA01() inp.BuildFinishedOn not equal to stmt.Predicate.Metadata.BuildFinishedOn")
+			if test.args.stmt.Metadata != nil && test.args.stmt.Metadata.BuildFinishedOn != nil {
+				expectedFinishTime := time.Unix(test.args.stmt.Metadata.BuildFinishedOn.GetSeconds(), int64(test.args.stmt.Metadata.BuildFinishedOn.GetNanos()))
+				if test.args.inp.FinishedOn != nil && !test.args.inp.FinishedOn.Equal(expectedFinishTime) {
+					t.Errorf("fillSLSA01() inp.FinishedOn not equal to expected time")
+				}
 			}
 		})
 	}
@@ -155,14 +158,14 @@ func Test_getSlsaEntity(t *testing.T) {
 		testname string
 		uri      string
 		name     string
-		digest   scommon.DigestSet
+		digest   map[string]string
 		expected *slsaEntity
 		wantErr  bool
 	}{
 		{
 			testname: "with uri and digest",
 			uri:      "pkg:npm/sigstore/sigstore-js@4.2.0",
-			digest: scommon.DigestSet{
+			digest: map[string]string{
 				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
 			},
 			expected: &slsaEntity{
@@ -188,7 +191,7 @@ func Test_getSlsaEntity(t *testing.T) {
 		{
 			testname: "with name and digest",
 			name:     "sigstore",
-			digest: scommon.DigestSet{
+			digest: map[string]string{
 				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
 			},
 			expected: &slsaEntity{
@@ -213,7 +216,7 @@ func Test_getSlsaEntity(t *testing.T) {
 		},
 		{
 			testname: "without name and uri",
-			digest: scommon.DigestSet{
+			digest: map[string]string{
 				"sha1": "428601801d1f5d105351a403f58c38269de93f680",
 			},
 			wantErr: true,
