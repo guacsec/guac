@@ -43,8 +43,6 @@ const (
 	ColorWhite = "\033[37m"
 )
 
-
-
 const (
 	Pkg NodeType = iota
 	DepPkg
@@ -1008,10 +1006,11 @@ func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analys
 
 			if i >= len(shorterPath) {
 				dumnode := &Node{}
-				if node.NodeType == "Package" {
+				switch node.NodeType {
+				case "Package":
 					dumnode.NodeType = "Package"
 					dumnode.Pkg = model.AllIsDependencyTreePackage{}
-				} else if node.NodeType == "DependencyPackage" {
+				case "DependencyPackage":
 					dumnode.NodeType = "DependencyPackage"
 					dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
 				}
@@ -1141,13 +1140,15 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 			var missingPath []Node
 			for _, node := range val {
 				dumnode := &Node{}
-				if node.NodeType == "Package" {
+				switch node.NodeType {
+				case "Package":
 					dumnode.NodeType = "Package"
 					dumnode.Pkg = model.AllIsDependencyTreePackage{}
-				} else if node.NodeType == "DependencyPackage" {
+				case "DependencyPackage":
 					dumnode.NodeType = "DependencyPackage"
 					dumnode.DepPkg = model.AllIsDependencyTreeDependencyPackage{}
 				}
+
 				dmp := diffmatchpatch.New()
 				diffNode, _, err := compareNodes(dmp, *node, *dumnode)
 				if err != nil {

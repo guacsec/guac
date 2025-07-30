@@ -31,12 +31,15 @@ import (
 var diffTestFile = "https://raw.githubusercontent.com/guacsec/guac-test/main/hasSbom-pairs/hasSBOM-syft-spdx-k8s.gcr.io-kube-apiserver.v1.24.1.json"
 
 func readTestFileFromHub(fileUrl string) ([]byte, error) {
-
 	resp, err := http.Get(fileUrl)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			return
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
