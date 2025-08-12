@@ -51,14 +51,13 @@ func recursiveSubgraphIncrease(adjMapOne, adjMapTwo map[string]map[string]graph.
 		nodesToRemove = append(nodesToRemove, currentNodeId)
 	}
 
-	if len(predecessorsOne) != len(predecessorsTwo) {
-		//cannot proceed ahead with recursion
+	if len(predecessorsOne) != len(predecessorsTwo) { // Cannot proceed with recursion
 		return nodesToRemove
 	}
 
 	predecessorsToRemove := []string{}
 
-	//now check all nodes are the same and start recursion
+	// Now check all nodes are the same and start recursion
 	for val := range predecessorsOne {
 		_, ok := predecessorsTwo[val]
 		if !ok {
@@ -70,7 +69,7 @@ func recursiveSubgraphIncrease(adjMapOne, adjMapTwo map[string]map[string]graph.
 		predecessorsToRemove = append(predecessorsToRemove, recursiveSubgraphIncrease(adjMapOne, adjMapTwo, val)...)
 	}
 
-	//add currentNode predecessors
+	// Add currentNode predecessors
 	if len(predecessorsOne) != 1 && len(predecessorsToRemove) != 0 {
 		for predecessor := range predecessorsOne {
 			nodesToRemove = append(nodesToRemove, predecessor)
@@ -118,12 +117,11 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 	for smallId := range small {
 		_, ok := big[smallId]
 		if ok {
-			//go upwards
 			nodesToRemove = append(nodesToRemove, recursiveSubgraphIncrease(smallMap, bigMap, smallId)...)
 		}
 	}
 
-	//REMOVE OUTGOING EDGES & REMOVE INCOMING EDGES & REMOVE NODES
+	// Remove outgoing edges, incoming edges and nodes
 	for _, val := range nodesToRemove {
 
 		nodeMapOne, ok := gOneAdjacencyMap[val]
@@ -136,7 +134,7 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 			return g1, g2, fmt.Errorf("node to delete not found in nodeMapTwo")
 		}
 
-		//delete incoming edges to node one
+		// Delete incoming edges to node one
 
 		for _, nodeMapOne := range gOneAdjacencyMap {
 
@@ -154,7 +152,7 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 			}
 		}
 
-		//delete incoming edges to node two
+		// Delete incoming edges to node two
 		for _, nodeMapTwo := range gTwoAdjacencyMap {
 
 			if len(nodeMapTwo) == 0 {
@@ -171,7 +169,7 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 			}
 		}
 
-		//delete outgoing nodes from graph one
+		// Delete outgoing nodes from graph one
 		if len(nodeMapOne) != 0 {
 			for _, edge := range nodeMapOne {
 				errOne := g1.RemoveEdge(edge.Source, edge.Target)
@@ -181,7 +179,7 @@ func CompressGraphs(g1, g2 graph.Graph[string, *Node]) (graph.Graph[string, *Nod
 			}
 		}
 
-		//delete outgoing nodes from graph two
+		// Delete outgoing nodes from graph two
 		if len(nodeMapTwo) != 0 {
 			for _, edge := range nodeMapTwo {
 				errTwo := g2.RemoveEdge(edge.Source, edge.Target)

@@ -230,7 +230,7 @@ func FindPathsFromHasSBOMNode(g graph.Graph[string, *Node]) ([][]string, error) 
 		}
 
 		if node.NodeType == "Package" {
-			//now start dfs
+			// Now start DFS
 			dfsFindPaths(nodeID, allNodeEdges, currentPath, &paths)
 		}
 	}
@@ -256,7 +256,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action Action) ([]
 
 	var analysisOne, analysisTwo [][]*Node
 
-	//create a map so that we are only using unique paths.
+	// Create a map so that we are only using unique paths.
 	for i := range pathsOne {
 		nodes, err := nodeIDListToNodeList(gOne, pathsOne[i])
 		if err != nil {
@@ -328,13 +328,13 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 	g := graph.New(NodeHash, graph.Directed())
 
-	//create HasSBOM node
+	// Create HasSBOM node
 	AddGraphNode(g, "HasSBOM", "black")
 
 	compareAll := !metadata && !inclSoft && !inclDeps && !inclOccur && !namespaces
 
 	if metadata || compareAll {
-		//add metadata
+		// Add metadata
 		node, err := g.Vertex("HasSBOM")
 		if err != nil {
 			return g, fmt.Errorf("hasSBOM node not found")
@@ -346,11 +346,11 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 	}
 
 	if inclDeps || compareAll {
-		//add included dependencies
-		//sort dependencies here
+		// Add included dependencies
+		// Sort dependencies here
 		for _, dependency := range hasSBOM.IncludedDependencies {
-			//package node
-			//sort namespaces
+			// Package node
+			// Sort namespaces
 			sort.Sort(packageNameSpaces(dependency.Package.Namespaces))
 			message := dependency.Package.Type
 			for _, namespace := range dependency.Package.Namespaces {
@@ -378,10 +378,10 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 			hashValPackage := nodeHasher([]byte(message))
 			_, err := g.Vertex(hashValPackage)
 
-			if err != nil { //node does not exist
-				AddGraphNode(g, hashValPackage, "black") // so, create a node
+			if err != nil { // Node does not exist
+				AddGraphNode(g, hashValPackage, "black") // Create a node
 				AddGraphEdge(g, "HasSBOM", hashValPackage, "black")
-				//set attributes here
+				// Set attributes here
 				node, err := g.Vertex(hashValPackage)
 				if err != nil {
 					return g, fmt.Errorf("newly created node not found in graph")
@@ -390,7 +390,7 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 				node.Pkg = dependency.Package
 			}
 
-			//dependencyPackage node
+			// DependencyPackage node
 			sort.Sort(packageNameSpaces(dependency.DependencyPackage.Namespaces))
 			message = dependency.DependencyPackage.Type
 			for _, namespace := range dependency.DependencyPackage.Namespaces {
@@ -414,7 +414,7 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 			hashValDependencyPackage := nodeHasher([]byte(message))
 			_, err = g.Vertex(hashValDependencyPackage)
 
-			if err != nil { //node does not exist
+			if err != nil { // Node does not exist
 				AddGraphNode(g, hashValDependencyPackage, "black")
 				node, err := g.Vertex(hashValDependencyPackage)
 				if err != nil {
@@ -597,9 +597,8 @@ func DiffMissingNamespace(dmp *diffmatchpatch.DiffMatchPatch, namespace model.Al
 
 func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string) string {
 
-	// Enable line mode for faster processing on large texts
 	diffs := dmp.DiffMain(text1, text2, true)
-	diffs = dmp.DiffCleanupSemantic(diffs) // Optional: Clean up diff for better readability
+	diffs = dmp.DiffCleanupSemantic(diffs)
 	diffString := FormatDiffs(diffs)
 	return diffString
 }
@@ -607,7 +606,6 @@ func ComputeStringDiffs(dmp *diffmatchpatch.DiffMatchPatch, text1, text2 string)
 func FormatDiffsTableWriter(diffs []diffmatchpatch.Diff) string {
 
 	var parts []string
-	// Precompile color codes into variables
 	colorGreen := ColorGreen
 	colorRed := ColorRed
 	colorWhite := ColorWhite
@@ -632,7 +630,6 @@ func FormatDiffsTableWriter(diffs []diffmatchpatch.Diff) string {
 func FormatDiffs(diffs []diffmatchpatch.Diff) string {
 
 	var parts []string
-	// Precompile color codes into variables
 	colorGreen := "[green]"
 	colorRed := "[red]"
 	colorWhite := "[white]"
@@ -993,7 +990,7 @@ func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analys
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	errChan := make(chan error, len(longerPath)) // Buffer channel to hold errors
+	errChan := make(chan error, len(longerPath))
 
 	for i, node := range longerPath {
 		wg.Add(1)
@@ -1034,9 +1031,8 @@ func CompareTwoPaths(dmp *diffmatchpatch.DiffMatchPatch, analysisListOne, analys
 	}
 
 	wg.Wait()
-	close(errChan) // Close the channel after all goroutines are done
+	close(errChan)
 
-	// Check for errors
 	if len(errChan) != 0 {
 		return nodesDiff, pathDiff, 0, fmt.Errorf("could not diff node")
 	}
@@ -1104,7 +1100,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 		count := 0
 		seenNodeIndex := -1
 
-		//find if there is only one node causing the paths to differ. If yes, then mark it in the seen map.
+		// Find if there is only one node causing the paths to differ. If yes, then mark it in the seen map.
 		for k, list := range pathDiff.Diffs {
 			if len(list) > 0 {
 				count++
@@ -1136,7 +1132,7 @@ func CompareAllPaths(listOne, listTwo [][]*Node) (DiffResult, error) {
 		_, ok := used[i]
 		if !ok {
 
-			//diff each missing path and append to result
+			// Diff each missing path and append to result
 			var missingPath []Node
 			for _, node := range val {
 				dumnode := &Node{}

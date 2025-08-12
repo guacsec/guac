@@ -131,18 +131,15 @@ func CheckEmptyTrim(value string) string {
 
 func PrintPathTable(header string, analysisOne, analysisTwo [][]*Node) error {
 	app := tview.NewApplication()
-
-	// Create a scrollable Table
 	table := tview.NewTable().
-		SetBorders(true) // Add borders to the table for readability
+		SetBorders(true)
 
-	// Add Header Row
 	table.SetCell(0, 0, tview.NewTableCell(header).
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignCenter).
-		SetSelectable(false)) // Header is not selectable
+		SetSelectable(false))
 
-	rowIndex := 1 // Start adding rows below the header
+	rowIndex := 1
 
 	// Function to add paths to the table
 	addPathsToTable := func(paths [][]*Node, startRowIndex int) (int, error) {
@@ -349,7 +346,6 @@ func PrintAnalysis(diffs DiffResult) error {
 		}
 	}
 
-	// Enable scrolling and quit handling
 	table.SetFixed(1, 0).SetSelectable(true, true)
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyCtrlC {
@@ -358,7 +354,6 @@ func PrintAnalysis(diffs DiffResult) error {
 		return event
 	})
 
-	// Run the application
 	if err := app.SetRoot(table, true).Run(); err != nil {
 		return fmt.Errorf("error running table application: %v", err)
 	}
