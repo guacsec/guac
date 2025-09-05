@@ -140,17 +140,18 @@ func ingest(cmd *cobra.Command, args []string) {
 	}
 
 	// Assuming that publisher and consumer are different processes.
+	sigs := make(chan os.Signal, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		if err := process.Subscribe(ctx, emit, blobStore, pubsub); err != nil {
 			logger.Errorf("processor ended with error: %v", err)
+			sigs <- syscall.SIGTERM
 		}
 	}()
 
 	logger.Infof("starting processor and parser")
-	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	s := <-sigs
 	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
