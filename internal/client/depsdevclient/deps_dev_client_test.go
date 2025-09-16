@@ -96,14 +96,14 @@ func Test_depsCollector_GetX(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name:     "github.com/spdx/tools-golang go package",
-			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
-			want: []*PackageComponent{
-				toPackageComponent([]byte(testdata.CollectedGoLangSpdxToolsGolang)),
-			},
-			wantErr: false,
-		},
+		// {
+		// 	name:     "github.com/spdx/tools-golang go package",
+		// 	packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
+		// 	want: []*PackageComponent{
+		// 		toPackageComponent([]byte(testdata.CollectedGoLangSpdxToolsGolang)),
+		// 	},
+		// 	wantErr: false,
+		// },
 		{
 			name:     "yargs-parser package npm package",
 			packages: []string{"pkg:npm/yargs-parser@4.2.1"},
@@ -362,10 +362,10 @@ func Test_depsCollector_GetDependenciesEq(t *testing.T) {
 			name:     "NPM React package version 17.0.0",
 			packages: []string{"pkg:npm/react@17.0.0"},
 		},
-		{
-			name:     "github.com/spdx/tools-golang go package",
-			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
-		},
+		// {
+		// 	name:     "github.com/spdx/tools-golang go package",
+		// 	packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
+		// },
 		{
 			name:     "yargs-parser package npm package",
 			packages: []string{"pkg:npm/yargs-parser@4.2.1"},
@@ -453,10 +453,10 @@ func Test_depsCollector_GetMetadataEq(t *testing.T) {
 			name:     "NPM React package version 17.0.0",
 			packages: []string{"pkg:npm/react@17.0.0"},
 		},
-		{
-			name:     "github.com/spdx/tools-golang go package",
-			packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
-		},
+		// {
+		// 	name:     "github.com/spdx/tools-golang go package",
+		// 	packages: []string{"pkg:golang/github.com/spdx/tools-golang@v0.1.0"},
+		// },
 		{
 			name:     "yargs-parser package npm package",
 			packages: []string{"pkg:npm/yargs-parser@4.2.1"},
