@@ -54,7 +54,7 @@ jobs:
         with:
           go-version: '1.24'
       - name: Install cosign
-        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # main
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # main
       - name: Install syft
         uses: anchore/sbom-action/download-syft@cee1b8e05ae5b2593a75e197229729eabaa9f8ec # v0.20.2
 
@@ -163,7 +163,7 @@ jobs:
           format: "spdx-json"
           output: "spdx.sbom.json"
       - name: Install cosign
-        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # main
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash
