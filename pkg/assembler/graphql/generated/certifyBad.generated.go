@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -31,31 +30,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _CertifyBad_id(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -72,31 +59,19 @@ func (ec *executionContext) fieldContext_CertifyBad_id(_ context.Context, field 
 }
 
 func (ec *executionContext) _CertifyBad_subject(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_subject(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Subject, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.PackageSourceOrArtifact)
-	fc.Result = res
-	return ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_subject,
+		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_subject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -113,31 +88,19 @@ func (ec *executionContext) fieldContext_CertifyBad_subject(_ context.Context, f
 }
 
 func (ec *executionContext) _CertifyBad_justification(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_justification(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Justification, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_justification,
+		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_justification(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -154,31 +117,19 @@ func (ec *executionContext) fieldContext_CertifyBad_justification(_ context.Cont
 }
 
 func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_knownSince(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.KnownSince, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_knownSince,
+		func(ctx context.Context) (any, error) { return obj.KnownSince, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_knownSince(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -195,31 +146,19 @@ func (ec *executionContext) fieldContext_CertifyBad_knownSince(_ context.Context
 }
 
 func (ec *executionContext) _CertifyBad_origin(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_origin(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Origin, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_origin,
+		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_origin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -236,31 +175,19 @@ func (ec *executionContext) fieldContext_CertifyBad_origin(_ context.Context, fi
 }
 
 func (ec *executionContext) _CertifyBad_collector(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_collector(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Collector, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_collector,
+		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_collector(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -277,31 +204,19 @@ func (ec *executionContext) fieldContext_CertifyBad_collector(_ context.Context,
 }
 
 func (ec *executionContext) _CertifyBad_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_documentRef(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DocumentRef, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBad_documentRef,
+		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_documentRef(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -318,31 +233,19 @@ func (ec *executionContext) fieldContext_CertifyBad_documentRef(_ context.Contex
 }
 
 func (ec *executionContext) _CertifyBadConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBadConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBadConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBadConnection_totalCount,
+		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBadConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -359,31 +262,19 @@ func (ec *executionContext) fieldContext_CertifyBadConnection_totalCount(_ conte
 }
 
 func (ec *executionContext) _CertifyBadConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBadConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBadConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBadConnection_pageInfo,
+		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBadConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -408,31 +299,19 @@ func (ec *executionContext) fieldContext_CertifyBadConnection_pageInfo(_ context
 }
 
 func (ec *executionContext) _CertifyBadConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBadConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBadConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.CertifyBadEdge)
-	fc.Result = res
-	return ec.marshalNCertifyBadEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadEdgeᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBadConnection_edges,
+		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNCertifyBadEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadEdgeᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBadConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -455,31 +334,19 @@ func (ec *executionContext) fieldContext_CertifyBadConnection_edges(_ context.Co
 }
 
 func (ec *executionContext) _CertifyBadEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBadEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBadEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBadEdge_cursor,
+		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBadEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -496,31 +363,19 @@ func (ec *executionContext) fieldContext_CertifyBadEdge_cursor(_ context.Context
 }
 
 func (ec *executionContext) _CertifyBadEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBadEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBadEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.CertifyBad)
-	fc.Result = res
-	return ec.marshalNCertifyBad2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBad(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CertifyBadEdge_node,
+		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNCertifyBad2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBad,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_CertifyBadEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -838,13 +693,6 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Package(ctx, sel, obj)
 	case model.Source:
 		return ec._Source(ctx, sel, &obj)
 	case *model.Source:
@@ -852,6 +700,13 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 			return graphql.Null
 		}
 		return ec._Source(ctx, sel, obj)
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
 	case model.Artifact:
 		return ec._Artifact(ctx, sel, &obj)
 	case *model.Artifact:
@@ -1149,9 +1004,7 @@ func (ec *executionContext) unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsec
 
 func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx context.Context, v any) ([]*model.CertifyBadInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.CertifyBadInputSpec, len(vSlice))
 	for i := range vSlice {

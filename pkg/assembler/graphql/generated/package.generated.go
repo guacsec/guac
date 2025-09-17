@@ -34,31 +34,19 @@ type PackageResolver interface {
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Package_id(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Package_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_Package_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -75,31 +63,19 @@ func (ec *executionContext) fieldContext_Package_id(_ context.Context, field gra
 }
 
 func (ec *executionContext) _Package_type(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_type(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Package_type,
+		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_Package_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -116,31 +92,21 @@ func (ec *executionContext) fieldContext_Package_type(_ context.Context, field g
 }
 
 func (ec *executionContext) _Package_namespaces(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_namespaces(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Package().Namespaces(rctx, obj)
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PackageNamespace)
-	fc.Result = res
-	return ec.marshalNPackageNamespace2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageNamespaceᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Package_namespaces,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Package().Namespaces(ctx, obj)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageNamespace2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageNamespaceᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_Package_namespaces(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -165,31 +131,19 @@ func (ec *executionContext) fieldContext_Package_namespaces(_ context.Context, f
 }
 
 func (ec *executionContext) _PackageConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.PackageConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageConnection_totalCount,
+		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -206,31 +160,19 @@ func (ec *executionContext) fieldContext_PackageConnection_totalCount(_ context.
 }
 
 func (ec *executionContext) _PackageConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.PackageConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageConnection_pageInfo,
+		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -255,31 +197,19 @@ func (ec *executionContext) fieldContext_PackageConnection_pageInfo(_ context.Co
 }
 
 func (ec *executionContext) _PackageConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.PackageConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PackageEdge)
-	fc.Result = res
-	return ec.marshalNPackageEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageEdgeᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageConnection_edges,
+		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageEdgeᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -302,31 +232,19 @@ func (ec *executionContext) fieldContext_PackageConnection_edges(_ context.Conte
 }
 
 func (ec *executionContext) _PackageEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.PackageEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageEdge_cursor,
+		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -343,31 +261,19 @@ func (ec *executionContext) fieldContext_PackageEdge_cursor(_ context.Context, f
 }
 
 func (ec *executionContext) _PackageEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.PackageEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Package)
-	fc.Result = res
-	return ec.marshalNPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageEdge_node,
+		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -392,31 +298,19 @@ func (ec *executionContext) fieldContext_PackageEdge_node(_ context.Context, fie
 }
 
 func (ec *executionContext) _PackageIDs_packageTypeID(ctx context.Context, field graphql.CollectedField, obj *model.PackageIDs) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageIDs_packageTypeID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PackageTypeID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageIDs_packageTypeID,
+		func(ctx context.Context) (any, error) { return obj.PackageTypeID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageIDs_packageTypeID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -433,31 +327,19 @@ func (ec *executionContext) fieldContext_PackageIDs_packageTypeID(_ context.Cont
 }
 
 func (ec *executionContext) _PackageIDs_packageNamespaceID(ctx context.Context, field graphql.CollectedField, obj *model.PackageIDs) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageIDs_packageNamespaceID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PackageNamespaceID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageIDs_packageNamespaceID,
+		func(ctx context.Context) (any, error) { return obj.PackageNamespaceID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageIDs_packageNamespaceID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -474,31 +356,19 @@ func (ec *executionContext) fieldContext_PackageIDs_packageNamespaceID(_ context
 }
 
 func (ec *executionContext) _PackageIDs_packageNameID(ctx context.Context, field graphql.CollectedField, obj *model.PackageIDs) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageIDs_packageNameID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PackageNameID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageIDs_packageNameID,
+		func(ctx context.Context) (any, error) { return obj.PackageNameID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageIDs_packageNameID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -515,31 +385,19 @@ func (ec *executionContext) fieldContext_PackageIDs_packageNameID(_ context.Cont
 }
 
 func (ec *executionContext) _PackageIDs_packageVersionID(ctx context.Context, field graphql.CollectedField, obj *model.PackageIDs) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageIDs_packageVersionID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PackageVersionID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageIDs_packageVersionID,
+		func(ctx context.Context) (any, error) { return obj.PackageVersionID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageIDs_packageVersionID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -556,31 +414,19 @@ func (ec *executionContext) fieldContext_PackageIDs_packageVersionID(_ context.C
 }
 
 func (ec *executionContext) _PackageName_id(ctx context.Context, field graphql.CollectedField, obj *model.PackageName) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageName_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageName_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageName_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -597,31 +443,19 @@ func (ec *executionContext) fieldContext_PackageName_id(_ context.Context, field
 }
 
 func (ec *executionContext) _PackageName_name(ctx context.Context, field graphql.CollectedField, obj *model.PackageName) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageName_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageName_name,
+		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageName_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -638,31 +472,19 @@ func (ec *executionContext) fieldContext_PackageName_name(_ context.Context, fie
 }
 
 func (ec *executionContext) _PackageName_versions(ctx context.Context, field graphql.CollectedField, obj *model.PackageName) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageName_versions(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Versions, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PackageVersion)
-	fc.Result = res
-	return ec.marshalNPackageVersion2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageVersionᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageName_versions,
+		func(ctx context.Context) (any, error) { return obj.Versions, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageVersion2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageVersionᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageName_versions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -691,31 +513,19 @@ func (ec *executionContext) fieldContext_PackageName_versions(_ context.Context,
 }
 
 func (ec *executionContext) _PackageNamespace_id(ctx context.Context, field graphql.CollectedField, obj *model.PackageNamespace) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageNamespace_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageNamespace_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageNamespace_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -732,31 +542,19 @@ func (ec *executionContext) fieldContext_PackageNamespace_id(_ context.Context, 
 }
 
 func (ec *executionContext) _PackageNamespace_namespace(ctx context.Context, field graphql.CollectedField, obj *model.PackageNamespace) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageNamespace_namespace(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageNamespace_namespace,
+		func(ctx context.Context) (any, error) { return obj.Namespace, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageNamespace_namespace(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -773,31 +571,19 @@ func (ec *executionContext) fieldContext_PackageNamespace_namespace(_ context.Co
 }
 
 func (ec *executionContext) _PackageNamespace_names(ctx context.Context, field graphql.CollectedField, obj *model.PackageNamespace) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageNamespace_names(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Names, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PackageName)
-	fc.Result = res
-	return ec.marshalNPackageName2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageNameᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageNamespace_names,
+		func(ctx context.Context) (any, error) { return obj.Names, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageName2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageNameᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageNamespace_names(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -822,31 +608,19 @@ func (ec *executionContext) fieldContext_PackageNamespace_names(_ context.Contex
 }
 
 func (ec *executionContext) _PackageQualifier_key(ctx context.Context, field graphql.CollectedField, obj *model.PackageQualifier) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageQualifier_key(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Key, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageQualifier_key,
+		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageQualifier_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -863,31 +637,19 @@ func (ec *executionContext) fieldContext_PackageQualifier_key(_ context.Context,
 }
 
 func (ec *executionContext) _PackageQualifier_value(ctx context.Context, field graphql.CollectedField, obj *model.PackageQualifier) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageQualifier_value(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageQualifier_value,
+		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageQualifier_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -904,31 +666,19 @@ func (ec *executionContext) fieldContext_PackageQualifier_value(_ context.Contex
 }
 
 func (ec *executionContext) _PackageVersion_id(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageVersion_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageVersion_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageVersion_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -945,31 +695,19 @@ func (ec *executionContext) fieldContext_PackageVersion_id(_ context.Context, fi
 }
 
 func (ec *executionContext) _PackageVersion_purl(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageVersion_purl(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Purl, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageVersion_purl,
+		func(ctx context.Context) (any, error) { return obj.Purl, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageVersion_purl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -986,31 +724,19 @@ func (ec *executionContext) fieldContext_PackageVersion_purl(_ context.Context, 
 }
 
 func (ec *executionContext) _PackageVersion_version(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageVersion_version(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Version, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageVersion_version,
+		func(ctx context.Context) (any, error) { return obj.Version, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageVersion_version(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1027,31 +753,19 @@ func (ec *executionContext) fieldContext_PackageVersion_version(_ context.Contex
 }
 
 func (ec *executionContext) _PackageVersion_qualifiers(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageVersion_qualifiers(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Qualifiers, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PackageQualifier)
-	fc.Result = res
-	return ec.marshalNPackageQualifier2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageVersion_qualifiers,
+		func(ctx context.Context) (any, error) { return obj.Qualifiers, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageQualifier2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageVersion_qualifiers(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1074,31 +788,19 @@ func (ec *executionContext) fieldContext_PackageVersion_qualifiers(_ context.Con
 }
 
 func (ec *executionContext) _PackageVersion_subpath(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PackageVersion_subpath(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Subpath, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PackageVersion_subpath,
+		func(ctx context.Context) (any, error) { return obj.Subpath, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PackageVersion_subpath(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1846,9 +1548,7 @@ func (ec *executionContext) unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguac
 
 func (ec *executionContext) unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorPkgInput, len(vSlice))
 	for i := range vSlice {
@@ -2268,9 +1968,7 @@ func (ec *executionContext) unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorPkgInput, len(vSlice))
 	for i := range vSlice {
@@ -2303,9 +2001,7 @@ func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗc
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PackageQualifierInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -2323,9 +2019,7 @@ func (ec *executionContext) unmarshalOPackageQualifierSpec2ᚕᚖgithubᚗcomᚋ
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PackageQualifierSpec, len(vSlice))
 	for i := range vSlice {
@@ -2351,9 +2045,7 @@ func (ec *executionContext) unmarshalOPkgSpec2ᚕᚖgithubᚗcomᚋguacsecᚋgua
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PkgSpec, len(vSlice))
 	for i := range vSlice {

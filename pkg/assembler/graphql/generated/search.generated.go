@@ -30,31 +30,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _FindSoftwareConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.FindSoftwareConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FindSoftwareConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FindSoftwareConnection_totalCount,
+		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_FindSoftwareConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -71,31 +59,19 @@ func (ec *executionContext) fieldContext_FindSoftwareConnection_totalCount(_ con
 }
 
 func (ec *executionContext) _FindSoftwareConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.FindSoftwareConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FindSoftwareConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FindSoftwareConnection_pageInfo,
+		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_FindSoftwareConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -120,31 +96,19 @@ func (ec *executionContext) fieldContext_FindSoftwareConnection_pageInfo(_ conte
 }
 
 func (ec *executionContext) _FindSoftwareConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.FindSoftwareConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FindSoftwareConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SoftwareEdge)
-	fc.Result = res
-	return ec.marshalNSoftwareEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSoftwareEdgeᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FindSoftwareConnection_edges,
+		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNSoftwareEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSoftwareEdgeᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_FindSoftwareConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -167,31 +131,19 @@ func (ec *executionContext) fieldContext_FindSoftwareConnection_edges(_ context.
 }
 
 func (ec *executionContext) _SoftwareEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.SoftwareEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SoftwareEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SoftwareEdge_cursor,
+		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SoftwareEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -208,31 +160,19 @@ func (ec *executionContext) fieldContext_SoftwareEdge_cursor(_ context.Context, 
 }
 
 func (ec *executionContext) _SoftwareEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.SoftwareEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SoftwareEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.PackageSourceOrArtifact)
-	fc.Result = res
-	return ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SoftwareEdge_node,
+		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SoftwareEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {

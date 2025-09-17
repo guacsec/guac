@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -31,31 +30,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _HasSLSA_id(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSA_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSA_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -72,31 +59,19 @@ func (ec *executionContext) fieldContext_HasSLSA_id(_ context.Context, field gra
 }
 
 func (ec *executionContext) _HasSLSA_subject(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_subject(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Subject, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Artifact)
-	fc.Result = res
-	return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSA_subject,
+		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSA_subject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -121,31 +96,19 @@ func (ec *executionContext) fieldContext_HasSLSA_subject(_ context.Context, fiel
 }
 
 func (ec *executionContext) _HasSLSA_slsa(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_slsa(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Slsa, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Slsa)
-	fc.Result = res
-	return ec.marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSA_slsa,
+		func(ctx context.Context) (any, error) { return obj.Slsa, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSA_slsa(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -184,31 +147,19 @@ func (ec *executionContext) fieldContext_HasSLSA_slsa(_ context.Context, field g
 }
 
 func (ec *executionContext) _HasSLSAConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.HasSLSAConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSAConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSAConnection_totalCount,
+		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSAConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -225,31 +176,19 @@ func (ec *executionContext) fieldContext_HasSLSAConnection_totalCount(_ context.
 }
 
 func (ec *executionContext) _HasSLSAConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.HasSLSAConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSAConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSAConnection_pageInfo,
+		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSAConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -274,31 +213,19 @@ func (ec *executionContext) fieldContext_HasSLSAConnection_pageInfo(_ context.Co
 }
 
 func (ec *executionContext) _HasSLSAConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.HasSLSAConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSAConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.HasSLSAEdge)
-	fc.Result = res
-	return ec.marshalNHasSLSAEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSAEdgeᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSAConnection_edges,
+		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNHasSLSAEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSAEdgeᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSAConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -321,31 +248,19 @@ func (ec *executionContext) fieldContext_HasSLSAConnection_edges(_ context.Conte
 }
 
 func (ec *executionContext) _HasSLSAEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.HasSLSAEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSAEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSAEdge_cursor,
+		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSAEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -362,31 +277,19 @@ func (ec *executionContext) fieldContext_HasSLSAEdge_cursor(_ context.Context, f
 }
 
 func (ec *executionContext) _HasSLSAEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.HasSLSAEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSAEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.HasSlsa)
-	fc.Result = res
-	return ec.marshalNHasSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsa(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasSLSAEdge_node,
+		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNHasSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsa,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasSLSAEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -411,31 +314,19 @@ func (ec *executionContext) fieldContext_HasSLSAEdge_node(_ context.Context, fie
 }
 
 func (ec *executionContext) _SLSA_builtFrom(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_builtFrom(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.BuiltFrom, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Artifact)
-	fc.Result = res
-	return ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_builtFrom,
+		func(ctx context.Context) (any, error) { return obj.BuiltFrom, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_builtFrom(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -460,31 +351,19 @@ func (ec *executionContext) fieldContext_SLSA_builtFrom(_ context.Context, field
 }
 
 func (ec *executionContext) _SLSA_builtBy(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_builtBy(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.BuiltBy, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Builder)
-	fc.Result = res
-	return ec.marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_builtBy,
+		func(ctx context.Context) (any, error) { return obj.BuiltBy, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_builtBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -507,31 +386,19 @@ func (ec *executionContext) fieldContext_SLSA_builtBy(_ context.Context, field g
 }
 
 func (ec *executionContext) _SLSA_buildType(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_buildType(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.BuildType, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_buildType,
+		func(ctx context.Context) (any, error) { return obj.BuildType, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_buildType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -548,31 +415,19 @@ func (ec *executionContext) fieldContext_SLSA_buildType(_ context.Context, field
 }
 
 func (ec *executionContext) _SLSA_slsaPredicate(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_slsaPredicate(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SlsaPredicate, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SLSAPredicate)
-	fc.Result = res
-	return ec.marshalNSLSAPredicate2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_slsaPredicate,
+		func(ctx context.Context) (any, error) { return obj.SlsaPredicate, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNSLSAPredicate2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_slsaPredicate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -595,31 +450,19 @@ func (ec *executionContext) fieldContext_SLSA_slsaPredicate(_ context.Context, f
 }
 
 func (ec *executionContext) _SLSA_slsaVersion(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_slsaVersion(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SlsaVersion, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_slsaVersion,
+		func(ctx context.Context) (any, error) { return obj.SlsaVersion, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_slsaVersion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -636,28 +479,19 @@ func (ec *executionContext) fieldContext_SLSA_slsaVersion(_ context.Context, fie
 }
 
 func (ec *executionContext) _SLSA_startedOn(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_startedOn(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.StartedOn, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_startedOn,
+		func(ctx context.Context) (any, error) { return obj.StartedOn, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalOTime2ᚖtimeᚐTime,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_startedOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -674,28 +508,19 @@ func (ec *executionContext) fieldContext_SLSA_startedOn(_ context.Context, field
 }
 
 func (ec *executionContext) _SLSA_finishedOn(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_finishedOn(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FinishedOn, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*time.Time)
-	fc.Result = res
-	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_finishedOn,
+		func(ctx context.Context) (any, error) { return obj.FinishedOn, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalOTime2ᚖtimeᚐTime,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_finishedOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -712,31 +537,19 @@ func (ec *executionContext) fieldContext_SLSA_finishedOn(_ context.Context, fiel
 }
 
 func (ec *executionContext) _SLSA_origin(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_origin(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Origin, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_origin,
+		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_origin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -753,31 +566,19 @@ func (ec *executionContext) fieldContext_SLSA_origin(_ context.Context, field gr
 }
 
 func (ec *executionContext) _SLSA_collector(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_collector(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Collector, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_collector,
+		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_collector(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -794,31 +595,19 @@ func (ec *executionContext) fieldContext_SLSA_collector(_ context.Context, field
 }
 
 func (ec *executionContext) _SLSA_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSA_documentRef(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DocumentRef, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSA_documentRef,
+		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSA_documentRef(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -835,31 +624,19 @@ func (ec *executionContext) fieldContext_SLSA_documentRef(_ context.Context, fie
 }
 
 func (ec *executionContext) _SLSAPredicate_key(ctx context.Context, field graphql.CollectedField, obj *model.SLSAPredicate) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSAPredicate_key(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Key, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSAPredicate_key,
+		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSAPredicate_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -876,31 +653,19 @@ func (ec *executionContext) fieldContext_SLSAPredicate_key(_ context.Context, fi
 }
 
 func (ec *executionContext) _SLSAPredicate_value(ctx context.Context, field graphql.CollectedField, obj *model.SLSAPredicate) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SLSAPredicate_value(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SLSAPredicate_value,
+		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SLSAPredicate_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1578,9 +1343,7 @@ func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋgua
 
 func (ec *executionContext) unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx context.Context, v any) ([]*model.SLSAInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.SLSAInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1654,9 +1417,7 @@ func (ec *executionContext) marshalNSLSAPredicate2ᚖgithubᚗcomᚋguacsecᚋgu
 
 func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpecᚄ(ctx context.Context, v any) ([]*model.SLSAPredicateInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.SLSAPredicateInputSpec, len(vSlice))
 	for i := range vSlice {
@@ -1691,9 +1452,7 @@ func (ec *executionContext) unmarshalOSLSAPredicateSpec2ᚕᚖgithubᚗcomᚋgua
 		return nil, nil
 	}
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.SLSAPredicateSpec, len(vSlice))
 	for i := range vSlice {

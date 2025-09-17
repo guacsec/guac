@@ -771,7 +771,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
+func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -2076,7 +2076,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_delete_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_delete_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2088,7 +2088,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestArtifact_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestArtifact_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2100,7 +2100,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestArtifacts_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestArtifacts_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2112,7 +2112,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestBuilder_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestBuilder_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2124,7 +2124,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestBuilders_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestBuilders_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2136,7 +2136,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestBulkHasMetadata_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestBulkHasMetadata_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2148,7 +2148,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestBulkVulnerabilityMetadata_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestBulkVulnerabilityMetadata_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2160,7 +2160,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyBad_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyBad_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2172,7 +2172,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyBads_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyBads_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2184,7 +2184,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyGood_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyGood_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2196,7 +2196,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyGoods_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyGoods_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2208,7 +2208,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyLegal_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyLegal_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2220,7 +2220,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyLegals_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyLegals_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2232,7 +2232,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyVuln_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyVuln_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2244,7 +2244,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCertifyVulns_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyVulns_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2256,7 +2256,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestDependencies_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestDependencies_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2268,7 +2268,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestDependency_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestDependency_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2280,7 +2280,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHasMetadata_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHasMetadata_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2292,7 +2292,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHasSBOMs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHasSBOMs_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2304,7 +2304,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHasSBOM_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHasSBOM_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2316,7 +2316,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHasSourceAt_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHasSourceAt_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2328,7 +2328,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHasSourceAts_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHasSourceAts_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2340,7 +2340,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHashEqual_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHashEqual_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2352,7 +2352,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestHashEquals_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestHashEquals_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2364,7 +2364,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestLicense_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestLicense_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2376,7 +2376,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestLicenses_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestLicenses_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2388,7 +2388,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestOccurrence_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestOccurrence_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2400,7 +2400,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestOccurrences_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestOccurrences_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2412,7 +2412,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestPackage_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestPackage_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2424,7 +2424,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestPackages_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestPackages_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2436,7 +2436,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestPkgEqual_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestPkgEqual_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2448,7 +2448,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestPkgEquals_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestPkgEquals_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2460,7 +2460,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestPointOfContact_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestPointOfContact_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2472,7 +2472,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestPointOfContacts_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestPointOfContacts_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2484,7 +2484,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestSLSAs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestSLSAs_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2496,7 +2496,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestScorecard_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestScorecard_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2508,7 +2508,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestScorecards_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestScorecards_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2520,7 +2520,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestSLSA_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestSLSA_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2532,7 +2532,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestSource_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestSource_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2544,7 +2544,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestSources_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestSources_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2556,7 +2556,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVEXStatement_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVEXStatement_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2568,7 +2568,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVEXStatements_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVEXStatements_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2580,7 +2580,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVulnEqual_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVulnEqual_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2592,7 +2592,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVulnEquals_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVulnEquals_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2604,7 +2604,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVulnerabilities_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVulnerabilities_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2616,7 +2616,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVulnerability_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVulnerability_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -2628,7 +2628,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestVulnerabilityMetadata_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestVulnerabilityMetadata_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3046,7 +3046,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_artifacts_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_artifacts_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3058,7 +3058,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_artifactsList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_artifactsList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3070,7 +3070,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_BatchQueryDepPkgDependency_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_BatchQueryDepPkgDependency_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3082,7 +3082,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyLegal_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3094,7 +3094,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_BatchQueryPkgIDCertifyVuln_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3106,7 +3106,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_BatchQuerySubjectPkgDependency_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_BatchQuerySubjectPkgDependency_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3118,7 +3118,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_builders_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_builders_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3130,7 +3130,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_buildersList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_buildersList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3142,7 +3142,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyBad_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyBad_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3154,7 +3154,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyBadList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyBadList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3166,7 +3166,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyGood_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyGood_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3178,7 +3178,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyGoodList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyGoodList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3190,7 +3190,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyLegal_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyLegal_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3202,7 +3202,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyLegalList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyLegalList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3214,7 +3214,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyVEXStatement_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyVEXStatement_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3226,7 +3226,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyVEXStatementList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyVEXStatementList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3238,7 +3238,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyVuln_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyVuln_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3250,7 +3250,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_CertifyVulnList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_CertifyVulnList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3262,7 +3262,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_findPackagesThatNeedScanning_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_findPackagesThatNeedScanning_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3274,7 +3274,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_findSoftware_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_findSoftware_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3286,7 +3286,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_findSoftwareList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_findSoftwareList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3298,7 +3298,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasMetadata_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasMetadata_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3310,7 +3310,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasMetadataList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasMetadataList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3322,7 +3322,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasSBOMList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSBOMList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3334,7 +3334,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasSLSAList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSLSAList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3346,7 +3346,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasSBOM_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSBOM_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3358,7 +3358,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasSLSA_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSLSA_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3370,7 +3370,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasSourceAt_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSourceAt_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3382,7 +3382,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HasSourceAtList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSourceAtList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3394,7 +3394,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HashEqual_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HashEqual_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3406,7 +3406,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_HashEqualList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HashEqualList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3418,7 +3418,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_IsDependency_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_IsDependency_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3430,7 +3430,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_IsDependencyList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_IsDependencyList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3442,7 +3442,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_IsOccurrence_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_IsOccurrence_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3454,7 +3454,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_IsOccurrenceList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_IsOccurrenceList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3466,7 +3466,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_licenseList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_licenseList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3478,7 +3478,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_licenses_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_licenses_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3490,7 +3490,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_neighbors_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_neighbors_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3502,7 +3502,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_neighborsList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_neighborsList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3514,7 +3514,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_node_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_node_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3526,7 +3526,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_nodes_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_nodes_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3538,7 +3538,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_packages_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_packages_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3550,7 +3550,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_packagesList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_packagesList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3562,7 +3562,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_path_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_path_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3574,7 +3574,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_PkgEqual_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_PkgEqual_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3586,7 +3586,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_PkgEqualList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_PkgEqualList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3598,7 +3598,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_PointOfContact_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_PointOfContact_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3610,7 +3610,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_PointOfContactList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_PointOfContactList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3622,7 +3622,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_queryPackagesListForScan_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_queryPackagesListForScan_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3634,7 +3634,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_scorecards_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_scorecards_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3646,7 +3646,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_scorecardsList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_scorecardsList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3658,7 +3658,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_sources_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_sources_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3670,7 +3670,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_sourcesList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_sourcesList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3682,7 +3682,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_vulnEqual_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_vulnEqual_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3694,7 +3694,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_vulnEqualList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_vulnEqualList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3706,7 +3706,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_vulnerabilities_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_vulnerabilities_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3718,7 +3718,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_vulnerabilityList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_vulnerabilityList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3730,7 +3730,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_vulnerabilityMetadata_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_vulnerabilityMetadata_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -3742,7 +3742,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_vulnerabilityMetadataList_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_vulnerabilityMetadataList_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}

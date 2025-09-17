@@ -20,82 +20,29 @@ import (
 func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_filter_argsKeyName(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "keyName", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["keyName"] = arg0
-	arg1, err := ec.dir_filter_argsOperation(ctx, rawArgs)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "operation", ec.unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation)
 	if err != nil {
 		return nil, err
 	}
 	args["operation"] = arg1
-	arg2, err := ec.dir_filter_argsValue(ctx, rawArgs)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "value", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["value"] = arg2
 	return args, nil
 }
-func (ec *executionContext) dir_filter_argsKeyName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	if _, ok := rawArgs["keyName"]; !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("keyName"))
-	if tmp, ok := rawArgs["keyName"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_filter_argsOperation(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*model.FilterOperation, error) {
-	if _, ok := rawArgs["operation"]; !ok {
-		var zeroVal *model.FilterOperation
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("operation"))
-	if tmp, ok := rawArgs["operation"]; ok {
-		return ec.unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation(ctx, tmp)
-	}
-
-	var zeroVal *model.FilterOperation
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_filter_argsValue(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	if _, ok := rawArgs["value"]; !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-	if tmp, ok := rawArgs["value"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
 
 // endregion ***************************** args.gotpl *****************************
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) any {
+func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
 	fc := graphql.GetFieldContext(ctx)
 	for _, d := range fc.Field.Directives {
 		switch d.Name {
@@ -115,12 +62,7 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 			}
 		}
 	}
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
+	return next
 }
 
 // endregion ************************** directives.gotpl **************************

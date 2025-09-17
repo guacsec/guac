@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -31,31 +30,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _PointOfContact_id(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -72,31 +59,19 @@ func (ec *executionContext) fieldContext_PointOfContact_id(_ context.Context, fi
 }
 
 func (ec *executionContext) _PointOfContact_subject(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_subject(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Subject, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.PackageSourceOrArtifact)
-	fc.Result = res
-	return ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_subject,
+		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_subject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -113,31 +88,19 @@ func (ec *executionContext) fieldContext_PointOfContact_subject(_ context.Contex
 }
 
 func (ec *executionContext) _PointOfContact_email(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_email(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_email,
+		func(ctx context.Context) (any, error) { return obj.Email, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -154,31 +117,19 @@ func (ec *executionContext) fieldContext_PointOfContact_email(_ context.Context,
 }
 
 func (ec *executionContext) _PointOfContact_info(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_info(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Info, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_info,
+		func(ctx context.Context) (any, error) { return obj.Info, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_info(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -195,31 +146,19 @@ func (ec *executionContext) fieldContext_PointOfContact_info(_ context.Context, 
 }
 
 func (ec *executionContext) _PointOfContact_since(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_since(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Since, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_since,
+		func(ctx context.Context) (any, error) { return obj.Since, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_since(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -236,31 +175,19 @@ func (ec *executionContext) fieldContext_PointOfContact_since(_ context.Context,
 }
 
 func (ec *executionContext) _PointOfContact_justification(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_justification(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Justification, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_justification,
+		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_justification(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -277,31 +204,19 @@ func (ec *executionContext) fieldContext_PointOfContact_justification(_ context.
 }
 
 func (ec *executionContext) _PointOfContact_origin(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_origin(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Origin, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_origin,
+		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_origin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -318,31 +233,19 @@ func (ec *executionContext) fieldContext_PointOfContact_origin(_ context.Context
 }
 
 func (ec *executionContext) _PointOfContact_collector(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_collector(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Collector, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_collector,
+		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_collector(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -359,31 +262,19 @@ func (ec *executionContext) fieldContext_PointOfContact_collector(_ context.Cont
 }
 
 func (ec *executionContext) _PointOfContact_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContact_documentRef(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DocumentRef, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContact_documentRef,
+		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContact_documentRef(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -400,31 +291,19 @@ func (ec *executionContext) fieldContext_PointOfContact_documentRef(_ context.Co
 }
 
 func (ec *executionContext) _PointOfContactConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContactConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContactConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContactConnection_totalCount,
+		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContactConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -441,31 +320,19 @@ func (ec *executionContext) fieldContext_PointOfContactConnection_totalCount(_ c
 }
 
 func (ec *executionContext) _PointOfContactConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContactConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContactConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContactConnection_pageInfo,
+		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContactConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -490,31 +357,19 @@ func (ec *executionContext) fieldContext_PointOfContactConnection_pageInfo(_ con
 }
 
 func (ec *executionContext) _PointOfContactConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContactConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContactConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PointOfContactEdge)
-	fc.Result = res
-	return ec.marshalNPointOfContactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactEdgeᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContactConnection_edges,
+		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPointOfContactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactEdgeᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContactConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -537,31 +392,19 @@ func (ec *executionContext) fieldContext_PointOfContactConnection_edges(_ contex
 }
 
 func (ec *executionContext) _PointOfContactEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContactEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContactEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContactEdge_cursor,
+		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContactEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -578,31 +421,19 @@ func (ec *executionContext) fieldContext_PointOfContactEdge_cursor(_ context.Con
 }
 
 func (ec *executionContext) _PointOfContactEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContactEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PointOfContactEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PointOfContact)
-	fc.Result = res
-	return ec.marshalNPointOfContact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContact(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PointOfContactEdge_node,
+		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPointOfContact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContact,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_PointOfContactEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1093,9 +924,7 @@ func (ec *executionContext) unmarshalNPointOfContactInputSpec2githubᚗcomᚋgua
 
 func (ec *executionContext) unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ(ctx context.Context, v any) ([]*model.PointOfContactInputSpec, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*model.PointOfContactInputSpec, len(vSlice))
 	for i := range vSlice {
