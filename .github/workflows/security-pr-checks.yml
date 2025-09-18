@@ -1,0 +1,13 @@
+name: security-pr-checks
+on:
+  # Allow for manual run of security workflows
+  workflow_dispatch:
+  # Scan changed files in PRs (diff-aware scanning):
+  pull_request: {}
+jobs:
+  running-pr-security-checks:
+    uses: verkada/securitybots/.github/workflows/pr-checks.yml@main
+    secrets: inherit
+  running-pr-semgrep-check:
+    uses: verkada/securitybots/.github/workflows/semgrep-pr-checks.yml@main
+    secrets: inherit
