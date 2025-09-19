@@ -32,7 +32,6 @@ package vuln
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -153,11 +152,11 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 		}
 		ivs = append(ivs, iv)
 
-		var severityErrors error
 		for _, severity := range res.Severity {
 			score, err := parseScoreBasedOnMethod(severity)
 			if err != nil {
-				severityErrors = errors.Join(fmt.Errorf("parsing severity score failed for method %s: %w", severity.Method, err))
+				// TODO: log it as Ward/Info log which severity failed to parse and why
+				continue
 			}
 			vmi = append(vmi, assembler.VulnMetadataIngest{
 				Vulnerability: vuln,
@@ -166,9 +165,6 @@ func parseVulns(_ context.Context, s *attestation_vuln.VulnerabilityStatement) (
 					ScoreValue: score,
 				},
 			})
-		}
-		if severityErrors != nil {
-			return nil, nil, nil, severityErrors
 		}
 	}
 	return vs, ivs, vmi, nil
