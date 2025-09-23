@@ -18,6 +18,10 @@ package scorecard
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"time"
 
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/checks"
@@ -31,6 +35,64 @@ type scorecardRunner struct {
 }
 
 func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+	// First try API approach
+	result, err := s.getScoreFromAPI(repoName, commitSHA, tag)
+	if err == nil {
+		return result, nil
+	}
+	return s.computeScore(repoName, commitSHA, tag)
+}
+
+func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.ScorecardResult, error) {
+	url, err := url.JoinPath("https://api.securityscorecards.dev", "projects", repoName)
+	if err != nil {
+		return nil, err
+	}
+
+	if commitSHA != "" {
+		url += "?commit=" + commitSHA
+	}
+
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	req, err := http.NewRequestWithContext(s.ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "guac-scorecard-certifier/1.0")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := httpClient.Do(req)
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	if err != nil {
+		return nil, fmt.Errorf("scorecard request failed: %w", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("Scorecard for repo %s not found in scorecard API", repoName)
+	}
+
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Use scorecard's built-in JSON parser, which is experimental
+	// but still better then rolling out your own type
+	result, _, err := sc.ExperimentalFromJSON2(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode API response: %w", err)
+	}
+
+	return &result, nil
+}
+
+func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
 	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
