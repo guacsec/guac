@@ -20,6 +20,7 @@ package scorecard
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -61,6 +62,87 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 				return
 			}
 			t.Logf("scorecard result: %v", got.Repo.Name)
+		})
+	}
+}
+
+// Test_scorecardRunner_getScoreFromAPI tests the API fetch logic with retry behavior.
+// Tests that require network access use a well-known repo (ossf/scorecard).
+
+func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
+	tests := []struct {
+		name        string
+		repoName    string
+		commitSHA   string
+		tag         string
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name:      "valid repo without commit returns latest scorecard",
+			repoName:  "github.com/ossf/scorecard",
+			commitSHA: "",
+			tag:       "",
+			wantErr:   false,
+		},
+		{
+			name:        "tag without commit SHA skips API for local computation",
+			repoName:    "github.com/ossf/scorecard",
+			commitSHA:   "",
+			tag:         "v4.10.4",
+			wantErr:     true,
+			errContains: "tag provided without commit SHA",
+		},
+		{
+			name:        "tag with HEAD skips API for local computation",
+			repoName:    "github.com/ossf/scorecard",
+			commitSHA:   "HEAD",
+			tag:         "v4.10.4",
+			wantErr:     true,
+			errContains: "tag provided without commit SHA",
+		},
+		{
+			name:        "non-existent repo returns error",
+			repoName:    "github.com/nonexistent/nonexistent-repo-12345",
+			commitSHA:   "",
+			tag:         "",
+			wantErr:     true,
+			errContains: "scorecard not found in API",
+		},
+		{
+			name:      "invalid commit SHA falls back to latest scorecard",
+			repoName:  "github.com/ossf/scorecard",
+			commitSHA: "0000000000000000000000000000000000000000",
+			tag:       "",
+			wantErr:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			runner := scorecardRunner{ctx: ctx}
+
+			got, err := runner.getScoreFromAPI(tt.repoName, tt.commitSHA, tt.tag)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getScoreFromAPI() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err != nil && tt.errContains != "" {
+				if !strings.Contains(err.Error(), tt.errContains) {
+					t.Errorf("getScoreFromAPI() error = %v, should contain %v", err, tt.errContains)
+				}
+			}
+
+			if !tt.wantErr && got == nil {
+				t.Errorf("getScoreFromAPI() returned nil result without error")
+			}
+
+			if !tt.wantErr && got != nil {
+				t.Logf("Successfully fetched scorecard for %s", got.Repo.Name)
+			}
 		})
 	}
 }
