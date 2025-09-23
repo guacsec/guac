@@ -100,21 +100,26 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 }
 
 // NewScorecardCertifier initializes the scorecard certifier.
-// It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not, it returns an error.w
+// It checks if the GITHUB_AUTH_TOKEN is set in the environment only for local scorecard runners.
 // The token is used to access the GitHub API, https://github.com/ossf/scorecard#authentication.
 func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 	if sc == nil {
 		return nil, fmt.Errorf("scorecard cannot be nil")
 	}
 
-	// check if the GITHUB_AUTH_TOKEN is set
-	s, ok := os.LookupEnv("GITHUB_AUTH_TOKEN")
-	if !ok || s == "" {
-		return nil, fmt.Errorf("GITHUB_AUTH_TOKEN is not set")
+	var ghToken string
+	
+	// Only check for GITHUB_AUTH_TOKEN if the scorecard implementation requires it
+	if sc.RequiresGitHubToken() {
+		s, ok := os.LookupEnv("GITHUB_AUTH_TOKEN")
+		if !ok || s == "" {
+			return nil, fmt.Errorf("GITHUB_AUTH_TOKEN is not set")
+		}
+		ghToken = s
 	}
 
 	return &scorecard{
 		scorecard: sc,
-		ghToken:   s,
+		ghToken:   ghToken,
 	}, nil
 }

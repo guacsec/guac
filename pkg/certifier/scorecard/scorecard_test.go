@@ -30,10 +30,16 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-type mockScorecard struct{}
+type mockScorecard struct {
+	requiresGitHubToken bool
+}
 
 func (m mockScorecard) GetScore(repoName, commitSHA, tag string) (*pkg.ScorecardResult, error) {
 	return &pkg.ScorecardResult{}, nil
+}
+
+func (m mockScorecard) RequiresGitHubToken() bool {
+	return m.requiresGitHubToken
 }
 
 func TestNewScorecard(t *testing.T) {
@@ -50,18 +56,32 @@ func TestNewScorecard(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:          "Auth token is set",
-			sc:            mockScorecard{},
-			want:          &scorecard{scorecard: mockScorecard{}, ghToken: "test"},
+			name:          "Auth token is set and required",
+			sc:            mockScorecard{requiresGitHubToken: true},
+			want:          &scorecard{scorecard: mockScorecard{requiresGitHubToken: true}, ghToken: "test"},
 			authToken:     "test",
 			wantAuthToken: true,
 		},
 		{
-			name:          "Auth token is empty",
-			sc:            mockScorecard{},
+			name:          "Auth token is empty but required",
+			sc:            mockScorecard{requiresGitHubToken: true},
 			authToken:     "",
 			wantAuthToken: true,
 			wantErr:       true,
+		},
+		{
+			name:          "Auth token not required (API fetcher)",
+			sc:            mockScorecard{requiresGitHubToken: false},
+			want:          &scorecard{scorecard: mockScorecard{requiresGitHubToken: false}, ghToken: ""},
+			authToken:     "",
+			wantAuthToken: false,
+		},
+		{
+			name:          "Auth token not required but provided (API fetcher)",
+			sc:            mockScorecard{requiresGitHubToken: false},
+			want:          &scorecard{scorecard: mockScorecard{requiresGitHubToken: false}, ghToken: ""},
+			authToken:     "test",
+			wantAuthToken: false,
 		},
 	}
 	for _, test := range tests {

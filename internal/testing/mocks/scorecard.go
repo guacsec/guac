@@ -54,3 +54,17 @@ func (mr *MockScorecardMockRecorder) GetScore(repoName, commitSHA, tag any) *gom
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScore", reflect.TypeOf((*MockScorecard)(nil).GetScore), repoName, commitSHA, tag)
 }
+
+// RequiresGitHubToken mocks base method.
+func (m *MockScorecard) RequiresGitHubToken() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RequiresGitHubToken")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// RequiresGitHubToken indicates an expected call of RequiresGitHubToken.
+func (mr *MockScorecardMockRecorder) RequiresGitHubToken() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequiresGitHubToken", reflect.TypeOf((*MockScorecard)(nil).RequiresGitHubToken))
+}
