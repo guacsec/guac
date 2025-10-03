@@ -23,14 +23,15 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type scorecardOptions struct {
@@ -50,19 +51,29 @@ type scorecardOptions struct {
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// scorecard mode: "query" (default) or "compute"
+	mode string
+	// HTTP timeout for query mode
+	httpTimeout time.Duration
 }
+
+const (
+	defaultScorecardAPIBase      = "https://api.securityscorecards.dev"
+	defaultScorecardDomainPrefix = "github.com"
+)
 
 var scorecardCmd = &cobra.Command{
 	Use:   "scorecard [flags]",
 	Short: "runs the scorecard certifier",
 	Long: `
-guaccollect scorecard runs the scorecard certifier queries scorecard for sources that are collected in guac.
-Ingestion to GUAC happens via an event stream (NATS)
-to allow for decoupling of the collectors from the ingestion into GUAC. 
+guaccollect scorecard runs the scorecard certifier to query scorecard data for sources that are collected in GUAC.
+
+Ingestion to GUAC happens via an event stream (NATS) to allow for decoupling of the collectors
+from the ingestion into GUAC.
 
 Each collector collects the "document" and stores it in the blob store for further
-evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via 
-the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for 
+evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via
+the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for
 processing and ingestion.
 
 Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as documented here: https://gocloud.dev/howto/blob/
@@ -81,6 +92,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("publish-to-queue"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetString("scorecard-mode"),
+			viper.GetString("scorecard-http-timeout"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -91,10 +104,28 @@ you have access to read and write to the respective blob store.`,
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		// scorecard runner is the scorecard library that runs the scorecard checks
-		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
-		if err != nil {
-			fmt.Printf("unable to create scorecard runner: %v\n", err)
+		var scorecardRunner scorecard.Scorecard
+
+		// Create scorecard runner based on mode
+		switch opts.mode {
+		case "query":
+			logger.Infof("Using query mode (API-based) with base URL: %s (domain prefix: %s)", defaultScorecardAPIBase, defaultScorecardDomainPrefix)
+			scorecardRunner, err = scorecard.NewQueryScorecardRunner(ctx, defaultScorecardAPIBase, defaultScorecardDomainPrefix, opts.httpTimeout)
+			if err != nil {
+				fmt.Printf("unable to create query scorecard runner: %v\n", err)
+				_ = cmd.Help()
+				os.Exit(1)
+			}
+		case "compute":
+			logger.Info("Using compute mode (scorecard library)")
+			scorecardRunner, err = scorecard.NewScorecardRunner(ctx)
+			if err != nil {
+				fmt.Printf("unable to create compute scorecard runner: %v\n", err)
+				_ = cmd.Help()
+				os.Exit(1)
+			}
+		default:
+			fmt.Printf("invalid scorecard-mode: %s. Must be 'query' or 'compute'\n", opts.mode)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
@@ -136,7 +167,9 @@ func validateScorecardFlags(
 	poll bool,
 	pubToQueue bool,
 	certifierLatencyStr string,
-	batchSize int) (scorecardOptions, error) {
+	batchSize int,
+	mode,
+	httpTimeoutStr string) (scorecardOptions, error) {
 
 	var opts scorecardOptions
 
@@ -146,6 +179,7 @@ func validateScorecardFlags(
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
+	opts.batchSize = batchSize
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -163,7 +197,23 @@ func validateScorecardFlags(
 		opts.addedLatency = nil
 	}
 
-	opts.batchSize = batchSize
+	// Validate and set scorecard mode
+	if mode == "" {
+		mode = "query" // default to query
+	}
+	if mode != "compute" && mode != "query" {
+		return opts, fmt.Errorf("invalid scorecard-mode: %s. Must be 'query' or 'compute'", mode)
+	}
+	opts.mode = mode
+
+	if httpTimeoutStr == "" {
+		httpTimeoutStr = "30s"
+	}
+	httpTimeout, err := time.ParseDuration(httpTimeoutStr)
+	if err != nil {
+		return opts, fmt.Errorf("failed to parse HTTP timeout duration with error: %w", err)
+	}
+	opts.httpTimeout = httpTimeout
 
 	return opts, nil
 }
@@ -177,7 +227,16 @@ func init() {
 		os.Exit(1)
 	}
 	scorecardCmd.PersistentFlags().AddFlagSet(set)
+
+	// scorecard-specific flags
+	scorecardCmd.Flags().String("scorecard-mode", "query", "Scorecard mode: 'query' (default, uses REST API) or 'compute' (uses scorecard library)")
+	scorecardCmd.Flags().String("scorecard-http-timeout", "30s", "HTTP timeout for API requests when using 'query' mode")
+
 	if err := viper.BindPFlags(scorecardCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+	if err := viper.BindPFlags(scorecardCmd.Flags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
