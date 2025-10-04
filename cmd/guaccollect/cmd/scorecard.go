@@ -50,19 +50,28 @@ type scorecardOptions struct {
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// scorecard fetcher type: "local" (default) or "api"
+	fetcherType string
+	// API base URL for API-based fetcher
+	apiBase string
+	// domain prefix for API-based fetcher
+	domainPrefix string
+	// HTTP timeout for API-based fetcher
+	httpTimeout time.Duration
 }
 
 var scorecardCmd = &cobra.Command{
 	Use:   "scorecard [flags]",
 	Short: "runs the scorecard certifier",
 	Long: `
-guaccollect scorecard runs the scorecard certifier queries scorecard for sources that are collected in guac.
-Ingestion to GUAC happens via an event stream (NATS)
-to allow for decoupling of the collectors from the ingestion into GUAC. 
+guaccollect scorecard runs the scorecard certifier to query scorecard data for sources that are collected in GUAC.
+
+Ingestion to GUAC happens via an event stream (NATS) to allow for decoupling of the collectors
+from the ingestion into GUAC.
 
 Each collector collects the "document" and stores it in the blob store for further
-evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via 
-the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for 
+evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via
+the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for
 processing and ingestion.
 
 Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as documented here: https://gocloud.dev/howto/blob/
@@ -81,6 +90,10 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("publish-to-queue"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetString("scorecard-fetcher-type"),
+			viper.GetString("scorecard-api-base"),
+			viper.GetString("scorecard-domain-prefix"),
+			viper.GetString("scorecard-http-timeout"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -91,10 +104,28 @@ you have access to read and write to the respective blob store.`,
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		// scorecard runner is the scorecard library that runs the scorecard checks
-		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
-		if err != nil {
-			fmt.Printf("unable to create scorecard runner: %v\n", err)
+		var scorecardRunner scorecard.Scorecard
+
+		// Create scorecard runner based on fetcher type
+		switch opts.fetcherType {
+		case "api":
+			logger.Infof("Using API-based scorecard fetcher with base URL: %s", opts.apiBase)
+			scorecardRunner, err = scorecard.NewAPIScorecardRunner(ctx, opts.apiBase, opts.domainPrefix, opts.httpTimeout)
+			if err != nil {
+				fmt.Printf("unable to create API scorecard runner: %v\n", err)
+				_ = cmd.Help()
+				os.Exit(1)
+			}
+		case "local":
+			logger.Info("Using local scorecard library runner")
+			scorecardRunner, err = scorecard.NewScorecardRunner(ctx)
+			if err != nil {
+				fmt.Printf("unable to create local scorecard runner: %v\n", err)
+				_ = cmd.Help()
+				os.Exit(1)
+			}
+		default:
+			fmt.Printf("invalid scorecard-fetcher-type: %s. Must be 'local' or 'api'\n", opts.fetcherType)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
@@ -136,7 +167,11 @@ func validateScorecardFlags(
 	poll bool,
 	pubToQueue bool,
 	certifierLatencyStr string,
-	batchSize int) (scorecardOptions, error) {
+	batchSize int,
+	fetcherType,
+	apiBase,
+	domainPrefix,
+	httpTimeoutStr string) (scorecardOptions, error) {
 
 	var opts scorecardOptions
 
@@ -146,6 +181,7 @@ func validateScorecardFlags(
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
+	opts.batchSize = batchSize
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -163,7 +199,39 @@ func validateScorecardFlags(
 		opts.addedLatency = nil
 	}
 
-	opts.batchSize = batchSize
+	// Validate and set fetcher type
+	if fetcherType == "" {
+		fetcherType = "api" // default to api
+	}
+	if fetcherType != "local" && fetcherType != "api" {
+		return opts, fmt.Errorf("invalid scorecard-fetcher-type: %s. Must be 'local' or 'api'", fetcherType)
+	}
+	opts.fetcherType = fetcherType
+
+	// Set API-specific options
+	if apiBase == "" {
+		apiBase = "https://api.securityscorecards.dev"
+	}
+	opts.apiBase = apiBase
+
+	if domainPrefix == "" {
+		domainPrefix = "github.com"
+	}
+	opts.domainPrefix = domainPrefix
+
+	if httpTimeoutStr == "" {
+		httpTimeoutStr = "30s"
+	}
+	httpTimeout, err := time.ParseDuration(httpTimeoutStr)
+	if err != nil {
+		return opts, fmt.Errorf("failed to parse HTTP timeout duration with error: %w", err)
+	}
+	opts.httpTimeout = httpTimeout
+
+	// Validate API-specific requirements
+	if fetcherType == "api" && apiBase == "" {
+		return opts, fmt.Errorf("scorecard-api-base is required when using API fetcher")
+	}
 
 	return opts, nil
 }
@@ -177,7 +245,18 @@ func init() {
 		os.Exit(1)
 	}
 	scorecardCmd.PersistentFlags().AddFlagSet(set)
+
+	// Add scorecard-specific flags
+	scorecardCmd.Flags().String("scorecard-fetcher-type", "api", "Scorecard fetcher type: 'api' (default, uses REST API) or 'local' (uses scorecard library)")
+	scorecardCmd.Flags().String("scorecard-api-base", "https://api.securityscorecards.dev", "Base URL for scorecard API when using 'api' fetcher type")
+	scorecardCmd.Flags().String("scorecard-domain-prefix", "github.com", "Domain prefix for repository URLs when using 'api' fetcher type")
+	scorecardCmd.Flags().String("scorecard-http-timeout", "30s", "HTTP timeout for API requests when using 'api' fetcher type")
+
 	if err := viper.BindPFlags(scorecardCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+	if err := viper.BindPFlags(scorecardCmd.Flags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}

@@ -90,6 +90,11 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 	return &res, nil
 }
 
+// RequiresGitHubToken returns true for local scorecard runner as it needs GitHub authentication
+func (s scorecardRunner) RequiresGitHubToken() bool {
+	return true
+}
+
 func NewScorecardRunner(ctx context.Context) (Scorecard, error) {
 	return scorecardRunner{
 		ctx,
