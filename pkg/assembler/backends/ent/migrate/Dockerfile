@@ -9,4 +9,8 @@ COPY migrations ./migrations
 COPY atlas.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
+# Create non-root user and switch to it
+RUN addgroup -g 1001 -S appgroup && adduser -u 1001 -S appuser -G appgroup
+USER appuser
+
 ENTRYPOINT ["/app/entrypoint.sh"]
