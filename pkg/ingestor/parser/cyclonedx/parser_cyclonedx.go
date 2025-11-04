@@ -40,10 +40,12 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 var zeroTime = time.Unix(0, 0).UTC()
 
 var vexStatusMap = map[cdx.ImpactAnalysisState]model.VexStatus{
-	cdx.IASResolved:    model.VexStatusFixed,
-	cdx.IASExploitable: model.VexStatusAffected,
-	cdx.IASInTriage:    model.VexStatusUnderInvestigation,
-	cdx.IASNotAffected: model.VexStatusNotAffected,
+	cdx.IASResolved:             model.VexStatusFixed,
+	cdx.IASExploitable:          model.VexStatusAffected,
+	cdx.IASInTriage:             model.VexStatusUnderInvestigation,
+	cdx.IASNotAffected:          model.VexStatusNotAffected,
+	cdx.IASResolvedWithPedigree: model.VexStatusFixed,
+	cdx.IASFalsePositive:        model.VexStatusNotAffected,
 }
 
 var justificationsMap = map[cdx.ImpactAnalysisJustification]model.VexJustification{
