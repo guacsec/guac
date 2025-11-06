@@ -2,8 +2,8 @@ package vuln
 
 import (
 	"strconv"
+	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation/vuln"
 	gocvss20 "github.com/pandatix/go-cvss/20"
 	gocvss30 "github.com/pandatix/go-cvss/30"
@@ -13,27 +13,27 @@ import (
 
 func parseScoreBasedOnMethod(severity attestation_vuln.Severity) (float64, error) {
 	score := severity.Score
-	switch severity.Method {
+	switch {
 	// TODO: match for other score types
-	case string(generated.VulnerabilityScoreTypeCvssv2):
+	case strings.HasPrefix(score, "CVSS:2.0"):
 		vector, err := gocvss20.ParseVector(score)
 		if err != nil {
 			return 0, err
 		}
 		return vector.BaseScore(), nil
-	case string(generated.VulnerabilityScoreTypeCvssv3):
+	case strings.HasPrefix(score, "CVSS:3.0"):
 		vector, err := gocvss30.ParseVector(score)
 		if err != nil {
 			return 0, err
 		}
 		return vector.BaseScore(), nil
-	case string(generated.VulnerabilityScoreTypeCvssv31):
+	case strings.HasPrefix(score, "CVSS:3.1"):
 		vector, err := gocvss31.ParseVector(score)
 		if err != nil {
 			return 0, err
 		}
 		return vector.BaseScore(), nil
-	case string(generated.VulnerabilityScoreTypeCvssv4):
+	case strings.HasPrefix(score, "CVSS:4.0"):
 		vector, err := gocvss40.ParseVector(score)
 		if err != nil {
 			return 0, err

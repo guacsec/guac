@@ -196,6 +196,24 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.XraySBOMVulnsPredicates,
 		wantErr:        false,
+	}, {
+		name: "valid CycloneDX VEX document with resolved_with_pedigree status",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXVEXResolvedWithPedigree,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CycloneDXResolvedWithPedigreePredicates,
+		wantErr:        false,
+	}, {
+		name: "valid CycloneDX VEX document with false_positive status",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXVEXFalsePositive,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: &testdata.CycloneDXFalsePositivePredicates,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

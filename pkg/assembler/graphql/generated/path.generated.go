@@ -30,31 +30,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _NeighborConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.NeighborConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_NeighborConnection_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_NeighborConnection_totalCount,
+		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_NeighborConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -71,31 +59,19 @@ func (ec *executionContext) fieldContext_NeighborConnection_totalCount(_ context
 }
 
 func (ec *executionContext) _NeighborConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.NeighborConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_NeighborConnection_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.PageInfo)
-	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_NeighborConnection_pageInfo,
+		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_NeighborConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -120,31 +96,19 @@ func (ec *executionContext) fieldContext_NeighborConnection_pageInfo(_ context.C
 }
 
 func (ec *executionContext) _NeighborConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.NeighborConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_NeighborConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.NeighborEdge)
-	fc.Result = res
-	return ec.marshalNNeighborEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNeighborEdgeᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_NeighborConnection_edges,
+		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNNeighborEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNeighborEdgeᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_NeighborConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -167,31 +131,19 @@ func (ec *executionContext) fieldContext_NeighborConnection_edges(_ context.Cont
 }
 
 func (ec *executionContext) _NeighborEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.NeighborEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_NeighborEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_NeighborEdge_cursor,
+		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNID2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_NeighborEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -208,31 +160,19 @@ func (ec *executionContext) fieldContext_NeighborEdge_cursor(_ context.Context, 
 }
 
 func (ec *executionContext) _NeighborEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.NeighborEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_NeighborEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.Node)
-	fc.Result = res
-	return ec.marshalNNode2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNode(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_NeighborEdge_node,
+		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNNode2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNode,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_NeighborEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -260,34 +200,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
+	case model.VulnerabilityMetadata:
+		return ec._VulnerabilityMetadata(ctx, sel, &obj)
+	case *model.VulnerabilityMetadata:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._Package(ctx, sel, obj)
-	case model.Source:
-		return ec._Source(ctx, sel, &obj)
-	case *model.Source:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Source(ctx, sel, obj)
-	case model.Artifact:
-		return ec._Artifact(ctx, sel, &obj)
-	case *model.Artifact:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Artifact(ctx, sel, obj)
-	case model.Builder:
-		return ec._Builder(ctx, sel, &obj)
-	case *model.Builder:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Builder(ctx, sel, obj)
+		return ec._VulnerabilityMetadata(ctx, sel, obj)
 	case model.Vulnerability:
 		return ec._Vulnerability(ctx, sel, &obj)
 	case *model.Vulnerability:
@@ -295,6 +214,48 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Vulnerability(ctx, sel, obj)
+	case model.VulnEqual:
+		return ec._VulnEqual(ctx, sel, &obj)
+	case *model.VulnEqual:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VulnEqual(ctx, sel, obj)
+	case model.Source:
+		return ec._Source(ctx, sel, &obj)
+	case *model.Source:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Source(ctx, sel, obj)
+	case model.PointOfContact:
+		return ec._PointOfContact(ctx, sel, &obj)
+	case *model.PointOfContact:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PointOfContact(ctx, sel, obj)
+	case model.PkgEqual:
+		return ec._PkgEqual(ctx, sel, &obj)
+	case *model.PkgEqual:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PkgEqual(ctx, sel, obj)
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
+	case model.License:
+		return ec._License(ctx, sel, &obj)
+	case *model.License:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._License(ctx, sel, obj)
 	case model.IsOccurrence:
 		return ec._IsOccurrence(ctx, sel, &obj)
 	case *model.IsOccurrence:
@@ -309,20 +270,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._IsDependency(ctx, sel, obj)
-	case model.VulnEqual:
-		return ec._VulnEqual(ctx, sel, &obj)
-	case *model.VulnEqual:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._VulnEqual(ctx, sel, obj)
-	case model.CertifyVEXStatement:
-		return ec._CertifyVEXStatement(ctx, sel, &obj)
-	case *model.CertifyVEXStatement:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyVEXStatement(ctx, sel, obj)
 	case model.HashEqual:
 		return ec._HashEqual(ctx, sel, &obj)
 	case *model.HashEqual:
@@ -330,41 +277,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HashEqual(ctx, sel, obj)
-	case model.CertifyBad:
-		return ec._CertifyBad(ctx, sel, &obj)
-	case *model.CertifyBad:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyBad(ctx, sel, obj)
-	case model.CertifyGood:
-		return ec._CertifyGood(ctx, sel, &obj)
-	case *model.CertifyGood:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyGood(ctx, sel, obj)
-	case model.PkgEqual:
-		return ec._PkgEqual(ctx, sel, &obj)
-	case *model.PkgEqual:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PkgEqual(ctx, sel, obj)
-	case model.CertifyScorecard:
-		return ec._CertifyScorecard(ctx, sel, &obj)
-	case *model.CertifyScorecard:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyScorecard(ctx, sel, obj)
-	case model.CertifyVuln:
-		return ec._CertifyVuln(ctx, sel, &obj)
-	case *model.CertifyVuln:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CertifyVuln(ctx, sel, obj)
 	case model.HasSourceAt:
 		return ec._HasSourceAt(ctx, sel, &obj)
 	case *model.HasSourceAt:
@@ -372,13 +284,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasSourceAt(ctx, sel, obj)
-	case model.HasSbom:
-		return ec._HasSBOM(ctx, sel, &obj)
-	case *model.HasSbom:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._HasSBOM(ctx, sel, obj)
 	case model.HasSlsa:
 		return ec._HasSLSA(ctx, sel, &obj)
 	case *model.HasSlsa:
@@ -386,6 +291,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasSLSA(ctx, sel, obj)
+	case model.HasSbom:
+		return ec._HasSBOM(ctx, sel, &obj)
+	case *model.HasSbom:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HasSBOM(ctx, sel, obj)
 	case model.HasMetadata:
 		return ec._HasMetadata(ctx, sel, &obj)
 	case *model.HasMetadata:
@@ -393,27 +305,27 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasMetadata(ctx, sel, obj)
-	case model.PointOfContact:
-		return ec._PointOfContact(ctx, sel, &obj)
-	case *model.PointOfContact:
+	case model.CertifyVuln:
+		return ec._CertifyVuln(ctx, sel, &obj)
+	case *model.CertifyVuln:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._PointOfContact(ctx, sel, obj)
-	case model.VulnerabilityMetadata:
-		return ec._VulnerabilityMetadata(ctx, sel, &obj)
-	case *model.VulnerabilityMetadata:
+		return ec._CertifyVuln(ctx, sel, obj)
+	case model.CertifyVEXStatement:
+		return ec._CertifyVEXStatement(ctx, sel, &obj)
+	case *model.CertifyVEXStatement:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._VulnerabilityMetadata(ctx, sel, obj)
-	case model.License:
-		return ec._License(ctx, sel, &obj)
-	case *model.License:
+		return ec._CertifyVEXStatement(ctx, sel, obj)
+	case model.CertifyScorecard:
+		return ec._CertifyScorecard(ctx, sel, &obj)
+	case *model.CertifyScorecard:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._License(ctx, sel, obj)
+		return ec._CertifyScorecard(ctx, sel, obj)
 	case model.CertifyLegal:
 		return ec._CertifyLegal(ctx, sel, &obj)
 	case *model.CertifyLegal:
@@ -421,6 +333,34 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._CertifyLegal(ctx, sel, obj)
+	case model.CertifyGood:
+		return ec._CertifyGood(ctx, sel, &obj)
+	case *model.CertifyGood:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CertifyGood(ctx, sel, obj)
+	case model.CertifyBad:
+		return ec._CertifyBad(ctx, sel, &obj)
+	case *model.CertifyBad:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CertifyBad(ctx, sel, obj)
+	case model.Builder:
+		return ec._Builder(ctx, sel, &obj)
+	case *model.Builder:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Builder(ctx, sel, obj)
+	case model.Artifact:
+		return ec._Artifact(ctx, sel, &obj)
+	case *model.Artifact:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Artifact(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -539,9 +479,7 @@ func (ec *executionContext) marshalNEdge2githubᚗcomᚋguacsecᚋguacᚋpkgᚋa
 
 func (ec *executionContext) unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx context.Context, v any) ([]model.Edge, error) {
 	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
+	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]model.Edge, len(vSlice))
 	for i := range vSlice {
