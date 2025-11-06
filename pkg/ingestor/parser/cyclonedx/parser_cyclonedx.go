@@ -579,6 +579,8 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 			vd.KnownSince = publishedTime
 			vd.Statement = vulnerability.Description
 
+			// Extract StatusNotes from analysis detail field.
+			// This applies to all analysis states including resolved_with_pedigree and false_positive.
 			if vulnerability.Analysis.Detail != "" {
 				vd.StatusNotes = vulnerability.Analysis.Detail
 			} else if vulnerability.Analysis.Response != nil {
@@ -587,7 +589,14 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 					response = append(response, string(res))
 				}
 				vd.StatusNotes = strings.Join(response, ",")
-			} else {
+			} else if vulnerability.Analysis.State != cdx.IASResolved &&
+				vulnerability.Analysis.State != cdx.IASExploitable &&
+				vulnerability.Analysis.State != cdx.IASInTriage &&
+				vulnerability.Analysis.State != cdx.IASNotAffected {
+				// Only preserve the CDX state enum information if it's not one of the original 4 states, since those provide additional context beyond what's already captured in vd.Status
+				// Original states: IASResolved, IASExploitable, IASInTriage, IASNotAffected
+				vd.StatusNotes = fmt.Sprintf("CDX state: %s", string(vulnerability.Analysis.State))
+			} else if vulnerability.Detail != "" {
 				vd.StatusNotes = vulnerability.Detail
 			}
 		} else {
