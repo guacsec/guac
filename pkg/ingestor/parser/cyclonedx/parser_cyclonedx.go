@@ -558,10 +558,16 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 		var vd model.VexStatementInputSpec
 		publishedTime := zeroTime
 		if vulnerability.Analysis != nil {
-			if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
-				vd.Status = vexStatus
+			// Only set status if state is not empty
+			if vulnerability.Analysis.State != "" {
+				if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
+					vd.Status = vexStatus
+				} else {
+					return fmt.Errorf("unknown vulnerability status %s", vulnerability.Analysis.State)
+				}
 			} else {
-				return fmt.Errorf("unknown vulnerability status %s", vulnerability.Analysis.State)
+				// If state is empty, use default status (affected)
+				vd.Status = model.VexStatusAffected
 			}
 
 			if vexJustification, ok := justificationsMap[vulnerability.Analysis.Justification]; ok {
@@ -571,9 +577,22 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 			}
 
 			if vulnerability.Published != "" {
+				// Try RFC3339 first, then try various formats
 				publishedTime, err = time.Parse(time.RFC3339, vulnerability.Published)
 				if err != nil {
-					return fmt.Errorf("failed to pase time: %s, with error: %w", vulnerability.Published, err)
+					// Try RFC3339 without seconds (e.g., "2025-01-29T00:00Z")
+					publishedTime, err = time.Parse("2006-01-02T15:04Z", vulnerability.Published)
+					if err != nil {
+						// Try parsing without timezone (e.g., "2023-08-22T19:16:31.080")
+						publishedTime, err = time.Parse("2006-01-02T15:04:05.000", vulnerability.Published)
+						if err != nil {
+							// Try parsing without milliseconds
+							publishedTime, err = time.Parse("2006-01-02T15:04:05", vulnerability.Published)
+							if err != nil {
+								return fmt.Errorf("failed to parse time: %s, with error: %w", vulnerability.Published, err)
+							}
+						}
+					}
 				}
 			}
 			vd.KnownSince = publishedTime
