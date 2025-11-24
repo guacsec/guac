@@ -66,12 +66,14 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.Sco
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := httpClient.Do(req)
-	defer func() {
-		_ = resp.Body.Close()
-	}()
 	if err != nil {
 		return nil, fmt.Errorf("scorecard request failed: %w", err)
 	}
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+	}()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("Scorecard for repo %s not found in scorecard API", repoName)
