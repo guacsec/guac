@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/checks"
 	"github.com/ossf/scorecard/v4/log"
@@ -35,15 +36,30 @@ type scorecardRunner struct {
 }
 
 func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+	logger := logging.FromContext(s.ctx)
+
 	// First try API approach
+	logger.Infof("Attempting to fetch scorecard from API for repo: %s, commit: %s", repoName, commitSHA)
 	result, err := s.getScoreFromAPI(repoName, commitSHA, tag)
 	if err == nil {
+		logger.Infof("✅ Successfully fetched scorecard from API for repo: %s", repoName)
 		return result, nil
 	}
-	return s.computeScore(repoName, commitSHA, tag)
+
+	// Log API failure and fallback to local computation
+	logger.Warnf("⚠️ API fetch failed for repo %s: %v. Falling back to local computation", repoName, err)
+	result, err = s.computeScore(repoName, commitSHA, tag)
+	if err == nil {
+		logger.Infof("✅ Successfully computed scorecard locally for repo: %s", repoName)
+	} else {
+		logger.Errorf("❌ Failed to compute scorecard locally for repo %s: %v", repoName, err)
+	}
+	return result, err
 }
 
 func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.ScorecardResult, error) {
+	logger := logging.FromContext(s.ctx)
+
 	url, err := url.JoinPath("https://api.securityscorecards.dev", "projects", repoName)
 	if err != nil {
 		return nil, err
@@ -52,6 +68,8 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.Sco
 	if commitSHA != "" {
 		url += "?commit=" + commitSHA
 	}
+
+	logger.Debugf("Making API request to: %s", url)
 
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
@@ -75,6 +93,8 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.Sco
 		}
 	}()
 
+	logger.Debugf("API response status code: %d", resp.StatusCode)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("Scorecard for repo %s not found in scorecard API", repoName)
 	}
@@ -86,15 +106,19 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.Sco
 
 	// Use scorecard's built-in JSON parser, which is experimental
 	// but still better then rolling out your own type
-	result, _, err := sc.ExperimentalFromJSON2(resp.Body)
+	result, aggregateScore, err := sc.ExperimentalFromJSON2(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode API response: %w", err)
 	}
 
+	logger.Debugf("API returned aggregate score: %.1f/10.0", aggregateScore)
 	return &result, nil
 }
 
 func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+	logger := logging.FromContext(s.ctx)
+	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
+
 	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
@@ -143,10 +167,25 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Scor
 		}
 	}
 
+	logger.Debugf("Running %d scorecard checks locally", len(enabledChecks))
 	res, err := sc.RunScorecard(s.ctx, repo, commitSHA, 0, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}
+
+	// Calculate aggregate score from checks
+	var totalScore float64
+	var totalWeight int
+	for _, check := range res.Checks {
+		totalScore += float64(check.Score)
+		totalWeight++
+	}
+	aggregateScore := 0.0
+	if totalWeight > 0 {
+		aggregateScore = totalScore / float64(totalWeight)
+	}
+
+	logger.Infof("Local scorecard computation completed. Average score: %.1f/10.0", aggregateScore)
 	if res.Repo.Name == "" {
 		// The commit SHA can be invalid or the repo can be private.
 		return nil, fmt.Errorf("error, failed to get scorecard data for repo %v, commit SHA %v", res.Repo.Name, commitSHA)

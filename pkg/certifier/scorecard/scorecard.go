@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/events"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v4/docs/checks"
 	"github.com/ossf/scorecard/v4/log"
 
@@ -39,7 +40,7 @@ type scorecard struct {
 var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *source.SourceNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
-func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
 	if docChannel == nil {
 		return fmt.Errorf("docChannel cannot be nil")
 	}
@@ -62,6 +63,8 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 	if sourceNode.Repo == "" {
 		return fmt.Errorf("source repo cannot be empty")
 	}
+
+	logger := logging.FromContext(ctx)
 
 	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit, sourceNode.Tag)
 	if err != nil {
@@ -94,6 +97,7 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Tag
 	}
 
+	logger.Debugf("Generated scorecard document for %s", res.SourceInformation.Source)
 	docChannel <- &res
 
 	return nil
