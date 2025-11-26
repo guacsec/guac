@@ -179,19 +179,6 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Scor
 		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}
 
-	// Calculate aggregate score from checks
-	var totalScore float64
-	var totalWeight int
-	for _, check := range res.Checks {
-		totalScore += float64(check.Score)
-		totalWeight++
-	}
-	aggregateScore := 0.0
-	if totalWeight > 0 {
-		aggregateScore = totalScore / float64(totalWeight)
-	}
-
-	logger.Infof("Local scorecard computation completed. Average score: %.1f/10.0", aggregateScore)
 	if res.Repo.Name == "" {
 		// The commit SHA can be invalid or the repo can be private.
 		return nil, fmt.Errorf("error, failed to get scorecard data for repo %v, commit SHA %v", res.Repo.Name, commitSHA)
