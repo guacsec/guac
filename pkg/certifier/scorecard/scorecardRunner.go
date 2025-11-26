@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/guacsec/guac/pkg/logging"
@@ -39,20 +40,26 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 	logger := logging.FromContext(s.ctx)
 
 	// First try API approach
-	logger.Infof("Attempting to fetch scorecard from API for repo: %s, commit: %s", repoName, commitSHA)
+	logger.Debugf("Attempting to fetch scorecard from API for repo: %s, commit: %s", repoName, commitSHA)
 	result, err := s.getScoreFromAPI(repoName, commitSHA, tag)
 	if err == nil {
-		logger.Infof("✅ Successfully fetched scorecard from API for repo: %s", repoName)
+		logger.Infof("Successfully fetched scorecard from API for repo: %s", repoName)
 		return result, nil
 	}
 
-	// Log API failure and fallback to local computation
-	logger.Warnf("⚠️ API fetch failed for repo %s: %v. Falling back to local computation", repoName, err)
+	// Log API failure and check if we can fallback to local computation
+	logger.Warnf("API fetch failed for repo %s: %v", repoName, err)
+
+	// Check if GitHub token is available for local computation
+	if _, ok := os.LookupEnv("GITHUB_AUTH_TOKEN"); !ok {
+		logger.Errorf("Cannot fall back to local computation - GITHUB_AUTH_TOKEN not set")
+		return nil, fmt.Errorf("scorecard API failed and GITHUB_AUTH_TOKEN not available for local computation: %w", err)
+	}
+
+	logger.Infof("Falling back to local computation for repo: %s", repoName)
 	result, err = s.computeScore(repoName, commitSHA, tag)
-	if err == nil {
-		logger.Infof("✅ Successfully computed scorecard locally for repo: %s", repoName)
-	} else {
-		logger.Errorf("❌ Failed to compute scorecard locally for repo %s: %v", repoName, err)
+	if err != nil {
+		logger.Errorf("Failed to compute scorecard locally for repo %s: %v", repoName, err)
 	}
 	return result, err
 }
@@ -60,12 +67,12 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.ScorecardResult, error) {
 	logger := logging.FromContext(s.ctx)
 
-	url, err := url.JoinPath("https://api.securityscorecards.dev", "projects", repoName)
+	url, err := url.JoinPath("https://api.securityscorecards.dev", "projects", "github.com", repoName)
 	if err != nil {
 		return nil, err
 	}
 
-	if commitSHA != "" {
+	if commitSHA != "" && commitSHA != "HEAD" {
 		url += "?commit=" + commitSHA
 	}
 
@@ -106,12 +113,11 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.Sco
 
 	// Use scorecard's built-in JSON parser, which is experimental
 	// but still better then rolling out your own type
-	result, aggregateScore, err := sc.ExperimentalFromJSON2(resp.Body)
+	result, _, err := sc.ExperimentalFromJSON2(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode API response: %w", err)
 	}
 
-	logger.Debugf("API returned aggregate score: %.1f/10.0", aggregateScore)
 	return &result, nil
 }
 

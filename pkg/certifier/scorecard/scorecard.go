@@ -64,8 +64,6 @@ func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface
 		return fmt.Errorf("source repo cannot be empty")
 	}
 
-	logger := logging.FromContext(ctx)
-
 	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit, sourceNode.Tag)
 	if err != nil {
 		return fmt.Errorf("error getting scorecard result: %w", err)
@@ -97,7 +95,6 @@ func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface
 		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Tag
 	}
 
-	logger.Debugf("Generated scorecard document for %s", res.SourceInformation.Source)
 	docChannel <- &res
 
 	return nil
@@ -114,7 +111,10 @@ func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 	// check if the GITHUB_AUTH_TOKEN is set
 	s, ok := os.LookupEnv("GITHUB_AUTH_TOKEN")
 	if !ok || s == "" {
-		return nil, fmt.Errorf("GITHUB_AUTH_TOKEN is not set")
+		// Log warning but allow initialization without token
+		// The API path will still work, only local computation will fail
+		logger := logging.FromContext(context.Background())
+		logger.Warnf("GITHUB_AUTH_TOKEN not set - scorecard API will work, but local computation fallback will be disabled")
 	}
 
 	return &scorecard{
