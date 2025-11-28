@@ -111,7 +111,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 	}{
 		{
 			name:      "successful mock API call with commit",
-			repoName:  "github.com/test/repo",
+			repoName:  "test/repo",
 			commitSHA: "abc123",
 			tag:       "",
 			setupServer: func() *httptest.Server {
@@ -137,7 +137,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:      "successful mock API call without commit",
-			repoName:  "github.com/test/repo",
+			repoName:  "test/repo",
 			commitSHA: "",
 			tag:       "",
 			setupServer: func() *httptest.Server {
@@ -154,7 +154,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:      "API returns 404 not found",
-			repoName:  "github.com/unknown/repo",
+			repoName:  "unknown/repo",
 			commitSHA: "xyz789",
 			tag:       "",
 			setupServer: func() *httptest.Server {
@@ -169,7 +169,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:      "API returns 500 internal server error",
-			repoName:  "github.com/test/repo",
+			repoName:  "test/repo", 
 			commitSHA: "abc123",
 			tag:       "",
 			setupServer: func() *httptest.Server {
@@ -184,7 +184,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:      "API returns invalid JSON",
-			repoName:  "github.com/test/repo",
+			repoName:  "test/repo",
 			commitSHA: "abc123",
 			tag:       "",
 			setupServer: func() *httptest.Server {
@@ -199,7 +199,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:      "tag parameter is ignored",
-			repoName:  "github.com/test/repo",
+			repoName:  "test/repo",
 			commitSHA: "abc123",
 			tag:       "v1.0.0", // This should be ignored by getScoreFromAPI
 			setupServer: func() *httptest.Server {
@@ -217,7 +217,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:        "real API test - successful fetch",
-			repoName:    "github.com/ossf/scorecard",
+			repoName:    "ossf/scorecard",
 			commitSHA:   "",
 			tag:         "",
 			setupServer: nil,
@@ -226,7 +226,7 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 		},
 		{
 			name:        "real API test - non-existent repo",
-			repoName:    "github.com/nonexistent/repo-that-does-not-exist-12345",
+			repoName:    "nonexistent/repo-that-does-not-exist-12345",
 			commitSHA:   "",
 			tag:         "",
 			setupServer: nil,

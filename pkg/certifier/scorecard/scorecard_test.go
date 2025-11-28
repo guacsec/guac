@@ -61,7 +61,8 @@ func TestNewScorecard(t *testing.T) {
 			sc:            mockScorecard{},
 			authToken:     "",
 			wantAuthToken: true,
-			wantErr:       true,
+			wantErr:       false,
+			want:          &scorecard{scorecard: mockScorecard{}, ghToken: ""},
 		},
 	}
 	for _, test := range tests {
