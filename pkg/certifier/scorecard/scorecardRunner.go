@@ -64,8 +64,16 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 	return result, err
 }
 
-func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, _ string) (*sc.ScorecardResult, error) {
+func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
 	logger := logging.FromContext(s.ctx)
+
+	// The Scorecard API only supports commit SHAs, not tags.
+	// If a tag is provided without a commitSHA, we cannot use the API
+	// and must fall back to local computation to avoid returning incorrect results.
+	if (commitSHA == "" || commitSHA == "HEAD") && tag != "" {
+		logger.Debugf("Cannot use API for tag %s without commit SHA - will fall back to local computation", tag)
+		return nil, fmt.Errorf("scorecard API does not support tags; commit SHA required for tag %s", tag)
+	}
 
 	url, err := url.JoinPath("https://api.securityscorecards.dev", "projects", "github.com", repoName)
 	if err != nil {

@@ -198,10 +198,10 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 			skipRealAPI: true,
 		},
 		{
-			name:      "tag parameter is ignored",
+			name:      "tag with commit SHA works",
 			repoName:  "test/repo",
 			commitSHA: "abc123",
-			tag:       "v1.0.0", // This should be ignored by getScoreFromAPI
+			tag:       "v1.0.0", // Tag with commit SHA should work
 			setupServer: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					// Tag should not be part of the API call
@@ -214,6 +214,26 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 			},
 			wantErr:     false,
 			skipRealAPI: true,
+		},
+		{
+			name:        "tag without commit SHA returns error",
+			repoName:    "test/repo",
+			commitSHA:   "",
+			tag:         "v1.0.0", // Tag without commit SHA should trigger error
+			setupServer: nil,
+			wantErr:     true,
+			errContains: "scorecard API does not support tags",
+			skipRealAPI: false, // This test doesn't need network since it fails early
+		},
+		{
+			name:        "tag with HEAD commit SHA returns error",
+			repoName:    "test/repo",
+			commitSHA:   "HEAD",
+			tag:         "v1.0.0", // Tag with HEAD should also trigger error
+			setupServer: nil,
+			wantErr:     true,
+			errContains: "scorecard API does not support tags",
+			skipRealAPI: false, // This test doesn't need network since it fails early
 		},
 		{
 			name:        "real API test - successful fetch",
