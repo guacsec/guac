@@ -18,7 +18,13 @@ package scorecard
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"time"
 
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/checks"
 	"github.com/ossf/scorecard/v4/log"
@@ -31,6 +37,102 @@ type scorecardRunner struct {
 }
 
 func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+	logger := logging.FromContext(s.ctx)
+
+	// First try API approach
+	logger.Debugf("Attempting to fetch scorecard from API for repo: %s, commit: %s", repoName, commitSHA)
+	result, err := s.getScoreFromAPI(repoName, commitSHA, tag)
+	if err == nil {
+		logger.Infof("Successfully fetched scorecard from API for repo: %s", repoName)
+		return result, nil
+	}
+
+	// Log API failure and check if we can fallback to local computation
+	logger.Warnf("API fetch failed for repo %s: %v", repoName, err)
+
+	// Check if GitHub token is available for local computation
+	if _, ok := os.LookupEnv("GITHUB_AUTH_TOKEN"); !ok {
+		logger.Errorf("Cannot fall back to local computation - GITHUB_AUTH_TOKEN not set")
+		return nil, fmt.Errorf("scorecard API failed and GITHUB_AUTH_TOKEN not available for local computation: %w", err)
+	}
+
+	logger.Infof("Falling back to local computation for repo: %s", repoName)
+	result, err = s.computeScore(repoName, commitSHA, tag)
+	if err != nil {
+		logger.Errorf("Failed to compute scorecard locally for repo %s: %v", repoName, err)
+	}
+	return result, err
+}
+
+func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+	logger := logging.FromContext(s.ctx)
+
+	// The Scorecard API only supports commit SHAs, not tags.
+	// If a tag is provided without a commitSHA, we cannot use the API
+	// and must fall back to local computation to avoid returning incorrect results.
+	if (commitSHA == "" || commitSHA == "HEAD") && tag != "" {
+		logger.Debugf("Cannot use API for tag %s without commit SHA - will fall back to local computation", tag)
+		return nil, fmt.Errorf("scorecard API does not support tags; commit SHA required for tag %s", tag)
+	}
+
+	url, err := url.JoinPath("https://api.securityscorecards.dev", "projects", "github.com", repoName)
+	if err != nil {
+		return nil, err
+	}
+
+	if commitSHA != "" && commitSHA != "HEAD" {
+		url += "?commit=" + commitSHA
+	}
+
+	logger.Debugf("Making API request to: %s", url)
+
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	req, err := http.NewRequestWithContext(s.ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "guac-scorecard-certifier/1.0")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("scorecard request failed: %w", err)
+	}
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+	}()
+
+	logger.Debugf("API response status code: %d", resp.StatusCode)
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("Scorecard for repo %s not found in scorecard API", repoName)
+	}
+
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Use scorecard's built-in JSON parser, which is experimental
+	// but still better then rolling out your own type
+	result, _, err := sc.ExperimentalFromJSON2(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode API response: %w", err)
+	}
+
+	return &result, nil
+}
+
+func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+	logger := logging.FromContext(s.ctx)
+	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
+
 	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
@@ -79,10 +181,12 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 		}
 	}
 
+	logger.Debugf("Running %d scorecard checks locally", len(enabledChecks))
 	res, err := sc.RunScorecard(s.ctx, repo, commitSHA, 0, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}
+
 	if res.Repo.Name == "" {
 		// The commit SHA can be invalid or the repo can be private.
 		return nil, fmt.Errorf("error, failed to get scorecard data for repo %v, commit SHA %v", res.Repo.Name, commitSHA)

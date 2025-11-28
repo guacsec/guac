@@ -20,6 +20,7 @@ package scorecard
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -61,6 +62,67 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 				return
 			}
 			t.Logf("scorecard result: %v", got.Repo.Name)
+		})
+	}
+}
+
+// Test_scorecardRunner_getScoreFromAPI tests the early return logic
+// for tags without commit SHAs, which doesn't require network access.
+
+func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
+	tests := []struct {
+		name        string
+		repoName    string
+		commitSHA   string
+		tag         string
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name:        "tag without commit SHA returns error",
+			repoName:    "test/repo",
+			commitSHA:   "",
+			tag:         "v1.0.0",
+			wantErr:     true,
+			errContains: "scorecard API does not support tags",
+		},
+		{
+			name:        "tag with HEAD commit SHA returns error",
+			repoName:    "test/repo",
+			commitSHA:   "HEAD",
+			tag:         "v1.0.0",
+			wantErr:     true,
+			errContains: "scorecard API does not support tags",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			runner := scorecardRunner{ctx: ctx}
+
+			// Run the actual API call - these tests only cover edge cases
+			// that return early without making network requests
+			got, err := runner.getScoreFromAPI(tt.repoName, tt.commitSHA, tt.tag)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getScoreFromAPI() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err != nil && tt.errContains != "" {
+				if !strings.Contains(err.Error(), tt.errContains) {
+					t.Errorf("getScoreFromAPI() error = %v, should contain %v", err, tt.errContains)
+				}
+			}
+
+			if !tt.wantErr && got == nil {
+				t.Errorf("getScoreFromAPI() returned nil result without error")
+			}
+
+			if !tt.wantErr && got != nil {
+				t.Logf("Successfully fetched scorecard for %s", got.Repo.Name)
+			}
 		})
 	}
 }
