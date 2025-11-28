@@ -19,16 +19,9 @@ package scorecard
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/ossf/scorecard/v4/checker"
-	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
 func Test_scorecardRunner_GetScore(t *testing.T) {
@@ -73,186 +66,33 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 	}
 }
 
+// Test_scorecardRunner_getScoreFromAPI tests the early return logic
+// for tags without commit SHAs, which doesn't require network access.
+
 func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
-	// Skip if running in CI without network access
-	if testing.Short() {
-		t.Skip("Skipping API tests in short mode")
-	}
-
-	// Create a sample scorecard result for successful responses
-	sampleResult := sc.ScorecardResult{
-		Repo: sc.RepoInfo{
-			Name:      "github.com/test/repo",
-			CommitSHA: "abc123",
-		},
-		Date: time.Now(),
-		Scorecard: sc.ScorecardInfo{
-			Version:   "v4.10.5",
-			CommitSHA: "def456",
-		},
-		Checks: []checker.CheckResult{
-			{
-				Name:  "Code-Review",
-				Score: 10,
-			},
-		},
-		RawResults: checker.RawResults{},
-	}
-
 	tests := []struct {
-		name         string
-		repoName     string
-		commitSHA    string
-		tag          string
-		setupServer  func() *httptest.Server
-		wantErr      bool
-		errContains  string
-		skipRealAPI  bool
+		name        string
+		repoName    string
+		commitSHA   string
+		tag         string
+		wantErr     bool
+		errContains string
 	}{
-		{
-			name:      "successful mock API call with commit",
-			repoName:  "test/repo",
-			commitSHA: "abc123",
-			tag:       "",
-			setupServer: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					if !strings.HasSuffix(r.URL.Path, "/projects/github.com/test/repo") {
-						t.Errorf("unexpected path: %s", r.URL.Path)
-					}
-					if r.URL.Query().Get("commit") != "abc123" {
-						t.Errorf("expected commit=abc123, got %s", r.URL.Query().Get("commit"))
-					}
-					if r.Header.Get("User-Agent") != "guac-scorecard-certifier/1.0" {
-						t.Errorf("unexpected User-Agent: %s", r.Header.Get("User-Agent"))
-					}
-					if r.Header.Get("Accept") != "application/json" {
-						t.Errorf("unexpected Accept header: %s", r.Header.Get("Accept"))
-					}
-					w.Header().Set("Content-Type", "application/json")
-					json.NewEncoder(w).Encode(sampleResult)
-				}))
-			},
-			wantErr:     false,
-			skipRealAPI: true,
-		},
-		{
-			name:      "successful mock API call without commit",
-			repoName:  "test/repo",
-			commitSHA: "",
-			tag:       "",
-			setupServer: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					if r.URL.Query().Get("commit") != "" {
-						t.Errorf("expected no commit query param, got %s", r.URL.Query().Get("commit"))
-					}
-					w.Header().Set("Content-Type", "application/json")
-					json.NewEncoder(w).Encode(sampleResult)
-				}))
-			},
-			wantErr:     false,
-			skipRealAPI: true,
-		},
-		{
-			name:      "API returns 404 not found",
-			repoName:  "unknown/repo",
-			commitSHA: "xyz789",
-			tag:       "",
-			setupServer: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					w.WriteHeader(http.StatusNotFound)
-					w.Write([]byte("Repository not found"))
-				}))
-			},
-			wantErr:     true,
-			errContains: "not found in scorecard API",
-			skipRealAPI: true,
-		},
-		{
-			name:      "API returns 500 internal server error",
-			repoName:  "test/repo", 
-			commitSHA: "abc123",
-			tag:       "",
-			setupServer: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte("Internal server error"))
-				}))
-			},
-			wantErr:     true,
-			errContains: "API returned status 500",
-			skipRealAPI: true,
-		},
-		{
-			name:      "API returns invalid JSON",
-			repoName:  "test/repo",
-			commitSHA: "abc123",
-			tag:       "",
-			setupServer: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					w.Header().Set("Content-Type", "application/json")
-					w.Write([]byte("invalid json{"))
-				}))
-			},
-			wantErr:     true,
-			errContains: "failed to decode API response",
-			skipRealAPI: true,
-		},
-		{
-			name:      "tag with commit SHA works",
-			repoName:  "test/repo",
-			commitSHA: "abc123",
-			tag:       "v1.0.0", // Tag with commit SHA should work
-			setupServer: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					// Tag should not be part of the API call
-					if r.URL.Query().Get("tag") != "" {
-						t.Errorf("expected no tag query param, got %s", r.URL.Query().Get("tag"))
-					}
-					w.Header().Set("Content-Type", "application/json")
-					json.NewEncoder(w).Encode(sampleResult)
-				}))
-			},
-			wantErr:     false,
-			skipRealAPI: true,
-		},
 		{
 			name:        "tag without commit SHA returns error",
 			repoName:    "test/repo",
 			commitSHA:   "",
-			tag:         "v1.0.0", // Tag without commit SHA should trigger error
-			setupServer: nil,
+			tag:         "v1.0.0",
 			wantErr:     true,
 			errContains: "scorecard API does not support tags",
-			skipRealAPI: false, // This test doesn't need network since it fails early
 		},
 		{
 			name:        "tag with HEAD commit SHA returns error",
 			repoName:    "test/repo",
 			commitSHA:   "HEAD",
-			tag:         "v1.0.0", // Tag with HEAD should also trigger error
-			setupServer: nil,
+			tag:         "v1.0.0",
 			wantErr:     true,
 			errContains: "scorecard API does not support tags",
-			skipRealAPI: false, // This test doesn't need network since it fails early
-		},
-		{
-			name:        "real API test - successful fetch",
-			repoName:    "ossf/scorecard",
-			commitSHA:   "",
-			tag:         "",
-			setupServer: nil,
-			wantErr:     false,
-			skipRealAPI: false,
-		},
-		{
-			name:        "real API test - non-existent repo",
-			repoName:    "nonexistent/repo-that-does-not-exist-12345",
-			commitSHA:   "",
-			tag:         "",
-			setupServer: nil,
-			wantErr:     true,
-			errContains: "not found",
-			skipRealAPI: false,
 		},
 	}
 
@@ -261,16 +101,8 @@ func Test_scorecardRunner_getScoreFromAPI(t *testing.T) {
 			ctx := context.Background()
 			runner := scorecardRunner{ctx: ctx}
 
-			// For mock tests, we need to modify the function to use our test server
-			// Since we can't easily modify the hardcoded URL, we'll only run real API tests
-			// or document that this requires refactoring for better testability
-
-			if tt.skipRealAPI {
-				t.Skip("Skipping mock test - requires refactoring to make API URL configurable")
-				return
-			}
-
-			// Run the actual API call
+			// Run the actual API call - these tests only cover edge cases
+			// that return early without making network requests
 			got, err := runner.getScoreFromAPI(tt.repoName, tt.commitSHA, tt.tag)
 
 			if (err != nil) != tt.wantErr {
