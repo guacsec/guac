@@ -188,6 +188,7 @@ signs:
     args:
       - "sign-blob"
       - "--yes"
+      - "--bundle"
       - "--output-signature"
       - "${artifact}-keyless.sig"
       - "--output-certificate"
