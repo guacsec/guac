@@ -57,16 +57,6 @@ jobs:
         uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # main
       - name: Install syft
         uses: anchore/sbom-action/download-syft@aa0e114b2e19480f157109b9922bda359bd98b90 # v0.20.8
-
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghcli
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/local/share/boost
-          docker system prune -af
-          df -h
-
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         id: run-goreleaser-snapshot
