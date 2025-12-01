@@ -1230,7 +1230,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
 	httpClient := http.Client{}
-	gqlClient := graphql.NewClient("http://localhost:9090/query", &httpClient)
+	gqlClient := graphql.NewClient("http://localhost:8080/query", &httpClient)
 
 	testCases := []struct {
 		name              string
