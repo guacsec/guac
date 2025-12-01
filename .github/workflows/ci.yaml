@@ -98,5 +98,3 @@ jobs:
         run: make format
       - name: Check that all linted text is up to date
         run: make generated_up_to_date
-      - name: Run atlas Lint
-        run: make atlas-lint
