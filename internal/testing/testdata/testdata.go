@@ -2240,29 +2240,36 @@ var (
 	}`
 
 	VertxWebAttestation = `{
-		"type": "https://in-toto.io/Statement/v1",
-		"subject": [
+		  "type": "https://in-toto.io/Statement/v1",
+		  "subject": [
+		    {
+		      "uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
+		    }
+		  ],
+		  "predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
+		  "predicate": {
+		    "scanner": {
+		      "uri": "osv.dev",
+		      "version": "0.0.14",
+		      "db": {},
+		      "result": [
 			{
-				"uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
-			}
-		],
-		"predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
-		"predicate": {
-			"scanner": {
-				"uri": "osv.dev",
-				"version": "0.0.14",
-				"result": [
-					{
-						"id": "GHSA-53jx-vvf9-4x38"
-					}
-				]
+			  "id": "GHSA-45p5-v273-3qqr"
 			},
-			"metadata": {
-				"scanStartedOn":"2023-02-15T11:10:08.986506-08:00",
-				"scanFinishedOn":"2023-02-15T11:10:08.986506-08:00"
+			{
+			  "id": "GHSA-53jx-vvf9-4x38"
+			},
+			{
+			  "id": "GHSA-h5fg-jpgr-rv9c"
 			}
-		}
-	}`
+		      ]
+		    },
+		    "metadata": {
+		      "scanStartedOn": "2025-12-01T15:19:40.545851224Z",
+		      "scanFinishedOn": "2025-12-01T15:19:40.545851224Z"
+		    }
+		  }
+		}`
 
 	VertxWebCommonPackage = root_package.PackageNode{
 		Purl: "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar",
