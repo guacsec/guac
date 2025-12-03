@@ -1,0 +1,82 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:4e671687-395b-41f5-a30f-a58921a69b80",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-01-15T10:30:00Z",
+    "component": {
+      "bom-ref": "test-component-2",
+      "type": "application",
+      "name": "test-app-2",
+      "version": "1.0.0"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2024-0002",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-0002"
+      },
+      "ratings": [
+        {
+          "source": {
+            "name": "NVD",
+            "url": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator"
+          },
+          "score": 6.0,
+          "severity": "medium",
+          "method": "CVSSv31"
+        }
+      ],
+      "analysis": {
+        "state": "false_positive",
+        "detail": "Vulnerability was falsely identified or associated with this component"
+      },
+      "affects": [
+        {
+          "ref": "urn:uuid:4e671687-395b-41f5-a30f-a58921a69b80/1#test-component-2",
+          "versions": [
+            {
+              "version": "1.0.0",
+              "status": "unaffected"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-0004",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-0004"
+      },
+      "ratings": [
+        {
+          "source": {
+            "name": "NVD",
+            "url": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator"
+          },
+          "score": 6.0,
+          "severity": "medium",
+          "method": "CVSSv31"
+        }
+      ],
+      "analysis": {
+        "state": "false_positive"
+      },
+      "affects": [
+        {
+          "ref": "urn:uuid:4e671687-395b-41f5-a30f-a58921a69b80/1#test-component-2-no-detail",
+          "versions": [
+            {
+              "version": "1.0.0",
+              "status": "unaffected"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

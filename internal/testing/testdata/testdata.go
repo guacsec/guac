@@ -120,6 +120,12 @@ var (
 	//go:embed exampledata/cyclonedx-vex-no-analysis.json
 	CycloneDXVEXWithoutAnalysis []byte
 
+	//go:embed exampledata/cyclonedx-vex-resolved-with-pedigree.json
+	CycloneDXVEXResolvedWithPedigree []byte
+
+	//go:embed exampledata/cyclonedx-vex-false-positive.json
+	CycloneDXVEXFalsePositive []byte
+
 	//go:embed exampledata/cyclonedx-vex.xml
 	CyloneDXVEXExampleXML []byte
 
@@ -304,6 +310,93 @@ var (
 			},
 		},
 	}
+	// VexData for resolved_with_pedigree status (maps to VexStatusFixed)
+	VexDataResolvedWithPedigree = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusFixed,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "",
+		StatusNotes:      "Vulnerability has been remediated with evidence provided in component pedigree",
+		KnownSince:       time.Unix(0, 0).UTC(),
+	}
+	// VexData for false_positive status (maps to VexStatusNotAffected)
+	VexDataFalsePositive = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusNotAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "",
+		StatusNotes:      "Vulnerability was falsely identified or associated with this component",
+		KnownSince:       time.Unix(0, 0).UTC(),
+	}
+	// VexData for resolved_with_pedigree status without detail (maps to VexStatusFixed)
+	VexDataResolvedWithPedigreeNoDetail = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusFixed,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "",
+		StatusNotes:      "CDX state: resolved_with_pedigree",
+		KnownSince:       time.Unix(0, 0).UTC(),
+	}
+	// VexData for false_positive status without detail (maps to VexStatusNotAffected)
+	VexDataFalsePositiveNoDetail = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusNotAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "",
+		StatusNotes:      "CDX state: false_positive",
+		KnownSince:       time.Unix(0, 0).UTC(),
+	}
+	VulnSpecResolvedWithPedigree = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2024-0001",
+	}
+	VulnSpecFalsePositive = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2024-0002",
+	}
+	// Vulnerability specs for no-detail test cases
+	VulnSpecResolvedWithPedigreeNoDetail = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2024-0003",
+	}
+	VulnSpecFalsePositiveNoDetail = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2024-0004",
+	}
+	// VulnMetadata for resolved_with_pedigree test
+	CycloneDXResolvedWithPedigreeVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: VulnSpecResolvedWithPedigree,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 7.5,
+				Timestamp:  time.Unix(0, 0).UTC(),
+			},
+		},
+		{
+			Vulnerability: VulnSpecResolvedWithPedigreeNoDetail,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 7.5,
+				Timestamp:  time.Unix(0, 0).UTC(),
+			},
+		},
+	}
+	// VulnMetadata for false_positive test
+	CycloneDXFalsePositiveVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: VulnSpecFalsePositive,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 6.0,
+				Timestamp:  time.Unix(0, 0).UTC(),
+			},
+		},
+		{
+			Vulnerability: VulnSpecFalsePositiveNoDetail,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 6.0,
+				Timestamp:  time.Unix(0, 0).UTC(),
+			},
+		},
+	}
 
 	topLevelPkg, _     = asmhelpers.PurlToPkg("pkg:guac/cdx/ABC")
 	HasSBOMVexAffected = []assembler.HasSBOMIngest{
@@ -325,6 +418,73 @@ var (
 				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
 			},
 		},
+	}
+	// HasSBOM for resolved_with_pedigree test
+	topLevelPkgResolvedWithPedigree, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/test-app@1.0.0")
+	HasSBOMVexResolvedWithPedigree     = []assembler.HasSBOMIngest{
+		{
+			Pkg: topLevelPkgResolvedWithPedigree,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:        "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+				Algorithm:  "sha256",
+				Digest:     "32981b0c4f87df9243c0e9b8a9600f2e19aae0c0cb76122edfe4a54ef59b9d48",
+				KnownSince: parseRfc3339("2024-01-15T10:30:00Z"),
+			},
+		},
+	}
+	// HasSBOM for false_positive test
+	topLevelPkgFalsePositive, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/test-app-2@1.0.0")
+	HasSBOMVexFalsePositive     = []assembler.HasSBOMIngest{
+		{
+			Pkg: topLevelPkgFalsePositive,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:        "urn:uuid:4e671687-395b-41f5-a30f-a58921a69b80",
+				Algorithm:  "sha256",
+				Digest:     "0731373583749ae046d0992e9b417d4b2960f75d7a979c72fd0b7a258566d520",
+				KnownSince: parseRfc3339("2024-01-15T10:30:00Z"),
+			},
+		},
+	}
+	// Predicates for resolved_with_pedigree test
+	resolvedWithPedigreePkg, _             = asmhelpers.PurlToPkg("pkg:guac/pkg/test-component@1.0.0")
+	resolvedWithPedigreeNoDetailPkg, _     = asmhelpers.PurlToPkg("pkg:guac/pkg/test-component-no-detail@1.0.0")
+	CycloneDXResolvedWithPedigreeVexIngest = []assembler.VexIngest{
+		{
+			Pkg:           resolvedWithPedigreePkg,
+			Vulnerability: VulnSpecResolvedWithPedigree,
+			VexData:       VexDataResolvedWithPedigree,
+		},
+		{
+			Pkg:           resolvedWithPedigreeNoDetailPkg,
+			Vulnerability: VulnSpecResolvedWithPedigreeNoDetail,
+			VexData:       VexDataResolvedWithPedigreeNoDetail,
+		},
+	}
+	CycloneDXResolvedWithPedigreePredicates = assembler.IngestPredicates{
+		HasSBOM:      HasSBOMVexResolvedWithPedigree,
+		VulnMetadata: CycloneDXResolvedWithPedigreeVulnMetadata,
+		Vex:          CycloneDXResolvedWithPedigreeVexIngest,
+		// Note: No CertifyVuln because status is Fixed (not Affected/UnderInvestigation)
+	}
+	// Predicates for false_positive test
+	falsePositivePkg, _             = asmhelpers.PurlToPkg("pkg:guac/pkg/test-component-2@1.0.0")
+	falsePositiveNoDetailPkg, _     = asmhelpers.PurlToPkg("pkg:guac/pkg/test-component-2-no-detail@1.0.0")
+	CycloneDXFalsePositiveVexIngest = []assembler.VexIngest{
+		{
+			Pkg:           falsePositivePkg,
+			Vulnerability: VulnSpecFalsePositive,
+			VexData:       VexDataFalsePositive,
+		},
+		{
+			Pkg:           falsePositiveNoDetailPkg,
+			Vulnerability: VulnSpecFalsePositiveNoDetail,
+			VexData:       VexDataFalsePositiveNoDetail,
+		},
+	}
+	CycloneDXFalsePositivePredicates = assembler.IngestPredicates{
+		HasSBOM:      HasSBOMVexFalsePositive,
+		VulnMetadata: CycloneDXFalsePositiveVulnMetadata,
+		Vex:          CycloneDXFalsePositiveVexIngest,
 	}
 
 	// DSSE/SLSA Testdata
