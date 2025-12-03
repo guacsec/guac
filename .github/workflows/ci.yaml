@@ -90,7 +90,7 @@ jobs:
       - name: Install atlas
         uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9 # 8.0.0
+        uses: golangci/golangci-lint-action@0a35821d5c230e903fcfe077583637dea1b27b47 # 9.0.0
         with:
           only-new-issues: true
           skip-cache: true
