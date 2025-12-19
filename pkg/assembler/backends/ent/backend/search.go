@@ -251,13 +251,87 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 
 	if len(shortenedQueryList) > 0 {
 		var queryErr error
-		pkgConn, queryErr = b.client.PackageVersion.Query().
-			Where(packageversion.IDIn(shortenedQueryList...)).
-			WithName(func(q *ent.PackageNameQuery) {}).
-			Paginate(ctx, afterCursor, first, nil, nil)
+		// PostgreSQL has a parameter limit of 65535. Each UUID in IDIn counts as one parameter.
+		// To avoid exceeding this limit, we batch queries when dealing with large ID lists.
+		const maxIDsPerQuery = 60000 // Leave some room for other query parameters
+		
+		if len(shortenedQueryList) <= maxIDsPerQuery {
+			// Small list - execute single query
+			pkgConn, queryErr = b.client.PackageVersion.Query().
+				Where(packageversion.IDIn(shortenedQueryList...)).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				Paginate(ctx, afterCursor, first, nil, nil)
 
-		if queryErr != nil {
-			return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+			if queryErr != nil {
+				return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+			}
+		} else {
+			// Large list - execute batched queries and merge results
+			var allPackages []*ent.PackageVersion
+			
+			for i := 0; i < len(shortenedQueryList); i += maxIDsPerQuery {
+				end := i + maxIDsPerQuery
+				if end > len(shortenedQueryList) {
+					end = len(shortenedQueryList)
+				}
+				batch := shortenedQueryList[i:end]
+				
+				pkgs, err := b.client.PackageVersion.Query().
+					Where(packageversion.IDIn(batch...)).
+					WithName(func(q *ent.PackageNameQuery) {}).
+					All(ctx)
+				
+				if err != nil {
+					return nil, fmt.Errorf("failed package query batch %d-%d with error: %w", i, end, err)
+				}
+				
+				allPackages = append(allPackages, pkgs...)
+			}
+			
+			// For batched queries, we need to manually paginate the results
+			// Sort by ID to ensure consistent ordering
+			sort.Slice(allPackages, func(i, j int) bool {
+				return allPackages[i].ID.String() < allPackages[j].ID.String()
+			})
+			
+			// Apply cursor-based pagination manually
+			startIdx := 0
+			if afterCursor != nil {
+				for idx, pkg := range allPackages {
+					if pkg.ID == afterCursor.ID {
+						startIdx = idx + 1
+						break
+					}
+				}
+			}
+			
+			// Limit results to 'first' items
+			endIdx := startIdx + *first
+			if endIdx > len(allPackages) {
+				endIdx = len(allPackages)
+			}
+			
+			paginatedPackages := allPackages[startIdx:endIdx]
+			
+			// Construct a manual PackageVersionConnection
+			pkgConn = &ent.PackageVersionConnection{
+				TotalCount: len(allPackages),
+				PageInfo: ent.PageInfo{
+					HasNextPage: endIdx < len(allPackages),
+				},
+			}
+			
+			if len(paginatedPackages) > 0 {
+				pkgConn.PageInfo.StartCursor = &ent.Cursor{ID: paginatedPackages[0].ID}
+				pkgConn.PageInfo.EndCursor = &ent.Cursor{ID: paginatedPackages[len(paginatedPackages)-1].ID}
+				
+				for _, pkg := range paginatedPackages {
+					pkgConn.Edges = append(pkgConn.Edges, &ent.PackageVersionEdge{
+						Node:   pkg,
+						Cursor: ent.Cursor{ID: pkg.ID},
+					})
+				}
+			}
 		}
 	}
 
