@@ -243,9 +243,15 @@ func validateOCIRegistryFlags(
 	sources := []datasource.Source{}
 	for _, arg := range args {
 		// Min check to validate registry by resolving hostname
-		_, err := net.LookupHost(arg)
+		// Split host:port before DNS lookup, since LookupHost expects hostname only
+		host, _, err := net.SplitHostPort(arg)
 		if err != nil {
-			return opts, fmt.Errorf("registry parsing error. require format registry:port")
+			// If SplitHostPort fails, assume arg is just a hostname without port
+			host = arg
+		}
+		_, err = net.LookupHost(host)
+		if err != nil {
+			return opts, fmt.Errorf("registry parsing error: unable to resolve hostname %q: %w", host, err)
 		}
 		sources = append(sources, datasource.Source{
 			Value: arg,
