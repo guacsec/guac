@@ -40,6 +40,9 @@ func init() {
 	set.Bool("csub-tls-skip-verify", false, "skip verifying server certificate (for self-signed certificates for example)")
 	set.Bool("use-csub", true, "use collectsub server for datasource")
 
+	// OCI collector options
+	set.Bool("insecure-skip-tls-verify", false, "skip TLS verification when connecting to OCI registries (allows HTTP)")
+
 	set.Int("csub-listen-port", 2782, "port to listen to on collect-sub service")
 	set.String("csub-tls-cert-file", "", "path to the TLS certificate in PEM format for collect-sub service")
 	set.String("csub-tls-key-file", "", "path to the TLS key in PEM format for collect-sub service")
