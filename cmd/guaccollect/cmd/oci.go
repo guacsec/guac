@@ -260,7 +260,7 @@ func validateOCIRegistryFlags(
 
 	var err error
 	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
-		OciDataSources: sources,
+		OciRegistryDataSources: sources,
 	})
 	if err != nil {
 		return opts, err
