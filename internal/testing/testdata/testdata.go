@@ -2269,6 +2269,9 @@ var (
 					"id":"GHSA-p6xc-xr62-6r2g"
 				 },
 				 {
+					"id":"GHSA-vc5p-v9hr-52mj"
+				 },
+				 {
 					"id":"GHSA-vwqq-5vrc-xw9h"
 				 }
 			  ]
