@@ -80,5 +80,12 @@ services:
       - --data-dir=/data
       - --pd=pd:2379
     depends_on:
-      - "pd"
+      pd:
+        condition: service_healthy
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:20180/status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
