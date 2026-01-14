@@ -172,6 +172,11 @@ universal_binaries:
     id: guacgql
     ids:
       - guacgql
+  - replace: true
+    name_template: guacrest
+    id: guacrest
+    ids:
+      - guacrest
 
 sboms:
   - id: bins
