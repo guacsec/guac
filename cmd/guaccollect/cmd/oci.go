@@ -30,8 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/oci"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/regclient/regclient"
-	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -102,7 +100,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
-			viper.GetBool("insecure-skip-tls-verify"),
+			viper.GetBool(ociInsecureSkipTLSVerify),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -116,8 +114,8 @@ you have access to read and write to the respective blob store.`,
 		// the CollectSources so that there isn't a long delay from adding new data sources.
 
 		// Build regclient options with TLS configuration
-		registryHosts := extractRegistryHosts(args)
-		rcOpts := buildOCIRegClientOptions(opts.insecureSkipTLSVerify, registryHosts)
+		registryHosts := oci.ExtractRegistryHosts(args)
+		rcOpts := oci.BuildRegClientOptions(opts.insecureSkipTLSVerify, registryHosts)
 
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
@@ -146,7 +144,7 @@ var ociRegistryCmd = &cobra.Command{
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
-			viper.GetBool("insecure-skip-tls-verify"),
+			viper.GetBool(ociInsecureSkipTLSVerify),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -160,7 +158,7 @@ var ociRegistryCmd = &cobra.Command{
 
 		// Build regclient options with TLS configuration
 		// For registry command, args are registry hosts directly
-		rcOpts := buildOCIRegClientOptions(opts.insecureSkipTLSVerify, args)
+		rcOpts := oci.BuildRegClientOptions(opts.insecureSkipTLSVerify, args)
 
 		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
@@ -288,45 +286,6 @@ func validateOCIRegistryFlags(
 	}
 
 	return opts, nil
-}
-
-// buildOCIRegClientOptions constructs regclient options for OCI operations.
-// If insecure is true, it configures the specified hosts to skip TLS verification.
-func buildOCIRegClientOptions(insecure bool, hosts []string) []regclient.Opt {
-	rcOpts := oci.GetRegClientOptions()
-
-	if insecure && len(hosts) > 0 {
-		hostConfigs := make([]config.Host, len(hosts))
-		for i, host := range hosts {
-			hostConfigs[i] = config.Host{
-				Name:     host,
-				Hostname: host,
-				TLS:      config.TLSDisabled,
-			}
-		}
-		rcOpts = append(rcOpts, regclient.WithConfigHost(hostConfigs...))
-	}
-
-	return rcOpts
-}
-
-// extractRegistryHosts extracts unique registry hosts from image references.
-// For image paths like "registry.example.com:5000/repo/image:tag", it returns "registry.example.com:5000".
-func extractRegistryHosts(imagePaths []string) []string {
-	hostsMap := make(map[string]struct{})
-	for _, imagePath := range imagePaths {
-		r, err := ref.New(imagePath)
-		if err != nil {
-			continue
-		}
-		hostsMap[r.Registry] = struct{}{}
-	}
-
-	hosts := make([]string, 0, len(hostsMap))
-	for host := range hostsMap {
-		hosts = append(hosts, host)
-	}
-	return hosts
 }
 
 func init() {

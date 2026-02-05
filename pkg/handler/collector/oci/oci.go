@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/types/descriptor"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/platform"
@@ -540,4 +541,43 @@ func GetRegClientOptions() []regclient.Opt {
 
 func getRegClientOptions() []regclient.Opt {
 	return GetRegClientOptions()
+}
+
+// BuildRegClientOptions constructs regclient options for OCI operations.
+// If insecure is true, it configures the specified hosts to skip TLS verification.
+func BuildRegClientOptions(insecure bool, hosts []string) []regclient.Opt {
+	rcOpts := GetRegClientOptions()
+
+	if insecure && len(hosts) > 0 {
+		hostConfigs := make([]config.Host, len(hosts))
+		for i, host := range hosts {
+			hostConfigs[i] = config.Host{
+				Name:     host,
+				Hostname: host,
+				TLS:      config.TLSDisabled,
+			}
+		}
+		rcOpts = append(rcOpts, regclient.WithConfigHost(hostConfigs...))
+	}
+
+	return rcOpts
+}
+
+// ExtractRegistryHosts extracts unique registry hosts from image references.
+// For image paths like "registry.example.com:5000/repo/image:tag", it returns "registry.example.com:5000".
+func ExtractRegistryHosts(imagePaths []string) []string {
+	hostsMap := make(map[string]struct{})
+	for _, imagePath := range imagePaths {
+		r, err := ref.New(imagePath)
+		if err != nil {
+			continue
+		}
+		hostsMap[r.Registry] = struct{}{}
+	}
+
+	hosts := make([]string, 0, len(hostsMap))
+	for host := range hostsMap {
+		hosts = append(hosts, host)
+	}
+	return hosts
 }
