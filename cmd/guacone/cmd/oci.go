@@ -99,7 +99,9 @@ var ociCmd = &cobra.Command{
 		// Register collector
 		// Build regclient options with TLS configuration
 		registryHosts := oci.ExtractRegistryHosts(args)
-		rcOpts := oci.BuildRegClientOptions(opts.insecureSkipTLSVerify, registryHosts)
+		rcOpts := oci.BuildRegClientOptions(registryHosts, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
 
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
@@ -182,7 +184,9 @@ var ociRegistryCmd = &cobra.Command{
 		// Register collector
 		// Build regclient options with TLS configuration
 		// For registry command, args are registry hosts directly
-		rcOpts := oci.BuildRegClientOptions(opts.insecureSkipTLSVerify, args)
+		rcOpts := oci.BuildRegClientOptions(args, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
 
 		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, false, 30*time.Second, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)

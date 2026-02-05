@@ -543,22 +543,46 @@ func getRegClientOptions() []regclient.Opt {
 	return GetRegClientOptions()
 }
 
+// OCIClientOptions contains configuration for OCI registry connections.
+// New fields should always have sensible zero-value defaults for backward compatibility.
+type OCIClientOptions struct {
+	// InsecureSkipTLSVerify disables TLS entirely (uses HTTP)
+	InsecureSkipTLSVerify bool
+}
+
+// needsHostConfig returns true if any custom host configuration is needed.
+func (o OCIClientOptions) needsHostConfig() bool {
+	return o.InsecureSkipTLSVerify
+}
+
+// toHostConfig converts options to a regclient config.Host for the given hostname.
+func (o OCIClientOptions) toHostConfig(host string) config.Host {
+	h := config.Host{
+		Name:     host,
+		Hostname: host,
+	}
+
+	if o.InsecureSkipTLSVerify {
+		h.TLS = config.TLSDisabled
+	}
+
+	return h
+}
+
 // BuildRegClientOptions constructs regclient options for OCI operations.
-// If insecure is true, it configures the specified hosts to skip TLS verification.
-func BuildRegClientOptions(insecure bool, hosts []string) []regclient.Opt {
+// The opts parameter allows configuration of TLS settings for the specified hosts.
+func BuildRegClientOptions(hosts []string, opts OCIClientOptions) []regclient.Opt {
 	rcOpts := GetRegClientOptions()
 
-	if insecure && len(hosts) > 0 {
-		hostConfigs := make([]config.Host, len(hosts))
-		for i, host := range hosts {
-			hostConfigs[i] = config.Host{
-				Name:     host,
-				Hostname: host,
-				TLS:      config.TLSDisabled,
-			}
-		}
-		rcOpts = append(rcOpts, regclient.WithConfigHost(hostConfigs...))
+	if len(hosts) == 0 || !opts.needsHostConfig() {
+		return rcOpts
 	}
+
+	hostConfigs := make([]config.Host, len(hosts))
+	for i, host := range hosts {
+		hostConfigs[i] = opts.toHostConfig(host)
+	}
+	rcOpts = append(rcOpts, regclient.WithConfigHost(hostConfigs...))
 
 	return rcOpts
 }

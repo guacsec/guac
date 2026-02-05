@@ -115,7 +115,9 @@ you have access to read and write to the respective blob store.`,
 
 		// Build regclient options with TLS configuration
 		registryHosts := oci.ExtractRegistryHosts(args)
-		rcOpts := oci.BuildRegClientOptions(opts.insecureSkipTLSVerify, registryHosts)
+		rcOpts := oci.BuildRegClientOptions(registryHosts, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
 
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
@@ -158,7 +160,9 @@ var ociRegistryCmd = &cobra.Command{
 
 		// Build regclient options with TLS configuration
 		// For registry command, args are registry hosts directly
-		rcOpts := oci.BuildRegClientOptions(opts.insecureSkipTLSVerify, args)
+		rcOpts := oci.BuildRegClientOptions(args, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
 
 		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
