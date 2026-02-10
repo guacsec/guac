@@ -58,6 +58,12 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 		if err != nil {
 			return fmt.Errorf("failed to query packages with error: %w", err)
 		}
+
+		// handle nil response or empty SourcesList when table is empty
+		if srcConn == nil || srcConn.SourcesList == nil {
+			break
+		}
+
 		srcEdges := srcConn.SourcesList.Edges
 
 		for _, srcNode := range srcEdges {
