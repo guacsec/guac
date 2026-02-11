@@ -161,6 +161,27 @@ func TestPurlsToScan(t *testing.T) {
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
+					VulnerabilityID: "ghsa-vc5p-v9hr-52mj",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "osv_certifier",
+					Collector:      "osv_certifier",
+					DocumentRef:    "sha256_daeea32fb48a532d48ce7a549b7e0cdf98eb6df80869c3b6d3ec21174b015d14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
 					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 				},
 				VulnData: &generated.ScanMetadataInput{
@@ -262,6 +283,22 @@ func TestPurlsToScan(t *testing.T) {
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
 					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+					Origin:        "osv_certifier",
+					Collector:     "osv_certifier",
+					DocumentRef:   "sha256_daeea32fb48a532d48ce7a549b7e0cdf98eb6df80869c3b6d3ec21174b015d14",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vc5p-v9hr-52mj",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-vc5p-v9hr-52mj",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",

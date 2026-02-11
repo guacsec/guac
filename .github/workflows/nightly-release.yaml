@@ -29,6 +29,9 @@ on:
   # schedule:
   #   - cron: '44 4 * * *'   #UTC
 
+permissions:
+  contents: read
+
 env:
   NIGHTLY_RELEASE_TAG: v0-nightly   #goreleaser enforces semver on tags
   # Note that the container tag (per .goreleaser-nightly.yaml)

@@ -2269,6 +2269,9 @@ var (
 					"id":"GHSA-p6xc-xr62-6r2g"
 				 },
 				 {
+					"id":"GHSA-vc5p-v9hr-52mj"
+				 },
+				 {
 					"id":"GHSA-vwqq-5vrc-xw9h"
 				 }
 			  ]
@@ -2389,12 +2392,15 @@ var (
 				"result": [
 					{
 						"id": "GHSA-9ph3-v2vh-3qx7"
+					},
+					{
+						"id":"GHSA-cphf-4846-3xx9"
 					}
 				]
 			},
 			"metadata": {
-				"scanStartedOn":"2023-02-15T11:10:08.986506-08:00",
-				"scanFinishedOn":"2023-02-15T11:10:08.986506-08:00"
+				"scanStartedOn":"2026-02-09T15:58:30.797127394Z",
+				"scanFinishedOn":"2026-02-09T15:58:30.797127394Z"
 			}
 		}
 	}`

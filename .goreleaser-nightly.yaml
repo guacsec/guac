@@ -131,6 +131,19 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
+  - main: ./cmd/guacrest
+    id: guacrest
+    binary: guacrest-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
 
 universal_binaries:
   - replace: true
@@ -158,6 +171,11 @@ universal_binaries:
     id: guacgql
     ids:
       - guacgql
+  - replace: true
+    name_template: guacrest
+    id: guacrest
+    ids:
+      - guacrest
 
 sboms:
   - id: bins
@@ -168,16 +186,12 @@ sboms:
 signs:
   - id: guac-cosign-keyless
     artifacts: checksum
-    signature: "${artifact}-keyless.sig"
-    certificate: "${artifact}-keyless.pem"
+    signature: "${artifact}.bundle"
     cmd: cosign
     args:
       - "sign-blob"
+      - "--bundle=${signature}"
       - "--yes"
-      - "--output-signature"
-      - "${artifact}-keyless.sig"
-      - "--output-certificate"
-      - "${artifact}-keyless.pem"
       - "${artifact}"
     output: true
 
