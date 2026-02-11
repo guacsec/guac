@@ -253,7 +253,7 @@ func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
+		if err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert hasSourceAt node")
 		}
 	}
@@ -533,7 +533,7 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 				),
 			).
 			DoNothing().
-			Exec(ctx); err != nil {
+			Exec(ctx); err != nil && err != stdsql.ErrNoRows {
 
 			return nil, errors.Wrap(err, "bulk upsert source name node")
 		}
