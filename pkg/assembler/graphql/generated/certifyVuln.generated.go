@@ -35,7 +35,9 @@ func (ec *executionContext) _CertifyVuln_id(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVuln_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _CertifyVuln_package(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVuln_package,
-		func(ctx context.Context) (any, error) { return obj.Package, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Package, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _CertifyVuln_vulnerability(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVuln_vulnerability,
-		func(ctx context.Context) (any, error) { return obj.Vulnerability, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Vulnerability, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -138,7 +144,9 @@ func (ec *executionContext) _CertifyVuln_metadata(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVuln_metadata,
-		func(ctx context.Context) (any, error) { return obj.Metadata, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Metadata, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -185,7 +193,9 @@ func (ec *executionContext) _CertifyVulnConnection_totalCount(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVulnConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -214,7 +224,9 @@ func (ec *executionContext) _CertifyVulnConnection_pageInfo(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVulnConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -251,7 +263,9 @@ func (ec *executionContext) _CertifyVulnConnection_edges(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVulnConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -286,7 +300,9 @@ func (ec *executionContext) _CertifyVulnEdge_cursor(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVulnEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -315,7 +331,9 @@ func (ec *executionContext) _CertifyVulnEdge_node(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVulnEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -354,7 +372,9 @@ func (ec *executionContext) _ScanMetadata_timeScanned(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_timeScanned,
-		func(ctx context.Context) (any, error) { return obj.TimeScanned, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TimeScanned, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -383,7 +403,9 @@ func (ec *executionContext) _ScanMetadata_dbUri(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_dbUri,
-		func(ctx context.Context) (any, error) { return obj.DbURI, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DbURI, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -412,7 +434,9 @@ func (ec *executionContext) _ScanMetadata_dbVersion(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_dbVersion,
-		func(ctx context.Context) (any, error) { return obj.DbVersion, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DbVersion, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -441,7 +465,9 @@ func (ec *executionContext) _ScanMetadata_scannerUri(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_scannerUri,
-		func(ctx context.Context) (any, error) { return obj.ScannerURI, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ScannerURI, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -470,7 +496,9 @@ func (ec *executionContext) _ScanMetadata_scannerVersion(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_scannerVersion,
-		func(ctx context.Context) (any, error) { return obj.ScannerVersion, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ScannerVersion, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -499,7 +527,9 @@ func (ec *executionContext) _ScanMetadata_origin(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -528,7 +558,9 @@ func (ec *executionContext) _ScanMetadata_collector(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -557,7 +589,9 @@ func (ec *executionContext) _ScanMetadata_documentRef(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScanMetadata_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1037,7 +1071,7 @@ func (ec *executionContext) marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVuln) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1091,7 +1125,7 @@ func (ec *executionContext) marshalNCertifyVulnEdge2ᚕᚖgithubᚗcomᚋguacsec
 func (ec *executionContext) marshalNCertifyVulnEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVulnEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1106,7 +1140,7 @@ func (ec *executionContext) unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNScanMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadata(ctx context.Context, sel ast.SelectionSet, v *model.ScanMetadata) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

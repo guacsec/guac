@@ -91,7 +91,7 @@ func (*VulnEqual) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the VulnEqual fields.
-func (ve *VulnEqual) assignValues(columns []string, values []any) error {
+func (_m *VulnEqual) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -101,52 +101,52 @@ func (ve *VulnEqual) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				ve.ID = *value
+				_m.ID = *value
 			}
 		case vulnequal.FieldVulnID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field vuln_id", values[i])
 			} else if value != nil {
-				ve.VulnID = *value
+				_m.VulnID = *value
 			}
 		case vulnequal.FieldEqualVulnID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field equal_vuln_id", values[i])
 			} else if value != nil {
-				ve.EqualVulnID = *value
+				_m.EqualVulnID = *value
 			}
 		case vulnequal.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				ve.Justification = value.String
+				_m.Justification = value.String
 			}
 		case vulnequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				ve.Origin = value.String
+				_m.Origin = value.String
 			}
 		case vulnequal.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				ve.Collector = value.String
+				_m.Collector = value.String
 			}
 		case vulnequal.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				ve.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case vulnequal.FieldVulnerabilitiesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerabilities_hash", values[i])
 			} else if value.Valid {
-				ve.VulnerabilitiesHash = value.String
+				_m.VulnerabilitiesHash = value.String
 			}
 		default:
-			ve.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -154,63 +154,63 @@ func (ve *VulnEqual) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the VulnEqual.
 // This includes values selected through modifiers, order, etc.
-func (ve *VulnEqual) Value(name string) (ent.Value, error) {
-	return ve.selectValues.Get(name)
+func (_m *VulnEqual) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryVulnerabilityA queries the "vulnerability_a" edge of the VulnEqual entity.
-func (ve *VulnEqual) QueryVulnerabilityA() *VulnerabilityIDQuery {
-	return NewVulnEqualClient(ve.config).QueryVulnerabilityA(ve)
+func (_m *VulnEqual) QueryVulnerabilityA() *VulnerabilityIDQuery {
+	return NewVulnEqualClient(_m.config).QueryVulnerabilityA(_m)
 }
 
 // QueryVulnerabilityB queries the "vulnerability_b" edge of the VulnEqual entity.
-func (ve *VulnEqual) QueryVulnerabilityB() *VulnerabilityIDQuery {
-	return NewVulnEqualClient(ve.config).QueryVulnerabilityB(ve)
+func (_m *VulnEqual) QueryVulnerabilityB() *VulnerabilityIDQuery {
+	return NewVulnEqualClient(_m.config).QueryVulnerabilityB(_m)
 }
 
 // Update returns a builder for updating this VulnEqual.
 // Note that you need to call VulnEqual.Unwrap() before calling this method if this VulnEqual
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ve *VulnEqual) Update() *VulnEqualUpdateOne {
-	return NewVulnEqualClient(ve.config).UpdateOne(ve)
+func (_m *VulnEqual) Update() *VulnEqualUpdateOne {
+	return NewVulnEqualClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the VulnEqual entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ve *VulnEqual) Unwrap() *VulnEqual {
-	_tx, ok := ve.config.driver.(*txDriver)
+func (_m *VulnEqual) Unwrap() *VulnEqual {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: VulnEqual is not a transactional entity")
 	}
-	ve.config.driver = _tx.drv
-	return ve
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ve *VulnEqual) String() string {
+func (_m *VulnEqual) String() string {
 	var builder strings.Builder
 	builder.WriteString("VulnEqual(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ve.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("vuln_id=")
-	builder.WriteString(fmt.Sprintf("%v", ve.VulnID))
+	builder.WriteString(fmt.Sprintf("%v", _m.VulnID))
 	builder.WriteString(", ")
 	builder.WriteString("equal_vuln_id=")
-	builder.WriteString(fmt.Sprintf("%v", ve.EqualVulnID))
+	builder.WriteString(fmt.Sprintf("%v", _m.EqualVulnID))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(ve.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(ve.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(ve.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(ve.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("vulnerabilities_hash=")
-	builder.WriteString(ve.VulnerabilitiesHash)
+	builder.WriteString(_m.VulnerabilitiesHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -35,7 +35,9 @@ func (ec *executionContext) _CertifyLegal_id(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _CertifyLegal_subject(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _CertifyLegal_declaredLicense(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_declaredLicense,
-		func(ctx context.Context) (any, error) { return obj.DeclaredLicense, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DeclaredLicense, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -122,7 +128,9 @@ func (ec *executionContext) _CertifyLegal_declaredLicenses(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_declaredLicenses,
-		func(ctx context.Context) (any, error) { return obj.DeclaredLicenses, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DeclaredLicenses, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -161,7 +169,9 @@ func (ec *executionContext) _CertifyLegal_discoveredLicense(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_discoveredLicense,
-		func(ctx context.Context) (any, error) { return obj.DiscoveredLicense, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DiscoveredLicense, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -190,7 +200,9 @@ func (ec *executionContext) _CertifyLegal_discoveredLicenses(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_discoveredLicenses,
-		func(ctx context.Context) (any, error) { return obj.DiscoveredLicenses, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DiscoveredLicenses, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -229,7 +241,9 @@ func (ec *executionContext) _CertifyLegal_attribution(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_attribution,
-		func(ctx context.Context) (any, error) { return obj.Attribution, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Attribution, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -258,7 +272,9 @@ func (ec *executionContext) _CertifyLegal_justification(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -287,7 +303,9 @@ func (ec *executionContext) _CertifyLegal_timeScanned(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_timeScanned,
-		func(ctx context.Context) (any, error) { return obj.TimeScanned, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TimeScanned, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -316,7 +334,9 @@ func (ec *executionContext) _CertifyLegal_origin(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -345,7 +365,9 @@ func (ec *executionContext) _CertifyLegal_collector(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -374,7 +396,9 @@ func (ec *executionContext) _CertifyLegal_documentRef(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegal_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -403,7 +427,9 @@ func (ec *executionContext) _CertifyLegalConnection_totalCount(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegalConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -432,7 +458,9 @@ func (ec *executionContext) _CertifyLegalConnection_pageInfo(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegalConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -469,7 +497,9 @@ func (ec *executionContext) _CertifyLegalConnection_edges(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegalConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -504,7 +534,9 @@ func (ec *executionContext) _CertifyLegalEdge_cursor(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegalEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -533,7 +565,9 @@ func (ec *executionContext) _CertifyLegalEdge_node(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyLegalEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1012,7 +1046,7 @@ func (ec *executionContext) marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx context.Context, sel ast.SelectionSet, v *model.CertifyLegal) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1066,7 +1100,7 @@ func (ec *executionContext) marshalNCertifyLegalEdge2ᚕᚖgithubᚗcomᚋguacse
 func (ec *executionContext) marshalNCertifyLegalEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyLegalEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

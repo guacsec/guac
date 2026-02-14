@@ -35,7 +35,9 @@ func (ec *executionContext) _IsOccurrence_id(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _IsOccurrence_subject(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _IsOccurrence_artifact(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_artifact,
-		func(ctx context.Context) (any, error) { return obj.Artifact, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Artifact, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -130,7 +136,9 @@ func (ec *executionContext) _IsOccurrence_justification(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -159,7 +167,9 @@ func (ec *executionContext) _IsOccurrence_origin(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -188,7 +198,9 @@ func (ec *executionContext) _IsOccurrence_collector(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -217,7 +229,9 @@ func (ec *executionContext) _IsOccurrence_documentRef(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrence_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -246,7 +260,9 @@ func (ec *executionContext) _IsOccurrenceConnection_totalCount(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrenceConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -275,7 +291,9 @@ func (ec *executionContext) _IsOccurrenceConnection_pageInfo(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrenceConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -312,7 +330,9 @@ func (ec *executionContext) _IsOccurrenceConnection_edges(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrenceConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -347,7 +367,9 @@ func (ec *executionContext) _IsOccurrenceEdge_cursor(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrenceEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -376,7 +398,9 @@ func (ec *executionContext) _IsOccurrenceEdge_node(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsOccurrenceEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -661,7 +685,11 @@ func (ec *executionContext) _PackageOrSource(ctx context.Context, sel ast.Select
 		}
 		return ec._Package(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of PackageOrSource must implement graphql.Marshaler", obj))
+		}
 	}
 }
 
@@ -882,7 +910,7 @@ func (ec *executionContext) marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx context.Context, sel ast.SelectionSet, v *model.IsOccurrence) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -936,7 +964,7 @@ func (ec *executionContext) marshalNIsOccurrenceEdge2ᚕᚖgithubᚗcomᚋguacse
 func (ec *executionContext) marshalNIsOccurrenceEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceEdge(ctx context.Context, sel ast.SelectionSet, v *model.IsOccurrenceEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -981,7 +1009,7 @@ func (ec *executionContext) unmarshalNIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsec
 func (ec *executionContext) marshalNPackageOrSource2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSource(ctx context.Context, sel ast.SelectionSet, v model.PackageOrSource) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

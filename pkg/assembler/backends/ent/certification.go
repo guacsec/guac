@@ -131,7 +131,7 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Certification fields.
-func (c *Certification) assignValues(columns []string, values []any) error {
+func (_m *Certification) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -141,74 +141,74 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				c.ID = *value
+				_m.ID = *value
 			}
 		case certification.FieldSourceID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				c.SourceID = new(uuid.UUID)
-				*c.SourceID = *value.S.(*uuid.UUID)
+				_m.SourceID = new(uuid.UUID)
+				*_m.SourceID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldPackageVersionID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				c.PackageVersionID = new(uuid.UUID)
-				*c.PackageVersionID = *value.S.(*uuid.UUID)
+				_m.PackageVersionID = new(uuid.UUID)
+				*_m.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldPackageNameID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				c.PackageNameID = new(uuid.UUID)
-				*c.PackageNameID = *value.S.(*uuid.UUID)
+				_m.PackageNameID = new(uuid.UUID)
+				*_m.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				c.ArtifactID = new(uuid.UUID)
-				*c.ArtifactID = *value.S.(*uuid.UUID)
+				_m.ArtifactID = new(uuid.UUID)
+				*_m.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				c.Type = certification.Type(value.String)
+				_m.Type = certification.Type(value.String)
 			}
 		case certification.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				c.Justification = value.String
+				_m.Justification = value.String
 			}
 		case certification.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field known_since", values[i])
 			} else if value.Valid {
-				c.KnownSince = value.Time
+				_m.KnownSince = value.Time
 			}
 		case certification.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				c.Origin = value.String
+				_m.Origin = value.String
 			}
 		case certification.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				c.Collector = value.String
+				_m.Collector = value.String
 			}
 		case certification.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				c.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -216,90 +216,90 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Certification.
 // This includes values selected through modifiers, order, etc.
-func (c *Certification) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (_m *Certification) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySource queries the "source" edge of the Certification entity.
-func (c *Certification) QuerySource() *SourceNameQuery {
-	return NewCertificationClient(c.config).QuerySource(c)
+func (_m *Certification) QuerySource() *SourceNameQuery {
+	return NewCertificationClient(_m.config).QuerySource(_m)
 }
 
 // QueryPackageVersion queries the "package_version" edge of the Certification entity.
-func (c *Certification) QueryPackageVersion() *PackageVersionQuery {
-	return NewCertificationClient(c.config).QueryPackageVersion(c)
+func (_m *Certification) QueryPackageVersion() *PackageVersionQuery {
+	return NewCertificationClient(_m.config).QueryPackageVersion(_m)
 }
 
 // QueryAllVersions queries the "all_versions" edge of the Certification entity.
-func (c *Certification) QueryAllVersions() *PackageNameQuery {
-	return NewCertificationClient(c.config).QueryAllVersions(c)
+func (_m *Certification) QueryAllVersions() *PackageNameQuery {
+	return NewCertificationClient(_m.config).QueryAllVersions(_m)
 }
 
 // QueryArtifact queries the "artifact" edge of the Certification entity.
-func (c *Certification) QueryArtifact() *ArtifactQuery {
-	return NewCertificationClient(c.config).QueryArtifact(c)
+func (_m *Certification) QueryArtifact() *ArtifactQuery {
+	return NewCertificationClient(_m.config).QueryArtifact(_m)
 }
 
 // Update returns a builder for updating this Certification.
 // Note that you need to call Certification.Unwrap() before calling this method if this Certification
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Certification) Update() *CertificationUpdateOne {
-	return NewCertificationClient(c.config).UpdateOne(c)
+func (_m *Certification) Update() *CertificationUpdateOne {
+	return NewCertificationClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Certification entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Certification) Unwrap() *Certification {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Certification) Unwrap() *Certification {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Certification is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Certification) String() string {
+func (_m *Certification) String() string {
 	var builder strings.Builder
 	builder.WriteString("Certification(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
-	if v := c.SourceID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := c.PackageVersionID; v != nil {
+	if v := _m.PackageVersionID; v != nil {
 		builder.WriteString("package_version_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := c.PackageNameID; v != nil {
+	if v := _m.PackageNameID; v != nil {
 		builder.WriteString("package_name_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := c.ArtifactID; v != nil {
+	if v := _m.ArtifactID; v != nil {
 		builder.WriteString("artifact_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", c.Type))
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(c.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("known_since=")
-	builder.WriteString(c.KnownSince.Format(time.ANSIC))
+	builder.WriteString(_m.KnownSince.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(c.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(c.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(c.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

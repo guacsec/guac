@@ -71,7 +71,7 @@ func SetupBackend(ctx context.Context, options *BackendOptions) (*ent.Client, er
 	if err != nil {
 		return nil, fmt.Errorf("error opening db: %w", err)
 	}
-	if err := otelsql.RegisterDBStatsMetrics(db); err != nil {
+	if _, err := otelsql.RegisterDBStatsMetrics(db); err != nil {
 		return nil, fmt.Errorf("error registering db metrics: %w", err)
 	}
 

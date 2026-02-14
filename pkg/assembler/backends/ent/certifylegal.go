@@ -132,7 +132,7 @@ func (*CertifyLegal) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CertifyLegal fields.
-func (cl *CertifyLegal) assignValues(columns []string, values []any) error {
+func (_m *CertifyLegal) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -142,84 +142,84 @@ func (cl *CertifyLegal) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				cl.ID = *value
+				_m.ID = *value
 			}
 		case certifylegal.FieldPackageID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				cl.PackageID = new(uuid.UUID)
-				*cl.PackageID = *value.S.(*uuid.UUID)
+				_m.PackageID = new(uuid.UUID)
+				*_m.PackageID = *value.S.(*uuid.UUID)
 			}
 		case certifylegal.FieldSourceID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				cl.SourceID = new(uuid.UUID)
-				*cl.SourceID = *value.S.(*uuid.UUID)
+				_m.SourceID = new(uuid.UUID)
+				*_m.SourceID = *value.S.(*uuid.UUID)
 			}
 		case certifylegal.FieldDeclaredLicense:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field declared_license", values[i])
 			} else if value.Valid {
-				cl.DeclaredLicense = value.String
+				_m.DeclaredLicense = value.String
 			}
 		case certifylegal.FieldDiscoveredLicense:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field discovered_license", values[i])
 			} else if value.Valid {
-				cl.DiscoveredLicense = value.String
+				_m.DiscoveredLicense = value.String
 			}
 		case certifylegal.FieldAttribution:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field attribution", values[i])
 			} else if value.Valid {
-				cl.Attribution = value.String
+				_m.Attribution = value.String
 			}
 		case certifylegal.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				cl.Justification = value.String
+				_m.Justification = value.String
 			}
 		case certifylegal.FieldTimeScanned:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field time_scanned", values[i])
 			} else if value.Valid {
-				cl.TimeScanned = value.Time
+				_m.TimeScanned = value.Time
 			}
 		case certifylegal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				cl.Origin = value.String
+				_m.Origin = value.String
 			}
 		case certifylegal.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				cl.Collector = value.String
+				_m.Collector = value.String
 			}
 		case certifylegal.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				cl.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case certifylegal.FieldDeclaredLicensesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field declared_licenses_hash", values[i])
 			} else if value.Valid {
-				cl.DeclaredLicensesHash = value.String
+				_m.DeclaredLicensesHash = value.String
 			}
 		case certifylegal.FieldDiscoveredLicensesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field discovered_licenses_hash", values[i])
 			} else if value.Valid {
-				cl.DiscoveredLicensesHash = value.String
+				_m.DiscoveredLicensesHash = value.String
 			}
 		default:
-			cl.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -227,141 +227,141 @@ func (cl *CertifyLegal) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CertifyLegal.
 // This includes values selected through modifiers, order, etc.
-func (cl *CertifyLegal) Value(name string) (ent.Value, error) {
-	return cl.selectValues.Get(name)
+func (_m *CertifyLegal) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPackage queries the "package" edge of the CertifyLegal entity.
-func (cl *CertifyLegal) QueryPackage() *PackageVersionQuery {
-	return NewCertifyLegalClient(cl.config).QueryPackage(cl)
+func (_m *CertifyLegal) QueryPackage() *PackageVersionQuery {
+	return NewCertifyLegalClient(_m.config).QueryPackage(_m)
 }
 
 // QuerySource queries the "source" edge of the CertifyLegal entity.
-func (cl *CertifyLegal) QuerySource() *SourceNameQuery {
-	return NewCertifyLegalClient(cl.config).QuerySource(cl)
+func (_m *CertifyLegal) QuerySource() *SourceNameQuery {
+	return NewCertifyLegalClient(_m.config).QuerySource(_m)
 }
 
 // QueryDeclaredLicenses queries the "declared_licenses" edge of the CertifyLegal entity.
-func (cl *CertifyLegal) QueryDeclaredLicenses() *LicenseQuery {
-	return NewCertifyLegalClient(cl.config).QueryDeclaredLicenses(cl)
+func (_m *CertifyLegal) QueryDeclaredLicenses() *LicenseQuery {
+	return NewCertifyLegalClient(_m.config).QueryDeclaredLicenses(_m)
 }
 
 // QueryDiscoveredLicenses queries the "discovered_licenses" edge of the CertifyLegal entity.
-func (cl *CertifyLegal) QueryDiscoveredLicenses() *LicenseQuery {
-	return NewCertifyLegalClient(cl.config).QueryDiscoveredLicenses(cl)
+func (_m *CertifyLegal) QueryDiscoveredLicenses() *LicenseQuery {
+	return NewCertifyLegalClient(_m.config).QueryDiscoveredLicenses(_m)
 }
 
 // Update returns a builder for updating this CertifyLegal.
 // Note that you need to call CertifyLegal.Unwrap() before calling this method if this CertifyLegal
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (cl *CertifyLegal) Update() *CertifyLegalUpdateOne {
-	return NewCertifyLegalClient(cl.config).UpdateOne(cl)
+func (_m *CertifyLegal) Update() *CertifyLegalUpdateOne {
+	return NewCertifyLegalClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the CertifyLegal entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (cl *CertifyLegal) Unwrap() *CertifyLegal {
-	_tx, ok := cl.config.driver.(*txDriver)
+func (_m *CertifyLegal) Unwrap() *CertifyLegal {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: CertifyLegal is not a transactional entity")
 	}
-	cl.config.driver = _tx.drv
-	return cl
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (cl *CertifyLegal) String() string {
+func (_m *CertifyLegal) String() string {
 	var builder strings.Builder
 	builder.WriteString("CertifyLegal(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", cl.ID))
-	if v := cl.PackageID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.PackageID; v != nil {
 		builder.WriteString("package_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := cl.SourceID; v != nil {
+	if v := _m.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("declared_license=")
-	builder.WriteString(cl.DeclaredLicense)
+	builder.WriteString(_m.DeclaredLicense)
 	builder.WriteString(", ")
 	builder.WriteString("discovered_license=")
-	builder.WriteString(cl.DiscoveredLicense)
+	builder.WriteString(_m.DiscoveredLicense)
 	builder.WriteString(", ")
 	builder.WriteString("attribution=")
-	builder.WriteString(cl.Attribution)
+	builder.WriteString(_m.Attribution)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(cl.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("time_scanned=")
-	builder.WriteString(cl.TimeScanned.Format(time.ANSIC))
+	builder.WriteString(_m.TimeScanned.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(cl.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(cl.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(cl.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("declared_licenses_hash=")
-	builder.WriteString(cl.DeclaredLicensesHash)
+	builder.WriteString(_m.DeclaredLicensesHash)
 	builder.WriteString(", ")
 	builder.WriteString("discovered_licenses_hash=")
-	builder.WriteString(cl.DiscoveredLicensesHash)
+	builder.WriteString(_m.DiscoveredLicensesHash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedDeclaredLicenses returns the DeclaredLicenses named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (cl *CertifyLegal) NamedDeclaredLicenses(name string) ([]*License, error) {
-	if cl.Edges.namedDeclaredLicenses == nil {
+func (_m *CertifyLegal) NamedDeclaredLicenses(name string) ([]*License, error) {
+	if _m.Edges.namedDeclaredLicenses == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := cl.Edges.namedDeclaredLicenses[name]
+	nodes, ok := _m.Edges.namedDeclaredLicenses[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (cl *CertifyLegal) appendNamedDeclaredLicenses(name string, edges ...*License) {
-	if cl.Edges.namedDeclaredLicenses == nil {
-		cl.Edges.namedDeclaredLicenses = make(map[string][]*License)
+func (_m *CertifyLegal) appendNamedDeclaredLicenses(name string, edges ...*License) {
+	if _m.Edges.namedDeclaredLicenses == nil {
+		_m.Edges.namedDeclaredLicenses = make(map[string][]*License)
 	}
 	if len(edges) == 0 {
-		cl.Edges.namedDeclaredLicenses[name] = []*License{}
+		_m.Edges.namedDeclaredLicenses[name] = []*License{}
 	} else {
-		cl.Edges.namedDeclaredLicenses[name] = append(cl.Edges.namedDeclaredLicenses[name], edges...)
+		_m.Edges.namedDeclaredLicenses[name] = append(_m.Edges.namedDeclaredLicenses[name], edges...)
 	}
 }
 
 // NamedDiscoveredLicenses returns the DiscoveredLicenses named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (cl *CertifyLegal) NamedDiscoveredLicenses(name string) ([]*License, error) {
-	if cl.Edges.namedDiscoveredLicenses == nil {
+func (_m *CertifyLegal) NamedDiscoveredLicenses(name string) ([]*License, error) {
+	if _m.Edges.namedDiscoveredLicenses == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := cl.Edges.namedDiscoveredLicenses[name]
+	nodes, ok := _m.Edges.namedDiscoveredLicenses[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (cl *CertifyLegal) appendNamedDiscoveredLicenses(name string, edges ...*License) {
-	if cl.Edges.namedDiscoveredLicenses == nil {
-		cl.Edges.namedDiscoveredLicenses = make(map[string][]*License)
+func (_m *CertifyLegal) appendNamedDiscoveredLicenses(name string, edges ...*License) {
+	if _m.Edges.namedDiscoveredLicenses == nil {
+		_m.Edges.namedDiscoveredLicenses = make(map[string][]*License)
 	}
 	if len(edges) == 0 {
-		cl.Edges.namedDiscoveredLicenses[name] = []*License{}
+		_m.Edges.namedDiscoveredLicenses[name] = []*License{}
 	} else {
-		cl.Edges.namedDiscoveredLicenses[name] = append(cl.Edges.namedDiscoveredLicenses[name], edges...)
+		_m.Edges.namedDiscoveredLicenses[name] = append(_m.Edges.namedDiscoveredLicenses[name], edges...)
 	}
 }
 

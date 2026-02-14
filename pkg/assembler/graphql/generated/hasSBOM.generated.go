@@ -35,7 +35,9 @@ func (ec *executionContext) _HasSBOM_id(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _HasSBOM_uri(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_uri,
-		func(ctx context.Context) (any, error) { return obj.URI, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.URI, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -122,7 +128,9 @@ func (ec *executionContext) _HasSBOM_algorithm(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_algorithm,
-		func(ctx context.Context) (any, error) { return obj.Algorithm, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Algorithm, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -151,7 +159,9 @@ func (ec *executionContext) _HasSBOM_digest(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_digest,
-		func(ctx context.Context) (any, error) { return obj.Digest, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Digest, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -180,7 +190,9 @@ func (ec *executionContext) _HasSBOM_downloadLocation(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_downloadLocation,
-		func(ctx context.Context) (any, error) { return obj.DownloadLocation, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DownloadLocation, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -209,7 +221,9 @@ func (ec *executionContext) _HasSBOM_knownSince(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_knownSince,
-		func(ctx context.Context) (any, error) { return obj.KnownSince, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.KnownSince, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -238,7 +252,9 @@ func (ec *executionContext) _HasSBOM_origin(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -267,7 +283,9 @@ func (ec *executionContext) _HasSBOM_collector(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -296,7 +314,9 @@ func (ec *executionContext) _HasSBOM_documentRef(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -325,7 +345,9 @@ func (ec *executionContext) _HasSBOM_includedSoftware(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_includedSoftware,
-		func(ctx context.Context) (any, error) { return obj.IncludedSoftware, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IncludedSoftware, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -354,7 +376,9 @@ func (ec *executionContext) _HasSBOM_includedDependencies(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_includedDependencies,
-		func(ctx context.Context) (any, error) { return obj.IncludedDependencies, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IncludedDependencies, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -401,7 +425,9 @@ func (ec *executionContext) _HasSBOM_includedOccurrences(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOM_includedOccurrences,
-		func(ctx context.Context) (any, error) { return obj.IncludedOccurrences, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IncludedOccurrences, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -446,7 +472,9 @@ func (ec *executionContext) _HasSBOMConnection_totalCount(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOMConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -475,7 +503,9 @@ func (ec *executionContext) _HasSBOMConnection_pageInfo(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOMConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -512,7 +542,9 @@ func (ec *executionContext) _HasSBOMConnection_edges(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOMConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -547,7 +579,9 @@ func (ec *executionContext) _HasSBOMEdge_cursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOMEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -576,7 +610,9 @@ func (ec *executionContext) _HasSBOMEdge_node(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSBOMEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1117,7 +1153,7 @@ func (ec *executionContext) marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx context.Context, sel ast.SelectionSet, v *model.HasSbom) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1171,7 +1207,7 @@ func (ec *executionContext) marshalNHasSBOMEdge2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNHasSBOMEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMEdge(ctx context.Context, sel ast.SelectionSet, v *model.HasSBOMEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

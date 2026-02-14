@@ -33,7 +33,9 @@ func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_hasNextPage,
-		func(ctx context.Context) (any, error) { return obj.HasNextPage, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.HasNextPage, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -62,7 +64,9 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_startCursor,
-		func(ctx context.Context) (any, error) { return obj.StartCursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StartCursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -91,7 +95,9 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_endCursor,
-		func(ctx context.Context) (any, error) { return obj.EndCursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.EndCursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -176,7 +182,7 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

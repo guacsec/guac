@@ -35,7 +35,9 @@ func (ec *executionContext) _HasMetadata_id(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _HasMetadata_subject(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _HasMetadata_key(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_key,
-		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -122,7 +128,9 @@ func (ec *executionContext) _HasMetadata_value(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -151,7 +159,9 @@ func (ec *executionContext) _HasMetadata_timestamp(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_timestamp,
-		func(ctx context.Context) (any, error) { return obj.Timestamp, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Timestamp, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -180,7 +190,9 @@ func (ec *executionContext) _HasMetadata_justification(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -209,7 +221,9 @@ func (ec *executionContext) _HasMetadata_origin(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -238,7 +252,9 @@ func (ec *executionContext) _HasMetadata_collector(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -267,7 +283,9 @@ func (ec *executionContext) _HasMetadata_documentRef(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadata_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -296,7 +314,9 @@ func (ec *executionContext) _HasMetadataConnection_totalCount(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadataConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -325,7 +345,9 @@ func (ec *executionContext) _HasMetadataConnection_pageInfo(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadataConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -362,7 +384,9 @@ func (ec *executionContext) _HasMetadataConnection_edges(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadataConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -397,7 +421,9 @@ func (ec *executionContext) _HasMetadataEdge_cursor(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadataEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -426,7 +452,9 @@ func (ec *executionContext) _HasMetadataEdge_node(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasMetadataEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -856,7 +884,7 @@ func (ec *executionContext) marshalNHasMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNHasMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadata(ctx context.Context, sel ast.SelectionSet, v *model.HasMetadata) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -910,7 +938,7 @@ func (ec *executionContext) marshalNHasMetadataEdge2ᚕᚖgithubᚗcomᚋguacsec
 func (ec *executionContext) marshalNHasMetadataEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataEdge(ctx context.Context, sel ast.SelectionSet, v *model.HasMetadataEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

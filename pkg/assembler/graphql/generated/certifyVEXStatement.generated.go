@@ -35,7 +35,9 @@ func (ec *executionContext) _CertifyVEXStatement_id(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _CertifyVEXStatement_subject(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _CertifyVEXStatement_vulnerability(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_vulnerability,
-		func(ctx context.Context) (any, error) { return obj.Vulnerability, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Vulnerability, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -130,7 +136,9 @@ func (ec *executionContext) _CertifyVEXStatement_status(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_status,
-		func(ctx context.Context) (any, error) { return obj.Status, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -159,7 +167,9 @@ func (ec *executionContext) _CertifyVEXStatement_vexJustification(ctx context.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_vexJustification,
-		func(ctx context.Context) (any, error) { return obj.VexJustification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.VexJustification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -188,7 +198,9 @@ func (ec *executionContext) _CertifyVEXStatement_statement(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_statement,
-		func(ctx context.Context) (any, error) { return obj.Statement, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Statement, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -217,7 +229,9 @@ func (ec *executionContext) _CertifyVEXStatement_statusNotes(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_statusNotes,
-		func(ctx context.Context) (any, error) { return obj.StatusNotes, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StatusNotes, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -246,7 +260,9 @@ func (ec *executionContext) _CertifyVEXStatement_knownSince(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_knownSince,
-		func(ctx context.Context) (any, error) { return obj.KnownSince, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.KnownSince, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -275,7 +291,9 @@ func (ec *executionContext) _CertifyVEXStatement_origin(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -304,7 +322,9 @@ func (ec *executionContext) _CertifyVEXStatement_collector(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -333,7 +353,9 @@ func (ec *executionContext) _CertifyVEXStatement_documentRef(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyVEXStatement_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -362,7 +384,9 @@ func (ec *executionContext) _VEXConnection_totalCount(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VEXConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -391,7 +415,9 @@ func (ec *executionContext) _VEXConnection_pageInfo(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VEXConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -428,7 +454,9 @@ func (ec *executionContext) _VEXConnection_edges(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VEXConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -463,7 +491,9 @@ func (ec *executionContext) _VEXEdge_cursor(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VEXEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -492,7 +522,9 @@ func (ec *executionContext) _VEXEdge_node(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VEXEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -841,7 +873,11 @@ func (ec *executionContext) _PackageOrArtifact(ctx context.Context, sel ast.Sele
 		}
 		return ec._Artifact(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of PackageOrArtifact must implement graphql.Marshaler", obj))
+		}
 	}
 }
 
@@ -1082,7 +1118,7 @@ func (ec *executionContext) marshalNCertifyVEXStatement2ᚕᚖgithubᚗcomᚋgua
 func (ec *executionContext) marshalNCertifyVEXStatement2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVEXStatement) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1097,7 +1133,7 @@ func (ec *executionContext) unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋgua
 func (ec *executionContext) marshalNPackageOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifact(ctx context.Context, sel ast.SelectionSet, v model.PackageOrArtifact) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1210,7 +1246,7 @@ func (ec *executionContext) marshalNVEXEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNVEXEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVEXEdge(ctx context.Context, sel ast.SelectionSet, v *model.VEXEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

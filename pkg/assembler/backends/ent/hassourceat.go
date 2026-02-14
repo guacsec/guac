@@ -113,7 +113,7 @@ func (*HasSourceAt) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the HasSourceAt fields.
-func (hsa *HasSourceAt) assignValues(columns []string, values []any) error {
+func (_m *HasSourceAt) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -123,60 +123,60 @@ func (hsa *HasSourceAt) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				hsa.ID = *value
+				_m.ID = *value
 			}
 		case hassourceat.FieldPackageVersionID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				hsa.PackageVersionID = new(uuid.UUID)
-				*hsa.PackageVersionID = *value.S.(*uuid.UUID)
+				_m.PackageVersionID = new(uuid.UUID)
+				*_m.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case hassourceat.FieldPackageNameID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				hsa.PackageNameID = new(uuid.UUID)
-				*hsa.PackageNameID = *value.S.(*uuid.UUID)
+				_m.PackageNameID = new(uuid.UUID)
+				*_m.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case hassourceat.FieldSourceID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value != nil {
-				hsa.SourceID = *value
+				_m.SourceID = *value
 			}
 		case hassourceat.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field known_since", values[i])
 			} else if value.Valid {
-				hsa.KnownSince = value.Time
+				_m.KnownSince = value.Time
 			}
 		case hassourceat.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				hsa.Justification = value.String
+				_m.Justification = value.String
 			}
 		case hassourceat.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				hsa.Origin = value.String
+				_m.Origin = value.String
 			}
 		case hassourceat.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				hsa.Collector = value.String
+				_m.Collector = value.String
 			}
 		case hassourceat.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				hsa.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			hsa.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -184,75 +184,75 @@ func (hsa *HasSourceAt) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the HasSourceAt.
 // This includes values selected through modifiers, order, etc.
-func (hsa *HasSourceAt) Value(name string) (ent.Value, error) {
-	return hsa.selectValues.Get(name)
+func (_m *HasSourceAt) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPackageVersion queries the "package_version" edge of the HasSourceAt entity.
-func (hsa *HasSourceAt) QueryPackageVersion() *PackageVersionQuery {
-	return NewHasSourceAtClient(hsa.config).QueryPackageVersion(hsa)
+func (_m *HasSourceAt) QueryPackageVersion() *PackageVersionQuery {
+	return NewHasSourceAtClient(_m.config).QueryPackageVersion(_m)
 }
 
 // QueryAllVersions queries the "all_versions" edge of the HasSourceAt entity.
-func (hsa *HasSourceAt) QueryAllVersions() *PackageNameQuery {
-	return NewHasSourceAtClient(hsa.config).QueryAllVersions(hsa)
+func (_m *HasSourceAt) QueryAllVersions() *PackageNameQuery {
+	return NewHasSourceAtClient(_m.config).QueryAllVersions(_m)
 }
 
 // QuerySource queries the "source" edge of the HasSourceAt entity.
-func (hsa *HasSourceAt) QuerySource() *SourceNameQuery {
-	return NewHasSourceAtClient(hsa.config).QuerySource(hsa)
+func (_m *HasSourceAt) QuerySource() *SourceNameQuery {
+	return NewHasSourceAtClient(_m.config).QuerySource(_m)
 }
 
 // Update returns a builder for updating this HasSourceAt.
 // Note that you need to call HasSourceAt.Unwrap() before calling this method if this HasSourceAt
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (hsa *HasSourceAt) Update() *HasSourceAtUpdateOne {
-	return NewHasSourceAtClient(hsa.config).UpdateOne(hsa)
+func (_m *HasSourceAt) Update() *HasSourceAtUpdateOne {
+	return NewHasSourceAtClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the HasSourceAt entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (hsa *HasSourceAt) Unwrap() *HasSourceAt {
-	_tx, ok := hsa.config.driver.(*txDriver)
+func (_m *HasSourceAt) Unwrap() *HasSourceAt {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: HasSourceAt is not a transactional entity")
 	}
-	hsa.config.driver = _tx.drv
-	return hsa
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (hsa *HasSourceAt) String() string {
+func (_m *HasSourceAt) String() string {
 	var builder strings.Builder
 	builder.WriteString("HasSourceAt(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", hsa.ID))
-	if v := hsa.PackageVersionID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.PackageVersionID; v != nil {
 		builder.WriteString("package_version_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := hsa.PackageNameID; v != nil {
+	if v := _m.PackageNameID; v != nil {
 		builder.WriteString("package_name_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("source_id=")
-	builder.WriteString(fmt.Sprintf("%v", hsa.SourceID))
+	builder.WriteString(fmt.Sprintf("%v", _m.SourceID))
 	builder.WriteString(", ")
 	builder.WriteString("known_since=")
-	builder.WriteString(hsa.KnownSince.Format(time.ANSIC))
+	builder.WriteString(_m.KnownSince.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(hsa.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(hsa.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(hsa.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(hsa.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

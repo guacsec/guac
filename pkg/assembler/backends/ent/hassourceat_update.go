@@ -27,195 +27,195 @@ type HasSourceAtUpdate struct {
 }
 
 // Where appends a list predicates to the HasSourceAtUpdate builder.
-func (hsau *HasSourceAtUpdate) Where(ps ...predicate.HasSourceAt) *HasSourceAtUpdate {
-	hsau.mutation.Where(ps...)
-	return hsau
+func (_u *HasSourceAtUpdate) Where(ps ...predicate.HasSourceAt) *HasSourceAtUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hsau *HasSourceAtUpdate) SetPackageVersionID(u uuid.UUID) *HasSourceAtUpdate {
-	hsau.mutation.SetPackageVersionID(u)
-	return hsau
+func (_u *HasSourceAtUpdate) SetPackageVersionID(v uuid.UUID) *HasSourceAtUpdate {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillablePackageVersionID(u *uuid.UUID) *HasSourceAtUpdate {
-	if u != nil {
-		hsau.SetPackageVersionID(*u)
+func (_u *HasSourceAtUpdate) SetNillablePackageVersionID(v *uuid.UUID) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return hsau
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (hsau *HasSourceAtUpdate) ClearPackageVersionID() *HasSourceAtUpdate {
-	hsau.mutation.ClearPackageVersionID()
-	return hsau
+func (_u *HasSourceAtUpdate) ClearPackageVersionID() *HasSourceAtUpdate {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hsau *HasSourceAtUpdate) SetPackageNameID(u uuid.UUID) *HasSourceAtUpdate {
-	hsau.mutation.SetPackageNameID(u)
-	return hsau
+func (_u *HasSourceAtUpdate) SetPackageNameID(v uuid.UUID) *HasSourceAtUpdate {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillablePackageNameID(u *uuid.UUID) *HasSourceAtUpdate {
-	if u != nil {
-		hsau.SetPackageNameID(*u)
+func (_u *HasSourceAtUpdate) SetNillablePackageNameID(v *uuid.UUID) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return hsau
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (hsau *HasSourceAtUpdate) ClearPackageNameID() *HasSourceAtUpdate {
-	hsau.mutation.ClearPackageNameID()
-	return hsau
+func (_u *HasSourceAtUpdate) ClearPackageNameID() *HasSourceAtUpdate {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (hsau *HasSourceAtUpdate) SetSourceID(u uuid.UUID) *HasSourceAtUpdate {
-	hsau.mutation.SetSourceID(u)
-	return hsau
+func (_u *HasSourceAtUpdate) SetSourceID(v uuid.UUID) *HasSourceAtUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableSourceID(u *uuid.UUID) *HasSourceAtUpdate {
-	if u != nil {
-		hsau.SetSourceID(*u)
+func (_u *HasSourceAtUpdate) SetNillableSourceID(v *uuid.UUID) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return hsau
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (hsau *HasSourceAtUpdate) SetKnownSince(t time.Time) *HasSourceAtUpdate {
-	hsau.mutation.SetKnownSince(t)
-	return hsau
+func (_u *HasSourceAtUpdate) SetKnownSince(v time.Time) *HasSourceAtUpdate {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableKnownSince(t *time.Time) *HasSourceAtUpdate {
-	if t != nil {
-		hsau.SetKnownSince(*t)
+func (_u *HasSourceAtUpdate) SetNillableKnownSince(v *time.Time) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return hsau
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (hsau *HasSourceAtUpdate) SetJustification(s string) *HasSourceAtUpdate {
-	hsau.mutation.SetJustification(s)
-	return hsau
+func (_u *HasSourceAtUpdate) SetJustification(v string) *HasSourceAtUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableJustification(s *string) *HasSourceAtUpdate {
-	if s != nil {
-		hsau.SetJustification(*s)
+func (_u *HasSourceAtUpdate) SetNillableJustification(v *string) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return hsau
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (hsau *HasSourceAtUpdate) SetOrigin(s string) *HasSourceAtUpdate {
-	hsau.mutation.SetOrigin(s)
-	return hsau
+func (_u *HasSourceAtUpdate) SetOrigin(v string) *HasSourceAtUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableOrigin(s *string) *HasSourceAtUpdate {
-	if s != nil {
-		hsau.SetOrigin(*s)
+func (_u *HasSourceAtUpdate) SetNillableOrigin(v *string) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return hsau
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (hsau *HasSourceAtUpdate) SetCollector(s string) *HasSourceAtUpdate {
-	hsau.mutation.SetCollector(s)
-	return hsau
+func (_u *HasSourceAtUpdate) SetCollector(v string) *HasSourceAtUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableCollector(s *string) *HasSourceAtUpdate {
-	if s != nil {
-		hsau.SetCollector(*s)
+func (_u *HasSourceAtUpdate) SetNillableCollector(v *string) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return hsau
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hsau *HasSourceAtUpdate) SetDocumentRef(s string) *HasSourceAtUpdate {
-	hsau.mutation.SetDocumentRef(s)
-	return hsau
+func (_u *HasSourceAtUpdate) SetDocumentRef(v string) *HasSourceAtUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableDocumentRef(s *string) *HasSourceAtUpdate {
-	if s != nil {
-		hsau.SetDocumentRef(*s)
+func (_u *HasSourceAtUpdate) SetNillableDocumentRef(v *string) *HasSourceAtUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return hsau
+	return _u
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (hsau *HasSourceAtUpdate) SetPackageVersion(p *PackageVersion) *HasSourceAtUpdate {
-	return hsau.SetPackageVersionID(p.ID)
+func (_u *HasSourceAtUpdate) SetPackageVersion(v *PackageVersion) *HasSourceAtUpdate {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hsau *HasSourceAtUpdate) SetAllVersionsID(id uuid.UUID) *HasSourceAtUpdate {
-	hsau.mutation.SetAllVersionsID(id)
-	return hsau
+func (_u *HasSourceAtUpdate) SetAllVersionsID(id uuid.UUID) *HasSourceAtUpdate {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtUpdate {
+func (_u *HasSourceAtUpdate) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtUpdate {
 	if id != nil {
-		hsau = hsau.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return hsau
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (hsau *HasSourceAtUpdate) SetAllVersions(p *PackageName) *HasSourceAtUpdate {
-	return hsau.SetAllVersionsID(p.ID)
+func (_u *HasSourceAtUpdate) SetAllVersions(v *PackageName) *HasSourceAtUpdate {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (hsau *HasSourceAtUpdate) SetSource(s *SourceName) *HasSourceAtUpdate {
-	return hsau.SetSourceID(s.ID)
+func (_u *HasSourceAtUpdate) SetSource(v *SourceName) *HasSourceAtUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // Mutation returns the HasSourceAtMutation object of the builder.
-func (hsau *HasSourceAtUpdate) Mutation() *HasSourceAtMutation {
-	return hsau.mutation
+func (_u *HasSourceAtUpdate) Mutation() *HasSourceAtMutation {
+	return _u.mutation
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (hsau *HasSourceAtUpdate) ClearPackageVersion() *HasSourceAtUpdate {
-	hsau.mutation.ClearPackageVersion()
-	return hsau
+func (_u *HasSourceAtUpdate) ClearPackageVersion() *HasSourceAtUpdate {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (hsau *HasSourceAtUpdate) ClearAllVersions() *HasSourceAtUpdate {
-	hsau.mutation.ClearAllVersions()
-	return hsau
+func (_u *HasSourceAtUpdate) ClearAllVersions() *HasSourceAtUpdate {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (hsau *HasSourceAtUpdate) ClearSource() *HasSourceAtUpdate {
-	hsau.mutation.ClearSource()
-	return hsau
+func (_u *HasSourceAtUpdate) ClearSource() *HasSourceAtUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (hsau *HasSourceAtUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, hsau.sqlSave, hsau.mutation, hsau.hooks)
+func (_u *HasSourceAtUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hsau *HasSourceAtUpdate) SaveX(ctx context.Context) int {
-	affected, err := hsau.Save(ctx)
+func (_u *HasSourceAtUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -223,54 +223,54 @@ func (hsau *HasSourceAtUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (hsau *HasSourceAtUpdate) Exec(ctx context.Context) error {
-	_, err := hsau.Save(ctx)
+func (_u *HasSourceAtUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hsau *HasSourceAtUpdate) ExecX(ctx context.Context) {
-	if err := hsau.Exec(ctx); err != nil {
+func (_u *HasSourceAtUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (hsau *HasSourceAtUpdate) check() error {
-	if hsau.mutation.SourceCleared() && len(hsau.mutation.SourceIDs()) > 0 {
+func (_u *HasSourceAtUpdate) check() error {
+	if _u.mutation.SourceCleared() && len(_u.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HasSourceAt.source"`)
 	}
 	return nil
 }
 
-func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := hsau.check(); err != nil {
-		return n, err
+func (_u *HasSourceAtUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
-	if ps := hsau.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := hsau.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(hassourceat.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := hsau.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(hassourceat.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := hsau.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(hassourceat.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := hsau.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(hassourceat.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := hsau.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(hassourceat.FieldDocumentRef, field.TypeString, value)
 	}
-	if hsau.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -283,7 +283,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hsau.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -299,7 +299,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hsau.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -312,7 +312,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hsau.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -328,7 +328,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hsau.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -341,7 +341,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hsau.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -357,7 +357,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, hsau.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{hassourceat.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -365,8 +365,8 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	hsau.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // HasSourceAtUpdateOne is the builder for updating a single HasSourceAt entity.
@@ -378,202 +378,202 @@ type HasSourceAtUpdateOne struct {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hsauo *HasSourceAtUpdateOne) SetPackageVersionID(u uuid.UUID) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetPackageVersionID(u)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetPackageVersionID(v uuid.UUID) *HasSourceAtUpdateOne {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *HasSourceAtUpdateOne {
-	if u != nil {
-		hsauo.SetPackageVersionID(*u)
+func (_u *HasSourceAtUpdateOne) SetNillablePackageVersionID(v *uuid.UUID) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (hsauo *HasSourceAtUpdateOne) ClearPackageVersionID() *HasSourceAtUpdateOne {
-	hsauo.mutation.ClearPackageVersionID()
-	return hsauo
+func (_u *HasSourceAtUpdateOne) ClearPackageVersionID() *HasSourceAtUpdateOne {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hsauo *HasSourceAtUpdateOne) SetPackageNameID(u uuid.UUID) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetPackageNameID(u)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetPackageNameID(v uuid.UUID) *HasSourceAtUpdateOne {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *HasSourceAtUpdateOne {
-	if u != nil {
-		hsauo.SetPackageNameID(*u)
+func (_u *HasSourceAtUpdateOne) SetNillablePackageNameID(v *uuid.UUID) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (hsauo *HasSourceAtUpdateOne) ClearPackageNameID() *HasSourceAtUpdateOne {
-	hsauo.mutation.ClearPackageNameID()
-	return hsauo
+func (_u *HasSourceAtUpdateOne) ClearPackageNameID() *HasSourceAtUpdateOne {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (hsauo *HasSourceAtUpdateOne) SetSourceID(u uuid.UUID) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetSourceID(u)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetSourceID(v uuid.UUID) *HasSourceAtUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableSourceID(u *uuid.UUID) *HasSourceAtUpdateOne {
-	if u != nil {
-		hsauo.SetSourceID(*u)
+func (_u *HasSourceAtUpdateOne) SetNillableSourceID(v *uuid.UUID) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (hsauo *HasSourceAtUpdateOne) SetKnownSince(t time.Time) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetKnownSince(t)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetKnownSince(v time.Time) *HasSourceAtUpdateOne {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableKnownSince(t *time.Time) *HasSourceAtUpdateOne {
-	if t != nil {
-		hsauo.SetKnownSince(*t)
+func (_u *HasSourceAtUpdateOne) SetNillableKnownSince(v *time.Time) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (hsauo *HasSourceAtUpdateOne) SetJustification(s string) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetJustification(s)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetJustification(v string) *HasSourceAtUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableJustification(s *string) *HasSourceAtUpdateOne {
-	if s != nil {
-		hsauo.SetJustification(*s)
+func (_u *HasSourceAtUpdateOne) SetNillableJustification(v *string) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (hsauo *HasSourceAtUpdateOne) SetOrigin(s string) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetOrigin(s)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetOrigin(v string) *HasSourceAtUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableOrigin(s *string) *HasSourceAtUpdateOne {
-	if s != nil {
-		hsauo.SetOrigin(*s)
+func (_u *HasSourceAtUpdateOne) SetNillableOrigin(v *string) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (hsauo *HasSourceAtUpdateOne) SetCollector(s string) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetCollector(s)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetCollector(v string) *HasSourceAtUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableCollector(s *string) *HasSourceAtUpdateOne {
-	if s != nil {
-		hsauo.SetCollector(*s)
+func (_u *HasSourceAtUpdateOne) SetNillableCollector(v *string) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hsauo *HasSourceAtUpdateOne) SetDocumentRef(s string) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetDocumentRef(s)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetDocumentRef(v string) *HasSourceAtUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableDocumentRef(s *string) *HasSourceAtUpdateOne {
-	if s != nil {
-		hsauo.SetDocumentRef(*s)
+func (_u *HasSourceAtUpdateOne) SetNillableDocumentRef(v *string) *HasSourceAtUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return hsauo
+	return _u
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (hsauo *HasSourceAtUpdateOne) SetPackageVersion(p *PackageVersion) *HasSourceAtUpdateOne {
-	return hsauo.SetPackageVersionID(p.ID)
+func (_u *HasSourceAtUpdateOne) SetPackageVersion(v *PackageVersion) *HasSourceAtUpdateOne {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hsauo *HasSourceAtUpdateOne) SetAllVersionsID(id uuid.UUID) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetAllVersionsID(id)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) SetAllVersionsID(id uuid.UUID) *HasSourceAtUpdateOne {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtUpdateOne {
+func (_u *HasSourceAtUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtUpdateOne {
 	if id != nil {
-		hsauo = hsauo.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return hsauo
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (hsauo *HasSourceAtUpdateOne) SetAllVersions(p *PackageName) *HasSourceAtUpdateOne {
-	return hsauo.SetAllVersionsID(p.ID)
+func (_u *HasSourceAtUpdateOne) SetAllVersions(v *PackageName) *HasSourceAtUpdateOne {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (hsauo *HasSourceAtUpdateOne) SetSource(s *SourceName) *HasSourceAtUpdateOne {
-	return hsauo.SetSourceID(s.ID)
+func (_u *HasSourceAtUpdateOne) SetSource(v *SourceName) *HasSourceAtUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // Mutation returns the HasSourceAtMutation object of the builder.
-func (hsauo *HasSourceAtUpdateOne) Mutation() *HasSourceAtMutation {
-	return hsauo.mutation
+func (_u *HasSourceAtUpdateOne) Mutation() *HasSourceAtMutation {
+	return _u.mutation
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (hsauo *HasSourceAtUpdateOne) ClearPackageVersion() *HasSourceAtUpdateOne {
-	hsauo.mutation.ClearPackageVersion()
-	return hsauo
+func (_u *HasSourceAtUpdateOne) ClearPackageVersion() *HasSourceAtUpdateOne {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (hsauo *HasSourceAtUpdateOne) ClearAllVersions() *HasSourceAtUpdateOne {
-	hsauo.mutation.ClearAllVersions()
-	return hsauo
+func (_u *HasSourceAtUpdateOne) ClearAllVersions() *HasSourceAtUpdateOne {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (hsauo *HasSourceAtUpdateOne) ClearSource() *HasSourceAtUpdateOne {
-	hsauo.mutation.ClearSource()
-	return hsauo
+func (_u *HasSourceAtUpdateOne) ClearSource() *HasSourceAtUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // Where appends a list predicates to the HasSourceAtUpdate builder.
-func (hsauo *HasSourceAtUpdateOne) Where(ps ...predicate.HasSourceAt) *HasSourceAtUpdateOne {
-	hsauo.mutation.Where(ps...)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) Where(ps ...predicate.HasSourceAt) *HasSourceAtUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (hsauo *HasSourceAtUpdateOne) Select(field string, fields ...string) *HasSourceAtUpdateOne {
-	hsauo.fields = append([]string{field}, fields...)
-	return hsauo
+func (_u *HasSourceAtUpdateOne) Select(field string, fields ...string) *HasSourceAtUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated HasSourceAt entity.
-func (hsauo *HasSourceAtUpdateOne) Save(ctx context.Context) (*HasSourceAt, error) {
-	return withHooks(ctx, hsauo.sqlSave, hsauo.mutation, hsauo.hooks)
+func (_u *HasSourceAtUpdateOne) Save(ctx context.Context) (*HasSourceAt, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hsauo *HasSourceAtUpdateOne) SaveX(ctx context.Context) *HasSourceAt {
-	node, err := hsauo.Save(ctx)
+func (_u *HasSourceAtUpdateOne) SaveX(ctx context.Context) *HasSourceAt {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -581,37 +581,37 @@ func (hsauo *HasSourceAtUpdateOne) SaveX(ctx context.Context) *HasSourceAt {
 }
 
 // Exec executes the query on the entity.
-func (hsauo *HasSourceAtUpdateOne) Exec(ctx context.Context) error {
-	_, err := hsauo.Save(ctx)
+func (_u *HasSourceAtUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hsauo *HasSourceAtUpdateOne) ExecX(ctx context.Context) {
-	if err := hsauo.Exec(ctx); err != nil {
+func (_u *HasSourceAtUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (hsauo *HasSourceAtUpdateOne) check() error {
-	if hsauo.mutation.SourceCleared() && len(hsauo.mutation.SourceIDs()) > 0 {
+func (_u *HasSourceAtUpdateOne) check() error {
+	if _u.mutation.SourceCleared() && len(_u.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HasSourceAt.source"`)
 	}
 	return nil
 }
 
-func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourceAt, err error) {
-	if err := hsauo.check(); err != nil {
+func (_u *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourceAt, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
-	id, ok := hsauo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "HasSourceAt.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := hsauo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, hassourceat.FieldID)
 		for _, f := range fields {
@@ -623,29 +623,29 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			}
 		}
 	}
-	if ps := hsauo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := hsauo.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(hassourceat.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := hsauo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(hassourceat.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := hsauo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(hassourceat.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := hsauo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(hassourceat.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := hsauo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(hassourceat.FieldDocumentRef, field.TypeString, value)
 	}
-	if hsauo.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -658,7 +658,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hsauo.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -674,7 +674,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hsauo.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -687,7 +687,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hsauo.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -703,7 +703,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hsauo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -716,7 +716,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hsauo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -732,10 +732,10 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &HasSourceAt{config: hsauo.config}
+	_node = &HasSourceAt{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, hsauo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{hassourceat.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -743,6 +743,6 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 		}
 		return nil, err
 	}
-	hsauo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

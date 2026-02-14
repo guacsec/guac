@@ -35,7 +35,9 @@ func (ec *executionContext) _HasSourceAt_id(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _HasSourceAt_package(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_package,
-		func(ctx context.Context) (any, error) { return obj.Package, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Package, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _HasSourceAt_source(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_source,
-		func(ctx context.Context) (any, error) { return obj.Source, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Source, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -138,7 +144,9 @@ func (ec *executionContext) _HasSourceAt_knownSince(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_knownSince,
-		func(ctx context.Context) (any, error) { return obj.KnownSince, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.KnownSince, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -167,7 +175,9 @@ func (ec *executionContext) _HasSourceAt_justification(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -196,7 +206,9 @@ func (ec *executionContext) _HasSourceAt_origin(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -225,7 +237,9 @@ func (ec *executionContext) _HasSourceAt_collector(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -254,7 +268,9 @@ func (ec *executionContext) _HasSourceAt_documentRef(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAt_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -283,7 +299,9 @@ func (ec *executionContext) _HasSourceAtConnection_totalCount(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAtConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -312,7 +330,9 @@ func (ec *executionContext) _HasSourceAtConnection_pageInfo(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAtConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -349,7 +369,9 @@ func (ec *executionContext) _HasSourceAtConnection_edges(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAtConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -384,7 +406,9 @@ func (ec *executionContext) _HasSourceAtEdge_cursor(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAtEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -413,7 +437,9 @@ func (ec *executionContext) _HasSourceAtEdge_node(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSourceAtEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -815,7 +841,7 @@ func (ec *executionContext) marshalNHasSourceAt2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNHasSourceAt2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAt(ctx context.Context, sel ast.SelectionSet, v *model.HasSourceAt) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -869,7 +895,7 @@ func (ec *executionContext) marshalNHasSourceAtEdge2ᚕᚖgithubᚗcomᚋguacsec
 func (ec *executionContext) marshalNHasSourceAtEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtEdge(ctx context.Context, sel ast.SelectionSet, v *model.HasSourceAtEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

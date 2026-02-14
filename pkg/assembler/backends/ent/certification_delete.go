@@ -20,56 +20,56 @@ type CertificationDelete struct {
 }
 
 // Where appends a list predicates to the CertificationDelete builder.
-func (cd *CertificationDelete) Where(ps ...predicate.Certification) *CertificationDelete {
-	cd.mutation.Where(ps...)
-	return cd
+func (_d *CertificationDelete) Where(ps ...predicate.Certification) *CertificationDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (cd *CertificationDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, cd.sqlExec, cd.mutation, cd.hooks)
+func (_d *CertificationDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cd *CertificationDelete) ExecX(ctx context.Context) int {
-	n, err := cd.Exec(ctx)
+func (_d *CertificationDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (cd *CertificationDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *CertificationDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(certification.Table, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
-	if ps := cd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, cd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	cd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // CertificationDeleteOne is the builder for deleting a single Certification entity.
 type CertificationDeleteOne struct {
-	cd *CertificationDelete
+	_d *CertificationDelete
 }
 
 // Where appends a list predicates to the CertificationDelete builder.
-func (cdo *CertificationDeleteOne) Where(ps ...predicate.Certification) *CertificationDeleteOne {
-	cdo.cd.mutation.Where(ps...)
-	return cdo
+func (_d *CertificationDeleteOne) Where(ps ...predicate.Certification) *CertificationDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (cdo *CertificationDeleteOne) Exec(ctx context.Context) error {
-	n, err := cdo.cd.Exec(ctx)
+func (_d *CertificationDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (cdo *CertificationDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cdo *CertificationDeleteOne) ExecX(ctx context.Context) {
-	if err := cdo.Exec(ctx); err != nil {
+func (_d *CertificationDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

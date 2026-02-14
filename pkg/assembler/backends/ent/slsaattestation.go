@@ -120,7 +120,7 @@ func (*SLSAAttestation) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the SLSAAttestation fields.
-func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
+func (_m *SLSAAttestation) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -130,31 +130,31 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				sa.ID = *value
+				_m.ID = *value
 			}
 		case slsaattestation.FieldBuildType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field build_type", values[i])
 			} else if value.Valid {
-				sa.BuildType = value.String
+				_m.BuildType = value.String
 			}
 		case slsaattestation.FieldBuiltByID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field built_by_id", values[i])
 			} else if value != nil {
-				sa.BuiltByID = *value
+				_m.BuiltByID = *value
 			}
 		case slsaattestation.FieldSubjectID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field subject_id", values[i])
 			} else if value != nil {
-				sa.SubjectID = *value
+				_m.SubjectID = *value
 			}
 		case slsaattestation.FieldSlsaPredicate:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field slsa_predicate", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &sa.SlsaPredicate); err != nil {
+				if err := json.Unmarshal(*value, &_m.SlsaPredicate); err != nil {
 					return fmt.Errorf("unmarshal field slsa_predicate: %w", err)
 				}
 			}
@@ -162,46 +162,46 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field slsa_version", values[i])
 			} else if value.Valid {
-				sa.SlsaVersion = value.String
+				_m.SlsaVersion = value.String
 			}
 		case slsaattestation.FieldStartedOn:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field started_on", values[i])
 			} else if value.Valid {
-				sa.StartedOn = value.Time
+				_m.StartedOn = value.Time
 			}
 		case slsaattestation.FieldFinishedOn:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field finished_on", values[i])
 			} else if value.Valid {
-				sa.FinishedOn = value.Time
+				_m.FinishedOn = value.Time
 			}
 		case slsaattestation.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				sa.Origin = value.String
+				_m.Origin = value.String
 			}
 		case slsaattestation.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				sa.Collector = value.String
+				_m.Collector = value.String
 			}
 		case slsaattestation.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				sa.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case slsaattestation.FieldBuiltFromHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field built_from_hash", values[i])
 			} else if value.Valid {
-				sa.BuiltFromHash = value.String
+				_m.BuiltFromHash = value.String
 			}
 		default:
-			sa.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -209,105 +209,105 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the SLSAAttestation.
 // This includes values selected through modifiers, order, etc.
-func (sa *SLSAAttestation) Value(name string) (ent.Value, error) {
-	return sa.selectValues.Get(name)
+func (_m *SLSAAttestation) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryBuiltFrom queries the "built_from" edge of the SLSAAttestation entity.
-func (sa *SLSAAttestation) QueryBuiltFrom() *ArtifactQuery {
-	return NewSLSAAttestationClient(sa.config).QueryBuiltFrom(sa)
+func (_m *SLSAAttestation) QueryBuiltFrom() *ArtifactQuery {
+	return NewSLSAAttestationClient(_m.config).QueryBuiltFrom(_m)
 }
 
 // QueryBuiltBy queries the "built_by" edge of the SLSAAttestation entity.
-func (sa *SLSAAttestation) QueryBuiltBy() *BuilderQuery {
-	return NewSLSAAttestationClient(sa.config).QueryBuiltBy(sa)
+func (_m *SLSAAttestation) QueryBuiltBy() *BuilderQuery {
+	return NewSLSAAttestationClient(_m.config).QueryBuiltBy(_m)
 }
 
 // QuerySubject queries the "subject" edge of the SLSAAttestation entity.
-func (sa *SLSAAttestation) QuerySubject() *ArtifactQuery {
-	return NewSLSAAttestationClient(sa.config).QuerySubject(sa)
+func (_m *SLSAAttestation) QuerySubject() *ArtifactQuery {
+	return NewSLSAAttestationClient(_m.config).QuerySubject(_m)
 }
 
 // Update returns a builder for updating this SLSAAttestation.
 // Note that you need to call SLSAAttestation.Unwrap() before calling this method if this SLSAAttestation
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (sa *SLSAAttestation) Update() *SLSAAttestationUpdateOne {
-	return NewSLSAAttestationClient(sa.config).UpdateOne(sa)
+func (_m *SLSAAttestation) Update() *SLSAAttestationUpdateOne {
+	return NewSLSAAttestationClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the SLSAAttestation entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (sa *SLSAAttestation) Unwrap() *SLSAAttestation {
-	_tx, ok := sa.config.driver.(*txDriver)
+func (_m *SLSAAttestation) Unwrap() *SLSAAttestation {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: SLSAAttestation is not a transactional entity")
 	}
-	sa.config.driver = _tx.drv
-	return sa
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (sa *SLSAAttestation) String() string {
+func (_m *SLSAAttestation) String() string {
 	var builder strings.Builder
 	builder.WriteString("SLSAAttestation(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", sa.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("build_type=")
-	builder.WriteString(sa.BuildType)
+	builder.WriteString(_m.BuildType)
 	builder.WriteString(", ")
 	builder.WriteString("built_by_id=")
-	builder.WriteString(fmt.Sprintf("%v", sa.BuiltByID))
+	builder.WriteString(fmt.Sprintf("%v", _m.BuiltByID))
 	builder.WriteString(", ")
 	builder.WriteString("subject_id=")
-	builder.WriteString(fmt.Sprintf("%v", sa.SubjectID))
+	builder.WriteString(fmt.Sprintf("%v", _m.SubjectID))
 	builder.WriteString(", ")
 	builder.WriteString("slsa_predicate=")
-	builder.WriteString(fmt.Sprintf("%v", sa.SlsaPredicate))
+	builder.WriteString(fmt.Sprintf("%v", _m.SlsaPredicate))
 	builder.WriteString(", ")
 	builder.WriteString("slsa_version=")
-	builder.WriteString(sa.SlsaVersion)
+	builder.WriteString(_m.SlsaVersion)
 	builder.WriteString(", ")
 	builder.WriteString("started_on=")
-	builder.WriteString(sa.StartedOn.Format(time.ANSIC))
+	builder.WriteString(_m.StartedOn.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("finished_on=")
-	builder.WriteString(sa.FinishedOn.Format(time.ANSIC))
+	builder.WriteString(_m.FinishedOn.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(sa.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(sa.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(sa.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("built_from_hash=")
-	builder.WriteString(sa.BuiltFromHash)
+	builder.WriteString(_m.BuiltFromHash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedBuiltFrom returns the BuiltFrom named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sa *SLSAAttestation) NamedBuiltFrom(name string) ([]*Artifact, error) {
-	if sa.Edges.namedBuiltFrom == nil {
+func (_m *SLSAAttestation) NamedBuiltFrom(name string) ([]*Artifact, error) {
+	if _m.Edges.namedBuiltFrom == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sa.Edges.namedBuiltFrom[name]
+	nodes, ok := _m.Edges.namedBuiltFrom[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sa *SLSAAttestation) appendNamedBuiltFrom(name string, edges ...*Artifact) {
-	if sa.Edges.namedBuiltFrom == nil {
-		sa.Edges.namedBuiltFrom = make(map[string][]*Artifact)
+func (_m *SLSAAttestation) appendNamedBuiltFrom(name string, edges ...*Artifact) {
+	if _m.Edges.namedBuiltFrom == nil {
+		_m.Edges.namedBuiltFrom = make(map[string][]*Artifact)
 	}
 	if len(edges) == 0 {
-		sa.Edges.namedBuiltFrom[name] = []*Artifact{}
+		_m.Edges.namedBuiltFrom[name] = []*Artifact{}
 	} else {
-		sa.Edges.namedBuiltFrom[name] = append(sa.Edges.namedBuiltFrom[name], edges...)
+		_m.Edges.namedBuiltFrom[name] = append(_m.Edges.namedBuiltFrom[name], edges...)
 	}
 }
 

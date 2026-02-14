@@ -445,8 +445,8 @@ func (c *ArtifactClient) Update() *ArtifactUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ArtifactClient) UpdateOne(a *Artifact) *ArtifactUpdateOne {
-	mutation := newArtifactMutation(c.config, OpUpdateOne, withArtifact(a))
+func (c *ArtifactClient) UpdateOne(_m *Artifact) *ArtifactUpdateOne {
+	mutation := newArtifactMutation(c.config, OpUpdateOne, withArtifact(_m))
 	return &ArtifactUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -463,8 +463,8 @@ func (c *ArtifactClient) Delete() *ArtifactDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *ArtifactClient) DeleteOne(a *Artifact) *ArtifactDeleteOne {
-	return c.DeleteOneID(a.ID)
+func (c *ArtifactClient) DeleteOne(_m *Artifact) *ArtifactDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -499,176 +499,176 @@ func (c *ArtifactClient) GetX(ctx context.Context, id uuid.UUID) *Artifact {
 }
 
 // QueryOccurrences queries the occurrences edge of a Artifact.
-func (c *ArtifactClient) QueryOccurrences(a *Artifact) *OccurrenceQuery {
+func (c *ArtifactClient) QueryOccurrences(_m *Artifact) *OccurrenceQuery {
 	query := (&OccurrenceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QuerySbom queries the sbom edge of a Artifact.
-func (c *ArtifactClient) QuerySbom(a *Artifact) *BillOfMaterialsQuery {
+func (c *ArtifactClient) QuerySbom(_m *Artifact) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryAttestations queries the attestations edge of a Artifact.
-func (c *ArtifactClient) QueryAttestations(a *Artifact) *SLSAAttestationQuery {
+func (c *ArtifactClient) QueryAttestations(_m *Artifact) *SLSAAttestationQuery {
 	query := (&SLSAAttestationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryAttestationsSubject queries the attestations_subject edge of a Artifact.
-func (c *ArtifactClient) QueryAttestationsSubject(a *Artifact) *SLSAAttestationQuery {
+func (c *ArtifactClient) QueryAttestationsSubject(_m *Artifact) *SLSAAttestationQuery {
 	query := (&SLSAAttestationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.AttestationsSubjectTable, artifact.AttestationsSubjectColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryHashEqualArtA queries the hash_equal_art_a edge of a Artifact.
-func (c *ArtifactClient) QueryHashEqualArtA(a *Artifact) *HashEqualQuery {
+func (c *ArtifactClient) QueryHashEqualArtA(_m *Artifact) *HashEqualQuery {
 	query := (&HashEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtATable, artifact.HashEqualArtAColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryHashEqualArtB queries the hash_equal_art_b edge of a Artifact.
-func (c *ArtifactClient) QueryHashEqualArtB(a *Artifact) *HashEqualQuery {
+func (c *ArtifactClient) QueryHashEqualArtB(_m *Artifact) *HashEqualQuery {
 	query := (&HashEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtBTable, artifact.HashEqualArtBColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVex queries the vex edge of a Artifact.
-func (c *ArtifactClient) QueryVex(a *Artifact) *CertifyVexQuery {
+func (c *ArtifactClient) QueryVex(_m *Artifact) *CertifyVexQuery {
 	query := (&CertifyVexClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.VexTable, artifact.VexColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertification queries the certification edge of a Artifact.
-func (c *ArtifactClient) QueryCertification(a *Artifact) *CertificationQuery {
+func (c *ArtifactClient) QueryCertification(_m *Artifact) *CertificationQuery {
 	query := (&CertificationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(certification.Table, certification.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.CertificationTable, artifact.CertificationColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryMetadata queries the metadata edge of a Artifact.
-func (c *ArtifactClient) QueryMetadata(a *Artifact) *HasMetadataQuery {
+func (c *ArtifactClient) QueryMetadata(_m *Artifact) *HasMetadataQuery {
 	query := (&HasMetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.MetadataTable, artifact.MetadataColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPoc queries the poc edge of a Artifact.
-func (c *ArtifactClient) QueryPoc(a *Artifact) *PointOfContactQuery {
+func (c *ArtifactClient) QueryPoc(_m *Artifact) *PointOfContactQuery {
 	query := (&PointOfContactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.PocTable, artifact.PocColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedInSboms queries the included_in_sboms edge of a Artifact.
-func (c *ArtifactClient) QueryIncludedInSboms(a *Artifact) *BillOfMaterialsQuery {
+func (c *ArtifactClient) QueryIncludedInSboms(_m *Artifact) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.IncludedInSbomsTable, artifact.IncludedInSbomsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -754,8 +754,8 @@ func (c *BillOfMaterialsClient) Update() *BillOfMaterialsUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *BillOfMaterialsClient) UpdateOne(bom *BillOfMaterials) *BillOfMaterialsUpdateOne {
-	mutation := newBillOfMaterialsMutation(c.config, OpUpdateOne, withBillOfMaterials(bom))
+func (c *BillOfMaterialsClient) UpdateOne(_m *BillOfMaterials) *BillOfMaterialsUpdateOne {
+	mutation := newBillOfMaterialsMutation(c.config, OpUpdateOne, withBillOfMaterials(_m))
 	return &BillOfMaterialsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -772,8 +772,8 @@ func (c *BillOfMaterialsClient) Delete() *BillOfMaterialsDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *BillOfMaterialsClient) DeleteOne(bom *BillOfMaterials) *BillOfMaterialsDeleteOne {
-	return c.DeleteOneID(bom.ID)
+func (c *BillOfMaterialsClient) DeleteOne(_m *BillOfMaterials) *BillOfMaterialsDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -808,96 +808,96 @@ func (c *BillOfMaterialsClient) GetX(ctx context.Context, id uuid.UUID) *BillOfM
 }
 
 // QueryPackage queries the package edge of a BillOfMaterials.
-func (c *BillOfMaterialsClient) QueryPackage(bom *BillOfMaterials) *PackageVersionQuery {
+func (c *BillOfMaterialsClient) QueryPackage(_m *BillOfMaterials) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := bom.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, billofmaterials.PackageTable, billofmaterials.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryArtifact queries the artifact edge of a BillOfMaterials.
-func (c *BillOfMaterialsClient) QueryArtifact(bom *BillOfMaterials) *ArtifactQuery {
+func (c *BillOfMaterialsClient) QueryArtifact(_m *BillOfMaterials) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := bom.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, billofmaterials.ArtifactTable, billofmaterials.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedSoftwarePackages queries the included_software_packages edge of a BillOfMaterials.
-func (c *BillOfMaterialsClient) QueryIncludedSoftwarePackages(bom *BillOfMaterials) *PackageVersionQuery {
+func (c *BillOfMaterialsClient) QueryIncludedSoftwarePackages(_m *BillOfMaterials) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := bom.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedSoftwarePackagesTable, billofmaterials.IncludedSoftwarePackagesPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedSoftwareArtifacts queries the included_software_artifacts edge of a BillOfMaterials.
-func (c *BillOfMaterialsClient) QueryIncludedSoftwareArtifacts(bom *BillOfMaterials) *ArtifactQuery {
+func (c *BillOfMaterialsClient) QueryIncludedSoftwareArtifacts(_m *BillOfMaterials) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := bom.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedSoftwareArtifactsTable, billofmaterials.IncludedSoftwareArtifactsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedDependencies queries the included_dependencies edge of a BillOfMaterials.
-func (c *BillOfMaterialsClient) QueryIncludedDependencies(bom *BillOfMaterials) *DependencyQuery {
+func (c *BillOfMaterialsClient) QueryIncludedDependencies(_m *BillOfMaterials) *DependencyQuery {
 	query := (&DependencyClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := bom.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(dependency.Table, dependency.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedDependenciesTable, billofmaterials.IncludedDependenciesPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedOccurrences queries the included_occurrences edge of a BillOfMaterials.
-func (c *BillOfMaterialsClient) QueryIncludedOccurrences(bom *BillOfMaterials) *OccurrenceQuery {
+func (c *BillOfMaterialsClient) QueryIncludedOccurrences(_m *BillOfMaterials) *OccurrenceQuery {
 	query := (&OccurrenceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := bom.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedOccurrencesTable, billofmaterials.IncludedOccurrencesPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -983,8 +983,8 @@ func (c *BuilderClient) Update() *BuilderUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *BuilderClient) UpdateOne(b *Builder) *BuilderUpdateOne {
-	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilder(b))
+func (c *BuilderClient) UpdateOne(_m *Builder) *BuilderUpdateOne {
+	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilder(_m))
 	return &BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1001,8 +1001,8 @@ func (c *BuilderClient) Delete() *BuilderDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *BuilderClient) DeleteOne(b *Builder) *BuilderDeleteOne {
-	return c.DeleteOneID(b.ID)
+func (c *BuilderClient) DeleteOne(_m *Builder) *BuilderDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1037,16 +1037,16 @@ func (c *BuilderClient) GetX(ctx context.Context, id uuid.UUID) *Builder {
 }
 
 // QuerySlsaAttestations queries the slsa_attestations edge of a Builder.
-func (c *BuilderClient) QuerySlsaAttestations(b *Builder) *SLSAAttestationQuery {
+func (c *BuilderClient) QuerySlsaAttestations(_m *Builder) *SLSAAttestationQuery {
 	query := (&SLSAAttestationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := b.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(builder.Table, builder.FieldID, id),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, builder.SlsaAttestationsTable, builder.SlsaAttestationsColumn),
 		)
-		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -1132,8 +1132,8 @@ func (c *CertificationClient) Update() *CertificationUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CertificationClient) UpdateOne(ce *Certification) *CertificationUpdateOne {
-	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertification(ce))
+func (c *CertificationClient) UpdateOne(_m *Certification) *CertificationUpdateOne {
+	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertification(_m))
 	return &CertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1150,8 +1150,8 @@ func (c *CertificationClient) Delete() *CertificationDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CertificationClient) DeleteOne(ce *Certification) *CertificationDeleteOne {
-	return c.DeleteOneID(ce.ID)
+func (c *CertificationClient) DeleteOne(_m *Certification) *CertificationDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1186,64 +1186,64 @@ func (c *CertificationClient) GetX(ctx context.Context, id uuid.UUID) *Certifica
 }
 
 // QuerySource queries the source edge of a Certification.
-func (c *CertificationClient) QuerySource(ce *Certification) *SourceNameQuery {
+func (c *CertificationClient) QuerySource(_m *Certification) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ce.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certification.Table, certification.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certification.SourceTable, certification.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPackageVersion queries the package_version edge of a Certification.
-func (c *CertificationClient) QueryPackageVersion(ce *Certification) *PackageVersionQuery {
+func (c *CertificationClient) QueryPackageVersion(_m *Certification) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ce.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certification.Table, certification.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certification.PackageVersionTable, certification.PackageVersionColumn),
 		)
-		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryAllVersions queries the all_versions edge of a Certification.
-func (c *CertificationClient) QueryAllVersions(ce *Certification) *PackageNameQuery {
+func (c *CertificationClient) QueryAllVersions(_m *Certification) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ce.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certification.Table, certification.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certification.AllVersionsTable, certification.AllVersionsColumn),
 		)
-		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryArtifact queries the artifact edge of a Certification.
-func (c *CertificationClient) QueryArtifact(ce *Certification) *ArtifactQuery {
+func (c *CertificationClient) QueryArtifact(_m *Certification) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ce.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certification.Table, certification.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certification.ArtifactTable, certification.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -1329,8 +1329,8 @@ func (c *CertifyLegalClient) Update() *CertifyLegalUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CertifyLegalClient) UpdateOne(cl *CertifyLegal) *CertifyLegalUpdateOne {
-	mutation := newCertifyLegalMutation(c.config, OpUpdateOne, withCertifyLegal(cl))
+func (c *CertifyLegalClient) UpdateOne(_m *CertifyLegal) *CertifyLegalUpdateOne {
+	mutation := newCertifyLegalMutation(c.config, OpUpdateOne, withCertifyLegal(_m))
 	return &CertifyLegalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1347,8 +1347,8 @@ func (c *CertifyLegalClient) Delete() *CertifyLegalDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CertifyLegalClient) DeleteOne(cl *CertifyLegal) *CertifyLegalDeleteOne {
-	return c.DeleteOneID(cl.ID)
+func (c *CertifyLegalClient) DeleteOne(_m *CertifyLegal) *CertifyLegalDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1383,64 +1383,64 @@ func (c *CertifyLegalClient) GetX(ctx context.Context, id uuid.UUID) *CertifyLeg
 }
 
 // QueryPackage queries the package edge of a CertifyLegal.
-func (c *CertifyLegalClient) QueryPackage(cl *CertifyLegal) *PackageVersionQuery {
+func (c *CertifyLegalClient) QueryPackage(_m *CertifyLegal) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifylegal.PackageTable, certifylegal.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QuerySource queries the source edge of a CertifyLegal.
-func (c *CertifyLegalClient) QuerySource(cl *CertifyLegal) *SourceNameQuery {
+func (c *CertifyLegalClient) QuerySource(_m *CertifyLegal) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifylegal.SourceTable, certifylegal.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryDeclaredLicenses queries the declared_licenses edge of a CertifyLegal.
-func (c *CertifyLegalClient) QueryDeclaredLicenses(cl *CertifyLegal) *LicenseQuery {
+func (c *CertifyLegalClient) QueryDeclaredLicenses(_m *CertifyLegal) *LicenseQuery {
 	query := (&LicenseClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
 			sqlgraph.To(license.Table, license.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, certifylegal.DeclaredLicensesTable, certifylegal.DeclaredLicensesPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryDiscoveredLicenses queries the discovered_licenses edge of a CertifyLegal.
-func (c *CertifyLegalClient) QueryDiscoveredLicenses(cl *CertifyLegal) *LicenseQuery {
+func (c *CertifyLegalClient) QueryDiscoveredLicenses(_m *CertifyLegal) *LicenseQuery {
 	query := (&LicenseClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
 			sqlgraph.To(license.Table, license.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, certifylegal.DiscoveredLicensesTable, certifylegal.DiscoveredLicensesPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -1526,8 +1526,8 @@ func (c *CertifyScorecardClient) Update() *CertifyScorecardUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CertifyScorecardClient) UpdateOne(cs *CertifyScorecard) *CertifyScorecardUpdateOne {
-	mutation := newCertifyScorecardMutation(c.config, OpUpdateOne, withCertifyScorecard(cs))
+func (c *CertifyScorecardClient) UpdateOne(_m *CertifyScorecard) *CertifyScorecardUpdateOne {
+	mutation := newCertifyScorecardMutation(c.config, OpUpdateOne, withCertifyScorecard(_m))
 	return &CertifyScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1544,8 +1544,8 @@ func (c *CertifyScorecardClient) Delete() *CertifyScorecardDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CertifyScorecardClient) DeleteOne(cs *CertifyScorecard) *CertifyScorecardDeleteOne {
-	return c.DeleteOneID(cs.ID)
+func (c *CertifyScorecardClient) DeleteOne(_m *CertifyScorecard) *CertifyScorecardDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1580,16 +1580,16 @@ func (c *CertifyScorecardClient) GetX(ctx context.Context, id uuid.UUID) *Certif
 }
 
 // QuerySource queries the source edge of a CertifyScorecard.
-func (c *CertifyScorecardClient) QuerySource(cs *CertifyScorecard) *SourceNameQuery {
+func (c *CertifyScorecardClient) QuerySource(_m *CertifyScorecard) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cs.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyscorecard.Table, certifyscorecard.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyscorecard.SourceTable, certifyscorecard.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(cs.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -1675,8 +1675,8 @@ func (c *CertifyVexClient) Update() *CertifyVexUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CertifyVexClient) UpdateOne(cv *CertifyVex) *CertifyVexUpdateOne {
-	mutation := newCertifyVexMutation(c.config, OpUpdateOne, withCertifyVex(cv))
+func (c *CertifyVexClient) UpdateOne(_m *CertifyVex) *CertifyVexUpdateOne {
+	mutation := newCertifyVexMutation(c.config, OpUpdateOne, withCertifyVex(_m))
 	return &CertifyVexUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1693,8 +1693,8 @@ func (c *CertifyVexClient) Delete() *CertifyVexDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CertifyVexClient) DeleteOne(cv *CertifyVex) *CertifyVexDeleteOne {
-	return c.DeleteOneID(cv.ID)
+func (c *CertifyVexClient) DeleteOne(_m *CertifyVex) *CertifyVexDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1729,48 +1729,48 @@ func (c *CertifyVexClient) GetX(ctx context.Context, id uuid.UUID) *CertifyVex {
 }
 
 // QueryPackage queries the package edge of a CertifyVex.
-func (c *CertifyVexClient) QueryPackage(cv *CertifyVex) *PackageVersionQuery {
+func (c *CertifyVexClient) QueryPackage(_m *CertifyVex) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.PackageTable, certifyvex.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryArtifact queries the artifact edge of a CertifyVex.
-func (c *CertifyVexClient) QueryArtifact(cv *CertifyVex) *ArtifactQuery {
+func (c *CertifyVexClient) QueryArtifact(_m *CertifyVex) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.ArtifactTable, certifyvex.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVulnerability queries the vulnerability edge of a CertifyVex.
-func (c *CertifyVexClient) QueryVulnerability(cv *CertifyVex) *VulnerabilityIDQuery {
+func (c *CertifyVexClient) QueryVulnerability(_m *CertifyVex) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.VulnerabilityTable, certifyvex.VulnerabilityColumn),
 		)
-		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -1856,8 +1856,8 @@ func (c *CertifyVulnClient) Update() *CertifyVulnUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CertifyVulnClient) UpdateOne(cv *CertifyVuln) *CertifyVulnUpdateOne {
-	mutation := newCertifyVulnMutation(c.config, OpUpdateOne, withCertifyVuln(cv))
+func (c *CertifyVulnClient) UpdateOne(_m *CertifyVuln) *CertifyVulnUpdateOne {
+	mutation := newCertifyVulnMutation(c.config, OpUpdateOne, withCertifyVuln(_m))
 	return &CertifyVulnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1874,8 +1874,8 @@ func (c *CertifyVulnClient) Delete() *CertifyVulnDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CertifyVulnClient) DeleteOne(cv *CertifyVuln) *CertifyVulnDeleteOne {
-	return c.DeleteOneID(cv.ID)
+func (c *CertifyVulnClient) DeleteOne(_m *CertifyVuln) *CertifyVulnDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1910,32 +1910,32 @@ func (c *CertifyVulnClient) GetX(ctx context.Context, id uuid.UUID) *CertifyVuln
 }
 
 // QueryVulnerability queries the vulnerability edge of a CertifyVuln.
-func (c *CertifyVulnClient) QueryVulnerability(cv *CertifyVuln) *VulnerabilityIDQuery {
+func (c *CertifyVulnClient) QueryVulnerability(_m *CertifyVuln) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.VulnerabilityTable, certifyvuln.VulnerabilityColumn),
 		)
-		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPackage queries the package edge of a CertifyVuln.
-func (c *CertifyVulnClient) QueryPackage(cv *CertifyVuln) *PackageVersionQuery {
+func (c *CertifyVulnClient) QueryPackage(_m *CertifyVuln) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.PackageTable, certifyvuln.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -2021,8 +2021,8 @@ func (c *DependencyClient) Update() *DependencyUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DependencyClient) UpdateOne(d *Dependency) *DependencyUpdateOne {
-	mutation := newDependencyMutation(c.config, OpUpdateOne, withDependency(d))
+func (c *DependencyClient) UpdateOne(_m *Dependency) *DependencyUpdateOne {
+	mutation := newDependencyMutation(c.config, OpUpdateOne, withDependency(_m))
 	return &DependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2039,8 +2039,8 @@ func (c *DependencyClient) Delete() *DependencyDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *DependencyClient) DeleteOne(d *Dependency) *DependencyDeleteOne {
-	return c.DeleteOneID(d.ID)
+func (c *DependencyClient) DeleteOne(_m *Dependency) *DependencyDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -2075,48 +2075,48 @@ func (c *DependencyClient) GetX(ctx context.Context, id uuid.UUID) *Dependency {
 }
 
 // QueryPackage queries the package edge of a Dependency.
-func (c *DependencyClient) QueryPackage(d *Dependency) *PackageVersionQuery {
+func (c *DependencyClient) QueryPackage(_m *Dependency) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := d.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, dependency.PackageTable, dependency.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryDependentPackageVersion queries the dependent_package_version edge of a Dependency.
-func (c *DependencyClient) QueryDependentPackageVersion(d *Dependency) *PackageVersionQuery {
+func (c *DependencyClient) QueryDependentPackageVersion(_m *Dependency) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := d.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageVersionTable, dependency.DependentPackageVersionColumn),
 		)
-		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedInSboms queries the included_in_sboms edge of a Dependency.
-func (c *DependencyClient) QueryIncludedInSboms(d *Dependency) *BillOfMaterialsQuery {
+func (c *DependencyClient) QueryIncludedInSboms(_m *Dependency) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := d.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, dependency.IncludedInSbomsTable, dependency.IncludedInSbomsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -2202,8 +2202,8 @@ func (c *HasMetadataClient) Update() *HasMetadataUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *HasMetadataClient) UpdateOne(hm *HasMetadata) *HasMetadataUpdateOne {
-	mutation := newHasMetadataMutation(c.config, OpUpdateOne, withHasMetadata(hm))
+func (c *HasMetadataClient) UpdateOne(_m *HasMetadata) *HasMetadataUpdateOne {
+	mutation := newHasMetadataMutation(c.config, OpUpdateOne, withHasMetadata(_m))
 	return &HasMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2220,8 +2220,8 @@ func (c *HasMetadataClient) Delete() *HasMetadataDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *HasMetadataClient) DeleteOne(hm *HasMetadata) *HasMetadataDeleteOne {
-	return c.DeleteOneID(hm.ID)
+func (c *HasMetadataClient) DeleteOne(_m *HasMetadata) *HasMetadataDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -2256,64 +2256,64 @@ func (c *HasMetadataClient) GetX(ctx context.Context, id uuid.UUID) *HasMetadata
 }
 
 // QuerySource queries the source edge of a HasMetadata.
-func (c *HasMetadataClient) QuerySource(hm *HasMetadata) *SourceNameQuery {
+func (c *HasMetadataClient) QuerySource(_m *HasMetadata) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hm.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hasmetadata.Table, hasmetadata.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.SourceTable, hasmetadata.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(hm.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPackageVersion queries the package_version edge of a HasMetadata.
-func (c *HasMetadataClient) QueryPackageVersion(hm *HasMetadata) *PackageVersionQuery {
+func (c *HasMetadataClient) QueryPackageVersion(_m *HasMetadata) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hm.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hasmetadata.Table, hasmetadata.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.PackageVersionTable, hasmetadata.PackageVersionColumn),
 		)
-		fromV = sqlgraph.Neighbors(hm.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryAllVersions queries the all_versions edge of a HasMetadata.
-func (c *HasMetadataClient) QueryAllVersions(hm *HasMetadata) *PackageNameQuery {
+func (c *HasMetadataClient) QueryAllVersions(_m *HasMetadata) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hm.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hasmetadata.Table, hasmetadata.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.AllVersionsTable, hasmetadata.AllVersionsColumn),
 		)
-		fromV = sqlgraph.Neighbors(hm.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryArtifact queries the artifact edge of a HasMetadata.
-func (c *HasMetadataClient) QueryArtifact(hm *HasMetadata) *ArtifactQuery {
+func (c *HasMetadataClient) QueryArtifact(_m *HasMetadata) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hm.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hasmetadata.Table, hasmetadata.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.ArtifactTable, hasmetadata.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(hm.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -2399,8 +2399,8 @@ func (c *HasSourceAtClient) Update() *HasSourceAtUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *HasSourceAtClient) UpdateOne(hsa *HasSourceAt) *HasSourceAtUpdateOne {
-	mutation := newHasSourceAtMutation(c.config, OpUpdateOne, withHasSourceAt(hsa))
+func (c *HasSourceAtClient) UpdateOne(_m *HasSourceAt) *HasSourceAtUpdateOne {
+	mutation := newHasSourceAtMutation(c.config, OpUpdateOne, withHasSourceAt(_m))
 	return &HasSourceAtUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2417,8 +2417,8 @@ func (c *HasSourceAtClient) Delete() *HasSourceAtDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *HasSourceAtClient) DeleteOne(hsa *HasSourceAt) *HasSourceAtDeleteOne {
-	return c.DeleteOneID(hsa.ID)
+func (c *HasSourceAtClient) DeleteOne(_m *HasSourceAt) *HasSourceAtDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -2453,48 +2453,48 @@ func (c *HasSourceAtClient) GetX(ctx context.Context, id uuid.UUID) *HasSourceAt
 }
 
 // QueryPackageVersion queries the package_version edge of a HasSourceAt.
-func (c *HasSourceAtClient) QueryPackageVersion(hsa *HasSourceAt) *PackageVersionQuery {
+func (c *HasSourceAtClient) QueryPackageVersion(_m *HasSourceAt) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hsa.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hassourceat.Table, hassourceat.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hassourceat.PackageVersionTable, hassourceat.PackageVersionColumn),
 		)
-		fromV = sqlgraph.Neighbors(hsa.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryAllVersions queries the all_versions edge of a HasSourceAt.
-func (c *HasSourceAtClient) QueryAllVersions(hsa *HasSourceAt) *PackageNameQuery {
+func (c *HasSourceAtClient) QueryAllVersions(_m *HasSourceAt) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hsa.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hassourceat.Table, hassourceat.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hassourceat.AllVersionsTable, hassourceat.AllVersionsColumn),
 		)
-		fromV = sqlgraph.Neighbors(hsa.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QuerySource queries the source edge of a HasSourceAt.
-func (c *HasSourceAtClient) QuerySource(hsa *HasSourceAt) *SourceNameQuery {
+func (c *HasSourceAtClient) QuerySource(_m *HasSourceAt) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := hsa.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hassourceat.Table, hassourceat.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hassourceat.SourceTable, hassourceat.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(hsa.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -2580,8 +2580,8 @@ func (c *HashEqualClient) Update() *HashEqualUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *HashEqualClient) UpdateOne(he *HashEqual) *HashEqualUpdateOne {
-	mutation := newHashEqualMutation(c.config, OpUpdateOne, withHashEqual(he))
+func (c *HashEqualClient) UpdateOne(_m *HashEqual) *HashEqualUpdateOne {
+	mutation := newHashEqualMutation(c.config, OpUpdateOne, withHashEqual(_m))
 	return &HashEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2598,8 +2598,8 @@ func (c *HashEqualClient) Delete() *HashEqualDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *HashEqualClient) DeleteOne(he *HashEqual) *HashEqualDeleteOne {
-	return c.DeleteOneID(he.ID)
+func (c *HashEqualClient) DeleteOne(_m *HashEqual) *HashEqualDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -2634,32 +2634,32 @@ func (c *HashEqualClient) GetX(ctx context.Context, id uuid.UUID) *HashEqual {
 }
 
 // QueryArtifactA queries the artifact_a edge of a HashEqual.
-func (c *HashEqualClient) QueryArtifactA(he *HashEqual) *ArtifactQuery {
+func (c *HashEqualClient) QueryArtifactA(_m *HashEqual) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := he.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactATable, hashequal.ArtifactAColumn),
 		)
-		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryArtifactB queries the artifact_b edge of a HashEqual.
-func (c *HashEqualClient) QueryArtifactB(he *HashEqual) *ArtifactQuery {
+func (c *HashEqualClient) QueryArtifactB(_m *HashEqual) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := he.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactBTable, hashequal.ArtifactBColumn),
 		)
-		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -2745,8 +2745,8 @@ func (c *LicenseClient) Update() *LicenseUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *LicenseClient) UpdateOne(l *License) *LicenseUpdateOne {
-	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicense(l))
+func (c *LicenseClient) UpdateOne(_m *License) *LicenseUpdateOne {
+	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicense(_m))
 	return &LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2763,8 +2763,8 @@ func (c *LicenseClient) Delete() *LicenseDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *LicenseClient) DeleteOne(l *License) *LicenseDeleteOne {
-	return c.DeleteOneID(l.ID)
+func (c *LicenseClient) DeleteOne(_m *License) *LicenseDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -2799,32 +2799,32 @@ func (c *LicenseClient) GetX(ctx context.Context, id uuid.UUID) *License {
 }
 
 // QueryDeclaredInCertifyLegals queries the declared_in_certify_legals edge of a License.
-func (c *LicenseClient) QueryDeclaredInCertifyLegals(l *License) *CertifyLegalQuery {
+func (c *LicenseClient) QueryDeclaredInCertifyLegals(_m *License) *CertifyLegalQuery {
 	query := (&CertifyLegalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := l.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(license.Table, license.FieldID, id),
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, license.DeclaredInCertifyLegalsTable, license.DeclaredInCertifyLegalsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryDiscoveredInCertifyLegals queries the discovered_in_certify_legals edge of a License.
-func (c *LicenseClient) QueryDiscoveredInCertifyLegals(l *License) *CertifyLegalQuery {
+func (c *LicenseClient) QueryDiscoveredInCertifyLegals(_m *License) *CertifyLegalQuery {
 	query := (&CertifyLegalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := l.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(license.Table, license.FieldID, id),
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, license.DiscoveredInCertifyLegalsTable, license.DiscoveredInCertifyLegalsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -2910,8 +2910,8 @@ func (c *OccurrenceClient) Update() *OccurrenceUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *OccurrenceClient) UpdateOne(o *Occurrence) *OccurrenceUpdateOne {
-	mutation := newOccurrenceMutation(c.config, OpUpdateOne, withOccurrence(o))
+func (c *OccurrenceClient) UpdateOne(_m *Occurrence) *OccurrenceUpdateOne {
+	mutation := newOccurrenceMutation(c.config, OpUpdateOne, withOccurrence(_m))
 	return &OccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2928,8 +2928,8 @@ func (c *OccurrenceClient) Delete() *OccurrenceDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *OccurrenceClient) DeleteOne(o *Occurrence) *OccurrenceDeleteOne {
-	return c.DeleteOneID(o.ID)
+func (c *OccurrenceClient) DeleteOne(_m *Occurrence) *OccurrenceDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -2964,64 +2964,64 @@ func (c *OccurrenceClient) GetX(ctx context.Context, id uuid.UUID) *Occurrence {
 }
 
 // QueryArtifact queries the artifact edge of a Occurrence.
-func (c *OccurrenceClient) QueryArtifact(o *Occurrence) *ArtifactQuery {
+func (c *OccurrenceClient) QueryArtifact(_m *Occurrence) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := o.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.ArtifactTable, occurrence.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPackage queries the package edge of a Occurrence.
-func (c *OccurrenceClient) QueryPackage(o *Occurrence) *PackageVersionQuery {
+func (c *OccurrenceClient) QueryPackage(_m *Occurrence) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := o.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.PackageTable, occurrence.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QuerySource queries the source edge of a Occurrence.
-func (c *OccurrenceClient) QuerySource(o *Occurrence) *SourceNameQuery {
+func (c *OccurrenceClient) QuerySource(_m *Occurrence) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := o.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.SourceTable, occurrence.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedInSboms queries the included_in_sboms edge of a Occurrence.
-func (c *OccurrenceClient) QueryIncludedInSboms(o *Occurrence) *BillOfMaterialsQuery {
+func (c *OccurrenceClient) QueryIncludedInSboms(_m *Occurrence) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := o.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, occurrence.IncludedInSbomsTable, occurrence.IncludedInSbomsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -3107,8 +3107,8 @@ func (c *PackageNameClient) Update() *PackageNameUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PackageNameClient) UpdateOne(pn *PackageName) *PackageNameUpdateOne {
-	mutation := newPackageNameMutation(c.config, OpUpdateOne, withPackageName(pn))
+func (c *PackageNameClient) UpdateOne(_m *PackageName) *PackageNameUpdateOne {
+	mutation := newPackageNameMutation(c.config, OpUpdateOne, withPackageName(_m))
 	return &PackageNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -3125,8 +3125,8 @@ func (c *PackageNameClient) Delete() *PackageNameDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PackageNameClient) DeleteOne(pn *PackageName) *PackageNameDeleteOne {
-	return c.DeleteOneID(pn.ID)
+func (c *PackageNameClient) DeleteOne(_m *PackageName) *PackageNameDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -3161,80 +3161,80 @@ func (c *PackageNameClient) GetX(ctx context.Context, id uuid.UUID) *PackageName
 }
 
 // QueryVersions queries the versions edge of a PackageName.
-func (c *PackageNameClient) QueryVersions(pn *PackageName) *PackageVersionQuery {
+func (c *PackageNameClient) QueryVersions(_m *PackageName) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagename.Table, packagename.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, packagename.VersionsTable, packagename.VersionsColumn),
 		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryHasSourceAt queries the has_source_at edge of a PackageName.
-func (c *PackageNameClient) QueryHasSourceAt(pn *PackageName) *HasSourceAtQuery {
+func (c *PackageNameClient) QueryHasSourceAt(_m *PackageName) *HasSourceAtQuery {
 	query := (&HasSourceAtClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagename.Table, packagename.FieldID, id),
 			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packagename.HasSourceAtTable, packagename.HasSourceAtColumn),
 		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertification queries the certification edge of a PackageName.
-func (c *PackageNameClient) QueryCertification(pn *PackageName) *CertificationQuery {
+func (c *PackageNameClient) QueryCertification(_m *PackageName) *CertificationQuery {
 	query := (&CertificationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagename.Table, packagename.FieldID, id),
 			sqlgraph.To(certification.Table, certification.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packagename.CertificationTable, packagename.CertificationColumn),
 		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryMetadata queries the metadata edge of a PackageName.
-func (c *PackageNameClient) QueryMetadata(pn *PackageName) *HasMetadataQuery {
+func (c *PackageNameClient) QueryMetadata(_m *PackageName) *HasMetadataQuery {
 	query := (&HasMetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagename.Table, packagename.FieldID, id),
 			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packagename.MetadataTable, packagename.MetadataColumn),
 		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPoc queries the poc edge of a PackageName.
-func (c *PackageNameClient) QueryPoc(pn *PackageName) *PointOfContactQuery {
+func (c *PackageNameClient) QueryPoc(_m *PackageName) *PointOfContactQuery {
 	query := (&PointOfContactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagename.Table, packagename.FieldID, id),
 			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packagename.PocTable, packagename.PocColumn),
 		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -3320,8 +3320,8 @@ func (c *PackageVersionClient) Update() *PackageVersionUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PackageVersionClient) UpdateOne(pv *PackageVersion) *PackageVersionUpdateOne {
-	mutation := newPackageVersionMutation(c.config, OpUpdateOne, withPackageVersion(pv))
+func (c *PackageVersionClient) UpdateOne(_m *PackageVersion) *PackageVersionUpdateOne {
+	mutation := newPackageVersionMutation(c.config, OpUpdateOne, withPackageVersion(_m))
 	return &PackageVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -3338,8 +3338,8 @@ func (c *PackageVersionClient) Delete() *PackageVersionDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PackageVersionClient) DeleteOne(pv *PackageVersion) *PackageVersionDeleteOne {
-	return c.DeleteOneID(pv.ID)
+func (c *PackageVersionClient) DeleteOne(_m *PackageVersion) *PackageVersionDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -3374,240 +3374,240 @@ func (c *PackageVersionClient) GetX(ctx context.Context, id uuid.UUID) *PackageV
 }
 
 // QueryName queries the name edge of a PackageVersion.
-func (c *PackageVersionClient) QueryName(pv *PackageVersion) *PackageNameQuery {
+func (c *PackageVersionClient) QueryName(_m *PackageVersion) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, packageversion.NameTable, packageversion.NameColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryOccurrences queries the occurrences edge of a PackageVersion.
-func (c *PackageVersionClient) QueryOccurrences(pv *PackageVersion) *OccurrenceQuery {
+func (c *PackageVersionClient) QueryOccurrences(_m *PackageVersion) *OccurrenceQuery {
 	query := (&OccurrenceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.OccurrencesTable, packageversion.OccurrencesColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QuerySbom queries the sbom edge of a PackageVersion.
-func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQuery {
+func (c *PackageVersionClient) QuerySbom(_m *PackageVersion) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.SbomTable, packageversion.SbomColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVuln queries the vuln edge of a PackageVersion.
-func (c *PackageVersionClient) QueryVuln(pv *PackageVersion) *CertifyVulnQuery {
+func (c *PackageVersionClient) QueryVuln(_m *PackageVersion) *CertifyVulnQuery {
 	query := (&CertifyVulnClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(certifyvuln.Table, certifyvuln.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.VulnTable, packageversion.VulnColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVex queries the vex edge of a PackageVersion.
-func (c *PackageVersionClient) QueryVex(pv *PackageVersion) *CertifyVexQuery {
+func (c *PackageVersionClient) QueryVex(_m *PackageVersion) *CertifyVexQuery {
 	query := (&CertifyVexClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.VexTable, packageversion.VexColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryHasSourceAt queries the has_source_at edge of a PackageVersion.
-func (c *PackageVersionClient) QueryHasSourceAt(pv *PackageVersion) *HasSourceAtQuery {
+func (c *PackageVersionClient) QueryHasSourceAt(_m *PackageVersion) *HasSourceAtQuery {
 	query := (&HasSourceAtClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.HasSourceAtTable, packageversion.HasSourceAtColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertification queries the certification edge of a PackageVersion.
-func (c *PackageVersionClient) QueryCertification(pv *PackageVersion) *CertificationQuery {
+func (c *PackageVersionClient) QueryCertification(_m *PackageVersion) *CertificationQuery {
 	query := (&CertificationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(certification.Table, certification.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.CertificationTable, packageversion.CertificationColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryMetadata queries the metadata edge of a PackageVersion.
-func (c *PackageVersionClient) QueryMetadata(pv *PackageVersion) *HasMetadataQuery {
+func (c *PackageVersionClient) QueryMetadata(_m *PackageVersion) *HasMetadataQuery {
 	query := (&HasMetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.MetadataTable, packageversion.MetadataColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryDependency queries the dependency edge of a PackageVersion.
-func (c *PackageVersionClient) QueryDependency(pv *PackageVersion) *DependencyQuery {
+func (c *PackageVersionClient) QueryDependency(_m *PackageVersion) *DependencyQuery {
 	query := (&DependencyClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(dependency.Table, dependency.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.DependencyTable, packageversion.DependencyColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryDependencySubject queries the dependency_subject edge of a PackageVersion.
-func (c *PackageVersionClient) QueryDependencySubject(pv *PackageVersion) *DependencyQuery {
+func (c *PackageVersionClient) QueryDependencySubject(_m *PackageVersion) *DependencyQuery {
 	query := (&DependencyClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(dependency.Table, dependency.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.DependencySubjectTable, packageversion.DependencySubjectColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryIncludedInSboms queries the included_in_sboms edge of a PackageVersion.
-func (c *PackageVersionClient) QueryIncludedInSboms(pv *PackageVersion) *BillOfMaterialsQuery {
+func (c *PackageVersionClient) QueryIncludedInSboms(_m *PackageVersion) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.IncludedInSbomsTable, packageversion.IncludedInSbomsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPkgEqualPkgA queries the pkg_equal_pkg_a edge of a PackageVersion.
-func (c *PackageVersionClient) QueryPkgEqualPkgA(pv *PackageVersion) *PkgEqualQuery {
+func (c *PackageVersionClient) QueryPkgEqualPkgA(_m *PackageVersion) *PkgEqualQuery {
 	query := (&PkgEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgATable, packageversion.PkgEqualPkgAColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPkgEqualPkgB queries the pkg_equal_pkg_b edge of a PackageVersion.
-func (c *PackageVersionClient) QueryPkgEqualPkgB(pv *PackageVersion) *PkgEqualQuery {
+func (c *PackageVersionClient) QueryPkgEqualPkgB(_m *PackageVersion) *PkgEqualQuery {
 	query := (&PkgEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgBTable, packageversion.PkgEqualPkgBColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPoc queries the poc edge of a PackageVersion.
-func (c *PackageVersionClient) QueryPoc(pv *PackageVersion) *PointOfContactQuery {
+func (c *PackageVersionClient) QueryPoc(_m *PackageVersion) *PointOfContactQuery {
 	query := (&PointOfContactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PocTable, packageversion.PocColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertifyLegal queries the certify_legal edge of a PackageVersion.
-func (c *PackageVersionClient) QueryCertifyLegal(pv *PackageVersion) *CertifyLegalQuery {
+func (c *PackageVersionClient) QueryCertifyLegal(_m *PackageVersion) *CertifyLegalQuery {
 	query := (&CertifyLegalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.CertifyLegalTable, packageversion.CertifyLegalColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -3693,8 +3693,8 @@ func (c *PkgEqualClient) Update() *PkgEqualUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PkgEqualClient) UpdateOne(pe *PkgEqual) *PkgEqualUpdateOne {
-	mutation := newPkgEqualMutation(c.config, OpUpdateOne, withPkgEqual(pe))
+func (c *PkgEqualClient) UpdateOne(_m *PkgEqual) *PkgEqualUpdateOne {
+	mutation := newPkgEqualMutation(c.config, OpUpdateOne, withPkgEqual(_m))
 	return &PkgEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -3711,8 +3711,8 @@ func (c *PkgEqualClient) Delete() *PkgEqualDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PkgEqualClient) DeleteOne(pe *PkgEqual) *PkgEqualDeleteOne {
-	return c.DeleteOneID(pe.ID)
+func (c *PkgEqualClient) DeleteOne(_m *PkgEqual) *PkgEqualDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -3747,32 +3747,32 @@ func (c *PkgEqualClient) GetX(ctx context.Context, id uuid.UUID) *PkgEqual {
 }
 
 // QueryPackageA queries the package_a edge of a PkgEqual.
-func (c *PkgEqualClient) QueryPackageA(pe *PkgEqual) *PackageVersionQuery {
+func (c *PkgEqualClient) QueryPackageA(_m *PkgEqual) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pe.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageATable, pkgequal.PackageAColumn),
 		)
-		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPackageB queries the package_b edge of a PkgEqual.
-func (c *PkgEqualClient) QueryPackageB(pe *PkgEqual) *PackageVersionQuery {
+func (c *PkgEqualClient) QueryPackageB(_m *PkgEqual) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pe.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageBTable, pkgequal.PackageBColumn),
 		)
-		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -3858,8 +3858,8 @@ func (c *PointOfContactClient) Update() *PointOfContactUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PointOfContactClient) UpdateOne(poc *PointOfContact) *PointOfContactUpdateOne {
-	mutation := newPointOfContactMutation(c.config, OpUpdateOne, withPointOfContact(poc))
+func (c *PointOfContactClient) UpdateOne(_m *PointOfContact) *PointOfContactUpdateOne {
+	mutation := newPointOfContactMutation(c.config, OpUpdateOne, withPointOfContact(_m))
 	return &PointOfContactUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -3876,8 +3876,8 @@ func (c *PointOfContactClient) Delete() *PointOfContactDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PointOfContactClient) DeleteOne(poc *PointOfContact) *PointOfContactDeleteOne {
-	return c.DeleteOneID(poc.ID)
+func (c *PointOfContactClient) DeleteOne(_m *PointOfContact) *PointOfContactDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -3912,64 +3912,64 @@ func (c *PointOfContactClient) GetX(ctx context.Context, id uuid.UUID) *PointOfC
 }
 
 // QuerySource queries the source edge of a PointOfContact.
-func (c *PointOfContactClient) QuerySource(poc *PointOfContact) *SourceNameQuery {
+func (c *PointOfContactClient) QuerySource(_m *PointOfContact) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := poc.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pointofcontact.Table, pointofcontact.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.SourceTable, pointofcontact.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(poc.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPackageVersion queries the package_version edge of a PointOfContact.
-func (c *PointOfContactClient) QueryPackageVersion(poc *PointOfContact) *PackageVersionQuery {
+func (c *PointOfContactClient) QueryPackageVersion(_m *PointOfContact) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := poc.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pointofcontact.Table, pointofcontact.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.PackageVersionTable, pointofcontact.PackageVersionColumn),
 		)
-		fromV = sqlgraph.Neighbors(poc.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryAllVersions queries the all_versions edge of a PointOfContact.
-func (c *PointOfContactClient) QueryAllVersions(poc *PointOfContact) *PackageNameQuery {
+func (c *PointOfContactClient) QueryAllVersions(_m *PointOfContact) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := poc.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pointofcontact.Table, pointofcontact.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.AllVersionsTable, pointofcontact.AllVersionsColumn),
 		)
-		fromV = sqlgraph.Neighbors(poc.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryArtifact queries the artifact edge of a PointOfContact.
-func (c *PointOfContactClient) QueryArtifact(poc *PointOfContact) *ArtifactQuery {
+func (c *PointOfContactClient) QueryArtifact(_m *PointOfContact) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := poc.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pointofcontact.Table, pointofcontact.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.ArtifactTable, pointofcontact.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(poc.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -4055,8 +4055,8 @@ func (c *SLSAAttestationClient) Update() *SLSAAttestationUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *SLSAAttestationClient) UpdateOne(sa *SLSAAttestation) *SLSAAttestationUpdateOne {
-	mutation := newSLSAAttestationMutation(c.config, OpUpdateOne, withSLSAAttestation(sa))
+func (c *SLSAAttestationClient) UpdateOne(_m *SLSAAttestation) *SLSAAttestationUpdateOne {
+	mutation := newSLSAAttestationMutation(c.config, OpUpdateOne, withSLSAAttestation(_m))
 	return &SLSAAttestationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -4073,8 +4073,8 @@ func (c *SLSAAttestationClient) Delete() *SLSAAttestationDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *SLSAAttestationClient) DeleteOne(sa *SLSAAttestation) *SLSAAttestationDeleteOne {
-	return c.DeleteOneID(sa.ID)
+func (c *SLSAAttestationClient) DeleteOne(_m *SLSAAttestation) *SLSAAttestationDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -4109,48 +4109,48 @@ func (c *SLSAAttestationClient) GetX(ctx context.Context, id uuid.UUID) *SLSAAtt
 }
 
 // QueryBuiltFrom queries the built_from edge of a SLSAAttestation.
-func (c *SLSAAttestationClient) QueryBuiltFrom(sa *SLSAAttestation) *ArtifactQuery {
+func (c *SLSAAttestationClient) QueryBuiltFrom(_m *SLSAAttestation) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sa.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryBuiltBy queries the built_by edge of a SLSAAttestation.
-func (c *SLSAAttestationClient) QueryBuiltBy(sa *SLSAAttestation) *BuilderQuery {
+func (c *SLSAAttestationClient) QueryBuiltBy(_m *SLSAAttestation) *BuilderQuery {
 	query := (&BuilderClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sa.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
 			sqlgraph.To(builder.Table, builder.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
-		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QuerySubject queries the subject edge of a SLSAAttestation.
-func (c *SLSAAttestationClient) QuerySubject(sa *SLSAAttestation) *ArtifactQuery {
+func (c *SLSAAttestationClient) QuerySubject(_m *SLSAAttestation) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sa.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.SubjectTable, slsaattestation.SubjectColumn),
 		)
-		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -4236,8 +4236,8 @@ func (c *SourceNameClient) Update() *SourceNameUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *SourceNameClient) UpdateOne(sn *SourceName) *SourceNameUpdateOne {
-	mutation := newSourceNameMutation(c.config, OpUpdateOne, withSourceName(sn))
+func (c *SourceNameClient) UpdateOne(_m *SourceName) *SourceNameUpdateOne {
+	mutation := newSourceNameMutation(c.config, OpUpdateOne, withSourceName(_m))
 	return &SourceNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -4254,8 +4254,8 @@ func (c *SourceNameClient) Delete() *SourceNameDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *SourceNameClient) DeleteOne(sn *SourceName) *SourceNameDeleteOne {
-	return c.DeleteOneID(sn.ID)
+func (c *SourceNameClient) DeleteOne(_m *SourceName) *SourceNameDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -4290,112 +4290,112 @@ func (c *SourceNameClient) GetX(ctx context.Context, id uuid.UUID) *SourceName {
 }
 
 // QueryOccurrences queries the occurrences edge of a SourceName.
-func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *OccurrenceQuery {
+func (c *SourceNameClient) QueryOccurrences(_m *SourceName) *OccurrenceQuery {
 	query := (&OccurrenceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.OccurrencesTable, sourcename.OccurrencesColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryHasSourceAt queries the has_source_at edge of a SourceName.
-func (c *SourceNameClient) QueryHasSourceAt(sn *SourceName) *HasSourceAtQuery {
+func (c *SourceNameClient) QueryHasSourceAt(_m *SourceName) *HasSourceAtQuery {
 	query := (&HasSourceAtClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.HasSourceAtTable, sourcename.HasSourceAtColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryScorecard queries the scorecard edge of a SourceName.
-func (c *SourceNameClient) QueryScorecard(sn *SourceName) *CertifyScorecardQuery {
+func (c *SourceNameClient) QueryScorecard(_m *SourceName) *CertifyScorecardQuery {
 	query := (&CertifyScorecardClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.ScorecardTable, sourcename.ScorecardColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertification queries the certification edge of a SourceName.
-func (c *SourceNameClient) QueryCertification(sn *SourceName) *CertificationQuery {
+func (c *SourceNameClient) QueryCertification(_m *SourceName) *CertificationQuery {
 	query := (&CertificationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(certification.Table, certification.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertificationTable, sourcename.CertificationColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryMetadata queries the metadata edge of a SourceName.
-func (c *SourceNameClient) QueryMetadata(sn *SourceName) *HasMetadataQuery {
+func (c *SourceNameClient) QueryMetadata(_m *SourceName) *HasMetadataQuery {
 	query := (&HasMetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.MetadataTable, sourcename.MetadataColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryPoc queries the poc edge of a SourceName.
-func (c *SourceNameClient) QueryPoc(sn *SourceName) *PointOfContactQuery {
+func (c *SourceNameClient) QueryPoc(_m *SourceName) *PointOfContactQuery {
 	query := (&PointOfContactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.PocTable, sourcename.PocColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertifyLegal queries the certify_legal edge of a SourceName.
-func (c *SourceNameClient) QueryCertifyLegal(sn *SourceName) *CertifyLegalQuery {
+func (c *SourceNameClient) QueryCertifyLegal(_m *SourceName) *CertifyLegalQuery {
 	query := (&CertifyLegalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertifyLegalTable, sourcename.CertifyLegalColumn),
 		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -4481,8 +4481,8 @@ func (c *VulnEqualClient) Update() *VulnEqualUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *VulnEqualClient) UpdateOne(ve *VulnEqual) *VulnEqualUpdateOne {
-	mutation := newVulnEqualMutation(c.config, OpUpdateOne, withVulnEqual(ve))
+func (c *VulnEqualClient) UpdateOne(_m *VulnEqual) *VulnEqualUpdateOne {
+	mutation := newVulnEqualMutation(c.config, OpUpdateOne, withVulnEqual(_m))
 	return &VulnEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -4499,8 +4499,8 @@ func (c *VulnEqualClient) Delete() *VulnEqualDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *VulnEqualClient) DeleteOne(ve *VulnEqual) *VulnEqualDeleteOne {
-	return c.DeleteOneID(ve.ID)
+func (c *VulnEqualClient) DeleteOne(_m *VulnEqual) *VulnEqualDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -4535,32 +4535,32 @@ func (c *VulnEqualClient) GetX(ctx context.Context, id uuid.UUID) *VulnEqual {
 }
 
 // QueryVulnerabilityA queries the vulnerability_a edge of a VulnEqual.
-func (c *VulnEqualClient) QueryVulnerabilityA(ve *VulnEqual) *VulnerabilityIDQuery {
+func (c *VulnEqualClient) QueryVulnerabilityA(_m *VulnEqual) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ve.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityATable, vulnequal.VulnerabilityAColumn),
 		)
-		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVulnerabilityB queries the vulnerability_b edge of a VulnEqual.
-func (c *VulnEqualClient) QueryVulnerabilityB(ve *VulnEqual) *VulnerabilityIDQuery {
+func (c *VulnEqualClient) QueryVulnerabilityB(_m *VulnEqual) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ve.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityBTable, vulnequal.VulnerabilityBColumn),
 		)
-		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -4646,8 +4646,8 @@ func (c *VulnerabilityIDClient) Update() *VulnerabilityIDUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *VulnerabilityIDClient) UpdateOne(vi *VulnerabilityID) *VulnerabilityIDUpdateOne {
-	mutation := newVulnerabilityIDMutation(c.config, OpUpdateOne, withVulnerabilityID(vi))
+func (c *VulnerabilityIDClient) UpdateOne(_m *VulnerabilityID) *VulnerabilityIDUpdateOne {
+	mutation := newVulnerabilityIDMutation(c.config, OpUpdateOne, withVulnerabilityID(_m))
 	return &VulnerabilityIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -4664,8 +4664,8 @@ func (c *VulnerabilityIDClient) Delete() *VulnerabilityIDDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *VulnerabilityIDClient) DeleteOne(vi *VulnerabilityID) *VulnerabilityIDDeleteOne {
-	return c.DeleteOneID(vi.ID)
+func (c *VulnerabilityIDClient) DeleteOne(_m *VulnerabilityID) *VulnerabilityIDDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -4700,80 +4700,80 @@ func (c *VulnerabilityIDClient) GetX(ctx context.Context, id uuid.UUID) *Vulnera
 }
 
 // QueryVulnEqualVulnA queries the vuln_equal_vuln_a edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVulnEqualVulnA(vi *VulnerabilityID) *VulnEqualQuery {
+func (c *VulnerabilityIDClient) QueryVulnEqualVulnA(_m *VulnerabilityID) *VulnEqualQuery {
 	query := (&VulnEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vi.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnEqualVulnATable, vulnerabilityid.VulnEqualVulnAColumn),
 		)
-		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVulnEqualVulnB queries the vuln_equal_vuln_b edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVulnEqualVulnB(vi *VulnerabilityID) *VulnEqualQuery {
+func (c *VulnerabilityIDClient) QueryVulnEqualVulnB(_m *VulnerabilityID) *VulnEqualQuery {
 	query := (&VulnEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vi.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnEqualVulnBTable, vulnerabilityid.VulnEqualVulnBColumn),
 		)
-		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryMetadata queries the metadata edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryMetadata(vi *VulnerabilityID) *VulnerabilityMetadataQuery {
+func (c *VulnerabilityIDClient) QueryMetadata(_m *VulnerabilityID) *VulnerabilityMetadataQuery {
 	query := (&VulnerabilityMetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vi.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnerabilitymetadata.Table, vulnerabilitymetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.MetadataTable, vulnerabilityid.MetadataColumn),
 		)
-		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCertifyVuln queries the certify_vuln edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryCertifyVuln(vi *VulnerabilityID) *CertifyVulnQuery {
+func (c *VulnerabilityIDClient) QueryCertifyVuln(_m *VulnerabilityID) *CertifyVulnQuery {
 	query := (&CertifyVulnClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vi.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(certifyvuln.Table, certifyvuln.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.CertifyVulnTable, vulnerabilityid.CertifyVulnColumn),
 		)
-		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryVex queries the vex edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVex(vi *VulnerabilityID) *CertifyVexQuery {
+func (c *VulnerabilityIDClient) QueryVex(_m *VulnerabilityID) *CertifyVexQuery {
 	query := (&CertifyVexClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vi.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VexTable, vulnerabilityid.VexColumn),
 		)
-		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -4859,8 +4859,8 @@ func (c *VulnerabilityMetadataClient) Update() *VulnerabilityMetadataUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *VulnerabilityMetadataClient) UpdateOne(vm *VulnerabilityMetadata) *VulnerabilityMetadataUpdateOne {
-	mutation := newVulnerabilityMetadataMutation(c.config, OpUpdateOne, withVulnerabilityMetadata(vm))
+func (c *VulnerabilityMetadataClient) UpdateOne(_m *VulnerabilityMetadata) *VulnerabilityMetadataUpdateOne {
+	mutation := newVulnerabilityMetadataMutation(c.config, OpUpdateOne, withVulnerabilityMetadata(_m))
 	return &VulnerabilityMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -4877,8 +4877,8 @@ func (c *VulnerabilityMetadataClient) Delete() *VulnerabilityMetadataDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *VulnerabilityMetadataClient) DeleteOne(vm *VulnerabilityMetadata) *VulnerabilityMetadataDeleteOne {
-	return c.DeleteOneID(vm.ID)
+func (c *VulnerabilityMetadataClient) DeleteOne(_m *VulnerabilityMetadata) *VulnerabilityMetadataDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -4913,16 +4913,16 @@ func (c *VulnerabilityMetadataClient) GetX(ctx context.Context, id uuid.UUID) *V
 }
 
 // QueryVulnerabilityID queries the vulnerability_id edge of a VulnerabilityMetadata.
-func (c *VulnerabilityMetadataClient) QueryVulnerabilityID(vm *VulnerabilityMetadata) *VulnerabilityIDQuery {
+func (c *VulnerabilityMetadataClient) QueryVulnerabilityID(_m *VulnerabilityMetadata) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vm.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilitymetadata.Table, vulnerabilitymetadata.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, vulnerabilitymetadata.VulnerabilityIDTable, vulnerabilitymetadata.VulnerabilityIDColumn),
 		)
-		fromV = sqlgraph.Neighbors(vm.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

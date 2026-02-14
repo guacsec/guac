@@ -121,7 +121,7 @@ func (*Occurrence) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Occurrence fields.
-func (o *Occurrence) assignValues(columns []string, values []any) error {
+func (_m *Occurrence) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -131,54 +131,54 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				o.ID = *value
+				_m.ID = *value
 			}
 		case occurrence.FieldArtifactID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value != nil {
-				o.ArtifactID = *value
+				_m.ArtifactID = *value
 			}
 		case occurrence.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				o.Justification = value.String
+				_m.Justification = value.String
 			}
 		case occurrence.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				o.Origin = value.String
+				_m.Origin = value.String
 			}
 		case occurrence.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				o.Collector = value.String
+				_m.Collector = value.String
 			}
 		case occurrence.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				o.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case occurrence.FieldSourceID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				o.SourceID = new(uuid.UUID)
-				*o.SourceID = *value.S.(*uuid.UUID)
+				_m.SourceID = new(uuid.UUID)
+				*_m.SourceID = *value.S.(*uuid.UUID)
 			}
 		case occurrence.FieldPackageID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				o.PackageID = new(uuid.UUID)
-				*o.PackageID = *value.S.(*uuid.UUID)
+				_m.PackageID = new(uuid.UUID)
+				*_m.PackageID = *value.S.(*uuid.UUID)
 			}
 		default:
-			o.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -186,74 +186,74 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Occurrence.
 // This includes values selected through modifiers, order, etc.
-func (o *Occurrence) Value(name string) (ent.Value, error) {
-	return o.selectValues.Get(name)
+func (_m *Occurrence) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryArtifact queries the "artifact" edge of the Occurrence entity.
-func (o *Occurrence) QueryArtifact() *ArtifactQuery {
-	return NewOccurrenceClient(o.config).QueryArtifact(o)
+func (_m *Occurrence) QueryArtifact() *ArtifactQuery {
+	return NewOccurrenceClient(_m.config).QueryArtifact(_m)
 }
 
 // QueryPackage queries the "package" edge of the Occurrence entity.
-func (o *Occurrence) QueryPackage() *PackageVersionQuery {
-	return NewOccurrenceClient(o.config).QueryPackage(o)
+func (_m *Occurrence) QueryPackage() *PackageVersionQuery {
+	return NewOccurrenceClient(_m.config).QueryPackage(_m)
 }
 
 // QuerySource queries the "source" edge of the Occurrence entity.
-func (o *Occurrence) QuerySource() *SourceNameQuery {
-	return NewOccurrenceClient(o.config).QuerySource(o)
+func (_m *Occurrence) QuerySource() *SourceNameQuery {
+	return NewOccurrenceClient(_m.config).QuerySource(_m)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the Occurrence entity.
-func (o *Occurrence) QueryIncludedInSboms() *BillOfMaterialsQuery {
-	return NewOccurrenceClient(o.config).QueryIncludedInSboms(o)
+func (_m *Occurrence) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewOccurrenceClient(_m.config).QueryIncludedInSboms(_m)
 }
 
 // Update returns a builder for updating this Occurrence.
 // Note that you need to call Occurrence.Unwrap() before calling this method if this Occurrence
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (o *Occurrence) Update() *OccurrenceUpdateOne {
-	return NewOccurrenceClient(o.config).UpdateOne(o)
+func (_m *Occurrence) Update() *OccurrenceUpdateOne {
+	return NewOccurrenceClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Occurrence entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (o *Occurrence) Unwrap() *Occurrence {
-	_tx, ok := o.config.driver.(*txDriver)
+func (_m *Occurrence) Unwrap() *Occurrence {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Occurrence is not a transactional entity")
 	}
-	o.config.driver = _tx.drv
-	return o
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (o *Occurrence) String() string {
+func (_m *Occurrence) String() string {
 	var builder strings.Builder
 	builder.WriteString("Occurrence(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("artifact_id=")
-	builder.WriteString(fmt.Sprintf("%v", o.ArtifactID))
+	builder.WriteString(fmt.Sprintf("%v", _m.ArtifactID))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(o.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(o.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(o.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(o.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
-	if v := o.SourceID; v != nil {
+	if v := _m.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := o.PackageID; v != nil {
+	if v := _m.PackageID; v != nil {
 		builder.WriteString("package_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
@@ -263,25 +263,25 @@ func (o *Occurrence) String() string {
 
 // NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (o *Occurrence) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
-	if o.Edges.namedIncludedInSboms == nil {
+func (_m *Occurrence) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if _m.Edges.namedIncludedInSboms == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := o.Edges.namedIncludedInSboms[name]
+	nodes, ok := _m.Edges.namedIncludedInSboms[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (o *Occurrence) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
-	if o.Edges.namedIncludedInSboms == nil {
-		o.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+func (_m *Occurrence) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if _m.Edges.namedIncludedInSboms == nil {
+		_m.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
 	}
 	if len(edges) == 0 {
-		o.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+		_m.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
 	} else {
-		o.Edges.namedIncludedInSboms[name] = append(o.Edges.namedIncludedInSboms[name], edges...)
+		_m.Edges.namedIncludedInSboms[name] = append(_m.Edges.namedIncludedInSboms[name], edges...)
 	}
 }
 

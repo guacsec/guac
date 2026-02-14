@@ -35,7 +35,9 @@ func (ec *executionContext) _HasSLSA_id(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSA_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _HasSLSA_subject(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSA_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _HasSLSA_slsa(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSA_slsa,
-		func(ctx context.Context) (any, error) { return obj.Slsa, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Slsa, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -152,7 +158,9 @@ func (ec *executionContext) _HasSLSAConnection_totalCount(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSAConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -181,7 +189,9 @@ func (ec *executionContext) _HasSLSAConnection_pageInfo(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSAConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -218,7 +228,9 @@ func (ec *executionContext) _HasSLSAConnection_edges(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSAConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -253,7 +265,9 @@ func (ec *executionContext) _HasSLSAEdge_cursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSAEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -282,7 +296,9 @@ func (ec *executionContext) _HasSLSAEdge_node(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HasSLSAEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -319,7 +335,9 @@ func (ec *executionContext) _SLSA_builtFrom(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_builtFrom,
-		func(ctx context.Context) (any, error) { return obj.BuiltFrom, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.BuiltFrom, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -356,7 +374,9 @@ func (ec *executionContext) _SLSA_builtBy(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_builtBy,
-		func(ctx context.Context) (any, error) { return obj.BuiltBy, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.BuiltBy, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -391,7 +411,9 @@ func (ec *executionContext) _SLSA_buildType(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_buildType,
-		func(ctx context.Context) (any, error) { return obj.BuildType, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.BuildType, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -420,7 +442,9 @@ func (ec *executionContext) _SLSA_slsaPredicate(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_slsaPredicate,
-		func(ctx context.Context) (any, error) { return obj.SlsaPredicate, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SlsaPredicate, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -455,7 +479,9 @@ func (ec *executionContext) _SLSA_slsaVersion(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_slsaVersion,
-		func(ctx context.Context) (any, error) { return obj.SlsaVersion, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SlsaVersion, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -484,7 +510,9 @@ func (ec *executionContext) _SLSA_startedOn(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_startedOn,
-		func(ctx context.Context) (any, error) { return obj.StartedOn, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StartedOn, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -513,7 +541,9 @@ func (ec *executionContext) _SLSA_finishedOn(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_finishedOn,
-		func(ctx context.Context) (any, error) { return obj.FinishedOn, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.FinishedOn, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -542,7 +572,9 @@ func (ec *executionContext) _SLSA_origin(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -571,7 +603,9 @@ func (ec *executionContext) _SLSA_collector(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -600,7 +634,9 @@ func (ec *executionContext) _SLSA_documentRef(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSA_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -629,7 +665,9 @@ func (ec *executionContext) _SLSAPredicate_key(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSAPredicate_key,
-		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -658,7 +696,9 @@ func (ec *executionContext) _SLSAPredicate_value(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SLSAPredicate_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1260,7 +1300,7 @@ func (ec *executionContext) marshalNHasSLSA2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNHasSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsa(ctx context.Context, sel ast.SelectionSet, v *model.HasSlsa) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1314,7 +1354,7 @@ func (ec *executionContext) marshalNHasSLSAEdge2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNHasSLSAEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSAEdge(ctx context.Context, sel ast.SelectionSet, v *model.HasSLSAEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1329,7 +1369,7 @@ func (ec *executionContext) unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx context.Context, sel ast.SelectionSet, v *model.Slsa) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1408,7 +1448,7 @@ func (ec *executionContext) marshalNSLSAPredicate2ᚕᚖgithubᚗcomᚋguacsec�
 func (ec *executionContext) marshalNSLSAPredicate2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicate(ctx context.Context, sel ast.SelectionSet, v *model.SLSAPredicate) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

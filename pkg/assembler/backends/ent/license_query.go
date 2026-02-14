@@ -37,44 +37,44 @@ type LicenseQuery struct {
 }
 
 // Where adds a new predicate for the LicenseQuery builder.
-func (lq *LicenseQuery) Where(ps ...predicate.License) *LicenseQuery {
-	lq.predicates = append(lq.predicates, ps...)
-	return lq
+func (_q *LicenseQuery) Where(ps ...predicate.License) *LicenseQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (lq *LicenseQuery) Limit(limit int) *LicenseQuery {
-	lq.ctx.Limit = &limit
-	return lq
+func (_q *LicenseQuery) Limit(limit int) *LicenseQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (lq *LicenseQuery) Offset(offset int) *LicenseQuery {
-	lq.ctx.Offset = &offset
-	return lq
+func (_q *LicenseQuery) Offset(offset int) *LicenseQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (lq *LicenseQuery) Unique(unique bool) *LicenseQuery {
-	lq.ctx.Unique = &unique
-	return lq
+func (_q *LicenseQuery) Unique(unique bool) *LicenseQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (lq *LicenseQuery) Order(o ...license.OrderOption) *LicenseQuery {
-	lq.order = append(lq.order, o...)
-	return lq
+func (_q *LicenseQuery) Order(o ...license.OrderOption) *LicenseQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryDeclaredInCertifyLegals chains the current query on the "declared_in_certify_legals" edge.
-func (lq *LicenseQuery) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
-	query := (&CertifyLegalClient{config: lq.config}).Query()
+func (_q *LicenseQuery) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := lq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -83,20 +83,20 @@ func (lq *LicenseQuery) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, license.DeclaredInCertifyLegalsTable, license.DeclaredInCertifyLegalsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryDiscoveredInCertifyLegals chains the current query on the "discovered_in_certify_legals" edge.
-func (lq *LicenseQuery) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
-	query := (&CertifyLegalClient{config: lq.config}).Query()
+func (_q *LicenseQuery) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := lq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (lq *LicenseQuery) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, license.DiscoveredInCertifyLegalsTable, license.DiscoveredInCertifyLegalsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -113,8 +113,8 @@ func (lq *LicenseQuery) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
 
 // First returns the first License entity from the query.
 // Returns a *NotFoundError when no License was found.
-func (lq *LicenseQuery) First(ctx context.Context) (*License, error) {
-	nodes, err := lq.Limit(1).All(setContextOp(ctx, lq.ctx, ent.OpQueryFirst))
+func (_q *LicenseQuery) First(ctx context.Context) (*License, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +125,8 @@ func (lq *LicenseQuery) First(ctx context.Context) (*License, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
-	node, err := lq.First(ctx)
+func (_q *LicenseQuery) FirstX(ctx context.Context) *License {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -135,9 +135,9 @@ func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
 
 // FirstID returns the first License ID from the query.
 // Returns a *NotFoundError when no License ID was found.
-func (lq *LicenseQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *LicenseQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -148,8 +148,8 @@ func (lq *LicenseQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (lq *LicenseQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := lq.FirstID(ctx)
+func (_q *LicenseQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -159,8 +159,8 @@ func (lq *LicenseQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single License entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one License entity is found.
 // Returns a *NotFoundError when no License entities are found.
-func (lq *LicenseQuery) Only(ctx context.Context) (*License, error) {
-	nodes, err := lq.Limit(2).All(setContextOp(ctx, lq.ctx, ent.OpQueryOnly))
+func (_q *LicenseQuery) Only(ctx context.Context) (*License, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +175,8 @@ func (lq *LicenseQuery) Only(ctx context.Context) (*License, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
-	node, err := lq.Only(ctx)
+func (_q *LicenseQuery) OnlyX(ctx context.Context) *License {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -186,9 +186,9 @@ func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
 // OnlyID is like Only, but returns the only License ID in the query.
 // Returns a *NotSingularError when more than one License ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (lq *LicenseQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *LicenseQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -203,8 +203,8 @@ func (lq *LicenseQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (lq *LicenseQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := lq.OnlyID(ctx)
+func (_q *LicenseQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -212,18 +212,18 @@ func (lq *LicenseQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of Licenses.
-func (lq *LicenseQuery) All(ctx context.Context) ([]*License, error) {
-	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryAll)
-	if err := lq.prepareQuery(ctx); err != nil {
+func (_q *LicenseQuery) All(ctx context.Context) ([]*License, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*License, *LicenseQuery]()
-	return withInterceptors[[]*License](ctx, lq, qr, lq.inters)
+	return withInterceptors[[]*License](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (lq *LicenseQuery) AllX(ctx context.Context) []*License {
-	nodes, err := lq.All(ctx)
+func (_q *LicenseQuery) AllX(ctx context.Context) []*License {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -231,20 +231,20 @@ func (lq *LicenseQuery) AllX(ctx context.Context) []*License {
 }
 
 // IDs executes the query and returns a list of License IDs.
-func (lq *LicenseQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if lq.ctx.Unique == nil && lq.path != nil {
-		lq.Unique(true)
+func (_q *LicenseQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryIDs)
-	if err = lq.Select(license.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(license.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (lq *LicenseQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := lq.IDs(ctx)
+func (_q *LicenseQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -252,17 +252,17 @@ func (lq *LicenseQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (lq *LicenseQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryCount)
-	if err := lq.prepareQuery(ctx); err != nil {
+func (_q *LicenseQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, lq, querierCount[*LicenseQuery](), lq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*LicenseQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (lq *LicenseQuery) CountX(ctx context.Context) int {
-	count, err := lq.Count(ctx)
+func (_q *LicenseQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -270,9 +270,9 @@ func (lq *LicenseQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (lq *LicenseQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryExist)
-	switch _, err := lq.FirstID(ctx); {
+func (_q *LicenseQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -283,8 +283,8 @@ func (lq *LicenseQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (lq *LicenseQuery) ExistX(ctx context.Context) bool {
-	exist, err := lq.Exist(ctx)
+func (_q *LicenseQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -293,44 +293,44 @@ func (lq *LicenseQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the LicenseQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (lq *LicenseQuery) Clone() *LicenseQuery {
-	if lq == nil {
+func (_q *LicenseQuery) Clone() *LicenseQuery {
+	if _q == nil {
 		return nil
 	}
 	return &LicenseQuery{
-		config:                        lq.config,
-		ctx:                           lq.ctx.Clone(),
-		order:                         append([]license.OrderOption{}, lq.order...),
-		inters:                        append([]Interceptor{}, lq.inters...),
-		predicates:                    append([]predicate.License{}, lq.predicates...),
-		withDeclaredInCertifyLegals:   lq.withDeclaredInCertifyLegals.Clone(),
-		withDiscoveredInCertifyLegals: lq.withDiscoveredInCertifyLegals.Clone(),
+		config:                        _q.config,
+		ctx:                           _q.ctx.Clone(),
+		order:                         append([]license.OrderOption{}, _q.order...),
+		inters:                        append([]Interceptor{}, _q.inters...),
+		predicates:                    append([]predicate.License{}, _q.predicates...),
+		withDeclaredInCertifyLegals:   _q.withDeclaredInCertifyLegals.Clone(),
+		withDiscoveredInCertifyLegals: _q.withDiscoveredInCertifyLegals.Clone(),
 		// clone intermediate query.
-		sql:  lq.sql.Clone(),
-		path: lq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithDeclaredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to
 // the "declared_in_certify_legals" edge. The optional arguments are used to configure the query builder of the edge.
-func (lq *LicenseQuery) WithDeclaredInCertifyLegals(opts ...func(*CertifyLegalQuery)) *LicenseQuery {
-	query := (&CertifyLegalClient{config: lq.config}).Query()
+func (_q *LicenseQuery) WithDeclaredInCertifyLegals(opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	lq.withDeclaredInCertifyLegals = query
-	return lq
+	_q.withDeclaredInCertifyLegals = query
+	return _q
 }
 
 // WithDiscoveredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to
 // the "discovered_in_certify_legals" edge. The optional arguments are used to configure the query builder of the edge.
-func (lq *LicenseQuery) WithDiscoveredInCertifyLegals(opts ...func(*CertifyLegalQuery)) *LicenseQuery {
-	query := (&CertifyLegalClient{config: lq.config}).Query()
+func (_q *LicenseQuery) WithDiscoveredInCertifyLegals(opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	lq.withDiscoveredInCertifyLegals = query
-	return lq
+	_q.withDiscoveredInCertifyLegals = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -347,10 +347,10 @@ func (lq *LicenseQuery) WithDiscoveredInCertifyLegals(opts ...func(*CertifyLegal
 //		GroupBy(license.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy {
-	lq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &LicenseGroupBy{build: lq}
-	grbuild.flds = &lq.ctx.Fields
+func (_q *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &LicenseGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = license.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -368,77 +368,77 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 //	client.License.Query().
 //		Select(license.FieldName).
 //		Scan(ctx, &v)
-func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
-	lq.ctx.Fields = append(lq.ctx.Fields, fields...)
-	sbuild := &LicenseSelect{LicenseQuery: lq}
+func (_q *LicenseQuery) Select(fields ...string) *LicenseSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &LicenseSelect{LicenseQuery: _q}
 	sbuild.label = license.Label
-	sbuild.flds, sbuild.scan = &lq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a LicenseSelect configured with the given aggregations.
-func (lq *LicenseQuery) Aggregate(fns ...AggregateFunc) *LicenseSelect {
-	return lq.Select().Aggregate(fns...)
+func (_q *LicenseQuery) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range lq.inters {
+func (_q *LicenseQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, lq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range lq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !license.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if lq.path != nil {
-		prev, err := lq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		lq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*License, error) {
+func (_q *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*License, error) {
 	var (
 		nodes       = []*License{}
-		_spec       = lq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			lq.withDeclaredInCertifyLegals != nil,
-			lq.withDiscoveredInCertifyLegals != nil,
+			_q.withDeclaredInCertifyLegals != nil,
+			_q.withDiscoveredInCertifyLegals != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*License).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &License{config: lq.config}
+		node := &License{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(lq.modifiers) > 0 {
-		_spec.Modifiers = lq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, lq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := lq.withDeclaredInCertifyLegals; query != nil {
-		if err := lq.loadDeclaredInCertifyLegals(ctx, query, nodes,
+	if query := _q.withDeclaredInCertifyLegals; query != nil {
+		if err := _q.loadDeclaredInCertifyLegals(ctx, query, nodes,
 			func(n *License) { n.Edges.DeclaredInCertifyLegals = []*CertifyLegal{} },
 			func(n *License, e *CertifyLegal) {
 				n.Edges.DeclaredInCertifyLegals = append(n.Edges.DeclaredInCertifyLegals, e)
@@ -446,8 +446,8 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 			return nil, err
 		}
 	}
-	if query := lq.withDiscoveredInCertifyLegals; query != nil {
-		if err := lq.loadDiscoveredInCertifyLegals(ctx, query, nodes,
+	if query := _q.withDiscoveredInCertifyLegals; query != nil {
+		if err := _q.loadDiscoveredInCertifyLegals(ctx, query, nodes,
 			func(n *License) { n.Edges.DiscoveredInCertifyLegals = []*CertifyLegal{} },
 			func(n *License, e *CertifyLegal) {
 				n.Edges.DiscoveredInCertifyLegals = append(n.Edges.DiscoveredInCertifyLegals, e)
@@ -455,29 +455,29 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 			return nil, err
 		}
 	}
-	for name, query := range lq.withNamedDeclaredInCertifyLegals {
-		if err := lq.loadDeclaredInCertifyLegals(ctx, query, nodes,
+	for name, query := range _q.withNamedDeclaredInCertifyLegals {
+		if err := _q.loadDeclaredInCertifyLegals(ctx, query, nodes,
 			func(n *License) { n.appendNamedDeclaredInCertifyLegals(name) },
 			func(n *License, e *CertifyLegal) { n.appendNamedDeclaredInCertifyLegals(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range lq.withNamedDiscoveredInCertifyLegals {
-		if err := lq.loadDiscoveredInCertifyLegals(ctx, query, nodes,
+	for name, query := range _q.withNamedDiscoveredInCertifyLegals {
+		if err := _q.loadDiscoveredInCertifyLegals(ctx, query, nodes,
 			func(n *License) { n.appendNamedDiscoveredInCertifyLegals(name) },
 			func(n *License, e *CertifyLegal) { n.appendNamedDiscoveredInCertifyLegals(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range lq.loadTotal {
-		if err := lq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (lq *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
+func (_q *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*License)
 	nids := make(map[uuid.UUID]map[*License]struct{})
@@ -538,7 +538,7 @@ func (lq *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *
 	}
 	return nil
 }
-func (lq *LicenseQuery) loadDiscoveredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
+func (_q *LicenseQuery) loadDiscoveredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*License)
 	nids := make(map[uuid.UUID]map[*License]struct{})
@@ -600,27 +600,27 @@ func (lq *LicenseQuery) loadDiscoveredInCertifyLegals(ctx context.Context, query
 	return nil
 }
 
-func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := lq.querySpec()
-	if len(lq.modifiers) > 0 {
-		_spec.Modifiers = lq.modifiers
+func (_q *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = lq.ctx.Fields
-	if len(lq.ctx.Fields) > 0 {
-		_spec.Unique = lq.ctx.Unique != nil && *lq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, lq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
-	_spec.From = lq.sql
-	if unique := lq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if lq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := lq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, license.FieldID)
 		for i := range fields {
@@ -629,20 +629,20 @@ func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := lq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := lq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := lq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := lq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -652,33 +652,33 @@ func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (lq *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(lq.driver.Dialect())
+func (_q *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(license.Table)
-	columns := lq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = license.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if lq.sql != nil {
-		selector = lq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if lq.ctx.Unique != nil && *lq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range lq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range lq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := lq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := lq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -686,30 +686,30 @@ func (lq *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // WithNamedDeclaredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to the "declared_in_certify_legals"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (lq *LicenseQuery) WithNamedDeclaredInCertifyLegals(name string, opts ...func(*CertifyLegalQuery)) *LicenseQuery {
-	query := (&CertifyLegalClient{config: lq.config}).Query()
+func (_q *LicenseQuery) WithNamedDeclaredInCertifyLegals(name string, opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if lq.withNamedDeclaredInCertifyLegals == nil {
-		lq.withNamedDeclaredInCertifyLegals = make(map[string]*CertifyLegalQuery)
+	if _q.withNamedDeclaredInCertifyLegals == nil {
+		_q.withNamedDeclaredInCertifyLegals = make(map[string]*CertifyLegalQuery)
 	}
-	lq.withNamedDeclaredInCertifyLegals[name] = query
-	return lq
+	_q.withNamedDeclaredInCertifyLegals[name] = query
+	return _q
 }
 
 // WithNamedDiscoveredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to the "discovered_in_certify_legals"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (lq *LicenseQuery) WithNamedDiscoveredInCertifyLegals(name string, opts ...func(*CertifyLegalQuery)) *LicenseQuery {
-	query := (&CertifyLegalClient{config: lq.config}).Query()
+func (_q *LicenseQuery) WithNamedDiscoveredInCertifyLegals(name string, opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if lq.withNamedDiscoveredInCertifyLegals == nil {
-		lq.withNamedDiscoveredInCertifyLegals = make(map[string]*CertifyLegalQuery)
+	if _q.withNamedDiscoveredInCertifyLegals == nil {
+		_q.withNamedDiscoveredInCertifyLegals = make(map[string]*CertifyLegalQuery)
 	}
-	lq.withNamedDiscoveredInCertifyLegals[name] = query
-	return lq
+	_q.withNamedDiscoveredInCertifyLegals[name] = query
+	return _q
 }
 
 // LicenseGroupBy is the group-by builder for License entities.
@@ -719,41 +719,41 @@ type LicenseGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
-	lgb.fns = append(lgb.fns, fns...)
-	return lgb
+func (_g *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, lgb.build.ctx, ent.OpQueryGroupBy)
-	if err := lgb.build.prepareQuery(ctx); err != nil {
+func (_g *LicenseGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*LicenseQuery, *LicenseGroupBy](ctx, lgb.build, lgb, lgb.build.inters, v)
+	return scanWithInterceptors[*LicenseQuery, *LicenseGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
+func (_g *LicenseGroupBy) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(lgb.fns))
-	for _, fn := range lgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*lgb.flds)+len(lgb.fns))
-		for _, f := range *lgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*lgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := lgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -767,27 +767,27 @@ type LicenseSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
-	ls.fns = append(ls.fns, fns...)
-	return ls
+func (_s *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ls.ctx, ent.OpQuerySelect)
-	if err := ls.prepareQuery(ctx); err != nil {
+func (_s *LicenseSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*LicenseQuery, *LicenseSelect](ctx, ls.LicenseQuery, ls, ls.inters, v)
+	return scanWithInterceptors[*LicenseQuery, *LicenseSelect](ctx, _s.LicenseQuery, _s, _s.inters, v)
 }
 
-func (ls *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
+func (_s *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ls.fns))
-	for _, fn := range ls.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ls.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -795,7 +795,7 @@ func (ls *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ls.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

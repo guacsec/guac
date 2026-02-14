@@ -35,7 +35,9 @@ func (ec *executionContext) _PkgEqual_id(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqual_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _PkgEqual_packages(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqual_packages,
-		func(ctx context.Context) (any, error) { return obj.Packages, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Packages, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _PkgEqual_justification(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqual_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -130,7 +136,9 @@ func (ec *executionContext) _PkgEqual_origin(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqual_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -159,7 +167,9 @@ func (ec *executionContext) _PkgEqual_collector(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqual_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -188,7 +198,9 @@ func (ec *executionContext) _PkgEqual_documentRef(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqual_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -217,7 +229,9 @@ func (ec *executionContext) _PkgEqualConnection_totalCount(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqualConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -246,7 +260,9 @@ func (ec *executionContext) _PkgEqualConnection_pageInfo(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqualConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -283,7 +299,9 @@ func (ec *executionContext) _PkgEqualConnection_edges(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqualConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -318,7 +336,9 @@ func (ec *executionContext) _PkgEqualEdge_cursor(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqualEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -347,7 +367,9 @@ func (ec *executionContext) _PkgEqualEdge_node(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PkgEqualEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -714,7 +736,7 @@ func (ec *executionContext) marshalNPkgEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguac
 func (ec *executionContext) marshalNPkgEqual2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqual(ctx context.Context, sel ast.SelectionSet, v *model.PkgEqual) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -768,7 +790,7 @@ func (ec *executionContext) marshalNPkgEqualEdge2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNPkgEqualEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualEdge(ctx context.Context, sel ast.SelectionSet, v *model.PkgEqualEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

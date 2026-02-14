@@ -35,7 +35,9 @@ func (ec *executionContext) _VulnerabilityMetadata_id(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _VulnerabilityMetadata_vulnerability(ctx context.Con
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_vulnerability,
-		func(ctx context.Context) (any, error) { return obj.Vulnerability, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Vulnerability, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _VulnerabilityMetadata_scoreType(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_scoreType,
-		func(ctx context.Context) (any, error) { return obj.ScoreType, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ScoreType, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -130,7 +136,9 @@ func (ec *executionContext) _VulnerabilityMetadata_scoreValue(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_scoreValue,
-		func(ctx context.Context) (any, error) { return obj.ScoreValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ScoreValue, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -159,7 +167,9 @@ func (ec *executionContext) _VulnerabilityMetadata_timestamp(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_timestamp,
-		func(ctx context.Context) (any, error) { return obj.Timestamp, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Timestamp, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -188,7 +198,9 @@ func (ec *executionContext) _VulnerabilityMetadata_origin(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -217,7 +229,9 @@ func (ec *executionContext) _VulnerabilityMetadata_collector(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -246,7 +260,9 @@ func (ec *executionContext) _VulnerabilityMetadata_documentRef(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadata_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -275,7 +291,9 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_totalCount(ctx cont
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadataConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -304,7 +322,9 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_pageInfo(ctx contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadataConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -341,7 +361,9 @@ func (ec *executionContext) _VulnerabilityMetadataConnection_edges(ctx context.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadataConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -376,7 +398,9 @@ func (ec *executionContext) _VulnerabilityMetadataEdge_cursor(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadataEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -405,7 +429,9 @@ func (ec *executionContext) _VulnerabilityMetadataEdge_node(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_VulnerabilityMetadataEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -821,7 +847,7 @@ func (ec *executionContext) marshalNVulnerabilityMetadata2ᚕᚖgithubᚗcomᚋg
 func (ec *executionContext) marshalNVulnerabilityMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadata(ctx context.Context, sel ast.SelectionSet, v *model.VulnerabilityMetadata) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -875,7 +901,7 @@ func (ec *executionContext) marshalNVulnerabilityMetadataEdge2ᚕᚖgithubᚗcom
 func (ec *executionContext) marshalNVulnerabilityMetadataEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataEdge(ctx context.Context, sel ast.SelectionSet, v *model.VulnerabilityMetadataEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

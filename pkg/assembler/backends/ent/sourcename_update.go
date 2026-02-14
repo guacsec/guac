@@ -30,358 +30,358 @@ type SourceNameUpdate struct {
 }
 
 // Where appends a list predicates to the SourceNameUpdate builder.
-func (snu *SourceNameUpdate) Where(ps ...predicate.SourceName) *SourceNameUpdate {
-	snu.mutation.Where(ps...)
-	return snu
+func (_u *SourceNameUpdate) Where(ps ...predicate.SourceName) *SourceNameUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetType sets the "type" field.
-func (snu *SourceNameUpdate) SetType(s string) *SourceNameUpdate {
-	snu.mutation.SetType(s)
-	return snu
+func (_u *SourceNameUpdate) SetType(v string) *SourceNameUpdate {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (snu *SourceNameUpdate) SetNillableType(s *string) *SourceNameUpdate {
-	if s != nil {
-		snu.SetType(*s)
+func (_u *SourceNameUpdate) SetNillableType(v *string) *SourceNameUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return snu
+	return _u
 }
 
 // SetNamespace sets the "namespace" field.
-func (snu *SourceNameUpdate) SetNamespace(s string) *SourceNameUpdate {
-	snu.mutation.SetNamespace(s)
-	return snu
+func (_u *SourceNameUpdate) SetNamespace(v string) *SourceNameUpdate {
+	_u.mutation.SetNamespace(v)
+	return _u
 }
 
 // SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (snu *SourceNameUpdate) SetNillableNamespace(s *string) *SourceNameUpdate {
-	if s != nil {
-		snu.SetNamespace(*s)
+func (_u *SourceNameUpdate) SetNillableNamespace(v *string) *SourceNameUpdate {
+	if v != nil {
+		_u.SetNamespace(*v)
 	}
-	return snu
+	return _u
 }
 
 // SetName sets the "name" field.
-func (snu *SourceNameUpdate) SetName(s string) *SourceNameUpdate {
-	snu.mutation.SetName(s)
-	return snu
+func (_u *SourceNameUpdate) SetName(v string) *SourceNameUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (snu *SourceNameUpdate) SetNillableName(s *string) *SourceNameUpdate {
-	if s != nil {
-		snu.SetName(*s)
+func (_u *SourceNameUpdate) SetNillableName(v *string) *SourceNameUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return snu
+	return _u
 }
 
 // SetCommit sets the "commit" field.
-func (snu *SourceNameUpdate) SetCommit(s string) *SourceNameUpdate {
-	snu.mutation.SetCommit(s)
-	return snu
+func (_u *SourceNameUpdate) SetCommit(v string) *SourceNameUpdate {
+	_u.mutation.SetCommit(v)
+	return _u
 }
 
 // SetNillableCommit sets the "commit" field if the given value is not nil.
-func (snu *SourceNameUpdate) SetNillableCommit(s *string) *SourceNameUpdate {
-	if s != nil {
-		snu.SetCommit(*s)
+func (_u *SourceNameUpdate) SetNillableCommit(v *string) *SourceNameUpdate {
+	if v != nil {
+		_u.SetCommit(*v)
 	}
-	return snu
+	return _u
 }
 
 // ClearCommit clears the value of the "commit" field.
-func (snu *SourceNameUpdate) ClearCommit() *SourceNameUpdate {
-	snu.mutation.ClearCommit()
-	return snu
+func (_u *SourceNameUpdate) ClearCommit() *SourceNameUpdate {
+	_u.mutation.ClearCommit()
+	return _u
 }
 
 // SetTag sets the "tag" field.
-func (snu *SourceNameUpdate) SetTag(s string) *SourceNameUpdate {
-	snu.mutation.SetTag(s)
-	return snu
+func (_u *SourceNameUpdate) SetTag(v string) *SourceNameUpdate {
+	_u.mutation.SetTag(v)
+	return _u
 }
 
 // SetNillableTag sets the "tag" field if the given value is not nil.
-func (snu *SourceNameUpdate) SetNillableTag(s *string) *SourceNameUpdate {
-	if s != nil {
-		snu.SetTag(*s)
+func (_u *SourceNameUpdate) SetNillableTag(v *string) *SourceNameUpdate {
+	if v != nil {
+		_u.SetTag(*v)
 	}
-	return snu
+	return _u
 }
 
 // ClearTag clears the value of the "tag" field.
-func (snu *SourceNameUpdate) ClearTag() *SourceNameUpdate {
-	snu.mutation.ClearTag()
-	return snu
+func (_u *SourceNameUpdate) ClearTag() *SourceNameUpdate {
+	_u.mutation.ClearTag()
+	return _u
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (snu *SourceNameUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddOccurrenceIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddOccurrenceIDs(ids...)
+	return _u
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (snu *SourceNameUpdate) AddOccurrences(o ...*Occurrence) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *SourceNameUpdate) AddOccurrences(v ...*Occurrence) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddOccurrenceIDs(ids...)
+	return _u.AddOccurrenceIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (snu *SourceNameUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddHasSourceAtIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddHasSourceAtIDs(ids...)
+	return _u
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (snu *SourceNameUpdate) AddHasSourceAt(h ...*HasSourceAt) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdate) AddHasSourceAt(v ...*HasSourceAt) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddHasSourceAtIDs(ids...)
+	return _u.AddHasSourceAtIDs(ids...)
 }
 
 // AddScorecardIDs adds the "scorecard" edge to the CertifyScorecard entity by IDs.
-func (snu *SourceNameUpdate) AddScorecardIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddScorecardIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddScorecardIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddScorecardIDs(ids...)
+	return _u
 }
 
 // AddScorecard adds the "scorecard" edges to the CertifyScorecard entity.
-func (snu *SourceNameUpdate) AddScorecard(c ...*CertifyScorecard) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdate) AddScorecard(v ...*CertifyScorecard) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddScorecardIDs(ids...)
+	return _u.AddScorecardIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (snu *SourceNameUpdate) AddCertificationIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddCertificationIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddCertificationIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddCertificationIDs(ids...)
+	return _u
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (snu *SourceNameUpdate) AddCertification(c ...*Certification) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdate) AddCertification(v ...*Certification) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddCertificationIDs(ids...)
+	return _u.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (snu *SourceNameUpdate) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddMetadatumIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddMetadatumIDs(ids...)
+	return _u
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (snu *SourceNameUpdate) AddMetadata(h ...*HasMetadata) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdate) AddMetadata(v ...*HasMetadata) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddMetadatumIDs(ids...)
+	return _u.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (snu *SourceNameUpdate) AddPocIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddPocIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddPocIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddPocIDs(ids...)
+	return _u
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (snu *SourceNameUpdate) AddPoc(p ...*PointOfContact) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *SourceNameUpdate) AddPoc(v ...*PointOfContact) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddPocIDs(ids...)
+	return _u.AddPocIDs(ids...)
 }
 
 // AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
-func (snu *SourceNameUpdate) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.AddCertifyLegalIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.AddCertifyLegalIDs(ids...)
+	return _u
 }
 
 // AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
-func (snu *SourceNameUpdate) AddCertifyLegal(c ...*CertifyLegal) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdate) AddCertifyLegal(v ...*CertifyLegal) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.AddCertifyLegalIDs(ids...)
+	return _u.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the SourceNameMutation object of the builder.
-func (snu *SourceNameUpdate) Mutation() *SourceNameMutation {
-	return snu.mutation
+func (_u *SourceNameUpdate) Mutation() *SourceNameMutation {
+	return _u.mutation
 }
 
 // ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
-func (snu *SourceNameUpdate) ClearOccurrences() *SourceNameUpdate {
-	snu.mutation.ClearOccurrences()
-	return snu
+func (_u *SourceNameUpdate) ClearOccurrences() *SourceNameUpdate {
+	_u.mutation.ClearOccurrences()
+	return _u
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (snu *SourceNameUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemoveOccurrenceIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemoveOccurrenceIDs(ids...)
+	return _u
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
-func (snu *SourceNameUpdate) RemoveOccurrences(o ...*Occurrence) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *SourceNameUpdate) RemoveOccurrences(v ...*Occurrence) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemoveOccurrenceIDs(ids...)
+	return _u.RemoveOccurrenceIDs(ids...)
 }
 
 // ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
-func (snu *SourceNameUpdate) ClearHasSourceAt() *SourceNameUpdate {
-	snu.mutation.ClearHasSourceAt()
-	return snu
+func (_u *SourceNameUpdate) ClearHasSourceAt() *SourceNameUpdate {
+	_u.mutation.ClearHasSourceAt()
+	return _u
 }
 
 // RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
-func (snu *SourceNameUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemoveHasSourceAtIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemoveHasSourceAtIDs(ids...)
+	return _u
 }
 
 // RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
-func (snu *SourceNameUpdate) RemoveHasSourceAt(h ...*HasSourceAt) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdate) RemoveHasSourceAt(v ...*HasSourceAt) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemoveHasSourceAtIDs(ids...)
+	return _u.RemoveHasSourceAtIDs(ids...)
 }
 
 // ClearScorecard clears all "scorecard" edges to the CertifyScorecard entity.
-func (snu *SourceNameUpdate) ClearScorecard() *SourceNameUpdate {
-	snu.mutation.ClearScorecard()
-	return snu
+func (_u *SourceNameUpdate) ClearScorecard() *SourceNameUpdate {
+	_u.mutation.ClearScorecard()
+	return _u
 }
 
 // RemoveScorecardIDs removes the "scorecard" edge to CertifyScorecard entities by IDs.
-func (snu *SourceNameUpdate) RemoveScorecardIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemoveScorecardIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemoveScorecardIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemoveScorecardIDs(ids...)
+	return _u
 }
 
 // RemoveScorecard removes "scorecard" edges to CertifyScorecard entities.
-func (snu *SourceNameUpdate) RemoveScorecard(c ...*CertifyScorecard) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdate) RemoveScorecard(v ...*CertifyScorecard) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemoveScorecardIDs(ids...)
+	return _u.RemoveScorecardIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
-func (snu *SourceNameUpdate) ClearCertification() *SourceNameUpdate {
-	snu.mutation.ClearCertification()
-	return snu
+func (_u *SourceNameUpdate) ClearCertification() *SourceNameUpdate {
+	_u.mutation.ClearCertification()
+	return _u
 }
 
 // RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
-func (snu *SourceNameUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemoveCertificationIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemoveCertificationIDs(ids...)
+	return _u
 }
 
 // RemoveCertification removes "certification" edges to Certification entities.
-func (snu *SourceNameUpdate) RemoveCertification(c ...*Certification) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdate) RemoveCertification(v ...*Certification) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemoveCertificationIDs(ids...)
+	return _u.RemoveCertificationIDs(ids...)
 }
 
 // ClearMetadata clears all "metadata" edges to the HasMetadata entity.
-func (snu *SourceNameUpdate) ClearMetadata() *SourceNameUpdate {
-	snu.mutation.ClearMetadata()
-	return snu
+func (_u *SourceNameUpdate) ClearMetadata() *SourceNameUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
-func (snu *SourceNameUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemoveMetadatumIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemoveMetadatumIDs(ids...)
+	return _u
 }
 
 // RemoveMetadata removes "metadata" edges to HasMetadata entities.
-func (snu *SourceNameUpdate) RemoveMetadata(h ...*HasMetadata) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdate) RemoveMetadata(v ...*HasMetadata) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemoveMetadatumIDs(ids...)
+	return _u.RemoveMetadatumIDs(ids...)
 }
 
 // ClearPoc clears all "poc" edges to the PointOfContact entity.
-func (snu *SourceNameUpdate) ClearPoc() *SourceNameUpdate {
-	snu.mutation.ClearPoc()
-	return snu
+func (_u *SourceNameUpdate) ClearPoc() *SourceNameUpdate {
+	_u.mutation.ClearPoc()
+	return _u
 }
 
 // RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
-func (snu *SourceNameUpdate) RemovePocIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemovePocIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemovePocIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemovePocIDs(ids...)
+	return _u
 }
 
 // RemovePoc removes "poc" edges to PointOfContact entities.
-func (snu *SourceNameUpdate) RemovePoc(p ...*PointOfContact) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *SourceNameUpdate) RemovePoc(v ...*PointOfContact) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemovePocIDs(ids...)
+	return _u.RemovePocIDs(ids...)
 }
 
 // ClearCertifyLegal clears all "certify_legal" edges to the CertifyLegal entity.
-func (snu *SourceNameUpdate) ClearCertifyLegal() *SourceNameUpdate {
-	snu.mutation.ClearCertifyLegal()
-	return snu
+func (_u *SourceNameUpdate) ClearCertifyLegal() *SourceNameUpdate {
+	_u.mutation.ClearCertifyLegal()
+	return _u
 }
 
 // RemoveCertifyLegalIDs removes the "certify_legal" edge to CertifyLegal entities by IDs.
-func (snu *SourceNameUpdate) RemoveCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdate {
-	snu.mutation.RemoveCertifyLegalIDs(ids...)
-	return snu
+func (_u *SourceNameUpdate) RemoveCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdate {
+	_u.mutation.RemoveCertifyLegalIDs(ids...)
+	return _u
 }
 
 // RemoveCertifyLegal removes "certify_legal" edges to CertifyLegal entities.
-func (snu *SourceNameUpdate) RemoveCertifyLegal(c ...*CertifyLegal) *SourceNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdate) RemoveCertifyLegal(v ...*CertifyLegal) *SourceNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snu.RemoveCertifyLegalIDs(ids...)
+	return _u.RemoveCertifyLegalIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (snu *SourceNameUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, snu.sqlSave, snu.mutation, snu.hooks)
+func (_u *SourceNameUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (snu *SourceNameUpdate) SaveX(ctx context.Context) int {
-	affected, err := snu.Save(ctx)
+func (_u *SourceNameUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -389,49 +389,49 @@ func (snu *SourceNameUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (snu *SourceNameUpdate) Exec(ctx context.Context) error {
-	_, err := snu.Save(ctx)
+func (_u *SourceNameUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (snu *SourceNameUpdate) ExecX(ctx context.Context) {
-	if err := snu.Exec(ctx); err != nil {
+func (_u *SourceNameUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *SourceNameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
-	if ps := snu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := snu.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(sourcename.FieldType, field.TypeString, value)
 	}
-	if value, ok := snu.mutation.Namespace(); ok {
+	if value, ok := _u.mutation.Namespace(); ok {
 		_spec.SetField(sourcename.FieldNamespace, field.TypeString, value)
 	}
-	if value, ok := snu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(sourcename.FieldName, field.TypeString, value)
 	}
-	if value, ok := snu.mutation.Commit(); ok {
+	if value, ok := _u.mutation.Commit(); ok {
 		_spec.SetField(sourcename.FieldCommit, field.TypeString, value)
 	}
-	if snu.mutation.CommitCleared() {
+	if _u.mutation.CommitCleared() {
 		_spec.ClearField(sourcename.FieldCommit, field.TypeString)
 	}
-	if value, ok := snu.mutation.Tag(); ok {
+	if value, ok := _u.mutation.Tag(); ok {
 		_spec.SetField(sourcename.FieldTag, field.TypeString, value)
 	}
-	if snu.mutation.TagCleared() {
+	if _u.mutation.TagCleared() {
 		_spec.ClearField(sourcename.FieldTag, field.TypeString)
 	}
-	if snu.mutation.OccurrencesCleared() {
+	if _u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -444,23 +444,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !snu.mutation.OccurrencesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   sourcename.OccurrencesTable,
-			Columns: []string{sourcename.OccurrencesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := snu.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !_u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -474,9 +458,25 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.OccurrencesTable,
+			Columns: []string{sourcename.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snu.mutation.HasSourceAtCleared() {
+	if _u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -489,7 +489,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !snu.mutation.HasSourceAtCleared() {
+	if nodes := _u.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !_u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -505,7 +505,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -521,7 +521,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snu.mutation.ScorecardCleared() {
+	if _u.mutation.ScorecardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -534,23 +534,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedScorecardIDs(); len(nodes) > 0 && !snu.mutation.ScorecardCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   sourcename.ScorecardTable,
-			Columns: []string{sourcename.ScorecardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := snu.mutation.ScorecardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedScorecardIDs(); len(nodes) > 0 && !_u.mutation.ScorecardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -564,9 +548,25 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ScorecardIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.ScorecardTable,
+			Columns: []string{sourcename.ScorecardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snu.mutation.CertificationCleared() {
+	if _u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -579,7 +579,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !snu.mutation.CertificationCleared() {
+	if nodes := _u.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !_u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -595,7 +595,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -611,7 +611,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snu.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -624,7 +624,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !snu.mutation.MetadataCleared() {
+	if nodes := _u.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !_u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -640,7 +640,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -656,7 +656,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snu.mutation.PocCleared() {
+	if _u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -669,7 +669,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedPocIDs(); len(nodes) > 0 && !snu.mutation.PocCleared() {
+	if nodes := _u.mutation.RemovedPocIDs(); len(nodes) > 0 && !_u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -685,7 +685,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -701,7 +701,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snu.mutation.CertifyLegalCleared() {
+	if _u.mutation.CertifyLegalCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -714,7 +714,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.RemovedCertifyLegalIDs(); len(nodes) > 0 && !snu.mutation.CertifyLegalCleared() {
+	if nodes := _u.mutation.RemovedCertifyLegalIDs(); len(nodes) > 0 && !_u.mutation.CertifyLegalCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -730,7 +730,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertifyLegalIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -746,7 +746,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, snu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{sourcename.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -754,8 +754,8 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	snu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // SourceNameUpdateOne is the builder for updating a single SourceName entity.
@@ -767,365 +767,365 @@ type SourceNameUpdateOne struct {
 }
 
 // SetType sets the "type" field.
-func (snuo *SourceNameUpdateOne) SetType(s string) *SourceNameUpdateOne {
-	snuo.mutation.SetType(s)
-	return snuo
+func (_u *SourceNameUpdateOne) SetType(v string) *SourceNameUpdateOne {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (snuo *SourceNameUpdateOne) SetNillableType(s *string) *SourceNameUpdateOne {
-	if s != nil {
-		snuo.SetType(*s)
+func (_u *SourceNameUpdateOne) SetNillableType(v *string) *SourceNameUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return snuo
+	return _u
 }
 
 // SetNamespace sets the "namespace" field.
-func (snuo *SourceNameUpdateOne) SetNamespace(s string) *SourceNameUpdateOne {
-	snuo.mutation.SetNamespace(s)
-	return snuo
+func (_u *SourceNameUpdateOne) SetNamespace(v string) *SourceNameUpdateOne {
+	_u.mutation.SetNamespace(v)
+	return _u
 }
 
 // SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (snuo *SourceNameUpdateOne) SetNillableNamespace(s *string) *SourceNameUpdateOne {
-	if s != nil {
-		snuo.SetNamespace(*s)
+func (_u *SourceNameUpdateOne) SetNillableNamespace(v *string) *SourceNameUpdateOne {
+	if v != nil {
+		_u.SetNamespace(*v)
 	}
-	return snuo
+	return _u
 }
 
 // SetName sets the "name" field.
-func (snuo *SourceNameUpdateOne) SetName(s string) *SourceNameUpdateOne {
-	snuo.mutation.SetName(s)
-	return snuo
+func (_u *SourceNameUpdateOne) SetName(v string) *SourceNameUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (snuo *SourceNameUpdateOne) SetNillableName(s *string) *SourceNameUpdateOne {
-	if s != nil {
-		snuo.SetName(*s)
+func (_u *SourceNameUpdateOne) SetNillableName(v *string) *SourceNameUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return snuo
+	return _u
 }
 
 // SetCommit sets the "commit" field.
-func (snuo *SourceNameUpdateOne) SetCommit(s string) *SourceNameUpdateOne {
-	snuo.mutation.SetCommit(s)
-	return snuo
+func (_u *SourceNameUpdateOne) SetCommit(v string) *SourceNameUpdateOne {
+	_u.mutation.SetCommit(v)
+	return _u
 }
 
 // SetNillableCommit sets the "commit" field if the given value is not nil.
-func (snuo *SourceNameUpdateOne) SetNillableCommit(s *string) *SourceNameUpdateOne {
-	if s != nil {
-		snuo.SetCommit(*s)
+func (_u *SourceNameUpdateOne) SetNillableCommit(v *string) *SourceNameUpdateOne {
+	if v != nil {
+		_u.SetCommit(*v)
 	}
-	return snuo
+	return _u
 }
 
 // ClearCommit clears the value of the "commit" field.
-func (snuo *SourceNameUpdateOne) ClearCommit() *SourceNameUpdateOne {
-	snuo.mutation.ClearCommit()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearCommit() *SourceNameUpdateOne {
+	_u.mutation.ClearCommit()
+	return _u
 }
 
 // SetTag sets the "tag" field.
-func (snuo *SourceNameUpdateOne) SetTag(s string) *SourceNameUpdateOne {
-	snuo.mutation.SetTag(s)
-	return snuo
+func (_u *SourceNameUpdateOne) SetTag(v string) *SourceNameUpdateOne {
+	_u.mutation.SetTag(v)
+	return _u
 }
 
 // SetNillableTag sets the "tag" field if the given value is not nil.
-func (snuo *SourceNameUpdateOne) SetNillableTag(s *string) *SourceNameUpdateOne {
-	if s != nil {
-		snuo.SetTag(*s)
+func (_u *SourceNameUpdateOne) SetNillableTag(v *string) *SourceNameUpdateOne {
+	if v != nil {
+		_u.SetTag(*v)
 	}
-	return snuo
+	return _u
 }
 
 // ClearTag clears the value of the "tag" field.
-func (snuo *SourceNameUpdateOne) ClearTag() *SourceNameUpdateOne {
-	snuo.mutation.ClearTag()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearTag() *SourceNameUpdateOne {
+	_u.mutation.ClearTag()
+	return _u
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (snuo *SourceNameUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddOccurrenceIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddOccurrenceIDs(ids...)
+	return _u
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (snuo *SourceNameUpdateOne) AddOccurrences(o ...*Occurrence) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *SourceNameUpdateOne) AddOccurrences(v ...*Occurrence) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddOccurrenceIDs(ids...)
+	return _u.AddOccurrenceIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (snuo *SourceNameUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddHasSourceAtIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddHasSourceAtIDs(ids...)
+	return _u
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (snuo *SourceNameUpdateOne) AddHasSourceAt(h ...*HasSourceAt) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdateOne) AddHasSourceAt(v ...*HasSourceAt) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddHasSourceAtIDs(ids...)
+	return _u.AddHasSourceAtIDs(ids...)
 }
 
 // AddScorecardIDs adds the "scorecard" edge to the CertifyScorecard entity by IDs.
-func (snuo *SourceNameUpdateOne) AddScorecardIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddScorecardIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddScorecardIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddScorecardIDs(ids...)
+	return _u
 }
 
 // AddScorecard adds the "scorecard" edges to the CertifyScorecard entity.
-func (snuo *SourceNameUpdateOne) AddScorecard(c ...*CertifyScorecard) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdateOne) AddScorecard(v ...*CertifyScorecard) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddScorecardIDs(ids...)
+	return _u.AddScorecardIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (snuo *SourceNameUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddCertificationIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddCertificationIDs(ids...)
+	return _u
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (snuo *SourceNameUpdateOne) AddCertification(c ...*Certification) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdateOne) AddCertification(v ...*Certification) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddCertificationIDs(ids...)
+	return _u.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (snuo *SourceNameUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddMetadatumIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddMetadatumIDs(ids...)
+	return _u
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (snuo *SourceNameUpdateOne) AddMetadata(h ...*HasMetadata) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdateOne) AddMetadata(v ...*HasMetadata) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddMetadatumIDs(ids...)
+	return _u.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (snuo *SourceNameUpdateOne) AddPocIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddPocIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddPocIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddPocIDs(ids...)
+	return _u
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (snuo *SourceNameUpdateOne) AddPoc(p ...*PointOfContact) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *SourceNameUpdateOne) AddPoc(v ...*PointOfContact) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddPocIDs(ids...)
+	return _u.AddPocIDs(ids...)
 }
 
 // AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
-func (snuo *SourceNameUpdateOne) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.AddCertifyLegalIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.AddCertifyLegalIDs(ids...)
+	return _u
 }
 
 // AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
-func (snuo *SourceNameUpdateOne) AddCertifyLegal(c ...*CertifyLegal) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdateOne) AddCertifyLegal(v ...*CertifyLegal) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.AddCertifyLegalIDs(ids...)
+	return _u.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the SourceNameMutation object of the builder.
-func (snuo *SourceNameUpdateOne) Mutation() *SourceNameMutation {
-	return snuo.mutation
+func (_u *SourceNameUpdateOne) Mutation() *SourceNameMutation {
+	return _u.mutation
 }
 
 // ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
-func (snuo *SourceNameUpdateOne) ClearOccurrences() *SourceNameUpdateOne {
-	snuo.mutation.ClearOccurrences()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearOccurrences() *SourceNameUpdateOne {
+	_u.mutation.ClearOccurrences()
+	return _u
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemoveOccurrenceIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemoveOccurrenceIDs(ids...)
+	return _u
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
-func (snuo *SourceNameUpdateOne) RemoveOccurrences(o ...*Occurrence) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *SourceNameUpdateOne) RemoveOccurrences(v ...*Occurrence) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemoveOccurrenceIDs(ids...)
+	return _u.RemoveOccurrenceIDs(ids...)
 }
 
 // ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
-func (snuo *SourceNameUpdateOne) ClearHasSourceAt() *SourceNameUpdateOne {
-	snuo.mutation.ClearHasSourceAt()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearHasSourceAt() *SourceNameUpdateOne {
+	_u.mutation.ClearHasSourceAt()
+	return _u
 }
 
 // RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemoveHasSourceAtIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemoveHasSourceAtIDs(ids...)
+	return _u
 }
 
 // RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
-func (snuo *SourceNameUpdateOne) RemoveHasSourceAt(h ...*HasSourceAt) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdateOne) RemoveHasSourceAt(v ...*HasSourceAt) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemoveHasSourceAtIDs(ids...)
+	return _u.RemoveHasSourceAtIDs(ids...)
 }
 
 // ClearScorecard clears all "scorecard" edges to the CertifyScorecard entity.
-func (snuo *SourceNameUpdateOne) ClearScorecard() *SourceNameUpdateOne {
-	snuo.mutation.ClearScorecard()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearScorecard() *SourceNameUpdateOne {
+	_u.mutation.ClearScorecard()
+	return _u
 }
 
 // RemoveScorecardIDs removes the "scorecard" edge to CertifyScorecard entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveScorecardIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemoveScorecardIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemoveScorecardIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemoveScorecardIDs(ids...)
+	return _u
 }
 
 // RemoveScorecard removes "scorecard" edges to CertifyScorecard entities.
-func (snuo *SourceNameUpdateOne) RemoveScorecard(c ...*CertifyScorecard) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdateOne) RemoveScorecard(v ...*CertifyScorecard) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemoveScorecardIDs(ids...)
+	return _u.RemoveScorecardIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
-func (snuo *SourceNameUpdateOne) ClearCertification() *SourceNameUpdateOne {
-	snuo.mutation.ClearCertification()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearCertification() *SourceNameUpdateOne {
+	_u.mutation.ClearCertification()
+	return _u
 }
 
 // RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemoveCertificationIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemoveCertificationIDs(ids...)
+	return _u
 }
 
 // RemoveCertification removes "certification" edges to Certification entities.
-func (snuo *SourceNameUpdateOne) RemoveCertification(c ...*Certification) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdateOne) RemoveCertification(v ...*Certification) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemoveCertificationIDs(ids...)
+	return _u.RemoveCertificationIDs(ids...)
 }
 
 // ClearMetadata clears all "metadata" edges to the HasMetadata entity.
-func (snuo *SourceNameUpdateOne) ClearMetadata() *SourceNameUpdateOne {
-	snuo.mutation.ClearMetadata()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearMetadata() *SourceNameUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemoveMetadatumIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemoveMetadatumIDs(ids...)
+	return _u
 }
 
 // RemoveMetadata removes "metadata" edges to HasMetadata entities.
-func (snuo *SourceNameUpdateOne) RemoveMetadata(h ...*HasMetadata) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *SourceNameUpdateOne) RemoveMetadata(v ...*HasMetadata) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemoveMetadatumIDs(ids...)
+	return _u.RemoveMetadatumIDs(ids...)
 }
 
 // ClearPoc clears all "poc" edges to the PointOfContact entity.
-func (snuo *SourceNameUpdateOne) ClearPoc() *SourceNameUpdateOne {
-	snuo.mutation.ClearPoc()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearPoc() *SourceNameUpdateOne {
+	_u.mutation.ClearPoc()
+	return _u
 }
 
 // RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
-func (snuo *SourceNameUpdateOne) RemovePocIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemovePocIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemovePocIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemovePocIDs(ids...)
+	return _u
 }
 
 // RemovePoc removes "poc" edges to PointOfContact entities.
-func (snuo *SourceNameUpdateOne) RemovePoc(p ...*PointOfContact) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *SourceNameUpdateOne) RemovePoc(v ...*PointOfContact) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemovePocIDs(ids...)
+	return _u.RemovePocIDs(ids...)
 }
 
 // ClearCertifyLegal clears all "certify_legal" edges to the CertifyLegal entity.
-func (snuo *SourceNameUpdateOne) ClearCertifyLegal() *SourceNameUpdateOne {
-	snuo.mutation.ClearCertifyLegal()
-	return snuo
+func (_u *SourceNameUpdateOne) ClearCertifyLegal() *SourceNameUpdateOne {
+	_u.mutation.ClearCertifyLegal()
+	return _u
 }
 
 // RemoveCertifyLegalIDs removes the "certify_legal" edge to CertifyLegal entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
-	snuo.mutation.RemoveCertifyLegalIDs(ids...)
-	return snuo
+func (_u *SourceNameUpdateOne) RemoveCertifyLegalIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
+	_u.mutation.RemoveCertifyLegalIDs(ids...)
+	return _u
 }
 
 // RemoveCertifyLegal removes "certify_legal" edges to CertifyLegal entities.
-func (snuo *SourceNameUpdateOne) RemoveCertifyLegal(c ...*CertifyLegal) *SourceNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SourceNameUpdateOne) RemoveCertifyLegal(v ...*CertifyLegal) *SourceNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snuo.RemoveCertifyLegalIDs(ids...)
+	return _u.RemoveCertifyLegalIDs(ids...)
 }
 
 // Where appends a list predicates to the SourceNameUpdate builder.
-func (snuo *SourceNameUpdateOne) Where(ps ...predicate.SourceName) *SourceNameUpdateOne {
-	snuo.mutation.Where(ps...)
-	return snuo
+func (_u *SourceNameUpdateOne) Where(ps ...predicate.SourceName) *SourceNameUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (snuo *SourceNameUpdateOne) Select(field string, fields ...string) *SourceNameUpdateOne {
-	snuo.fields = append([]string{field}, fields...)
-	return snuo
+func (_u *SourceNameUpdateOne) Select(field string, fields ...string) *SourceNameUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated SourceName entity.
-func (snuo *SourceNameUpdateOne) Save(ctx context.Context) (*SourceName, error) {
-	return withHooks(ctx, snuo.sqlSave, snuo.mutation, snuo.hooks)
+func (_u *SourceNameUpdateOne) Save(ctx context.Context) (*SourceName, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (snuo *SourceNameUpdateOne) SaveX(ctx context.Context) *SourceName {
-	node, err := snuo.Save(ctx)
+func (_u *SourceNameUpdateOne) SaveX(ctx context.Context) *SourceName {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1133,26 +1133,26 @@ func (snuo *SourceNameUpdateOne) SaveX(ctx context.Context) *SourceName {
 }
 
 // Exec executes the query on the entity.
-func (snuo *SourceNameUpdateOne) Exec(ctx context.Context) error {
-	_, err := snuo.Save(ctx)
+func (_u *SourceNameUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (snuo *SourceNameUpdateOne) ExecX(ctx context.Context) {
-	if err := snuo.Exec(ctx); err != nil {
+func (_u *SourceNameUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName, err error) {
+func (_u *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName, err error) {
 	_spec := sqlgraph.NewUpdateSpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
-	id, ok := snuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SourceName.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := snuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, sourcename.FieldID)
 		for _, f := range fields {
@@ -1164,35 +1164,35 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			}
 		}
 	}
-	if ps := snuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := snuo.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(sourcename.FieldType, field.TypeString, value)
 	}
-	if value, ok := snuo.mutation.Namespace(); ok {
+	if value, ok := _u.mutation.Namespace(); ok {
 		_spec.SetField(sourcename.FieldNamespace, field.TypeString, value)
 	}
-	if value, ok := snuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(sourcename.FieldName, field.TypeString, value)
 	}
-	if value, ok := snuo.mutation.Commit(); ok {
+	if value, ok := _u.mutation.Commit(); ok {
 		_spec.SetField(sourcename.FieldCommit, field.TypeString, value)
 	}
-	if snuo.mutation.CommitCleared() {
+	if _u.mutation.CommitCleared() {
 		_spec.ClearField(sourcename.FieldCommit, field.TypeString)
 	}
-	if value, ok := snuo.mutation.Tag(); ok {
+	if value, ok := _u.mutation.Tag(); ok {
 		_spec.SetField(sourcename.FieldTag, field.TypeString, value)
 	}
-	if snuo.mutation.TagCleared() {
+	if _u.mutation.TagCleared() {
 		_spec.ClearField(sourcename.FieldTag, field.TypeString)
 	}
-	if snuo.mutation.OccurrencesCleared() {
+	if _u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1205,23 +1205,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !snuo.mutation.OccurrencesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   sourcename.OccurrencesTable,
-			Columns: []string{sourcename.OccurrencesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := snuo.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !_u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1235,9 +1219,25 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.OccurrencesTable,
+			Columns: []string{sourcename.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snuo.mutation.HasSourceAtCleared() {
+	if _u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1250,7 +1250,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !snuo.mutation.HasSourceAtCleared() {
+	if nodes := _u.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !_u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1266,7 +1266,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1282,7 +1282,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snuo.mutation.ScorecardCleared() {
+	if _u.mutation.ScorecardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1295,23 +1295,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedScorecardIDs(); len(nodes) > 0 && !snuo.mutation.ScorecardCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   sourcename.ScorecardTable,
-			Columns: []string{sourcename.ScorecardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := snuo.mutation.ScorecardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedScorecardIDs(); len(nodes) > 0 && !_u.mutation.ScorecardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1325,9 +1309,25 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ScorecardIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.ScorecardTable,
+			Columns: []string{sourcename.ScorecardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snuo.mutation.CertificationCleared() {
+	if _u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1340,7 +1340,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !snuo.mutation.CertificationCleared() {
+	if nodes := _u.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !_u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1356,7 +1356,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1372,7 +1372,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snuo.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1385,7 +1385,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !snuo.mutation.MetadataCleared() {
+	if nodes := _u.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !_u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1401,7 +1401,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1417,7 +1417,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snuo.mutation.PocCleared() {
+	if _u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1430,7 +1430,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedPocIDs(); len(nodes) > 0 && !snuo.mutation.PocCleared() {
+	if nodes := _u.mutation.RemovedPocIDs(); len(nodes) > 0 && !_u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1446,7 +1446,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1462,7 +1462,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if snuo.mutation.CertifyLegalCleared() {
+	if _u.mutation.CertifyLegalCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1475,7 +1475,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.RemovedCertifyLegalIDs(); len(nodes) > 0 && !snuo.mutation.CertifyLegalCleared() {
+	if nodes := _u.mutation.RemovedCertifyLegalIDs(); len(nodes) > 0 && !_u.mutation.CertifyLegalCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1491,7 +1491,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertifyLegalIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1507,10 +1507,10 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &SourceName{config: snuo.config}
+	_node = &SourceName{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, snuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{sourcename.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1518,6 +1518,6 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 		}
 		return nil, err
 	}
-	snuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

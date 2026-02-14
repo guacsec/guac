@@ -39,44 +39,44 @@ type PointOfContactQuery struct {
 }
 
 // Where adds a new predicate for the PointOfContactQuery builder.
-func (pocq *PointOfContactQuery) Where(ps ...predicate.PointOfContact) *PointOfContactQuery {
-	pocq.predicates = append(pocq.predicates, ps...)
-	return pocq
+func (_q *PointOfContactQuery) Where(ps ...predicate.PointOfContact) *PointOfContactQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (pocq *PointOfContactQuery) Limit(limit int) *PointOfContactQuery {
-	pocq.ctx.Limit = &limit
-	return pocq
+func (_q *PointOfContactQuery) Limit(limit int) *PointOfContactQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (pocq *PointOfContactQuery) Offset(offset int) *PointOfContactQuery {
-	pocq.ctx.Offset = &offset
-	return pocq
+func (_q *PointOfContactQuery) Offset(offset int) *PointOfContactQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (pocq *PointOfContactQuery) Unique(unique bool) *PointOfContactQuery {
-	pocq.ctx.Unique = &unique
-	return pocq
+func (_q *PointOfContactQuery) Unique(unique bool) *PointOfContactQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (pocq *PointOfContactQuery) Order(o ...pointofcontact.OrderOption) *PointOfContactQuery {
-	pocq.order = append(pocq.order, o...)
-	return pocq
+func (_q *PointOfContactQuery) Order(o ...pointofcontact.OrderOption) *PointOfContactQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QuerySource chains the current query on the "source" edge.
-func (pocq *PointOfContactQuery) QuerySource() *SourceNameQuery {
-	query := (&SourceNameClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) QuerySource() *SourceNameQuery {
+	query := (&SourceNameClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pocq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pocq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -85,20 +85,20 @@ func (pocq *PointOfContactQuery) QuerySource() *SourceNameQuery {
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.SourceTable, pointofcontact.SourceColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(pocq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryPackageVersion chains the current query on the "package_version" edge.
-func (pocq *PointOfContactQuery) QueryPackageVersion() *PackageVersionQuery {
-	query := (&PackageVersionClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) QueryPackageVersion() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pocq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pocq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -107,20 +107,20 @@ func (pocq *PointOfContactQuery) QueryPackageVersion() *PackageVersionQuery {
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.PackageVersionTable, pointofcontact.PackageVersionColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(pocq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryAllVersions chains the current query on the "all_versions" edge.
-func (pocq *PointOfContactQuery) QueryAllVersions() *PackageNameQuery {
-	query := (&PackageNameClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) QueryAllVersions() *PackageNameQuery {
+	query := (&PackageNameClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pocq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pocq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -129,20 +129,20 @@ func (pocq *PointOfContactQuery) QueryAllVersions() *PackageNameQuery {
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.AllVersionsTable, pointofcontact.AllVersionsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(pocq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryArtifact chains the current query on the "artifact" edge.
-func (pocq *PointOfContactQuery) QueryArtifact() *ArtifactQuery {
-	query := (&ArtifactClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) QueryArtifact() *ArtifactQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pocq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pocq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -151,7 +151,7 @@ func (pocq *PointOfContactQuery) QueryArtifact() *ArtifactQuery {
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, pointofcontact.ArtifactTable, pointofcontact.ArtifactColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(pocq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -159,8 +159,8 @@ func (pocq *PointOfContactQuery) QueryArtifact() *ArtifactQuery {
 
 // First returns the first PointOfContact entity from the query.
 // Returns a *NotFoundError when no PointOfContact was found.
-func (pocq *PointOfContactQuery) First(ctx context.Context) (*PointOfContact, error) {
-	nodes, err := pocq.Limit(1).All(setContextOp(ctx, pocq.ctx, ent.OpQueryFirst))
+func (_q *PointOfContactQuery) First(ctx context.Context) (*PointOfContact, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -171,8 +171,8 @@ func (pocq *PointOfContactQuery) First(ctx context.Context) (*PointOfContact, er
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (pocq *PointOfContactQuery) FirstX(ctx context.Context) *PointOfContact {
-	node, err := pocq.First(ctx)
+func (_q *PointOfContactQuery) FirstX(ctx context.Context) *PointOfContact {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -181,9 +181,9 @@ func (pocq *PointOfContactQuery) FirstX(ctx context.Context) *PointOfContact {
 
 // FirstID returns the first PointOfContact ID from the query.
 // Returns a *NotFoundError when no PointOfContact ID was found.
-func (pocq *PointOfContactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *PointOfContactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = pocq.Limit(1).IDs(setContextOp(ctx, pocq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -194,8 +194,8 @@ func (pocq *PointOfContactQuery) FirstID(ctx context.Context) (id uuid.UUID, err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pocq *PointOfContactQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := pocq.FirstID(ctx)
+func (_q *PointOfContactQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -205,8 +205,8 @@ func (pocq *PointOfContactQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single PointOfContact entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one PointOfContact entity is found.
 // Returns a *NotFoundError when no PointOfContact entities are found.
-func (pocq *PointOfContactQuery) Only(ctx context.Context) (*PointOfContact, error) {
-	nodes, err := pocq.Limit(2).All(setContextOp(ctx, pocq.ctx, ent.OpQueryOnly))
+func (_q *PointOfContactQuery) Only(ctx context.Context) (*PointOfContact, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -221,8 +221,8 @@ func (pocq *PointOfContactQuery) Only(ctx context.Context) (*PointOfContact, err
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (pocq *PointOfContactQuery) OnlyX(ctx context.Context) *PointOfContact {
-	node, err := pocq.Only(ctx)
+func (_q *PointOfContactQuery) OnlyX(ctx context.Context) *PointOfContact {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -232,9 +232,9 @@ func (pocq *PointOfContactQuery) OnlyX(ctx context.Context) *PointOfContact {
 // OnlyID is like Only, but returns the only PointOfContact ID in the query.
 // Returns a *NotSingularError when more than one PointOfContact ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pocq *PointOfContactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *PointOfContactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = pocq.Limit(2).IDs(setContextOp(ctx, pocq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -249,8 +249,8 @@ func (pocq *PointOfContactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pocq *PointOfContactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := pocq.OnlyID(ctx)
+func (_q *PointOfContactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -258,18 +258,18 @@ func (pocq *PointOfContactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of PointOfContacts.
-func (pocq *PointOfContactQuery) All(ctx context.Context) ([]*PointOfContact, error) {
-	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryAll)
-	if err := pocq.prepareQuery(ctx); err != nil {
+func (_q *PointOfContactQuery) All(ctx context.Context) ([]*PointOfContact, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*PointOfContact, *PointOfContactQuery]()
-	return withInterceptors[[]*PointOfContact](ctx, pocq, qr, pocq.inters)
+	return withInterceptors[[]*PointOfContact](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pocq *PointOfContactQuery) AllX(ctx context.Context) []*PointOfContact {
-	nodes, err := pocq.All(ctx)
+func (_q *PointOfContactQuery) AllX(ctx context.Context) []*PointOfContact {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -277,20 +277,20 @@ func (pocq *PointOfContactQuery) AllX(ctx context.Context) []*PointOfContact {
 }
 
 // IDs executes the query and returns a list of PointOfContact IDs.
-func (pocq *PointOfContactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if pocq.ctx.Unique == nil && pocq.path != nil {
-		pocq.Unique(true)
+func (_q *PointOfContactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryIDs)
-	if err = pocq.Select(pointofcontact.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(pointofcontact.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pocq *PointOfContactQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := pocq.IDs(ctx)
+func (_q *PointOfContactQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -298,17 +298,17 @@ func (pocq *PointOfContactQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (pocq *PointOfContactQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryCount)
-	if err := pocq.prepareQuery(ctx); err != nil {
+func (_q *PointOfContactQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, pocq, querierCount[*PointOfContactQuery](), pocq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*PointOfContactQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (pocq *PointOfContactQuery) CountX(ctx context.Context) int {
-	count, err := pocq.Count(ctx)
+func (_q *PointOfContactQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -316,9 +316,9 @@ func (pocq *PointOfContactQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (pocq *PointOfContactQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pocq.ctx, ent.OpQueryExist)
-	switch _, err := pocq.FirstID(ctx); {
+func (_q *PointOfContactQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -329,8 +329,8 @@ func (pocq *PointOfContactQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (pocq *PointOfContactQuery) ExistX(ctx context.Context) bool {
-	exist, err := pocq.Exist(ctx)
+func (_q *PointOfContactQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -339,68 +339,68 @@ func (pocq *PointOfContactQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the PointOfContactQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (pocq *PointOfContactQuery) Clone() *PointOfContactQuery {
-	if pocq == nil {
+func (_q *PointOfContactQuery) Clone() *PointOfContactQuery {
+	if _q == nil {
 		return nil
 	}
 	return &PointOfContactQuery{
-		config:             pocq.config,
-		ctx:                pocq.ctx.Clone(),
-		order:              append([]pointofcontact.OrderOption{}, pocq.order...),
-		inters:             append([]Interceptor{}, pocq.inters...),
-		predicates:         append([]predicate.PointOfContact{}, pocq.predicates...),
-		withSource:         pocq.withSource.Clone(),
-		withPackageVersion: pocq.withPackageVersion.Clone(),
-		withAllVersions:    pocq.withAllVersions.Clone(),
-		withArtifact:       pocq.withArtifact.Clone(),
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]pointofcontact.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.PointOfContact{}, _q.predicates...),
+		withSource:         _q.withSource.Clone(),
+		withPackageVersion: _q.withPackageVersion.Clone(),
+		withAllVersions:    _q.withAllVersions.Clone(),
+		withArtifact:       _q.withArtifact.Clone(),
 		// clone intermediate query.
-		sql:  pocq.sql.Clone(),
-		path: pocq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithSource tells the query-builder to eager-load the nodes that are connected to
 // the "source" edge. The optional arguments are used to configure the query builder of the edge.
-func (pocq *PointOfContactQuery) WithSource(opts ...func(*SourceNameQuery)) *PointOfContactQuery {
-	query := (&SourceNameClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) WithSource(opts ...func(*SourceNameQuery)) *PointOfContactQuery {
+	query := (&SourceNameClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pocq.withSource = query
-	return pocq
+	_q.withSource = query
+	return _q
 }
 
 // WithPackageVersion tells the query-builder to eager-load the nodes that are connected to
 // the "package_version" edge. The optional arguments are used to configure the query builder of the edge.
-func (pocq *PointOfContactQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *PointOfContactQuery {
-	query := (&PackageVersionClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *PointOfContactQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pocq.withPackageVersion = query
-	return pocq
+	_q.withPackageVersion = query
+	return _q
 }
 
 // WithAllVersions tells the query-builder to eager-load the nodes that are connected to
 // the "all_versions" edge. The optional arguments are used to configure the query builder of the edge.
-func (pocq *PointOfContactQuery) WithAllVersions(opts ...func(*PackageNameQuery)) *PointOfContactQuery {
-	query := (&PackageNameClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) WithAllVersions(opts ...func(*PackageNameQuery)) *PointOfContactQuery {
+	query := (&PackageNameClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pocq.withAllVersions = query
-	return pocq
+	_q.withAllVersions = query
+	return _q
 }
 
 // WithArtifact tells the query-builder to eager-load the nodes that are connected to
 // the "artifact" edge. The optional arguments are used to configure the query builder of the edge.
-func (pocq *PointOfContactQuery) WithArtifact(opts ...func(*ArtifactQuery)) *PointOfContactQuery {
-	query := (&ArtifactClient{config: pocq.config}).Query()
+func (_q *PointOfContactQuery) WithArtifact(opts ...func(*ArtifactQuery)) *PointOfContactQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pocq.withArtifact = query
-	return pocq
+	_q.withArtifact = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -417,10 +417,10 @@ func (pocq *PointOfContactQuery) WithArtifact(opts ...func(*ArtifactQuery)) *Poi
 //		GroupBy(pointofcontact.FieldSourceID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (pocq *PointOfContactQuery) GroupBy(field string, fields ...string) *PointOfContactGroupBy {
-	pocq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &PointOfContactGroupBy{build: pocq}
-	grbuild.flds = &pocq.ctx.Fields
+func (_q *PointOfContactQuery) GroupBy(field string, fields ...string) *PointOfContactGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &PointOfContactGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = pointofcontact.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -438,110 +438,110 @@ func (pocq *PointOfContactQuery) GroupBy(field string, fields ...string) *PointO
 //	client.PointOfContact.Query().
 //		Select(pointofcontact.FieldSourceID).
 //		Scan(ctx, &v)
-func (pocq *PointOfContactQuery) Select(fields ...string) *PointOfContactSelect {
-	pocq.ctx.Fields = append(pocq.ctx.Fields, fields...)
-	sbuild := &PointOfContactSelect{PointOfContactQuery: pocq}
+func (_q *PointOfContactQuery) Select(fields ...string) *PointOfContactSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &PointOfContactSelect{PointOfContactQuery: _q}
 	sbuild.label = pointofcontact.Label
-	sbuild.flds, sbuild.scan = &pocq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a PointOfContactSelect configured with the given aggregations.
-func (pocq *PointOfContactQuery) Aggregate(fns ...AggregateFunc) *PointOfContactSelect {
-	return pocq.Select().Aggregate(fns...)
+func (_q *PointOfContactQuery) Aggregate(fns ...AggregateFunc) *PointOfContactSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (pocq *PointOfContactQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range pocq.inters {
+func (_q *PointOfContactQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, pocq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range pocq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !pointofcontact.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if pocq.path != nil {
-		prev, err := pocq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		pocq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (pocq *PointOfContactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PointOfContact, error) {
+func (_q *PointOfContactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PointOfContact, error) {
 	var (
 		nodes       = []*PointOfContact{}
-		_spec       = pocq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [4]bool{
-			pocq.withSource != nil,
-			pocq.withPackageVersion != nil,
-			pocq.withAllVersions != nil,
-			pocq.withArtifact != nil,
+			_q.withSource != nil,
+			_q.withPackageVersion != nil,
+			_q.withAllVersions != nil,
+			_q.withArtifact != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*PointOfContact).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &PointOfContact{config: pocq.config}
+		node := &PointOfContact{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(pocq.modifiers) > 0 {
-		_spec.Modifiers = pocq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, pocq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := pocq.withSource; query != nil {
-		if err := pocq.loadSource(ctx, query, nodes, nil,
+	if query := _q.withSource; query != nil {
+		if err := _q.loadSource(ctx, query, nodes, nil,
 			func(n *PointOfContact, e *SourceName) { n.Edges.Source = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := pocq.withPackageVersion; query != nil {
-		if err := pocq.loadPackageVersion(ctx, query, nodes, nil,
+	if query := _q.withPackageVersion; query != nil {
+		if err := _q.loadPackageVersion(ctx, query, nodes, nil,
 			func(n *PointOfContact, e *PackageVersion) { n.Edges.PackageVersion = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := pocq.withAllVersions; query != nil {
-		if err := pocq.loadAllVersions(ctx, query, nodes, nil,
+	if query := _q.withAllVersions; query != nil {
+		if err := _q.loadAllVersions(ctx, query, nodes, nil,
 			func(n *PointOfContact, e *PackageName) { n.Edges.AllVersions = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := pocq.withArtifact; query != nil {
-		if err := pocq.loadArtifact(ctx, query, nodes, nil,
+	if query := _q.withArtifact; query != nil {
+		if err := _q.loadArtifact(ctx, query, nodes, nil,
 			func(n *PointOfContact, e *Artifact) { n.Edges.Artifact = e }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range pocq.loadTotal {
-		if err := pocq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (pocq *PointOfContactQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *SourceName)) error {
+func (_q *PointOfContactQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *SourceName)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
@@ -573,7 +573,7 @@ func (pocq *PointOfContactQuery) loadSource(ctx context.Context, query *SourceNa
 	}
 	return nil
 }
-func (pocq *PointOfContactQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *PackageVersion)) error {
+func (_q *PointOfContactQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *PackageVersion)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
@@ -605,7 +605,7 @@ func (pocq *PointOfContactQuery) loadPackageVersion(ctx context.Context, query *
 	}
 	return nil
 }
-func (pocq *PointOfContactQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *PackageName)) error {
+func (_q *PointOfContactQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *PackageName)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
@@ -637,7 +637,7 @@ func (pocq *PointOfContactQuery) loadAllVersions(ctx context.Context, query *Pac
 	}
 	return nil
 }
-func (pocq *PointOfContactQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *Artifact)) error {
+func (_q *PointOfContactQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *Artifact)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
@@ -670,27 +670,27 @@ func (pocq *PointOfContactQuery) loadArtifact(ctx context.Context, query *Artifa
 	return nil
 }
 
-func (pocq *PointOfContactQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := pocq.querySpec()
-	if len(pocq.modifiers) > 0 {
-		_spec.Modifiers = pocq.modifiers
+func (_q *PointOfContactQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = pocq.ctx.Fields
-	if len(pocq.ctx.Fields) > 0 {
-		_spec.Unique = pocq.ctx.Unique != nil && *pocq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, pocq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (pocq *PointOfContactQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *PointOfContactQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
-	_spec.From = pocq.sql
-	if unique := pocq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if pocq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := pocq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pointofcontact.FieldID)
 		for i := range fields {
@@ -698,33 +698,33 @@ func (pocq *PointOfContactQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if pocq.withSource != nil {
+		if _q.withSource != nil {
 			_spec.Node.AddColumnOnce(pointofcontact.FieldSourceID)
 		}
-		if pocq.withPackageVersion != nil {
+		if _q.withPackageVersion != nil {
 			_spec.Node.AddColumnOnce(pointofcontact.FieldPackageVersionID)
 		}
-		if pocq.withAllVersions != nil {
+		if _q.withAllVersions != nil {
 			_spec.Node.AddColumnOnce(pointofcontact.FieldPackageNameID)
 		}
-		if pocq.withArtifact != nil {
+		if _q.withArtifact != nil {
 			_spec.Node.AddColumnOnce(pointofcontact.FieldArtifactID)
 		}
 	}
-	if ps := pocq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := pocq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := pocq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := pocq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -734,33 +734,33 @@ func (pocq *PointOfContactQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (pocq *PointOfContactQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(pocq.driver.Dialect())
+func (_q *PointOfContactQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(pointofcontact.Table)
-	columns := pocq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = pointofcontact.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if pocq.sql != nil {
-		selector = pocq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if pocq.ctx.Unique != nil && *pocq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range pocq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range pocq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := pocq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := pocq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -773,41 +773,41 @@ type PointOfContactGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pocgb *PointOfContactGroupBy) Aggregate(fns ...AggregateFunc) *PointOfContactGroupBy {
-	pocgb.fns = append(pocgb.fns, fns...)
-	return pocgb
+func (_g *PointOfContactGroupBy) Aggregate(fns ...AggregateFunc) *PointOfContactGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pocgb *PointOfContactGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pocgb.build.ctx, ent.OpQueryGroupBy)
-	if err := pocgb.build.prepareQuery(ctx); err != nil {
+func (_g *PointOfContactGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PointOfContactQuery, *PointOfContactGroupBy](ctx, pocgb.build, pocgb, pocgb.build.inters, v)
+	return scanWithInterceptors[*PointOfContactQuery, *PointOfContactGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (pocgb *PointOfContactGroupBy) sqlScan(ctx context.Context, root *PointOfContactQuery, v any) error {
+func (_g *PointOfContactGroupBy) sqlScan(ctx context.Context, root *PointOfContactQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pocgb.fns))
-	for _, fn := range pocgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pocgb.flds)+len(pocgb.fns))
-		for _, f := range *pocgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pocgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pocgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -821,27 +821,27 @@ type PointOfContactSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (pocs *PointOfContactSelect) Aggregate(fns ...AggregateFunc) *PointOfContactSelect {
-	pocs.fns = append(pocs.fns, fns...)
-	return pocs
+func (_s *PointOfContactSelect) Aggregate(fns ...AggregateFunc) *PointOfContactSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pocs *PointOfContactSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pocs.ctx, ent.OpQuerySelect)
-	if err := pocs.prepareQuery(ctx); err != nil {
+func (_s *PointOfContactSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PointOfContactQuery, *PointOfContactSelect](ctx, pocs.PointOfContactQuery, pocs, pocs.inters, v)
+	return scanWithInterceptors[*PointOfContactQuery, *PointOfContactSelect](ctx, _s.PointOfContactQuery, _s, _s.inters, v)
 }
 
-func (pocs *PointOfContactSelect) sqlScan(ctx context.Context, root *PointOfContactQuery, v any) error {
+func (_s *PointOfContactSelect) sqlScan(ctx context.Context, root *PointOfContactQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(pocs.fns))
-	for _, fn := range pocs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*pocs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -849,7 +849,7 @@ func (pocs *PointOfContactSelect) sqlScan(ctx context.Context, root *PointOfCont
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pocs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

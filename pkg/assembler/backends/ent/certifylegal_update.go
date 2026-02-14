@@ -27,298 +27,298 @@ type CertifyLegalUpdate struct {
 }
 
 // Where appends a list predicates to the CertifyLegalUpdate builder.
-func (clu *CertifyLegalUpdate) Where(ps ...predicate.CertifyLegal) *CertifyLegalUpdate {
-	clu.mutation.Where(ps...)
-	return clu
+func (_u *CertifyLegalUpdate) Where(ps ...predicate.CertifyLegal) *CertifyLegalUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (clu *CertifyLegalUpdate) SetPackageID(u uuid.UUID) *CertifyLegalUpdate {
-	clu.mutation.SetPackageID(u)
-	return clu
+func (_u *CertifyLegalUpdate) SetPackageID(v uuid.UUID) *CertifyLegalUpdate {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillablePackageID(u *uuid.UUID) *CertifyLegalUpdate {
-	if u != nil {
-		clu.SetPackageID(*u)
+func (_u *CertifyLegalUpdate) SetNillablePackageID(v *uuid.UUID) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return clu
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (clu *CertifyLegalUpdate) ClearPackageID() *CertifyLegalUpdate {
-	clu.mutation.ClearPackageID()
-	return clu
+func (_u *CertifyLegalUpdate) ClearPackageID() *CertifyLegalUpdate {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (clu *CertifyLegalUpdate) SetSourceID(u uuid.UUID) *CertifyLegalUpdate {
-	clu.mutation.SetSourceID(u)
-	return clu
+func (_u *CertifyLegalUpdate) SetSourceID(v uuid.UUID) *CertifyLegalUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableSourceID(u *uuid.UUID) *CertifyLegalUpdate {
-	if u != nil {
-		clu.SetSourceID(*u)
+func (_u *CertifyLegalUpdate) SetNillableSourceID(v *uuid.UUID) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return clu
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (clu *CertifyLegalUpdate) ClearSourceID() *CertifyLegalUpdate {
-	clu.mutation.ClearSourceID()
-	return clu
+func (_u *CertifyLegalUpdate) ClearSourceID() *CertifyLegalUpdate {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetDeclaredLicense sets the "declared_license" field.
-func (clu *CertifyLegalUpdate) SetDeclaredLicense(s string) *CertifyLegalUpdate {
-	clu.mutation.SetDeclaredLicense(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetDeclaredLicense(v string) *CertifyLegalUpdate {
+	_u.mutation.SetDeclaredLicense(v)
+	return _u
 }
 
 // SetNillableDeclaredLicense sets the "declared_license" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableDeclaredLicense(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetDeclaredLicense(*s)
+func (_u *CertifyLegalUpdate) SetNillableDeclaredLicense(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetDeclaredLicense(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetDiscoveredLicense sets the "discovered_license" field.
-func (clu *CertifyLegalUpdate) SetDiscoveredLicense(s string) *CertifyLegalUpdate {
-	clu.mutation.SetDiscoveredLicense(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetDiscoveredLicense(v string) *CertifyLegalUpdate {
+	_u.mutation.SetDiscoveredLicense(v)
+	return _u
 }
 
 // SetNillableDiscoveredLicense sets the "discovered_license" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableDiscoveredLicense(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetDiscoveredLicense(*s)
+func (_u *CertifyLegalUpdate) SetNillableDiscoveredLicense(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetDiscoveredLicense(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetAttribution sets the "attribution" field.
-func (clu *CertifyLegalUpdate) SetAttribution(s string) *CertifyLegalUpdate {
-	clu.mutation.SetAttribution(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetAttribution(v string) *CertifyLegalUpdate {
+	_u.mutation.SetAttribution(v)
+	return _u
 }
 
 // SetNillableAttribution sets the "attribution" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableAttribution(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetAttribution(*s)
+func (_u *CertifyLegalUpdate) SetNillableAttribution(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetAttribution(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (clu *CertifyLegalUpdate) SetJustification(s string) *CertifyLegalUpdate {
-	clu.mutation.SetJustification(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetJustification(v string) *CertifyLegalUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableJustification(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetJustification(*s)
+func (_u *CertifyLegalUpdate) SetNillableJustification(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (clu *CertifyLegalUpdate) SetTimeScanned(t time.Time) *CertifyLegalUpdate {
-	clu.mutation.SetTimeScanned(t)
-	return clu
+func (_u *CertifyLegalUpdate) SetTimeScanned(v time.Time) *CertifyLegalUpdate {
+	_u.mutation.SetTimeScanned(v)
+	return _u
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableTimeScanned(t *time.Time) *CertifyLegalUpdate {
-	if t != nil {
-		clu.SetTimeScanned(*t)
+func (_u *CertifyLegalUpdate) SetNillableTimeScanned(v *time.Time) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetTimeScanned(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (clu *CertifyLegalUpdate) SetOrigin(s string) *CertifyLegalUpdate {
-	clu.mutation.SetOrigin(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetOrigin(v string) *CertifyLegalUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableOrigin(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetOrigin(*s)
+func (_u *CertifyLegalUpdate) SetNillableOrigin(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (clu *CertifyLegalUpdate) SetCollector(s string) *CertifyLegalUpdate {
-	clu.mutation.SetCollector(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetCollector(v string) *CertifyLegalUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableCollector(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetCollector(*s)
+func (_u *CertifyLegalUpdate) SetNillableCollector(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (clu *CertifyLegalUpdate) SetDocumentRef(s string) *CertifyLegalUpdate {
-	clu.mutation.SetDocumentRef(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetDocumentRef(v string) *CertifyLegalUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableDocumentRef(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetDocumentRef(*s)
+func (_u *CertifyLegalUpdate) SetNillableDocumentRef(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
-func (clu *CertifyLegalUpdate) SetDeclaredLicensesHash(s string) *CertifyLegalUpdate {
-	clu.mutation.SetDeclaredLicensesHash(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetDeclaredLicensesHash(v string) *CertifyLegalUpdate {
+	_u.mutation.SetDeclaredLicensesHash(v)
+	return _u
 }
 
 // SetNillableDeclaredLicensesHash sets the "declared_licenses_hash" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableDeclaredLicensesHash(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetDeclaredLicensesHash(*s)
+func (_u *CertifyLegalUpdate) SetNillableDeclaredLicensesHash(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetDeclaredLicensesHash(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetDiscoveredLicensesHash sets the "discovered_licenses_hash" field.
-func (clu *CertifyLegalUpdate) SetDiscoveredLicensesHash(s string) *CertifyLegalUpdate {
-	clu.mutation.SetDiscoveredLicensesHash(s)
-	return clu
+func (_u *CertifyLegalUpdate) SetDiscoveredLicensesHash(v string) *CertifyLegalUpdate {
+	_u.mutation.SetDiscoveredLicensesHash(v)
+	return _u
 }
 
 // SetNillableDiscoveredLicensesHash sets the "discovered_licenses_hash" field if the given value is not nil.
-func (clu *CertifyLegalUpdate) SetNillableDiscoveredLicensesHash(s *string) *CertifyLegalUpdate {
-	if s != nil {
-		clu.SetDiscoveredLicensesHash(*s)
+func (_u *CertifyLegalUpdate) SetNillableDiscoveredLicensesHash(v *string) *CertifyLegalUpdate {
+	if v != nil {
+		_u.SetDiscoveredLicensesHash(*v)
 	}
-	return clu
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (clu *CertifyLegalUpdate) SetPackage(p *PackageVersion) *CertifyLegalUpdate {
-	return clu.SetPackageID(p.ID)
+func (_u *CertifyLegalUpdate) SetPackage(v *PackageVersion) *CertifyLegalUpdate {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (clu *CertifyLegalUpdate) SetSource(s *SourceName) *CertifyLegalUpdate {
-	return clu.SetSourceID(s.ID)
+func (_u *CertifyLegalUpdate) SetSource(v *SourceName) *CertifyLegalUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // AddDeclaredLicenseIDs adds the "declared_licenses" edge to the License entity by IDs.
-func (clu *CertifyLegalUpdate) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
-	clu.mutation.AddDeclaredLicenseIDs(ids...)
-	return clu
+func (_u *CertifyLegalUpdate) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
+	_u.mutation.AddDeclaredLicenseIDs(ids...)
+	return _u
 }
 
 // AddDeclaredLicenses adds the "declared_licenses" edges to the License entity.
-func (clu *CertifyLegalUpdate) AddDeclaredLicenses(l ...*License) *CertifyLegalUpdate {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdate) AddDeclaredLicenses(v ...*License) *CertifyLegalUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return clu.AddDeclaredLicenseIDs(ids...)
+	return _u.AddDeclaredLicenseIDs(ids...)
 }
 
 // AddDiscoveredLicenseIDs adds the "discovered_licenses" edge to the License entity by IDs.
-func (clu *CertifyLegalUpdate) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
-	clu.mutation.AddDiscoveredLicenseIDs(ids...)
-	return clu
+func (_u *CertifyLegalUpdate) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
+	_u.mutation.AddDiscoveredLicenseIDs(ids...)
+	return _u
 }
 
 // AddDiscoveredLicenses adds the "discovered_licenses" edges to the License entity.
-func (clu *CertifyLegalUpdate) AddDiscoveredLicenses(l ...*License) *CertifyLegalUpdate {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdate) AddDiscoveredLicenses(v ...*License) *CertifyLegalUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return clu.AddDiscoveredLicenseIDs(ids...)
+	return _u.AddDiscoveredLicenseIDs(ids...)
 }
 
 // Mutation returns the CertifyLegalMutation object of the builder.
-func (clu *CertifyLegalUpdate) Mutation() *CertifyLegalMutation {
-	return clu.mutation
+func (_u *CertifyLegalUpdate) Mutation() *CertifyLegalMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (clu *CertifyLegalUpdate) ClearPackage() *CertifyLegalUpdate {
-	clu.mutation.ClearPackage()
-	return clu
+func (_u *CertifyLegalUpdate) ClearPackage() *CertifyLegalUpdate {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (clu *CertifyLegalUpdate) ClearSource() *CertifyLegalUpdate {
-	clu.mutation.ClearSource()
-	return clu
+func (_u *CertifyLegalUpdate) ClearSource() *CertifyLegalUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearDeclaredLicenses clears all "declared_licenses" edges to the License entity.
-func (clu *CertifyLegalUpdate) ClearDeclaredLicenses() *CertifyLegalUpdate {
-	clu.mutation.ClearDeclaredLicenses()
-	return clu
+func (_u *CertifyLegalUpdate) ClearDeclaredLicenses() *CertifyLegalUpdate {
+	_u.mutation.ClearDeclaredLicenses()
+	return _u
 }
 
 // RemoveDeclaredLicenseIDs removes the "declared_licenses" edge to License entities by IDs.
-func (clu *CertifyLegalUpdate) RemoveDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
-	clu.mutation.RemoveDeclaredLicenseIDs(ids...)
-	return clu
+func (_u *CertifyLegalUpdate) RemoveDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
+	_u.mutation.RemoveDeclaredLicenseIDs(ids...)
+	return _u
 }
 
 // RemoveDeclaredLicenses removes "declared_licenses" edges to License entities.
-func (clu *CertifyLegalUpdate) RemoveDeclaredLicenses(l ...*License) *CertifyLegalUpdate {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdate) RemoveDeclaredLicenses(v ...*License) *CertifyLegalUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return clu.RemoveDeclaredLicenseIDs(ids...)
+	return _u.RemoveDeclaredLicenseIDs(ids...)
 }
 
 // ClearDiscoveredLicenses clears all "discovered_licenses" edges to the License entity.
-func (clu *CertifyLegalUpdate) ClearDiscoveredLicenses() *CertifyLegalUpdate {
-	clu.mutation.ClearDiscoveredLicenses()
-	return clu
+func (_u *CertifyLegalUpdate) ClearDiscoveredLicenses() *CertifyLegalUpdate {
+	_u.mutation.ClearDiscoveredLicenses()
+	return _u
 }
 
 // RemoveDiscoveredLicenseIDs removes the "discovered_licenses" edge to License entities by IDs.
-func (clu *CertifyLegalUpdate) RemoveDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
-	clu.mutation.RemoveDiscoveredLicenseIDs(ids...)
-	return clu
+func (_u *CertifyLegalUpdate) RemoveDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdate {
+	_u.mutation.RemoveDiscoveredLicenseIDs(ids...)
+	return _u
 }
 
 // RemoveDiscoveredLicenses removes "discovered_licenses" edges to License entities.
-func (clu *CertifyLegalUpdate) RemoveDiscoveredLicenses(l ...*License) *CertifyLegalUpdate {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdate) RemoveDiscoveredLicenses(v ...*License) *CertifyLegalUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return clu.RemoveDiscoveredLicenseIDs(ids...)
+	return _u.RemoveDiscoveredLicenseIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (clu *CertifyLegalUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, clu.sqlSave, clu.mutation, clu.hooks)
+func (_u *CertifyLegalUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (clu *CertifyLegalUpdate) SaveX(ctx context.Context) int {
-	affected, err := clu.Save(ctx)
+func (_u *CertifyLegalUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -326,58 +326,58 @@ func (clu *CertifyLegalUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (clu *CertifyLegalUpdate) Exec(ctx context.Context) error {
-	_, err := clu.Save(ctx)
+func (_u *CertifyLegalUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (clu *CertifyLegalUpdate) ExecX(ctx context.Context) {
-	if err := clu.Exec(ctx); err != nil {
+func (_u *CertifyLegalUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CertifyLegalUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(certifylegal.Table, certifylegal.Columns, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID))
-	if ps := clu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := clu.mutation.DeclaredLicense(); ok {
+	if value, ok := _u.mutation.DeclaredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicense, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.DiscoveredLicense(); ok {
+	if value, ok := _u.mutation.DiscoveredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDiscoveredLicense, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.Attribution(); ok {
+	if value, ok := _u.mutation.Attribution(); ok {
 		_spec.SetField(certifylegal.FieldAttribution, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(certifylegal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.TimeScanned(); ok {
+	if value, ok := _u.mutation.TimeScanned(); ok {
 		_spec.SetField(certifylegal.FieldTimeScanned, field.TypeTime, value)
 	}
-	if value, ok := clu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifylegal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifylegal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifylegal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.DeclaredLicensesHash(); ok {
+	if value, ok := _u.mutation.DeclaredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicensesHash, field.TypeString, value)
 	}
-	if value, ok := clu.mutation.DiscoveredLicensesHash(); ok {
+	if value, ok := _u.mutation.DiscoveredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDiscoveredLicensesHash, field.TypeString, value)
 	}
-	if clu.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -390,7 +390,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -406,7 +406,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if clu.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -419,7 +419,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -435,7 +435,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if clu.mutation.DeclaredLicensesCleared() {
+	if _u.mutation.DeclaredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -448,7 +448,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.RemovedDeclaredLicensesIDs(); len(nodes) > 0 && !clu.mutation.DeclaredLicensesCleared() {
+	if nodes := _u.mutation.RemovedDeclaredLicensesIDs(); len(nodes) > 0 && !_u.mutation.DeclaredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -464,7 +464,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.DeclaredLicensesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DeclaredLicensesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -480,7 +480,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if clu.mutation.DiscoveredLicensesCleared() {
+	if _u.mutation.DiscoveredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -493,7 +493,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.RemovedDiscoveredLicensesIDs(); len(nodes) > 0 && !clu.mutation.DiscoveredLicensesCleared() {
+	if nodes := _u.mutation.RemovedDiscoveredLicensesIDs(); len(nodes) > 0 && !_u.mutation.DiscoveredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -509,7 +509,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.DiscoveredLicensesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DiscoveredLicensesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -525,7 +525,7 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, clu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifylegal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -533,8 +533,8 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	clu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // CertifyLegalUpdateOne is the builder for updating a single CertifyLegal entity.
@@ -546,305 +546,305 @@ type CertifyLegalUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (cluo *CertifyLegalUpdateOne) SetPackageID(u uuid.UUID) *CertifyLegalUpdateOne {
-	cluo.mutation.SetPackageID(u)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetPackageID(v uuid.UUID) *CertifyLegalUpdateOne {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillablePackageID(u *uuid.UUID) *CertifyLegalUpdateOne {
-	if u != nil {
-		cluo.SetPackageID(*u)
+func (_u *CertifyLegalUpdateOne) SetNillablePackageID(v *uuid.UUID) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return cluo
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (cluo *CertifyLegalUpdateOne) ClearPackageID() *CertifyLegalUpdateOne {
-	cluo.mutation.ClearPackageID()
-	return cluo
+func (_u *CertifyLegalUpdateOne) ClearPackageID() *CertifyLegalUpdateOne {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (cluo *CertifyLegalUpdateOne) SetSourceID(u uuid.UUID) *CertifyLegalUpdateOne {
-	cluo.mutation.SetSourceID(u)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetSourceID(v uuid.UUID) *CertifyLegalUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableSourceID(u *uuid.UUID) *CertifyLegalUpdateOne {
-	if u != nil {
-		cluo.SetSourceID(*u)
+func (_u *CertifyLegalUpdateOne) SetNillableSourceID(v *uuid.UUID) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return cluo
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (cluo *CertifyLegalUpdateOne) ClearSourceID() *CertifyLegalUpdateOne {
-	cluo.mutation.ClearSourceID()
-	return cluo
+func (_u *CertifyLegalUpdateOne) ClearSourceID() *CertifyLegalUpdateOne {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetDeclaredLicense sets the "declared_license" field.
-func (cluo *CertifyLegalUpdateOne) SetDeclaredLicense(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetDeclaredLicense(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetDeclaredLicense(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetDeclaredLicense(v)
+	return _u
 }
 
 // SetNillableDeclaredLicense sets the "declared_license" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableDeclaredLicense(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetDeclaredLicense(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableDeclaredLicense(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetDeclaredLicense(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetDiscoveredLicense sets the "discovered_license" field.
-func (cluo *CertifyLegalUpdateOne) SetDiscoveredLicense(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetDiscoveredLicense(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetDiscoveredLicense(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetDiscoveredLicense(v)
+	return _u
 }
 
 // SetNillableDiscoveredLicense sets the "discovered_license" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableDiscoveredLicense(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetDiscoveredLicense(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableDiscoveredLicense(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetDiscoveredLicense(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetAttribution sets the "attribution" field.
-func (cluo *CertifyLegalUpdateOne) SetAttribution(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetAttribution(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetAttribution(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetAttribution(v)
+	return _u
 }
 
 // SetNillableAttribution sets the "attribution" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableAttribution(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetAttribution(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableAttribution(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetAttribution(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (cluo *CertifyLegalUpdateOne) SetJustification(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetJustification(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetJustification(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableJustification(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetJustification(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableJustification(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (cluo *CertifyLegalUpdateOne) SetTimeScanned(t time.Time) *CertifyLegalUpdateOne {
-	cluo.mutation.SetTimeScanned(t)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetTimeScanned(v time.Time) *CertifyLegalUpdateOne {
+	_u.mutation.SetTimeScanned(v)
+	return _u
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableTimeScanned(t *time.Time) *CertifyLegalUpdateOne {
-	if t != nil {
-		cluo.SetTimeScanned(*t)
+func (_u *CertifyLegalUpdateOne) SetNillableTimeScanned(v *time.Time) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetTimeScanned(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cluo *CertifyLegalUpdateOne) SetOrigin(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetOrigin(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetOrigin(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableOrigin(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetOrigin(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableOrigin(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cluo *CertifyLegalUpdateOne) SetCollector(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetCollector(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetCollector(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableCollector(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetCollector(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableCollector(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cluo *CertifyLegalUpdateOne) SetDocumentRef(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetDocumentRef(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetDocumentRef(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableDocumentRef(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetDocumentRef(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableDocumentRef(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
-func (cluo *CertifyLegalUpdateOne) SetDeclaredLicensesHash(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetDeclaredLicensesHash(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetDeclaredLicensesHash(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetDeclaredLicensesHash(v)
+	return _u
 }
 
 // SetNillableDeclaredLicensesHash sets the "declared_licenses_hash" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableDeclaredLicensesHash(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetDeclaredLicensesHash(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableDeclaredLicensesHash(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetDeclaredLicensesHash(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetDiscoveredLicensesHash sets the "discovered_licenses_hash" field.
-func (cluo *CertifyLegalUpdateOne) SetDiscoveredLicensesHash(s string) *CertifyLegalUpdateOne {
-	cluo.mutation.SetDiscoveredLicensesHash(s)
-	return cluo
+func (_u *CertifyLegalUpdateOne) SetDiscoveredLicensesHash(v string) *CertifyLegalUpdateOne {
+	_u.mutation.SetDiscoveredLicensesHash(v)
+	return _u
 }
 
 // SetNillableDiscoveredLicensesHash sets the "discovered_licenses_hash" field if the given value is not nil.
-func (cluo *CertifyLegalUpdateOne) SetNillableDiscoveredLicensesHash(s *string) *CertifyLegalUpdateOne {
-	if s != nil {
-		cluo.SetDiscoveredLicensesHash(*s)
+func (_u *CertifyLegalUpdateOne) SetNillableDiscoveredLicensesHash(v *string) *CertifyLegalUpdateOne {
+	if v != nil {
+		_u.SetDiscoveredLicensesHash(*v)
 	}
-	return cluo
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cluo *CertifyLegalUpdateOne) SetPackage(p *PackageVersion) *CertifyLegalUpdateOne {
-	return cluo.SetPackageID(p.ID)
+func (_u *CertifyLegalUpdateOne) SetPackage(v *PackageVersion) *CertifyLegalUpdateOne {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (cluo *CertifyLegalUpdateOne) SetSource(s *SourceName) *CertifyLegalUpdateOne {
-	return cluo.SetSourceID(s.ID)
+func (_u *CertifyLegalUpdateOne) SetSource(v *SourceName) *CertifyLegalUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // AddDeclaredLicenseIDs adds the "declared_licenses" edge to the License entity by IDs.
-func (cluo *CertifyLegalUpdateOne) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
-	cluo.mutation.AddDeclaredLicenseIDs(ids...)
-	return cluo
+func (_u *CertifyLegalUpdateOne) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
+	_u.mutation.AddDeclaredLicenseIDs(ids...)
+	return _u
 }
 
 // AddDeclaredLicenses adds the "declared_licenses" edges to the License entity.
-func (cluo *CertifyLegalUpdateOne) AddDeclaredLicenses(l ...*License) *CertifyLegalUpdateOne {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdateOne) AddDeclaredLicenses(v ...*License) *CertifyLegalUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cluo.AddDeclaredLicenseIDs(ids...)
+	return _u.AddDeclaredLicenseIDs(ids...)
 }
 
 // AddDiscoveredLicenseIDs adds the "discovered_licenses" edge to the License entity by IDs.
-func (cluo *CertifyLegalUpdateOne) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
-	cluo.mutation.AddDiscoveredLicenseIDs(ids...)
-	return cluo
+func (_u *CertifyLegalUpdateOne) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
+	_u.mutation.AddDiscoveredLicenseIDs(ids...)
+	return _u
 }
 
 // AddDiscoveredLicenses adds the "discovered_licenses" edges to the License entity.
-func (cluo *CertifyLegalUpdateOne) AddDiscoveredLicenses(l ...*License) *CertifyLegalUpdateOne {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdateOne) AddDiscoveredLicenses(v ...*License) *CertifyLegalUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cluo.AddDiscoveredLicenseIDs(ids...)
+	return _u.AddDiscoveredLicenseIDs(ids...)
 }
 
 // Mutation returns the CertifyLegalMutation object of the builder.
-func (cluo *CertifyLegalUpdateOne) Mutation() *CertifyLegalMutation {
-	return cluo.mutation
+func (_u *CertifyLegalUpdateOne) Mutation() *CertifyLegalMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (cluo *CertifyLegalUpdateOne) ClearPackage() *CertifyLegalUpdateOne {
-	cluo.mutation.ClearPackage()
-	return cluo
+func (_u *CertifyLegalUpdateOne) ClearPackage() *CertifyLegalUpdateOne {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (cluo *CertifyLegalUpdateOne) ClearSource() *CertifyLegalUpdateOne {
-	cluo.mutation.ClearSource()
-	return cluo
+func (_u *CertifyLegalUpdateOne) ClearSource() *CertifyLegalUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearDeclaredLicenses clears all "declared_licenses" edges to the License entity.
-func (cluo *CertifyLegalUpdateOne) ClearDeclaredLicenses() *CertifyLegalUpdateOne {
-	cluo.mutation.ClearDeclaredLicenses()
-	return cluo
+func (_u *CertifyLegalUpdateOne) ClearDeclaredLicenses() *CertifyLegalUpdateOne {
+	_u.mutation.ClearDeclaredLicenses()
+	return _u
 }
 
 // RemoveDeclaredLicenseIDs removes the "declared_licenses" edge to License entities by IDs.
-func (cluo *CertifyLegalUpdateOne) RemoveDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
-	cluo.mutation.RemoveDeclaredLicenseIDs(ids...)
-	return cluo
+func (_u *CertifyLegalUpdateOne) RemoveDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
+	_u.mutation.RemoveDeclaredLicenseIDs(ids...)
+	return _u
 }
 
 // RemoveDeclaredLicenses removes "declared_licenses" edges to License entities.
-func (cluo *CertifyLegalUpdateOne) RemoveDeclaredLicenses(l ...*License) *CertifyLegalUpdateOne {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdateOne) RemoveDeclaredLicenses(v ...*License) *CertifyLegalUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cluo.RemoveDeclaredLicenseIDs(ids...)
+	return _u.RemoveDeclaredLicenseIDs(ids...)
 }
 
 // ClearDiscoveredLicenses clears all "discovered_licenses" edges to the License entity.
-func (cluo *CertifyLegalUpdateOne) ClearDiscoveredLicenses() *CertifyLegalUpdateOne {
-	cluo.mutation.ClearDiscoveredLicenses()
-	return cluo
+func (_u *CertifyLegalUpdateOne) ClearDiscoveredLicenses() *CertifyLegalUpdateOne {
+	_u.mutation.ClearDiscoveredLicenses()
+	return _u
 }
 
 // RemoveDiscoveredLicenseIDs removes the "discovered_licenses" edge to License entities by IDs.
-func (cluo *CertifyLegalUpdateOne) RemoveDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
-	cluo.mutation.RemoveDiscoveredLicenseIDs(ids...)
-	return cluo
+func (_u *CertifyLegalUpdateOne) RemoveDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalUpdateOne {
+	_u.mutation.RemoveDiscoveredLicenseIDs(ids...)
+	return _u
 }
 
 // RemoveDiscoveredLicenses removes "discovered_licenses" edges to License entities.
-func (cluo *CertifyLegalUpdateOne) RemoveDiscoveredLicenses(l ...*License) *CertifyLegalUpdateOne {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_u *CertifyLegalUpdateOne) RemoveDiscoveredLicenses(v ...*License) *CertifyLegalUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cluo.RemoveDiscoveredLicenseIDs(ids...)
+	return _u.RemoveDiscoveredLicenseIDs(ids...)
 }
 
 // Where appends a list predicates to the CertifyLegalUpdate builder.
-func (cluo *CertifyLegalUpdateOne) Where(ps ...predicate.CertifyLegal) *CertifyLegalUpdateOne {
-	cluo.mutation.Where(ps...)
-	return cluo
+func (_u *CertifyLegalUpdateOne) Where(ps ...predicate.CertifyLegal) *CertifyLegalUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cluo *CertifyLegalUpdateOne) Select(field string, fields ...string) *CertifyLegalUpdateOne {
-	cluo.fields = append([]string{field}, fields...)
-	return cluo
+func (_u *CertifyLegalUpdateOne) Select(field string, fields ...string) *CertifyLegalUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated CertifyLegal entity.
-func (cluo *CertifyLegalUpdateOne) Save(ctx context.Context) (*CertifyLegal, error) {
-	return withHooks(ctx, cluo.sqlSave, cluo.mutation, cluo.hooks)
+func (_u *CertifyLegalUpdateOne) Save(ctx context.Context) (*CertifyLegal, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cluo *CertifyLegalUpdateOne) SaveX(ctx context.Context) *CertifyLegal {
-	node, err := cluo.Save(ctx)
+func (_u *CertifyLegalUpdateOne) SaveX(ctx context.Context) *CertifyLegal {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -852,26 +852,26 @@ func (cluo *CertifyLegalUpdateOne) SaveX(ctx context.Context) *CertifyLegal {
 }
 
 // Exec executes the query on the entity.
-func (cluo *CertifyLegalUpdateOne) Exec(ctx context.Context) error {
-	_, err := cluo.Save(ctx)
+func (_u *CertifyLegalUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cluo *CertifyLegalUpdateOne) ExecX(ctx context.Context) {
-	if err := cluo.Exec(ctx); err != nil {
+func (_u *CertifyLegalUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyLegal, err error) {
+func (_u *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyLegal, err error) {
 	_spec := sqlgraph.NewUpdateSpec(certifylegal.Table, certifylegal.Columns, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID))
-	id, ok := cluo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CertifyLegal.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cluo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifylegal.FieldID)
 		for _, f := range fields {
@@ -883,44 +883,44 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 			}
 		}
 	}
-	if ps := cluo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cluo.mutation.DeclaredLicense(); ok {
+	if value, ok := _u.mutation.DeclaredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicense, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.DiscoveredLicense(); ok {
+	if value, ok := _u.mutation.DiscoveredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDiscoveredLicense, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.Attribution(); ok {
+	if value, ok := _u.mutation.Attribution(); ok {
 		_spec.SetField(certifylegal.FieldAttribution, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(certifylegal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.TimeScanned(); ok {
+	if value, ok := _u.mutation.TimeScanned(); ok {
 		_spec.SetField(certifylegal.FieldTimeScanned, field.TypeTime, value)
 	}
-	if value, ok := cluo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifylegal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifylegal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifylegal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.DeclaredLicensesHash(); ok {
+	if value, ok := _u.mutation.DeclaredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicensesHash, field.TypeString, value)
 	}
-	if value, ok := cluo.mutation.DiscoveredLicensesHash(); ok {
+	if value, ok := _u.mutation.DiscoveredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDiscoveredLicensesHash, field.TypeString, value)
 	}
-	if cluo.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -933,7 +933,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -949,7 +949,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cluo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -962,7 +962,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -978,7 +978,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cluo.mutation.DeclaredLicensesCleared() {
+	if _u.mutation.DeclaredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -991,7 +991,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.RemovedDeclaredLicensesIDs(); len(nodes) > 0 && !cluo.mutation.DeclaredLicensesCleared() {
+	if nodes := _u.mutation.RemovedDeclaredLicensesIDs(); len(nodes) > 0 && !_u.mutation.DeclaredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1007,7 +1007,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.DeclaredLicensesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DeclaredLicensesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1023,7 +1023,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cluo.mutation.DiscoveredLicensesCleared() {
+	if _u.mutation.DiscoveredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1036,7 +1036,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.RemovedDiscoveredLicensesIDs(); len(nodes) > 0 && !cluo.mutation.DiscoveredLicensesCleared() {
+	if nodes := _u.mutation.RemovedDiscoveredLicensesIDs(); len(nodes) > 0 && !_u.mutation.DiscoveredLicensesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1052,7 +1052,7 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.DiscoveredLicensesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DiscoveredLicensesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1068,10 +1068,10 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &CertifyLegal{config: cluo.config}
+	_node = &CertifyLegal{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cluo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifylegal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1079,6 +1079,6 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 		}
 		return nil, err
 	}
-	cluo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

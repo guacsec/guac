@@ -1963,7 +1963,9 @@ func (ec *executionContext) _Artifact_id(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Artifact_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1992,7 +1994,9 @@ func (ec *executionContext) _Artifact_algorithm(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Artifact_algorithm,
-		func(ctx context.Context) (any, error) { return obj.Algorithm, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Algorithm, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -2021,7 +2025,9 @@ func (ec *executionContext) _Artifact_digest(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Artifact_digest,
-		func(ctx context.Context) (any, error) { return obj.Digest, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Digest, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -2050,7 +2056,9 @@ func (ec *executionContext) _ArtifactConnection_totalCount(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ArtifactConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -2079,7 +2087,9 @@ func (ec *executionContext) _ArtifactConnection_pageInfo(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ArtifactConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -2116,7 +2126,9 @@ func (ec *executionContext) _ArtifactConnection_edges(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ArtifactConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -2151,7 +2163,9 @@ func (ec *executionContext) _ArtifactEdge_cursor(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ArtifactEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -2180,7 +2194,9 @@ func (ec *executionContext) _ArtifactEdge_node(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ArtifactEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -9500,7 +9516,7 @@ func (ec *executionContext) marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguac
 func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx context.Context, sel ast.SelectionSet, v *model.Artifact) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -9554,7 +9570,7 @@ func (ec *executionContext) marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

@@ -35,7 +35,9 @@ func (ec *executionContext) _IsDependency_id(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _IsDependency_package(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_package,
-		func(ctx context.Context) (any, error) { return obj.Package, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Package, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _IsDependency_dependencyPackage(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_dependencyPackage,
-		func(ctx context.Context) (any, error) { return obj.DependencyPackage, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DependencyPackage, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -138,7 +144,9 @@ func (ec *executionContext) _IsDependency_dependencyType(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_dependencyType,
-		func(ctx context.Context) (any, error) { return obj.DependencyType, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DependencyType, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -167,7 +175,9 @@ func (ec *executionContext) _IsDependency_justification(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -196,7 +206,9 @@ func (ec *executionContext) _IsDependency_origin(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -225,7 +237,9 @@ func (ec *executionContext) _IsDependency_collector(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -254,7 +268,9 @@ func (ec *executionContext) _IsDependency_documentRef(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependency_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -283,7 +299,9 @@ func (ec *executionContext) _IsDependencyConnection_totalCount(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependencyConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -312,7 +330,9 @@ func (ec *executionContext) _IsDependencyConnection_pageInfo(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependencyConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -349,7 +369,9 @@ func (ec *executionContext) _IsDependencyConnection_edges(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependencyConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -384,7 +406,9 @@ func (ec *executionContext) _IsDependencyEdge_cursor(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependencyEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -413,7 +437,9 @@ func (ec *executionContext) _IsDependencyEdge_node(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_IsDependencyEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -825,7 +851,7 @@ func (ec *executionContext) marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNIsDependency2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependency(ctx context.Context, sel ast.SelectionSet, v *model.IsDependency) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -879,7 +905,7 @@ func (ec *executionContext) marshalNIsDependencyEdge2ᚕᚖgithubᚗcomᚋguacse
 func (ec *executionContext) marshalNIsDependencyEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyEdge(ctx context.Context, sel ast.SelectionSet, v *model.IsDependencyEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

@@ -39,7 +39,9 @@ func (ec *executionContext) _Package_id(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Package_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -68,7 +70,9 @@ func (ec *executionContext) _Package_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Package_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -136,7 +140,9 @@ func (ec *executionContext) _PackageConnection_totalCount(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -165,7 +171,9 @@ func (ec *executionContext) _PackageConnection_pageInfo(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -202,7 +210,9 @@ func (ec *executionContext) _PackageConnection_edges(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -237,7 +247,9 @@ func (ec *executionContext) _PackageEdge_cursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -266,7 +278,9 @@ func (ec *executionContext) _PackageEdge_node(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -303,7 +317,9 @@ func (ec *executionContext) _PackageIDs_packageTypeID(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageIDs_packageTypeID,
-		func(ctx context.Context) (any, error) { return obj.PackageTypeID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PackageTypeID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -332,7 +348,9 @@ func (ec *executionContext) _PackageIDs_packageNamespaceID(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageIDs_packageNamespaceID,
-		func(ctx context.Context) (any, error) { return obj.PackageNamespaceID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PackageNamespaceID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -361,7 +379,9 @@ func (ec *executionContext) _PackageIDs_packageNameID(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageIDs_packageNameID,
-		func(ctx context.Context) (any, error) { return obj.PackageNameID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PackageNameID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -390,7 +410,9 @@ func (ec *executionContext) _PackageIDs_packageVersionID(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageIDs_packageVersionID,
-		func(ctx context.Context) (any, error) { return obj.PackageVersionID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PackageVersionID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -419,7 +441,9 @@ func (ec *executionContext) _PackageName_id(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageName_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -448,7 +472,9 @@ func (ec *executionContext) _PackageName_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageName_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -477,7 +503,9 @@ func (ec *executionContext) _PackageName_versions(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageName_versions,
-		func(ctx context.Context) (any, error) { return obj.Versions, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Versions, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -518,7 +546,9 @@ func (ec *executionContext) _PackageNamespace_id(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageNamespace_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -547,7 +577,9 @@ func (ec *executionContext) _PackageNamespace_namespace(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageNamespace_namespace,
-		func(ctx context.Context) (any, error) { return obj.Namespace, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Namespace, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -576,7 +608,9 @@ func (ec *executionContext) _PackageNamespace_names(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageNamespace_names,
-		func(ctx context.Context) (any, error) { return obj.Names, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Names, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -613,7 +647,9 @@ func (ec *executionContext) _PackageQualifier_key(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageQualifier_key,
-		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -642,7 +678,9 @@ func (ec *executionContext) _PackageQualifier_value(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageQualifier_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -671,7 +709,9 @@ func (ec *executionContext) _PackageVersion_id(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageVersion_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -700,7 +740,9 @@ func (ec *executionContext) _PackageVersion_purl(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageVersion_purl,
-		func(ctx context.Context) (any, error) { return obj.Purl, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Purl, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -729,7 +771,9 @@ func (ec *executionContext) _PackageVersion_version(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageVersion_version,
-		func(ctx context.Context) (any, error) { return obj.Version, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Version, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -758,7 +802,9 @@ func (ec *executionContext) _PackageVersion_qualifiers(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageVersion_qualifiers,
-		func(ctx context.Context) (any, error) { return obj.Qualifiers, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Qualifiers, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -793,7 +839,9 @@ func (ec *executionContext) _PackageVersion_subpath(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PackageVersion_subpath,
-		func(ctx context.Context) (any, error) { return obj.Subpath, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subpath, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1613,7 +1661,7 @@ func (ec *executionContext) marshalNPackage2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx context.Context, sel ast.SelectionSet, v *model.Package) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1667,7 +1715,7 @@ func (ec *executionContext) marshalNPackageEdge2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNPackageEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageEdge(ctx context.Context, sel ast.SelectionSet, v *model.PackageEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1725,7 +1773,7 @@ func (ec *executionContext) marshalNPackageIDs2ᚕᚖgithubᚗcomᚋguacsecᚋgu
 func (ec *executionContext) marshalNPackageIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDs(ctx context.Context, sel ast.SelectionSet, v *model.PackageIDs) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1779,7 +1827,7 @@ func (ec *executionContext) marshalNPackageName2ᚕᚖgithubᚗcomᚋguacsecᚋg
 func (ec *executionContext) marshalNPackageName2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageName(ctx context.Context, sel ast.SelectionSet, v *model.PackageName) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1833,7 +1881,7 @@ func (ec *executionContext) marshalNPackageNamespace2ᚕᚖgithubᚗcomᚋguacse
 func (ec *executionContext) marshalNPackageNamespace2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageNamespace(ctx context.Context, sel ast.SelectionSet, v *model.PackageNamespace) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1887,7 +1935,7 @@ func (ec *executionContext) marshalNPackageQualifier2ᚕᚖgithubᚗcomᚋguacse
 func (ec *executionContext) marshalNPackageQualifier2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifier(ctx context.Context, sel ast.SelectionSet, v *model.PackageQualifier) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1951,7 +1999,7 @@ func (ec *executionContext) marshalNPackageVersion2ᚕᚖgithubᚗcomᚋguacsec�
 func (ec *executionContext) marshalNPackageVersion2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageVersion(ctx context.Context, sel ast.SelectionSet, v *model.PackageVersion) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

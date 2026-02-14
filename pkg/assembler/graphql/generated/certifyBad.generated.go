@@ -35,7 +35,9 @@ func (ec *executionContext) _CertifyBad_id(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _CertifyBad_subject(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _CertifyBad_justification(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -122,7 +128,9 @@ func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_knownSince,
-		func(ctx context.Context) (any, error) { return obj.KnownSince, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.KnownSince, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -151,7 +159,9 @@ func (ec *executionContext) _CertifyBad_origin(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -180,7 +190,9 @@ func (ec *executionContext) _CertifyBad_collector(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -209,7 +221,9 @@ func (ec *executionContext) _CertifyBad_documentRef(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBad_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -238,7 +252,9 @@ func (ec *executionContext) _CertifyBadConnection_totalCount(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBadConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -267,7 +283,9 @@ func (ec *executionContext) _CertifyBadConnection_pageInfo(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBadConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -304,7 +322,9 @@ func (ec *executionContext) _CertifyBadConnection_edges(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBadConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -339,7 +359,9 @@ func (ec *executionContext) _CertifyBadEdge_cursor(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBadEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -368,7 +390,9 @@ func (ec *executionContext) _CertifyBadEdge_node(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyBadEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -715,7 +739,11 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 		}
 		return ec._Artifact(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of PackageSourceOrArtifact must implement graphql.Marshaler", obj))
+		}
 	}
 }
 
@@ -936,7 +964,7 @@ func (ec *executionContext) marshalNCertifyBad2ᚕᚖgithubᚗcomᚋguacsecᚋgu
 func (ec *executionContext) marshalNCertifyBad2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBad(ctx context.Context, sel ast.SelectionSet, v *model.CertifyBad) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -990,7 +1018,7 @@ func (ec *executionContext) marshalNCertifyBadEdge2ᚕᚖgithubᚗcomᚋguacsec�
 func (ec *executionContext) marshalNCertifyBadEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyBadEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1035,7 +1063,7 @@ func (ec *executionContext) unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx context.Context, sel ast.SelectionSet, v model.PackageSourceOrArtifact) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

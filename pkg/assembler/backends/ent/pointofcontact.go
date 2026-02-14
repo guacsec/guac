@@ -133,7 +133,7 @@ func (*PointOfContact) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the PointOfContact fields.
-func (poc *PointOfContact) assignValues(columns []string, values []any) error {
+func (_m *PointOfContact) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -143,80 +143,80 @@ func (poc *PointOfContact) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				poc.ID = *value
+				_m.ID = *value
 			}
 		case pointofcontact.FieldSourceID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				poc.SourceID = new(uuid.UUID)
-				*poc.SourceID = *value.S.(*uuid.UUID)
+				_m.SourceID = new(uuid.UUID)
+				*_m.SourceID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldPackageVersionID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				poc.PackageVersionID = new(uuid.UUID)
-				*poc.PackageVersionID = *value.S.(*uuid.UUID)
+				_m.PackageVersionID = new(uuid.UUID)
+				*_m.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldPackageNameID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				poc.PackageNameID = new(uuid.UUID)
-				*poc.PackageNameID = *value.S.(*uuid.UUID)
+				_m.PackageNameID = new(uuid.UUID)
+				*_m.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				poc.ArtifactID = new(uuid.UUID)
-				*poc.ArtifactID = *value.S.(*uuid.UUID)
+				_m.ArtifactID = new(uuid.UUID)
+				*_m.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
-				poc.Email = value.String
+				_m.Email = value.String
 			}
 		case pointofcontact.FieldInfo:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field info", values[i])
 			} else if value.Valid {
-				poc.Info = value.String
+				_m.Info = value.String
 			}
 		case pointofcontact.FieldSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field since", values[i])
 			} else if value.Valid {
-				poc.Since = value.Time
+				_m.Since = value.Time
 			}
 		case pointofcontact.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				poc.Justification = value.String
+				_m.Justification = value.String
 			}
 		case pointofcontact.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				poc.Origin = value.String
+				_m.Origin = value.String
 			}
 		case pointofcontact.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				poc.Collector = value.String
+				_m.Collector = value.String
 			}
 		case pointofcontact.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				poc.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			poc.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -224,93 +224,93 @@ func (poc *PointOfContact) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the PointOfContact.
 // This includes values selected through modifiers, order, etc.
-func (poc *PointOfContact) Value(name string) (ent.Value, error) {
-	return poc.selectValues.Get(name)
+func (_m *PointOfContact) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySource queries the "source" edge of the PointOfContact entity.
-func (poc *PointOfContact) QuerySource() *SourceNameQuery {
-	return NewPointOfContactClient(poc.config).QuerySource(poc)
+func (_m *PointOfContact) QuerySource() *SourceNameQuery {
+	return NewPointOfContactClient(_m.config).QuerySource(_m)
 }
 
 // QueryPackageVersion queries the "package_version" edge of the PointOfContact entity.
-func (poc *PointOfContact) QueryPackageVersion() *PackageVersionQuery {
-	return NewPointOfContactClient(poc.config).QueryPackageVersion(poc)
+func (_m *PointOfContact) QueryPackageVersion() *PackageVersionQuery {
+	return NewPointOfContactClient(_m.config).QueryPackageVersion(_m)
 }
 
 // QueryAllVersions queries the "all_versions" edge of the PointOfContact entity.
-func (poc *PointOfContact) QueryAllVersions() *PackageNameQuery {
-	return NewPointOfContactClient(poc.config).QueryAllVersions(poc)
+func (_m *PointOfContact) QueryAllVersions() *PackageNameQuery {
+	return NewPointOfContactClient(_m.config).QueryAllVersions(_m)
 }
 
 // QueryArtifact queries the "artifact" edge of the PointOfContact entity.
-func (poc *PointOfContact) QueryArtifact() *ArtifactQuery {
-	return NewPointOfContactClient(poc.config).QueryArtifact(poc)
+func (_m *PointOfContact) QueryArtifact() *ArtifactQuery {
+	return NewPointOfContactClient(_m.config).QueryArtifact(_m)
 }
 
 // Update returns a builder for updating this PointOfContact.
 // Note that you need to call PointOfContact.Unwrap() before calling this method if this PointOfContact
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (poc *PointOfContact) Update() *PointOfContactUpdateOne {
-	return NewPointOfContactClient(poc.config).UpdateOne(poc)
+func (_m *PointOfContact) Update() *PointOfContactUpdateOne {
+	return NewPointOfContactClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the PointOfContact entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (poc *PointOfContact) Unwrap() *PointOfContact {
-	_tx, ok := poc.config.driver.(*txDriver)
+func (_m *PointOfContact) Unwrap() *PointOfContact {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: PointOfContact is not a transactional entity")
 	}
-	poc.config.driver = _tx.drv
-	return poc
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (poc *PointOfContact) String() string {
+func (_m *PointOfContact) String() string {
 	var builder strings.Builder
 	builder.WriteString("PointOfContact(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", poc.ID))
-	if v := poc.SourceID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := poc.PackageVersionID; v != nil {
+	if v := _m.PackageVersionID; v != nil {
 		builder.WriteString("package_version_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := poc.PackageNameID; v != nil {
+	if v := _m.PackageNameID; v != nil {
 		builder.WriteString("package_name_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := poc.ArtifactID; v != nil {
+	if v := _m.ArtifactID; v != nil {
 		builder.WriteString("artifact_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("email=")
-	builder.WriteString(poc.Email)
+	builder.WriteString(_m.Email)
 	builder.WriteString(", ")
 	builder.WriteString("info=")
-	builder.WriteString(poc.Info)
+	builder.WriteString(_m.Info)
 	builder.WriteString(", ")
 	builder.WriteString("since=")
-	builder.WriteString(poc.Since.Format(time.ANSIC))
+	builder.WriteString(_m.Since.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(poc.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(poc.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(poc.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(poc.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

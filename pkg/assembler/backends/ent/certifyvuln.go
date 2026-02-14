@@ -101,7 +101,7 @@ func (*CertifyVuln) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CertifyVuln fields.
-func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
+func (_m *CertifyVuln) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -111,70 +111,70 @@ func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				cv.ID = *value
+				_m.ID = *value
 			}
 		case certifyvuln.FieldVulnerabilityID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerability_id", values[i])
 			} else if value != nil {
-				cv.VulnerabilityID = *value
+				_m.VulnerabilityID = *value
 			}
 		case certifyvuln.FieldPackageID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value != nil {
-				cv.PackageID = *value
+				_m.PackageID = *value
 			}
 		case certifyvuln.FieldTimeScanned:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field time_scanned", values[i])
 			} else if value.Valid {
-				cv.TimeScanned = value.Time
+				_m.TimeScanned = value.Time
 			}
 		case certifyvuln.FieldDbURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field db_uri", values[i])
 			} else if value.Valid {
-				cv.DbURI = value.String
+				_m.DbURI = value.String
 			}
 		case certifyvuln.FieldDbVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field db_version", values[i])
 			} else if value.Valid {
-				cv.DbVersion = value.String
+				_m.DbVersion = value.String
 			}
 		case certifyvuln.FieldScannerURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scanner_uri", values[i])
 			} else if value.Valid {
-				cv.ScannerURI = value.String
+				_m.ScannerURI = value.String
 			}
 		case certifyvuln.FieldScannerVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scanner_version", values[i])
 			} else if value.Valid {
-				cv.ScannerVersion = value.String
+				_m.ScannerVersion = value.String
 			}
 		case certifyvuln.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				cv.Origin = value.String
+				_m.Origin = value.String
 			}
 		case certifyvuln.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				cv.Collector = value.String
+				_m.Collector = value.String
 			}
 		case certifyvuln.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				cv.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			cv.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -182,72 +182,72 @@ func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CertifyVuln.
 // This includes values selected through modifiers, order, etc.
-func (cv *CertifyVuln) Value(name string) (ent.Value, error) {
-	return cv.selectValues.Get(name)
+func (_m *CertifyVuln) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryVulnerability queries the "vulnerability" edge of the CertifyVuln entity.
-func (cv *CertifyVuln) QueryVulnerability() *VulnerabilityIDQuery {
-	return NewCertifyVulnClient(cv.config).QueryVulnerability(cv)
+func (_m *CertifyVuln) QueryVulnerability() *VulnerabilityIDQuery {
+	return NewCertifyVulnClient(_m.config).QueryVulnerability(_m)
 }
 
 // QueryPackage queries the "package" edge of the CertifyVuln entity.
-func (cv *CertifyVuln) QueryPackage() *PackageVersionQuery {
-	return NewCertifyVulnClient(cv.config).QueryPackage(cv)
+func (_m *CertifyVuln) QueryPackage() *PackageVersionQuery {
+	return NewCertifyVulnClient(_m.config).QueryPackage(_m)
 }
 
 // Update returns a builder for updating this CertifyVuln.
 // Note that you need to call CertifyVuln.Unwrap() before calling this method if this CertifyVuln
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (cv *CertifyVuln) Update() *CertifyVulnUpdateOne {
-	return NewCertifyVulnClient(cv.config).UpdateOne(cv)
+func (_m *CertifyVuln) Update() *CertifyVulnUpdateOne {
+	return NewCertifyVulnClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the CertifyVuln entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (cv *CertifyVuln) Unwrap() *CertifyVuln {
-	_tx, ok := cv.config.driver.(*txDriver)
+func (_m *CertifyVuln) Unwrap() *CertifyVuln {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: CertifyVuln is not a transactional entity")
 	}
-	cv.config.driver = _tx.drv
-	return cv
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (cv *CertifyVuln) String() string {
+func (_m *CertifyVuln) String() string {
 	var builder strings.Builder
 	builder.WriteString("CertifyVuln(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", cv.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("vulnerability_id=")
-	builder.WriteString(fmt.Sprintf("%v", cv.VulnerabilityID))
+	builder.WriteString(fmt.Sprintf("%v", _m.VulnerabilityID))
 	builder.WriteString(", ")
 	builder.WriteString("package_id=")
-	builder.WriteString(fmt.Sprintf("%v", cv.PackageID))
+	builder.WriteString(fmt.Sprintf("%v", _m.PackageID))
 	builder.WriteString(", ")
 	builder.WriteString("time_scanned=")
-	builder.WriteString(cv.TimeScanned.Format(time.ANSIC))
+	builder.WriteString(_m.TimeScanned.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("db_uri=")
-	builder.WriteString(cv.DbURI)
+	builder.WriteString(_m.DbURI)
 	builder.WriteString(", ")
 	builder.WriteString("db_version=")
-	builder.WriteString(cv.DbVersion)
+	builder.WriteString(_m.DbVersion)
 	builder.WriteString(", ")
 	builder.WriteString("scanner_uri=")
-	builder.WriteString(cv.ScannerURI)
+	builder.WriteString(_m.ScannerURI)
 	builder.WriteString(", ")
 	builder.WriteString("scanner_version=")
-	builder.WriteString(cv.ScannerVersion)
+	builder.WriteString(_m.ScannerVersion)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(cv.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(cv.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(cv.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

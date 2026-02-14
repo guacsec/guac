@@ -28,121 +28,121 @@ type OccurrenceCreate struct {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (oc *OccurrenceCreate) SetArtifactID(u uuid.UUID) *OccurrenceCreate {
-	oc.mutation.SetArtifactID(u)
-	return oc
+func (_c *OccurrenceCreate) SetArtifactID(v uuid.UUID) *OccurrenceCreate {
+	_c.mutation.SetArtifactID(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (oc *OccurrenceCreate) SetJustification(s string) *OccurrenceCreate {
-	oc.mutation.SetJustification(s)
-	return oc
+func (_c *OccurrenceCreate) SetJustification(v string) *OccurrenceCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (oc *OccurrenceCreate) SetOrigin(s string) *OccurrenceCreate {
-	oc.mutation.SetOrigin(s)
-	return oc
+func (_c *OccurrenceCreate) SetOrigin(v string) *OccurrenceCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (oc *OccurrenceCreate) SetCollector(s string) *OccurrenceCreate {
-	oc.mutation.SetCollector(s)
-	return oc
+func (_c *OccurrenceCreate) SetCollector(v string) *OccurrenceCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (oc *OccurrenceCreate) SetDocumentRef(s string) *OccurrenceCreate {
-	oc.mutation.SetDocumentRef(s)
-	return oc
+func (_c *OccurrenceCreate) SetDocumentRef(v string) *OccurrenceCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetSourceID sets the "source_id" field.
-func (oc *OccurrenceCreate) SetSourceID(u uuid.UUID) *OccurrenceCreate {
-	oc.mutation.SetSourceID(u)
-	return oc
+func (_c *OccurrenceCreate) SetSourceID(v uuid.UUID) *OccurrenceCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (oc *OccurrenceCreate) SetNillableSourceID(u *uuid.UUID) *OccurrenceCreate {
-	if u != nil {
-		oc.SetSourceID(*u)
+func (_c *OccurrenceCreate) SetNillableSourceID(v *uuid.UUID) *OccurrenceCreate {
+	if v != nil {
+		_c.SetSourceID(*v)
 	}
-	return oc
+	return _c
 }
 
 // SetPackageID sets the "package_id" field.
-func (oc *OccurrenceCreate) SetPackageID(u uuid.UUID) *OccurrenceCreate {
-	oc.mutation.SetPackageID(u)
-	return oc
+func (_c *OccurrenceCreate) SetPackageID(v uuid.UUID) *OccurrenceCreate {
+	_c.mutation.SetPackageID(v)
+	return _c
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (oc *OccurrenceCreate) SetNillablePackageID(u *uuid.UUID) *OccurrenceCreate {
-	if u != nil {
-		oc.SetPackageID(*u)
+func (_c *OccurrenceCreate) SetNillablePackageID(v *uuid.UUID) *OccurrenceCreate {
+	if v != nil {
+		_c.SetPackageID(*v)
 	}
-	return oc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (oc *OccurrenceCreate) SetID(u uuid.UUID) *OccurrenceCreate {
-	oc.mutation.SetID(u)
-	return oc
+func (_c *OccurrenceCreate) SetID(v uuid.UUID) *OccurrenceCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (oc *OccurrenceCreate) SetNillableID(u *uuid.UUID) *OccurrenceCreate {
-	if u != nil {
-		oc.SetID(*u)
+func (_c *OccurrenceCreate) SetNillableID(v *uuid.UUID) *OccurrenceCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return oc
+	return _c
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (oc *OccurrenceCreate) SetArtifact(a *Artifact) *OccurrenceCreate {
-	return oc.SetArtifactID(a.ID)
+func (_c *OccurrenceCreate) SetArtifact(v *Artifact) *OccurrenceCreate {
+	return _c.SetArtifactID(v.ID)
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (oc *OccurrenceCreate) SetPackage(p *PackageVersion) *OccurrenceCreate {
-	return oc.SetPackageID(p.ID)
+func (_c *OccurrenceCreate) SetPackage(v *PackageVersion) *OccurrenceCreate {
+	return _c.SetPackageID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (oc *OccurrenceCreate) SetSource(s *SourceName) *OccurrenceCreate {
-	return oc.SetSourceID(s.ID)
+func (_c *OccurrenceCreate) SetSource(v *SourceName) *OccurrenceCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (oc *OccurrenceCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceCreate {
-	oc.mutation.AddIncludedInSbomIDs(ids...)
-	return oc
+func (_c *OccurrenceCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceCreate {
+	_c.mutation.AddIncludedInSbomIDs(ids...)
+	return _c
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (oc *OccurrenceCreate) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *OccurrenceCreate) AddIncludedInSboms(v ...*BillOfMaterials) *OccurrenceCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return oc.AddIncludedInSbomIDs(ids...)
+	return _c.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the OccurrenceMutation object of the builder.
-func (oc *OccurrenceCreate) Mutation() *OccurrenceMutation {
-	return oc.mutation
+func (_c *OccurrenceCreate) Mutation() *OccurrenceMutation {
+	return _c.mutation
 }
 
 // Save creates the Occurrence in the database.
-func (oc *OccurrenceCreate) Save(ctx context.Context) (*Occurrence, error) {
-	oc.defaults()
-	return withHooks(ctx, oc.sqlSave, oc.mutation, oc.hooks)
+func (_c *OccurrenceCreate) Save(ctx context.Context) (*Occurrence, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (oc *OccurrenceCreate) SaveX(ctx context.Context) *Occurrence {
-	v, err := oc.Save(ctx)
+func (_c *OccurrenceCreate) SaveX(ctx context.Context) *Occurrence {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -150,55 +150,55 @@ func (oc *OccurrenceCreate) SaveX(ctx context.Context) *Occurrence {
 }
 
 // Exec executes the query.
-func (oc *OccurrenceCreate) Exec(ctx context.Context) error {
-	_, err := oc.Save(ctx)
+func (_c *OccurrenceCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (oc *OccurrenceCreate) ExecX(ctx context.Context) {
-	if err := oc.Exec(ctx); err != nil {
+func (_c *OccurrenceCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (oc *OccurrenceCreate) defaults() {
-	if _, ok := oc.mutation.ID(); !ok {
+func (_c *OccurrenceCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := occurrence.DefaultID()
-		oc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (oc *OccurrenceCreate) check() error {
-	if _, ok := oc.mutation.ArtifactID(); !ok {
+func (_c *OccurrenceCreate) check() error {
+	if _, ok := _c.mutation.ArtifactID(); !ok {
 		return &ValidationError{Name: "artifact_id", err: errors.New(`ent: missing required field "Occurrence.artifact_id"`)}
 	}
-	if _, ok := oc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "Occurrence.justification"`)}
 	}
-	if _, ok := oc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "Occurrence.origin"`)}
 	}
-	if _, ok := oc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Occurrence.collector"`)}
 	}
-	if _, ok := oc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Occurrence.document_ref"`)}
 	}
-	if len(oc.mutation.ArtifactIDs()) == 0 {
+	if len(_c.mutation.ArtifactIDs()) == 0 {
 		return &ValidationError{Name: "artifact", err: errors.New(`ent: missing required edge "Occurrence.artifact"`)}
 	}
 	return nil
 }
 
-func (oc *OccurrenceCreate) sqlSave(ctx context.Context) (*Occurrence, error) {
-	if err := oc.check(); err != nil {
+func (_c *OccurrenceCreate) sqlSave(ctx context.Context) (*Occurrence, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := oc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, oc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -211,38 +211,38 @@ func (oc *OccurrenceCreate) sqlSave(ctx context.Context) (*Occurrence, error) {
 			return nil, err
 		}
 	}
-	oc.mutation.id = &_node.ID
-	oc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
+func (_c *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Occurrence{config: oc.config}
+		_node = &Occurrence{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(occurrence.Table, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = oc.conflict
-	if id, ok := oc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := oc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(occurrence.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := oc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(occurrence.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := oc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := oc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(occurrence.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := oc.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -259,7 +259,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 		_node.ArtifactID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := oc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -276,7 +276,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 		_node.PackageID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := oc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -293,7 +293,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := oc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -328,10 +328,10 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 //			SetArtifactID(v+v).
 //		}).
 //		Exec(ctx)
-func (oc *OccurrenceCreate) OnConflict(opts ...sql.ConflictOption) *OccurrenceUpsertOne {
-	oc.conflict = opts
+func (_c *OccurrenceCreate) OnConflict(opts ...sql.ConflictOption) *OccurrenceUpsertOne {
+	_c.conflict = opts
 	return &OccurrenceUpsertOne{
-		create: oc,
+		create: _c,
 	}
 }
 
@@ -341,10 +341,10 @@ func (oc *OccurrenceCreate) OnConflict(opts ...sql.ConflictOption) *OccurrenceUp
 //	client.Occurrence.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (oc *OccurrenceCreate) OnConflictColumns(columns ...string) *OccurrenceUpsertOne {
-	oc.conflict = append(oc.conflict, sql.ConflictColumns(columns...))
+func (_c *OccurrenceCreate) OnConflictColumns(columns ...string) *OccurrenceUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &OccurrenceUpsertOne{
-		create: oc,
+		create: _c,
 	}
 }
 
@@ -664,16 +664,16 @@ type OccurrenceCreateBulk struct {
 }
 
 // Save creates the Occurrence entities in the database.
-func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error) {
-	if ocb.err != nil {
-		return nil, ocb.err
+func (_c *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ocb.builders))
-	nodes := make([]*Occurrence, len(ocb.builders))
-	mutators := make([]Mutator, len(ocb.builders))
-	for i := range ocb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Occurrence, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ocb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*OccurrenceMutation)
@@ -687,12 +687,12 @@ func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ocb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ocb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ocb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -712,7 +712,7 @@ func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ocb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -720,8 +720,8 @@ func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ocb *OccurrenceCreateBulk) SaveX(ctx context.Context) []*Occurrence {
-	v, err := ocb.Save(ctx)
+func (_c *OccurrenceCreateBulk) SaveX(ctx context.Context) []*Occurrence {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -729,14 +729,14 @@ func (ocb *OccurrenceCreateBulk) SaveX(ctx context.Context) []*Occurrence {
 }
 
 // Exec executes the query.
-func (ocb *OccurrenceCreateBulk) Exec(ctx context.Context) error {
-	_, err := ocb.Save(ctx)
+func (_c *OccurrenceCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ocb *OccurrenceCreateBulk) ExecX(ctx context.Context) {
-	if err := ocb.Exec(ctx); err != nil {
+func (_c *OccurrenceCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -756,10 +756,10 @@ func (ocb *OccurrenceCreateBulk) ExecX(ctx context.Context) {
 //			SetArtifactID(v+v).
 //		}).
 //		Exec(ctx)
-func (ocb *OccurrenceCreateBulk) OnConflict(opts ...sql.ConflictOption) *OccurrenceUpsertBulk {
-	ocb.conflict = opts
+func (_c *OccurrenceCreateBulk) OnConflict(opts ...sql.ConflictOption) *OccurrenceUpsertBulk {
+	_c.conflict = opts
 	return &OccurrenceUpsertBulk{
-		create: ocb,
+		create: _c,
 	}
 }
 
@@ -769,10 +769,10 @@ func (ocb *OccurrenceCreateBulk) OnConflict(opts ...sql.ConflictOption) *Occurre
 //	client.Occurrence.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ocb *OccurrenceCreateBulk) OnConflictColumns(columns ...string) *OccurrenceUpsertBulk {
-	ocb.conflict = append(ocb.conflict, sql.ConflictColumns(columns...))
+func (_c *OccurrenceCreateBulk) OnConflictColumns(columns ...string) *OccurrenceUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &OccurrenceUpsertBulk{
-		create: ocb,
+		create: _c,
 	}
 }
 

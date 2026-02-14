@@ -28,161 +28,161 @@ type CertifyLegalCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (clc *CertifyLegalCreate) SetPackageID(u uuid.UUID) *CertifyLegalCreate {
-	clc.mutation.SetPackageID(u)
-	return clc
+func (_c *CertifyLegalCreate) SetPackageID(v uuid.UUID) *CertifyLegalCreate {
+	_c.mutation.SetPackageID(v)
+	return _c
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (clc *CertifyLegalCreate) SetNillablePackageID(u *uuid.UUID) *CertifyLegalCreate {
-	if u != nil {
-		clc.SetPackageID(*u)
+func (_c *CertifyLegalCreate) SetNillablePackageID(v *uuid.UUID) *CertifyLegalCreate {
+	if v != nil {
+		_c.SetPackageID(*v)
 	}
-	return clc
+	return _c
 }
 
 // SetSourceID sets the "source_id" field.
-func (clc *CertifyLegalCreate) SetSourceID(u uuid.UUID) *CertifyLegalCreate {
-	clc.mutation.SetSourceID(u)
-	return clc
+func (_c *CertifyLegalCreate) SetSourceID(v uuid.UUID) *CertifyLegalCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (clc *CertifyLegalCreate) SetNillableSourceID(u *uuid.UUID) *CertifyLegalCreate {
-	if u != nil {
-		clc.SetSourceID(*u)
+func (_c *CertifyLegalCreate) SetNillableSourceID(v *uuid.UUID) *CertifyLegalCreate {
+	if v != nil {
+		_c.SetSourceID(*v)
 	}
-	return clc
+	return _c
 }
 
 // SetDeclaredLicense sets the "declared_license" field.
-func (clc *CertifyLegalCreate) SetDeclaredLicense(s string) *CertifyLegalCreate {
-	clc.mutation.SetDeclaredLicense(s)
-	return clc
+func (_c *CertifyLegalCreate) SetDeclaredLicense(v string) *CertifyLegalCreate {
+	_c.mutation.SetDeclaredLicense(v)
+	return _c
 }
 
 // SetDiscoveredLicense sets the "discovered_license" field.
-func (clc *CertifyLegalCreate) SetDiscoveredLicense(s string) *CertifyLegalCreate {
-	clc.mutation.SetDiscoveredLicense(s)
-	return clc
+func (_c *CertifyLegalCreate) SetDiscoveredLicense(v string) *CertifyLegalCreate {
+	_c.mutation.SetDiscoveredLicense(v)
+	return _c
 }
 
 // SetAttribution sets the "attribution" field.
-func (clc *CertifyLegalCreate) SetAttribution(s string) *CertifyLegalCreate {
-	clc.mutation.SetAttribution(s)
-	return clc
+func (_c *CertifyLegalCreate) SetAttribution(v string) *CertifyLegalCreate {
+	_c.mutation.SetAttribution(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (clc *CertifyLegalCreate) SetJustification(s string) *CertifyLegalCreate {
-	clc.mutation.SetJustification(s)
-	return clc
+func (_c *CertifyLegalCreate) SetJustification(v string) *CertifyLegalCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (clc *CertifyLegalCreate) SetTimeScanned(t time.Time) *CertifyLegalCreate {
-	clc.mutation.SetTimeScanned(t)
-	return clc
+func (_c *CertifyLegalCreate) SetTimeScanned(v time.Time) *CertifyLegalCreate {
+	_c.mutation.SetTimeScanned(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (clc *CertifyLegalCreate) SetOrigin(s string) *CertifyLegalCreate {
-	clc.mutation.SetOrigin(s)
-	return clc
+func (_c *CertifyLegalCreate) SetOrigin(v string) *CertifyLegalCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (clc *CertifyLegalCreate) SetCollector(s string) *CertifyLegalCreate {
-	clc.mutation.SetCollector(s)
-	return clc
+func (_c *CertifyLegalCreate) SetCollector(v string) *CertifyLegalCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (clc *CertifyLegalCreate) SetDocumentRef(s string) *CertifyLegalCreate {
-	clc.mutation.SetDocumentRef(s)
-	return clc
+func (_c *CertifyLegalCreate) SetDocumentRef(v string) *CertifyLegalCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
-func (clc *CertifyLegalCreate) SetDeclaredLicensesHash(s string) *CertifyLegalCreate {
-	clc.mutation.SetDeclaredLicensesHash(s)
-	return clc
+func (_c *CertifyLegalCreate) SetDeclaredLicensesHash(v string) *CertifyLegalCreate {
+	_c.mutation.SetDeclaredLicensesHash(v)
+	return _c
 }
 
 // SetDiscoveredLicensesHash sets the "discovered_licenses_hash" field.
-func (clc *CertifyLegalCreate) SetDiscoveredLicensesHash(s string) *CertifyLegalCreate {
-	clc.mutation.SetDiscoveredLicensesHash(s)
-	return clc
+func (_c *CertifyLegalCreate) SetDiscoveredLicensesHash(v string) *CertifyLegalCreate {
+	_c.mutation.SetDiscoveredLicensesHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (clc *CertifyLegalCreate) SetID(u uuid.UUID) *CertifyLegalCreate {
-	clc.mutation.SetID(u)
-	return clc
+func (_c *CertifyLegalCreate) SetID(v uuid.UUID) *CertifyLegalCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (clc *CertifyLegalCreate) SetNillableID(u *uuid.UUID) *CertifyLegalCreate {
-	if u != nil {
-		clc.SetID(*u)
+func (_c *CertifyLegalCreate) SetNillableID(v *uuid.UUID) *CertifyLegalCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return clc
+	return _c
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (clc *CertifyLegalCreate) SetPackage(p *PackageVersion) *CertifyLegalCreate {
-	return clc.SetPackageID(p.ID)
+func (_c *CertifyLegalCreate) SetPackage(v *PackageVersion) *CertifyLegalCreate {
+	return _c.SetPackageID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (clc *CertifyLegalCreate) SetSource(s *SourceName) *CertifyLegalCreate {
-	return clc.SetSourceID(s.ID)
+func (_c *CertifyLegalCreate) SetSource(v *SourceName) *CertifyLegalCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // AddDeclaredLicenseIDs adds the "declared_licenses" edge to the License entity by IDs.
-func (clc *CertifyLegalCreate) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalCreate {
-	clc.mutation.AddDeclaredLicenseIDs(ids...)
-	return clc
+func (_c *CertifyLegalCreate) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalCreate {
+	_c.mutation.AddDeclaredLicenseIDs(ids...)
+	return _c
 }
 
 // AddDeclaredLicenses adds the "declared_licenses" edges to the License entity.
-func (clc *CertifyLegalCreate) AddDeclaredLicenses(l ...*License) *CertifyLegalCreate {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_c *CertifyLegalCreate) AddDeclaredLicenses(v ...*License) *CertifyLegalCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return clc.AddDeclaredLicenseIDs(ids...)
+	return _c.AddDeclaredLicenseIDs(ids...)
 }
 
 // AddDiscoveredLicenseIDs adds the "discovered_licenses" edge to the License entity by IDs.
-func (clc *CertifyLegalCreate) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalCreate {
-	clc.mutation.AddDiscoveredLicenseIDs(ids...)
-	return clc
+func (_c *CertifyLegalCreate) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalCreate {
+	_c.mutation.AddDiscoveredLicenseIDs(ids...)
+	return _c
 }
 
 // AddDiscoveredLicenses adds the "discovered_licenses" edges to the License entity.
-func (clc *CertifyLegalCreate) AddDiscoveredLicenses(l ...*License) *CertifyLegalCreate {
-	ids := make([]uuid.UUID, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+func (_c *CertifyLegalCreate) AddDiscoveredLicenses(v ...*License) *CertifyLegalCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return clc.AddDiscoveredLicenseIDs(ids...)
+	return _c.AddDiscoveredLicenseIDs(ids...)
 }
 
 // Mutation returns the CertifyLegalMutation object of the builder.
-func (clc *CertifyLegalCreate) Mutation() *CertifyLegalMutation {
-	return clc.mutation
+func (_c *CertifyLegalCreate) Mutation() *CertifyLegalMutation {
+	return _c.mutation
 }
 
 // Save creates the CertifyLegal in the database.
-func (clc *CertifyLegalCreate) Save(ctx context.Context) (*CertifyLegal, error) {
-	clc.defaults()
-	return withHooks(ctx, clc.sqlSave, clc.mutation, clc.hooks)
+func (_c *CertifyLegalCreate) Save(ctx context.Context) (*CertifyLegal, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (clc *CertifyLegalCreate) SaveX(ctx context.Context) *CertifyLegal {
-	v, err := clc.Save(ctx)
+func (_c *CertifyLegalCreate) SaveX(ctx context.Context) *CertifyLegal {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -190,67 +190,67 @@ func (clc *CertifyLegalCreate) SaveX(ctx context.Context) *CertifyLegal {
 }
 
 // Exec executes the query.
-func (clc *CertifyLegalCreate) Exec(ctx context.Context) error {
-	_, err := clc.Save(ctx)
+func (_c *CertifyLegalCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (clc *CertifyLegalCreate) ExecX(ctx context.Context) {
-	if err := clc.Exec(ctx); err != nil {
+func (_c *CertifyLegalCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (clc *CertifyLegalCreate) defaults() {
-	if _, ok := clc.mutation.ID(); !ok {
+func (_c *CertifyLegalCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := certifylegal.DefaultID()
-		clc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (clc *CertifyLegalCreate) check() error {
-	if _, ok := clc.mutation.DeclaredLicense(); !ok {
+func (_c *CertifyLegalCreate) check() error {
+	if _, ok := _c.mutation.DeclaredLicense(); !ok {
 		return &ValidationError{Name: "declared_license", err: errors.New(`ent: missing required field "CertifyLegal.declared_license"`)}
 	}
-	if _, ok := clc.mutation.DiscoveredLicense(); !ok {
+	if _, ok := _c.mutation.DiscoveredLicense(); !ok {
 		return &ValidationError{Name: "discovered_license", err: errors.New(`ent: missing required field "CertifyLegal.discovered_license"`)}
 	}
-	if _, ok := clc.mutation.Attribution(); !ok {
+	if _, ok := _c.mutation.Attribution(); !ok {
 		return &ValidationError{Name: "attribution", err: errors.New(`ent: missing required field "CertifyLegal.attribution"`)}
 	}
-	if _, ok := clc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "CertifyLegal.justification"`)}
 	}
-	if _, ok := clc.mutation.TimeScanned(); !ok {
+	if _, ok := _c.mutation.TimeScanned(); !ok {
 		return &ValidationError{Name: "time_scanned", err: errors.New(`ent: missing required field "CertifyLegal.time_scanned"`)}
 	}
-	if _, ok := clc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "CertifyLegal.origin"`)}
 	}
-	if _, ok := clc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyLegal.collector"`)}
 	}
-	if _, ok := clc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyLegal.document_ref"`)}
 	}
-	if _, ok := clc.mutation.DeclaredLicensesHash(); !ok {
+	if _, ok := _c.mutation.DeclaredLicensesHash(); !ok {
 		return &ValidationError{Name: "declared_licenses_hash", err: errors.New(`ent: missing required field "CertifyLegal.declared_licenses_hash"`)}
 	}
-	if _, ok := clc.mutation.DiscoveredLicensesHash(); !ok {
+	if _, ok := _c.mutation.DiscoveredLicensesHash(); !ok {
 		return &ValidationError{Name: "discovered_licenses_hash", err: errors.New(`ent: missing required field "CertifyLegal.discovered_licenses_hash"`)}
 	}
 	return nil
 }
 
-func (clc *CertifyLegalCreate) sqlSave(ctx context.Context) (*CertifyLegal, error) {
-	if err := clc.check(); err != nil {
+func (_c *CertifyLegalCreate) sqlSave(ctx context.Context) (*CertifyLegal, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := clc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, clc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -263,62 +263,62 @@ func (clc *CertifyLegalCreate) sqlSave(ctx context.Context) (*CertifyLegal, erro
 			return nil, err
 		}
 	}
-	clc.mutation.id = &_node.ID
-	clc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec) {
+func (_c *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec) {
 	var (
-		_node = &CertifyLegal{config: clc.config}
+		_node = &CertifyLegal{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(certifylegal.Table, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = clc.conflict
-	if id, ok := clc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := clc.mutation.DeclaredLicense(); ok {
+	if value, ok := _c.mutation.DeclaredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicense, field.TypeString, value)
 		_node.DeclaredLicense = value
 	}
-	if value, ok := clc.mutation.DiscoveredLicense(); ok {
+	if value, ok := _c.mutation.DiscoveredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDiscoveredLicense, field.TypeString, value)
 		_node.DiscoveredLicense = value
 	}
-	if value, ok := clc.mutation.Attribution(); ok {
+	if value, ok := _c.mutation.Attribution(); ok {
 		_spec.SetField(certifylegal.FieldAttribution, field.TypeString, value)
 		_node.Attribution = value
 	}
-	if value, ok := clc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(certifylegal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := clc.mutation.TimeScanned(); ok {
+	if value, ok := _c.mutation.TimeScanned(); ok {
 		_spec.SetField(certifylegal.FieldTimeScanned, field.TypeTime, value)
 		_node.TimeScanned = value
 	}
-	if value, ok := clc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(certifylegal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := clc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(certifylegal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := clc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(certifylegal.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := clc.mutation.DeclaredLicensesHash(); ok {
+	if value, ok := _c.mutation.DeclaredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicensesHash, field.TypeString, value)
 		_node.DeclaredLicensesHash = value
 	}
-	if value, ok := clc.mutation.DiscoveredLicensesHash(); ok {
+	if value, ok := _c.mutation.DiscoveredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDiscoveredLicensesHash, field.TypeString, value)
 		_node.DiscoveredLicensesHash = value
 	}
-	if nodes := clc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -335,7 +335,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 		_node.PackageID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := clc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -352,7 +352,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := clc.mutation.DeclaredLicensesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DeclaredLicensesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -368,7 +368,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := clc.mutation.DiscoveredLicensesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DiscoveredLicensesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -403,10 +403,10 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (clc *CertifyLegalCreate) OnConflict(opts ...sql.ConflictOption) *CertifyLegalUpsertOne {
-	clc.conflict = opts
+func (_c *CertifyLegalCreate) OnConflict(opts ...sql.ConflictOption) *CertifyLegalUpsertOne {
+	_c.conflict = opts
 	return &CertifyLegalUpsertOne{
-		create: clc,
+		create: _c,
 	}
 }
 
@@ -416,10 +416,10 @@ func (clc *CertifyLegalCreate) OnConflict(opts ...sql.ConflictOption) *CertifyLe
 //	client.CertifyLegal.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (clc *CertifyLegalCreate) OnConflictColumns(columns ...string) *CertifyLegalUpsertOne {
-	clc.conflict = append(clc.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyLegalCreate) OnConflictColumns(columns ...string) *CertifyLegalUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyLegalUpsertOne{
-		create: clc,
+		create: _c,
 	}
 }
 
@@ -869,16 +869,16 @@ type CertifyLegalCreateBulk struct {
 }
 
 // Save creates the CertifyLegal entities in the database.
-func (clcb *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, error) {
-	if clcb.err != nil {
-		return nil, clcb.err
+func (_c *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(clcb.builders))
-	nodes := make([]*CertifyLegal, len(clcb.builders))
-	mutators := make([]Mutator, len(clcb.builders))
-	for i := range clcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*CertifyLegal, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := clcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyLegalMutation)
@@ -892,12 +892,12 @@ func (clcb *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, 
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, clcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = clcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, clcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -917,7 +917,7 @@ func (clcb *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, 
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, clcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -925,8 +925,8 @@ func (clcb *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, 
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (clcb *CertifyLegalCreateBulk) SaveX(ctx context.Context) []*CertifyLegal {
-	v, err := clcb.Save(ctx)
+func (_c *CertifyLegalCreateBulk) SaveX(ctx context.Context) []*CertifyLegal {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -934,14 +934,14 @@ func (clcb *CertifyLegalCreateBulk) SaveX(ctx context.Context) []*CertifyLegal {
 }
 
 // Exec executes the query.
-func (clcb *CertifyLegalCreateBulk) Exec(ctx context.Context) error {
-	_, err := clcb.Save(ctx)
+func (_c *CertifyLegalCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (clcb *CertifyLegalCreateBulk) ExecX(ctx context.Context) {
-	if err := clcb.Exec(ctx); err != nil {
+func (_c *CertifyLegalCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -961,10 +961,10 @@ func (clcb *CertifyLegalCreateBulk) ExecX(ctx context.Context) {
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (clcb *CertifyLegalCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyLegalUpsertBulk {
-	clcb.conflict = opts
+func (_c *CertifyLegalCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyLegalUpsertBulk {
+	_c.conflict = opts
 	return &CertifyLegalUpsertBulk{
-		create: clcb,
+		create: _c,
 	}
 }
 
@@ -974,10 +974,10 @@ func (clcb *CertifyLegalCreateBulk) OnConflict(opts ...sql.ConflictOption) *Cert
 //	client.CertifyLegal.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (clcb *CertifyLegalCreateBulk) OnConflictColumns(columns ...string) *CertifyLegalUpsertBulk {
-	clcb.conflict = append(clcb.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyLegalCreateBulk) OnConflictColumns(columns ...string) *CertifyLegalUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyLegalUpsertBulk{
-		create: clcb,
+		create: _c,
 	}
 }
 

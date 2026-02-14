@@ -35,7 +35,9 @@ func (ec *executionContext) _PointOfContact_id(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _PointOfContact_subject(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_subject,
-		func(ctx context.Context) (any, error) { return obj.Subject, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _PointOfContact_email(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_email,
-		func(ctx context.Context) (any, error) { return obj.Email, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -122,7 +128,9 @@ func (ec *executionContext) _PointOfContact_info(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_info,
-		func(ctx context.Context) (any, error) { return obj.Info, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Info, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -151,7 +159,9 @@ func (ec *executionContext) _PointOfContact_since(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_since,
-		func(ctx context.Context) (any, error) { return obj.Since, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Since, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -180,7 +190,9 @@ func (ec *executionContext) _PointOfContact_justification(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_justification,
-		func(ctx context.Context) (any, error) { return obj.Justification, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Justification, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -209,7 +221,9 @@ func (ec *executionContext) _PointOfContact_origin(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -238,7 +252,9 @@ func (ec *executionContext) _PointOfContact_collector(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -267,7 +283,9 @@ func (ec *executionContext) _PointOfContact_documentRef(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContact_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -296,7 +314,9 @@ func (ec *executionContext) _PointOfContactConnection_totalCount(ctx context.Con
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContactConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -325,7 +345,9 @@ func (ec *executionContext) _PointOfContactConnection_pageInfo(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContactConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -362,7 +384,9 @@ func (ec *executionContext) _PointOfContactConnection_edges(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContactConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -397,7 +421,9 @@ func (ec *executionContext) _PointOfContactEdge_cursor(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContactEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -426,7 +452,9 @@ func (ec *executionContext) _PointOfContactEdge_node(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PointOfContactEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -856,7 +884,7 @@ func (ec *executionContext) marshalNPointOfContact2ᚕᚖgithubᚗcomᚋguacsec�
 func (ec *executionContext) marshalNPointOfContact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContact(ctx context.Context, sel ast.SelectionSet, v *model.PointOfContact) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -910,7 +938,7 @@ func (ec *executionContext) marshalNPointOfContactEdge2ᚕᚖgithubᚗcomᚋguac
 func (ec *executionContext) marshalNPointOfContactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactEdge(ctx context.Context, sel ast.SelectionSet, v *model.PointOfContactEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

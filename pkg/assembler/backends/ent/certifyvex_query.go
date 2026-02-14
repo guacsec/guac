@@ -37,44 +37,44 @@ type CertifyVexQuery struct {
 }
 
 // Where adds a new predicate for the CertifyVexQuery builder.
-func (cvq *CertifyVexQuery) Where(ps ...predicate.CertifyVex) *CertifyVexQuery {
-	cvq.predicates = append(cvq.predicates, ps...)
-	return cvq
+func (_q *CertifyVexQuery) Where(ps ...predicate.CertifyVex) *CertifyVexQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (cvq *CertifyVexQuery) Limit(limit int) *CertifyVexQuery {
-	cvq.ctx.Limit = &limit
-	return cvq
+func (_q *CertifyVexQuery) Limit(limit int) *CertifyVexQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (cvq *CertifyVexQuery) Offset(offset int) *CertifyVexQuery {
-	cvq.ctx.Offset = &offset
-	return cvq
+func (_q *CertifyVexQuery) Offset(offset int) *CertifyVexQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cvq *CertifyVexQuery) Unique(unique bool) *CertifyVexQuery {
-	cvq.ctx.Unique = &unique
-	return cvq
+func (_q *CertifyVexQuery) Unique(unique bool) *CertifyVexQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (cvq *CertifyVexQuery) Order(o ...certifyvex.OrderOption) *CertifyVexQuery {
-	cvq.order = append(cvq.order, o...)
-	return cvq
+func (_q *CertifyVexQuery) Order(o ...certifyvex.OrderOption) *CertifyVexQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryPackage chains the current query on the "package" edge.
-func (cvq *CertifyVexQuery) QueryPackage() *PackageVersionQuery {
-	query := (&PackageVersionClient{config: cvq.config}).Query()
+func (_q *CertifyVexQuery) QueryPackage() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cvq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cvq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -83,20 +83,20 @@ func (cvq *CertifyVexQuery) QueryPackage() *PackageVersionQuery {
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.PackageTable, certifyvex.PackageColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryArtifact chains the current query on the "artifact" edge.
-func (cvq *CertifyVexQuery) QueryArtifact() *ArtifactQuery {
-	query := (&ArtifactClient{config: cvq.config}).Query()
+func (_q *CertifyVexQuery) QueryArtifact() *ArtifactQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cvq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cvq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -105,20 +105,20 @@ func (cvq *CertifyVexQuery) QueryArtifact() *ArtifactQuery {
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.ArtifactTable, certifyvex.ArtifactColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryVulnerability chains the current query on the "vulnerability" edge.
-func (cvq *CertifyVexQuery) QueryVulnerability() *VulnerabilityIDQuery {
-	query := (&VulnerabilityIDClient{config: cvq.config}).Query()
+func (_q *CertifyVexQuery) QueryVulnerability() *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cvq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cvq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -127,7 +127,7 @@ func (cvq *CertifyVexQuery) QueryVulnerability() *VulnerabilityIDQuery {
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.VulnerabilityTable, certifyvex.VulnerabilityColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -135,8 +135,8 @@ func (cvq *CertifyVexQuery) QueryVulnerability() *VulnerabilityIDQuery {
 
 // First returns the first CertifyVex entity from the query.
 // Returns a *NotFoundError when no CertifyVex was found.
-func (cvq *CertifyVexQuery) First(ctx context.Context) (*CertifyVex, error) {
-	nodes, err := cvq.Limit(1).All(setContextOp(ctx, cvq.ctx, ent.OpQueryFirst))
+func (_q *CertifyVexQuery) First(ctx context.Context) (*CertifyVex, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -147,8 +147,8 @@ func (cvq *CertifyVexQuery) First(ctx context.Context) (*CertifyVex, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cvq *CertifyVexQuery) FirstX(ctx context.Context) *CertifyVex {
-	node, err := cvq.First(ctx)
+func (_q *CertifyVexQuery) FirstX(ctx context.Context) *CertifyVex {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -157,9 +157,9 @@ func (cvq *CertifyVexQuery) FirstX(ctx context.Context) *CertifyVex {
 
 // FirstID returns the first CertifyVex ID from the query.
 // Returns a *NotFoundError when no CertifyVex ID was found.
-func (cvq *CertifyVexQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *CertifyVexQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -170,8 +170,8 @@ func (cvq *CertifyVexQuery) FirstID(ctx context.Context) (id uuid.UUID, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cvq *CertifyVexQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := cvq.FirstID(ctx)
+func (_q *CertifyVexQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -181,8 +181,8 @@ func (cvq *CertifyVexQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single CertifyVex entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one CertifyVex entity is found.
 // Returns a *NotFoundError when no CertifyVex entities are found.
-func (cvq *CertifyVexQuery) Only(ctx context.Context) (*CertifyVex, error) {
-	nodes, err := cvq.Limit(2).All(setContextOp(ctx, cvq.ctx, ent.OpQueryOnly))
+func (_q *CertifyVexQuery) Only(ctx context.Context) (*CertifyVex, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -197,8 +197,8 @@ func (cvq *CertifyVexQuery) Only(ctx context.Context) (*CertifyVex, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cvq *CertifyVexQuery) OnlyX(ctx context.Context) *CertifyVex {
-	node, err := cvq.Only(ctx)
+func (_q *CertifyVexQuery) OnlyX(ctx context.Context) *CertifyVex {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -208,9 +208,9 @@ func (cvq *CertifyVexQuery) OnlyX(ctx context.Context) *CertifyVex {
 // OnlyID is like Only, but returns the only CertifyVex ID in the query.
 // Returns a *NotSingularError when more than one CertifyVex ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cvq *CertifyVexQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *CertifyVexQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -225,8 +225,8 @@ func (cvq *CertifyVexQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cvq *CertifyVexQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := cvq.OnlyID(ctx)
+func (_q *CertifyVexQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -234,18 +234,18 @@ func (cvq *CertifyVexQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of CertifyVexes.
-func (cvq *CertifyVexQuery) All(ctx context.Context) ([]*CertifyVex, error) {
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryAll)
-	if err := cvq.prepareQuery(ctx); err != nil {
+func (_q *CertifyVexQuery) All(ctx context.Context) ([]*CertifyVex, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*CertifyVex, *CertifyVexQuery]()
-	return withInterceptors[[]*CertifyVex](ctx, cvq, qr, cvq.inters)
+	return withInterceptors[[]*CertifyVex](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cvq *CertifyVexQuery) AllX(ctx context.Context) []*CertifyVex {
-	nodes, err := cvq.All(ctx)
+func (_q *CertifyVexQuery) AllX(ctx context.Context) []*CertifyVex {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -253,20 +253,20 @@ func (cvq *CertifyVexQuery) AllX(ctx context.Context) []*CertifyVex {
 }
 
 // IDs executes the query and returns a list of CertifyVex IDs.
-func (cvq *CertifyVexQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if cvq.ctx.Unique == nil && cvq.path != nil {
-		cvq.Unique(true)
+func (_q *CertifyVexQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryIDs)
-	if err = cvq.Select(certifyvex.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(certifyvex.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cvq *CertifyVexQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := cvq.IDs(ctx)
+func (_q *CertifyVexQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -274,17 +274,17 @@ func (cvq *CertifyVexQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (cvq *CertifyVexQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryCount)
-	if err := cvq.prepareQuery(ctx); err != nil {
+func (_q *CertifyVexQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cvq, querierCount[*CertifyVexQuery](), cvq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*CertifyVexQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cvq *CertifyVexQuery) CountX(ctx context.Context) int {
-	count, err := cvq.Count(ctx)
+func (_q *CertifyVexQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -292,9 +292,9 @@ func (cvq *CertifyVexQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cvq *CertifyVexQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryExist)
-	switch _, err := cvq.FirstID(ctx); {
+func (_q *CertifyVexQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -305,8 +305,8 @@ func (cvq *CertifyVexQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cvq *CertifyVexQuery) ExistX(ctx context.Context) bool {
-	exist, err := cvq.Exist(ctx)
+func (_q *CertifyVexQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -315,56 +315,56 @@ func (cvq *CertifyVexQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CertifyVexQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cvq *CertifyVexQuery) Clone() *CertifyVexQuery {
-	if cvq == nil {
+func (_q *CertifyVexQuery) Clone() *CertifyVexQuery {
+	if _q == nil {
 		return nil
 	}
 	return &CertifyVexQuery{
-		config:            cvq.config,
-		ctx:               cvq.ctx.Clone(),
-		order:             append([]certifyvex.OrderOption{}, cvq.order...),
-		inters:            append([]Interceptor{}, cvq.inters...),
-		predicates:        append([]predicate.CertifyVex{}, cvq.predicates...),
-		withPackage:       cvq.withPackage.Clone(),
-		withArtifact:      cvq.withArtifact.Clone(),
-		withVulnerability: cvq.withVulnerability.Clone(),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]certifyvex.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.CertifyVex{}, _q.predicates...),
+		withPackage:       _q.withPackage.Clone(),
+		withArtifact:      _q.withArtifact.Clone(),
+		withVulnerability: _q.withVulnerability.Clone(),
 		// clone intermediate query.
-		sql:  cvq.sql.Clone(),
-		path: cvq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithPackage tells the query-builder to eager-load the nodes that are connected to
 // the "package" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVexQuery) WithPackage(opts ...func(*PackageVersionQuery)) *CertifyVexQuery {
-	query := (&PackageVersionClient{config: cvq.config}).Query()
+func (_q *CertifyVexQuery) WithPackage(opts ...func(*PackageVersionQuery)) *CertifyVexQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cvq.withPackage = query
-	return cvq
+	_q.withPackage = query
+	return _q
 }
 
 // WithArtifact tells the query-builder to eager-load the nodes that are connected to
 // the "artifact" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVexQuery) WithArtifact(opts ...func(*ArtifactQuery)) *CertifyVexQuery {
-	query := (&ArtifactClient{config: cvq.config}).Query()
+func (_q *CertifyVexQuery) WithArtifact(opts ...func(*ArtifactQuery)) *CertifyVexQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cvq.withArtifact = query
-	return cvq
+	_q.withArtifact = query
+	return _q
 }
 
 // WithVulnerability tells the query-builder to eager-load the nodes that are connected to
 // the "vulnerability" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVexQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery)) *CertifyVexQuery {
-	query := (&VulnerabilityIDClient{config: cvq.config}).Query()
+func (_q *CertifyVexQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery)) *CertifyVexQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cvq.withVulnerability = query
-	return cvq
+	_q.withVulnerability = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -381,10 +381,10 @@ func (cvq *CertifyVexQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery
 //		GroupBy(certifyvex.FieldPackageID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (cvq *CertifyVexQuery) GroupBy(field string, fields ...string) *CertifyVexGroupBy {
-	cvq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CertifyVexGroupBy{build: cvq}
-	grbuild.flds = &cvq.ctx.Fields
+func (_q *CertifyVexQuery) GroupBy(field string, fields ...string) *CertifyVexGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CertifyVexGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = certifyvex.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -402,103 +402,103 @@ func (cvq *CertifyVexQuery) GroupBy(field string, fields ...string) *CertifyVexG
 //	client.CertifyVex.Query().
 //		Select(certifyvex.FieldPackageID).
 //		Scan(ctx, &v)
-func (cvq *CertifyVexQuery) Select(fields ...string) *CertifyVexSelect {
-	cvq.ctx.Fields = append(cvq.ctx.Fields, fields...)
-	sbuild := &CertifyVexSelect{CertifyVexQuery: cvq}
+func (_q *CertifyVexQuery) Select(fields ...string) *CertifyVexSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &CertifyVexSelect{CertifyVexQuery: _q}
 	sbuild.label = certifyvex.Label
-	sbuild.flds, sbuild.scan = &cvq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CertifyVexSelect configured with the given aggregations.
-func (cvq *CertifyVexQuery) Aggregate(fns ...AggregateFunc) *CertifyVexSelect {
-	return cvq.Select().Aggregate(fns...)
+func (_q *CertifyVexQuery) Aggregate(fns ...AggregateFunc) *CertifyVexSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (cvq *CertifyVexQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cvq.inters {
+func (_q *CertifyVexQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cvq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range cvq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !certifyvex.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if cvq.path != nil {
-		prev, err := cvq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cvq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (cvq *CertifyVexQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CertifyVex, error) {
+func (_q *CertifyVexQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CertifyVex, error) {
 	var (
 		nodes       = []*CertifyVex{}
-		_spec       = cvq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [3]bool{
-			cvq.withPackage != nil,
-			cvq.withArtifact != nil,
-			cvq.withVulnerability != nil,
+			_q.withPackage != nil,
+			_q.withArtifact != nil,
+			_q.withVulnerability != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CertifyVex).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CertifyVex{config: cvq.config}
+		node := &CertifyVex{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(cvq.modifiers) > 0 {
-		_spec.Modifiers = cvq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cvq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := cvq.withPackage; query != nil {
-		if err := cvq.loadPackage(ctx, query, nodes, nil,
+	if query := _q.withPackage; query != nil {
+		if err := _q.loadPackage(ctx, query, nodes, nil,
 			func(n *CertifyVex, e *PackageVersion) { n.Edges.Package = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := cvq.withArtifact; query != nil {
-		if err := cvq.loadArtifact(ctx, query, nodes, nil,
+	if query := _q.withArtifact; query != nil {
+		if err := _q.loadArtifact(ctx, query, nodes, nil,
 			func(n *CertifyVex, e *Artifact) { n.Edges.Artifact = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := cvq.withVulnerability; query != nil {
-		if err := cvq.loadVulnerability(ctx, query, nodes, nil,
+	if query := _q.withVulnerability; query != nil {
+		if err := _q.loadVulnerability(ctx, query, nodes, nil,
 			func(n *CertifyVex, e *VulnerabilityID) { n.Edges.Vulnerability = e }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range cvq.loadTotal {
-		if err := cvq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (cvq *CertifyVexQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *PackageVersion)) error {
+func (_q *CertifyVexQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *PackageVersion)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyVex)
 	for i := range nodes {
@@ -530,7 +530,7 @@ func (cvq *CertifyVexQuery) loadPackage(ctx context.Context, query *PackageVersi
 	}
 	return nil
 }
-func (cvq *CertifyVexQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *Artifact)) error {
+func (_q *CertifyVexQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *Artifact)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyVex)
 	for i := range nodes {
@@ -562,7 +562,7 @@ func (cvq *CertifyVexQuery) loadArtifact(ctx context.Context, query *ArtifactQue
 	}
 	return nil
 }
-func (cvq *CertifyVexQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *VulnerabilityID)) error {
+func (_q *CertifyVexQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *VulnerabilityID)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyVex)
 	for i := range nodes {
@@ -592,27 +592,27 @@ func (cvq *CertifyVexQuery) loadVulnerability(ctx context.Context, query *Vulner
 	return nil
 }
 
-func (cvq *CertifyVexQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := cvq.querySpec()
-	if len(cvq.modifiers) > 0 {
-		_spec.Modifiers = cvq.modifiers
+func (_q *CertifyVexQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = cvq.ctx.Fields
-	if len(cvq.ctx.Fields) > 0 {
-		_spec.Unique = cvq.ctx.Unique != nil && *cvq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, cvq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (cvq *CertifyVexQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *CertifyVexQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
-	_spec.From = cvq.sql
-	if unique := cvq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if cvq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := cvq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifyvex.FieldID)
 		for i := range fields {
@@ -620,30 +620,30 @@ func (cvq *CertifyVexQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if cvq.withPackage != nil {
+		if _q.withPackage != nil {
 			_spec.Node.AddColumnOnce(certifyvex.FieldPackageID)
 		}
-		if cvq.withArtifact != nil {
+		if _q.withArtifact != nil {
 			_spec.Node.AddColumnOnce(certifyvex.FieldArtifactID)
 		}
-		if cvq.withVulnerability != nil {
+		if _q.withVulnerability != nil {
 			_spec.Node.AddColumnOnce(certifyvex.FieldVulnerabilityID)
 		}
 	}
-	if ps := cvq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := cvq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cvq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := cvq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -653,33 +653,33 @@ func (cvq *CertifyVexQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cvq *CertifyVexQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(cvq.driver.Dialect())
+func (_q *CertifyVexQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(certifyvex.Table)
-	columns := cvq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = certifyvex.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if cvq.sql != nil {
-		selector = cvq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cvq.ctx.Unique != nil && *cvq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range cvq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range cvq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := cvq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cvq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -692,41 +692,41 @@ type CertifyVexGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cvgb *CertifyVexGroupBy) Aggregate(fns ...AggregateFunc) *CertifyVexGroupBy {
-	cvgb.fns = append(cvgb.fns, fns...)
-	return cvgb
+func (_g *CertifyVexGroupBy) Aggregate(fns ...AggregateFunc) *CertifyVexGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cvgb *CertifyVexGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvgb.build.ctx, ent.OpQueryGroupBy)
-	if err := cvgb.build.prepareQuery(ctx); err != nil {
+func (_g *CertifyVexGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CertifyVexQuery, *CertifyVexGroupBy](ctx, cvgb.build, cvgb, cvgb.build.inters, v)
+	return scanWithInterceptors[*CertifyVexQuery, *CertifyVexGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (cvgb *CertifyVexGroupBy) sqlScan(ctx context.Context, root *CertifyVexQuery, v any) error {
+func (_g *CertifyVexGroupBy) sqlScan(ctx context.Context, root *CertifyVexQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(cvgb.fns))
-	for _, fn := range cvgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*cvgb.flds)+len(cvgb.fns))
-		for _, f := range *cvgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*cvgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cvgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -740,27 +740,27 @@ type CertifyVexSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (cvs *CertifyVexSelect) Aggregate(fns ...AggregateFunc) *CertifyVexSelect {
-	cvs.fns = append(cvs.fns, fns...)
-	return cvs
+func (_s *CertifyVexSelect) Aggregate(fns ...AggregateFunc) *CertifyVexSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cvs *CertifyVexSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvs.ctx, ent.OpQuerySelect)
-	if err := cvs.prepareQuery(ctx); err != nil {
+func (_s *CertifyVexSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CertifyVexQuery, *CertifyVexSelect](ctx, cvs.CertifyVexQuery, cvs, cvs.inters, v)
+	return scanWithInterceptors[*CertifyVexQuery, *CertifyVexSelect](ctx, _s.CertifyVexQuery, _s, _s.inters, v)
 }
 
-func (cvs *CertifyVexSelect) sqlScan(ctx context.Context, root *CertifyVexQuery, v any) error {
+func (_s *CertifyVexSelect) sqlScan(ctx context.Context, root *CertifyVexQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(cvs.fns))
-	for _, fn := range cvs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*cvs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -768,7 +768,7 @@ func (cvs *CertifyVexSelect) sqlScan(ctx context.Context, root *CertifyVexQuery,
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cvs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

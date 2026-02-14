@@ -28,130 +28,130 @@ type CertifyVexCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvc *CertifyVexCreate) SetPackageID(u uuid.UUID) *CertifyVexCreate {
-	cvc.mutation.SetPackageID(u)
-	return cvc
+func (_c *CertifyVexCreate) SetPackageID(v uuid.UUID) *CertifyVexCreate {
+	_c.mutation.SetPackageID(v)
+	return _c
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvc *CertifyVexCreate) SetNillablePackageID(u *uuid.UUID) *CertifyVexCreate {
-	if u != nil {
-		cvc.SetPackageID(*u)
+func (_c *CertifyVexCreate) SetNillablePackageID(v *uuid.UUID) *CertifyVexCreate {
+	if v != nil {
+		_c.SetPackageID(*v)
 	}
-	return cvc
+	return _c
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cvc *CertifyVexCreate) SetArtifactID(u uuid.UUID) *CertifyVexCreate {
-	cvc.mutation.SetArtifactID(u)
-	return cvc
+func (_c *CertifyVexCreate) SetArtifactID(v uuid.UUID) *CertifyVexCreate {
+	_c.mutation.SetArtifactID(v)
+	return _c
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cvc *CertifyVexCreate) SetNillableArtifactID(u *uuid.UUID) *CertifyVexCreate {
-	if u != nil {
-		cvc.SetArtifactID(*u)
+func (_c *CertifyVexCreate) SetNillableArtifactID(v *uuid.UUID) *CertifyVexCreate {
+	if v != nil {
+		_c.SetArtifactID(*v)
 	}
-	return cvc
+	return _c
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvc *CertifyVexCreate) SetVulnerabilityID(u uuid.UUID) *CertifyVexCreate {
-	cvc.mutation.SetVulnerabilityID(u)
-	return cvc
+func (_c *CertifyVexCreate) SetVulnerabilityID(v uuid.UUID) *CertifyVexCreate {
+	_c.mutation.SetVulnerabilityID(v)
+	return _c
 }
 
 // SetKnownSince sets the "known_since" field.
-func (cvc *CertifyVexCreate) SetKnownSince(t time.Time) *CertifyVexCreate {
-	cvc.mutation.SetKnownSince(t)
-	return cvc
+func (_c *CertifyVexCreate) SetKnownSince(v time.Time) *CertifyVexCreate {
+	_c.mutation.SetKnownSince(v)
+	return _c
 }
 
 // SetStatus sets the "status" field.
-func (cvc *CertifyVexCreate) SetStatus(s string) *CertifyVexCreate {
-	cvc.mutation.SetStatus(s)
-	return cvc
+func (_c *CertifyVexCreate) SetStatus(v string) *CertifyVexCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetStatement sets the "statement" field.
-func (cvc *CertifyVexCreate) SetStatement(s string) *CertifyVexCreate {
-	cvc.mutation.SetStatement(s)
-	return cvc
+func (_c *CertifyVexCreate) SetStatement(v string) *CertifyVexCreate {
+	_c.mutation.SetStatement(v)
+	return _c
 }
 
 // SetStatusNotes sets the "status_notes" field.
-func (cvc *CertifyVexCreate) SetStatusNotes(s string) *CertifyVexCreate {
-	cvc.mutation.SetStatusNotes(s)
-	return cvc
+func (_c *CertifyVexCreate) SetStatusNotes(v string) *CertifyVexCreate {
+	_c.mutation.SetStatusNotes(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (cvc *CertifyVexCreate) SetJustification(s string) *CertifyVexCreate {
-	cvc.mutation.SetJustification(s)
-	return cvc
+func (_c *CertifyVexCreate) SetJustification(v string) *CertifyVexCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (cvc *CertifyVexCreate) SetOrigin(s string) *CertifyVexCreate {
-	cvc.mutation.SetOrigin(s)
-	return cvc
+func (_c *CertifyVexCreate) SetOrigin(v string) *CertifyVexCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (cvc *CertifyVexCreate) SetCollector(s string) *CertifyVexCreate {
-	cvc.mutation.SetCollector(s)
-	return cvc
+func (_c *CertifyVexCreate) SetCollector(v string) *CertifyVexCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cvc *CertifyVexCreate) SetDocumentRef(s string) *CertifyVexCreate {
-	cvc.mutation.SetDocumentRef(s)
-	return cvc
+func (_c *CertifyVexCreate) SetDocumentRef(v string) *CertifyVexCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (cvc *CertifyVexCreate) SetID(u uuid.UUID) *CertifyVexCreate {
-	cvc.mutation.SetID(u)
-	return cvc
+func (_c *CertifyVexCreate) SetID(v uuid.UUID) *CertifyVexCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (cvc *CertifyVexCreate) SetNillableID(u *uuid.UUID) *CertifyVexCreate {
-	if u != nil {
-		cvc.SetID(*u)
+func (_c *CertifyVexCreate) SetNillableID(v *uuid.UUID) *CertifyVexCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return cvc
+	return _c
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cvc *CertifyVexCreate) SetPackage(p *PackageVersion) *CertifyVexCreate {
-	return cvc.SetPackageID(p.ID)
+func (_c *CertifyVexCreate) SetPackage(v *PackageVersion) *CertifyVexCreate {
+	return _c.SetPackageID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (cvc *CertifyVexCreate) SetArtifact(a *Artifact) *CertifyVexCreate {
-	return cvc.SetArtifactID(a.ID)
+func (_c *CertifyVexCreate) SetArtifact(v *Artifact) *CertifyVexCreate {
+	return _c.SetArtifactID(v.ID)
 }
 
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
-func (cvc *CertifyVexCreate) SetVulnerability(v *VulnerabilityID) *CertifyVexCreate {
-	return cvc.SetVulnerabilityID(v.ID)
+func (_c *CertifyVexCreate) SetVulnerability(v *VulnerabilityID) *CertifyVexCreate {
+	return _c.SetVulnerabilityID(v.ID)
 }
 
 // Mutation returns the CertifyVexMutation object of the builder.
-func (cvc *CertifyVexCreate) Mutation() *CertifyVexMutation {
-	return cvc.mutation
+func (_c *CertifyVexCreate) Mutation() *CertifyVexMutation {
+	return _c.mutation
 }
 
 // Save creates the CertifyVex in the database.
-func (cvc *CertifyVexCreate) Save(ctx context.Context) (*CertifyVex, error) {
-	cvc.defaults()
-	return withHooks(ctx, cvc.sqlSave, cvc.mutation, cvc.hooks)
+func (_c *CertifyVexCreate) Save(ctx context.Context) (*CertifyVex, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cvc *CertifyVexCreate) SaveX(ctx context.Context) *CertifyVex {
-	v, err := cvc.Save(ctx)
+func (_c *CertifyVexCreate) SaveX(ctx context.Context) *CertifyVex {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -159,67 +159,67 @@ func (cvc *CertifyVexCreate) SaveX(ctx context.Context) *CertifyVex {
 }
 
 // Exec executes the query.
-func (cvc *CertifyVexCreate) Exec(ctx context.Context) error {
-	_, err := cvc.Save(ctx)
+func (_c *CertifyVexCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvc *CertifyVexCreate) ExecX(ctx context.Context) {
-	if err := cvc.Exec(ctx); err != nil {
+func (_c *CertifyVexCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (cvc *CertifyVexCreate) defaults() {
-	if _, ok := cvc.mutation.ID(); !ok {
+func (_c *CertifyVexCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := certifyvex.DefaultID()
-		cvc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cvc *CertifyVexCreate) check() error {
-	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
+func (_c *CertifyVexCreate) check() error {
+	if _, ok := _c.mutation.VulnerabilityID(); !ok {
 		return &ValidationError{Name: "vulnerability_id", err: errors.New(`ent: missing required field "CertifyVex.vulnerability_id"`)}
 	}
-	if _, ok := cvc.mutation.KnownSince(); !ok {
+	if _, ok := _c.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "CertifyVex.known_since"`)}
 	}
-	if _, ok := cvc.mutation.Status(); !ok {
+	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "CertifyVex.status"`)}
 	}
-	if _, ok := cvc.mutation.Statement(); !ok {
+	if _, ok := _c.mutation.Statement(); !ok {
 		return &ValidationError{Name: "statement", err: errors.New(`ent: missing required field "CertifyVex.statement"`)}
 	}
-	if _, ok := cvc.mutation.StatusNotes(); !ok {
+	if _, ok := _c.mutation.StatusNotes(); !ok {
 		return &ValidationError{Name: "status_notes", err: errors.New(`ent: missing required field "CertifyVex.status_notes"`)}
 	}
-	if _, ok := cvc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "CertifyVex.justification"`)}
 	}
-	if _, ok := cvc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "CertifyVex.origin"`)}
 	}
-	if _, ok := cvc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyVex.collector"`)}
 	}
-	if _, ok := cvc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyVex.document_ref"`)}
 	}
-	if len(cvc.mutation.VulnerabilityIDs()) == 0 {
+	if len(_c.mutation.VulnerabilityIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability", err: errors.New(`ent: missing required edge "CertifyVex.vulnerability"`)}
 	}
 	return nil
 }
 
-func (cvc *CertifyVexCreate) sqlSave(ctx context.Context) (*CertifyVex, error) {
-	if err := cvc.check(); err != nil {
+func (_c *CertifyVexCreate) sqlSave(ctx context.Context) (*CertifyVex, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cvc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cvc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -232,54 +232,54 @@ func (cvc *CertifyVexCreate) sqlSave(ctx context.Context) (*CertifyVex, error) {
 			return nil, err
 		}
 	}
-	cvc.mutation.id = &_node.ID
-	cvc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
+func (_c *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 	var (
-		_node = &CertifyVex{config: cvc.config}
+		_node = &CertifyVex{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(certifyvex.Table, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = cvc.conflict
-	if id, ok := cvc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := cvc.mutation.KnownSince(); ok {
+	if value, ok := _c.mutation.KnownSince(); ok {
 		_spec.SetField(certifyvex.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
 	}
-	if value, ok := cvc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(certifyvex.FieldStatus, field.TypeString, value)
 		_node.Status = value
 	}
-	if value, ok := cvc.mutation.Statement(); ok {
+	if value, ok := _c.mutation.Statement(); ok {
 		_spec.SetField(certifyvex.FieldStatement, field.TypeString, value)
 		_node.Statement = value
 	}
-	if value, ok := cvc.mutation.StatusNotes(); ok {
+	if value, ok := _c.mutation.StatusNotes(); ok {
 		_spec.SetField(certifyvex.FieldStatusNotes, field.TypeString, value)
 		_node.StatusNotes = value
 	}
-	if value, ok := cvc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(certifyvex.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := cvc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(certifyvex.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := cvc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(certifyvex.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := cvc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyvex.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := cvc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -296,7 +296,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 		_node.PackageID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cvc.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -313,7 +313,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 		_node.ArtifactID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cvc.mutation.VulnerabilityIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -349,10 +349,10 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (cvc *CertifyVexCreate) OnConflict(opts ...sql.ConflictOption) *CertifyVexUpsertOne {
-	cvc.conflict = opts
+func (_c *CertifyVexCreate) OnConflict(opts ...sql.ConflictOption) *CertifyVexUpsertOne {
+	_c.conflict = opts
 	return &CertifyVexUpsertOne{
-		create: cvc,
+		create: _c,
 	}
 }
 
@@ -362,10 +362,10 @@ func (cvc *CertifyVexCreate) OnConflict(opts ...sql.ConflictOption) *CertifyVexU
 //	client.CertifyVex.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cvc *CertifyVexCreate) OnConflictColumns(columns ...string) *CertifyVexUpsertOne {
-	cvc.conflict = append(cvc.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyVexCreate) OnConflictColumns(columns ...string) *CertifyVexUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyVexUpsertOne{
-		create: cvc,
+		create: _c,
 	}
 }
 
@@ -789,16 +789,16 @@ type CertifyVexCreateBulk struct {
 }
 
 // Save creates the CertifyVex entities in the database.
-func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, error) {
-	if cvcb.err != nil {
-		return nil, cvcb.err
+func (_c *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(cvcb.builders))
-	nodes := make([]*CertifyVex, len(cvcb.builders))
-	mutators := make([]Mutator, len(cvcb.builders))
-	for i := range cvcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*CertifyVex, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := cvcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyVexMutation)
@@ -812,12 +812,12 @@ func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, erro
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, cvcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = cvcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, cvcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -837,7 +837,7 @@ func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, erro
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, cvcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -845,8 +845,8 @@ func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, erro
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cvcb *CertifyVexCreateBulk) SaveX(ctx context.Context) []*CertifyVex {
-	v, err := cvcb.Save(ctx)
+func (_c *CertifyVexCreateBulk) SaveX(ctx context.Context) []*CertifyVex {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -854,14 +854,14 @@ func (cvcb *CertifyVexCreateBulk) SaveX(ctx context.Context) []*CertifyVex {
 }
 
 // Exec executes the query.
-func (cvcb *CertifyVexCreateBulk) Exec(ctx context.Context) error {
-	_, err := cvcb.Save(ctx)
+func (_c *CertifyVexCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvcb *CertifyVexCreateBulk) ExecX(ctx context.Context) {
-	if err := cvcb.Exec(ctx); err != nil {
+func (_c *CertifyVexCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -881,10 +881,10 @@ func (cvcb *CertifyVexCreateBulk) ExecX(ctx context.Context) {
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (cvcb *CertifyVexCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyVexUpsertBulk {
-	cvcb.conflict = opts
+func (_c *CertifyVexCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyVexUpsertBulk {
+	_c.conflict = opts
 	return &CertifyVexUpsertBulk{
-		create: cvcb,
+		create: _c,
 	}
 }
 
@@ -894,10 +894,10 @@ func (cvcb *CertifyVexCreateBulk) OnConflict(opts ...sql.ConflictOption) *Certif
 //	client.CertifyVex.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cvcb *CertifyVexCreateBulk) OnConflictColumns(columns ...string) *CertifyVexUpsertBulk {
-	cvcb.conflict = append(cvcb.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyVexCreateBulk) OnConflictColumns(columns ...string) *CertifyVexUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyVexUpsertBulk{
-		create: cvcb,
+		create: _c,
 	}
 }
 

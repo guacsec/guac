@@ -31,448 +31,448 @@ type ArtifactUpdate struct {
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
-func (au *ArtifactUpdate) Where(ps ...predicate.Artifact) *ArtifactUpdate {
-	au.mutation.Where(ps...)
-	return au
+func (_u *ArtifactUpdate) Where(ps ...predicate.Artifact) *ArtifactUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetAlgorithm sets the "algorithm" field.
-func (au *ArtifactUpdate) SetAlgorithm(s string) *ArtifactUpdate {
-	au.mutation.SetAlgorithm(s)
-	return au
+func (_u *ArtifactUpdate) SetAlgorithm(v string) *ArtifactUpdate {
+	_u.mutation.SetAlgorithm(v)
+	return _u
 }
 
 // SetNillableAlgorithm sets the "algorithm" field if the given value is not nil.
-func (au *ArtifactUpdate) SetNillableAlgorithm(s *string) *ArtifactUpdate {
-	if s != nil {
-		au.SetAlgorithm(*s)
+func (_u *ArtifactUpdate) SetNillableAlgorithm(v *string) *ArtifactUpdate {
+	if v != nil {
+		_u.SetAlgorithm(*v)
 	}
-	return au
+	return _u
 }
 
 // SetDigest sets the "digest" field.
-func (au *ArtifactUpdate) SetDigest(s string) *ArtifactUpdate {
-	au.mutation.SetDigest(s)
-	return au
+func (_u *ArtifactUpdate) SetDigest(v string) *ArtifactUpdate {
+	_u.mutation.SetDigest(v)
+	return _u
 }
 
 // SetNillableDigest sets the "digest" field if the given value is not nil.
-func (au *ArtifactUpdate) SetNillableDigest(s *string) *ArtifactUpdate {
-	if s != nil {
-		au.SetDigest(*s)
+func (_u *ArtifactUpdate) SetNillableDigest(v *string) *ArtifactUpdate {
+	if v != nil {
+		_u.SetDigest(*v)
 	}
-	return au
+	return _u
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (au *ArtifactUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddOccurrenceIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddOccurrenceIDs(ids...)
+	return _u
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (au *ArtifactUpdate) AddOccurrences(o ...*Occurrence) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *ArtifactUpdate) AddOccurrences(v ...*Occurrence) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddOccurrenceIDs(ids...)
+	return _u.AddOccurrenceIDs(ids...)
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (au *ArtifactUpdate) AddSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddSbomIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddSbomIDs(ids...)
+	return _u
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
-func (au *ArtifactUpdate) AddSbom(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdate) AddSbom(v ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddSbomIDs(ids...)
+	return _u.AddSbomIDs(ids...)
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
-func (au *ArtifactUpdate) AddAttestationIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddAttestationIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddAttestationIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddAttestationIDs(ids...)
+	return _u
 }
 
 // AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
-func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdate) AddAttestations(v ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddAttestationIDs(ids...)
+	return _u.AddAttestationIDs(ids...)
 }
 
 // AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
-func (au *ArtifactUpdate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddAttestationsSubjectIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddAttestationsSubjectIDs(ids...)
+	return _u
 }
 
 // AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
-func (au *ArtifactUpdate) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdate) AddAttestationsSubject(v ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddAttestationsSubjectIDs(ids...)
+	return _u.AddAttestationsSubjectIDs(ids...)
 }
 
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
-func (au *ArtifactUpdate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddHashEqualArtAIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddHashEqualArtAIDs(ids...)
+	return _u
 }
 
 // AddHashEqualArtA adds the "hash_equal_art_a" edges to the HashEqual entity.
-func (au *ArtifactUpdate) AddHashEqualArtA(h ...*HashEqual) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdate) AddHashEqualArtA(v ...*HashEqual) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddHashEqualArtAIDs(ids...)
+	return _u.AddHashEqualArtAIDs(ids...)
 }
 
 // AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by IDs.
-func (au *ArtifactUpdate) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddHashEqualArtBIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddHashEqualArtBIDs(ids...)
+	return _u
 }
 
 // AddHashEqualArtB adds the "hash_equal_art_b" edges to the HashEqual entity.
-func (au *ArtifactUpdate) AddHashEqualArtB(h ...*HashEqual) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdate) AddHashEqualArtB(v ...*HashEqual) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddHashEqualArtBIDs(ids...)
+	return _u.AddHashEqualArtBIDs(ids...)
 }
 
 // AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
-func (au *ArtifactUpdate) AddVexIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddVexIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddVexIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddVexIDs(ids...)
+	return _u
 }
 
 // AddVex adds the "vex" edges to the CertifyVex entity.
-func (au *ArtifactUpdate) AddVex(c ...*CertifyVex) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdate) AddVex(v ...*CertifyVex) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddVexIDs(ids...)
+	return _u.AddVexIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (au *ArtifactUpdate) AddCertificationIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddCertificationIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddCertificationIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddCertificationIDs(ids...)
+	return _u
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (au *ArtifactUpdate) AddCertification(c ...*Certification) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdate) AddCertification(v ...*Certification) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddCertificationIDs(ids...)
+	return _u.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (au *ArtifactUpdate) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddMetadatumIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddMetadatumIDs(ids...)
+	return _u
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (au *ArtifactUpdate) AddMetadata(h ...*HasMetadata) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdate) AddMetadata(v ...*HasMetadata) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddMetadatumIDs(ids...)
+	return _u.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (au *ArtifactUpdate) AddPocIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddPocIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddPocIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddPocIDs(ids...)
+	return _u
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (au *ArtifactUpdate) AddPoc(p ...*PointOfContact) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *ArtifactUpdate) AddPoc(v ...*PointOfContact) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddPocIDs(ids...)
+	return _u.AddPocIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (au *ArtifactUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddIncludedInSbomIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.AddIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (au *ArtifactUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdate) AddIncludedInSboms(v ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddIncludedInSbomIDs(ids...)
+	return _u.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
-func (au *ArtifactUpdate) Mutation() *ArtifactMutation {
-	return au.mutation
+func (_u *ArtifactUpdate) Mutation() *ArtifactMutation {
+	return _u.mutation
 }
 
 // ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
-func (au *ArtifactUpdate) ClearOccurrences() *ArtifactUpdate {
-	au.mutation.ClearOccurrences()
-	return au
+func (_u *ArtifactUpdate) ClearOccurrences() *ArtifactUpdate {
+	_u.mutation.ClearOccurrences()
+	return _u
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (au *ArtifactUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveOccurrenceIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveOccurrenceIDs(ids...)
+	return _u
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
-func (au *ArtifactUpdate) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *ArtifactUpdate) RemoveOccurrences(v ...*Occurrence) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveOccurrenceIDs(ids...)
+	return _u.RemoveOccurrenceIDs(ids...)
 }
 
 // ClearSbom clears all "sbom" edges to the BillOfMaterials entity.
-func (au *ArtifactUpdate) ClearSbom() *ArtifactUpdate {
-	au.mutation.ClearSbom()
-	return au
+func (_u *ArtifactUpdate) ClearSbom() *ArtifactUpdate {
+	_u.mutation.ClearSbom()
+	return _u
 }
 
 // RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
-func (au *ArtifactUpdate) RemoveSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveSbomIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveSbomIDs(ids...)
+	return _u
 }
 
 // RemoveSbom removes "sbom" edges to BillOfMaterials entities.
-func (au *ArtifactUpdate) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdate) RemoveSbom(v ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveSbomIDs(ids...)
+	return _u.RemoveSbomIDs(ids...)
 }
 
 // ClearAttestations clears all "attestations" edges to the SLSAAttestation entity.
-func (au *ArtifactUpdate) ClearAttestations() *ArtifactUpdate {
-	au.mutation.ClearAttestations()
-	return au
+func (_u *ArtifactUpdate) ClearAttestations() *ArtifactUpdate {
+	_u.mutation.ClearAttestations()
+	return _u
 }
 
 // RemoveAttestationIDs removes the "attestations" edge to SLSAAttestation entities by IDs.
-func (au *ArtifactUpdate) RemoveAttestationIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveAttestationIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveAttestationIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveAttestationIDs(ids...)
+	return _u
 }
 
 // RemoveAttestations removes "attestations" edges to SLSAAttestation entities.
-func (au *ArtifactUpdate) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdate) RemoveAttestations(v ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveAttestationIDs(ids...)
+	return _u.RemoveAttestationIDs(ids...)
 }
 
 // ClearAttestationsSubject clears all "attestations_subject" edges to the SLSAAttestation entity.
-func (au *ArtifactUpdate) ClearAttestationsSubject() *ArtifactUpdate {
-	au.mutation.ClearAttestationsSubject()
-	return au
+func (_u *ArtifactUpdate) ClearAttestationsSubject() *ArtifactUpdate {
+	_u.mutation.ClearAttestationsSubject()
+	return _u
 }
 
 // RemoveAttestationsSubjectIDs removes the "attestations_subject" edge to SLSAAttestation entities by IDs.
-func (au *ArtifactUpdate) RemoveAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveAttestationsSubjectIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveAttestationsSubjectIDs(ids...)
+	return _u
 }
 
 // RemoveAttestationsSubject removes "attestations_subject" edges to SLSAAttestation entities.
-func (au *ArtifactUpdate) RemoveAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdate) RemoveAttestationsSubject(v ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveAttestationsSubjectIDs(ids...)
+	return _u.RemoveAttestationsSubjectIDs(ids...)
 }
 
 // ClearHashEqualArtA clears all "hash_equal_art_a" edges to the HashEqual entity.
-func (au *ArtifactUpdate) ClearHashEqualArtA() *ArtifactUpdate {
-	au.mutation.ClearHashEqualArtA()
-	return au
+func (_u *ArtifactUpdate) ClearHashEqualArtA() *ArtifactUpdate {
+	_u.mutation.ClearHashEqualArtA()
+	return _u
 }
 
 // RemoveHashEqualArtAIDs removes the "hash_equal_art_a" edge to HashEqual entities by IDs.
-func (au *ArtifactUpdate) RemoveHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveHashEqualArtAIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveHashEqualArtAIDs(ids...)
+	return _u
 }
 
 // RemoveHashEqualArtA removes "hash_equal_art_a" edges to HashEqual entities.
-func (au *ArtifactUpdate) RemoveHashEqualArtA(h ...*HashEqual) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdate) RemoveHashEqualArtA(v ...*HashEqual) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveHashEqualArtAIDs(ids...)
+	return _u.RemoveHashEqualArtAIDs(ids...)
 }
 
 // ClearHashEqualArtB clears all "hash_equal_art_b" edges to the HashEqual entity.
-func (au *ArtifactUpdate) ClearHashEqualArtB() *ArtifactUpdate {
-	au.mutation.ClearHashEqualArtB()
-	return au
+func (_u *ArtifactUpdate) ClearHashEqualArtB() *ArtifactUpdate {
+	_u.mutation.ClearHashEqualArtB()
+	return _u
 }
 
 // RemoveHashEqualArtBIDs removes the "hash_equal_art_b" edge to HashEqual entities by IDs.
-func (au *ArtifactUpdate) RemoveHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveHashEqualArtBIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveHashEqualArtBIDs(ids...)
+	return _u
 }
 
 // RemoveHashEqualArtB removes "hash_equal_art_b" edges to HashEqual entities.
-func (au *ArtifactUpdate) RemoveHashEqualArtB(h ...*HashEqual) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdate) RemoveHashEqualArtB(v ...*HashEqual) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveHashEqualArtBIDs(ids...)
+	return _u.RemoveHashEqualArtBIDs(ids...)
 }
 
 // ClearVex clears all "vex" edges to the CertifyVex entity.
-func (au *ArtifactUpdate) ClearVex() *ArtifactUpdate {
-	au.mutation.ClearVex()
-	return au
+func (_u *ArtifactUpdate) ClearVex() *ArtifactUpdate {
+	_u.mutation.ClearVex()
+	return _u
 }
 
 // RemoveVexIDs removes the "vex" edge to CertifyVex entities by IDs.
-func (au *ArtifactUpdate) RemoveVexIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveVexIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveVexIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveVexIDs(ids...)
+	return _u
 }
 
 // RemoveVex removes "vex" edges to CertifyVex entities.
-func (au *ArtifactUpdate) RemoveVex(c ...*CertifyVex) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdate) RemoveVex(v ...*CertifyVex) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveVexIDs(ids...)
+	return _u.RemoveVexIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
-func (au *ArtifactUpdate) ClearCertification() *ArtifactUpdate {
-	au.mutation.ClearCertification()
-	return au
+func (_u *ArtifactUpdate) ClearCertification() *ArtifactUpdate {
+	_u.mutation.ClearCertification()
+	return _u
 }
 
 // RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
-func (au *ArtifactUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveCertificationIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveCertificationIDs(ids...)
+	return _u
 }
 
 // RemoveCertification removes "certification" edges to Certification entities.
-func (au *ArtifactUpdate) RemoveCertification(c ...*Certification) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdate) RemoveCertification(v ...*Certification) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveCertificationIDs(ids...)
+	return _u.RemoveCertificationIDs(ids...)
 }
 
 // ClearMetadata clears all "metadata" edges to the HasMetadata entity.
-func (au *ArtifactUpdate) ClearMetadata() *ArtifactUpdate {
-	au.mutation.ClearMetadata()
-	return au
+func (_u *ArtifactUpdate) ClearMetadata() *ArtifactUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
-func (au *ArtifactUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveMetadatumIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveMetadatumIDs(ids...)
+	return _u
 }
 
 // RemoveMetadata removes "metadata" edges to HasMetadata entities.
-func (au *ArtifactUpdate) RemoveMetadata(h ...*HasMetadata) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdate) RemoveMetadata(v ...*HasMetadata) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveMetadatumIDs(ids...)
+	return _u.RemoveMetadatumIDs(ids...)
 }
 
 // ClearPoc clears all "poc" edges to the PointOfContact entity.
-func (au *ArtifactUpdate) ClearPoc() *ArtifactUpdate {
-	au.mutation.ClearPoc()
-	return au
+func (_u *ArtifactUpdate) ClearPoc() *ArtifactUpdate {
+	_u.mutation.ClearPoc()
+	return _u
 }
 
 // RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
-func (au *ArtifactUpdate) RemovePocIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemovePocIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemovePocIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemovePocIDs(ids...)
+	return _u
 }
 
 // RemovePoc removes "poc" edges to PointOfContact entities.
-func (au *ArtifactUpdate) RemovePoc(p ...*PointOfContact) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *ArtifactUpdate) RemovePoc(v ...*PointOfContact) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemovePocIDs(ids...)
+	return _u.RemovePocIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
-func (au *ArtifactUpdate) ClearIncludedInSboms() *ArtifactUpdate {
-	au.mutation.ClearIncludedInSboms()
-	return au
+func (_u *ArtifactUpdate) ClearIncludedInSboms() *ArtifactUpdate {
+	_u.mutation.ClearIncludedInSboms()
+	return _u
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (au *ArtifactUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveIncludedInSbomIDs(ids...)
-	return au
+func (_u *ArtifactUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	_u.mutation.RemoveIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
-func (au *ArtifactUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdate) RemoveIncludedInSboms(v ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveIncludedInSbomIDs(ids...)
+	return _u.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (au *ArtifactUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
+func (_u *ArtifactUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (au *ArtifactUpdate) SaveX(ctx context.Context) int {
-	affected, err := au.Save(ctx)
+func (_u *ArtifactUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -480,34 +480,34 @@ func (au *ArtifactUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (au *ArtifactUpdate) Exec(ctx context.Context) error {
-	_, err := au.Save(ctx)
+func (_u *ArtifactUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (au *ArtifactUpdate) ExecX(ctx context.Context) {
-	if err := au.Exec(ctx); err != nil {
+func (_u *ArtifactUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *ArtifactUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
-	if ps := au.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := au.mutation.Algorithm(); ok {
+	if value, ok := _u.mutation.Algorithm(); ok {
 		_spec.SetField(artifact.FieldAlgorithm, field.TypeString, value)
 	}
-	if value, ok := au.mutation.Digest(); ok {
+	if value, ok := _u.mutation.Digest(); ok {
 		_spec.SetField(artifact.FieldDigest, field.TypeString, value)
 	}
-	if au.mutation.OccurrencesCleared() {
+	if _u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -520,23 +520,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !au.mutation.OccurrencesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   artifact.OccurrencesTable,
-			Columns: []string{artifact.OccurrencesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !_u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -550,9 +534,25 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.SbomCleared() {
+	if _u.mutation.SbomCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -565,7 +565,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedSbomIDs(); len(nodes) > 0 && !au.mutation.SbomCleared() {
+	if nodes := _u.mutation.RemovedSbomIDs(); len(nodes) > 0 && !_u.mutation.SbomCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -581,7 +581,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.SbomIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SbomIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -597,7 +597,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.AttestationsCleared() {
+	if _u.mutation.AttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -610,23 +610,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedAttestationsIDs(); len(nodes) > 0 && !au.mutation.AttestationsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   artifact.AttestationsTable,
-			Columns: artifact.AttestationsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.AttestationsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedAttestationsIDs(); len(nodes) > 0 && !_u.mutation.AttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -640,9 +624,25 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.AttestationsSubjectCleared() {
+	if _u.mutation.AttestationsSubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -655,7 +655,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedAttestationsSubjectIDs(); len(nodes) > 0 && !au.mutation.AttestationsSubjectCleared() {
+	if nodes := _u.mutation.RemovedAttestationsSubjectIDs(); len(nodes) > 0 && !_u.mutation.AttestationsSubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -671,7 +671,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -687,7 +687,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.HashEqualArtACleared() {
+	if _u.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -700,23 +700,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedHashEqualArtAIDs(); len(nodes) > 0 && !au.mutation.HashEqualArtACleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   artifact.HashEqualArtATable,
-			Columns: []string{artifact.HashEqualArtAColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedHashEqualArtAIDs(); len(nodes) > 0 && !_u.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -730,9 +714,25 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.HashEqualArtBCleared() {
+	if _u.mutation.HashEqualArtBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -745,7 +745,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedHashEqualArtBIDs(); len(nodes) > 0 && !au.mutation.HashEqualArtBCleared() {
+	if nodes := _u.mutation.RemovedHashEqualArtBIDs(); len(nodes) > 0 && !_u.mutation.HashEqualArtBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -761,7 +761,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -777,7 +777,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.VexCleared() {
+	if _u.mutation.VexCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -790,23 +790,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedVexIDs(); len(nodes) > 0 && !au.mutation.VexCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   artifact.VexTable,
-			Columns: []string{artifact.VexColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.VexIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedVexIDs(); len(nodes) > 0 && !_u.mutation.VexCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -820,9 +804,25 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.CertificationCleared() {
+	if _u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -835,7 +835,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !au.mutation.CertificationCleared() {
+	if nodes := _u.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !_u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -851,7 +851,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -867,7 +867,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -880,7 +880,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !au.mutation.MetadataCleared() {
+	if nodes := _u.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !_u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -896,7 +896,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -912,7 +912,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.PocCleared() {
+	if _u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -925,7 +925,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedPocIDs(); len(nodes) > 0 && !au.mutation.PocCleared() {
+	if nodes := _u.mutation.RemovedPocIDs(); len(nodes) > 0 && !_u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -941,7 +941,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -957,7 +957,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.IncludedInSbomsCleared() {
+	if _u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -970,7 +970,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !au.mutation.IncludedInSbomsCleared() {
+	if nodes := _u.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !_u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -986,7 +986,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1002,7 +1002,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1010,8 +1010,8 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	au.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // ArtifactUpdateOne is the builder for updating a single Artifact entity.
@@ -1023,455 +1023,455 @@ type ArtifactUpdateOne struct {
 }
 
 // SetAlgorithm sets the "algorithm" field.
-func (auo *ArtifactUpdateOne) SetAlgorithm(s string) *ArtifactUpdateOne {
-	auo.mutation.SetAlgorithm(s)
-	return auo
+func (_u *ArtifactUpdateOne) SetAlgorithm(v string) *ArtifactUpdateOne {
+	_u.mutation.SetAlgorithm(v)
+	return _u
 }
 
 // SetNillableAlgorithm sets the "algorithm" field if the given value is not nil.
-func (auo *ArtifactUpdateOne) SetNillableAlgorithm(s *string) *ArtifactUpdateOne {
-	if s != nil {
-		auo.SetAlgorithm(*s)
+func (_u *ArtifactUpdateOne) SetNillableAlgorithm(v *string) *ArtifactUpdateOne {
+	if v != nil {
+		_u.SetAlgorithm(*v)
 	}
-	return auo
+	return _u
 }
 
 // SetDigest sets the "digest" field.
-func (auo *ArtifactUpdateOne) SetDigest(s string) *ArtifactUpdateOne {
-	auo.mutation.SetDigest(s)
-	return auo
+func (_u *ArtifactUpdateOne) SetDigest(v string) *ArtifactUpdateOne {
+	_u.mutation.SetDigest(v)
+	return _u
 }
 
 // SetNillableDigest sets the "digest" field if the given value is not nil.
-func (auo *ArtifactUpdateOne) SetNillableDigest(s *string) *ArtifactUpdateOne {
-	if s != nil {
-		auo.SetDigest(*s)
+func (_u *ArtifactUpdateOne) SetNillableDigest(v *string) *ArtifactUpdateOne {
+	if v != nil {
+		_u.SetDigest(*v)
 	}
-	return auo
+	return _u
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (auo *ArtifactUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddOccurrenceIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddOccurrenceIDs(ids...)
+	return _u
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (auo *ArtifactUpdateOne) AddOccurrences(o ...*Occurrence) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *ArtifactUpdateOne) AddOccurrences(v ...*Occurrence) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddOccurrenceIDs(ids...)
+	return _u.AddOccurrenceIDs(ids...)
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (auo *ArtifactUpdateOne) AddSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddSbomIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddSbomIDs(ids...)
+	return _u
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
-func (auo *ArtifactUpdateOne) AddSbom(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdateOne) AddSbom(v ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddSbomIDs(ids...)
+	return _u.AddSbomIDs(ids...)
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
-func (auo *ArtifactUpdateOne) AddAttestationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddAttestationIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddAttestationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddAttestationIDs(ids...)
+	return _u
 }
 
 // AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
-func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdateOne) AddAttestations(v ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddAttestationIDs(ids...)
+	return _u.AddAttestationIDs(ids...)
 }
 
 // AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
-func (auo *ArtifactUpdateOne) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddAttestationsSubjectIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddAttestationsSubjectIDs(ids...)
+	return _u
 }
 
 // AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
-func (auo *ArtifactUpdateOne) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdateOne) AddAttestationsSubject(v ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddAttestationsSubjectIDs(ids...)
+	return _u.AddAttestationsSubjectIDs(ids...)
 }
 
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
-func (auo *ArtifactUpdateOne) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddHashEqualArtAIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddHashEqualArtAIDs(ids...)
+	return _u
 }
 
 // AddHashEqualArtA adds the "hash_equal_art_a" edges to the HashEqual entity.
-func (auo *ArtifactUpdateOne) AddHashEqualArtA(h ...*HashEqual) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdateOne) AddHashEqualArtA(v ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddHashEqualArtAIDs(ids...)
+	return _u.AddHashEqualArtAIDs(ids...)
 }
 
 // AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by IDs.
-func (auo *ArtifactUpdateOne) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddHashEqualArtBIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddHashEqualArtBIDs(ids...)
+	return _u
 }
 
 // AddHashEqualArtB adds the "hash_equal_art_b" edges to the HashEqual entity.
-func (auo *ArtifactUpdateOne) AddHashEqualArtB(h ...*HashEqual) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdateOne) AddHashEqualArtB(v ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddHashEqualArtBIDs(ids...)
+	return _u.AddHashEqualArtBIDs(ids...)
 }
 
 // AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
-func (auo *ArtifactUpdateOne) AddVexIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddVexIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddVexIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddVexIDs(ids...)
+	return _u
 }
 
 // AddVex adds the "vex" edges to the CertifyVex entity.
-func (auo *ArtifactUpdateOne) AddVex(c ...*CertifyVex) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdateOne) AddVex(v ...*CertifyVex) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddVexIDs(ids...)
+	return _u.AddVexIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (auo *ArtifactUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddCertificationIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddCertificationIDs(ids...)
+	return _u
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (auo *ArtifactUpdateOne) AddCertification(c ...*Certification) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdateOne) AddCertification(v ...*Certification) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddCertificationIDs(ids...)
+	return _u.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (auo *ArtifactUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddMetadatumIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddMetadatumIDs(ids...)
+	return _u
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (auo *ArtifactUpdateOne) AddMetadata(h ...*HasMetadata) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdateOne) AddMetadata(v ...*HasMetadata) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddMetadatumIDs(ids...)
+	return _u.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (auo *ArtifactUpdateOne) AddPocIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddPocIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddPocIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddPocIDs(ids...)
+	return _u
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (auo *ArtifactUpdateOne) AddPoc(p ...*PointOfContact) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *ArtifactUpdateOne) AddPoc(v ...*PointOfContact) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddPocIDs(ids...)
+	return _u.AddPocIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (auo *ArtifactUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddIncludedInSbomIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.AddIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (auo *ArtifactUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdateOne) AddIncludedInSboms(v ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddIncludedInSbomIDs(ids...)
+	return _u.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
-func (auo *ArtifactUpdateOne) Mutation() *ArtifactMutation {
-	return auo.mutation
+func (_u *ArtifactUpdateOne) Mutation() *ArtifactMutation {
+	return _u.mutation
 }
 
 // ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
-func (auo *ArtifactUpdateOne) ClearOccurrences() *ArtifactUpdateOne {
-	auo.mutation.ClearOccurrences()
-	return auo
+func (_u *ArtifactUpdateOne) ClearOccurrences() *ArtifactUpdateOne {
+	_u.mutation.ClearOccurrences()
+	return _u
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveOccurrenceIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveOccurrenceIDs(ids...)
+	return _u
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
-func (auo *ArtifactUpdateOne) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *ArtifactUpdateOne) RemoveOccurrences(v ...*Occurrence) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveOccurrenceIDs(ids...)
+	return _u.RemoveOccurrenceIDs(ids...)
 }
 
 // ClearSbom clears all "sbom" edges to the BillOfMaterials entity.
-func (auo *ArtifactUpdateOne) ClearSbom() *ArtifactUpdateOne {
-	auo.mutation.ClearSbom()
-	return auo
+func (_u *ArtifactUpdateOne) ClearSbom() *ArtifactUpdateOne {
+	_u.mutation.ClearSbom()
+	return _u
 }
 
 // RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveSbomIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveSbomIDs(ids...)
+	return _u
 }
 
 // RemoveSbom removes "sbom" edges to BillOfMaterials entities.
-func (auo *ArtifactUpdateOne) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdateOne) RemoveSbom(v ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveSbomIDs(ids...)
+	return _u.RemoveSbomIDs(ids...)
 }
 
 // ClearAttestations clears all "attestations" edges to the SLSAAttestation entity.
-func (auo *ArtifactUpdateOne) ClearAttestations() *ArtifactUpdateOne {
-	auo.mutation.ClearAttestations()
-	return auo
+func (_u *ArtifactUpdateOne) ClearAttestations() *ArtifactUpdateOne {
+	_u.mutation.ClearAttestations()
+	return _u
 }
 
 // RemoveAttestationIDs removes the "attestations" edge to SLSAAttestation entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveAttestationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveAttestationIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveAttestationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveAttestationIDs(ids...)
+	return _u
 }
 
 // RemoveAttestations removes "attestations" edges to SLSAAttestation entities.
-func (auo *ArtifactUpdateOne) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdateOne) RemoveAttestations(v ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveAttestationIDs(ids...)
+	return _u.RemoveAttestationIDs(ids...)
 }
 
 // ClearAttestationsSubject clears all "attestations_subject" edges to the SLSAAttestation entity.
-func (auo *ArtifactUpdateOne) ClearAttestationsSubject() *ArtifactUpdateOne {
-	auo.mutation.ClearAttestationsSubject()
-	return auo
+func (_u *ArtifactUpdateOne) ClearAttestationsSubject() *ArtifactUpdateOne {
+	_u.mutation.ClearAttestationsSubject()
+	return _u
 }
 
 // RemoveAttestationsSubjectIDs removes the "attestations_subject" edge to SLSAAttestation entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveAttestationsSubjectIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveAttestationsSubjectIDs(ids...)
+	return _u
 }
 
 // RemoveAttestationsSubject removes "attestations_subject" edges to SLSAAttestation entities.
-func (auo *ArtifactUpdateOne) RemoveAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *ArtifactUpdateOne) RemoveAttestationsSubject(v ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveAttestationsSubjectIDs(ids...)
+	return _u.RemoveAttestationsSubjectIDs(ids...)
 }
 
 // ClearHashEqualArtA clears all "hash_equal_art_a" edges to the HashEqual entity.
-func (auo *ArtifactUpdateOne) ClearHashEqualArtA() *ArtifactUpdateOne {
-	auo.mutation.ClearHashEqualArtA()
-	return auo
+func (_u *ArtifactUpdateOne) ClearHashEqualArtA() *ArtifactUpdateOne {
+	_u.mutation.ClearHashEqualArtA()
+	return _u
 }
 
 // RemoveHashEqualArtAIDs removes the "hash_equal_art_a" edge to HashEqual entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveHashEqualArtAIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveHashEqualArtAIDs(ids...)
+	return _u
 }
 
 // RemoveHashEqualArtA removes "hash_equal_art_a" edges to HashEqual entities.
-func (auo *ArtifactUpdateOne) RemoveHashEqualArtA(h ...*HashEqual) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdateOne) RemoveHashEqualArtA(v ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveHashEqualArtAIDs(ids...)
+	return _u.RemoveHashEqualArtAIDs(ids...)
 }
 
 // ClearHashEqualArtB clears all "hash_equal_art_b" edges to the HashEqual entity.
-func (auo *ArtifactUpdateOne) ClearHashEqualArtB() *ArtifactUpdateOne {
-	auo.mutation.ClearHashEqualArtB()
-	return auo
+func (_u *ArtifactUpdateOne) ClearHashEqualArtB() *ArtifactUpdateOne {
+	_u.mutation.ClearHashEqualArtB()
+	return _u
 }
 
 // RemoveHashEqualArtBIDs removes the "hash_equal_art_b" edge to HashEqual entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveHashEqualArtBIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveHashEqualArtBIDs(ids...)
+	return _u
 }
 
 // RemoveHashEqualArtB removes "hash_equal_art_b" edges to HashEqual entities.
-func (auo *ArtifactUpdateOne) RemoveHashEqualArtB(h ...*HashEqual) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdateOne) RemoveHashEqualArtB(v ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveHashEqualArtBIDs(ids...)
+	return _u.RemoveHashEqualArtBIDs(ids...)
 }
 
 // ClearVex clears all "vex" edges to the CertifyVex entity.
-func (auo *ArtifactUpdateOne) ClearVex() *ArtifactUpdateOne {
-	auo.mutation.ClearVex()
-	return auo
+func (_u *ArtifactUpdateOne) ClearVex() *ArtifactUpdateOne {
+	_u.mutation.ClearVex()
+	return _u
 }
 
 // RemoveVexIDs removes the "vex" edge to CertifyVex entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveVexIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveVexIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveVexIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveVexIDs(ids...)
+	return _u
 }
 
 // RemoveVex removes "vex" edges to CertifyVex entities.
-func (auo *ArtifactUpdateOne) RemoveVex(c ...*CertifyVex) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdateOne) RemoveVex(v ...*CertifyVex) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveVexIDs(ids...)
+	return _u.RemoveVexIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
-func (auo *ArtifactUpdateOne) ClearCertification() *ArtifactUpdateOne {
-	auo.mutation.ClearCertification()
-	return auo
+func (_u *ArtifactUpdateOne) ClearCertification() *ArtifactUpdateOne {
+	_u.mutation.ClearCertification()
+	return _u
 }
 
 // RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveCertificationIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveCertificationIDs(ids...)
+	return _u
 }
 
 // RemoveCertification removes "certification" edges to Certification entities.
-func (auo *ArtifactUpdateOne) RemoveCertification(c ...*Certification) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *ArtifactUpdateOne) RemoveCertification(v ...*Certification) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveCertificationIDs(ids...)
+	return _u.RemoveCertificationIDs(ids...)
 }
 
 // ClearMetadata clears all "metadata" edges to the HasMetadata entity.
-func (auo *ArtifactUpdateOne) ClearMetadata() *ArtifactUpdateOne {
-	auo.mutation.ClearMetadata()
-	return auo
+func (_u *ArtifactUpdateOne) ClearMetadata() *ArtifactUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveMetadatumIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveMetadatumIDs(ids...)
+	return _u
 }
 
 // RemoveMetadata removes "metadata" edges to HasMetadata entities.
-func (auo *ArtifactUpdateOne) RemoveMetadata(h ...*HasMetadata) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *ArtifactUpdateOne) RemoveMetadata(v ...*HasMetadata) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveMetadatumIDs(ids...)
+	return _u.RemoveMetadatumIDs(ids...)
 }
 
 // ClearPoc clears all "poc" edges to the PointOfContact entity.
-func (auo *ArtifactUpdateOne) ClearPoc() *ArtifactUpdateOne {
-	auo.mutation.ClearPoc()
-	return auo
+func (_u *ArtifactUpdateOne) ClearPoc() *ArtifactUpdateOne {
+	_u.mutation.ClearPoc()
+	return _u
 }
 
 // RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
-func (auo *ArtifactUpdateOne) RemovePocIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemovePocIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemovePocIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemovePocIDs(ids...)
+	return _u
 }
 
 // RemovePoc removes "poc" edges to PointOfContact entities.
-func (auo *ArtifactUpdateOne) RemovePoc(p ...*PointOfContact) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *ArtifactUpdateOne) RemovePoc(v ...*PointOfContact) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemovePocIDs(ids...)
+	return _u.RemovePocIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
-func (auo *ArtifactUpdateOne) ClearIncludedInSboms() *ArtifactUpdateOne {
-	auo.mutation.ClearIncludedInSboms()
-	return auo
+func (_u *ArtifactUpdateOne) ClearIncludedInSboms() *ArtifactUpdateOne {
+	_u.mutation.ClearIncludedInSboms()
+	return _u
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveIncludedInSbomIDs(ids...)
-	return auo
+func (_u *ArtifactUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	_u.mutation.RemoveIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
-func (auo *ArtifactUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *ArtifactUpdateOne) RemoveIncludedInSboms(v ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveIncludedInSbomIDs(ids...)
+	return _u.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
-func (auo *ArtifactUpdateOne) Where(ps ...predicate.Artifact) *ArtifactUpdateOne {
-	auo.mutation.Where(ps...)
-	return auo
+func (_u *ArtifactUpdateOne) Where(ps ...predicate.Artifact) *ArtifactUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (auo *ArtifactUpdateOne) Select(field string, fields ...string) *ArtifactUpdateOne {
-	auo.fields = append([]string{field}, fields...)
-	return auo
+func (_u *ArtifactUpdateOne) Select(field string, fields ...string) *ArtifactUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Artifact entity.
-func (auo *ArtifactUpdateOne) Save(ctx context.Context) (*Artifact, error) {
-	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
+func (_u *ArtifactUpdateOne) Save(ctx context.Context) (*Artifact, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (auo *ArtifactUpdateOne) SaveX(ctx context.Context) *Artifact {
-	node, err := auo.Save(ctx)
+func (_u *ArtifactUpdateOne) SaveX(ctx context.Context) *Artifact {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1479,26 +1479,26 @@ func (auo *ArtifactUpdateOne) SaveX(ctx context.Context) *Artifact {
 }
 
 // Exec executes the query on the entity.
-func (auo *ArtifactUpdateOne) Exec(ctx context.Context) error {
-	_, err := auo.Save(ctx)
+func (_u *ArtifactUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (auo *ArtifactUpdateOne) ExecX(ctx context.Context) {
-	if err := auo.Exec(ctx); err != nil {
+func (_u *ArtifactUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err error) {
+func (_u *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err error) {
 	_spec := sqlgraph.NewUpdateSpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
-	id, ok := auo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Artifact.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := auo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, artifact.FieldID)
 		for _, f := range fields {
@@ -1510,20 +1510,20 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			}
 		}
 	}
-	if ps := auo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := auo.mutation.Algorithm(); ok {
+	if value, ok := _u.mutation.Algorithm(); ok {
 		_spec.SetField(artifact.FieldAlgorithm, field.TypeString, value)
 	}
-	if value, ok := auo.mutation.Digest(); ok {
+	if value, ok := _u.mutation.Digest(); ok {
 		_spec.SetField(artifact.FieldDigest, field.TypeString, value)
 	}
-	if auo.mutation.OccurrencesCleared() {
+	if _u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1536,23 +1536,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !auo.mutation.OccurrencesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   artifact.OccurrencesTable,
-			Columns: []string{artifact.OccurrencesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !_u.mutation.OccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1566,9 +1550,25 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.SbomCleared() {
+	if _u.mutation.SbomCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1581,7 +1581,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedSbomIDs(); len(nodes) > 0 && !auo.mutation.SbomCleared() {
+	if nodes := _u.mutation.RemovedSbomIDs(); len(nodes) > 0 && !_u.mutation.SbomCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1597,7 +1597,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.SbomIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SbomIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1613,7 +1613,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.AttestationsCleared() {
+	if _u.mutation.AttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1626,23 +1626,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedAttestationsIDs(); len(nodes) > 0 && !auo.mutation.AttestationsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   artifact.AttestationsTable,
-			Columns: artifact.AttestationsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.AttestationsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedAttestationsIDs(); len(nodes) > 0 && !_u.mutation.AttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1656,9 +1640,25 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.AttestationsSubjectCleared() {
+	if _u.mutation.AttestationsSubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1671,7 +1671,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedAttestationsSubjectIDs(); len(nodes) > 0 && !auo.mutation.AttestationsSubjectCleared() {
+	if nodes := _u.mutation.RemovedAttestationsSubjectIDs(); len(nodes) > 0 && !_u.mutation.AttestationsSubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1687,7 +1687,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1703,7 +1703,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.HashEqualArtACleared() {
+	if _u.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1716,23 +1716,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedHashEqualArtAIDs(); len(nodes) > 0 && !auo.mutation.HashEqualArtACleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   artifact.HashEqualArtATable,
-			Columns: []string{artifact.HashEqualArtAColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedHashEqualArtAIDs(); len(nodes) > 0 && !_u.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1746,9 +1730,25 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.HashEqualArtBCleared() {
+	if _u.mutation.HashEqualArtBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1761,7 +1761,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedHashEqualArtBIDs(); len(nodes) > 0 && !auo.mutation.HashEqualArtBCleared() {
+	if nodes := _u.mutation.RemovedHashEqualArtBIDs(); len(nodes) > 0 && !_u.mutation.HashEqualArtBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1777,7 +1777,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1793,7 +1793,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.VexCleared() {
+	if _u.mutation.VexCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1806,23 +1806,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedVexIDs(); len(nodes) > 0 && !auo.mutation.VexCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   artifact.VexTable,
-			Columns: []string{artifact.VexColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.VexIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedVexIDs(); len(nodes) > 0 && !_u.mutation.VexCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1836,9 +1820,25 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.CertificationCleared() {
+	if _u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1851,7 +1851,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !auo.mutation.CertificationCleared() {
+	if nodes := _u.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !_u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1867,7 +1867,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1883,7 +1883,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1896,7 +1896,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !auo.mutation.MetadataCleared() {
+	if nodes := _u.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !_u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1912,7 +1912,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1928,7 +1928,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.PocCleared() {
+	if _u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1941,7 +1941,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedPocIDs(); len(nodes) > 0 && !auo.mutation.PocCleared() {
+	if nodes := _u.mutation.RemovedPocIDs(); len(nodes) > 0 && !_u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1957,7 +1957,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1973,7 +1973,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.IncludedInSbomsCleared() {
+	if _u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1986,7 +1986,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !auo.mutation.IncludedInSbomsCleared() {
+	if nodes := _u.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !_u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -2002,7 +2002,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -2018,10 +2018,10 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Artifact{config: auo.config}
+	_node = &Artifact{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -2029,6 +2029,6 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		return nil, err
 	}
-	auo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

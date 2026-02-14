@@ -28,260 +28,260 @@ type PointOfContactUpdate struct {
 }
 
 // Where appends a list predicates to the PointOfContactUpdate builder.
-func (pocu *PointOfContactUpdate) Where(ps ...predicate.PointOfContact) *PointOfContactUpdate {
-	pocu.mutation.Where(ps...)
-	return pocu
+func (_u *PointOfContactUpdate) Where(ps ...predicate.PointOfContact) *PointOfContactUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (pocu *PointOfContactUpdate) SetSourceID(u uuid.UUID) *PointOfContactUpdate {
-	pocu.mutation.SetSourceID(u)
-	return pocu
+func (_u *PointOfContactUpdate) SetSourceID(v uuid.UUID) *PointOfContactUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableSourceID(u *uuid.UUID) *PointOfContactUpdate {
-	if u != nil {
-		pocu.SetSourceID(*u)
+func (_u *PointOfContactUpdate) SetNillableSourceID(v *uuid.UUID) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return pocu
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (pocu *PointOfContactUpdate) ClearSourceID() *PointOfContactUpdate {
-	pocu.mutation.ClearSourceID()
-	return pocu
+func (_u *PointOfContactUpdate) ClearSourceID() *PointOfContactUpdate {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (pocu *PointOfContactUpdate) SetPackageVersionID(u uuid.UUID) *PointOfContactUpdate {
-	pocu.mutation.SetPackageVersionID(u)
-	return pocu
+func (_u *PointOfContactUpdate) SetPackageVersionID(v uuid.UUID) *PointOfContactUpdate {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillablePackageVersionID(u *uuid.UUID) *PointOfContactUpdate {
-	if u != nil {
-		pocu.SetPackageVersionID(*u)
+func (_u *PointOfContactUpdate) SetNillablePackageVersionID(v *uuid.UUID) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return pocu
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (pocu *PointOfContactUpdate) ClearPackageVersionID() *PointOfContactUpdate {
-	pocu.mutation.ClearPackageVersionID()
-	return pocu
+func (_u *PointOfContactUpdate) ClearPackageVersionID() *PointOfContactUpdate {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (pocu *PointOfContactUpdate) SetPackageNameID(u uuid.UUID) *PointOfContactUpdate {
-	pocu.mutation.SetPackageNameID(u)
-	return pocu
+func (_u *PointOfContactUpdate) SetPackageNameID(v uuid.UUID) *PointOfContactUpdate {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillablePackageNameID(u *uuid.UUID) *PointOfContactUpdate {
-	if u != nil {
-		pocu.SetPackageNameID(*u)
+func (_u *PointOfContactUpdate) SetNillablePackageNameID(v *uuid.UUID) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return pocu
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (pocu *PointOfContactUpdate) ClearPackageNameID() *PointOfContactUpdate {
-	pocu.mutation.ClearPackageNameID()
-	return pocu
+func (_u *PointOfContactUpdate) ClearPackageNameID() *PointOfContactUpdate {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (pocu *PointOfContactUpdate) SetArtifactID(u uuid.UUID) *PointOfContactUpdate {
-	pocu.mutation.SetArtifactID(u)
-	return pocu
+func (_u *PointOfContactUpdate) SetArtifactID(v uuid.UUID) *PointOfContactUpdate {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableArtifactID(u *uuid.UUID) *PointOfContactUpdate {
-	if u != nil {
-		pocu.SetArtifactID(*u)
+func (_u *PointOfContactUpdate) SetNillableArtifactID(v *uuid.UUID) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return pocu
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (pocu *PointOfContactUpdate) ClearArtifactID() *PointOfContactUpdate {
-	pocu.mutation.ClearArtifactID()
-	return pocu
+func (_u *PointOfContactUpdate) ClearArtifactID() *PointOfContactUpdate {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetEmail sets the "email" field.
-func (pocu *PointOfContactUpdate) SetEmail(s string) *PointOfContactUpdate {
-	pocu.mutation.SetEmail(s)
-	return pocu
+func (_u *PointOfContactUpdate) SetEmail(v string) *PointOfContactUpdate {
+	_u.mutation.SetEmail(v)
+	return _u
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableEmail(s *string) *PointOfContactUpdate {
-	if s != nil {
-		pocu.SetEmail(*s)
+func (_u *PointOfContactUpdate) SetNillableEmail(v *string) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetEmail(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetInfo sets the "info" field.
-func (pocu *PointOfContactUpdate) SetInfo(s string) *PointOfContactUpdate {
-	pocu.mutation.SetInfo(s)
-	return pocu
+func (_u *PointOfContactUpdate) SetInfo(v string) *PointOfContactUpdate {
+	_u.mutation.SetInfo(v)
+	return _u
 }
 
 // SetNillableInfo sets the "info" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableInfo(s *string) *PointOfContactUpdate {
-	if s != nil {
-		pocu.SetInfo(*s)
+func (_u *PointOfContactUpdate) SetNillableInfo(v *string) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetInfo(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetSince sets the "since" field.
-func (pocu *PointOfContactUpdate) SetSince(t time.Time) *PointOfContactUpdate {
-	pocu.mutation.SetSince(t)
-	return pocu
+func (_u *PointOfContactUpdate) SetSince(v time.Time) *PointOfContactUpdate {
+	_u.mutation.SetSince(v)
+	return _u
 }
 
 // SetNillableSince sets the "since" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableSince(t *time.Time) *PointOfContactUpdate {
-	if t != nil {
-		pocu.SetSince(*t)
+func (_u *PointOfContactUpdate) SetNillableSince(v *time.Time) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetSince(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (pocu *PointOfContactUpdate) SetJustification(s string) *PointOfContactUpdate {
-	pocu.mutation.SetJustification(s)
-	return pocu
+func (_u *PointOfContactUpdate) SetJustification(v string) *PointOfContactUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableJustification(s *string) *PointOfContactUpdate {
-	if s != nil {
-		pocu.SetJustification(*s)
+func (_u *PointOfContactUpdate) SetNillableJustification(v *string) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (pocu *PointOfContactUpdate) SetOrigin(s string) *PointOfContactUpdate {
-	pocu.mutation.SetOrigin(s)
-	return pocu
+func (_u *PointOfContactUpdate) SetOrigin(v string) *PointOfContactUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableOrigin(s *string) *PointOfContactUpdate {
-	if s != nil {
-		pocu.SetOrigin(*s)
+func (_u *PointOfContactUpdate) SetNillableOrigin(v *string) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (pocu *PointOfContactUpdate) SetCollector(s string) *PointOfContactUpdate {
-	pocu.mutation.SetCollector(s)
-	return pocu
+func (_u *PointOfContactUpdate) SetCollector(v string) *PointOfContactUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableCollector(s *string) *PointOfContactUpdate {
-	if s != nil {
-		pocu.SetCollector(*s)
+func (_u *PointOfContactUpdate) SetNillableCollector(v *string) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (pocu *PointOfContactUpdate) SetDocumentRef(s string) *PointOfContactUpdate {
-	pocu.mutation.SetDocumentRef(s)
-	return pocu
+func (_u *PointOfContactUpdate) SetDocumentRef(v string) *PointOfContactUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableDocumentRef(s *string) *PointOfContactUpdate {
-	if s != nil {
-		pocu.SetDocumentRef(*s)
+func (_u *PointOfContactUpdate) SetNillableDocumentRef(v *string) *PointOfContactUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return pocu
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (pocu *PointOfContactUpdate) SetSource(s *SourceName) *PointOfContactUpdate {
-	return pocu.SetSourceID(s.ID)
+func (_u *PointOfContactUpdate) SetSource(v *SourceName) *PointOfContactUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (pocu *PointOfContactUpdate) SetPackageVersion(p *PackageVersion) *PointOfContactUpdate {
-	return pocu.SetPackageVersionID(p.ID)
+func (_u *PointOfContactUpdate) SetPackageVersion(v *PackageVersion) *PointOfContactUpdate {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (pocu *PointOfContactUpdate) SetAllVersionsID(id uuid.UUID) *PointOfContactUpdate {
-	pocu.mutation.SetAllVersionsID(id)
-	return pocu
+func (_u *PointOfContactUpdate) SetAllVersionsID(id uuid.UUID) *PointOfContactUpdate {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactUpdate {
+func (_u *PointOfContactUpdate) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactUpdate {
 	if id != nil {
-		pocu = pocu.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return pocu
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (pocu *PointOfContactUpdate) SetAllVersions(p *PackageName) *PointOfContactUpdate {
-	return pocu.SetAllVersionsID(p.ID)
+func (_u *PointOfContactUpdate) SetAllVersions(v *PackageName) *PointOfContactUpdate {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (pocu *PointOfContactUpdate) SetArtifact(a *Artifact) *PointOfContactUpdate {
-	return pocu.SetArtifactID(a.ID)
+func (_u *PointOfContactUpdate) SetArtifact(v *Artifact) *PointOfContactUpdate {
+	return _u.SetArtifactID(v.ID)
 }
 
 // Mutation returns the PointOfContactMutation object of the builder.
-func (pocu *PointOfContactUpdate) Mutation() *PointOfContactMutation {
-	return pocu.mutation
+func (_u *PointOfContactUpdate) Mutation() *PointOfContactMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (pocu *PointOfContactUpdate) ClearSource() *PointOfContactUpdate {
-	pocu.mutation.ClearSource()
-	return pocu
+func (_u *PointOfContactUpdate) ClearSource() *PointOfContactUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (pocu *PointOfContactUpdate) ClearPackageVersion() *PointOfContactUpdate {
-	pocu.mutation.ClearPackageVersion()
-	return pocu
+func (_u *PointOfContactUpdate) ClearPackageVersion() *PointOfContactUpdate {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (pocu *PointOfContactUpdate) ClearAllVersions() *PointOfContactUpdate {
-	pocu.mutation.ClearAllVersions()
-	return pocu
+func (_u *PointOfContactUpdate) ClearAllVersions() *PointOfContactUpdate {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (pocu *PointOfContactUpdate) ClearArtifact() *PointOfContactUpdate {
-	pocu.mutation.ClearArtifact()
-	return pocu
+func (_u *PointOfContactUpdate) ClearArtifact() *PointOfContactUpdate {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (pocu *PointOfContactUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, pocu.sqlSave, pocu.mutation, pocu.hooks)
+func (_u *PointOfContactUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pocu *PointOfContactUpdate) SaveX(ctx context.Context) int {
-	affected, err := pocu.Save(ctx)
+func (_u *PointOfContactUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -289,49 +289,49 @@ func (pocu *PointOfContactUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (pocu *PointOfContactUpdate) Exec(ctx context.Context) error {
-	_, err := pocu.Save(ctx)
+func (_u *PointOfContactUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pocu *PointOfContactUpdate) ExecX(ctx context.Context) {
-	if err := pocu.Exec(ctx); err != nil {
+func (_u *PointOfContactUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PointOfContactUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
-	if ps := pocu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := pocu.mutation.Email(); ok {
+	if value, ok := _u.mutation.Email(); ok {
 		_spec.SetField(pointofcontact.FieldEmail, field.TypeString, value)
 	}
-	if value, ok := pocu.mutation.Info(); ok {
+	if value, ok := _u.mutation.Info(); ok {
 		_spec.SetField(pointofcontact.FieldInfo, field.TypeString, value)
 	}
-	if value, ok := pocu.mutation.Since(); ok {
+	if value, ok := _u.mutation.Since(); ok {
 		_spec.SetField(pointofcontact.FieldSince, field.TypeTime, value)
 	}
-	if value, ok := pocu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(pointofcontact.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := pocu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(pointofcontact.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := pocu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(pointofcontact.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := pocu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(pointofcontact.FieldDocumentRef, field.TypeString, value)
 	}
-	if pocu.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -344,7 +344,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocu.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -360,7 +360,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pocu.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -373,7 +373,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocu.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -389,7 +389,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pocu.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -402,7 +402,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocu.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -418,7 +418,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pocu.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -431,7 +431,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocu.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -447,7 +447,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, pocu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pointofcontact.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -455,8 +455,8 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		return 0, err
 	}
-	pocu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // PointOfContactUpdateOne is the builder for updating a single PointOfContact entity.
@@ -468,267 +468,267 @@ type PointOfContactUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (pocuo *PointOfContactUpdateOne) SetSourceID(u uuid.UUID) *PointOfContactUpdateOne {
-	pocuo.mutation.SetSourceID(u)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetSourceID(v uuid.UUID) *PointOfContactUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableSourceID(u *uuid.UUID) *PointOfContactUpdateOne {
-	if u != nil {
-		pocuo.SetSourceID(*u)
+func (_u *PointOfContactUpdateOne) SetNillableSourceID(v *uuid.UUID) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (pocuo *PointOfContactUpdateOne) ClearSourceID() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearSourceID()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearSourceID() *PointOfContactUpdateOne {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (pocuo *PointOfContactUpdateOne) SetPackageVersionID(u uuid.UUID) *PointOfContactUpdateOne {
-	pocuo.mutation.SetPackageVersionID(u)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetPackageVersionID(v uuid.UUID) *PointOfContactUpdateOne {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *PointOfContactUpdateOne {
-	if u != nil {
-		pocuo.SetPackageVersionID(*u)
+func (_u *PointOfContactUpdateOne) SetNillablePackageVersionID(v *uuid.UUID) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (pocuo *PointOfContactUpdateOne) ClearPackageVersionID() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearPackageVersionID()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearPackageVersionID() *PointOfContactUpdateOne {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (pocuo *PointOfContactUpdateOne) SetPackageNameID(u uuid.UUID) *PointOfContactUpdateOne {
-	pocuo.mutation.SetPackageNameID(u)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetPackageNameID(v uuid.UUID) *PointOfContactUpdateOne {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *PointOfContactUpdateOne {
-	if u != nil {
-		pocuo.SetPackageNameID(*u)
+func (_u *PointOfContactUpdateOne) SetNillablePackageNameID(v *uuid.UUID) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (pocuo *PointOfContactUpdateOne) ClearPackageNameID() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearPackageNameID()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearPackageNameID() *PointOfContactUpdateOne {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (pocuo *PointOfContactUpdateOne) SetArtifactID(u uuid.UUID) *PointOfContactUpdateOne {
-	pocuo.mutation.SetArtifactID(u)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetArtifactID(v uuid.UUID) *PointOfContactUpdateOne {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableArtifactID(u *uuid.UUID) *PointOfContactUpdateOne {
-	if u != nil {
-		pocuo.SetArtifactID(*u)
+func (_u *PointOfContactUpdateOne) SetNillableArtifactID(v *uuid.UUID) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (pocuo *PointOfContactUpdateOne) ClearArtifactID() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearArtifactID()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearArtifactID() *PointOfContactUpdateOne {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetEmail sets the "email" field.
-func (pocuo *PointOfContactUpdateOne) SetEmail(s string) *PointOfContactUpdateOne {
-	pocuo.mutation.SetEmail(s)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetEmail(v string) *PointOfContactUpdateOne {
+	_u.mutation.SetEmail(v)
+	return _u
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableEmail(s *string) *PointOfContactUpdateOne {
-	if s != nil {
-		pocuo.SetEmail(*s)
+func (_u *PointOfContactUpdateOne) SetNillableEmail(v *string) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetEmail(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetInfo sets the "info" field.
-func (pocuo *PointOfContactUpdateOne) SetInfo(s string) *PointOfContactUpdateOne {
-	pocuo.mutation.SetInfo(s)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetInfo(v string) *PointOfContactUpdateOne {
+	_u.mutation.SetInfo(v)
+	return _u
 }
 
 // SetNillableInfo sets the "info" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableInfo(s *string) *PointOfContactUpdateOne {
-	if s != nil {
-		pocuo.SetInfo(*s)
+func (_u *PointOfContactUpdateOne) SetNillableInfo(v *string) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetInfo(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetSince sets the "since" field.
-func (pocuo *PointOfContactUpdateOne) SetSince(t time.Time) *PointOfContactUpdateOne {
-	pocuo.mutation.SetSince(t)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetSince(v time.Time) *PointOfContactUpdateOne {
+	_u.mutation.SetSince(v)
+	return _u
 }
 
 // SetNillableSince sets the "since" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableSince(t *time.Time) *PointOfContactUpdateOne {
-	if t != nil {
-		pocuo.SetSince(*t)
+func (_u *PointOfContactUpdateOne) SetNillableSince(v *time.Time) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetSince(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (pocuo *PointOfContactUpdateOne) SetJustification(s string) *PointOfContactUpdateOne {
-	pocuo.mutation.SetJustification(s)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetJustification(v string) *PointOfContactUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableJustification(s *string) *PointOfContactUpdateOne {
-	if s != nil {
-		pocuo.SetJustification(*s)
+func (_u *PointOfContactUpdateOne) SetNillableJustification(v *string) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (pocuo *PointOfContactUpdateOne) SetOrigin(s string) *PointOfContactUpdateOne {
-	pocuo.mutation.SetOrigin(s)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetOrigin(v string) *PointOfContactUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableOrigin(s *string) *PointOfContactUpdateOne {
-	if s != nil {
-		pocuo.SetOrigin(*s)
+func (_u *PointOfContactUpdateOne) SetNillableOrigin(v *string) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (pocuo *PointOfContactUpdateOne) SetCollector(s string) *PointOfContactUpdateOne {
-	pocuo.mutation.SetCollector(s)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetCollector(v string) *PointOfContactUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableCollector(s *string) *PointOfContactUpdateOne {
-	if s != nil {
-		pocuo.SetCollector(*s)
+func (_u *PointOfContactUpdateOne) SetNillableCollector(v *string) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (pocuo *PointOfContactUpdateOne) SetDocumentRef(s string) *PointOfContactUpdateOne {
-	pocuo.mutation.SetDocumentRef(s)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetDocumentRef(v string) *PointOfContactUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableDocumentRef(s *string) *PointOfContactUpdateOne {
-	if s != nil {
-		pocuo.SetDocumentRef(*s)
+func (_u *PointOfContactUpdateOne) SetNillableDocumentRef(v *string) *PointOfContactUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return pocuo
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (pocuo *PointOfContactUpdateOne) SetSource(s *SourceName) *PointOfContactUpdateOne {
-	return pocuo.SetSourceID(s.ID)
+func (_u *PointOfContactUpdateOne) SetSource(v *SourceName) *PointOfContactUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (pocuo *PointOfContactUpdateOne) SetPackageVersion(p *PackageVersion) *PointOfContactUpdateOne {
-	return pocuo.SetPackageVersionID(p.ID)
+func (_u *PointOfContactUpdateOne) SetPackageVersion(v *PackageVersion) *PointOfContactUpdateOne {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (pocuo *PointOfContactUpdateOne) SetAllVersionsID(id uuid.UUID) *PointOfContactUpdateOne {
-	pocuo.mutation.SetAllVersionsID(id)
-	return pocuo
+func (_u *PointOfContactUpdateOne) SetAllVersionsID(id uuid.UUID) *PointOfContactUpdateOne {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactUpdateOne {
+func (_u *PointOfContactUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactUpdateOne {
 	if id != nil {
-		pocuo = pocuo.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return pocuo
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (pocuo *PointOfContactUpdateOne) SetAllVersions(p *PackageName) *PointOfContactUpdateOne {
-	return pocuo.SetAllVersionsID(p.ID)
+func (_u *PointOfContactUpdateOne) SetAllVersions(v *PackageName) *PointOfContactUpdateOne {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (pocuo *PointOfContactUpdateOne) SetArtifact(a *Artifact) *PointOfContactUpdateOne {
-	return pocuo.SetArtifactID(a.ID)
+func (_u *PointOfContactUpdateOne) SetArtifact(v *Artifact) *PointOfContactUpdateOne {
+	return _u.SetArtifactID(v.ID)
 }
 
 // Mutation returns the PointOfContactMutation object of the builder.
-func (pocuo *PointOfContactUpdateOne) Mutation() *PointOfContactMutation {
-	return pocuo.mutation
+func (_u *PointOfContactUpdateOne) Mutation() *PointOfContactMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (pocuo *PointOfContactUpdateOne) ClearSource() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearSource()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearSource() *PointOfContactUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (pocuo *PointOfContactUpdateOne) ClearPackageVersion() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearPackageVersion()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearPackageVersion() *PointOfContactUpdateOne {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (pocuo *PointOfContactUpdateOne) ClearAllVersions() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearAllVersions()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearAllVersions() *PointOfContactUpdateOne {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (pocuo *PointOfContactUpdateOne) ClearArtifact() *PointOfContactUpdateOne {
-	pocuo.mutation.ClearArtifact()
-	return pocuo
+func (_u *PointOfContactUpdateOne) ClearArtifact() *PointOfContactUpdateOne {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // Where appends a list predicates to the PointOfContactUpdate builder.
-func (pocuo *PointOfContactUpdateOne) Where(ps ...predicate.PointOfContact) *PointOfContactUpdateOne {
-	pocuo.mutation.Where(ps...)
-	return pocuo
+func (_u *PointOfContactUpdateOne) Where(ps ...predicate.PointOfContact) *PointOfContactUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (pocuo *PointOfContactUpdateOne) Select(field string, fields ...string) *PointOfContactUpdateOne {
-	pocuo.fields = append([]string{field}, fields...)
-	return pocuo
+func (_u *PointOfContactUpdateOne) Select(field string, fields ...string) *PointOfContactUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated PointOfContact entity.
-func (pocuo *PointOfContactUpdateOne) Save(ctx context.Context) (*PointOfContact, error) {
-	return withHooks(ctx, pocuo.sqlSave, pocuo.mutation, pocuo.hooks)
+func (_u *PointOfContactUpdateOne) Save(ctx context.Context) (*PointOfContact, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pocuo *PointOfContactUpdateOne) SaveX(ctx context.Context) *PointOfContact {
-	node, err := pocuo.Save(ctx)
+func (_u *PointOfContactUpdateOne) SaveX(ctx context.Context) *PointOfContact {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -736,26 +736,26 @@ func (pocuo *PointOfContactUpdateOne) SaveX(ctx context.Context) *PointOfContact
 }
 
 // Exec executes the query on the entity.
-func (pocuo *PointOfContactUpdateOne) Exec(ctx context.Context) error {
-	_, err := pocuo.Save(ctx)
+func (_u *PointOfContactUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pocuo *PointOfContactUpdateOne) ExecX(ctx context.Context) {
-	if err := pocuo.Exec(ctx); err != nil {
+func (_u *PointOfContactUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *PointOfContact, err error) {
+func (_u *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *PointOfContact, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
-	id, ok := pocuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PointOfContact.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := pocuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pointofcontact.FieldID)
 		for _, f := range fields {
@@ -767,35 +767,35 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			}
 		}
 	}
-	if ps := pocuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := pocuo.mutation.Email(); ok {
+	if value, ok := _u.mutation.Email(); ok {
 		_spec.SetField(pointofcontact.FieldEmail, field.TypeString, value)
 	}
-	if value, ok := pocuo.mutation.Info(); ok {
+	if value, ok := _u.mutation.Info(); ok {
 		_spec.SetField(pointofcontact.FieldInfo, field.TypeString, value)
 	}
-	if value, ok := pocuo.mutation.Since(); ok {
+	if value, ok := _u.mutation.Since(); ok {
 		_spec.SetField(pointofcontact.FieldSince, field.TypeTime, value)
 	}
-	if value, ok := pocuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(pointofcontact.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := pocuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(pointofcontact.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := pocuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(pointofcontact.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := pocuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(pointofcontact.FieldDocumentRef, field.TypeString, value)
 	}
-	if pocuo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -808,7 +808,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocuo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -824,7 +824,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pocuo.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -837,7 +837,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocuo.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -853,7 +853,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pocuo.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -866,7 +866,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocuo.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -882,7 +882,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pocuo.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -895,7 +895,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pocuo.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -911,10 +911,10 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &PointOfContact{config: pocuo.config}
+	_node = &PointOfContact{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, pocuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pointofcontact.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -922,6 +922,6 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 		}
 		return nil, err
 	}
-	pocuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -29,167 +29,167 @@ type CertificationCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (cc *CertificationCreate) SetSourceID(u uuid.UUID) *CertificationCreate {
-	cc.mutation.SetSourceID(u)
-	return cc
+func (_c *CertificationCreate) SetSourceID(v uuid.UUID) *CertificationCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableSourceID(u *uuid.UUID) *CertificationCreate {
-	if u != nil {
-		cc.SetSourceID(*u)
+func (_c *CertificationCreate) SetNillableSourceID(v *uuid.UUID) *CertificationCreate {
+	if v != nil {
+		_c.SetSourceID(*v)
 	}
-	return cc
+	return _c
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (cc *CertificationCreate) SetPackageVersionID(u uuid.UUID) *CertificationCreate {
-	cc.mutation.SetPackageVersionID(u)
-	return cc
+func (_c *CertificationCreate) SetPackageVersionID(v uuid.UUID) *CertificationCreate {
+	_c.mutation.SetPackageVersionID(v)
+	return _c
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillablePackageVersionID(u *uuid.UUID) *CertificationCreate {
-	if u != nil {
-		cc.SetPackageVersionID(*u)
+func (_c *CertificationCreate) SetNillablePackageVersionID(v *uuid.UUID) *CertificationCreate {
+	if v != nil {
+		_c.SetPackageVersionID(*v)
 	}
-	return cc
+	return _c
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (cc *CertificationCreate) SetPackageNameID(u uuid.UUID) *CertificationCreate {
-	cc.mutation.SetPackageNameID(u)
-	return cc
+func (_c *CertificationCreate) SetPackageNameID(v uuid.UUID) *CertificationCreate {
+	_c.mutation.SetPackageNameID(v)
+	return _c
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillablePackageNameID(u *uuid.UUID) *CertificationCreate {
-	if u != nil {
-		cc.SetPackageNameID(*u)
+func (_c *CertificationCreate) SetNillablePackageNameID(v *uuid.UUID) *CertificationCreate {
+	if v != nil {
+		_c.SetPackageNameID(*v)
 	}
-	return cc
+	return _c
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cc *CertificationCreate) SetArtifactID(u uuid.UUID) *CertificationCreate {
-	cc.mutation.SetArtifactID(u)
-	return cc
+func (_c *CertificationCreate) SetArtifactID(v uuid.UUID) *CertificationCreate {
+	_c.mutation.SetArtifactID(v)
+	return _c
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableArtifactID(u *uuid.UUID) *CertificationCreate {
-	if u != nil {
-		cc.SetArtifactID(*u)
+func (_c *CertificationCreate) SetNillableArtifactID(v *uuid.UUID) *CertificationCreate {
+	if v != nil {
+		_c.SetArtifactID(*v)
 	}
-	return cc
+	return _c
 }
 
 // SetType sets the "type" field.
-func (cc *CertificationCreate) SetType(c certification.Type) *CertificationCreate {
-	cc.mutation.SetType(c)
-	return cc
+func (_c *CertificationCreate) SetType(v certification.Type) *CertificationCreate {
+	_c.mutation.SetType(v)
+	return _c
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableType(c *certification.Type) *CertificationCreate {
-	if c != nil {
-		cc.SetType(*c)
+func (_c *CertificationCreate) SetNillableType(v *certification.Type) *CertificationCreate {
+	if v != nil {
+		_c.SetType(*v)
 	}
-	return cc
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (cc *CertificationCreate) SetJustification(s string) *CertificationCreate {
-	cc.mutation.SetJustification(s)
-	return cc
+func (_c *CertificationCreate) SetJustification(v string) *CertificationCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetKnownSince sets the "known_since" field.
-func (cc *CertificationCreate) SetKnownSince(t time.Time) *CertificationCreate {
-	cc.mutation.SetKnownSince(t)
-	return cc
+func (_c *CertificationCreate) SetKnownSince(v time.Time) *CertificationCreate {
+	_c.mutation.SetKnownSince(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (cc *CertificationCreate) SetOrigin(s string) *CertificationCreate {
-	cc.mutation.SetOrigin(s)
-	return cc
+func (_c *CertificationCreate) SetOrigin(v string) *CertificationCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (cc *CertificationCreate) SetCollector(s string) *CertificationCreate {
-	cc.mutation.SetCollector(s)
-	return cc
+func (_c *CertificationCreate) SetCollector(v string) *CertificationCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cc *CertificationCreate) SetDocumentRef(s string) *CertificationCreate {
-	cc.mutation.SetDocumentRef(s)
-	return cc
+func (_c *CertificationCreate) SetDocumentRef(v string) *CertificationCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (cc *CertificationCreate) SetID(u uuid.UUID) *CertificationCreate {
-	cc.mutation.SetID(u)
-	return cc
+func (_c *CertificationCreate) SetID(v uuid.UUID) *CertificationCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableID(u *uuid.UUID) *CertificationCreate {
-	if u != nil {
-		cc.SetID(*u)
+func (_c *CertificationCreate) SetNillableID(v *uuid.UUID) *CertificationCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return cc
+	return _c
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (cc *CertificationCreate) SetSource(s *SourceName) *CertificationCreate {
-	return cc.SetSourceID(s.ID)
+func (_c *CertificationCreate) SetSource(v *SourceName) *CertificationCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (cc *CertificationCreate) SetPackageVersion(p *PackageVersion) *CertificationCreate {
-	return cc.SetPackageVersionID(p.ID)
+func (_c *CertificationCreate) SetPackageVersion(v *PackageVersion) *CertificationCreate {
+	return _c.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (cc *CertificationCreate) SetAllVersionsID(id uuid.UUID) *CertificationCreate {
-	cc.mutation.SetAllVersionsID(id)
-	return cc
+func (_c *CertificationCreate) SetAllVersionsID(id uuid.UUID) *CertificationCreate {
+	_c.mutation.SetAllVersionsID(id)
+	return _c
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (cc *CertificationCreate) SetNillableAllVersionsID(id *uuid.UUID) *CertificationCreate {
+func (_c *CertificationCreate) SetNillableAllVersionsID(id *uuid.UUID) *CertificationCreate {
 	if id != nil {
-		cc = cc.SetAllVersionsID(*id)
+		_c = _c.SetAllVersionsID(*id)
 	}
-	return cc
+	return _c
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (cc *CertificationCreate) SetAllVersions(p *PackageName) *CertificationCreate {
-	return cc.SetAllVersionsID(p.ID)
+func (_c *CertificationCreate) SetAllVersions(v *PackageName) *CertificationCreate {
+	return _c.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (cc *CertificationCreate) SetArtifact(a *Artifact) *CertificationCreate {
-	return cc.SetArtifactID(a.ID)
+func (_c *CertificationCreate) SetArtifact(v *Artifact) *CertificationCreate {
+	return _c.SetArtifactID(v.ID)
 }
 
 // Mutation returns the CertificationMutation object of the builder.
-func (cc *CertificationCreate) Mutation() *CertificationMutation {
-	return cc.mutation
+func (_c *CertificationCreate) Mutation() *CertificationMutation {
+	return _c.mutation
 }
 
 // Save creates the Certification in the database.
-func (cc *CertificationCreate) Save(ctx context.Context) (*Certification, error) {
-	cc.defaults()
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (_c *CertificationCreate) Save(ctx context.Context) (*Certification, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CertificationCreate) SaveX(ctx context.Context) *Certification {
-	v, err := cc.Save(ctx)
+func (_c *CertificationCreate) SaveX(ctx context.Context) *Certification {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -197,64 +197,64 @@ func (cc *CertificationCreate) SaveX(ctx context.Context) *Certification {
 }
 
 // Exec executes the query.
-func (cc *CertificationCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CertificationCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CertificationCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CertificationCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (cc *CertificationCreate) defaults() {
-	if _, ok := cc.mutation.GetType(); !ok {
+func (_c *CertificationCreate) defaults() {
+	if _, ok := _c.mutation.GetType(); !ok {
 		v := certification.DefaultType
-		cc.mutation.SetType(v)
+		_c.mutation.SetType(v)
 	}
-	if _, ok := cc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := certification.DefaultID()
-		cc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CertificationCreate) check() error {
-	if _, ok := cc.mutation.GetType(); !ok {
+func (_c *CertificationCreate) check() error {
+	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Certification.type"`)}
 	}
-	if v, ok := cc.mutation.GetType(); ok {
+	if v, ok := _c.mutation.GetType(); ok {
 		if err := certification.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Certification.type": %w`, err)}
 		}
 	}
-	if _, ok := cc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "Certification.justification"`)}
 	}
-	if _, ok := cc.mutation.KnownSince(); !ok {
+	if _, ok := _c.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "Certification.known_since"`)}
 	}
-	if _, ok := cc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "Certification.origin"`)}
 	}
-	if _, ok := cc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Certification.collector"`)}
 	}
-	if _, ok := cc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Certification.document_ref"`)}
 	}
 	return nil
 }
 
-func (cc *CertificationCreate) sqlSave(ctx context.Context) (*Certification, error) {
-	if err := cc.check(); err != nil {
+func (_c *CertificationCreate) sqlSave(ctx context.Context) (*Certification, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -267,46 +267,46 @@ func (cc *CertificationCreate) sqlSave(ctx context.Context) (*Certification, err
 			return nil, err
 		}
 	}
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpec) {
+func (_c *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Certification{config: cc.config}
+		_node = &Certification{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(certification.Table, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = cc.conflict
-	if id, ok := cc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := cc.mutation.GetType(); ok {
+	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(certification.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
-	if value, ok := cc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(certification.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := cc.mutation.KnownSince(); ok {
+	if value, ok := _c.mutation.KnownSince(); ok {
 		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
 	}
-	if value, ok := cc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := cc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := cc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(certification.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := cc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -323,7 +323,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -340,7 +340,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_node.PackageVersionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -357,7 +357,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_node.PackageNameID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -393,10 +393,10 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (cc *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertOne {
-	cc.conflict = opts
+func (_c *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertOne {
+	_c.conflict = opts
 	return &CertificationUpsertOne{
-		create: cc,
+		create: _c,
 	}
 }
 
@@ -406,10 +406,10 @@ func (cc *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *Certifica
 //	client.Certification.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cc *CertificationCreate) OnConflictColumns(columns ...string) *CertificationUpsertOne {
-	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
+func (_c *CertificationCreate) OnConflictColumns(columns ...string) *CertificationUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertificationUpsertOne{
-		create: cc,
+		create: _c,
 	}
 }
 
@@ -833,16 +833,16 @@ type CertificationCreateBulk struct {
 }
 
 // Save creates the Certification entities in the database.
-func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (_c *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Certification, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Certification, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertificationMutation)
@@ -856,12 +856,12 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ccb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -881,7 +881,7 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -889,8 +889,8 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CertificationCreateBulk) SaveX(ctx context.Context) []*Certification {
-	v, err := ccb.Save(ctx)
+func (_c *CertificationCreateBulk) SaveX(ctx context.Context) []*Certification {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -898,14 +898,14 @@ func (ccb *CertificationCreateBulk) SaveX(ctx context.Context) []*Certification 
 }
 
 // Exec executes the query.
-func (ccb *CertificationCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (_c *CertificationCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CertificationCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (_c *CertificationCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -925,10 +925,10 @@ func (ccb *CertificationCreateBulk) ExecX(ctx context.Context) {
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (ccb *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertBulk {
-	ccb.conflict = opts
+func (_c *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertBulk {
+	_c.conflict = opts
 	return &CertificationUpsertBulk{
-		create: ccb,
+		create: _c,
 	}
 }
 
@@ -938,10 +938,10 @@ func (ccb *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *Cert
 //	client.Certification.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ccb *CertificationCreateBulk) OnConflictColumns(columns ...string) *CertificationUpsertBulk {
-	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
+func (_c *CertificationCreateBulk) OnConflictColumns(columns ...string) *CertificationUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertificationUpsertBulk{
-		create: ccb,
+		create: _c,
 	}
 }
 

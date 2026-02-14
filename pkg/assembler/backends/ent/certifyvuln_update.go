@@ -26,186 +26,186 @@ type CertifyVulnUpdate struct {
 }
 
 // Where appends a list predicates to the CertifyVulnUpdate builder.
-func (cvu *CertifyVulnUpdate) Where(ps ...predicate.CertifyVuln) *CertifyVulnUpdate {
-	cvu.mutation.Where(ps...)
-	return cvu
+func (_u *CertifyVulnUpdate) Where(ps ...predicate.CertifyVuln) *CertifyVulnUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvu *CertifyVulnUpdate) SetVulnerabilityID(u uuid.UUID) *CertifyVulnUpdate {
-	cvu.mutation.SetVulnerabilityID(u)
-	return cvu
+func (_u *CertifyVulnUpdate) SetVulnerabilityID(v uuid.UUID) *CertifyVulnUpdate {
+	_u.mutation.SetVulnerabilityID(v)
+	return _u
 }
 
 // SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableVulnerabilityID(u *uuid.UUID) *CertifyVulnUpdate {
-	if u != nil {
-		cvu.SetVulnerabilityID(*u)
+func (_u *CertifyVulnUpdate) SetNillableVulnerabilityID(v *uuid.UUID) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetVulnerabilityID(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvu *CertifyVulnUpdate) SetPackageID(u uuid.UUID) *CertifyVulnUpdate {
-	cvu.mutation.SetPackageID(u)
-	return cvu
+func (_u *CertifyVulnUpdate) SetPackageID(v uuid.UUID) *CertifyVulnUpdate {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillablePackageID(u *uuid.UUID) *CertifyVulnUpdate {
-	if u != nil {
-		cvu.SetPackageID(*u)
+func (_u *CertifyVulnUpdate) SetNillablePackageID(v *uuid.UUID) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (cvu *CertifyVulnUpdate) SetTimeScanned(t time.Time) *CertifyVulnUpdate {
-	cvu.mutation.SetTimeScanned(t)
-	return cvu
+func (_u *CertifyVulnUpdate) SetTimeScanned(v time.Time) *CertifyVulnUpdate {
+	_u.mutation.SetTimeScanned(v)
+	return _u
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableTimeScanned(t *time.Time) *CertifyVulnUpdate {
-	if t != nil {
-		cvu.SetTimeScanned(*t)
+func (_u *CertifyVulnUpdate) SetNillableTimeScanned(v *time.Time) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetTimeScanned(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetDbURI sets the "db_uri" field.
-func (cvu *CertifyVulnUpdate) SetDbURI(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetDbURI(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetDbURI(v string) *CertifyVulnUpdate {
+	_u.mutation.SetDbURI(v)
+	return _u
 }
 
 // SetNillableDbURI sets the "db_uri" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableDbURI(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetDbURI(*s)
+func (_u *CertifyVulnUpdate) SetNillableDbURI(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetDbURI(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetDbVersion sets the "db_version" field.
-func (cvu *CertifyVulnUpdate) SetDbVersion(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetDbVersion(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetDbVersion(v string) *CertifyVulnUpdate {
+	_u.mutation.SetDbVersion(v)
+	return _u
 }
 
 // SetNillableDbVersion sets the "db_version" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableDbVersion(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetDbVersion(*s)
+func (_u *CertifyVulnUpdate) SetNillableDbVersion(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetDbVersion(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetScannerURI sets the "scanner_uri" field.
-func (cvu *CertifyVulnUpdate) SetScannerURI(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetScannerURI(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetScannerURI(v string) *CertifyVulnUpdate {
+	_u.mutation.SetScannerURI(v)
+	return _u
 }
 
 // SetNillableScannerURI sets the "scanner_uri" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableScannerURI(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetScannerURI(*s)
+func (_u *CertifyVulnUpdate) SetNillableScannerURI(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetScannerURI(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetScannerVersion sets the "scanner_version" field.
-func (cvu *CertifyVulnUpdate) SetScannerVersion(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetScannerVersion(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetScannerVersion(v string) *CertifyVulnUpdate {
+	_u.mutation.SetScannerVersion(v)
+	return _u
 }
 
 // SetNillableScannerVersion sets the "scanner_version" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableScannerVersion(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetScannerVersion(*s)
+func (_u *CertifyVulnUpdate) SetNillableScannerVersion(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetScannerVersion(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cvu *CertifyVulnUpdate) SetOrigin(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetOrigin(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetOrigin(v string) *CertifyVulnUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableOrigin(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetOrigin(*s)
+func (_u *CertifyVulnUpdate) SetNillableOrigin(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cvu *CertifyVulnUpdate) SetCollector(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetCollector(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetCollector(v string) *CertifyVulnUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableCollector(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetCollector(*s)
+func (_u *CertifyVulnUpdate) SetNillableCollector(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cvu *CertifyVulnUpdate) SetDocumentRef(s string) *CertifyVulnUpdate {
-	cvu.mutation.SetDocumentRef(s)
-	return cvu
+func (_u *CertifyVulnUpdate) SetDocumentRef(v string) *CertifyVulnUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cvu *CertifyVulnUpdate) SetNillableDocumentRef(s *string) *CertifyVulnUpdate {
-	if s != nil {
-		cvu.SetDocumentRef(*s)
+func (_u *CertifyVulnUpdate) SetNillableDocumentRef(v *string) *CertifyVulnUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
-func (cvu *CertifyVulnUpdate) SetVulnerability(v *VulnerabilityID) *CertifyVulnUpdate {
-	return cvu.SetVulnerabilityID(v.ID)
+func (_u *CertifyVulnUpdate) SetVulnerability(v *VulnerabilityID) *CertifyVulnUpdate {
+	return _u.SetVulnerabilityID(v.ID)
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cvu *CertifyVulnUpdate) SetPackage(p *PackageVersion) *CertifyVulnUpdate {
-	return cvu.SetPackageID(p.ID)
+func (_u *CertifyVulnUpdate) SetPackage(v *PackageVersion) *CertifyVulnUpdate {
+	return _u.SetPackageID(v.ID)
 }
 
 // Mutation returns the CertifyVulnMutation object of the builder.
-func (cvu *CertifyVulnUpdate) Mutation() *CertifyVulnMutation {
-	return cvu.mutation
+func (_u *CertifyVulnUpdate) Mutation() *CertifyVulnMutation {
+	return _u.mutation
 }
 
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
-func (cvu *CertifyVulnUpdate) ClearVulnerability() *CertifyVulnUpdate {
-	cvu.mutation.ClearVulnerability()
-	return cvu
+func (_u *CertifyVulnUpdate) ClearVulnerability() *CertifyVulnUpdate {
+	_u.mutation.ClearVulnerability()
+	return _u
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (cvu *CertifyVulnUpdate) ClearPackage() *CertifyVulnUpdate {
-	cvu.mutation.ClearPackage()
-	return cvu
+func (_u *CertifyVulnUpdate) ClearPackage() *CertifyVulnUpdate {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cvu *CertifyVulnUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cvu.sqlSave, cvu.mutation, cvu.hooks)
+func (_u *CertifyVulnUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cvu *CertifyVulnUpdate) SaveX(ctx context.Context) int {
-	affected, err := cvu.Save(ctx)
+func (_u *CertifyVulnUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -213,66 +213,66 @@ func (cvu *CertifyVulnUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cvu *CertifyVulnUpdate) Exec(ctx context.Context) error {
-	_, err := cvu.Save(ctx)
+func (_u *CertifyVulnUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvu *CertifyVulnUpdate) ExecX(ctx context.Context) {
-	if err := cvu.Exec(ctx); err != nil {
+func (_u *CertifyVulnUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cvu *CertifyVulnUpdate) check() error {
-	if cvu.mutation.VulnerabilityCleared() && len(cvu.mutation.VulnerabilityIDs()) > 0 {
+func (_u *CertifyVulnUpdate) check() error {
+	if _u.mutation.VulnerabilityCleared() && len(_u.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.vulnerability"`)
 	}
-	if cvu.mutation.PackageCleared() && len(cvu.mutation.PackageIDs()) > 0 {
+	if _u.mutation.PackageCleared() && len(_u.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.package"`)
 	}
 	return nil
 }
 
-func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := cvu.check(); err != nil {
-		return n, err
+func (_u *CertifyVulnUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certifyvuln.Table, certifyvuln.Columns, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID))
-	if ps := cvu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cvu.mutation.TimeScanned(); ok {
+	if value, ok := _u.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyvuln.FieldTimeScanned, field.TypeTime, value)
 	}
-	if value, ok := cvu.mutation.DbURI(); ok {
+	if value, ok := _u.mutation.DbURI(); ok {
 		_spec.SetField(certifyvuln.FieldDbURI, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.DbVersion(); ok {
+	if value, ok := _u.mutation.DbVersion(); ok {
 		_spec.SetField(certifyvuln.FieldDbVersion, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.ScannerURI(); ok {
+	if value, ok := _u.mutation.ScannerURI(); ok {
 		_spec.SetField(certifyvuln.FieldScannerURI, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.ScannerVersion(); ok {
+	if value, ok := _u.mutation.ScannerVersion(); ok {
 		_spec.SetField(certifyvuln.FieldScannerVersion, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifyvuln.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifyvuln.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyvuln.FieldDocumentRef, field.TypeString, value)
 	}
-	if cvu.mutation.VulnerabilityCleared() {
+	if _u.mutation.VulnerabilityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -285,7 +285,7 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvu.mutation.VulnerabilityIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -301,7 +301,7 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cvu.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -314,7 +314,7 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvu.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -330,7 +330,7 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cvu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifyvuln.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -338,8 +338,8 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cvu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // CertifyVulnUpdateOne is the builder for updating a single CertifyVuln entity.
@@ -351,193 +351,193 @@ type CertifyVulnUpdateOne struct {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvuo *CertifyVulnUpdateOne) SetVulnerabilityID(u uuid.UUID) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetVulnerabilityID(u)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetVulnerabilityID(v uuid.UUID) *CertifyVulnUpdateOne {
+	_u.mutation.SetVulnerabilityID(v)
+	return _u
 }
 
 // SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableVulnerabilityID(u *uuid.UUID) *CertifyVulnUpdateOne {
-	if u != nil {
-		cvuo.SetVulnerabilityID(*u)
+func (_u *CertifyVulnUpdateOne) SetNillableVulnerabilityID(v *uuid.UUID) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetVulnerabilityID(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvuo *CertifyVulnUpdateOne) SetPackageID(u uuid.UUID) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetPackageID(u)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetPackageID(v uuid.UUID) *CertifyVulnUpdateOne {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillablePackageID(u *uuid.UUID) *CertifyVulnUpdateOne {
-	if u != nil {
-		cvuo.SetPackageID(*u)
+func (_u *CertifyVulnUpdateOne) SetNillablePackageID(v *uuid.UUID) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (cvuo *CertifyVulnUpdateOne) SetTimeScanned(t time.Time) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetTimeScanned(t)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetTimeScanned(v time.Time) *CertifyVulnUpdateOne {
+	_u.mutation.SetTimeScanned(v)
+	return _u
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableTimeScanned(t *time.Time) *CertifyVulnUpdateOne {
-	if t != nil {
-		cvuo.SetTimeScanned(*t)
+func (_u *CertifyVulnUpdateOne) SetNillableTimeScanned(v *time.Time) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetTimeScanned(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetDbURI sets the "db_uri" field.
-func (cvuo *CertifyVulnUpdateOne) SetDbURI(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetDbURI(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetDbURI(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetDbURI(v)
+	return _u
 }
 
 // SetNillableDbURI sets the "db_uri" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableDbURI(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetDbURI(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableDbURI(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetDbURI(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetDbVersion sets the "db_version" field.
-func (cvuo *CertifyVulnUpdateOne) SetDbVersion(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetDbVersion(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetDbVersion(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetDbVersion(v)
+	return _u
 }
 
 // SetNillableDbVersion sets the "db_version" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableDbVersion(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetDbVersion(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableDbVersion(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetDbVersion(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetScannerURI sets the "scanner_uri" field.
-func (cvuo *CertifyVulnUpdateOne) SetScannerURI(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetScannerURI(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetScannerURI(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetScannerURI(v)
+	return _u
 }
 
 // SetNillableScannerURI sets the "scanner_uri" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableScannerURI(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetScannerURI(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableScannerURI(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetScannerURI(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetScannerVersion sets the "scanner_version" field.
-func (cvuo *CertifyVulnUpdateOne) SetScannerVersion(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetScannerVersion(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetScannerVersion(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetScannerVersion(v)
+	return _u
 }
 
 // SetNillableScannerVersion sets the "scanner_version" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableScannerVersion(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetScannerVersion(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableScannerVersion(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetScannerVersion(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cvuo *CertifyVulnUpdateOne) SetOrigin(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetOrigin(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetOrigin(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableOrigin(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetOrigin(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableOrigin(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cvuo *CertifyVulnUpdateOne) SetCollector(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetCollector(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetCollector(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableCollector(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetCollector(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableCollector(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cvuo *CertifyVulnUpdateOne) SetDocumentRef(s string) *CertifyVulnUpdateOne {
-	cvuo.mutation.SetDocumentRef(s)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) SetDocumentRef(v string) *CertifyVulnUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cvuo *CertifyVulnUpdateOne) SetNillableDocumentRef(s *string) *CertifyVulnUpdateOne {
-	if s != nil {
-		cvuo.SetDocumentRef(*s)
+func (_u *CertifyVulnUpdateOne) SetNillableDocumentRef(v *string) *CertifyVulnUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
-func (cvuo *CertifyVulnUpdateOne) SetVulnerability(v *VulnerabilityID) *CertifyVulnUpdateOne {
-	return cvuo.SetVulnerabilityID(v.ID)
+func (_u *CertifyVulnUpdateOne) SetVulnerability(v *VulnerabilityID) *CertifyVulnUpdateOne {
+	return _u.SetVulnerabilityID(v.ID)
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cvuo *CertifyVulnUpdateOne) SetPackage(p *PackageVersion) *CertifyVulnUpdateOne {
-	return cvuo.SetPackageID(p.ID)
+func (_u *CertifyVulnUpdateOne) SetPackage(v *PackageVersion) *CertifyVulnUpdateOne {
+	return _u.SetPackageID(v.ID)
 }
 
 // Mutation returns the CertifyVulnMutation object of the builder.
-func (cvuo *CertifyVulnUpdateOne) Mutation() *CertifyVulnMutation {
-	return cvuo.mutation
+func (_u *CertifyVulnUpdateOne) Mutation() *CertifyVulnMutation {
+	return _u.mutation
 }
 
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
-func (cvuo *CertifyVulnUpdateOne) ClearVulnerability() *CertifyVulnUpdateOne {
-	cvuo.mutation.ClearVulnerability()
-	return cvuo
+func (_u *CertifyVulnUpdateOne) ClearVulnerability() *CertifyVulnUpdateOne {
+	_u.mutation.ClearVulnerability()
+	return _u
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (cvuo *CertifyVulnUpdateOne) ClearPackage() *CertifyVulnUpdateOne {
-	cvuo.mutation.ClearPackage()
-	return cvuo
+func (_u *CertifyVulnUpdateOne) ClearPackage() *CertifyVulnUpdateOne {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // Where appends a list predicates to the CertifyVulnUpdate builder.
-func (cvuo *CertifyVulnUpdateOne) Where(ps ...predicate.CertifyVuln) *CertifyVulnUpdateOne {
-	cvuo.mutation.Where(ps...)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) Where(ps ...predicate.CertifyVuln) *CertifyVulnUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cvuo *CertifyVulnUpdateOne) Select(field string, fields ...string) *CertifyVulnUpdateOne {
-	cvuo.fields = append([]string{field}, fields...)
-	return cvuo
+func (_u *CertifyVulnUpdateOne) Select(field string, fields ...string) *CertifyVulnUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated CertifyVuln entity.
-func (cvuo *CertifyVulnUpdateOne) Save(ctx context.Context) (*CertifyVuln, error) {
-	return withHooks(ctx, cvuo.sqlSave, cvuo.mutation, cvuo.hooks)
+func (_u *CertifyVulnUpdateOne) Save(ctx context.Context) (*CertifyVuln, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cvuo *CertifyVulnUpdateOne) SaveX(ctx context.Context) *CertifyVuln {
-	node, err := cvuo.Save(ctx)
+func (_u *CertifyVulnUpdateOne) SaveX(ctx context.Context) *CertifyVuln {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -545,40 +545,40 @@ func (cvuo *CertifyVulnUpdateOne) SaveX(ctx context.Context) *CertifyVuln {
 }
 
 // Exec executes the query on the entity.
-func (cvuo *CertifyVulnUpdateOne) Exec(ctx context.Context) error {
-	_, err := cvuo.Save(ctx)
+func (_u *CertifyVulnUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvuo *CertifyVulnUpdateOne) ExecX(ctx context.Context) {
-	if err := cvuo.Exec(ctx); err != nil {
+func (_u *CertifyVulnUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cvuo *CertifyVulnUpdateOne) check() error {
-	if cvuo.mutation.VulnerabilityCleared() && len(cvuo.mutation.VulnerabilityIDs()) > 0 {
+func (_u *CertifyVulnUpdateOne) check() error {
+	if _u.mutation.VulnerabilityCleared() && len(_u.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.vulnerability"`)
 	}
-	if cvuo.mutation.PackageCleared() && len(cvuo.mutation.PackageIDs()) > 0 {
+	if _u.mutation.PackageCleared() && len(_u.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVuln.package"`)
 	}
 	return nil
 }
 
-func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVuln, err error) {
-	if err := cvuo.check(); err != nil {
+func (_u *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVuln, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certifyvuln.Table, certifyvuln.Columns, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID))
-	id, ok := cvuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CertifyVuln.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cvuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifyvuln.FieldID)
 		for _, f := range fields {
@@ -590,38 +590,38 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 			}
 		}
 	}
-	if ps := cvuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cvuo.mutation.TimeScanned(); ok {
+	if value, ok := _u.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyvuln.FieldTimeScanned, field.TypeTime, value)
 	}
-	if value, ok := cvuo.mutation.DbURI(); ok {
+	if value, ok := _u.mutation.DbURI(); ok {
 		_spec.SetField(certifyvuln.FieldDbURI, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.DbVersion(); ok {
+	if value, ok := _u.mutation.DbVersion(); ok {
 		_spec.SetField(certifyvuln.FieldDbVersion, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.ScannerURI(); ok {
+	if value, ok := _u.mutation.ScannerURI(); ok {
 		_spec.SetField(certifyvuln.FieldScannerURI, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.ScannerVersion(); ok {
+	if value, ok := _u.mutation.ScannerVersion(); ok {
 		_spec.SetField(certifyvuln.FieldScannerVersion, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifyvuln.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifyvuln.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyvuln.FieldDocumentRef, field.TypeString, value)
 	}
-	if cvuo.mutation.VulnerabilityCleared() {
+	if _u.mutation.VulnerabilityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -634,7 +634,7 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvuo.mutation.VulnerabilityIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -650,7 +650,7 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cvuo.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -663,7 +663,7 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvuo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -679,10 +679,10 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &CertifyVuln{config: cvuo.config}
+	_node = &CertifyVuln{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cvuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifyvuln.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -690,6 +690,6 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 		}
 		return nil, err
 	}
-	cvuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

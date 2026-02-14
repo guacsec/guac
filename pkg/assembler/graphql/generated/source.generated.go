@@ -35,7 +35,9 @@ func (ec *executionContext) _Source_id(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Source_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _Source_type(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Source_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -93,7 +97,9 @@ func (ec *executionContext) _Source_namespaces(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Source_namespaces,
-		func(ctx context.Context) (any, error) { return obj.Namespaces, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Namespaces, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -130,7 +136,9 @@ func (ec *executionContext) _SourceConnection_totalCount(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -159,7 +167,9 @@ func (ec *executionContext) _SourceConnection_pageInfo(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -196,7 +206,9 @@ func (ec *executionContext) _SourceConnection_edges(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -231,7 +243,9 @@ func (ec *executionContext) _SourceEdge_cursor(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -260,7 +274,9 @@ func (ec *executionContext) _SourceEdge_node(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -297,7 +313,9 @@ func (ec *executionContext) _SourceIDs_sourceTypeID(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceIDs_sourceTypeID,
-		func(ctx context.Context) (any, error) { return obj.SourceTypeID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SourceTypeID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -326,7 +344,9 @@ func (ec *executionContext) _SourceIDs_sourceNamespaceID(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceIDs_sourceNamespaceID,
-		func(ctx context.Context) (any, error) { return obj.SourceNamespaceID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SourceNamespaceID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -355,7 +375,9 @@ func (ec *executionContext) _SourceIDs_sourceNameID(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceIDs_sourceNameID,
-		func(ctx context.Context) (any, error) { return obj.SourceNameID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SourceNameID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -384,7 +406,9 @@ func (ec *executionContext) _SourceName_id(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceName_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -413,7 +437,9 @@ func (ec *executionContext) _SourceName_name(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceName_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -442,7 +468,9 @@ func (ec *executionContext) _SourceName_tag(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceName_tag,
-		func(ctx context.Context) (any, error) { return obj.Tag, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Tag, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -471,7 +499,9 @@ func (ec *executionContext) _SourceName_commit(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceName_commit,
-		func(ctx context.Context) (any, error) { return obj.Commit, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Commit, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -500,7 +530,9 @@ func (ec *executionContext) _SourceNamespace_id(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceNamespace_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -529,7 +561,9 @@ func (ec *executionContext) _SourceNamespace_namespace(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceNamespace_namespace,
-		func(ctx context.Context) (any, error) { return obj.Namespace, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Namespace, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -558,7 +592,9 @@ func (ec *executionContext) _SourceNamespace_names(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SourceNamespace_names,
-		func(ctx context.Context) (any, error) { return obj.Names, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Names, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1139,7 +1175,7 @@ func (ec *executionContext) marshalNSource2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 func (ec *executionContext) marshalNSource2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSource(ctx context.Context, sel ast.SelectionSet, v *model.Source) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1193,7 +1229,7 @@ func (ec *executionContext) marshalNSourceEdge2ᚕᚖgithubᚗcomᚋguacsecᚋgu
 func (ec *executionContext) marshalNSourceEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceEdge(ctx context.Context, sel ast.SelectionSet, v *model.SourceEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1251,7 +1287,7 @@ func (ec *executionContext) marshalNSourceIDs2ᚕᚖgithubᚗcomᚋguacsecᚋgua
 func (ec *executionContext) marshalNSourceIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDs(ctx context.Context, sel ast.SelectionSet, v *model.SourceIDs) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1305,7 +1341,7 @@ func (ec *executionContext) marshalNSourceName2ᚕᚖgithubᚗcomᚋguacsecᚋgu
 func (ec *executionContext) marshalNSourceName2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceName(ctx context.Context, sel ast.SelectionSet, v *model.SourceName) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1359,7 +1395,7 @@ func (ec *executionContext) marshalNSourceNamespace2ᚕᚖgithubᚗcomᚋguacsec
 func (ec *executionContext) marshalNSourceNamespace2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceNamespace(ctx context.Context, sel ast.SelectionSet, v *model.SourceNamespace) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

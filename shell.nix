@@ -7,7 +7,7 @@ mkShell {
     docker-compose
     jq  
     gcc
-    go_1_21
+    go_1_25
     golangci-lint
     gopls
     gotests

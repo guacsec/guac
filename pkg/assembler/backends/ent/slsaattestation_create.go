@@ -28,124 +28,124 @@ type SLSAAttestationCreate struct {
 }
 
 // SetBuildType sets the "build_type" field.
-func (sac *SLSAAttestationCreate) SetBuildType(s string) *SLSAAttestationCreate {
-	sac.mutation.SetBuildType(s)
-	return sac
+func (_c *SLSAAttestationCreate) SetBuildType(v string) *SLSAAttestationCreate {
+	_c.mutation.SetBuildType(v)
+	return _c
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (sac *SLSAAttestationCreate) SetBuiltByID(u uuid.UUID) *SLSAAttestationCreate {
-	sac.mutation.SetBuiltByID(u)
-	return sac
+func (_c *SLSAAttestationCreate) SetBuiltByID(v uuid.UUID) *SLSAAttestationCreate {
+	_c.mutation.SetBuiltByID(v)
+	return _c
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (sac *SLSAAttestationCreate) SetSubjectID(u uuid.UUID) *SLSAAttestationCreate {
-	sac.mutation.SetSubjectID(u)
-	return sac
+func (_c *SLSAAttestationCreate) SetSubjectID(v uuid.UUID) *SLSAAttestationCreate {
+	_c.mutation.SetSubjectID(v)
+	return _c
 }
 
 // SetSlsaPredicate sets the "slsa_predicate" field.
-func (sac *SLSAAttestationCreate) SetSlsaPredicate(mp []*model.SLSAPredicate) *SLSAAttestationCreate {
-	sac.mutation.SetSlsaPredicate(mp)
-	return sac
+func (_c *SLSAAttestationCreate) SetSlsaPredicate(v []*model.SLSAPredicate) *SLSAAttestationCreate {
+	_c.mutation.SetSlsaPredicate(v)
+	return _c
 }
 
 // SetSlsaVersion sets the "slsa_version" field.
-func (sac *SLSAAttestationCreate) SetSlsaVersion(s string) *SLSAAttestationCreate {
-	sac.mutation.SetSlsaVersion(s)
-	return sac
+func (_c *SLSAAttestationCreate) SetSlsaVersion(v string) *SLSAAttestationCreate {
+	_c.mutation.SetSlsaVersion(v)
+	return _c
 }
 
 // SetStartedOn sets the "started_on" field.
-func (sac *SLSAAttestationCreate) SetStartedOn(t time.Time) *SLSAAttestationCreate {
-	sac.mutation.SetStartedOn(t)
-	return sac
+func (_c *SLSAAttestationCreate) SetStartedOn(v time.Time) *SLSAAttestationCreate {
+	_c.mutation.SetStartedOn(v)
+	return _c
 }
 
 // SetFinishedOn sets the "finished_on" field.
-func (sac *SLSAAttestationCreate) SetFinishedOn(t time.Time) *SLSAAttestationCreate {
-	sac.mutation.SetFinishedOn(t)
-	return sac
+func (_c *SLSAAttestationCreate) SetFinishedOn(v time.Time) *SLSAAttestationCreate {
+	_c.mutation.SetFinishedOn(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (sac *SLSAAttestationCreate) SetOrigin(s string) *SLSAAttestationCreate {
-	sac.mutation.SetOrigin(s)
-	return sac
+func (_c *SLSAAttestationCreate) SetOrigin(v string) *SLSAAttestationCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (sac *SLSAAttestationCreate) SetCollector(s string) *SLSAAttestationCreate {
-	sac.mutation.SetCollector(s)
-	return sac
+func (_c *SLSAAttestationCreate) SetCollector(v string) *SLSAAttestationCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (sac *SLSAAttestationCreate) SetDocumentRef(s string) *SLSAAttestationCreate {
-	sac.mutation.SetDocumentRef(s)
-	return sac
+func (_c *SLSAAttestationCreate) SetDocumentRef(v string) *SLSAAttestationCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetBuiltFromHash sets the "built_from_hash" field.
-func (sac *SLSAAttestationCreate) SetBuiltFromHash(s string) *SLSAAttestationCreate {
-	sac.mutation.SetBuiltFromHash(s)
-	return sac
+func (_c *SLSAAttestationCreate) SetBuiltFromHash(v string) *SLSAAttestationCreate {
+	_c.mutation.SetBuiltFromHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (sac *SLSAAttestationCreate) SetID(u uuid.UUID) *SLSAAttestationCreate {
-	sac.mutation.SetID(u)
-	return sac
+func (_c *SLSAAttestationCreate) SetID(v uuid.UUID) *SLSAAttestationCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (sac *SLSAAttestationCreate) SetNillableID(u *uuid.UUID) *SLSAAttestationCreate {
-	if u != nil {
-		sac.SetID(*u)
+func (_c *SLSAAttestationCreate) SetNillableID(v *uuid.UUID) *SLSAAttestationCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return sac
+	return _c
 }
 
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
-func (sac *SLSAAttestationCreate) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationCreate {
-	sac.mutation.AddBuiltFromIDs(ids...)
-	return sac
+func (_c *SLSAAttestationCreate) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationCreate {
+	_c.mutation.AddBuiltFromIDs(ids...)
+	return _c
 }
 
 // AddBuiltFrom adds the "built_from" edges to the Artifact entity.
-func (sac *SLSAAttestationCreate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationCreate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_c *SLSAAttestationCreate) AddBuiltFrom(v ...*Artifact) *SLSAAttestationCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sac.AddBuiltFromIDs(ids...)
+	return _c.AddBuiltFromIDs(ids...)
 }
 
 // SetBuiltBy sets the "built_by" edge to the Builder entity.
-func (sac *SLSAAttestationCreate) SetBuiltBy(b *Builder) *SLSAAttestationCreate {
-	return sac.SetBuiltByID(b.ID)
+func (_c *SLSAAttestationCreate) SetBuiltBy(v *Builder) *SLSAAttestationCreate {
+	return _c.SetBuiltByID(v.ID)
 }
 
 // SetSubject sets the "subject" edge to the Artifact entity.
-func (sac *SLSAAttestationCreate) SetSubject(a *Artifact) *SLSAAttestationCreate {
-	return sac.SetSubjectID(a.ID)
+func (_c *SLSAAttestationCreate) SetSubject(v *Artifact) *SLSAAttestationCreate {
+	return _c.SetSubjectID(v.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
-func (sac *SLSAAttestationCreate) Mutation() *SLSAAttestationMutation {
-	return sac.mutation
+func (_c *SLSAAttestationCreate) Mutation() *SLSAAttestationMutation {
+	return _c.mutation
 }
 
 // Save creates the SLSAAttestation in the database.
-func (sac *SLSAAttestationCreate) Save(ctx context.Context) (*SLSAAttestation, error) {
-	sac.defaults()
-	return withHooks(ctx, sac.sqlSave, sac.mutation, sac.hooks)
+func (_c *SLSAAttestationCreate) Save(ctx context.Context) (*SLSAAttestation, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (sac *SLSAAttestationCreate) SaveX(ctx context.Context) *SLSAAttestation {
-	v, err := sac.Save(ctx)
+func (_c *SLSAAttestationCreate) SaveX(ctx context.Context) *SLSAAttestation {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -153,73 +153,73 @@ func (sac *SLSAAttestationCreate) SaveX(ctx context.Context) *SLSAAttestation {
 }
 
 // Exec executes the query.
-func (sac *SLSAAttestationCreate) Exec(ctx context.Context) error {
-	_, err := sac.Save(ctx)
+func (_c *SLSAAttestationCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sac *SLSAAttestationCreate) ExecX(ctx context.Context) {
-	if err := sac.Exec(ctx); err != nil {
+func (_c *SLSAAttestationCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (sac *SLSAAttestationCreate) defaults() {
-	if _, ok := sac.mutation.ID(); !ok {
+func (_c *SLSAAttestationCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := slsaattestation.DefaultID()
-		sac.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sac *SLSAAttestationCreate) check() error {
-	if _, ok := sac.mutation.BuildType(); !ok {
+func (_c *SLSAAttestationCreate) check() error {
+	if _, ok := _c.mutation.BuildType(); !ok {
 		return &ValidationError{Name: "build_type", err: errors.New(`ent: missing required field "SLSAAttestation.build_type"`)}
 	}
-	if _, ok := sac.mutation.BuiltByID(); !ok {
+	if _, ok := _c.mutation.BuiltByID(); !ok {
 		return &ValidationError{Name: "built_by_id", err: errors.New(`ent: missing required field "SLSAAttestation.built_by_id"`)}
 	}
-	if _, ok := sac.mutation.SubjectID(); !ok {
+	if _, ok := _c.mutation.SubjectID(); !ok {
 		return &ValidationError{Name: "subject_id", err: errors.New(`ent: missing required field "SLSAAttestation.subject_id"`)}
 	}
-	if _, ok := sac.mutation.SlsaVersion(); !ok {
+	if _, ok := _c.mutation.SlsaVersion(); !ok {
 		return &ValidationError{Name: "slsa_version", err: errors.New(`ent: missing required field "SLSAAttestation.slsa_version"`)}
 	}
-	if _, ok := sac.mutation.StartedOn(); !ok {
+	if _, ok := _c.mutation.StartedOn(); !ok {
 		return &ValidationError{Name: "started_on", err: errors.New(`ent: missing required field "SLSAAttestation.started_on"`)}
 	}
-	if _, ok := sac.mutation.FinishedOn(); !ok {
+	if _, ok := _c.mutation.FinishedOn(); !ok {
 		return &ValidationError{Name: "finished_on", err: errors.New(`ent: missing required field "SLSAAttestation.finished_on"`)}
 	}
-	if _, ok := sac.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "SLSAAttestation.origin"`)}
 	}
-	if _, ok := sac.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "SLSAAttestation.collector"`)}
 	}
-	if _, ok := sac.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "SLSAAttestation.document_ref"`)}
 	}
-	if _, ok := sac.mutation.BuiltFromHash(); !ok {
+	if _, ok := _c.mutation.BuiltFromHash(); !ok {
 		return &ValidationError{Name: "built_from_hash", err: errors.New(`ent: missing required field "SLSAAttestation.built_from_hash"`)}
 	}
-	if len(sac.mutation.BuiltByIDs()) == 0 {
+	if len(_c.mutation.BuiltByIDs()) == 0 {
 		return &ValidationError{Name: "built_by", err: errors.New(`ent: missing required edge "SLSAAttestation.built_by"`)}
 	}
-	if len(sac.mutation.SubjectIDs()) == 0 {
+	if len(_c.mutation.SubjectIDs()) == 0 {
 		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required edge "SLSAAttestation.subject"`)}
 	}
 	return nil
 }
 
-func (sac *SLSAAttestationCreate) sqlSave(ctx context.Context) (*SLSAAttestation, error) {
-	if err := sac.check(); err != nil {
+func (_c *SLSAAttestationCreate) sqlSave(ctx context.Context) (*SLSAAttestation, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := sac.createSpec()
-	if err := sqlgraph.CreateNode(ctx, sac.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -232,58 +232,58 @@ func (sac *SLSAAttestationCreate) sqlSave(ctx context.Context) (*SLSAAttestation
 			return nil, err
 		}
 	}
-	sac.mutation.id = &_node.ID
-	sac.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.CreateSpec) {
+func (_c *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.CreateSpec) {
 	var (
-		_node = &SLSAAttestation{config: sac.config}
+		_node = &SLSAAttestation{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(slsaattestation.Table, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = sac.conflict
-	if id, ok := sac.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := sac.mutation.BuildType(); ok {
+	if value, ok := _c.mutation.BuildType(); ok {
 		_spec.SetField(slsaattestation.FieldBuildType, field.TypeString, value)
 		_node.BuildType = value
 	}
-	if value, ok := sac.mutation.SlsaPredicate(); ok {
+	if value, ok := _c.mutation.SlsaPredicate(); ok {
 		_spec.SetField(slsaattestation.FieldSlsaPredicate, field.TypeJSON, value)
 		_node.SlsaPredicate = value
 	}
-	if value, ok := sac.mutation.SlsaVersion(); ok {
+	if value, ok := _c.mutation.SlsaVersion(); ok {
 		_spec.SetField(slsaattestation.FieldSlsaVersion, field.TypeString, value)
 		_node.SlsaVersion = value
 	}
-	if value, ok := sac.mutation.StartedOn(); ok {
+	if value, ok := _c.mutation.StartedOn(); ok {
 		_spec.SetField(slsaattestation.FieldStartedOn, field.TypeTime, value)
 		_node.StartedOn = value
 	}
-	if value, ok := sac.mutation.FinishedOn(); ok {
+	if value, ok := _c.mutation.FinishedOn(); ok {
 		_spec.SetField(slsaattestation.FieldFinishedOn, field.TypeTime, value)
 		_node.FinishedOn = value
 	}
-	if value, ok := sac.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(slsaattestation.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := sac.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := sac.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(slsaattestation.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := sac.mutation.BuiltFromHash(); ok {
+	if value, ok := _c.mutation.BuiltFromHash(); ok {
 		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
 		_node.BuiltFromHash = value
 	}
-	if nodes := sac.mutation.BuiltFromIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -299,7 +299,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := sac.mutation.BuiltByIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -316,7 +316,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 		_node.BuiltByID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := sac.mutation.SubjectIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -352,10 +352,10 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 //			SetBuildType(v+v).
 //		}).
 //		Exec(ctx)
-func (sac *SLSAAttestationCreate) OnConflict(opts ...sql.ConflictOption) *SLSAAttestationUpsertOne {
-	sac.conflict = opts
+func (_c *SLSAAttestationCreate) OnConflict(opts ...sql.ConflictOption) *SLSAAttestationUpsertOne {
+	_c.conflict = opts
 	return &SLSAAttestationUpsertOne{
-		create: sac,
+		create: _c,
 	}
 }
 
@@ -365,10 +365,10 @@ func (sac *SLSAAttestationCreate) OnConflict(opts ...sql.ConflictOption) *SLSAAt
 //	client.SLSAAttestation.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (sac *SLSAAttestationCreate) OnConflictColumns(columns ...string) *SLSAAttestationUpsertOne {
-	sac.conflict = append(sac.conflict, sql.ConflictColumns(columns...))
+func (_c *SLSAAttestationCreate) OnConflictColumns(columns ...string) *SLSAAttestationUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &SLSAAttestationUpsertOne{
-		create: sac,
+		create: _c,
 	}
 }
 
@@ -779,16 +779,16 @@ type SLSAAttestationCreateBulk struct {
 }
 
 // Save creates the SLSAAttestation entities in the database.
-func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttestation, error) {
-	if sacb.err != nil {
-		return nil, sacb.err
+func (_c *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttestation, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(sacb.builders))
-	nodes := make([]*SLSAAttestation, len(sacb.builders))
-	mutators := make([]Mutator, len(sacb.builders))
-	for i := range sacb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*SLSAAttestation, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := sacb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SLSAAttestationMutation)
@@ -802,12 +802,12 @@ func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttesta
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, sacb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = sacb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, sacb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -827,7 +827,7 @@ func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttesta
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, sacb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -835,8 +835,8 @@ func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttesta
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sacb *SLSAAttestationCreateBulk) SaveX(ctx context.Context) []*SLSAAttestation {
-	v, err := sacb.Save(ctx)
+func (_c *SLSAAttestationCreateBulk) SaveX(ctx context.Context) []*SLSAAttestation {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -844,14 +844,14 @@ func (sacb *SLSAAttestationCreateBulk) SaveX(ctx context.Context) []*SLSAAttesta
 }
 
 // Exec executes the query.
-func (sacb *SLSAAttestationCreateBulk) Exec(ctx context.Context) error {
-	_, err := sacb.Save(ctx)
+func (_c *SLSAAttestationCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sacb *SLSAAttestationCreateBulk) ExecX(ctx context.Context) {
-	if err := sacb.Exec(ctx); err != nil {
+func (_c *SLSAAttestationCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -871,10 +871,10 @@ func (sacb *SLSAAttestationCreateBulk) ExecX(ctx context.Context) {
 //			SetBuildType(v+v).
 //		}).
 //		Exec(ctx)
-func (sacb *SLSAAttestationCreateBulk) OnConflict(opts ...sql.ConflictOption) *SLSAAttestationUpsertBulk {
-	sacb.conflict = opts
+func (_c *SLSAAttestationCreateBulk) OnConflict(opts ...sql.ConflictOption) *SLSAAttestationUpsertBulk {
+	_c.conflict = opts
 	return &SLSAAttestationUpsertBulk{
-		create: sacb,
+		create: _c,
 	}
 }
 
@@ -884,10 +884,10 @@ func (sacb *SLSAAttestationCreateBulk) OnConflict(opts ...sql.ConflictOption) *S
 //	client.SLSAAttestation.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (sacb *SLSAAttestationCreateBulk) OnConflictColumns(columns ...string) *SLSAAttestationUpsertBulk {
-	sacb.conflict = append(sacb.conflict, sql.ConflictColumns(columns...))
+func (_c *SLSAAttestationCreateBulk) OnConflictColumns(columns ...string) *SLSAAttestationUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &SLSAAttestationUpsertBulk{
-		create: sacb,
+		create: _c,
 	}
 }
 

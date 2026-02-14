@@ -65,7 +65,7 @@ func (*Builder) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Builder fields.
-func (b *Builder) assignValues(columns []string, values []any) error {
+func (_m *Builder) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -75,16 +75,16 @@ func (b *Builder) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				b.ID = *value
+				_m.ID = *value
 			}
 		case builder.FieldURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uri", values[i])
 			} else if value.Valid {
-				b.URI = value.String
+				_m.URI = value.String
 			}
 		default:
-			b.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -92,65 +92,65 @@ func (b *Builder) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Builder.
 // This includes values selected through modifiers, order, etc.
-func (b *Builder) Value(name string) (ent.Value, error) {
-	return b.selectValues.Get(name)
+func (_m *Builder) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySlsaAttestations queries the "slsa_attestations" edge of the Builder entity.
-func (b *Builder) QuerySlsaAttestations() *SLSAAttestationQuery {
-	return NewBuilderClient(b.config).QuerySlsaAttestations(b)
+func (_m *Builder) QuerySlsaAttestations() *SLSAAttestationQuery {
+	return NewBuilderClient(_m.config).QuerySlsaAttestations(_m)
 }
 
 // Update returns a builder for updating this Builder.
 // Note that you need to call Builder.Unwrap() before calling this method if this Builder
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (b *Builder) Update() *BuilderUpdateOne {
-	return NewBuilderClient(b.config).UpdateOne(b)
+func (_m *Builder) Update() *BuilderUpdateOne {
+	return NewBuilderClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Builder entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (b *Builder) Unwrap() *Builder {
-	_tx, ok := b.config.driver.(*txDriver)
+func (_m *Builder) Unwrap() *Builder {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Builder is not a transactional entity")
 	}
-	b.config.driver = _tx.drv
-	return b
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (b *Builder) String() string {
+func (_m *Builder) String() string {
 	var builder strings.Builder
 	builder.WriteString("Builder(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("uri=")
-	builder.WriteString(b.URI)
+	builder.WriteString(_m.URI)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedSlsaAttestations returns the SlsaAttestations named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (b *Builder) NamedSlsaAttestations(name string) ([]*SLSAAttestation, error) {
-	if b.Edges.namedSlsaAttestations == nil {
+func (_m *Builder) NamedSlsaAttestations(name string) ([]*SLSAAttestation, error) {
+	if _m.Edges.namedSlsaAttestations == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := b.Edges.namedSlsaAttestations[name]
+	nodes, ok := _m.Edges.namedSlsaAttestations[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (b *Builder) appendNamedSlsaAttestations(name string, edges ...*SLSAAttestation) {
-	if b.Edges.namedSlsaAttestations == nil {
-		b.Edges.namedSlsaAttestations = make(map[string][]*SLSAAttestation)
+func (_m *Builder) appendNamedSlsaAttestations(name string, edges ...*SLSAAttestation) {
+	if _m.Edges.namedSlsaAttestations == nil {
+		_m.Edges.namedSlsaAttestations = make(map[string][]*SLSAAttestation)
 	}
 	if len(edges) == 0 {
-		b.Edges.namedSlsaAttestations[name] = []*SLSAAttestation{}
+		_m.Edges.namedSlsaAttestations[name] = []*SLSAAttestation{}
 	} else {
-		b.Edges.namedSlsaAttestations[name] = append(b.Edges.namedSlsaAttestations[name], edges...)
+		_m.Edges.namedSlsaAttestations[name] = append(_m.Edges.namedSlsaAttestations[name], edges...)
 	}
 }
 

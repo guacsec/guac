@@ -20,56 +20,56 @@ type BillOfMaterialsDelete struct {
 }
 
 // Where appends a list predicates to the BillOfMaterialsDelete builder.
-func (bomd *BillOfMaterialsDelete) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsDelete {
-	bomd.mutation.Where(ps...)
-	return bomd
+func (_d *BillOfMaterialsDelete) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (bomd *BillOfMaterialsDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, bomd.sqlExec, bomd.mutation, bomd.hooks)
+func (_d *BillOfMaterialsDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bomd *BillOfMaterialsDelete) ExecX(ctx context.Context) int {
-	n, err := bomd.Exec(ctx)
+func (_d *BillOfMaterialsDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (bomd *BillOfMaterialsDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *BillOfMaterialsDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(billofmaterials.Table, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
-	if ps := bomd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, bomd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	bomd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // BillOfMaterialsDeleteOne is the builder for deleting a single BillOfMaterials entity.
 type BillOfMaterialsDeleteOne struct {
-	bomd *BillOfMaterialsDelete
+	_d *BillOfMaterialsDelete
 }
 
 // Where appends a list predicates to the BillOfMaterialsDelete builder.
-func (bomdo *BillOfMaterialsDeleteOne) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsDeleteOne {
-	bomdo.bomd.mutation.Where(ps...)
-	return bomdo
+func (_d *BillOfMaterialsDeleteOne) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (bomdo *BillOfMaterialsDeleteOne) Exec(ctx context.Context) error {
-	n, err := bomdo.bomd.Exec(ctx)
+func (_d *BillOfMaterialsDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (bomdo *BillOfMaterialsDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bomdo *BillOfMaterialsDeleteOne) ExecX(ctx context.Context) {
-	if err := bomdo.Exec(ctx); err != nil {
+func (_d *BillOfMaterialsDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

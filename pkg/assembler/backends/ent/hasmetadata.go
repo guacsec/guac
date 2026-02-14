@@ -133,7 +133,7 @@ func (*HasMetadata) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the HasMetadata fields.
-func (hm *HasMetadata) assignValues(columns []string, values []any) error {
+func (_m *HasMetadata) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -143,80 +143,80 @@ func (hm *HasMetadata) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				hm.ID = *value
+				_m.ID = *value
 			}
 		case hasmetadata.FieldSourceID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				hm.SourceID = new(uuid.UUID)
-				*hm.SourceID = *value.S.(*uuid.UUID)
+				_m.SourceID = new(uuid.UUID)
+				*_m.SourceID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldPackageVersionID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				hm.PackageVersionID = new(uuid.UUID)
-				*hm.PackageVersionID = *value.S.(*uuid.UUID)
+				_m.PackageVersionID = new(uuid.UUID)
+				*_m.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldPackageNameID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				hm.PackageNameID = new(uuid.UUID)
-				*hm.PackageNameID = *value.S.(*uuid.UUID)
+				_m.PackageNameID = new(uuid.UUID)
+				*_m.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				hm.ArtifactID = new(uuid.UUID)
-				*hm.ArtifactID = *value.S.(*uuid.UUID)
+				_m.ArtifactID = new(uuid.UUID)
+				*_m.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldTimestamp:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field timestamp", values[i])
 			} else if value.Valid {
-				hm.Timestamp = value.Time
+				_m.Timestamp = value.Time
 			}
 		case hasmetadata.FieldKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field key", values[i])
 			} else if value.Valid {
-				hm.Key = value.String
+				_m.Key = value.String
 			}
 		case hasmetadata.FieldValue:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field value", values[i])
 			} else if value.Valid {
-				hm.Value = value.String
+				_m.Value = value.String
 			}
 		case hasmetadata.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				hm.Justification = value.String
+				_m.Justification = value.String
 			}
 		case hasmetadata.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				hm.Origin = value.String
+				_m.Origin = value.String
 			}
 		case hasmetadata.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				hm.Collector = value.String
+				_m.Collector = value.String
 			}
 		case hasmetadata.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				hm.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			hm.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -224,93 +224,93 @@ func (hm *HasMetadata) assignValues(columns []string, values []any) error {
 
 // GetValue returns the ent.Value that was dynamically selected and assigned to the HasMetadata.
 // This includes values selected through modifiers, order, etc.
-func (hm *HasMetadata) GetValue(name string) (ent.Value, error) {
-	return hm.selectValues.Get(name)
+func (_m *HasMetadata) GetValue(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySource queries the "source" edge of the HasMetadata entity.
-func (hm *HasMetadata) QuerySource() *SourceNameQuery {
-	return NewHasMetadataClient(hm.config).QuerySource(hm)
+func (_m *HasMetadata) QuerySource() *SourceNameQuery {
+	return NewHasMetadataClient(_m.config).QuerySource(_m)
 }
 
 // QueryPackageVersion queries the "package_version" edge of the HasMetadata entity.
-func (hm *HasMetadata) QueryPackageVersion() *PackageVersionQuery {
-	return NewHasMetadataClient(hm.config).QueryPackageVersion(hm)
+func (_m *HasMetadata) QueryPackageVersion() *PackageVersionQuery {
+	return NewHasMetadataClient(_m.config).QueryPackageVersion(_m)
 }
 
 // QueryAllVersions queries the "all_versions" edge of the HasMetadata entity.
-func (hm *HasMetadata) QueryAllVersions() *PackageNameQuery {
-	return NewHasMetadataClient(hm.config).QueryAllVersions(hm)
+func (_m *HasMetadata) QueryAllVersions() *PackageNameQuery {
+	return NewHasMetadataClient(_m.config).QueryAllVersions(_m)
 }
 
 // QueryArtifact queries the "artifact" edge of the HasMetadata entity.
-func (hm *HasMetadata) QueryArtifact() *ArtifactQuery {
-	return NewHasMetadataClient(hm.config).QueryArtifact(hm)
+func (_m *HasMetadata) QueryArtifact() *ArtifactQuery {
+	return NewHasMetadataClient(_m.config).QueryArtifact(_m)
 }
 
 // Update returns a builder for updating this HasMetadata.
 // Note that you need to call HasMetadata.Unwrap() before calling this method if this HasMetadata
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (hm *HasMetadata) Update() *HasMetadataUpdateOne {
-	return NewHasMetadataClient(hm.config).UpdateOne(hm)
+func (_m *HasMetadata) Update() *HasMetadataUpdateOne {
+	return NewHasMetadataClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the HasMetadata entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (hm *HasMetadata) Unwrap() *HasMetadata {
-	_tx, ok := hm.config.driver.(*txDriver)
+func (_m *HasMetadata) Unwrap() *HasMetadata {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: HasMetadata is not a transactional entity")
 	}
-	hm.config.driver = _tx.drv
-	return hm
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (hm *HasMetadata) String() string {
+func (_m *HasMetadata) String() string {
 	var builder strings.Builder
 	builder.WriteString("HasMetadata(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", hm.ID))
-	if v := hm.SourceID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := hm.PackageVersionID; v != nil {
+	if v := _m.PackageVersionID; v != nil {
 		builder.WriteString("package_version_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := hm.PackageNameID; v != nil {
+	if v := _m.PackageNameID; v != nil {
 		builder.WriteString("package_name_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := hm.ArtifactID; v != nil {
+	if v := _m.ArtifactID; v != nil {
 		builder.WriteString("artifact_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("timestamp=")
-	builder.WriteString(hm.Timestamp.Format(time.ANSIC))
+	builder.WriteString(_m.Timestamp.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("key=")
-	builder.WriteString(hm.Key)
+	builder.WriteString(_m.Key)
 	builder.WriteString(", ")
 	builder.WriteString("value=")
-	builder.WriteString(hm.Value)
+	builder.WriteString(_m.Value)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(hm.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(hm.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(hm.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(hm.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

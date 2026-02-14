@@ -20,56 +20,56 @@ type PackageVersionDelete struct {
 }
 
 // Where appends a list predicates to the PackageVersionDelete builder.
-func (pvd *PackageVersionDelete) Where(ps ...predicate.PackageVersion) *PackageVersionDelete {
-	pvd.mutation.Where(ps...)
-	return pvd
+func (_d *PackageVersionDelete) Where(ps ...predicate.PackageVersion) *PackageVersionDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pvd *PackageVersionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pvd.sqlExec, pvd.mutation, pvd.hooks)
+func (_d *PackageVersionDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pvd *PackageVersionDelete) ExecX(ctx context.Context) int {
-	n, err := pvd.Exec(ctx)
+func (_d *PackageVersionDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pvd *PackageVersionDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *PackageVersionDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(packageversion.Table, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
-	if ps := pvd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pvd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pvd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // PackageVersionDeleteOne is the builder for deleting a single PackageVersion entity.
 type PackageVersionDeleteOne struct {
-	pvd *PackageVersionDelete
+	_d *PackageVersionDelete
 }
 
 // Where appends a list predicates to the PackageVersionDelete builder.
-func (pvdo *PackageVersionDeleteOne) Where(ps ...predicate.PackageVersion) *PackageVersionDeleteOne {
-	pvdo.pvd.mutation.Where(ps...)
-	return pvdo
+func (_d *PackageVersionDeleteOne) Where(ps ...predicate.PackageVersion) *PackageVersionDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (pvdo *PackageVersionDeleteOne) Exec(ctx context.Context) error {
-	n, err := pvdo.pvd.Exec(ctx)
+func (_d *PackageVersionDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (pvdo *PackageVersionDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pvdo *PackageVersionDeleteOne) ExecX(ctx context.Context) {
-	if err := pvdo.Exec(ctx); err != nil {
+func (_d *PackageVersionDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

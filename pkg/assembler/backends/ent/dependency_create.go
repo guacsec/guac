@@ -26,100 +26,100 @@ type DependencyCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (dc *DependencyCreate) SetPackageID(u uuid.UUID) *DependencyCreate {
-	dc.mutation.SetPackageID(u)
-	return dc
+func (_c *DependencyCreate) SetPackageID(v uuid.UUID) *DependencyCreate {
+	_c.mutation.SetPackageID(v)
+	return _c
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (dc *DependencyCreate) SetDependentPackageVersionID(u uuid.UUID) *DependencyCreate {
-	dc.mutation.SetDependentPackageVersionID(u)
-	return dc
+func (_c *DependencyCreate) SetDependentPackageVersionID(v uuid.UUID) *DependencyCreate {
+	_c.mutation.SetDependentPackageVersionID(v)
+	return _c
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (dc *DependencyCreate) SetDependencyType(dt dependency.DependencyType) *DependencyCreate {
-	dc.mutation.SetDependencyType(dt)
-	return dc
+func (_c *DependencyCreate) SetDependencyType(v dependency.DependencyType) *DependencyCreate {
+	_c.mutation.SetDependencyType(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (dc *DependencyCreate) SetJustification(s string) *DependencyCreate {
-	dc.mutation.SetJustification(s)
-	return dc
+func (_c *DependencyCreate) SetJustification(v string) *DependencyCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (dc *DependencyCreate) SetOrigin(s string) *DependencyCreate {
-	dc.mutation.SetOrigin(s)
-	return dc
+func (_c *DependencyCreate) SetOrigin(v string) *DependencyCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (dc *DependencyCreate) SetCollector(s string) *DependencyCreate {
-	dc.mutation.SetCollector(s)
-	return dc
+func (_c *DependencyCreate) SetCollector(v string) *DependencyCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (dc *DependencyCreate) SetDocumentRef(s string) *DependencyCreate {
-	dc.mutation.SetDocumentRef(s)
-	return dc
+func (_c *DependencyCreate) SetDocumentRef(v string) *DependencyCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (dc *DependencyCreate) SetID(u uuid.UUID) *DependencyCreate {
-	dc.mutation.SetID(u)
-	return dc
+func (_c *DependencyCreate) SetID(v uuid.UUID) *DependencyCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (dc *DependencyCreate) SetNillableID(u *uuid.UUID) *DependencyCreate {
-	if u != nil {
-		dc.SetID(*u)
+func (_c *DependencyCreate) SetNillableID(v *uuid.UUID) *DependencyCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (dc *DependencyCreate) SetPackage(p *PackageVersion) *DependencyCreate {
-	return dc.SetPackageID(p.ID)
+func (_c *DependencyCreate) SetPackage(v *PackageVersion) *DependencyCreate {
+	return _c.SetPackageID(v.ID)
 }
 
 // SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
-func (dc *DependencyCreate) SetDependentPackageVersion(p *PackageVersion) *DependencyCreate {
-	return dc.SetDependentPackageVersionID(p.ID)
+func (_c *DependencyCreate) SetDependentPackageVersion(v *PackageVersion) *DependencyCreate {
+	return _c.SetDependentPackageVersionID(v.ID)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (dc *DependencyCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyCreate {
-	dc.mutation.AddIncludedInSbomIDs(ids...)
-	return dc
+func (_c *DependencyCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyCreate {
+	_c.mutation.AddIncludedInSbomIDs(ids...)
+	return _c
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (dc *DependencyCreate) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *DependencyCreate) AddIncludedInSboms(v ...*BillOfMaterials) *DependencyCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return dc.AddIncludedInSbomIDs(ids...)
+	return _c.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the DependencyMutation object of the builder.
-func (dc *DependencyCreate) Mutation() *DependencyMutation {
-	return dc.mutation
+func (_c *DependencyCreate) Mutation() *DependencyMutation {
+	return _c.mutation
 }
 
 // Save creates the Dependency in the database.
-func (dc *DependencyCreate) Save(ctx context.Context) (*Dependency, error) {
-	dc.defaults()
-	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
+func (_c *DependencyCreate) Save(ctx context.Context) (*Dependency, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (dc *DependencyCreate) SaveX(ctx context.Context) *Dependency {
-	v, err := dc.Save(ctx)
+func (_c *DependencyCreate) SaveX(ctx context.Context) *Dependency {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -127,69 +127,69 @@ func (dc *DependencyCreate) SaveX(ctx context.Context) *Dependency {
 }
 
 // Exec executes the query.
-func (dc *DependencyCreate) Exec(ctx context.Context) error {
-	_, err := dc.Save(ctx)
+func (_c *DependencyCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dc *DependencyCreate) ExecX(ctx context.Context) {
-	if err := dc.Exec(ctx); err != nil {
+func (_c *DependencyCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (dc *DependencyCreate) defaults() {
-	if _, ok := dc.mutation.ID(); !ok {
+func (_c *DependencyCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := dependency.DefaultID()
-		dc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (dc *DependencyCreate) check() error {
-	if _, ok := dc.mutation.PackageID(); !ok {
+func (_c *DependencyCreate) check() error {
+	if _, ok := _c.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package_id", err: errors.New(`ent: missing required field "Dependency.package_id"`)}
 	}
-	if _, ok := dc.mutation.DependentPackageVersionID(); !ok {
+	if _, ok := _c.mutation.DependentPackageVersionID(); !ok {
 		return &ValidationError{Name: "dependent_package_version_id", err: errors.New(`ent: missing required field "Dependency.dependent_package_version_id"`)}
 	}
-	if _, ok := dc.mutation.DependencyType(); !ok {
+	if _, ok := _c.mutation.DependencyType(); !ok {
 		return &ValidationError{Name: "dependency_type", err: errors.New(`ent: missing required field "Dependency.dependency_type"`)}
 	}
-	if v, ok := dc.mutation.DependencyType(); ok {
+	if v, ok := _c.mutation.DependencyType(); ok {
 		if err := dependency.DependencyTypeValidator(v); err != nil {
 			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
 		}
 	}
-	if _, ok := dc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "Dependency.justification"`)}
 	}
-	if _, ok := dc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "Dependency.origin"`)}
 	}
-	if _, ok := dc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Dependency.collector"`)}
 	}
-	if _, ok := dc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Dependency.document_ref"`)}
 	}
-	if len(dc.mutation.PackageIDs()) == 0 {
+	if len(_c.mutation.PackageIDs()) == 0 {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "Dependency.package"`)}
 	}
-	if len(dc.mutation.DependentPackageVersionIDs()) == 0 {
+	if len(_c.mutation.DependentPackageVersionIDs()) == 0 {
 		return &ValidationError{Name: "dependent_package_version", err: errors.New(`ent: missing required edge "Dependency.dependent_package_version"`)}
 	}
 	return nil
 }
 
-func (dc *DependencyCreate) sqlSave(ctx context.Context) (*Dependency, error) {
-	if err := dc.check(); err != nil {
+func (_c *DependencyCreate) sqlSave(ctx context.Context) (*Dependency, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := dc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, dc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -202,42 +202,42 @@ func (dc *DependencyCreate) sqlSave(ctx context.Context) (*Dependency, error) {
 			return nil, err
 		}
 	}
-	dc.mutation.id = &_node.ID
-	dc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
+func (_c *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Dependency{config: dc.config}
+		_node = &Dependency{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(dependency.Table, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = dc.conflict
-	if id, ok := dc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := dc.mutation.DependencyType(); ok {
+	if value, ok := _c.mutation.DependencyType(); ok {
 		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 		_node.DependencyType = value
 	}
-	if value, ok := dc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(dependency.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := dc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(dependency.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := dc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(dependency.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := dc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(dependency.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := dc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -254,7 +254,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 		_node.PackageID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := dc.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -271,7 +271,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 		_node.DependentPackageVersionID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := dc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -306,10 +306,10 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (dc *DependencyCreate) OnConflict(opts ...sql.ConflictOption) *DependencyUpsertOne {
-	dc.conflict = opts
+func (_c *DependencyCreate) OnConflict(opts ...sql.ConflictOption) *DependencyUpsertOne {
+	_c.conflict = opts
 	return &DependencyUpsertOne{
-		create: dc,
+		create: _c,
 	}
 }
 
@@ -319,10 +319,10 @@ func (dc *DependencyCreate) OnConflict(opts ...sql.ConflictOption) *DependencyUp
 //	client.Dependency.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dc *DependencyCreate) OnConflictColumns(columns ...string) *DependencyUpsertOne {
-	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
+func (_c *DependencyCreate) OnConflictColumns(columns ...string) *DependencyUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &DependencyUpsertOne{
-		create: dc,
+		create: _c,
 	}
 }
 
@@ -616,16 +616,16 @@ type DependencyCreateBulk struct {
 }
 
 // Save creates the Dependency entities in the database.
-func (dcb *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error) {
-	if dcb.err != nil {
-		return nil, dcb.err
+func (_c *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(dcb.builders))
-	nodes := make([]*Dependency, len(dcb.builders))
-	mutators := make([]Mutator, len(dcb.builders))
-	for i := range dcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Dependency, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := dcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DependencyMutation)
@@ -639,12 +639,12 @@ func (dcb *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, dcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = dcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, dcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -664,7 +664,7 @@ func (dcb *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, dcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -672,8 +672,8 @@ func (dcb *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (dcb *DependencyCreateBulk) SaveX(ctx context.Context) []*Dependency {
-	v, err := dcb.Save(ctx)
+func (_c *DependencyCreateBulk) SaveX(ctx context.Context) []*Dependency {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -681,14 +681,14 @@ func (dcb *DependencyCreateBulk) SaveX(ctx context.Context) []*Dependency {
 }
 
 // Exec executes the query.
-func (dcb *DependencyCreateBulk) Exec(ctx context.Context) error {
-	_, err := dcb.Save(ctx)
+func (_c *DependencyCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dcb *DependencyCreateBulk) ExecX(ctx context.Context) {
-	if err := dcb.Exec(ctx); err != nil {
+func (_c *DependencyCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -708,10 +708,10 @@ func (dcb *DependencyCreateBulk) ExecX(ctx context.Context) {
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (dcb *DependencyCreateBulk) OnConflict(opts ...sql.ConflictOption) *DependencyUpsertBulk {
-	dcb.conflict = opts
+func (_c *DependencyCreateBulk) OnConflict(opts ...sql.ConflictOption) *DependencyUpsertBulk {
+	_c.conflict = opts
 	return &DependencyUpsertBulk{
-		create: dcb,
+		create: _c,
 	}
 }
 
@@ -721,10 +721,10 @@ func (dcb *DependencyCreateBulk) OnConflict(opts ...sql.ConflictOption) *Depende
 //	client.Dependency.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dcb *DependencyCreateBulk) OnConflictColumns(columns ...string) *DependencyUpsertBulk {
-	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
+func (_c *DependencyCreateBulk) OnConflictColumns(columns ...string) *DependencyUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &DependencyUpsertBulk{
-		create: dcb,
+		create: _c,
 	}
 }
 

@@ -36,7 +36,9 @@ func (ec *executionContext) _CertifyScorecard_id(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecard_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -65,7 +67,9 @@ func (ec *executionContext) _CertifyScorecard_source(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecard_source,
-		func(ctx context.Context) (any, error) { return obj.Source, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Source, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -102,7 +106,9 @@ func (ec *executionContext) _CertifyScorecard_scorecard(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecard_scorecard,
-		func(ctx context.Context) (any, error) { return obj.Scorecard, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Scorecard, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -149,7 +155,9 @@ func (ec *executionContext) _CertifyScorecardConnection_totalCount(ctx context.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecardConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -178,7 +186,9 @@ func (ec *executionContext) _CertifyScorecardConnection_pageInfo(ctx context.Con
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecardConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -215,7 +225,9 @@ func (ec *executionContext) _CertifyScorecardConnection_edges(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecardConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -250,7 +262,9 @@ func (ec *executionContext) _CertifyScorecardEdge_cursor(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecardEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -279,7 +293,9 @@ func (ec *executionContext) _CertifyScorecardEdge_node(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CertifyScorecardEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -316,7 +332,9 @@ func (ec *executionContext) _Scorecard_checks(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_checks,
-		func(ctx context.Context) (any, error) { return obj.Checks, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Checks, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -351,7 +369,9 @@ func (ec *executionContext) _Scorecard_aggregateScore(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_aggregateScore,
-		func(ctx context.Context) (any, error) { return obj.AggregateScore, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.AggregateScore, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -380,7 +400,9 @@ func (ec *executionContext) _Scorecard_timeScanned(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_timeScanned,
-		func(ctx context.Context) (any, error) { return obj.TimeScanned, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TimeScanned, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -409,7 +431,9 @@ func (ec *executionContext) _Scorecard_scorecardVersion(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_scorecardVersion,
-		func(ctx context.Context) (any, error) { return obj.ScorecardVersion, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ScorecardVersion, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -438,7 +462,9 @@ func (ec *executionContext) _Scorecard_scorecardCommit(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_scorecardCommit,
-		func(ctx context.Context) (any, error) { return obj.ScorecardCommit, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ScorecardCommit, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -467,7 +493,9 @@ func (ec *executionContext) _Scorecard_origin(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -496,7 +524,9 @@ func (ec *executionContext) _Scorecard_collector(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_collector,
-		func(ctx context.Context) (any, error) { return obj.Collector, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Collector, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -525,7 +555,9 @@ func (ec *executionContext) _Scorecard_documentRef(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Scorecard_documentRef,
-		func(ctx context.Context) (any, error) { return obj.DocumentRef, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentRef, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -554,7 +586,9 @@ func (ec *executionContext) _ScorecardCheck_check(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScorecardCheck_check,
-		func(ctx context.Context) (any, error) { return obj.Check, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Check, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -583,7 +617,9 @@ func (ec *executionContext) _ScorecardCheck_score(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ScorecardCheck_score,
-		func(ctx context.Context) (any, error) { return obj.Score, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Score, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -1167,7 +1203,7 @@ func (ec *executionContext) marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacse
 func (ec *executionContext) marshalNCertifyScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx context.Context, sel ast.SelectionSet, v *model.CertifyScorecard) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1221,7 +1257,7 @@ func (ec *executionContext) marshalNCertifyScorecardEdge2ᚕᚖgithubᚗcomᚋgu
 func (ec *executionContext) marshalNCertifyScorecardEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyScorecardEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1236,7 +1272,7 @@ func (ec *executionContext) unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacse
 func (ec *executionContext) marshalNScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecard(ctx context.Context, sel ast.SelectionSet, v *model.Scorecard) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1290,7 +1326,7 @@ func (ec *executionContext) marshalNScorecardCheck2ᚕᚖgithubᚗcomᚋguacsec�
 func (ec *executionContext) marshalNScorecardCheck2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheck(ctx context.Context, sel ast.SelectionSet, v *model.ScorecardCheck) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -1357,7 +1393,7 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	res := graphql.MarshalTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res

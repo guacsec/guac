@@ -104,7 +104,7 @@ func (*Dependency) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Dependency fields.
-func (d *Dependency) assignValues(columns []string, values []any) error {
+func (_m *Dependency) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -114,52 +114,52 @@ func (d *Dependency) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				d.ID = *value
+				_m.ID = *value
 			}
 		case dependency.FieldPackageID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value != nil {
-				d.PackageID = *value
+				_m.PackageID = *value
 			}
 		case dependency.FieldDependentPackageVersionID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field dependent_package_version_id", values[i])
 			} else if value != nil {
-				d.DependentPackageVersionID = *value
+				_m.DependentPackageVersionID = *value
 			}
 		case dependency.FieldDependencyType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field dependency_type", values[i])
 			} else if value.Valid {
-				d.DependencyType = dependency.DependencyType(value.String)
+				_m.DependencyType = dependency.DependencyType(value.String)
 			}
 		case dependency.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				d.Justification = value.String
+				_m.Justification = value.String
 			}
 		case dependency.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				d.Origin = value.String
+				_m.Origin = value.String
 			}
 		case dependency.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				d.Collector = value.String
+				_m.Collector = value.String
 			}
 		case dependency.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				d.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			d.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -167,93 +167,93 @@ func (d *Dependency) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Dependency.
 // This includes values selected through modifiers, order, etc.
-func (d *Dependency) Value(name string) (ent.Value, error) {
-	return d.selectValues.Get(name)
+func (_m *Dependency) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPackage queries the "package" edge of the Dependency entity.
-func (d *Dependency) QueryPackage() *PackageVersionQuery {
-	return NewDependencyClient(d.config).QueryPackage(d)
+func (_m *Dependency) QueryPackage() *PackageVersionQuery {
+	return NewDependencyClient(_m.config).QueryPackage(_m)
 }
 
 // QueryDependentPackageVersion queries the "dependent_package_version" edge of the Dependency entity.
-func (d *Dependency) QueryDependentPackageVersion() *PackageVersionQuery {
-	return NewDependencyClient(d.config).QueryDependentPackageVersion(d)
+func (_m *Dependency) QueryDependentPackageVersion() *PackageVersionQuery {
+	return NewDependencyClient(_m.config).QueryDependentPackageVersion(_m)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the Dependency entity.
-func (d *Dependency) QueryIncludedInSboms() *BillOfMaterialsQuery {
-	return NewDependencyClient(d.config).QueryIncludedInSboms(d)
+func (_m *Dependency) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewDependencyClient(_m.config).QueryIncludedInSboms(_m)
 }
 
 // Update returns a builder for updating this Dependency.
 // Note that you need to call Dependency.Unwrap() before calling this method if this Dependency
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (d *Dependency) Update() *DependencyUpdateOne {
-	return NewDependencyClient(d.config).UpdateOne(d)
+func (_m *Dependency) Update() *DependencyUpdateOne {
+	return NewDependencyClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Dependency entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (d *Dependency) Unwrap() *Dependency {
-	_tx, ok := d.config.driver.(*txDriver)
+func (_m *Dependency) Unwrap() *Dependency {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Dependency is not a transactional entity")
 	}
-	d.config.driver = _tx.drv
-	return d
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (d *Dependency) String() string {
+func (_m *Dependency) String() string {
 	var builder strings.Builder
 	builder.WriteString("Dependency(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("package_id=")
-	builder.WriteString(fmt.Sprintf("%v", d.PackageID))
+	builder.WriteString(fmt.Sprintf("%v", _m.PackageID))
 	builder.WriteString(", ")
 	builder.WriteString("dependent_package_version_id=")
-	builder.WriteString(fmt.Sprintf("%v", d.DependentPackageVersionID))
+	builder.WriteString(fmt.Sprintf("%v", _m.DependentPackageVersionID))
 	builder.WriteString(", ")
 	builder.WriteString("dependency_type=")
-	builder.WriteString(fmt.Sprintf("%v", d.DependencyType))
+	builder.WriteString(fmt.Sprintf("%v", _m.DependencyType))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(d.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(d.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(d.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(d.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (d *Dependency) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
-	if d.Edges.namedIncludedInSboms == nil {
+func (_m *Dependency) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if _m.Edges.namedIncludedInSboms == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := d.Edges.namedIncludedInSboms[name]
+	nodes, ok := _m.Edges.namedIncludedInSboms[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (d *Dependency) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
-	if d.Edges.namedIncludedInSboms == nil {
-		d.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+func (_m *Dependency) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if _m.Edges.namedIncludedInSboms == nil {
+		_m.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
 	}
 	if len(edges) == 0 {
-		d.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+		_m.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
 	} else {
-		d.Edges.namedIncludedInSboms[name] = append(d.Edges.namedIncludedInSboms[name], edges...)
+		_m.Edges.namedIncludedInSboms[name] = append(_m.Edges.namedIncludedInSboms[name], edges...)
 	}
 }
 

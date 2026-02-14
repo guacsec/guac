@@ -34,44 +34,44 @@ type VulnEqualQuery struct {
 }
 
 // Where adds a new predicate for the VulnEqualQuery builder.
-func (veq *VulnEqualQuery) Where(ps ...predicate.VulnEqual) *VulnEqualQuery {
-	veq.predicates = append(veq.predicates, ps...)
-	return veq
+func (_q *VulnEqualQuery) Where(ps ...predicate.VulnEqual) *VulnEqualQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (veq *VulnEqualQuery) Limit(limit int) *VulnEqualQuery {
-	veq.ctx.Limit = &limit
-	return veq
+func (_q *VulnEqualQuery) Limit(limit int) *VulnEqualQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (veq *VulnEqualQuery) Offset(offset int) *VulnEqualQuery {
-	veq.ctx.Offset = &offset
-	return veq
+func (_q *VulnEqualQuery) Offset(offset int) *VulnEqualQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (veq *VulnEqualQuery) Unique(unique bool) *VulnEqualQuery {
-	veq.ctx.Unique = &unique
-	return veq
+func (_q *VulnEqualQuery) Unique(unique bool) *VulnEqualQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (veq *VulnEqualQuery) Order(o ...vulnequal.OrderOption) *VulnEqualQuery {
-	veq.order = append(veq.order, o...)
-	return veq
+func (_q *VulnEqualQuery) Order(o ...vulnequal.OrderOption) *VulnEqualQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryVulnerabilityA chains the current query on the "vulnerability_a" edge.
-func (veq *VulnEqualQuery) QueryVulnerabilityA() *VulnerabilityIDQuery {
-	query := (&VulnerabilityIDClient{config: veq.config}).Query()
+func (_q *VulnEqualQuery) QueryVulnerabilityA() *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := veq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := veq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -80,20 +80,20 @@ func (veq *VulnEqualQuery) QueryVulnerabilityA() *VulnerabilityIDQuery {
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityATable, vulnequal.VulnerabilityAColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(veq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryVulnerabilityB chains the current query on the "vulnerability_b" edge.
-func (veq *VulnEqualQuery) QueryVulnerabilityB() *VulnerabilityIDQuery {
-	query := (&VulnerabilityIDClient{config: veq.config}).Query()
+func (_q *VulnEqualQuery) QueryVulnerabilityB() *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := veq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := veq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (veq *VulnEqualQuery) QueryVulnerabilityB() *VulnerabilityIDQuery {
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityBTable, vulnequal.VulnerabilityBColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(veq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -110,8 +110,8 @@ func (veq *VulnEqualQuery) QueryVulnerabilityB() *VulnerabilityIDQuery {
 
 // First returns the first VulnEqual entity from the query.
 // Returns a *NotFoundError when no VulnEqual was found.
-func (veq *VulnEqualQuery) First(ctx context.Context) (*VulnEqual, error) {
-	nodes, err := veq.Limit(1).All(setContextOp(ctx, veq.ctx, ent.OpQueryFirst))
+func (_q *VulnEqualQuery) First(ctx context.Context) (*VulnEqual, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (veq *VulnEqualQuery) First(ctx context.Context) (*VulnEqual, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (veq *VulnEqualQuery) FirstX(ctx context.Context) *VulnEqual {
-	node, err := veq.First(ctx)
+func (_q *VulnEqualQuery) FirstX(ctx context.Context) *VulnEqual {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -132,9 +132,9 @@ func (veq *VulnEqualQuery) FirstX(ctx context.Context) *VulnEqual {
 
 // FirstID returns the first VulnEqual ID from the query.
 // Returns a *NotFoundError when no VulnEqual ID was found.
-func (veq *VulnEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *VulnEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = veq.Limit(1).IDs(setContextOp(ctx, veq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -145,8 +145,8 @@ func (veq *VulnEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (veq *VulnEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := veq.FirstID(ctx)
+func (_q *VulnEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -156,8 +156,8 @@ func (veq *VulnEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single VulnEqual entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one VulnEqual entity is found.
 // Returns a *NotFoundError when no VulnEqual entities are found.
-func (veq *VulnEqualQuery) Only(ctx context.Context) (*VulnEqual, error) {
-	nodes, err := veq.Limit(2).All(setContextOp(ctx, veq.ctx, ent.OpQueryOnly))
+func (_q *VulnEqualQuery) Only(ctx context.Context) (*VulnEqual, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +172,8 @@ func (veq *VulnEqualQuery) Only(ctx context.Context) (*VulnEqual, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (veq *VulnEqualQuery) OnlyX(ctx context.Context) *VulnEqual {
-	node, err := veq.Only(ctx)
+func (_q *VulnEqualQuery) OnlyX(ctx context.Context) *VulnEqual {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,9 +183,9 @@ func (veq *VulnEqualQuery) OnlyX(ctx context.Context) *VulnEqual {
 // OnlyID is like Only, but returns the only VulnEqual ID in the query.
 // Returns a *NotSingularError when more than one VulnEqual ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (veq *VulnEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *VulnEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = veq.Limit(2).IDs(setContextOp(ctx, veq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -200,8 +200,8 @@ func (veq *VulnEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (veq *VulnEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := veq.OnlyID(ctx)
+func (_q *VulnEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -209,18 +209,18 @@ func (veq *VulnEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of VulnEquals.
-func (veq *VulnEqualQuery) All(ctx context.Context) ([]*VulnEqual, error) {
-	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryAll)
-	if err := veq.prepareQuery(ctx); err != nil {
+func (_q *VulnEqualQuery) All(ctx context.Context) ([]*VulnEqual, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*VulnEqual, *VulnEqualQuery]()
-	return withInterceptors[[]*VulnEqual](ctx, veq, qr, veq.inters)
+	return withInterceptors[[]*VulnEqual](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (veq *VulnEqualQuery) AllX(ctx context.Context) []*VulnEqual {
-	nodes, err := veq.All(ctx)
+func (_q *VulnEqualQuery) AllX(ctx context.Context) []*VulnEqual {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -228,20 +228,20 @@ func (veq *VulnEqualQuery) AllX(ctx context.Context) []*VulnEqual {
 }
 
 // IDs executes the query and returns a list of VulnEqual IDs.
-func (veq *VulnEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if veq.ctx.Unique == nil && veq.path != nil {
-		veq.Unique(true)
+func (_q *VulnEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryIDs)
-	if err = veq.Select(vulnequal.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(vulnequal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (veq *VulnEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := veq.IDs(ctx)
+func (_q *VulnEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -249,17 +249,17 @@ func (veq *VulnEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (veq *VulnEqualQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryCount)
-	if err := veq.prepareQuery(ctx); err != nil {
+func (_q *VulnEqualQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, veq, querierCount[*VulnEqualQuery](), veq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*VulnEqualQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (veq *VulnEqualQuery) CountX(ctx context.Context) int {
-	count, err := veq.Count(ctx)
+func (_q *VulnEqualQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -267,9 +267,9 @@ func (veq *VulnEqualQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (veq *VulnEqualQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, veq.ctx, ent.OpQueryExist)
-	switch _, err := veq.FirstID(ctx); {
+func (_q *VulnEqualQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -280,8 +280,8 @@ func (veq *VulnEqualQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (veq *VulnEqualQuery) ExistX(ctx context.Context) bool {
-	exist, err := veq.Exist(ctx)
+func (_q *VulnEqualQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -290,44 +290,44 @@ func (veq *VulnEqualQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the VulnEqualQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (veq *VulnEqualQuery) Clone() *VulnEqualQuery {
-	if veq == nil {
+func (_q *VulnEqualQuery) Clone() *VulnEqualQuery {
+	if _q == nil {
 		return nil
 	}
 	return &VulnEqualQuery{
-		config:             veq.config,
-		ctx:                veq.ctx.Clone(),
-		order:              append([]vulnequal.OrderOption{}, veq.order...),
-		inters:             append([]Interceptor{}, veq.inters...),
-		predicates:         append([]predicate.VulnEqual{}, veq.predicates...),
-		withVulnerabilityA: veq.withVulnerabilityA.Clone(),
-		withVulnerabilityB: veq.withVulnerabilityB.Clone(),
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]vulnequal.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.VulnEqual{}, _q.predicates...),
+		withVulnerabilityA: _q.withVulnerabilityA.Clone(),
+		withVulnerabilityB: _q.withVulnerabilityB.Clone(),
 		// clone intermediate query.
-		sql:  veq.sql.Clone(),
-		path: veq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithVulnerabilityA tells the query-builder to eager-load the nodes that are connected to
 // the "vulnerability_a" edge. The optional arguments are used to configure the query builder of the edge.
-func (veq *VulnEqualQuery) WithVulnerabilityA(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
-	query := (&VulnerabilityIDClient{config: veq.config}).Query()
+func (_q *VulnEqualQuery) WithVulnerabilityA(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	veq.withVulnerabilityA = query
-	return veq
+	_q.withVulnerabilityA = query
+	return _q
 }
 
 // WithVulnerabilityB tells the query-builder to eager-load the nodes that are connected to
 // the "vulnerability_b" edge. The optional arguments are used to configure the query builder of the edge.
-func (veq *VulnEqualQuery) WithVulnerabilityB(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
-	query := (&VulnerabilityIDClient{config: veq.config}).Query()
+func (_q *VulnEqualQuery) WithVulnerabilityB(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	veq.withVulnerabilityB = query
-	return veq
+	_q.withVulnerabilityB = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -344,10 +344,10 @@ func (veq *VulnEqualQuery) WithVulnerabilityB(opts ...func(*VulnerabilityIDQuery
 //		GroupBy(vulnequal.FieldVulnID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (veq *VulnEqualQuery) GroupBy(field string, fields ...string) *VulnEqualGroupBy {
-	veq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &VulnEqualGroupBy{build: veq}
-	grbuild.flds = &veq.ctx.Fields
+func (_q *VulnEqualQuery) GroupBy(field string, fields ...string) *VulnEqualGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &VulnEqualGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = vulnequal.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -365,96 +365,96 @@ func (veq *VulnEqualQuery) GroupBy(field string, fields ...string) *VulnEqualGro
 //	client.VulnEqual.Query().
 //		Select(vulnequal.FieldVulnID).
 //		Scan(ctx, &v)
-func (veq *VulnEqualQuery) Select(fields ...string) *VulnEqualSelect {
-	veq.ctx.Fields = append(veq.ctx.Fields, fields...)
-	sbuild := &VulnEqualSelect{VulnEqualQuery: veq}
+func (_q *VulnEqualQuery) Select(fields ...string) *VulnEqualSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &VulnEqualSelect{VulnEqualQuery: _q}
 	sbuild.label = vulnequal.Label
-	sbuild.flds, sbuild.scan = &veq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a VulnEqualSelect configured with the given aggregations.
-func (veq *VulnEqualQuery) Aggregate(fns ...AggregateFunc) *VulnEqualSelect {
-	return veq.Select().Aggregate(fns...)
+func (_q *VulnEqualQuery) Aggregate(fns ...AggregateFunc) *VulnEqualSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (veq *VulnEqualQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range veq.inters {
+func (_q *VulnEqualQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, veq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range veq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !vulnequal.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if veq.path != nil {
-		prev, err := veq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		veq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (veq *VulnEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*VulnEqual, error) {
+func (_q *VulnEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*VulnEqual, error) {
 	var (
 		nodes       = []*VulnEqual{}
-		_spec       = veq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			veq.withVulnerabilityA != nil,
-			veq.withVulnerabilityB != nil,
+			_q.withVulnerabilityA != nil,
+			_q.withVulnerabilityB != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*VulnEqual).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &VulnEqual{config: veq.config}
+		node := &VulnEqual{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(veq.modifiers) > 0 {
-		_spec.Modifiers = veq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, veq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := veq.withVulnerabilityA; query != nil {
-		if err := veq.loadVulnerabilityA(ctx, query, nodes, nil,
+	if query := _q.withVulnerabilityA; query != nil {
+		if err := _q.loadVulnerabilityA(ctx, query, nodes, nil,
 			func(n *VulnEqual, e *VulnerabilityID) { n.Edges.VulnerabilityA = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := veq.withVulnerabilityB; query != nil {
-		if err := veq.loadVulnerabilityB(ctx, query, nodes, nil,
+	if query := _q.withVulnerabilityB; query != nil {
+		if err := _q.loadVulnerabilityB(ctx, query, nodes, nil,
 			func(n *VulnEqual, e *VulnerabilityID) { n.Edges.VulnerabilityB = e }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range veq.loadTotal {
-		if err := veq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (veq *VulnEqualQuery) loadVulnerabilityA(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
+func (_q *VulnEqualQuery) loadVulnerabilityA(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*VulnEqual)
 	for i := range nodes {
@@ -483,7 +483,7 @@ func (veq *VulnEqualQuery) loadVulnerabilityA(ctx context.Context, query *Vulner
 	}
 	return nil
 }
-func (veq *VulnEqualQuery) loadVulnerabilityB(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
+func (_q *VulnEqualQuery) loadVulnerabilityB(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*VulnEqual)
 	for i := range nodes {
@@ -513,27 +513,27 @@ func (veq *VulnEqualQuery) loadVulnerabilityB(ctx context.Context, query *Vulner
 	return nil
 }
 
-func (veq *VulnEqualQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := veq.querySpec()
-	if len(veq.modifiers) > 0 {
-		_spec.Modifiers = veq.modifiers
+func (_q *VulnEqualQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = veq.ctx.Fields
-	if len(veq.ctx.Fields) > 0 {
-		_spec.Unique = veq.ctx.Unique != nil && *veq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, veq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (veq *VulnEqualQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *VulnEqualQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
-	_spec.From = veq.sql
-	if unique := veq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if veq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := veq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, vulnequal.FieldID)
 		for i := range fields {
@@ -541,27 +541,27 @@ func (veq *VulnEqualQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if veq.withVulnerabilityA != nil {
+		if _q.withVulnerabilityA != nil {
 			_spec.Node.AddColumnOnce(vulnequal.FieldVulnID)
 		}
-		if veq.withVulnerabilityB != nil {
+		if _q.withVulnerabilityB != nil {
 			_spec.Node.AddColumnOnce(vulnequal.FieldEqualVulnID)
 		}
 	}
-	if ps := veq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := veq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := veq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := veq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -571,33 +571,33 @@ func (veq *VulnEqualQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (veq *VulnEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(veq.driver.Dialect())
+func (_q *VulnEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(vulnequal.Table)
-	columns := veq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = vulnequal.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if veq.sql != nil {
-		selector = veq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if veq.ctx.Unique != nil && *veq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range veq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range veq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := veq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := veq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -610,41 +610,41 @@ type VulnEqualGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (vegb *VulnEqualGroupBy) Aggregate(fns ...AggregateFunc) *VulnEqualGroupBy {
-	vegb.fns = append(vegb.fns, fns...)
-	return vegb
+func (_g *VulnEqualGroupBy) Aggregate(fns ...AggregateFunc) *VulnEqualGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (vegb *VulnEqualGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, vegb.build.ctx, ent.OpQueryGroupBy)
-	if err := vegb.build.prepareQuery(ctx); err != nil {
+func (_g *VulnEqualGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*VulnEqualQuery, *VulnEqualGroupBy](ctx, vegb.build, vegb, vegb.build.inters, v)
+	return scanWithInterceptors[*VulnEqualQuery, *VulnEqualGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (vegb *VulnEqualGroupBy) sqlScan(ctx context.Context, root *VulnEqualQuery, v any) error {
+func (_g *VulnEqualGroupBy) sqlScan(ctx context.Context, root *VulnEqualQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(vegb.fns))
-	for _, fn := range vegb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*vegb.flds)+len(vegb.fns))
-		for _, f := range *vegb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*vegb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := vegb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -658,27 +658,27 @@ type VulnEqualSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ves *VulnEqualSelect) Aggregate(fns ...AggregateFunc) *VulnEqualSelect {
-	ves.fns = append(ves.fns, fns...)
-	return ves
+func (_s *VulnEqualSelect) Aggregate(fns ...AggregateFunc) *VulnEqualSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ves *VulnEqualSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ves.ctx, ent.OpQuerySelect)
-	if err := ves.prepareQuery(ctx); err != nil {
+func (_s *VulnEqualSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*VulnEqualQuery, *VulnEqualSelect](ctx, ves.VulnEqualQuery, ves, ves.inters, v)
+	return scanWithInterceptors[*VulnEqualQuery, *VulnEqualSelect](ctx, _s.VulnEqualQuery, _s, _s.inters, v)
 }
 
-func (ves *VulnEqualSelect) sqlScan(ctx context.Context, root *VulnEqualQuery, v any) error {
+func (_s *VulnEqualSelect) sqlScan(ctx context.Context, root *VulnEqualQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ves.fns))
-	for _, fn := range ves.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ves.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -686,7 +686,7 @@ func (ves *VulnEqualSelect) sqlScan(ctx context.Context, root *VulnEqualQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ves.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

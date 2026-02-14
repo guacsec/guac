@@ -35,7 +35,9 @@ func (ec *executionContext) _FindSoftwareConnection_totalCount(ctx context.Conte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FindSoftwareConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -64,7 +66,9 @@ func (ec *executionContext) _FindSoftwareConnection_pageInfo(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FindSoftwareConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -101,7 +105,9 @@ func (ec *executionContext) _FindSoftwareConnection_edges(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FindSoftwareConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -136,7 +142,9 @@ func (ec *executionContext) _SoftwareEdge_cursor(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SoftwareEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -165,7 +173,9 @@ func (ec *executionContext) _SoftwareEdge_node(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SoftwareEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -354,7 +364,7 @@ func (ec *executionContext) marshalNSoftwareEdge2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNSoftwareEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSoftwareEdge(ctx context.Context, sel ast.SelectionSet, v *model.SoftwareEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

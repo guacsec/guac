@@ -117,7 +117,7 @@ func (*PackageName) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the PackageName fields.
-func (pn *PackageName) assignValues(columns []string, values []any) error {
+func (_m *PackageName) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -127,28 +127,28 @@ func (pn *PackageName) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				pn.ID = *value
+				_m.ID = *value
 			}
 		case packagename.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				pn.Type = value.String
+				_m.Type = value.String
 			}
 		case packagename.FieldNamespace:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field namespace", values[i])
 			} else if value.Valid {
-				pn.Namespace = value.String
+				_m.Namespace = value.String
 			}
 		case packagename.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				pn.Name = value.String
+				_m.Name = value.String
 			}
 		default:
-			pn.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -156,187 +156,187 @@ func (pn *PackageName) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the PackageName.
 // This includes values selected through modifiers, order, etc.
-func (pn *PackageName) Value(name string) (ent.Value, error) {
-	return pn.selectValues.Get(name)
+func (_m *PackageName) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryVersions queries the "versions" edge of the PackageName entity.
-func (pn *PackageName) QueryVersions() *PackageVersionQuery {
-	return NewPackageNameClient(pn.config).QueryVersions(pn)
+func (_m *PackageName) QueryVersions() *PackageVersionQuery {
+	return NewPackageNameClient(_m.config).QueryVersions(_m)
 }
 
 // QueryHasSourceAt queries the "has_source_at" edge of the PackageName entity.
-func (pn *PackageName) QueryHasSourceAt() *HasSourceAtQuery {
-	return NewPackageNameClient(pn.config).QueryHasSourceAt(pn)
+func (_m *PackageName) QueryHasSourceAt() *HasSourceAtQuery {
+	return NewPackageNameClient(_m.config).QueryHasSourceAt(_m)
 }
 
 // QueryCertification queries the "certification" edge of the PackageName entity.
-func (pn *PackageName) QueryCertification() *CertificationQuery {
-	return NewPackageNameClient(pn.config).QueryCertification(pn)
+func (_m *PackageName) QueryCertification() *CertificationQuery {
+	return NewPackageNameClient(_m.config).QueryCertification(_m)
 }
 
 // QueryMetadata queries the "metadata" edge of the PackageName entity.
-func (pn *PackageName) QueryMetadata() *HasMetadataQuery {
-	return NewPackageNameClient(pn.config).QueryMetadata(pn)
+func (_m *PackageName) QueryMetadata() *HasMetadataQuery {
+	return NewPackageNameClient(_m.config).QueryMetadata(_m)
 }
 
 // QueryPoc queries the "poc" edge of the PackageName entity.
-func (pn *PackageName) QueryPoc() *PointOfContactQuery {
-	return NewPackageNameClient(pn.config).QueryPoc(pn)
+func (_m *PackageName) QueryPoc() *PointOfContactQuery {
+	return NewPackageNameClient(_m.config).QueryPoc(_m)
 }
 
 // Update returns a builder for updating this PackageName.
 // Note that you need to call PackageName.Unwrap() before calling this method if this PackageName
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pn *PackageName) Update() *PackageNameUpdateOne {
-	return NewPackageNameClient(pn.config).UpdateOne(pn)
+func (_m *PackageName) Update() *PackageNameUpdateOne {
+	return NewPackageNameClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the PackageName entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pn *PackageName) Unwrap() *PackageName {
-	_tx, ok := pn.config.driver.(*txDriver)
+func (_m *PackageName) Unwrap() *PackageName {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: PackageName is not a transactional entity")
 	}
-	pn.config.driver = _tx.drv
-	return pn
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (pn *PackageName) String() string {
+func (_m *PackageName) String() string {
 	var builder strings.Builder
 	builder.WriteString("PackageName(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pn.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("type=")
-	builder.WriteString(pn.Type)
+	builder.WriteString(_m.Type)
 	builder.WriteString(", ")
 	builder.WriteString("namespace=")
-	builder.WriteString(pn.Namespace)
+	builder.WriteString(_m.Namespace)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(pn.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedVersions returns the Versions named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pn *PackageName) NamedVersions(name string) ([]*PackageVersion, error) {
-	if pn.Edges.namedVersions == nil {
+func (_m *PackageName) NamedVersions(name string) ([]*PackageVersion, error) {
+	if _m.Edges.namedVersions == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pn.Edges.namedVersions[name]
+	nodes, ok := _m.Edges.namedVersions[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pn *PackageName) appendNamedVersions(name string, edges ...*PackageVersion) {
-	if pn.Edges.namedVersions == nil {
-		pn.Edges.namedVersions = make(map[string][]*PackageVersion)
+func (_m *PackageName) appendNamedVersions(name string, edges ...*PackageVersion) {
+	if _m.Edges.namedVersions == nil {
+		_m.Edges.namedVersions = make(map[string][]*PackageVersion)
 	}
 	if len(edges) == 0 {
-		pn.Edges.namedVersions[name] = []*PackageVersion{}
+		_m.Edges.namedVersions[name] = []*PackageVersion{}
 	} else {
-		pn.Edges.namedVersions[name] = append(pn.Edges.namedVersions[name], edges...)
+		_m.Edges.namedVersions[name] = append(_m.Edges.namedVersions[name], edges...)
 	}
 }
 
 // NamedHasSourceAt returns the HasSourceAt named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pn *PackageName) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
-	if pn.Edges.namedHasSourceAt == nil {
+func (_m *PackageName) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
+	if _m.Edges.namedHasSourceAt == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pn.Edges.namedHasSourceAt[name]
+	nodes, ok := _m.Edges.namedHasSourceAt[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pn *PackageName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
-	if pn.Edges.namedHasSourceAt == nil {
-		pn.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
+func (_m *PackageName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
+	if _m.Edges.namedHasSourceAt == nil {
+		_m.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
 	}
 	if len(edges) == 0 {
-		pn.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
+		_m.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
 	} else {
-		pn.Edges.namedHasSourceAt[name] = append(pn.Edges.namedHasSourceAt[name], edges...)
+		_m.Edges.namedHasSourceAt[name] = append(_m.Edges.namedHasSourceAt[name], edges...)
 	}
 }
 
 // NamedCertification returns the Certification named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pn *PackageName) NamedCertification(name string) ([]*Certification, error) {
-	if pn.Edges.namedCertification == nil {
+func (_m *PackageName) NamedCertification(name string) ([]*Certification, error) {
+	if _m.Edges.namedCertification == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pn.Edges.namedCertification[name]
+	nodes, ok := _m.Edges.namedCertification[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pn *PackageName) appendNamedCertification(name string, edges ...*Certification) {
-	if pn.Edges.namedCertification == nil {
-		pn.Edges.namedCertification = make(map[string][]*Certification)
+func (_m *PackageName) appendNamedCertification(name string, edges ...*Certification) {
+	if _m.Edges.namedCertification == nil {
+		_m.Edges.namedCertification = make(map[string][]*Certification)
 	}
 	if len(edges) == 0 {
-		pn.Edges.namedCertification[name] = []*Certification{}
+		_m.Edges.namedCertification[name] = []*Certification{}
 	} else {
-		pn.Edges.namedCertification[name] = append(pn.Edges.namedCertification[name], edges...)
+		_m.Edges.namedCertification[name] = append(_m.Edges.namedCertification[name], edges...)
 	}
 }
 
 // NamedMetadata returns the Metadata named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pn *PackageName) NamedMetadata(name string) ([]*HasMetadata, error) {
-	if pn.Edges.namedMetadata == nil {
+func (_m *PackageName) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if _m.Edges.namedMetadata == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pn.Edges.namedMetadata[name]
+	nodes, ok := _m.Edges.namedMetadata[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pn *PackageName) appendNamedMetadata(name string, edges ...*HasMetadata) {
-	if pn.Edges.namedMetadata == nil {
-		pn.Edges.namedMetadata = make(map[string][]*HasMetadata)
+func (_m *PackageName) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if _m.Edges.namedMetadata == nil {
+		_m.Edges.namedMetadata = make(map[string][]*HasMetadata)
 	}
 	if len(edges) == 0 {
-		pn.Edges.namedMetadata[name] = []*HasMetadata{}
+		_m.Edges.namedMetadata[name] = []*HasMetadata{}
 	} else {
-		pn.Edges.namedMetadata[name] = append(pn.Edges.namedMetadata[name], edges...)
+		_m.Edges.namedMetadata[name] = append(_m.Edges.namedMetadata[name], edges...)
 	}
 }
 
 // NamedPoc returns the Poc named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pn *PackageName) NamedPoc(name string) ([]*PointOfContact, error) {
-	if pn.Edges.namedPoc == nil {
+func (_m *PackageName) NamedPoc(name string) ([]*PointOfContact, error) {
+	if _m.Edges.namedPoc == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pn.Edges.namedPoc[name]
+	nodes, ok := _m.Edges.namedPoc[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pn *PackageName) appendNamedPoc(name string, edges ...*PointOfContact) {
-	if pn.Edges.namedPoc == nil {
-		pn.Edges.namedPoc = make(map[string][]*PointOfContact)
+func (_m *PackageName) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if _m.Edges.namedPoc == nil {
+		_m.Edges.namedPoc = make(map[string][]*PointOfContact)
 	}
 	if len(edges) == 0 {
-		pn.Edges.namedPoc[name] = []*PointOfContact{}
+		_m.Edges.namedPoc[name] = []*PointOfContact{}
 	} else {
-		pn.Edges.namedPoc[name] = append(pn.Edges.namedPoc[name], edges...)
+		_m.Edges.namedPoc[name] = append(_m.Edges.namedPoc[name], edges...)
 	}
 }
 

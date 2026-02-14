@@ -119,7 +119,7 @@ func (*CertifyVex) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CertifyVex fields.
-func (cv *CertifyVex) assignValues(columns []string, values []any) error {
+func (_m *CertifyVex) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -129,78 +129,78 @@ func (cv *CertifyVex) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				cv.ID = *value
+				_m.ID = *value
 			}
 		case certifyvex.FieldPackageID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				cv.PackageID = new(uuid.UUID)
-				*cv.PackageID = *value.S.(*uuid.UUID)
+				_m.PackageID = new(uuid.UUID)
+				*_m.PackageID = *value.S.(*uuid.UUID)
 			}
 		case certifyvex.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				cv.ArtifactID = new(uuid.UUID)
-				*cv.ArtifactID = *value.S.(*uuid.UUID)
+				_m.ArtifactID = new(uuid.UUID)
+				*_m.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case certifyvex.FieldVulnerabilityID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerability_id", values[i])
 			} else if value != nil {
-				cv.VulnerabilityID = *value
+				_m.VulnerabilityID = *value
 			}
 		case certifyvex.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field known_since", values[i])
 			} else if value.Valid {
-				cv.KnownSince = value.Time
+				_m.KnownSince = value.Time
 			}
 		case certifyvex.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				cv.Status = value.String
+				_m.Status = value.String
 			}
 		case certifyvex.FieldStatement:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field statement", values[i])
 			} else if value.Valid {
-				cv.Statement = value.String
+				_m.Statement = value.String
 			}
 		case certifyvex.FieldStatusNotes:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status_notes", values[i])
 			} else if value.Valid {
-				cv.StatusNotes = value.String
+				_m.StatusNotes = value.String
 			}
 		case certifyvex.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				cv.Justification = value.String
+				_m.Justification = value.String
 			}
 		case certifyvex.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				cv.Origin = value.String
+				_m.Origin = value.String
 			}
 		case certifyvex.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				cv.Collector = value.String
+				_m.Collector = value.String
 			}
 		case certifyvex.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				cv.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		default:
-			cv.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -208,84 +208,84 @@ func (cv *CertifyVex) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CertifyVex.
 // This includes values selected through modifiers, order, etc.
-func (cv *CertifyVex) Value(name string) (ent.Value, error) {
-	return cv.selectValues.Get(name)
+func (_m *CertifyVex) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPackage queries the "package" edge of the CertifyVex entity.
-func (cv *CertifyVex) QueryPackage() *PackageVersionQuery {
-	return NewCertifyVexClient(cv.config).QueryPackage(cv)
+func (_m *CertifyVex) QueryPackage() *PackageVersionQuery {
+	return NewCertifyVexClient(_m.config).QueryPackage(_m)
 }
 
 // QueryArtifact queries the "artifact" edge of the CertifyVex entity.
-func (cv *CertifyVex) QueryArtifact() *ArtifactQuery {
-	return NewCertifyVexClient(cv.config).QueryArtifact(cv)
+func (_m *CertifyVex) QueryArtifact() *ArtifactQuery {
+	return NewCertifyVexClient(_m.config).QueryArtifact(_m)
 }
 
 // QueryVulnerability queries the "vulnerability" edge of the CertifyVex entity.
-func (cv *CertifyVex) QueryVulnerability() *VulnerabilityIDQuery {
-	return NewCertifyVexClient(cv.config).QueryVulnerability(cv)
+func (_m *CertifyVex) QueryVulnerability() *VulnerabilityIDQuery {
+	return NewCertifyVexClient(_m.config).QueryVulnerability(_m)
 }
 
 // Update returns a builder for updating this CertifyVex.
 // Note that you need to call CertifyVex.Unwrap() before calling this method if this CertifyVex
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (cv *CertifyVex) Update() *CertifyVexUpdateOne {
-	return NewCertifyVexClient(cv.config).UpdateOne(cv)
+func (_m *CertifyVex) Update() *CertifyVexUpdateOne {
+	return NewCertifyVexClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the CertifyVex entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (cv *CertifyVex) Unwrap() *CertifyVex {
-	_tx, ok := cv.config.driver.(*txDriver)
+func (_m *CertifyVex) Unwrap() *CertifyVex {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: CertifyVex is not a transactional entity")
 	}
-	cv.config.driver = _tx.drv
-	return cv
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (cv *CertifyVex) String() string {
+func (_m *CertifyVex) String() string {
 	var builder strings.Builder
 	builder.WriteString("CertifyVex(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", cv.ID))
-	if v := cv.PackageID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.PackageID; v != nil {
 		builder.WriteString("package_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := cv.ArtifactID; v != nil {
+	if v := _m.ArtifactID; v != nil {
 		builder.WriteString("artifact_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("vulnerability_id=")
-	builder.WriteString(fmt.Sprintf("%v", cv.VulnerabilityID))
+	builder.WriteString(fmt.Sprintf("%v", _m.VulnerabilityID))
 	builder.WriteString(", ")
 	builder.WriteString("known_since=")
-	builder.WriteString(cv.KnownSince.Format(time.ANSIC))
+	builder.WriteString(_m.KnownSince.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(cv.Status)
+	builder.WriteString(_m.Status)
 	builder.WriteString(", ")
 	builder.WriteString("statement=")
-	builder.WriteString(cv.Statement)
+	builder.WriteString(_m.Statement)
 	builder.WriteString(", ")
 	builder.WriteString("status_notes=")
-	builder.WriteString(cv.StatusNotes)
+	builder.WriteString(_m.StatusNotes)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(cv.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(cv.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(cv.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(cv.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }
