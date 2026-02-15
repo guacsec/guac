@@ -53,7 +53,7 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
 		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
@@ -134,7 +134,7 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -182,7 +182,7 @@ func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceS
 
 func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -251,7 +251,7 @@ func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.IDorSo
 
 func (c *neo4jClient) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	values := map[string]any{}
 	values["sourceType"] = source.SourceInput.Type

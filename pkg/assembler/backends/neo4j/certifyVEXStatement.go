@@ -49,7 +49,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// }
 
 	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	// defer session.Close()
+	// defer func() { _ = session.Close() }()
 
 	// aggregateCertifyVEXStatement := []*model.CertifyVEXStatement{}
 

@@ -36,7 +36,7 @@ func (c *neo4jClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mod
 func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	queryAll := true
 	aggregateIsOccurrence := []*model.IsOccurrence{}
@@ -214,7 +214,7 @@ func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.Pack
 func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true

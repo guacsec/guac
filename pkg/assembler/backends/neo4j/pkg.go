@@ -60,7 +60,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -157,7 +157,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -203,7 +203,7 @@ func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) 
 
 func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -269,7 +269,7 @@ func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgS
 
 func (c *neo4jClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -366,7 +366,7 @@ func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgI
 
 func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	values := map[string]any{}
 	values["pkgType"] = pkg.PackageInput.Type

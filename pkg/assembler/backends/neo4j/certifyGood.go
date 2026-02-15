@@ -34,7 +34,7 @@ func (c *neo4jClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model
 
 func (c *neo4jClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	queryAll := true
 	aggregateCertifyGood := []*model.CertifyGood{}

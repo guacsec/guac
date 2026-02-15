@@ -6,6 +6,7 @@ run:
 linters:
   enable:
     - forcetypeassert
+    - errcheck
   exclusions:
     paths:
       - ".*\\.pb\\.go$"
@@ -19,5 +20,15 @@ linters:
         linters:
         - unused # getting many unused false positives in neo4j backend
         - forcetypeassert # this backend does this a lot
+linters-settings:
+  errcheck:
+    exclude-functions:
+      - (*os.File).Close
+      - (io.Closer).Close
+      - (net.Conn).Close
+      - (net/http.Body).Close
+      - (*net/http.Response).Body.Close
+      - (github.com/neo4j/neo4j-go-driver/v4/neo4j.Session).Close
+
 issues:
   max-same-issues: 50

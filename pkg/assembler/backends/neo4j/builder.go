@@ -29,7 +29,7 @@ func (c *neo4jClient) BuildersList(ctx context.Context, builderSpec model.Builde
 
 func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var query string
 	values := map[string]any{}
@@ -72,7 +72,7 @@ func (c *neo4jClient) IngestBuilders(ctx context.Context, builders []*model.IDor
 
 func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.IDorBuilderInput) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	values := map[string]any{}
 	values["uri"] = builder.BuilderInput.URI

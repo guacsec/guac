@@ -39,7 +39,7 @@ func (c *neo4jClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
 	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	// defer session.Close()
+	// defer func() { _ = session.Close() }()
 
 	// // TODO: Fix validation
 	// queryAll := true
@@ -340,7 +340,7 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgIn
 	// }
 
 	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	// defer session.Close()
+	// defer func() { _ = session.Close() }()
 
 	// var sb strings.Builder
 	// var firstMatch bool = true

@@ -26,7 +26,7 @@ import (
 
 func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -71,7 +71,7 @@ func (c *neo4jClient) IngestArtifacts(ctx context.Context, artifacts []*model.ID
 
 func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	values := map[string]any{}
 	values["algorithm"] = strings.ToLower(artifact.ArtifactInput.Algorithm)

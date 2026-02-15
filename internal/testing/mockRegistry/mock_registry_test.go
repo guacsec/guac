@@ -37,7 +37,7 @@ func TestMockRegistry_APIVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get API version: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -61,7 +61,7 @@ func TestMockRegistry_Catalog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get catalog: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -118,7 +118,7 @@ func TestMockRegistry_Tags(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to get tags: %v", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedCode {
 				t.Errorf("Expected status %d, got %d", tt.expectedCode, resp.StatusCode)
@@ -238,7 +238,7 @@ func TestMockRegistry_Manifests(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to do request: %v", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedCode {
 				t.Errorf("Expected status %d, got %d", tt.expectedCode, resp.StatusCode)
@@ -320,7 +320,7 @@ func TestMockRegistry_Blobs(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to do request: %v", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedCode {
 				t.Errorf("Expected status %d, got %d", tt.expectedCode, resp.StatusCode)
@@ -358,7 +358,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to start upload: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusAccepted {
 			body, _ := io.ReadAll(resp.Body)
@@ -379,7 +379,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get upload state: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		if resp.StatusCode != http.StatusNoContent {
 			t.Errorf("Expected status 204, got %d", resp.StatusCode)
 		}
@@ -408,7 +408,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to upload chunk %d: %v", i, err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != http.StatusAccepted {
 				body, _ := io.ReadAll(resp.Body)
@@ -430,7 +430,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to complete upload: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusCreated {
 			body, _ := io.ReadAll(resp.Body)
@@ -442,7 +442,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get blob: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -475,7 +475,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to do request: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusCreated {
 			body, _ := io.ReadAll(resp.Body)
@@ -487,7 +487,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get blob: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -529,7 +529,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to do request: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusCreated {
 			t.Fatalf("Failed to upload blob to source repo: %d", resp.StatusCode)
@@ -546,7 +546,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to do request: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusCreated {
 			t.Errorf("Expected status 201, got %d", resp.StatusCode)
@@ -557,7 +557,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get blob: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -579,7 +579,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to do request: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusBadRequest {
 			t.Errorf("Expected status 400, got %d", resp.StatusCode)
@@ -592,7 +592,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to start upload: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		location := resp.Header.Get("Location")
 		if location == "" {
@@ -612,7 +612,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to upload chunk: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusRequestedRangeNotSatisfiable {
 			t.Errorf("Expected status 416, got %d", resp.StatusCode)
@@ -848,7 +848,7 @@ func TestMockRegistry_Referrers(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to send request: %v", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedCode {
 				t.Errorf("Expected status %d, got %d", tt.expectedCode, resp.StatusCode)
@@ -904,7 +904,7 @@ func TestMockRegistry_Referrers(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get referrers after delete: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		var index v1.Index
 		if err := json.NewDecoder(resp.Body).Decode(&index); err != nil {

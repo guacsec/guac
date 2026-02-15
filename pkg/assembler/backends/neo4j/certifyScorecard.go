@@ -45,7 +45,7 @@ func (c *neo4jClient) ScorecardsList(ctx context.Context, scorecardSpec model.Ce
 
 func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -202,7 +202,7 @@ func (c *neo4jClient) IngestScorecards(ctx context.Context, sources []*model.IDo
 
 func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	values := map[string]any{}
 	values["sourceType"] = source.SourceInput.Type

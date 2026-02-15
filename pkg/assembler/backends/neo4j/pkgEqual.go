@@ -36,7 +36,7 @@ func (c *neo4jClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEq
 func (c *neo4jClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var selectedPkg *model.PkgSpec = nil
@@ -171,7 +171,7 @@ func setPkgEqualValues(sb *strings.Builder, pkgEqualSpec *model.PkgEqualSpec, fi
 
 func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	queryValues := map[string]any{}

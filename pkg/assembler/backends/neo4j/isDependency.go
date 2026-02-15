@@ -40,7 +40,7 @@ func (c *neo4jClient) IsDependencyList(ctx context.Context, isDependencySpec mod
 // note this has not been optimized to remove pkgVersion -> pkgName
 func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	var sb strings.Builder
 	var firstMatch bool = true
@@ -165,7 +165,7 @@ func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.IDor
 // note this has not been optimized to remove pkgVersion -> pkgName
 func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 	// TODO: handle depPkgMatchType
 
 	var sb strings.Builder

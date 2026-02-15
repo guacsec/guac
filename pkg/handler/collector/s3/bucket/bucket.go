@@ -123,7 +123,7 @@ func (d *s3Bucket) DownloadFile(ctx context.Context, bucket string, item string)
 	if err != nil {
 		return nil, fmt.Errorf("unable to download file: %s %w", item, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	buf := new(bytes.Buffer)
 	n, err := io.Copy(buf, resp.Body)

@@ -37,7 +37,7 @@ func (c *neo4jClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSA
 func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	// TODO update to not use PackageSourceOrArtifact
 	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	// defer session.Close()
+	// defer func() { _ = session.Close() }()
 
 	// queryAll := false
 	// //TODO(mihaimaruseac): Review this in e2e
