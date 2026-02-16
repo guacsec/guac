@@ -94,7 +94,7 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSlsa: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{}, hasSLSASpec.BuiltFrom, false)
 }
@@ -270,7 +270,7 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.IDorAr
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest hasSLSA: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, builtFromMap, nil, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
@@ -317,7 +317,7 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.IDorArtifac
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest hasSLSA: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.ArtifactInput.Algorithm, subject.ArtifactInput.Digest): artifacts}, nil, true)
 	if err != nil {
@@ -523,7 +523,7 @@ func (c *arangoClient) queryHasSlsaNodeByID(ctx context.Context, filter *model.H
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for hasSLSA: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbHasSLSA struct {
 		HasSlsaID     string     `json:"_id"`
@@ -650,7 +650,7 @@ func (c *arangoClient) hasSlsaNeighbors(ctx context.Context, nodeID string, allo
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSlsaNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbSlsaMaterialsNeighbor struct {
 			BuiltFrom []string `json:"builtFrom"`

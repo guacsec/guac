@@ -1660,7 +1660,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	case <-done:
 	case <-time.After(5 * time.Second):
 		cf()
-		server.Close()
+		_ = server.Close()
 	}
 	cf()
 }

@@ -1631,7 +1631,7 @@ func (_g *ArtifactGroupBy) sqlScan(ctx context.Context, root *ArtifactQuery, v a
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -1673,6 +1673,6 @@ func (_s *ArtifactSelect) sqlScan(ctx context.Context, root *ArtifactQuery, v an
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

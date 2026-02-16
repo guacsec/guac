@@ -77,7 +77,7 @@ $ guaccollect kubescape --service-poll=false --kubescape-filtered --kubescape-na
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
-			defer csubClient.Close()
+			defer func() { _ = csubClient.Close() }()
 		}
 
 		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue)

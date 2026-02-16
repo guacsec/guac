@@ -1169,7 +1169,7 @@ func (_g *BillOfMaterialsGroupBy) sqlScan(ctx context.Context, root *BillOfMater
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -1211,6 +1211,6 @@ func (_s *BillOfMaterialsSelect) sqlScan(ctx context.Context, root *BillOfMateri
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

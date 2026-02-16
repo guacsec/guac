@@ -65,5 +65,5 @@ func (m *redisBE) Clear() error {
 }
 
 func (m *redisBE) Cleanup() {
-	m.c.Close()
+	_ = m.c.Close()
 }

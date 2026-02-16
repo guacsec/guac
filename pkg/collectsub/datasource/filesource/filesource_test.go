@@ -130,7 +130,7 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 		if err != nil {
 			t.Errorf("unable to append to file: %v", err)
 		}
-		f.Close()
+		_ = f.Close()
 	}()
 	select {
 	case err = <-upChan:

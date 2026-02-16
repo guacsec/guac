@@ -135,7 +135,7 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsDependency: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getIsDependencyFromCursor(ctx, cursor, false)
 }
@@ -314,7 +314,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDo
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest isDependency: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	isDepList, err := getIsDependencyFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -369,7 +369,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.IDorPkgIn
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest isDependency: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	isDependencyList, err := getIsDependencyFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -481,7 +481,7 @@ func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *mo
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for isDependency: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbIsDependency struct {
 		IsDependencyID string `json:"_id"`
@@ -554,7 +554,7 @@ func (c *arangoClient) isDependencyNeighbors(ctx context.Context, nodeID string,
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "isDependencyNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbIsDepNeighbor struct {
 			PackageID    string `json:"packageID"`

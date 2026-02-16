@@ -148,7 +148,7 @@ func getPkgVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder 
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVEXStatement: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyVexFromCursor(ctx, cursor, false)
 }
@@ -182,7 +182,7 @@ func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBui
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVEXStatement: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyVexFromCursor(ctx, cursor, false)
 }
@@ -333,7 +333,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact VEX: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get VEX from arango cursor: %w", err)
@@ -417,7 +417,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package Vex: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
@@ -469,7 +469,7 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest VEX: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
 			return "", fmt.Errorf("failed to get VEX from arango cursor: %w", err)
@@ -520,7 +520,7 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		if err != nil {
 			return "", fmt.Errorf("failed to create ingest VEX: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
@@ -655,7 +655,7 @@ func (c *arangoClient) queryCertifyVexNodeByID(ctx context.Context, filter *mode
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyVex: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbVex struct {
 		VexID            string    `json:"_id"`

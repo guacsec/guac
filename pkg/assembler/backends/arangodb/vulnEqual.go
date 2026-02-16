@@ -166,7 +166,7 @@ func getVulnEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for vulnEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getVulnEqualFromCursor(ctx, cursor, false)
 }
@@ -286,7 +286,7 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest vulnEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	vulnEqualList, err := getVulnEqualFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -340,7 +340,7 @@ func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest vulnEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	vulnEqualList, err := getVulnEqualFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -459,7 +459,7 @@ func (c *arangoClient) queryVulnEqualNodeByID(ctx context.Context, filter *model
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for vulnEqual: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbVulnEqual struct {
 		VulnEqualID          string `json:"_id"`
@@ -521,7 +521,7 @@ func (c *arangoClient) vulnEqualNeighbors(ctx context.Context, nodeID string, al
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "vulnEqualNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbVulnEqualNeighbor struct {
 			VulnerabilityID      string `json:"vulnerabilityID"`

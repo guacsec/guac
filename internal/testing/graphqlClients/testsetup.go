@@ -74,7 +74,7 @@ func startGraphqlServer(t *testing.T, gqlHandler *handler.Server) string {
 	wg.Wait()
 
 	closeFunc := func() {
-		err := srv.Close()
+		err := _ = srv.Close()
 		if err != nil {
 			t.Logf("Error closing graphql server listener")
 		} else {

@@ -157,7 +157,7 @@ func Test_Publish(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
-	defer jetStream.Close()
+	defer func() { _ = jetStream.Close() }()
 
 	blobStore, err := blob.NewBlobStore(ctx, "mem://")
 	if err != nil {

@@ -113,7 +113,7 @@ func (s *Suite) SetupSubTest() {
 }
 
 func (s *Suite) TearDownSubTest() {
-	err := s.Client.Close()
+	err := _ = s.Client.Close()
 	if err != nil {
 		fmt.Printf("WARN: error while closing the Ent client :: %s", err)
 		return

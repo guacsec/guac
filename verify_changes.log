@@ -1,7 +1,0 @@
-	defer func() { _ = registry.Close() }()
-	defer func() { _ = resp.Body.Close() }()
-	defer func() { _ = registry.Close() }()
-	defer func() { _ = resp.Body.Close() }()
-	defer func() { _ = registry.Close() }()
-	defer func() { _ = os.Setenv(envVar, prevVal) }()
-	_ = c.conn.Close()

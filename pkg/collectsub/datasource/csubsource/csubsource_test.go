@@ -74,7 +74,7 @@ func Test_CsubSourceGetDataSources(t *testing.T) {
 		t.Errorf("unable to initiliaze simple source client: %v", err)
 		return
 	}
-	defer c.Close()
+	defer func() { _ = c.Close() }()
 
 	cds, err := NewCsubDatasource(c, time.Second)
 	if err != nil {
@@ -101,7 +101,7 @@ func Test_CsubSourceDataSourcesUpdate(t *testing.T) {
 		t.Errorf("unable to initiliaze simple source client: %v", err)
 		return
 	}
-	defer c.Close()
+	defer func() { _ = c.Close() }()
 
 	cds, err := NewCsubDatasource(c, time.Second)
 	if err != nil {

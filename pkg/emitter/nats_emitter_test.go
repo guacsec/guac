@@ -91,7 +91,7 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 	if err := jetStream.JetStreamInit(ctx); err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
-	defer jetStream.Close()
+	defer func() { _ = jetStream.Close() }()
 	tests := []struct {
 		name           string
 		deleteStream   bool

@@ -775,7 +775,7 @@ func (_g *DependencyGroupBy) sqlScan(ctx context.Context, root *DependencyQuery,
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -817,6 +817,6 @@ func (_s *DependencySelect) sqlScan(ctx context.Context, root *DependencyQuery, 
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

@@ -135,7 +135,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
-			defer csubClient.Close()
+			defer func() { _ = csubClient.Close() }()
 		}
 
 		errFound := false

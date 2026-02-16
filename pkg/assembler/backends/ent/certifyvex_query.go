@@ -729,7 +729,7 @@ func (_g *CertifyVexGroupBy) sqlScan(ctx context.Context, root *CertifyVexQuery,
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -771,6 +771,6 @@ func (_s *CertifyVexSelect) sqlScan(ctx context.Context, root *CertifyVexQuery, 
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

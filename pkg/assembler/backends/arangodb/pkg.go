@@ -432,7 +432,7 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for packages: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getPackages(ctx, cursor)
 }
@@ -456,7 +456,7 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for package types: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	var packages []*model.Package
 	for {
@@ -506,7 +506,7 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for package namespaces: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	pkgTypes := map[string][]*model.PackageNamespace{}
 	for {
@@ -576,7 +576,7 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for package names: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	pkgTypes := map[string]map[string][]*model.PackageName{}
 	for {
@@ -906,7 +906,7 @@ func (c *arangoClient) queryPkgVersionNodeByID(ctx context.Context, id string, f
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to query for package version: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedPkgVersion struct {
 		VersionID     string   `json:"version_id"`
@@ -964,7 +964,7 @@ func (c *arangoClient) queryPkgNameNodeByID(ctx context.Context, id string, filt
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to query for package name: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedPkgName struct {
 		NameID string `json:"name_id"`
@@ -1019,7 +1019,7 @@ func (c *arangoClient) queryPkgNamespaceNodeByID(ctx context.Context, id string,
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to query for package namespace: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedPkgNamespace struct {
 		NamespaceID string `json:"namespace_id"`
@@ -1073,7 +1073,7 @@ func (c *arangoClient) queryPkgTypeNodeByID(ctx context.Context, id string, filt
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for package type: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedPkgType struct {
 		TypeID  string `json:"type_id"`

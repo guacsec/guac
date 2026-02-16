@@ -230,7 +230,7 @@ func initializeNATsandCertifier(ctx context.Context, blobAddr, pubsubAddr string
 			if err := jetStream.JetStreamInit(ctx); err != nil {
 				logger.Fatalf("jetStream initialization failed with error: %v", err)
 			}
-			defer jetStream.Close()
+			defer func() { _ = jetStream.Close() }()
 		}
 		// initialize pubsub
 		pubsub = emitter.NewEmitterPubSub(ctx, pubsubAddr)

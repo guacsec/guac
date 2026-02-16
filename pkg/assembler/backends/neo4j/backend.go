@@ -107,7 +107,7 @@ func getBackend(_ context.Context, args backends.BackendArgs) (backends.Backend,
 	}
 
 	if err = driver.VerifyConnectivity(); err != nil {
-		driver.Close()
+		_ = driver.Close()
 		return nil, err
 	}
 	client := &neo4jClient{driver: driver}

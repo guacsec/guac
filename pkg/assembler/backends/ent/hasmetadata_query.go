@@ -810,7 +810,7 @@ func (_g *HasMetadataGroupBy) sqlScan(ctx context.Context, root *HasMetadataQuer
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -852,6 +852,6 @@ func (_s *HasMetadataSelect) sqlScan(ctx context.Context, root *HasMetadataQuery
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

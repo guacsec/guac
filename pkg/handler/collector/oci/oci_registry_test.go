@@ -142,7 +142,7 @@ func TestOCIRegistryCollectionPipeline(t *testing.T) {
 
 	// Create mock registry
 	registry := mockregistry.NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	// Extract host from registry URL
 	parsedURL, err := url.Parse(registry.URL())

@@ -11,7 +11,7 @@ import (
 
 func Test_versionHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(versionHandler))
-	defer ts.Close()
+	defer func() { _ = ts.Close() }()
 
 	res, err := http.Get(ts.URL)
 	assert.NoError(t, err)
@@ -19,7 +19,7 @@ func Test_versionHandler(t *testing.T) {
 	actualData, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 
-	err = res.Body.Close()
+	err = _ = res.Body.Close()
 	assert.NoError(t, err)
 
 	actualStr := string(actualData)

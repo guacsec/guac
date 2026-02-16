@@ -52,7 +52,7 @@ func TestEmitter_PublishOnEmit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
-	defer jetStream.Close()
+	defer func() { _ = jetStream.Close() }()
 
 	pubsub := NewEmitterPubSub(ctx, url)
 

@@ -305,7 +305,7 @@ func (c *Client) Debug() *Client {
 
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
-	return c.driver.Close()
+	return _ = c.driver.Close()
 }
 
 // Use adds the mutation hooks to all the entity clients.

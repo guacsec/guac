@@ -595,7 +595,7 @@ func (_g *BuilderGroupBy) sqlScan(ctx context.Context, root *BuilderQuery, v any
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -637,6 +637,6 @@ func (_s *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any)
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

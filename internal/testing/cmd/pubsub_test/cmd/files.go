@@ -119,7 +119,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 		if err := jetStream.JetStreamInit(ctx); err != nil {
 			logger.Fatalf("jetStream initialization failed with error: %v", err)
 		}
-		defer jetStream.Close()
+		defer func() { _ = jetStream.Close() }()
 	}
 
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)

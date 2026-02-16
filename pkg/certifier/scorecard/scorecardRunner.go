@@ -63,7 +63,7 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 		if err := repoClient.InitRepo(repo, commitSHA, 0); err != nil {
 			return nil, fmt.Errorf("error, failed to initialize repoClient: %w", err)
 		}
-		defer repoClient.Close()
+		defer func() { _ = repoClient.Close() }()
 
 		releases, err := repoClient.ListReleases()
 		if err != nil {

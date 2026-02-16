@@ -1,34 +1,32 @@
-version: "2"
 run:
   timeout: 6m
   build-tags:
     - integration
+
 linters:
   enable:
     - forcetypeassert
     - errcheck
-  exclusions:
-    paths:
-      - ".*\\.pb\\.go$"
-      - "pkg/assembler/generated/.*"
-      - "resolvers/schema\\.resolvers\\.go"
-    rules:
-      - path: _test\.go
-        linters:
-        - forcetypeassert # test files use mocks
-      - path: pkg/assembler/backends/neo4j
-        linters:
-        - unused # getting many unused false positives in neo4j backend
-        - forcetypeassert # this backend does this a lot
-linters-settings:
-  errcheck:
-    exclude-functions:
-      - (*os.File).Close
-      - (io.Closer).Close
-      - (net.Conn).Close
-      - (net/http.Body).Close
-      - (*net/http.Response).Body.Close
-      - (github.com/neo4j/neo4j-go-driver/v4/neo4j.Session).Close
 
 issues:
   max-same-issues: 50
+  exclude-rules:
+    - path: ".*\\.pb\\.go$"
+      linters:
+        - all
+    - path: "pkg/assembler/generated/.*"
+      linters:
+        - all
+    - path: "resolvers/schema\\.resolvers\\.go"
+      linters:
+        - all
+    - path: "_test\\.go"
+      linters:
+        - forcetypeassert
+    - path: "pkg/assembler/backends/neo4j"
+      linters:
+        - unused
+        - forcetypeassert
+    - linters:
+        - errcheck
+      text: "Error return value of .*(Close|Setenv) is not checked"

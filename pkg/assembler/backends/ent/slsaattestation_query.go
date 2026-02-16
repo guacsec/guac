@@ -775,7 +775,7 @@ func (_g *SLSAAttestationGroupBy) sqlScan(ctx context.Context, root *SLSAAttesta
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -817,6 +817,6 @@ func (_s *SLSAAttestationSelect) sqlScan(ctx context.Context, root *SLSAAttestat
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

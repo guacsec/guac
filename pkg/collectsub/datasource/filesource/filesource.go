@@ -90,12 +90,12 @@ func (d *fileDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 	}
 	err = watcher.Add(d.filePath)
 	if err != nil {
-		watcher.Close()
+		_ = watcher.Close()
 		return nil, err
 	}
 
 	go func() {
-		defer watcher.Close()
+		defer func() { _ = watcher.Close() }()
 
 		for {
 			select {

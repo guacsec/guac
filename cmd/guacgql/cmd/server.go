@@ -138,7 +138,7 @@ func startServer(cmd *cobra.Command) {
 	case <-time.After(5 * time.Second):
 		logger.Warnf("forcibly shutting down gql http server")
 		cf()
-		server.Close()
+		_ = server.Close()
 	}
 	cf()
 }

@@ -65,7 +65,7 @@ func (m *entBE) Clear() error {
 }
 
 func (m *entBE) Cleanup() {
-	m.topSQL.Close()
+	_ = m.topSQL.Close()
 }
 
 func (m *entBE) setupNewDB() error {

@@ -122,7 +122,7 @@ func TestCertifyComponent(t *testing.T) {
 			return
 		}
 	}))
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 	eolAPIBase = server.URL + "/api"
 
 	// Helper function to verify the generated document
@@ -180,7 +180,7 @@ func TestFetchAllProducts(t *testing.T) {
 		err := json.NewEncoder(w).Encode([]string{"sapmachine", "nodejs"})
 		require.NoError(t, err)
 	}))
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 	eolAPIBase = server.URL + "/api"
 
 	certifier := &eolCertifier{
@@ -275,7 +275,7 @@ func TestFetchProductEOL(t *testing.T) {
 				_, err := w.Write([]byte(tt.responseBody))
 				require.NoError(t, err)
 			}))
-			defer server.Close()
+			defer func() { _ = server.Close() }()
 
 			eolAPIBase = server.URL + "/api"
 			client := &http.Client{}

@@ -521,7 +521,7 @@ func TestPurlsLicenseScan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockCD := mockclearlydefined.NewMockClearlyDefined()
-			defer mockCD.Close()
+			defer func() { _ = mockCD.Close() }()
 			if err := mockCD.SetDefinitions(tt.serverDefinitions); err != nil {
 				t.Error(err)
 			}

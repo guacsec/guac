@@ -364,7 +364,7 @@ func TestOSVCertifierRateLimiter(t *testing.T) {
 			return
 		}
 	}))
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 
 	oldRateLimit := rateLimit
 	rateLimit = 5
@@ -384,7 +384,7 @@ func TestOSVCertifierRateLimiter(t *testing.T) {
 
 		resp, err := cert.(*osvCertifier).osvHTTPClient.Do(req)
 		assert.NoError(t, err)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	// Check if the log contains any rate limiting messages

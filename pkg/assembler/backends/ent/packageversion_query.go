@@ -1974,7 +1974,7 @@ func (_g *PackageVersionGroupBy) sqlScan(ctx context.Context, root *PackageVersi
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -2016,6 +2016,6 @@ func (_s *PackageVersionSelect) sqlScan(ctx context.Context, root *PackageVersio
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

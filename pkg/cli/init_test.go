@@ -27,7 +27,7 @@ var envVar string = "GUAC_LOG_LEVEL"
 
 func Test_InitConfig(t *testing.T) {
 	prevVal := os.Getenv(envVar)
-	defer func() { _ = os.Setenv(envVar, prevVal) }()
+	defer func() { _ = _ = os.Setenv(envVar, prevVal) }()
 
 	tests := []struct {
 		name                string

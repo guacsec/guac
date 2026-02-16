@@ -1186,7 +1186,7 @@ func (_g *SourceNameGroupBy) sqlScan(ctx context.Context, root *SourceNameQuery,
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -1228,6 +1228,6 @@ func (_s *SourceNameSelect) sqlScan(ctx context.Context, root *SourceNameQuery, 
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

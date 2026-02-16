@@ -199,7 +199,7 @@ func (g *gcs) getObject(ctx context.Context, object string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	var payload []byte
 	buffer := make([]byte, 1024)

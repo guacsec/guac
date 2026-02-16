@@ -777,7 +777,7 @@ func (c *ClientWithResponses) GetPackageVulnsWithResponse(ctx context.Context, p
 // ParseAnalyzeDependenciesResponse parses an HTTP response from a AnalyzeDependenciesWithResponse call
 func ParseAnalyzeDependenciesResponse(rsp *http.Response) (*AnalyzeDependenciesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -824,7 +824,7 @@ func ParseAnalyzeDependenciesResponse(rsp *http.Response) (*AnalyzeDependenciesR
 // ParseHealthCheckResponse parses an HTTP response from a HealthCheckWithResponse call
 func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -850,7 +850,7 @@ func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) 
 // ParseGetArtifactDepsResponse parses an HTTP response from a GetArtifactDepsWithResponse call
 func ParseGetArtifactDepsResponse(rsp *http.Response) (*GetArtifactDepsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -897,7 +897,7 @@ func ParseGetArtifactDepsResponse(rsp *http.Response) (*GetArtifactDepsResponse,
 // ParseGetArtifactVulnsResponse parses an HTTP response from a GetArtifactVulnsWithResponse call
 func ParseGetArtifactVulnsResponse(rsp *http.Response) (*GetArtifactVulnsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -944,7 +944,7 @@ func ParseGetArtifactVulnsResponse(rsp *http.Response) (*GetArtifactVulnsRespons
 // ParseGetPackagePurlsResponse parses an HTTP response from a GetPackagePurlsWithResponse call
 func ParseGetPackagePurlsResponse(rsp *http.Response) (*GetPackagePurlsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -991,7 +991,7 @@ func ParseGetPackagePurlsResponse(rsp *http.Response) (*GetPackagePurlsResponse,
 // ParseGetPackageDepsResponse parses an HTTP response from a GetPackageDepsWithResponse call
 func ParseGetPackageDepsResponse(rsp *http.Response) (*GetPackageDepsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -1038,7 +1038,7 @@ func ParseGetPackageDepsResponse(rsp *http.Response) (*GetPackageDepsResponse, e
 // ParseGetPackageVulnsResponse parses an HTTP response from a GetPackageVulnsWithResponse call
 func ParseGetPackageVulnsResponse(rsp *http.Response) (*GetPackageVulnsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}

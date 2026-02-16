@@ -67,5 +67,5 @@ func (m *tikvBE) Clear() error {
 }
 
 func (m *tikvBE) Cleanup() {
-	m.c.Close()
+	_ = m.c.Close()
 }

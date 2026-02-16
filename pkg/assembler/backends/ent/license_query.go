@@ -756,7 +756,7 @@ func (_g *LicenseGroupBy) sqlScan(ctx context.Context, root *LicenseQuery, v any
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -798,6 +798,6 @@ func (_s *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any)
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

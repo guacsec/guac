@@ -80,7 +80,7 @@ var csubAddCollectEntriesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx, csubClient := setupCsubClient(cmd, args)
 		logger := logging.FromContext(ctx)
-		defer csubClient.Close()
+		defer func() { _ = csubClient.Close() }()
 
 		bytes, err := io.ReadAll(cmd.InOrStdin())
 		if err != nil {
@@ -142,7 +142,7 @@ var csubGetCollectEntriesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx, csubClient := setupCsubClient(cmd, args)
 		logger := logging.FromContext(ctx)
-		defer csubClient.Close()
+		defer func() { _ = csubClient.Close() }()
 
 		var pbFilters []*collectsub.CollectEntryFilter
 		if len(args) > 0 && args[0] == "stdin" {

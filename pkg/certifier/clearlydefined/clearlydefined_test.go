@@ -117,7 +117,7 @@ func TestClearlyDefined(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockCD := mockclearlydefined.NewMockClearlyDefined()
-			defer mockCD.Close()
+			defer func() { _ = mockCD.Close() }()
 			if err := mockCD.SetDefinitions(tt.serverDefinitions); err != nil {
 				t.Error(err)
 			}
@@ -229,7 +229,7 @@ func TestCDCertifierRateLimiter(t *testing.T) {
 			return
 		}
 	}))
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 
 	oldRateLimit := rateLimit
 	rateLimit = 5
@@ -249,7 +249,7 @@ func TestCDCertifierRateLimiter(t *testing.T) {
 
 		resp, err := cert.(*cdCertifier).cdHTTPClient.Do(req)
 		assert.NoError(t, err)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	// Check if the log contains any rate limiting messages

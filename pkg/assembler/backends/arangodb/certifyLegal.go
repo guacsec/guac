@@ -144,7 +144,7 @@ func getSrcCertifyLegalForQuery(ctx context.Context, c *arangoClient,
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyLegal: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return c.getCertifyLegalFromCursor(ctx, cursor, decFilter, disFilter, false)
 }
@@ -183,7 +183,7 @@ func getPkgCertifyLegalForQuery(ctx context.Context, c *arangoClient,
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyLegal: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return c.getCertifyLegalFromCursor(ctx, cursor, decFilter, disFilter, false)
 }
@@ -351,7 +351,7 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package certifyLegal: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
@@ -427,7 +427,7 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source certifyLegal: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
@@ -552,7 +552,7 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package certifyLegals: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
@@ -669,7 +669,7 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source certifyLegal: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
@@ -829,7 +829,7 @@ func (c *arangoClient) queryCertifyLegalNodeByID(ctx context.Context, filter *mo
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyLegal: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbCertifyLegal struct {
 		CertifyLegalID     string    `json:"_id"`
@@ -964,7 +964,7 @@ func (c *arangoClient) certifyLegalNeighbors(ctx context.Context, nodeID string,
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "certifyLegalNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbLicenseNeighbor struct {
 			Declared   []string `json:"declared"`

@@ -109,7 +109,7 @@ func initializeNATsandCertifier(ctx context.Context, opts options) {
 		if err := jetStream.JetStreamInit(ctx); err != nil {
 			logger.Fatalf("jetStream initialization failed with error: %v", err)
 		}
-		defer jetStream.Close()
+		defer func() { _ = jetStream.Close() }()
 	}
 
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)

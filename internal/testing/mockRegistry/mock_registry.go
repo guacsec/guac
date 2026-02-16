@@ -105,7 +105,7 @@ func (m *MockRegistry) URL() string {
 
 // Close shuts down the mock registry server
 func (m *MockRegistry) Close() {
-	m.server.Close()
+	_ = m.server.Close()
 }
 
 func (m *MockRegistry) handler() http.Handler {

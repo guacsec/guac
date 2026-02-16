@@ -30,7 +30,7 @@ import (
 
 func TestMockRegistry_APIVersion(t *testing.T) {
 	registry := NewMockRegistry(&RegistryContent{})
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	// Test GET /v2/
 	resp, err := http.Get(registry.URL() + "/v2/")
@@ -55,7 +55,7 @@ func TestMockRegistry_Catalog(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	resp, err := http.Get(registry.URL() + "/v2/_catalog")
 	if err != nil {
@@ -91,7 +91,7 @@ func TestMockRegistry_Tags(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	tests := []struct {
 		name         string
@@ -171,7 +171,7 @@ func TestMockRegistry_Manifests(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	tests := []struct {
 		name         string
@@ -261,7 +261,7 @@ func TestMockRegistry_Blobs(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	tests := []struct {
 		name         string
@@ -350,7 +350,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	t.Run("chunked upload full flow", func(t *testing.T) {
 		// Start upload
@@ -512,7 +512,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 			},
 		}
 		registry := NewMockRegistry(content)
-		defer registry.Close()
+		defer func() { _ = registry.Close() }()
 
 		blobContent := []byte("blob to mount")
 		blobDigest := digest.FromBytes(blobContent)
@@ -723,7 +723,7 @@ func TestMockRegistry_Referrers(t *testing.T) {
 	}
 
 	registry := NewMockRegistry(content)
-	defer registry.Close()
+	defer func() { _ = registry.Close() }()
 
 	tests := []struct {
 		name          string
@@ -878,7 +878,7 @@ func TestMockRegistry_Referrers(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get referrers: %v", err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
 			t.Fatalf("Failed to get initial referrers: %d", resp.StatusCode)
 		}
@@ -893,7 +893,7 @@ func TestMockRegistry_Referrers(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to delete manifest: %v", err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode != http.StatusAccepted {
 			t.Fatalf("Failed to delete manifest: %d", resp.StatusCode)
 		}

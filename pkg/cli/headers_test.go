@@ -92,7 +92,7 @@ func TestHTTPHeaderTransport(t *testing.T) {
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				gotHeaders = r.Header
 			}))
-			defer srv.Close()
+			defer func() { _ = srv.Close() }()
 
 			client := http.Client{Transport: transport}
 

@@ -56,7 +56,7 @@ func (b *BlobStore) Write(ctx context.Context, key string, value []byte) error {
 
 	_, writeErr := w.Write(value)
 	// Always check the return value of Close when writing.
-	closeErr := w.Close()
+	closeErr := _ = w.Close()
 	if writeErr != nil {
 		return fmt.Errorf("failed to write the value with error: %w", writeErr)
 	}
@@ -72,7 +72,7 @@ func (b *BlobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read to bucket with error: %w", err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(r); err != nil {

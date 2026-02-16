@@ -991,7 +991,7 @@ func (_g *PackageNameGroupBy) sqlScan(ctx context.Context, root *PackageNameQuer
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -1033,6 +1033,6 @@ func (_s *PackageNameSelect) sqlScan(ctx context.Context, root *PackageNameQuery
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

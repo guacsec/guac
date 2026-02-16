@@ -140,7 +140,7 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsOccurrence: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getIsOccurrenceFromCursor(ctx, cursor, false)
 }
@@ -176,7 +176,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsOccurrence: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getIsOccurrenceFromCursor(ctx, cursor, false)
 }
@@ -311,7 +311,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package occurrence: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -374,7 +374,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return nil, fmt.Errorf("package or source not specified for IngestOccurrence")
 	}
@@ -425,7 +425,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package occurrence: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
@@ -458,7 +458,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return "", fmt.Errorf("package or source not specified for IngestOccurrence")
 	}
@@ -577,7 +577,7 @@ func (c *arangoClient) queryIsOccurrenceNodeByID(ctx context.Context, filter *mo
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for isOccurrence: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbIsOccurrence struct {
 		IsOccurrenceID string  `json:"_id"`

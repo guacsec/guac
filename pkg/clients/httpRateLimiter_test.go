@@ -52,7 +52,7 @@ func TestRateLimitedTransport(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 
 	// Create a rate limiter that allows 10 requests per 10 seconds
 	limiter := rate.NewLimiter(rate.Every(time.Second*10), 10)
@@ -73,7 +73,7 @@ func TestRateLimitedTransport(t *testing.T) {
 		resp, err := client.Do(req)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	logOutput := logBuffer.String()

@@ -573,7 +573,7 @@ func (_g *CertifyScorecardGroupBy) sqlScan(ctx context.Context, root *CertifySco
 	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }
 
@@ -615,6 +615,6 @@ func (_s *CertifyScorecardSelect) sqlScan(ctx context.Context, root *CertifyScor
 	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return sql.ScanSlice(rows, v)
 }

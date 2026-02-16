@@ -152,7 +152,7 @@ RETURN {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query FindSoftware: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedDoc struct {
 		NodeType string `json:"nodeType"`

@@ -94,7 +94,7 @@ func getVulnMetadataForQuery(ctx context.Context, c *arangoClient, arangoQueryBu
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for VulnerabilityMetadata: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return geVulnMetadataFromCursor(ctx, cursor, false)
 }
@@ -202,7 +202,7 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest VulnerabilityMetadata: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	vulnMetadataList, err := geVulnMetadataFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -275,7 +275,7 @@ func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vuln
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest VulnerabilityMetadatas %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	vulnMetadataList, err := geVulnMetadataFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -389,7 +389,7 @@ func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, f
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for vulnMetadata: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbVulnMetadata struct {
 		VulnMetadataID  string                       `json:"_id"`

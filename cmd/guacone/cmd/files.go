@@ -137,7 +137,7 @@ var filesCmd = &cobra.Command{
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
-			defer csubClient.Close()
+			defer func() { _ = csubClient.Close() }()
 		}
 
 		totalNum := 0
