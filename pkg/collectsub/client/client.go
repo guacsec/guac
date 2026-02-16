@@ -82,7 +82,7 @@ func NewClient(opts CsubClientOptions) (Client, error) {
 }
 
 func (c *client) Close() {
-	_ = _ = c.conn.Close()
+	_ = c.conn.Close()
 }
 
 func (c *client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {

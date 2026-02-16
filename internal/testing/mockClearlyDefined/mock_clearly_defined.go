@@ -68,7 +68,7 @@ func (t *MockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func (m *MockClearlyDefined) Close() {
-	_ = m.server.Close()
+	m.server.Close()
 }
 
 func (m *MockClearlyDefined) SetDefinitions(definitions map[string][]byte) error {

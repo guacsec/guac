@@ -119,7 +119,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
-			defer func() { _ = csubClient.Close() }()
+			defer func() { csubClient.Close() }()
 		}
 
 		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr, s3Opts.publishToQueue)

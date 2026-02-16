@@ -88,12 +88,12 @@ func (j *jetStream) JetStreamInit(ctx context.Context) error {
 	js, err := nc.JetStream()
 
 	if err != nil {
-		_ = nc.Close()
+		nc.Close()
 		return fmt.Errorf("unable to connect to nats jetstream with address: %s, with error: %w", j.url, err)
 	}
 	err = createStreamOrExists(ctx, js)
 	if err != nil {
-		_ = nc.Close()
+		nc.Close()
 		return fmt.Errorf("failed to create stream: %w", err)
 	}
 
@@ -131,7 +131,7 @@ func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 // Close closes the NATS connection
 func (j *jetStream) Close() {
 	if j.nc != nil {
-		_ = j.nc.Close()
+		j.nc.Close()
 	}
 }
 
@@ -145,7 +145,7 @@ func (j *jetStream) RecreateStream(ctx context.Context) error {
 	}
 	err := createStreamOrExists(ctx, j.js)
 	if err != nil {
-		_ = j.Close()
+		j.Close()
 		return fmt.Errorf("failed to create stream: %w", err)
 	}
 	return nil

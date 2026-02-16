@@ -56,7 +56,7 @@ func (b *BlobStore) Write(ctx context.Context, key string, value []byte) error {
 
 	_, writeErr := w.Write(value)
 	// Always check the return value of Close when writing.
-	closeErr := _ = w.Close()
+	closeErr := w.Close()
 	if writeErr != nil {
 		return fmt.Errorf("failed to write the value with error: %w", writeErr)
 	}

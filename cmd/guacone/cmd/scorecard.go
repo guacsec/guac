@@ -100,7 +100,7 @@ var scorecardCmd = &cobra.Command{
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
-			defer func() { _ = csubClient.Close() }()
+			defer func() { csubClient.Close() }()
 		}
 
 		httpClient := http.Client{Transport: transport}

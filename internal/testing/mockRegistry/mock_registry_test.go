@@ -30,7 +30,7 @@ import (
 
 func TestMockRegistry_APIVersion(t *testing.T) {
 	registry := NewMockRegistry(&RegistryContent{})
-	defer func() { _ = registry.Close() }()
+	defer registry.Close()
 
 	// Test GET /v2/
 	resp, err := http.Get(registry.URL() + "/v2/")
@@ -55,7 +55,7 @@ func TestMockRegistry_Catalog(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer func() { _ = registry.Close() }()
+	defer registry.Close()
 
 	resp, err := http.Get(registry.URL() + "/v2/_catalog")
 	if err != nil {
@@ -91,7 +91,9 @@ func TestMockRegistry_Tags(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer func() { _ = registry.Close() }()
+	defer registry.Close()
+	defer registry.Close()
+	defer registry.Close()
 
 	tests := []struct {
 		name         string
@@ -171,7 +173,7 @@ func TestMockRegistry_Manifests(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer func() { _ = registry.Close() }()
+	defer func() { registry.Close() }()
 
 	tests := []struct {
 		name         string
@@ -261,7 +263,7 @@ func TestMockRegistry_Blobs(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer func() { _ = registry.Close() }()
+	defer func() { registry.Close() }()
 
 	tests := []struct {
 		name         string
@@ -350,7 +352,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 		},
 	}
 	registry := NewMockRegistry(content)
-	defer func() { _ = registry.Close() }()
+	defer registry.Close()
 
 	t.Run("chunked upload full flow", func(t *testing.T) {
 		// Start upload
@@ -512,7 +514,7 @@ func TestMockRegistry_BlobUpload(t *testing.T) {
 			},
 		}
 		registry := NewMockRegistry(content)
-		defer func() { _ = registry.Close() }()
+		defer registry.Close()
 
 		blobContent := []byte("blob to mount")
 		blobDigest := digest.FromBytes(blobContent)
@@ -723,7 +725,7 @@ func TestMockRegistry_Referrers(t *testing.T) {
 	}
 
 	registry := NewMockRegistry(content)
-	defer func() { _ = registry.Close() }()
+	defer registry.Close()
 
 	tests := []struct {
 		name          string

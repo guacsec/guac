@@ -97,7 +97,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		if err := jetStream.JetStreamInit(ctx); err != nil {
 			logger.Fatalf("jetStream initialization failed with error: %v", err)
 		}
-		defer func() { _ = jetStream.Close() }()
+		defer func() { jetStream.Close() }()
 	}
 
 	// initialize blob store
@@ -115,7 +115,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		logger.Errorf("collectsub client initialization failed with error: %v", err)
 		os.Exit(1)
 	}
-	defer func() { _ = csubClient.Close() }()
+	defer func() { csubClient.Close() }()
 
 	ctx, cf := context.WithCancel(ctx)
 	emit := func(d *processor.Document) error {

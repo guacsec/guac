@@ -87,7 +87,7 @@ $ guacone collect kubescape --poll --kubescape-filtered --kubescape-namespace=al
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
-			defer func() { _ = csubClient.Close() }()
+			defer func() { csubClient.Close() }()
 		}
 
 		errFound := false

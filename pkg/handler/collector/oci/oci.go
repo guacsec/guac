@@ -440,7 +440,7 @@ func fetchOCIArtifactBlobs(
 			return fmt.Errorf("failed pulling layer %d: %w", i, err)
 		}
 		btr1, err := blob.RawBody()
-		closeErr := _ = blob.Close()
+		closeErr := blob.Close()
 		if err != nil {
 			return fmt.Errorf("failed reading layer %d: %w", i, err)
 		}
