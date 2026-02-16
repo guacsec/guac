@@ -31,7 +31,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           repository: ${{ inputs.repository }}
@@ -57,7 +57,7 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-local-organic-guac-amd64 local-organic-guac
           docker save -o ./bin/local-organic-guac.tar local-organic-guac
         shell: bash
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: guac-artifacts
           path: ./bin

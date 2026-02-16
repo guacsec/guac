@@ -22,6 +22,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/guacsec/guac/pkg/cli"
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
@@ -32,6 +33,10 @@ import (
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+)
+
+const (
+	ociInsecureSkipTLSVerify = "insecure-skip-tls-verify"
 )
 
 type ociOptions struct {
@@ -45,6 +50,8 @@ type ociOptions struct {
 	poll bool
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// skip TLS verification for registry connections
+	insecureSkipTLSVerify bool
 }
 
 type ociRegistryOptions struct {
@@ -58,6 +65,8 @@ type ociRegistryOptions struct {
 	poll bool
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// skip TLS verification for registry connections
+	insecureSkipTLSVerify bool
 }
 
 var ociCmd = &cobra.Command{
@@ -91,6 +100,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetBool(ociInsecureSkipTLSVerify),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -102,7 +112,14 @@ you have access to read and write to the respective blob store.`,
 		// TODO(lumjjb): Return this to a longer duration (~10 minutes) so as to not keep hitting
 		// the OCI server. This will require adding triggers to get new repos as they come up from
 		// the CollectSources so that there isn't a long delay from adding new data sources.
-		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
+
+		// Build regclient options with TLS configuration
+		registryHosts := oci.ExtractRegistryHosts(args)
+		rcOpts := oci.BuildRegClientOptions(registryHosts, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
+
+		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
@@ -129,6 +146,7 @@ var ociRegistryCmd = &cobra.Command{
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetBool(ociInsecureSkipTLSVerify),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -139,7 +157,14 @@ var ociRegistryCmd = &cobra.Command{
 		// Register collector
 		// We probably want a much longer poll interval for registry collectors as the _catalog
 		// endpoint can be expensive to hit and likely won't change often.
-		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute)
+
+		// Build regclient options with TLS configuration
+		// For registry command, args are registry hosts directly
+		rcOpts := oci.BuildRegClientOptions(args, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
+
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -158,6 +183,7 @@ func validateOCIFlags(
 	useCsub,
 	poll bool,
 	pubToQueue bool,
+	insecureSkipTLSVerify bool,
 	args []string,
 ) (ociOptions, error) {
 	var opts ociOptions
@@ -165,6 +191,7 @@ func validateOCIFlags(
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
+	opts.insecureSkipTLSVerify = insecureSkipTLSVerify
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -214,6 +241,7 @@ func validateOCIRegistryFlags(
 	useCsub,
 	poll,
 	pubToQueue bool,
+	insecureSkipTLSVerify bool,
 	args []string,
 ) (ociRegistryOptions, error) {
 	var opts ociRegistryOptions
@@ -221,6 +249,7 @@ func validateOCIRegistryFlags(
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
+	opts.insecureSkipTLSVerify = insecureSkipTLSVerify
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -264,6 +293,23 @@ func validateOCIRegistryFlags(
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{ociInsecureSkipTLSVerify})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+
+	ociCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(ociCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(ociCmd)
+
+	ociRegistryCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(ociRegistryCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(ociRegistryCmd)
 }

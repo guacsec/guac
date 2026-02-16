@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/types/descriptor"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/platform"
@@ -528,10 +529,79 @@ func hasNoIdentifier(r ref.Ref) bool {
 	return hasNoTag(r) && hasNoDigest(r)
 }
 
-func getRegClientOptions() []regclient.Opt {
+// GetRegClientOptions returns the default regclient options with Docker credentials,
+// certificates, and user agent configured.
+func GetRegClientOptions() []regclient.Opt {
 	rcOpts := []regclient.Opt{}
 	rcOpts = append(rcOpts, regclient.WithDockerCreds())
 	rcOpts = append(rcOpts, regclient.WithDockerCerts())
 	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
 	return rcOpts
+}
+
+func getRegClientOptions() []regclient.Opt {
+	return GetRegClientOptions()
+}
+
+// OCIClientOptions contains configuration for OCI registry connections.
+// New fields should always have sensible zero-value defaults for backward compatibility.
+type OCIClientOptions struct {
+	// InsecureSkipTLSVerify disables TLS entirely (uses HTTP)
+	InsecureSkipTLSVerify bool
+}
+
+// needsHostConfig returns true if any custom host configuration is needed.
+func (o OCIClientOptions) needsHostConfig() bool {
+	return o.InsecureSkipTLSVerify
+}
+
+// toHostConfig converts options to a regclient config.Host for the given hostname.
+func (o OCIClientOptions) toHostConfig(host string) config.Host {
+	h := config.Host{
+		Name:     host,
+		Hostname: host,
+	}
+
+	if o.InsecureSkipTLSVerify {
+		h.TLS = config.TLSDisabled
+	}
+
+	return h
+}
+
+// BuildRegClientOptions constructs regclient options for OCI operations.
+// The opts parameter allows configuration of TLS settings for the specified hosts.
+func BuildRegClientOptions(hosts []string, opts OCIClientOptions) []regclient.Opt {
+	rcOpts := GetRegClientOptions()
+
+	if len(hosts) == 0 || !opts.needsHostConfig() {
+		return rcOpts
+	}
+
+	hostConfigs := make([]config.Host, len(hosts))
+	for i, host := range hosts {
+		hostConfigs[i] = opts.toHostConfig(host)
+	}
+	rcOpts = append(rcOpts, regclient.WithConfigHost(hostConfigs...))
+
+	return rcOpts
+}
+
+// ExtractRegistryHosts extracts unique registry hosts from image references.
+// For image paths like "registry.example.com:5000/repo/image:tag", it returns "registry.example.com:5000".
+func ExtractRegistryHosts(imagePaths []string) []string {
+	hostsMap := make(map[string]struct{})
+	for _, imagePath := range imagePaths {
+		r, err := ref.New(imagePath)
+		if err != nil {
+			continue
+		}
+		hostsMap[r.Registry] = struct{}{}
+	}
+
+	hosts := make([]string, 0, len(hostsMap))
+	for host := range hostsMap {
+		hosts = append(hosts, host)
+	}
+	return hosts
 }
