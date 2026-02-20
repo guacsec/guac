@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
 	"time"
@@ -246,7 +247,7 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
+		if err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert slsa node")
 		}
 	}

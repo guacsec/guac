@@ -214,8 +214,9 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 	pkgNamespaces := map[string]string{}
 
 	for _, pkgs := range batches {
-		pkgNameCreates := make([]*ent.PackageNameCreate, len(pkgs))
 		pkgVersionCreates := make([]*ent.PackageVersionCreate, len(pkgs))
+		seenPkgNames := make(map[string]bool)
+		var pkgNameCreates []*ent.PackageNameCreate
 
 		for i, pkg := range pkgs {
 			pkgInput := pkg
@@ -223,12 +224,18 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			pkgNameID := generateUUIDKey([]byte(pkgIDs.NameId))
 			pkgVersionID := generateUUIDKey([]byte(pkgIDs.VersionId))
 
-			pkgNameCreates[i] = generatePackageNameCreate(tx, &pkgNameID, pkgInput)
+			// Deduplicate PackageName creates within the batch to avoid
+			// "ON CONFLICT DO UPDATE command cannot affect row a second time"
+			nameIDStr := pkgNameID.String()
+			if !seenPkgNames[nameIDStr] {
+				seenPkgNames[nameIDStr] = true
+				pkgNameCreates = append(pkgNameCreates, generatePackageNameCreate(tx, &pkgNameID, pkgInput))
+			}
 			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
 
-			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
-			pkgTypes[pkgNameID.String()] = pkgInput.PackageInput.Type
-			pkgNamespaces[pkgNameID.String()] = strings.Join([]string{pkgInput.PackageInput.Type, stringOrEmpty(pkgInput.PackageInput.Namespace)}, guacIDSplit)
+			pkgNameIDs = append(pkgNameIDs, nameIDStr)
+			pkgTypes[nameIDStr] = pkgInput.PackageInput.Type
+			pkgNamespaces[nameIDStr] = strings.Join([]string{pkgInput.PackageInput.Type, stringOrEmpty(pkgInput.PackageInput.Namespace)}, guacIDSplit)
 			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
 		}
 
@@ -236,7 +243,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			OnConflict(
 				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
 			).
-			DoNothing().
+			UpdateNewValues().
 			Exec(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "bulk upsert pkgName node")
@@ -250,7 +257,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 				),
 			).
 			DoNothing().
-			Exec(ctx); err != nil {
+			Exec(ctx); err != nil && err != stdsql.ErrNoRows {
 
 			return nil, errors.Wrap(err, "bulk upsert pkgVersion node")
 		}
@@ -276,14 +283,12 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	pkgNameCreate := generatePackageNameCreate(tx, &pkgNameID, &pkg)
 
-	err := pkgNameCreate.
+	if err := pkgNameCreate.
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
-		DoNothing().
-		Exec(ctx)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package name")
-		}
+		UpdateNewValues().
+		Exec(ctx); err != nil {
+
+		return nil, errors.Wrap(err, "upsert package name")
 	}
 
 	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, &pkg)

@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
 
@@ -189,7 +190,7 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
+		if err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert pkgEquals node")
 		}
 	}
