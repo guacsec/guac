@@ -1,6 +1,6 @@
 module github.com/guacsec/guac
 
-go 1.24.1
+go 1.25.0
 
 require (
 	cloud.google.com/go/storage v1.57.0
