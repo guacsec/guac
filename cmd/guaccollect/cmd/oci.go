@@ -271,11 +271,33 @@ func validateOCIRegistryFlags(
 
 	sources := []datasource.Source{}
 	for _, arg := range args {
-		// Min check to validate registry by resolving hostname
-		_, err := net.LookupHost(arg)
+		// Split host:port before DNS lookup, since LookupHost expects hostname only
+		host, port, err := net.SplitHostPort(arg)
 		if err != nil {
-			return opts, fmt.Errorf("registry parsing error. require format registry:port")
+			// Check if this is a format error vs just missing port
+			if addrErr, ok := err.(*net.AddrError); ok {
+				if addrErr.Err == "missing port in address" {
+					// No port specified, use arg as-is (port is optional)
+					host = arg
+				} else {
+					// Other format errors (e.g., "too many colons", "missing ']'")
+					return opts, fmt.Errorf("invalid registry format %q: %w", arg, err)
+				}
+			} else {
+				// Unknown error type, treat as format error
+				return opts, fmt.Errorf("invalid registry format %q: %w", arg, err)
+			}
 		}
+
+		// Attempt DNS resolution
+		_, err = net.LookupHost(host)
+		if err != nil {
+			if port != "" {
+				return opts, fmt.Errorf("unable to resolve registry hostname %q (from %q): %w. Ensure the registry is accessible and DNS is configured correctly", host, arg, err)
+			}
+			return opts, fmt.Errorf("unable to resolve registry hostname %q: %w. Ensure the registry is accessible and DNS is configured correctly", host, err)
+		}
+
 		sources = append(sources, datasource.Source{
 			Value: arg,
 		})
@@ -283,7 +305,7 @@ func validateOCIRegistryFlags(
 
 	var err error
 	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
-		OciDataSources: sources,
+		OciRegistryDataSources: sources,
 	})
 	if err != nil {
 		return opts, err
