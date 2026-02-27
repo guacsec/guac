@@ -38,6 +38,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	ociInsecureSkipTLSVerify = "insecure-skip-tls-verify"
+)
+
 type ociOptions struct {
 	graphqlEndpoint         string
 	headerFile              string
@@ -48,6 +52,7 @@ type ociOptions struct {
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
 	useCsub                 bool
+	insecureSkipTLSVerify   bool
 }
 
 type ociRegistryOptions struct {
@@ -60,6 +65,7 @@ type ociRegistryOptions struct {
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
 	useCsub                 bool
+	insecureSkipTLSVerify   bool
 }
 
 var ociCmd = &cobra.Command{
@@ -78,6 +84,7 @@ var ociCmd = &cobra.Command{
 			viper.GetBool("add-eol-on-ingest"),
 			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetBool("use-csub"),
+			viper.GetBool(ociInsecureSkipTLSVerify),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -90,7 +97,13 @@ var ociCmd = &cobra.Command{
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
-		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute)
+		// Build regclient options with TLS configuration
+		registryHosts := oci.ExtractRegistryHosts(args)
+		rcOpts := oci.BuildRegClientOptions(registryHosts, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
+
+		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
@@ -156,6 +169,7 @@ var ociRegistryCmd = &cobra.Command{
 			viper.GetBool("add-eol-on-ingest"),
 			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetBool("use-csub"),
+			viper.GetBool(ociInsecureSkipTLSVerify),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -168,7 +182,13 @@ var ociRegistryCmd = &cobra.Command{
 		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
-		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, false, 30*time.Second)
+		// Build regclient options with TLS configuration
+		// For registry command, args are registry hosts directly
+		rcOpts := oci.BuildRegClientOptions(args, oci.OCIClientOptions{
+			InsecureSkipTLSVerify: opts.insecureSkipTLSVerify,
+		})
+
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, false, 30*time.Second, rcOpts...)
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -219,7 +239,7 @@ var ociRegistryCmd = &cobra.Command{
 }
 
 func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, useCsub bool, args []string) (ociOptions, csub_client.Client, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, useCsub bool, insecureSkipTLSVerify bool, args []string) (ociOptions, csub_client.Client, error) {
 	var opts ociOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.headerFile = headerFile
@@ -228,6 +248,7 @@ func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTls
 	opts.queryEOLOnIngestion = queryEOLIngestion
 	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 	opts.useCsub = useCsub
+	opts.insecureSkipTLSVerify = insecureSkipTLSVerify
 
 	var csubClient csub_client.Client
 
@@ -274,7 +295,7 @@ func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTls
 }
 
 func validateOCIRegistryFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool,
-	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, useCsub bool, args []string) (ociRegistryOptions, csub_client.Client, error) {
+	queryVulnIngestion bool, queryLicenseIngestion bool, queryEOLIngestion bool, queryDepsDevOnIngestion bool, useCsub bool, insecureSkipTLSVerify bool, args []string) (ociRegistryOptions, csub_client.Client, error) {
 	var opts ociRegistryOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.headerFile = headerFile
@@ -283,6 +304,7 @@ func validateOCIRegistryFlags(gqlEndpoint, headerFile, csubAddr string, csubTls,
 	opts.queryEOLOnIngestion = queryEOLIngestion
 	opts.queryDepsDevOnIngestion = queryDepsDevOnIngestion
 	opts.useCsub = useCsub
+	opts.insecureSkipTLSVerify = insecureSkipTLSVerify
 
 	var csubClient csub_client.Client
 
@@ -353,7 +375,7 @@ func validateOCIRegistryFlags(gqlEndpoint, headerFile, csubAddr string, csubTls,
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"use-csub"})
+	set, err := cli.BuildFlags([]string{"use-csub", ociInsecureSkipTLSVerify})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
