@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/contrib/entgql"
@@ -194,7 +195,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
+		if err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert dependency node")
 		}
 	}

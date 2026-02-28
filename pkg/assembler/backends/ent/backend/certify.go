@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/contrib/entgql"
@@ -577,7 +578,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 				).
 				DoNothing().
 				Exec(ctx)
-			if err != nil {
+			if err != nil && err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "bulk upsert certifyBad node")
 			}
 		}
@@ -616,7 +617,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 				).
 				DoNothing().
 				Exec(ctx)
-			if err != nil {
+			if err != nil && err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "bulk upsert certifyGood node")
 			}
 		}

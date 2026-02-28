@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
 	"strconv"
@@ -276,7 +277,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
+		if err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert scorecard node")
 		}
 	}
