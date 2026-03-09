@@ -30,17 +30,17 @@ jobs:
         with:
           persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # tag=v3.2.1
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # tag=v3.2.1
         with:
-          go-version: '1.24'
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+          go-version: '1.25.0'
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/go/pkg/mod
           key: test-integration-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Setup the project
         run: go mod download
       - name: Install atlas
-        uses: ariga/setup-atlas@d52cd13fed38eca914fa57071155a4644fd6f820 # v0.2
+        uses: ariga/setup-atlas@2f3c785c89a15e1c0d07bcae3900fb5feb969eea # v0.3
       - name: Run integration merge test
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
