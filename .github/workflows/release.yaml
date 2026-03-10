@@ -54,7 +54,7 @@ jobs:
         with:
           go-version: '1.25.0'
       - name: Install cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # main
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # main
       - name: Install syft
         uses: anchore/sbom-action/download-syft@28d71544de8eaf1b958d335707167c5f783590ad # v0.22.2
       - name: Free disk space
@@ -167,7 +167,7 @@ jobs:
           format: "spdx-json"
           output: "spdx.sbom.json"
       - name: Install cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # main
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash
