@@ -174,7 +174,7 @@ func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDo
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
+		if err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert builder node")
 		}
 	}
