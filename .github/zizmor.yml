@@ -15,6 +15,15 @@ rules:
       # The release workflow only runs against well-defined tags and requires
       # maintainer action to trigger, so using `github.ref_name` in a template
       # is low-risk
-      - release.yaml:201:9
-      - release.yaml:217:9
-      - release.yaml:228:9
+      - release.yaml:236:91
+      - release.yaml:239:33
+      - release.yaml:249:85
+      - release.yaml:250:33
+      - release.yaml:260:85
+      - release.yaml:261:33
+  unpinned-uses:
+    ignore:
+      # The slsa-github-generator action requires tags instead of hashes
+      # https://github.com/slsa-framework/slsa-github-generator/tree/main?tab=readme-ov-file#referencing-slsa-builders-and-generators
+      - release.yaml:190:11
+      - release.yaml:204:11
