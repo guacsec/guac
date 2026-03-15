@@ -330,7 +330,7 @@ func toModelScorecard(record *ent.CertifyScorecard) *model.Scorecard {
 	return &model.Scorecard{
 		Checks:           record.Checks,
 		AggregateScore:   record.AggregateScore,
-		TimeScanned:      record.TimeScanned,
+		TimeScanned:      record.TimeScanned.UTC(),
 		ScorecardVersion: record.ScorecardVersion,
 		ScorecardCommit:  record.ScorecardCommit,
 		Origin:           record.Origin,

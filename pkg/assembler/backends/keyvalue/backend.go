@@ -343,6 +343,14 @@ func timeKey(t time.Time) string {
 	return fmt.Sprint(t.Unix())
 }
 
+func ptrToUTC(t *time.Time) *time.Time {
+	if t == nil {
+		return nil
+	}
+	utc := t.UTC()
+	return &utc
+}
+
 func (c *demoClient) getPackageVersionAndArtifacts(ctx context.Context, pkgOrArt []string) ([]string, []string, error) {
 	var pkgs []string
 	var arts []string

@@ -645,7 +645,7 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 				Origin:               createdValue.Origin,
 				Collector:            createdValue.Collector,
 				DocumentRef:          createdValue.DocumentRef,
-				KnownSince:           createdValue.KnownSince,
+				KnownSince:           createdValue.KnownSince.UTC(),
 				IncludedSoftware:     collectedSoftware,
 				IncludedDependencies: collectedDeps,
 				IncludedOccurrences:  collectedOccurs,

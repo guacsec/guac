@@ -235,7 +235,7 @@ func (c *demoClient) convLegal(ctx context.Context, in *certifyLegalStruct) (*mo
 		DiscoveredLicense: in.DiscoveredLicense,
 		Attribution:       in.Attribution,
 		Justification:     in.Justification,
-		TimeScanned:       in.TimeScanned,
+		TimeScanned:       in.TimeScanned.UTC(),
 		Origin:            in.Origin,
 		Collector:         in.Collector,
 		DocumentRef:       in.DocumentRef,

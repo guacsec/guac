@@ -433,7 +433,7 @@ func (c *demoClient) buildHasSourceAt(ctx context.Context, link *srcMapLink, fil
 		ID:            link.ThisID,
 		Package:       p,
 		Source:        s,
-		KnownSince:    link.KnownSince,
+		KnownSince:    link.KnownSince.UTC(),
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,

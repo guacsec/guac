@@ -578,7 +578,7 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 		Subject:       subj,
 		Email:         link.Email,
 		Info:          link.Info,
-		Since:         link.Since,
+		Since:         link.Since.UTC(),
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,

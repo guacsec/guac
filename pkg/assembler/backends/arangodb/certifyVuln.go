@@ -372,7 +372,7 @@ func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 		certifyVuln := &model.CertifyVuln{
 			ID: createdValue.CertifyVulnID,
 			Metadata: &model.ScanMetadata{
-				TimeScanned:    createdValue.TimeScanned,
+				TimeScanned:    createdValue.TimeScanned.UTC(),
 				DbURI:          createdValue.DbUri,
 				DbVersion:      createdValue.DbVersion,
 				ScannerURI:     createdValue.ScannerUri,

@@ -410,11 +410,13 @@ func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cu
 				}
 
 				if !createdValue.StartedOn.Equal(time.Unix(0, 0).UTC()) {
-					slsa.StartedOn = createdValue.StartedOn
+					t := createdValue.StartedOn.UTC()
+					slsa.StartedOn = &t
 				}
 
 				if !createdValue.FinishedOn.Equal(time.Unix(0, 0).UTC()) {
-					slsa.FinishedOn = createdValue.FinishedOn
+					t := createdValue.FinishedOn.UTC()
+					slsa.FinishedOn = &t
 				}
 
 				hasSLSA := &model.HasSlsa{
