@@ -159,7 +159,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	// so that they can be referenced with higher specificity in GUAC
 	//
 	// PURL types not defined in purl library handled generically
-	case "alpine", "alpm", "apk", "huggingface", "githubactions", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
+	case "alpine", "githubactions", PurlTypeGuac:
 		fallthrough
 	// PURL types defined in purl library handled generically
 	case purl.TypeBitbucket, purl.TypeCocoapods, purl.TypeCargo,
@@ -167,8 +167,9 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		purl.TypeDebian, purl.TypeGem, purl.TypeGithub,
 		purl.TypeGolang, purl.TypeHackage, purl.TypeHex, purl.TypeMaven,
 		purl.TypeNPM, purl.TypeNuget, purl.TypePyPi, purl.TypeRPM, purl.TypeSwift,
-		purl.TypeGeneric, purl.TypeYocto, purl.TypeCpan:
-		// some code
+		purl.TypeGeneric, purl.TypeYocto, purl.TypeCpan,
+		purl.TypeAlpm, purl.TypeApk, purl.TypeBitnami, purl.TypeHuggingface,
+		purl.TypeMLFlow, purl.TypePub, purl.TypeQpkg, purl.TypeSWID:
 		r := pkg(p.Type, p.Namespace, p.Name, p.Version, p.Subpath, p.Qualifiers.Map())
 		return r, nil
 
@@ -223,9 +224,13 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		return r, nil
 
 	default:
-		// unhandled types should throw an error so we can make sure to review the
-		// implementation of newly introduced PURL types.
-		return nil, fmt.Errorf("unhandled PURL type: %s", p.Type)
+		if _, ok := purl.KnownTypes[p.Type]; ok {
+			return nil, fmt.Errorf("unhandled known PURL type: %q. Please report at https://github.com/guacsec/guac/issues/new", p.Type)
+		}
+		if _, ok := purl.CandidateTypes[p.Type]; ok {
+			return nil, fmt.Errorf("unhandled candidate PURL type: %q. Please report at https://github.com/guacsec/guac/issues/new", p.Type)
+		}
+		return nil, fmt.Errorf("unsupported PURL type: %q", p.Type)
 	}
 }
 
