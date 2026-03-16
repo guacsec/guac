@@ -18,14 +18,18 @@ package git_collector
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/transport/client"
+	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"go.uber.org/zap"
 )
 
@@ -47,6 +51,12 @@ type gitDocumentCollector struct {
 }
 
 func NewGitDocumentCollector(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitDocumentCollector {
+	// Install custom HTTP transport with GUAC User-Agent header
+	// go-git requires global protocol installation rather than per-instance config.
+	httpClient := &http.Client{Transport: version.UATransport}
+	client.InstallProtocol("http", githttp.NewClient(httpClient))
+	client.InstallProtocol("https", githttp.NewClient(httpClient))
+
 	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
 
 	return &gitDocumentCollector{
