@@ -1673,9 +1673,17 @@ func startTestServer() (*http.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize graphql server: %s", err)
 	}
-	http.Handle("/query", srv)
 
-	server := &http.Server{Addr: fmt.Sprintf(":%d", 9090)}
+	// Use a fresh ServeMux per invocation to avoid "pattern already registered"
+	// panics on the global http.DefaultServeMux when tests run more than once in
+	// the same process or in parallel.
+	mux := http.NewServeMux()
+	mux.Handle("/query", srv)
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", 9090),
+		Handler: mux,
+	}
 	logger.Info("starting server")
 
 	go func() {

@@ -120,20 +120,100 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	pkgs, err := b.client.PackageVersion.Query().
-		Where(packageQueryPredicates(pkgSpec)).
-		WithName(func(q *ent.PackageNameQuery) {}).
+	// ID routing gate: if a specific ID is provided, detect its type.
+	// If it's a package_versions ID, fall back to the original version-first query path
+	// (single-ID lookups are safe from parameter limit bugs).
+	// If it's a package_names ID or has no type prefix, proceed with the name-first path.
+	if pkgSpec.ID != nil {
+		globalID := fromGlobalID(*pkgSpec.ID)
+		if globalID.nodeType == packageversion.Table {
+			// Fall back to version-first path for single-ID lookups (safe from parameter limits)
+			pkgs, err := b.client.PackageVersion.Query().
+				Where(packageQueryPredicates(pkgSpec)).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				All(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed package query with error: %w", err)
+			}
+			var pkgNames []*ent.PackageName
+			for _, collectedPkgVersion := range pkgs {
+				pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
+			}
+			return toModelPackageTrie(pkgNames), nil
+		} else if globalID.nodeType != "" && globalID.nodeType != packagename.Table {
+			// Invalid ID type
+			return nil, fmt.Errorf("invalid package ID type: %s", globalID.nodeType)
+		}
+		// else: nodeType == packagename.Table or "", proceed with name-first path
+	}
+
+	// Name-first query path to avoid SQL parameter limit explosion.
+	// Query PackageName directly with name-level predicates.
+	namePredicates := packageNameQuery(pkgSpec)
+	pkgNames, err := b.client.PackageName.Query().
+		Where(namePredicates).
+		Order(ent.Asc(packagename.FieldType, packagename.FieldNamespace, packagename.FieldName)).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed package query with error: %w", err)
+		return nil, fmt.Errorf("failed package name query with error: %w", err)
 	}
 
-	var pkgNames []*ent.PackageName
-	for _, collectedPkgVersion := range pkgs {
-		pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
+	// If no names found, return empty result
+	if len(pkgNames) == 0 {
+		return toModelPackageTrie(pkgNames), nil
 	}
 
-	return toModelPackageTrie(pkgNames), nil
+	// Build version-level predicates inline (using EqualFold for case-insensitive matching,
+	// not VersionEQ/SubpathEQ, to preserve existing case-insensitive semantics).
+	versionPreds := packageversion.And(
+		optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
+		optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+		packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+	)
+
+	// Chunk the names and manually query versions for each chunk to stay under
+	// the PostgreSQL parameter limit (65,535). MaxBatchSize = 5,000.
+	chunks := chunk(pkgNames, MaxBatchSize)
+	for _, nameChunk := range chunks {
+		// Extract UUIDs from PackageName structs
+		var nameIDs []uuid.UUID
+		nameIDMap := make(map[uuid.UUID]*ent.PackageName)
+		for _, pn := range nameChunk {
+			nameIDs = append(nameIDs, pn.ID)
+			nameIDMap[pn.ID] = pn
+		}
+
+		// Query versions for this chunk using the NameIDIn predicate (bounded by chunk size)
+		versions, err := b.client.PackageVersion.Query().
+			Where(
+				packageversion.NameIDIn(nameIDs...),
+				versionPreds,
+			).
+			All(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed package version query with error: %w", err)
+		}
+
+		// Populate the Edges.Versions for each PackageName by grouping versions by their NameID
+		for _, v := range versions {
+			if pn, ok := nameIDMap[v.NameID]; ok {
+				if pn.Edges.Versions == nil {
+					pn.Edges.Versions = make([]*ent.PackageVersion, 0)
+				}
+				pn.Edges.Versions = append(pn.Edges.Versions, v)
+			}
+		}
+	}
+
+	// PackageNames with no versions matching the criteria are filtered out
+	var resultNames []*ent.PackageName
+	for _, pn := range pkgNames {
+		if len(pn.Edges.Versions) > 0 {
+			resultNames = append(resultNames, pn)
+		}
+	}
+
+	return toModelPackageTrie(resultNames), nil
 }
 
 func packageQueryPredicates(pkgSpec *model.PkgSpec) predicate.PackageVersion {
