@@ -205,10 +205,17 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		}
 	}
 
-	// PackageNames with no versions matching the criteria are filtered out
+	// Only filter out names with no matching versions when version-level filters
+	// are active. Without filters the caller expects all names back with all
+	// their versions, so we must not silently drop a name whose edges weren't
+	// fully populated (e.g. due to a concurrent write or an empty chunk).
+	hasVersionFilter := pkgSpec.Version != nil || pkgSpec.Subpath != nil ||
+		len(pkgSpec.Qualifiers) > 0 ||
+		(pkgSpec.MatchOnlyEmptyQualifiers != nil && *pkgSpec.MatchOnlyEmptyQualifiers)
+
 	var resultNames []*ent.PackageName
 	for _, pn := range pkgNames {
-		if len(pn.Edges.Versions) > 0 {
+		if !hasVersionFilter || len(pn.Edges.Versions) > 0 {
 			resultNames = append(resultNames, pn)
 		}
 	}

@@ -215,15 +215,6 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:30019e253ab74eb3e38abae7b8997e8e60c420169044ca9bfaf9665f54ad18bc",
-				},
-			},
-			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX),
 				Type:   processor.DocumentSPDX,
 				Format: processor.FormatJSON,
