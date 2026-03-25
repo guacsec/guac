@@ -21,13 +21,10 @@ import (
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 )
 
-// PredicateVuln This is a new predicate type for vulnerabilities based off
-// https://github.com/sigstore/cosign/blob/main/specs/COSIGN_VULN_ATTESTATION_SPEC.md.
-// This is used by the certifier to attest to vulnerabilities in an artifact.
-// Currently, the predicate is defined here but the intention is to upstream this to
-// https://github.com/in-toto/attestation in the near future once the quirks are worked out.
+// PredicateVuln is the predicate type for vulnerability attestations as defined by the
+// in-toto attestation framework. See https://github.com/in-toto/attestation/blob/main/spec/predicates/vulns_02.md
 const (
-	PredicateVuln = "https://in-toto.io/attestation/vulns/v0.1"
+	PredicateVuln = "https://in-toto.io/attestation/vulns/v0.2"
 )
 
 // VulnerabilityStatement defines the statement header and the vulnerability predicate
@@ -44,13 +41,11 @@ type Metadata struct {
 }
 
 // Result defines the Vulnerability ID and its alias. There can be multiple
-// results per artifact
-// TODO: The spec has a discrepency that needs to be resolved, we are following
-// the example json in the spec since that seems to be what 2 examples we've seen
-// are using. Tracking https://github.com/in-toto/attestation/issues/391
+// results per artifact.
 type Result struct {
-	Id       string     `json:"id,omitempty"`
-	Severity []Severity `json:"severity,omitempty"`
+	Id          string                   `json:"id,omitempty"`
+	Severity    []Severity               `json:"severity,omitempty"`
+	Annotations []map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // Severity describes the severity of a vulnerability using one or more quantitative scoring method.
@@ -59,9 +54,6 @@ type Severity struct {
 	Method string `json:"method,omitempty"`
 	// required
 	Score string `json:"score,omitempty"`
-	// ambiguous type definition ins spec, look at
-	// https://github.com/in-toto/attestation/issues/390https://github.com/in-toto/attestation/issues/390
-	Annotations []map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // DB defines the scanner database used at the time of scan
