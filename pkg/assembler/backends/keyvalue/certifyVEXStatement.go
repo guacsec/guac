@@ -604,7 +604,7 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 		VexJustification: link.Justification,
 		Statement:        link.Statement,
 		StatusNotes:      link.StatusNotes,
-		KnownSince:       link.KnownSince,
+		KnownSince:       link.KnownSince.UTC(),
 		Origin:           link.Origin,
 		Collector:        link.Collector,
 		DocumentRef:      link.DocumentRef,

@@ -482,7 +482,7 @@ func (c *demoClient) buildScorecard(ctx context.Context, link *scorecardLink, fi
 		ID:     link.ThisID,
 		Source: s,
 		Scorecard: &model.Scorecard{
-			TimeScanned:      link.TimeScanned,
+			TimeScanned:      link.TimeScanned.UTC(),
 			AggregateScore:   link.AggregateScore,
 			Checks:           getCollectedScorecardChecks(link.Checks),
 			ScorecardVersion: link.ScorecardVersion,

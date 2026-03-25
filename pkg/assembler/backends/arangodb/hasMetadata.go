@@ -769,7 +769,7 @@ func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 			ID:            createdValue.HasMetadataID,
 			Key:           createdValue.Key,
 			Value:         createdValue.Value,
-			Timestamp:     createdValue.Timestamp,
+			Timestamp:     createdValue.Timestamp.UTC(),
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Origin,
 			Collector:     createdValue.Collector,

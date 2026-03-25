@@ -368,7 +368,7 @@ func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor, in
 		scorecard := &model.Scorecard{
 			Checks:           checks,
 			AggregateScore:   createdValue.AggregateScore,
-			TimeScanned:      createdValue.TimeScanned,
+			TimeScanned:      createdValue.TimeScanned.UTC(),
 			ScorecardVersion: createdValue.ScorecardVersion,
 			ScorecardCommit:  createdValue.ScorecardCommit,
 			Origin:           createdValue.Origin,
@@ -472,7 +472,7 @@ func (c *arangoClient) queryCertifyScorecardNodeByID(ctx context.Context, filter
 	scorecard := &model.Scorecard{
 		Checks:           checks,
 		AggregateScore:   collectedValues[0].AggregateScore,
-		TimeScanned:      collectedValues[0].TimeScanned,
+		TimeScanned:      collectedValues[0].TimeScanned.UTC(),
 		ScorecardVersion: collectedValues[0].ScorecardVersion,
 		ScorecardCommit:  collectedValues[0].ScorecardCommit,
 		Origin:           collectedValues[0].Origin,

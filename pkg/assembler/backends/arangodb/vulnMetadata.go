@@ -336,7 +336,7 @@ func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 				Vulnerability: vuln,
 				ScoreType:     createdValue.ScoreType,
 				ScoreValue:    createdValue.ScoreValue,
-				Timestamp:     createdValue.Timestamp,
+				Timestamp:     createdValue.Timestamp.UTC(),
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,
 				DocumentRef:   createdValue.DocumentRef,

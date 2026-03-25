@@ -579,7 +579,7 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 	hasMetadata := model.HasMetadata{
 		ID:            link.ThisID,
 		Subject:       subj,
-		Timestamp:     link.Timestamp,
+		Timestamp:     link.Timestamp.UTC(),
 		Key:           link.MDKey,
 		Value:         link.Value,
 		Justification: link.Justification,

@@ -464,7 +464,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 		Subject:       sub,
 		Email:         v.Email,
 		Info:          v.Info,
-		Since:         v.Since,
+		Since:         v.Since.UTC(),
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
