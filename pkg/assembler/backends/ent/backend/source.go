@@ -656,7 +656,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 		Source:        toModelSource(record.Edges.Source),
 		Package:       pkg,
 		ID:            hasSourceAtGlobalID(record.ID.String()),
-		KnownSince:    record.KnownSince,
+		KnownSince:    record.KnownSince.UTC(),
 		Justification: record.Justification,
 		Origin:        record.Origin,
 		Collector:     record.Collector,

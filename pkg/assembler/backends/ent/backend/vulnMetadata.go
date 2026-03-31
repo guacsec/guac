@@ -316,7 +316,7 @@ func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.Vulnerabi
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(v.Edges.VulnerabilityID),
 		ScoreType:     model.VulnerabilityScoreType(v.ScoreType),
 		ScoreValue:    v.ScoreValue,
-		Timestamp:     v.Timestamp,
+		Timestamp:     v.Timestamp.UTC(),
 		Origin:        v.Origin,
 		Collector:     v.Collector,
 		DocumentRef:   v.DocumentRef,

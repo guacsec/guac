@@ -560,7 +560,7 @@ func (c *demoClient) buildCertifyVulnerability(ctx context.Context, link *certif
 		Package:       p,
 		Vulnerability: vuln,
 		Metadata: &model.ScanMetadata{
-			TimeScanned:    link.TimeScanned,
+			TimeScanned:    link.TimeScanned.UTC(),
 			DbURI:          link.DBURI,
 			DbVersion:      link.DBVersion,
 			ScannerURI:     link.ScannerURI,

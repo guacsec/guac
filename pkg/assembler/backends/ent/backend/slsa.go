@@ -407,11 +407,13 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	}
 
 	if !att.StartedOn.Equal(time.Unix(0, 0).UTC()) {
-		slsa.StartedOn = &att.StartedOn
+		t := att.StartedOn.UTC()
+		slsa.StartedOn = &t
 	}
 
 	if !att.FinishedOn.Equal(time.Unix(0, 0).UTC()) {
-		slsa.FinishedOn = &att.FinishedOn
+		t := att.FinishedOn.UTC()
+		slsa.FinishedOn = &t
 	}
 
 	return &model.HasSlsa{

@@ -580,7 +580,7 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 			VexJustification: model.VexJustification(createdValue.VexJustification),
 			Statement:        createdValue.Statement,
 			StatusNotes:      createdValue.StatusNotes,
-			KnownSince:       createdValue.KnownSince,
+			KnownSince:       createdValue.KnownSince.UTC(),
 			Origin:           createdValue.Origin,
 			Collector:        createdValue.Collector,
 			DocumentRef:      createdValue.DocumentRef,

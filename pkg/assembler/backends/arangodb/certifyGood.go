@@ -758,7 +758,7 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Collector,
 			Collector:     createdValue.Origin,
-			KnownSince:    createdValue.KnownSince,
+			KnownSince:    createdValue.KnownSince.UTC(),
 			DocumentRef:   createdValue.DocumentRef,
 		}
 		if pkg != nil {
