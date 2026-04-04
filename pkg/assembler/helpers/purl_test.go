@@ -17,6 +17,7 @@ package helpers
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -216,6 +217,9 @@ func TestPurlConvert(t *testing.T) {
 		}, {
 			purlUri:  "pkg:cpan/Pod-Perldoc@3.20",
 			expected: pkg("cpan", "", "Pod-Perldoc", "3.20", "", map[string]string{}),
+		}, {
+			purlUri:  "pkg:bitnami/apache@2.4.57",
+			expected: pkg("bitnami", "", "apache", "2.4.57", "", map[string]string{}),
 		},
 	}
 
@@ -229,6 +233,38 @@ func TestPurlConvert(t *testing.T) {
 			if diff := cmp.Diff(tt.expected, got, cmpOpts...); diff != "" {
 				t.Errorf("model Package mismatch (-want +got):\n%s", diff)
 				return
+			}
+		})
+	}
+}
+
+func TestPurlConvertUnhandledTypes(t *testing.T) {
+	testCases := []struct {
+		name        string
+		purlUri     string
+		expectedErr string
+	}{
+		{
+			name:        "unhandled candidate purl type",
+			purlUri:     "pkg:helm/prometheus@14.0.0",
+			expectedErr: "unhandled candidate PURL type",
+		},
+		{
+			name:        "unsupported unknown purl type",
+			purlUri:     "pkg:customtype/mynamespace/mypackage@1.0.0",
+			expectedErr: "unsupported PURL type",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := PurlToPkg(tt.purlUri)
+			if err == nil {
+				t.Errorf("expected error for purl %s, got nil", tt.purlUri)
+				return
+			}
+			if !strings.Contains(err.Error(), tt.expectedErr) {
+				t.Errorf("expected error containing %q, got: %v", tt.expectedErr, err)
 			}
 		})
 	}
