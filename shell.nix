@@ -5,9 +5,9 @@ mkShell {
     colima
     docker
     docker-compose
-    jq  
+    jq
     gcc
-    go_1_25
+    go_1_26
     golangci-lint
     gopls
     gotests
