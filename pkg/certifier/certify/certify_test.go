@@ -82,7 +82,7 @@ func TestCertify(t *testing.T) {
 		query: newMockQuery(),
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.Text4ShellVulAttestation),
+				Blob:   []byte(testdata.Text4ShellVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -91,7 +91,7 @@ func TestCertify(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.SecondLevelVulAttestation),
+				Blob:   []byte(testdata.SecondLevelVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -100,7 +100,7 @@ func TestCertify(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.Log4JVulAttestation),
+				Blob:   []byte(testdata.Log4JVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -109,7 +109,7 @@ func TestCertify(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.RootVulAttestation),
+				Blob:   []byte(testdata.RootVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -125,7 +125,7 @@ func TestCertify(t *testing.T) {
 		query: newMockQuery(),
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.Text4ShellVulAttestation),
+				Blob:   []byte(testdata.Text4ShellVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -134,7 +134,7 @@ func TestCertify(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.SecondLevelVulAttestation),
+				Blob:   []byte(testdata.SecondLevelVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -143,7 +143,7 @@ func TestCertify(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.Log4JVulAttestation),
+				Blob:   []byte(testdata.Log4JVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -152,7 +152,7 @@ func TestCertify(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.RootVulAttestation),
+				Blob:   []byte(testdata.RootVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{

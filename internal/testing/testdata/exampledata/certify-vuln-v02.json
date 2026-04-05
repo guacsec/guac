@@ -1,0 +1,38 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "uri": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+    }
+  ],
+  "predicateType": "https://in-toto.io/attestation/vulns/v0.2",
+  "predicate": {
+    "scanner": {
+      "uri": "osv.dev",
+      "version": "0.0.14",
+      "result": [{
+            "id": "GHSA-7rjr-3q55-vv33",
+            "severity": [{
+                "method": "CVSSv31",
+                "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
+            }]
+        }, {
+            "id": "GHSA-8489-44mv-ggj8"
+        }, {
+            "id": "GHSA-fxph-q3j8-mv87"
+        }, {
+            "id": "GHSA-jfh8-c2jp-5v3q"
+        }, {
+            "id": "GHSA-p6xc-xr62-6r2g"
+        }, {
+            "id": "GHSA-vc5p-v9hr-52mj"
+        }, {
+            "id": "GHSA-vwqq-5vrc-xw9h"
+        }]
+    },
+    "metadata": {
+      "scanStartedOn": "2022-11-21T17:45:50.52Z",
+      "scanFinishedOn": "2022-11-21T17:45:50.52Z"
+    }
+  }
+}

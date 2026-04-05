@@ -190,6 +190,16 @@ func Test_GuessDocument(t *testing.T) {
 		expectedType:   processor.DocumentITE6Vul,
 		expectedFormat: processor.FormatJSON,
 	}, {
+		name: "valid Vuln v0.2 ITE6 Document",
+		document: &processor.Document{
+			Blob:              testdata.ITE6VulnV02Example,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentITE6Vul,
+		expectedFormat: processor.FormatJSON,
+	}, {
 		name: "valid clearly defined ITE6 Document",
 		document: &processor.Document{
 			Blob:              testdata.ITE6CDLog4j,

@@ -141,6 +141,9 @@ var (
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
 
+	//go:embed exampledata/certify-vuln-v02.json
+	ITE6VulnV02Example []byte
+
 	//go:embed exampledata/cd-log4j.json
 	ITE6CDLog4j []byte
 
@@ -155,6 +158,9 @@ var (
 
 	//go:embed exampledata/certify-novuln.json
 	ITE6NoVulnExample []byte
+
+	//go:embed exampledata/certify-novuln-v02.json
+	ITE6NoVulnV02Example []byte
 
 	//go:embed exampledata/oci-kubectl-linux-amd64-in-toto.json
 	OCIKubectlLinuxAMD64ITE6 []byte
@@ -2283,6 +2289,115 @@ var (
 		}
 	 }`
 
+	Text4ShellVulAttestationV02 = `{
+		"type":"https://in-toto.io/Statement/v1",
+		"subject":[
+		   {
+			  "uri":"pkg:maven/org.apache.commons/commons-text@1.9"
+		   }
+		],
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.2",
+		"predicate":{
+		   "scanner":{
+			  "uri":"osv.dev",
+			  "version":"0.0.14",
+			  "db":{
+			  },
+			  "result":[
+				 {
+					"id":"GHSA-599f-7c49-w659"
+				 }
+			  ]
+		   },
+		   "metadata":{
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+                          "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+		   }
+		}
+	 }`
+	SecondLevelVulAttestationV02 = `{
+		"type":"https://in-toto.io/Statement/v1",
+		"subject":[
+		   {
+			  "uri":"pkg:oci/vul-secondLevel-latest?repository_url=gcr.io"
+		   }
+		],
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.2",
+		"predicate":{
+		   "scanner": {
+			"uri": "osv.dev",
+			"version": "0.0.14"
+		   },
+		   "metadata":{
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+		   }
+		}
+	 }`
+	RootVulAttestationV02 = `{
+		"type":"https://in-toto.io/Statement/v1",
+		"subject":[
+		   {
+			  "uri":"pkg:oci/vul-image-latest?repository_url=gcr.io"
+		   }
+		],
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.2",
+		"predicate":{
+		   "scanner": {
+			"uri": "osv.dev",
+			"version": "0.0.14"
+		   },
+		   "metadata":{
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+		   }
+		}
+	 }`
+	Log4JVulAttestationV02 = `{
+		"type":"https://in-toto.io/Statement/v1",
+		"subject":[
+		   {
+			  "uri":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+		   }
+		],
+		"predicate_type":"https://in-toto.io/attestation/vulns/v0.2",
+		"predicate":{
+		   "scanner":{
+			  "uri":"osv.dev",
+			  "version":"0.0.14",
+			  "db":{
+			  },
+			  "result":[
+				 {
+					"id":"GHSA-7rjr-3q55-vv33"
+				 },
+				 {
+					"id":"GHSA-8489-44mv-ggj8"
+				 },
+				 {
+					"id":"GHSA-fxph-q3j8-mv87"
+				 },
+				 {
+					"id":"GHSA-jfh8-c2jp-5v3q"
+				 },
+				 {
+					"id":"GHSA-p6xc-xr62-6r2g"
+				 },
+				 {
+					"id":"GHSA-vc5p-v9hr-52mj"
+				 },
+				 {
+					"id":"GHSA-vwqq-5vrc-xw9h"
+				 }
+			  ]
+		   },
+		   "metadata":{
+			  "scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+			  "scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+		   }
+		}
+	 }`
+
 	RootPackage = root_package.PackageNode{
 		Purl: "pkg:oci/vul-image-latest?repository_url=gcr.io",
 	}
@@ -2413,6 +2528,126 @@ var (
 		    }
 		  ],
 		  "predicate_type": "https://in-toto.io/attestation/vulns/v0.1",
+		  "predicate": {
+		    "scanner": {
+		      "uri": "osv.dev",
+		      "version": "0.0.14",
+		      "db": {},
+		      "result": [
+			{
+			  "id": "GHSA-45p5-v273-3qqr"
+			},
+			{
+			  "id": "GHSA-53jx-vvf9-4x38"
+			},
+			{
+			  "id": "GHSA-h5fg-jpgr-rv9c"
+			}
+		      ]
+		    },
+		    "metadata": {
+		      "scanStartedOn": "2025-12-01T15:19:40.545851224Z",
+		      "scanFinishedOn": "2025-12-01T15:19:40.545851224Z"
+		    }
+		  }
+		}`
+
+	VertxWebCommonAttestationV02 = `{
+		"type": "https://in-toto.io/Statement/v1",
+		"subject": [
+			{
+				"uri": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar"
+			}
+		],
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.2",
+		"predicate": {
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14"
+			},
+			"metadata": {
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+			}
+		}
+	}`
+
+	VertxAuthCommonAttestationV02 = `{
+		"type": "https://in-toto.io/Statement/v1",
+		"subject": [
+			{
+				"uri": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar"
+			}
+		],
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.2",
+		"predicate": {
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14"
+			},
+			"metadata": {
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+			}
+		}
+	}`
+
+	VertxBridgeCommonAttestationV02 = `{
+		"type": "https://in-toto.io/Statement/v1",
+		"subject": [
+			{
+				"uri": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar"
+			}
+		],
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.2",
+		"predicate": {
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14"
+			},
+			"metadata": {
+				"scanStartedOn":"2022-11-22T13:19:18.825699-05:00",
+				"scanFinishedOn":"2022-11-22T13:19:18.825699-05:00"
+			}
+		}
+	}`
+
+	VertxCoreCommonAttestationV02 = `{
+		"type": "https://in-toto.io/Statement/v1",
+		"subject": [
+			{
+				"uri": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar"
+			}
+		],
+		"predicate_type": "https://in-toto.io/attestation/vulns/v0.2",
+		"predicate": {
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14",
+				"result": [
+					{
+						"id": "GHSA-9ph3-v2vh-3qx7"
+					},
+					{
+						"id":"GHSA-cphf-4846-3xx9"
+					}
+				]
+			},
+			"metadata": {
+				"scanStartedOn":"2026-02-09T15:58:30.797127394Z",
+				"scanFinishedOn":"2026-02-09T15:58:30.797127394Z"
+			}
+		}
+	}`
+
+	VertxWebAttestationV02 = `{
+		  "type": "https://in-toto.io/Statement/v1",
+		  "subject": [
+		    {
+		      "uri": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar"
+		    }
+		  ],
+		  "predicate_type": "https://in-toto.io/attestation/vulns/v0.2",
 		  "predicate": {
 		    "scanner": {
 		      "uri": "osv.dev",
