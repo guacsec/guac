@@ -17,7 +17,7 @@ package guesser
 
 import (
 	"github.com/guacsec/guac/pkg/handler/processor"
-	sc "github.com/ossf/scorecard/v4/pkg"
+	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 )
 
 type scorecardTypeGuesser struct{}
