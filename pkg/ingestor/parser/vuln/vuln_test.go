@@ -316,6 +316,279 @@ func TestParser(t *testing.T) {
 		}},
 		wantIVs: []assembler.VulnEqualIngest{},
 		wantErr: false,
+	}, {
+		name: "valid v0.2 vulnerability certifier document",
+		doc: &processor.Document{
+			Blob:   testdata.ITE6VulnV02Example,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentITE6Vul,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantCVs: []assembler.CertifyVulnIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vc5p-v9hr-52mj",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
+				},
+				VulnData: &generated.ScanMetadataInput{
+					TimeScanned:    tm,
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+		},
+		wantIVs: []assembler.VulnEqualIngest{
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vc5p-v9hr-52mj",
+				},
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-vc5p-v9hr-52mj",
+				},
+				VulnEqual: &generated.VulnEqualInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+		},
+		wantVMs: []assembler.VulnMetadataIngest{
+			{
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
+				},
+				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+					ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+					ScoreValue: 9.0,
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name: "no vulnerability v0.2 certifier document with package digest",
+		doc: &processor.Document{
+			Blob:   testdata.ITE6NoVulnV02Example,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentITE6Vul,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantCVs: []assembler.CertifyVulnIngest{{
+			Pkg: &generated.PkgInputSpec{
+				Type:      "maven",
+				Namespace: ptrfrom.String("org.apache.logging.log4j"),
+				Name:      "log4j-core",
+				Version:   ptrfrom.String("2.8.1"),
+				Subpath:   ptrfrom.String(""),
+			},
+			Vulnerability: &generated.VulnerabilityInputSpec{Type: "noVuln"},
+			VulnData: &generated.ScanMetadataInput{
+				TimeScanned:    tm,
+				ScannerUri:     "osv.dev",
+				ScannerVersion: "0.0.14",
+			},
+		}},
+		wantIVs: []assembler.VulnEqualIngest{},
+		wantErr: false,
 	}}
 	ivSortOpt := cmp.Transformer("Sort", func(in []assembler.VulnEqualIngest) []assembler.VulnEqualIngest {
 		out := append([]assembler.VulnEqualIngest(nil), in...)

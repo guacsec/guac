@@ -57,7 +57,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		rootComponent: []*root_package.PackageNode{&testdata.Text4ShellPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.Text4ShellVulAttestation),
+				Blob:   []byte(testdata.Text4ShellVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -66,7 +66,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.SecondLevelVulAttestation),
+				Blob:   []byte(testdata.SecondLevelVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -75,7 +75,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.Log4JVulAttestation),
+				Blob:   []byte(testdata.Log4JVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -84,7 +84,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.RootVulAttestation),
+				Blob:   []byte(testdata.RootVulAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -104,7 +104,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		rootComponent: []*root_package.PackageNode{&testdata.VertxWebCommonPackage, &testdata.VertxAuthCommonPackage, &testdata.VertxBridgeCommonPackage, &testdata.VertxCoreCommonPackage, &testdata.VertxWebPackage},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.VertxWebCommonAttestation),
+				Blob:   []byte(testdata.VertxWebCommonAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -113,7 +113,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.VertxAuthCommonAttestation),
+				Blob:   []byte(testdata.VertxAuthCommonAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -122,7 +122,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.VertxBridgeCommonAttestation),
+				Blob:   []byte(testdata.VertxBridgeCommonAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -131,7 +131,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.VertxCoreCommonAttestation),
+				Blob:   []byte(testdata.VertxCoreCommonAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -140,7 +140,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				},
 			},
 			{
-				Blob:   []byte(testdata.VertxWebAttestation),
+				Blob:   []byte(testdata.VertxWebAttestationV02),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -247,7 +247,7 @@ func Test_createAttestation(t *testing.T) {
 			want: &attestation_vuln.VulnerabilityStatement{
 				Statement: attestationv1.Statement{
 					Type:          attestationv1.StatementTypeUri,
-					PredicateType: attestation_vuln.PredicateVuln,
+					PredicateType: attestation_vuln.PredicateVulnV2,
 					Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 				},
 				Predicate: attestation_vuln.VulnerabilityPredicate{
@@ -281,7 +281,7 @@ func Test_createAttestation(t *testing.T) {
 			want: &attestation_vuln.VulnerabilityStatement{
 				Statement: attestationv1.Statement{
 					Type:          attestationv1.StatementTypeUri,
-					PredicateType: attestation_vuln.PredicateVuln,
+					PredicateType: attestation_vuln.PredicateVulnV2,
 					Subject:       []*attestationv1.ResourceDescriptor{{Name: ""}},
 				},
 				Predicate: attestation_vuln.VulnerabilityPredicate{
