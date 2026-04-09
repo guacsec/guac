@@ -32,210 +32,210 @@ type ArtifactCreate struct {
 }
 
 // SetAlgorithm sets the "algorithm" field.
-func (ac *ArtifactCreate) SetAlgorithm(s string) *ArtifactCreate {
-	ac.mutation.SetAlgorithm(s)
-	return ac
+func (_c *ArtifactCreate) SetAlgorithm(v string) *ArtifactCreate {
+	_c.mutation.SetAlgorithm(v)
+	return _c
 }
 
 // SetDigest sets the "digest" field.
-func (ac *ArtifactCreate) SetDigest(s string) *ArtifactCreate {
-	ac.mutation.SetDigest(s)
-	return ac
+func (_c *ArtifactCreate) SetDigest(v string) *ArtifactCreate {
+	_c.mutation.SetDigest(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (ac *ArtifactCreate) SetID(u uuid.UUID) *ArtifactCreate {
-	ac.mutation.SetID(u)
-	return ac
+func (_c *ArtifactCreate) SetID(v uuid.UUID) *ArtifactCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (ac *ArtifactCreate) SetNillableID(u *uuid.UUID) *ArtifactCreate {
-	if u != nil {
-		ac.SetID(*u)
+func (_c *ArtifactCreate) SetNillableID(v *uuid.UUID) *ArtifactCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return ac
+	return _c
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (ac *ArtifactCreate) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddOccurrenceIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddOccurrenceIDs(ids...)
+	return _c
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (ac *ArtifactCreate) AddOccurrences(o ...*Occurrence) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_c *ArtifactCreate) AddOccurrences(v ...*Occurrence) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddOccurrenceIDs(ids...)
+	return _c.AddOccurrenceIDs(ids...)
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (ac *ArtifactCreate) AddSbomIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddSbomIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddSbomIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddSbomIDs(ids...)
+	return _c
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
-func (ac *ArtifactCreate) AddSbom(b ...*BillOfMaterials) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *ArtifactCreate) AddSbom(v ...*BillOfMaterials) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddSbomIDs(ids...)
+	return _c.AddSbomIDs(ids...)
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
-func (ac *ArtifactCreate) AddAttestationIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddAttestationIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddAttestationIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddAttestationIDs(ids...)
+	return _c
 }
 
 // AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
-func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *ArtifactCreate) AddAttestations(v ...*SLSAAttestation) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddAttestationIDs(ids...)
+	return _c.AddAttestationIDs(ids...)
 }
 
 // AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
-func (ac *ArtifactCreate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddAttestationsSubjectIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddAttestationsSubjectIDs(ids...)
+	return _c
 }
 
 // AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
-func (ac *ArtifactCreate) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *ArtifactCreate) AddAttestationsSubject(v ...*SLSAAttestation) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddAttestationsSubjectIDs(ids...)
+	return _c.AddAttestationsSubjectIDs(ids...)
 }
 
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
-func (ac *ArtifactCreate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddHashEqualArtAIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddHashEqualArtAIDs(ids...)
+	return _c
 }
 
 // AddHashEqualArtA adds the "hash_equal_art_a" edges to the HashEqual entity.
-func (ac *ArtifactCreate) AddHashEqualArtA(h ...*HashEqual) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *ArtifactCreate) AddHashEqualArtA(v ...*HashEqual) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddHashEqualArtAIDs(ids...)
+	return _c.AddHashEqualArtAIDs(ids...)
 }
 
 // AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by IDs.
-func (ac *ArtifactCreate) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddHashEqualArtBIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddHashEqualArtBIDs(ids...)
+	return _c
 }
 
 // AddHashEqualArtB adds the "hash_equal_art_b" edges to the HashEqual entity.
-func (ac *ArtifactCreate) AddHashEqualArtB(h ...*HashEqual) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *ArtifactCreate) AddHashEqualArtB(v ...*HashEqual) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddHashEqualArtBIDs(ids...)
+	return _c.AddHashEqualArtBIDs(ids...)
 }
 
 // AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
-func (ac *ArtifactCreate) AddVexIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddVexIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddVexIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddVexIDs(ids...)
+	return _c
 }
 
 // AddVex adds the "vex" edges to the CertifyVex entity.
-func (ac *ArtifactCreate) AddVex(c ...*CertifyVex) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *ArtifactCreate) AddVex(v ...*CertifyVex) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddVexIDs(ids...)
+	return _c.AddVexIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (ac *ArtifactCreate) AddCertificationIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddCertificationIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddCertificationIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddCertificationIDs(ids...)
+	return _c
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (ac *ArtifactCreate) AddCertification(c ...*Certification) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *ArtifactCreate) AddCertification(v ...*Certification) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddCertificationIDs(ids...)
+	return _c.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (ac *ArtifactCreate) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddMetadatumIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddMetadatumIDs(ids...)
+	return _c
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (ac *ArtifactCreate) AddMetadata(h ...*HasMetadata) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *ArtifactCreate) AddMetadata(v ...*HasMetadata) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddMetadatumIDs(ids...)
+	return _c.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (ac *ArtifactCreate) AddPocIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddPocIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddPocIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddPocIDs(ids...)
+	return _c
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (ac *ArtifactCreate) AddPoc(p ...*PointOfContact) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *ArtifactCreate) AddPoc(v ...*PointOfContact) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddPocIDs(ids...)
+	return _c.AddPocIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (ac *ArtifactCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddIncludedInSbomIDs(ids...)
-	return ac
+func (_c *ArtifactCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactCreate {
+	_c.mutation.AddIncludedInSbomIDs(ids...)
+	return _c
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (ac *ArtifactCreate) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *ArtifactCreate) AddIncludedInSboms(v ...*BillOfMaterials) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddIncludedInSbomIDs(ids...)
+	return _c.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
-func (ac *ArtifactCreate) Mutation() *ArtifactMutation {
-	return ac.mutation
+func (_c *ArtifactCreate) Mutation() *ArtifactMutation {
+	return _c.mutation
 }
 
 // Save creates the Artifact in the database.
-func (ac *ArtifactCreate) Save(ctx context.Context) (*Artifact, error) {
-	ac.defaults()
-	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
+func (_c *ArtifactCreate) Save(ctx context.Context) (*Artifact, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ac *ArtifactCreate) SaveX(ctx context.Context) *Artifact {
-	v, err := ac.Save(ctx)
+func (_c *ArtifactCreate) SaveX(ctx context.Context) *Artifact {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -243,43 +243,43 @@ func (ac *ArtifactCreate) SaveX(ctx context.Context) *Artifact {
 }
 
 // Exec executes the query.
-func (ac *ArtifactCreate) Exec(ctx context.Context) error {
-	_, err := ac.Save(ctx)
+func (_c *ArtifactCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ac *ArtifactCreate) ExecX(ctx context.Context) {
-	if err := ac.Exec(ctx); err != nil {
+func (_c *ArtifactCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ac *ArtifactCreate) defaults() {
-	if _, ok := ac.mutation.ID(); !ok {
+func (_c *ArtifactCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := artifact.DefaultID()
-		ac.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ac *ArtifactCreate) check() error {
-	if _, ok := ac.mutation.Algorithm(); !ok {
+func (_c *ArtifactCreate) check() error {
+	if _, ok := _c.mutation.Algorithm(); !ok {
 		return &ValidationError{Name: "algorithm", err: errors.New(`ent: missing required field "Artifact.algorithm"`)}
 	}
-	if _, ok := ac.mutation.Digest(); !ok {
+	if _, ok := _c.mutation.Digest(); !ok {
 		return &ValidationError{Name: "digest", err: errors.New(`ent: missing required field "Artifact.digest"`)}
 	}
 	return nil
 }
 
-func (ac *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
-	if err := ac.check(); err != nil {
+func (_c *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ac.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ac.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -292,30 +292,30 @@ func (ac *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
 			return nil, err
 		}
 	}
-	ac.mutation.id = &_node.ID
-	ac.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
+func (_c *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Artifact{config: ac.config}
+		_node = &Artifact{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = ac.conflict
-	if id, ok := ac.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := ac.mutation.Algorithm(); ok {
+	if value, ok := _c.mutation.Algorithm(); ok {
 		_spec.SetField(artifact.FieldAlgorithm, field.TypeString, value)
 		_node.Algorithm = value
 	}
-	if value, ok := ac.mutation.Digest(); ok {
+	if value, ok := _c.mutation.Digest(); ok {
 		_spec.SetField(artifact.FieldDigest, field.TypeString, value)
 		_node.Digest = value
 	}
-	if nodes := ac.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.OccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -331,7 +331,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.SbomIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SbomIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -347,7 +347,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.AttestationsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AttestationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -363,7 +363,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -379,7 +379,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -395,7 +395,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -411,7 +411,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.VexIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VexIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -427,7 +427,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -443,7 +443,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -459,7 +459,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -475,7 +475,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -510,10 +510,10 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 //			SetAlgorithm(v+v).
 //		}).
 //		Exec(ctx)
-func (ac *ArtifactCreate) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsertOne {
-	ac.conflict = opts
+func (_c *ArtifactCreate) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsertOne {
+	_c.conflict = opts
 	return &ArtifactUpsertOne{
-		create: ac,
+		create: _c,
 	}
 }
 
@@ -523,10 +523,10 @@ func (ac *ArtifactCreate) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsert
 //	client.Artifact.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ac *ArtifactCreate) OnConflictColumns(columns ...string) *ArtifactUpsertOne {
-	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
+func (_c *ArtifactCreate) OnConflictColumns(columns ...string) *ArtifactUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &ArtifactUpsertOne{
-		create: ac,
+		create: _c,
 	}
 }
 
@@ -690,16 +690,16 @@ type ArtifactCreateBulk struct {
 }
 
 // Save creates the Artifact entities in the database.
-func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
-	if acb.err != nil {
-		return nil, acb.err
+func (_c *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
-	nodes := make([]*Artifact, len(acb.builders))
-	mutators := make([]Mutator, len(acb.builders))
-	for i := range acb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Artifact, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := acb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ArtifactMutation)
@@ -713,12 +713,12 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, acb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = acb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, acb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -738,7 +738,7 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, acb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -746,8 +746,8 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (acb *ArtifactCreateBulk) SaveX(ctx context.Context) []*Artifact {
-	v, err := acb.Save(ctx)
+func (_c *ArtifactCreateBulk) SaveX(ctx context.Context) []*Artifact {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -755,14 +755,14 @@ func (acb *ArtifactCreateBulk) SaveX(ctx context.Context) []*Artifact {
 }
 
 // Exec executes the query.
-func (acb *ArtifactCreateBulk) Exec(ctx context.Context) error {
-	_, err := acb.Save(ctx)
+func (_c *ArtifactCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (acb *ArtifactCreateBulk) ExecX(ctx context.Context) {
-	if err := acb.Exec(ctx); err != nil {
+func (_c *ArtifactCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -782,10 +782,10 @@ func (acb *ArtifactCreateBulk) ExecX(ctx context.Context) {
 //			SetAlgorithm(v+v).
 //		}).
 //		Exec(ctx)
-func (acb *ArtifactCreateBulk) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsertBulk {
-	acb.conflict = opts
+func (_c *ArtifactCreateBulk) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsertBulk {
+	_c.conflict = opts
 	return &ArtifactUpsertBulk{
-		create: acb,
+		create: _c,
 	}
 }
 
@@ -795,10 +795,10 @@ func (acb *ArtifactCreateBulk) OnConflict(opts ...sql.ConflictOption) *ArtifactU
 //	client.Artifact.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (acb *ArtifactCreateBulk) OnConflictColumns(columns ...string) *ArtifactUpsertBulk {
-	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
+func (_c *ArtifactCreateBulk) OnConflictColumns(columns ...string) *ArtifactUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &ArtifactUpsertBulk{
-		create: acb,
+		create: _c,
 	}
 }
 

@@ -20,56 +20,56 @@ type HasSourceAtDelete struct {
 }
 
 // Where appends a list predicates to the HasSourceAtDelete builder.
-func (hsad *HasSourceAtDelete) Where(ps ...predicate.HasSourceAt) *HasSourceAtDelete {
-	hsad.mutation.Where(ps...)
-	return hsad
+func (_d *HasSourceAtDelete) Where(ps ...predicate.HasSourceAt) *HasSourceAtDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (hsad *HasSourceAtDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, hsad.sqlExec, hsad.mutation, hsad.hooks)
+func (_d *HasSourceAtDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hsad *HasSourceAtDelete) ExecX(ctx context.Context) int {
-	n, err := hsad.Exec(ctx)
+func (_d *HasSourceAtDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (hsad *HasSourceAtDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *HasSourceAtDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(hassourceat.Table, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
-	if ps := hsad.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, hsad.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	hsad.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // HasSourceAtDeleteOne is the builder for deleting a single HasSourceAt entity.
 type HasSourceAtDeleteOne struct {
-	hsad *HasSourceAtDelete
+	_d *HasSourceAtDelete
 }
 
 // Where appends a list predicates to the HasSourceAtDelete builder.
-func (hsado *HasSourceAtDeleteOne) Where(ps ...predicate.HasSourceAt) *HasSourceAtDeleteOne {
-	hsado.hsad.mutation.Where(ps...)
-	return hsado
+func (_d *HasSourceAtDeleteOne) Where(ps ...predicate.HasSourceAt) *HasSourceAtDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (hsado *HasSourceAtDeleteOne) Exec(ctx context.Context) error {
-	n, err := hsado.hsad.Exec(ctx)
+func (_d *HasSourceAtDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (hsado *HasSourceAtDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hsado *HasSourceAtDeleteOne) ExecX(ctx context.Context) {
-	if err := hsado.Exec(ctx); err != nil {
+func (_d *HasSourceAtDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -27,223 +27,223 @@ type CertifyVexUpdate struct {
 }
 
 // Where appends a list predicates to the CertifyVexUpdate builder.
-func (cvu *CertifyVexUpdate) Where(ps ...predicate.CertifyVex) *CertifyVexUpdate {
-	cvu.mutation.Where(ps...)
-	return cvu
+func (_u *CertifyVexUpdate) Where(ps ...predicate.CertifyVex) *CertifyVexUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvu *CertifyVexUpdate) SetPackageID(u uuid.UUID) *CertifyVexUpdate {
-	cvu.mutation.SetPackageID(u)
-	return cvu
+func (_u *CertifyVexUpdate) SetPackageID(v uuid.UUID) *CertifyVexUpdate {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillablePackageID(u *uuid.UUID) *CertifyVexUpdate {
-	if u != nil {
-		cvu.SetPackageID(*u)
+func (_u *CertifyVexUpdate) SetNillablePackageID(v *uuid.UUID) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return cvu
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (cvu *CertifyVexUpdate) ClearPackageID() *CertifyVexUpdate {
-	cvu.mutation.ClearPackageID()
-	return cvu
+func (_u *CertifyVexUpdate) ClearPackageID() *CertifyVexUpdate {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cvu *CertifyVexUpdate) SetArtifactID(u uuid.UUID) *CertifyVexUpdate {
-	cvu.mutation.SetArtifactID(u)
-	return cvu
+func (_u *CertifyVexUpdate) SetArtifactID(v uuid.UUID) *CertifyVexUpdate {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableArtifactID(u *uuid.UUID) *CertifyVexUpdate {
-	if u != nil {
-		cvu.SetArtifactID(*u)
+func (_u *CertifyVexUpdate) SetNillableArtifactID(v *uuid.UUID) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return cvu
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (cvu *CertifyVexUpdate) ClearArtifactID() *CertifyVexUpdate {
-	cvu.mutation.ClearArtifactID()
-	return cvu
+func (_u *CertifyVexUpdate) ClearArtifactID() *CertifyVexUpdate {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvu *CertifyVexUpdate) SetVulnerabilityID(u uuid.UUID) *CertifyVexUpdate {
-	cvu.mutation.SetVulnerabilityID(u)
-	return cvu
+func (_u *CertifyVexUpdate) SetVulnerabilityID(v uuid.UUID) *CertifyVexUpdate {
+	_u.mutation.SetVulnerabilityID(v)
+	return _u
 }
 
 // SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableVulnerabilityID(u *uuid.UUID) *CertifyVexUpdate {
-	if u != nil {
-		cvu.SetVulnerabilityID(*u)
+func (_u *CertifyVexUpdate) SetNillableVulnerabilityID(v *uuid.UUID) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetVulnerabilityID(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (cvu *CertifyVexUpdate) SetKnownSince(t time.Time) *CertifyVexUpdate {
-	cvu.mutation.SetKnownSince(t)
-	return cvu
+func (_u *CertifyVexUpdate) SetKnownSince(v time.Time) *CertifyVexUpdate {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableKnownSince(t *time.Time) *CertifyVexUpdate {
-	if t != nil {
-		cvu.SetKnownSince(*t)
+func (_u *CertifyVexUpdate) SetNillableKnownSince(v *time.Time) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (cvu *CertifyVexUpdate) SetStatus(s string) *CertifyVexUpdate {
-	cvu.mutation.SetStatus(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetStatus(v string) *CertifyVexUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableStatus(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetStatus(*s)
+func (_u *CertifyVexUpdate) SetNillableStatus(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetStatement sets the "statement" field.
-func (cvu *CertifyVexUpdate) SetStatement(s string) *CertifyVexUpdate {
-	cvu.mutation.SetStatement(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetStatement(v string) *CertifyVexUpdate {
+	_u.mutation.SetStatement(v)
+	return _u
 }
 
 // SetNillableStatement sets the "statement" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableStatement(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetStatement(*s)
+func (_u *CertifyVexUpdate) SetNillableStatement(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetStatement(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetStatusNotes sets the "status_notes" field.
-func (cvu *CertifyVexUpdate) SetStatusNotes(s string) *CertifyVexUpdate {
-	cvu.mutation.SetStatusNotes(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetStatusNotes(v string) *CertifyVexUpdate {
+	_u.mutation.SetStatusNotes(v)
+	return _u
 }
 
 // SetNillableStatusNotes sets the "status_notes" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableStatusNotes(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetStatusNotes(*s)
+func (_u *CertifyVexUpdate) SetNillableStatusNotes(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetStatusNotes(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (cvu *CertifyVexUpdate) SetJustification(s string) *CertifyVexUpdate {
-	cvu.mutation.SetJustification(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetJustification(v string) *CertifyVexUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableJustification(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetJustification(*s)
+func (_u *CertifyVexUpdate) SetNillableJustification(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cvu *CertifyVexUpdate) SetOrigin(s string) *CertifyVexUpdate {
-	cvu.mutation.SetOrigin(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetOrigin(v string) *CertifyVexUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableOrigin(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetOrigin(*s)
+func (_u *CertifyVexUpdate) SetNillableOrigin(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cvu *CertifyVexUpdate) SetCollector(s string) *CertifyVexUpdate {
-	cvu.mutation.SetCollector(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetCollector(v string) *CertifyVexUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableCollector(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetCollector(*s)
+func (_u *CertifyVexUpdate) SetNillableCollector(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cvu *CertifyVexUpdate) SetDocumentRef(s string) *CertifyVexUpdate {
-	cvu.mutation.SetDocumentRef(s)
-	return cvu
+func (_u *CertifyVexUpdate) SetDocumentRef(v string) *CertifyVexUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableDocumentRef(s *string) *CertifyVexUpdate {
-	if s != nil {
-		cvu.SetDocumentRef(*s)
+func (_u *CertifyVexUpdate) SetNillableDocumentRef(v *string) *CertifyVexUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cvu
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cvu *CertifyVexUpdate) SetPackage(p *PackageVersion) *CertifyVexUpdate {
-	return cvu.SetPackageID(p.ID)
+func (_u *CertifyVexUpdate) SetPackage(v *PackageVersion) *CertifyVexUpdate {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (cvu *CertifyVexUpdate) SetArtifact(a *Artifact) *CertifyVexUpdate {
-	return cvu.SetArtifactID(a.ID)
+func (_u *CertifyVexUpdate) SetArtifact(v *Artifact) *CertifyVexUpdate {
+	return _u.SetArtifactID(v.ID)
 }
 
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
-func (cvu *CertifyVexUpdate) SetVulnerability(v *VulnerabilityID) *CertifyVexUpdate {
-	return cvu.SetVulnerabilityID(v.ID)
+func (_u *CertifyVexUpdate) SetVulnerability(v *VulnerabilityID) *CertifyVexUpdate {
+	return _u.SetVulnerabilityID(v.ID)
 }
 
 // Mutation returns the CertifyVexMutation object of the builder.
-func (cvu *CertifyVexUpdate) Mutation() *CertifyVexMutation {
-	return cvu.mutation
+func (_u *CertifyVexUpdate) Mutation() *CertifyVexMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (cvu *CertifyVexUpdate) ClearPackage() *CertifyVexUpdate {
-	cvu.mutation.ClearPackage()
-	return cvu
+func (_u *CertifyVexUpdate) ClearPackage() *CertifyVexUpdate {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (cvu *CertifyVexUpdate) ClearArtifact() *CertifyVexUpdate {
-	cvu.mutation.ClearArtifact()
-	return cvu
+func (_u *CertifyVexUpdate) ClearArtifact() *CertifyVexUpdate {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
-func (cvu *CertifyVexUpdate) ClearVulnerability() *CertifyVexUpdate {
-	cvu.mutation.ClearVulnerability()
-	return cvu
+func (_u *CertifyVexUpdate) ClearVulnerability() *CertifyVexUpdate {
+	_u.mutation.ClearVulnerability()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cvu *CertifyVexUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cvu.sqlSave, cvu.mutation, cvu.hooks)
+func (_u *CertifyVexUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cvu *CertifyVexUpdate) SaveX(ctx context.Context) int {
-	affected, err := cvu.Save(ctx)
+func (_u *CertifyVexUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -251,63 +251,63 @@ func (cvu *CertifyVexUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cvu *CertifyVexUpdate) Exec(ctx context.Context) error {
-	_, err := cvu.Save(ctx)
+func (_u *CertifyVexUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvu *CertifyVexUpdate) ExecX(ctx context.Context) {
-	if err := cvu.Exec(ctx); err != nil {
+func (_u *CertifyVexUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cvu *CertifyVexUpdate) check() error {
-	if cvu.mutation.VulnerabilityCleared() && len(cvu.mutation.VulnerabilityIDs()) > 0 {
+func (_u *CertifyVexUpdate) check() error {
+	if _u.mutation.VulnerabilityCleared() && len(_u.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVex.vulnerability"`)
 	}
 	return nil
 }
 
-func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := cvu.check(); err != nil {
-		return n, err
+func (_u *CertifyVexUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
-	if ps := cvu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cvu.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(certifyvex.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := cvu.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(certifyvex.FieldStatus, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.Statement(); ok {
+	if value, ok := _u.mutation.Statement(); ok {
 		_spec.SetField(certifyvex.FieldStatement, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.StatusNotes(); ok {
+	if value, ok := _u.mutation.StatusNotes(); ok {
 		_spec.SetField(certifyvex.FieldStatusNotes, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(certifyvex.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifyvex.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifyvex.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cvu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyvex.FieldDocumentRef, field.TypeString, value)
 	}
-	if cvu.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -320,7 +320,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvu.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -336,7 +336,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cvu.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -349,7 +349,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvu.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -365,7 +365,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cvu.mutation.VulnerabilityCleared() {
+	if _u.mutation.VulnerabilityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -378,7 +378,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvu.mutation.VulnerabilityIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -394,7 +394,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cvu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifyvex.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -402,8 +402,8 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cvu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // CertifyVexUpdateOne is the builder for updating a single CertifyVex entity.
@@ -415,230 +415,230 @@ type CertifyVexUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvuo *CertifyVexUpdateOne) SetPackageID(u uuid.UUID) *CertifyVexUpdateOne {
-	cvuo.mutation.SetPackageID(u)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetPackageID(v uuid.UUID) *CertifyVexUpdateOne {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillablePackageID(u *uuid.UUID) *CertifyVexUpdateOne {
-	if u != nil {
-		cvuo.SetPackageID(*u)
+func (_u *CertifyVexUpdateOne) SetNillablePackageID(v *uuid.UUID) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (cvuo *CertifyVexUpdateOne) ClearPackageID() *CertifyVexUpdateOne {
-	cvuo.mutation.ClearPackageID()
-	return cvuo
+func (_u *CertifyVexUpdateOne) ClearPackageID() *CertifyVexUpdateOne {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cvuo *CertifyVexUpdateOne) SetArtifactID(u uuid.UUID) *CertifyVexUpdateOne {
-	cvuo.mutation.SetArtifactID(u)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetArtifactID(v uuid.UUID) *CertifyVexUpdateOne {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableArtifactID(u *uuid.UUID) *CertifyVexUpdateOne {
-	if u != nil {
-		cvuo.SetArtifactID(*u)
+func (_u *CertifyVexUpdateOne) SetNillableArtifactID(v *uuid.UUID) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (cvuo *CertifyVexUpdateOne) ClearArtifactID() *CertifyVexUpdateOne {
-	cvuo.mutation.ClearArtifactID()
-	return cvuo
+func (_u *CertifyVexUpdateOne) ClearArtifactID() *CertifyVexUpdateOne {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvuo *CertifyVexUpdateOne) SetVulnerabilityID(u uuid.UUID) *CertifyVexUpdateOne {
-	cvuo.mutation.SetVulnerabilityID(u)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetVulnerabilityID(v uuid.UUID) *CertifyVexUpdateOne {
+	_u.mutation.SetVulnerabilityID(v)
+	return _u
 }
 
 // SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableVulnerabilityID(u *uuid.UUID) *CertifyVexUpdateOne {
-	if u != nil {
-		cvuo.SetVulnerabilityID(*u)
+func (_u *CertifyVexUpdateOne) SetNillableVulnerabilityID(v *uuid.UUID) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetVulnerabilityID(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (cvuo *CertifyVexUpdateOne) SetKnownSince(t time.Time) *CertifyVexUpdateOne {
-	cvuo.mutation.SetKnownSince(t)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetKnownSince(v time.Time) *CertifyVexUpdateOne {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableKnownSince(t *time.Time) *CertifyVexUpdateOne {
-	if t != nil {
-		cvuo.SetKnownSince(*t)
+func (_u *CertifyVexUpdateOne) SetNillableKnownSince(v *time.Time) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (cvuo *CertifyVexUpdateOne) SetStatus(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetStatus(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetStatus(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableStatus(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetStatus(*s)
+func (_u *CertifyVexUpdateOne) SetNillableStatus(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetStatement sets the "statement" field.
-func (cvuo *CertifyVexUpdateOne) SetStatement(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetStatement(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetStatement(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetStatement(v)
+	return _u
 }
 
 // SetNillableStatement sets the "statement" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableStatement(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetStatement(*s)
+func (_u *CertifyVexUpdateOne) SetNillableStatement(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetStatement(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetStatusNotes sets the "status_notes" field.
-func (cvuo *CertifyVexUpdateOne) SetStatusNotes(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetStatusNotes(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetStatusNotes(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetStatusNotes(v)
+	return _u
 }
 
 // SetNillableStatusNotes sets the "status_notes" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableStatusNotes(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetStatusNotes(*s)
+func (_u *CertifyVexUpdateOne) SetNillableStatusNotes(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetStatusNotes(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (cvuo *CertifyVexUpdateOne) SetJustification(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetJustification(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetJustification(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableJustification(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetJustification(*s)
+func (_u *CertifyVexUpdateOne) SetNillableJustification(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cvuo *CertifyVexUpdateOne) SetOrigin(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetOrigin(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetOrigin(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableOrigin(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetOrigin(*s)
+func (_u *CertifyVexUpdateOne) SetNillableOrigin(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cvuo *CertifyVexUpdateOne) SetCollector(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetCollector(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetCollector(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableCollector(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetCollector(*s)
+func (_u *CertifyVexUpdateOne) SetNillableCollector(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cvuo *CertifyVexUpdateOne) SetDocumentRef(s string) *CertifyVexUpdateOne {
-	cvuo.mutation.SetDocumentRef(s)
-	return cvuo
+func (_u *CertifyVexUpdateOne) SetDocumentRef(v string) *CertifyVexUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableDocumentRef(s *string) *CertifyVexUpdateOne {
-	if s != nil {
-		cvuo.SetDocumentRef(*s)
+func (_u *CertifyVexUpdateOne) SetNillableDocumentRef(v *string) *CertifyVexUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cvuo
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cvuo *CertifyVexUpdateOne) SetPackage(p *PackageVersion) *CertifyVexUpdateOne {
-	return cvuo.SetPackageID(p.ID)
+func (_u *CertifyVexUpdateOne) SetPackage(v *PackageVersion) *CertifyVexUpdateOne {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (cvuo *CertifyVexUpdateOne) SetArtifact(a *Artifact) *CertifyVexUpdateOne {
-	return cvuo.SetArtifactID(a.ID)
+func (_u *CertifyVexUpdateOne) SetArtifact(v *Artifact) *CertifyVexUpdateOne {
+	return _u.SetArtifactID(v.ID)
 }
 
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
-func (cvuo *CertifyVexUpdateOne) SetVulnerability(v *VulnerabilityID) *CertifyVexUpdateOne {
-	return cvuo.SetVulnerabilityID(v.ID)
+func (_u *CertifyVexUpdateOne) SetVulnerability(v *VulnerabilityID) *CertifyVexUpdateOne {
+	return _u.SetVulnerabilityID(v.ID)
 }
 
 // Mutation returns the CertifyVexMutation object of the builder.
-func (cvuo *CertifyVexUpdateOne) Mutation() *CertifyVexMutation {
-	return cvuo.mutation
+func (_u *CertifyVexUpdateOne) Mutation() *CertifyVexMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (cvuo *CertifyVexUpdateOne) ClearPackage() *CertifyVexUpdateOne {
-	cvuo.mutation.ClearPackage()
-	return cvuo
+func (_u *CertifyVexUpdateOne) ClearPackage() *CertifyVexUpdateOne {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (cvuo *CertifyVexUpdateOne) ClearArtifact() *CertifyVexUpdateOne {
-	cvuo.mutation.ClearArtifact()
-	return cvuo
+func (_u *CertifyVexUpdateOne) ClearArtifact() *CertifyVexUpdateOne {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
-func (cvuo *CertifyVexUpdateOne) ClearVulnerability() *CertifyVexUpdateOne {
-	cvuo.mutation.ClearVulnerability()
-	return cvuo
+func (_u *CertifyVexUpdateOne) ClearVulnerability() *CertifyVexUpdateOne {
+	_u.mutation.ClearVulnerability()
+	return _u
 }
 
 // Where appends a list predicates to the CertifyVexUpdate builder.
-func (cvuo *CertifyVexUpdateOne) Where(ps ...predicate.CertifyVex) *CertifyVexUpdateOne {
-	cvuo.mutation.Where(ps...)
-	return cvuo
+func (_u *CertifyVexUpdateOne) Where(ps ...predicate.CertifyVex) *CertifyVexUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cvuo *CertifyVexUpdateOne) Select(field string, fields ...string) *CertifyVexUpdateOne {
-	cvuo.fields = append([]string{field}, fields...)
-	return cvuo
+func (_u *CertifyVexUpdateOne) Select(field string, fields ...string) *CertifyVexUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated CertifyVex entity.
-func (cvuo *CertifyVexUpdateOne) Save(ctx context.Context) (*CertifyVex, error) {
-	return withHooks(ctx, cvuo.sqlSave, cvuo.mutation, cvuo.hooks)
+func (_u *CertifyVexUpdateOne) Save(ctx context.Context) (*CertifyVex, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cvuo *CertifyVexUpdateOne) SaveX(ctx context.Context) *CertifyVex {
-	node, err := cvuo.Save(ctx)
+func (_u *CertifyVexUpdateOne) SaveX(ctx context.Context) *CertifyVex {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -646,37 +646,37 @@ func (cvuo *CertifyVexUpdateOne) SaveX(ctx context.Context) *CertifyVex {
 }
 
 // Exec executes the query on the entity.
-func (cvuo *CertifyVexUpdateOne) Exec(ctx context.Context) error {
-	_, err := cvuo.Save(ctx)
+func (_u *CertifyVexUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvuo *CertifyVexUpdateOne) ExecX(ctx context.Context) {
-	if err := cvuo.Exec(ctx); err != nil {
+func (_u *CertifyVexUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cvuo *CertifyVexUpdateOne) check() error {
-	if cvuo.mutation.VulnerabilityCleared() && len(cvuo.mutation.VulnerabilityIDs()) > 0 {
+func (_u *CertifyVexUpdateOne) check() error {
+	if _u.mutation.VulnerabilityCleared() && len(_u.mutation.VulnerabilityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyVex.vulnerability"`)
 	}
 	return nil
 }
 
-func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex, err error) {
-	if err := cvuo.check(); err != nil {
+func (_u *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
-	id, ok := cvuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CertifyVex.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cvuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifyvex.FieldID)
 		for _, f := range fields {
@@ -688,38 +688,38 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			}
 		}
 	}
-	if ps := cvuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cvuo.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(certifyvex.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := cvuo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(certifyvex.FieldStatus, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.Statement(); ok {
+	if value, ok := _u.mutation.Statement(); ok {
 		_spec.SetField(certifyvex.FieldStatement, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.StatusNotes(); ok {
+	if value, ok := _u.mutation.StatusNotes(); ok {
 		_spec.SetField(certifyvex.FieldStatusNotes, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(certifyvex.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifyvex.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifyvex.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cvuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyvex.FieldDocumentRef, field.TypeString, value)
 	}
-	if cvuo.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -732,7 +732,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvuo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -748,7 +748,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cvuo.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -761,7 +761,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvuo.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -777,7 +777,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cvuo.mutation.VulnerabilityCleared() {
+	if _u.mutation.VulnerabilityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -790,7 +790,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cvuo.mutation.VulnerabilityIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -806,10 +806,10 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &CertifyVex{config: cvuo.config}
+	_node = &CertifyVex{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cvuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifyvex.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -817,6 +817,6 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 		}
 		return nil, err
 	}
-	cvuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

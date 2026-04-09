@@ -53,44 +53,44 @@ type SourceNameQuery struct {
 }
 
 // Where adds a new predicate for the SourceNameQuery builder.
-func (snq *SourceNameQuery) Where(ps ...predicate.SourceName) *SourceNameQuery {
-	snq.predicates = append(snq.predicates, ps...)
-	return snq
+func (_q *SourceNameQuery) Where(ps ...predicate.SourceName) *SourceNameQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (snq *SourceNameQuery) Limit(limit int) *SourceNameQuery {
-	snq.ctx.Limit = &limit
-	return snq
+func (_q *SourceNameQuery) Limit(limit int) *SourceNameQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (snq *SourceNameQuery) Offset(offset int) *SourceNameQuery {
-	snq.ctx.Offset = &offset
-	return snq
+func (_q *SourceNameQuery) Offset(offset int) *SourceNameQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (snq *SourceNameQuery) Unique(unique bool) *SourceNameQuery {
-	snq.ctx.Unique = &unique
-	return snq
+func (_q *SourceNameQuery) Unique(unique bool) *SourceNameQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (snq *SourceNameQuery) Order(o ...sourcename.OrderOption) *SourceNameQuery {
-	snq.order = append(snq.order, o...)
-	return snq
+func (_q *SourceNameQuery) Order(o ...sourcename.OrderOption) *SourceNameQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryOccurrences chains the current query on the "occurrences" edge.
-func (snq *SourceNameQuery) QueryOccurrences() *OccurrenceQuery {
-	query := (&OccurrenceClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryOccurrences() *OccurrenceQuery {
+	query := (&OccurrenceClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -99,20 +99,20 @@ func (snq *SourceNameQuery) QueryOccurrences() *OccurrenceQuery {
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.OccurrencesTable, sourcename.OccurrencesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryHasSourceAt chains the current query on the "has_source_at" edge.
-func (snq *SourceNameQuery) QueryHasSourceAt() *HasSourceAtQuery {
-	query := (&HasSourceAtClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryHasSourceAt() *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -121,20 +121,20 @@ func (snq *SourceNameQuery) QueryHasSourceAt() *HasSourceAtQuery {
 			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.HasSourceAtTable, sourcename.HasSourceAtColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryScorecard chains the current query on the "scorecard" edge.
-func (snq *SourceNameQuery) QueryScorecard() *CertifyScorecardQuery {
-	query := (&CertifyScorecardClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryScorecard() *CertifyScorecardQuery {
+	query := (&CertifyScorecardClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -143,20 +143,20 @@ func (snq *SourceNameQuery) QueryScorecard() *CertifyScorecardQuery {
 			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.ScorecardTable, sourcename.ScorecardColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryCertification chains the current query on the "certification" edge.
-func (snq *SourceNameQuery) QueryCertification() *CertificationQuery {
-	query := (&CertificationClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryCertification() *CertificationQuery {
+	query := (&CertificationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -165,20 +165,20 @@ func (snq *SourceNameQuery) QueryCertification() *CertificationQuery {
 			sqlgraph.To(certification.Table, certification.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertificationTable, sourcename.CertificationColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryMetadata chains the current query on the "metadata" edge.
-func (snq *SourceNameQuery) QueryMetadata() *HasMetadataQuery {
-	query := (&HasMetadataClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryMetadata() *HasMetadataQuery {
+	query := (&HasMetadataClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -187,20 +187,20 @@ func (snq *SourceNameQuery) QueryMetadata() *HasMetadataQuery {
 			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.MetadataTable, sourcename.MetadataColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryPoc chains the current query on the "poc" edge.
-func (snq *SourceNameQuery) QueryPoc() *PointOfContactQuery {
-	query := (&PointOfContactClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryPoc() *PointOfContactQuery {
+	query := (&PointOfContactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -209,20 +209,20 @@ func (snq *SourceNameQuery) QueryPoc() *PointOfContactQuery {
 			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.PocTable, sourcename.PocColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryCertifyLegal chains the current query on the "certify_legal" edge.
-func (snq *SourceNameQuery) QueryCertifyLegal() *CertifyLegalQuery {
-	query := (&CertifyLegalClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) QueryCertifyLegal() *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := snq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -231,7 +231,7 @@ func (snq *SourceNameQuery) QueryCertifyLegal() *CertifyLegalQuery {
 			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertifyLegalTable, sourcename.CertifyLegalColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -239,8 +239,8 @@ func (snq *SourceNameQuery) QueryCertifyLegal() *CertifyLegalQuery {
 
 // First returns the first SourceName entity from the query.
 // Returns a *NotFoundError when no SourceName was found.
-func (snq *SourceNameQuery) First(ctx context.Context) (*SourceName, error) {
-	nodes, err := snq.Limit(1).All(setContextOp(ctx, snq.ctx, ent.OpQueryFirst))
+func (_q *SourceNameQuery) First(ctx context.Context) (*SourceName, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -251,8 +251,8 @@ func (snq *SourceNameQuery) First(ctx context.Context) (*SourceName, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (snq *SourceNameQuery) FirstX(ctx context.Context) *SourceName {
-	node, err := snq.First(ctx)
+func (_q *SourceNameQuery) FirstX(ctx context.Context) *SourceName {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -261,9 +261,9 @@ func (snq *SourceNameQuery) FirstX(ctx context.Context) *SourceName {
 
 // FirstID returns the first SourceName ID from the query.
 // Returns a *NotFoundError when no SourceName ID was found.
-func (snq *SourceNameQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *SourceNameQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = snq.Limit(1).IDs(setContextOp(ctx, snq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -274,8 +274,8 @@ func (snq *SourceNameQuery) FirstID(ctx context.Context) (id uuid.UUID, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (snq *SourceNameQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := snq.FirstID(ctx)
+func (_q *SourceNameQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -285,8 +285,8 @@ func (snq *SourceNameQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single SourceName entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one SourceName entity is found.
 // Returns a *NotFoundError when no SourceName entities are found.
-func (snq *SourceNameQuery) Only(ctx context.Context) (*SourceName, error) {
-	nodes, err := snq.Limit(2).All(setContextOp(ctx, snq.ctx, ent.OpQueryOnly))
+func (_q *SourceNameQuery) Only(ctx context.Context) (*SourceName, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -301,8 +301,8 @@ func (snq *SourceNameQuery) Only(ctx context.Context) (*SourceName, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (snq *SourceNameQuery) OnlyX(ctx context.Context) *SourceName {
-	node, err := snq.Only(ctx)
+func (_q *SourceNameQuery) OnlyX(ctx context.Context) *SourceName {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -312,9 +312,9 @@ func (snq *SourceNameQuery) OnlyX(ctx context.Context) *SourceName {
 // OnlyID is like Only, but returns the only SourceName ID in the query.
 // Returns a *NotSingularError when more than one SourceName ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (snq *SourceNameQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *SourceNameQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = snq.Limit(2).IDs(setContextOp(ctx, snq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -329,8 +329,8 @@ func (snq *SourceNameQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (snq *SourceNameQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := snq.OnlyID(ctx)
+func (_q *SourceNameQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -338,18 +338,18 @@ func (snq *SourceNameQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of SourceNames.
-func (snq *SourceNameQuery) All(ctx context.Context) ([]*SourceName, error) {
-	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryAll)
-	if err := snq.prepareQuery(ctx); err != nil {
+func (_q *SourceNameQuery) All(ctx context.Context) ([]*SourceName, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*SourceName, *SourceNameQuery]()
-	return withInterceptors[[]*SourceName](ctx, snq, qr, snq.inters)
+	return withInterceptors[[]*SourceName](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (snq *SourceNameQuery) AllX(ctx context.Context) []*SourceName {
-	nodes, err := snq.All(ctx)
+func (_q *SourceNameQuery) AllX(ctx context.Context) []*SourceName {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -357,20 +357,20 @@ func (snq *SourceNameQuery) AllX(ctx context.Context) []*SourceName {
 }
 
 // IDs executes the query and returns a list of SourceName IDs.
-func (snq *SourceNameQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if snq.ctx.Unique == nil && snq.path != nil {
-		snq.Unique(true)
+func (_q *SourceNameQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryIDs)
-	if err = snq.Select(sourcename.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(sourcename.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (snq *SourceNameQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := snq.IDs(ctx)
+func (_q *SourceNameQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -378,17 +378,17 @@ func (snq *SourceNameQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (snq *SourceNameQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryCount)
-	if err := snq.prepareQuery(ctx); err != nil {
+func (_q *SourceNameQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, snq, querierCount[*SourceNameQuery](), snq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*SourceNameQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (snq *SourceNameQuery) CountX(ctx context.Context) int {
-	count, err := snq.Count(ctx)
+func (_q *SourceNameQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -396,9 +396,9 @@ func (snq *SourceNameQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (snq *SourceNameQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, snq.ctx, ent.OpQueryExist)
-	switch _, err := snq.FirstID(ctx); {
+func (_q *SourceNameQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -409,8 +409,8 @@ func (snq *SourceNameQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (snq *SourceNameQuery) ExistX(ctx context.Context) bool {
-	exist, err := snq.Exist(ctx)
+func (_q *SourceNameQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -419,104 +419,104 @@ func (snq *SourceNameQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the SourceNameQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (snq *SourceNameQuery) Clone() *SourceNameQuery {
-	if snq == nil {
+func (_q *SourceNameQuery) Clone() *SourceNameQuery {
+	if _q == nil {
 		return nil
 	}
 	return &SourceNameQuery{
-		config:            snq.config,
-		ctx:               snq.ctx.Clone(),
-		order:             append([]sourcename.OrderOption{}, snq.order...),
-		inters:            append([]Interceptor{}, snq.inters...),
-		predicates:        append([]predicate.SourceName{}, snq.predicates...),
-		withOccurrences:   snq.withOccurrences.Clone(),
-		withHasSourceAt:   snq.withHasSourceAt.Clone(),
-		withScorecard:     snq.withScorecard.Clone(),
-		withCertification: snq.withCertification.Clone(),
-		withMetadata:      snq.withMetadata.Clone(),
-		withPoc:           snq.withPoc.Clone(),
-		withCertifyLegal:  snq.withCertifyLegal.Clone(),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]sourcename.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.SourceName{}, _q.predicates...),
+		withOccurrences:   _q.withOccurrences.Clone(),
+		withHasSourceAt:   _q.withHasSourceAt.Clone(),
+		withScorecard:     _q.withScorecard.Clone(),
+		withCertification: _q.withCertification.Clone(),
+		withMetadata:      _q.withMetadata.Clone(),
+		withPoc:           _q.withPoc.Clone(),
+		withCertifyLegal:  _q.withCertifyLegal.Clone(),
 		// clone intermediate query.
-		sql:  snq.sql.Clone(),
-		path: snq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithOccurrences tells the query-builder to eager-load the nodes that are connected to
 // the "occurrences" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *SourceNameQuery {
-	query := (&OccurrenceClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *SourceNameQuery {
+	query := (&OccurrenceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withOccurrences = query
-	return snq
+	_q.withOccurrences = query
+	return _q
 }
 
 // WithHasSourceAt tells the query-builder to eager-load the nodes that are connected to
 // the "has_source_at" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithHasSourceAt(opts ...func(*HasSourceAtQuery)) *SourceNameQuery {
-	query := (&HasSourceAtClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithHasSourceAt(opts ...func(*HasSourceAtQuery)) *SourceNameQuery {
+	query := (&HasSourceAtClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withHasSourceAt = query
-	return snq
+	_q.withHasSourceAt = query
+	return _q
 }
 
 // WithScorecard tells the query-builder to eager-load the nodes that are connected to
 // the "scorecard" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithScorecard(opts ...func(*CertifyScorecardQuery)) *SourceNameQuery {
-	query := (&CertifyScorecardClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithScorecard(opts ...func(*CertifyScorecardQuery)) *SourceNameQuery {
+	query := (&CertifyScorecardClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withScorecard = query
-	return snq
+	_q.withScorecard = query
+	return _q
 }
 
 // WithCertification tells the query-builder to eager-load the nodes that are connected to
 // the "certification" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithCertification(opts ...func(*CertificationQuery)) *SourceNameQuery {
-	query := (&CertificationClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithCertification(opts ...func(*CertificationQuery)) *SourceNameQuery {
+	query := (&CertificationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withCertification = query
-	return snq
+	_q.withCertification = query
+	return _q
 }
 
 // WithMetadata tells the query-builder to eager-load the nodes that are connected to
 // the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *SourceNameQuery {
-	query := (&HasMetadataClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *SourceNameQuery {
+	query := (&HasMetadataClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withMetadata = query
-	return snq
+	_q.withMetadata = query
+	return _q
 }
 
 // WithPoc tells the query-builder to eager-load the nodes that are connected to
 // the "poc" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithPoc(opts ...func(*PointOfContactQuery)) *SourceNameQuery {
-	query := (&PointOfContactClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithPoc(opts ...func(*PointOfContactQuery)) *SourceNameQuery {
+	query := (&PointOfContactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withPoc = query
-	return snq
+	_q.withPoc = query
+	return _q
 }
 
 // WithCertifyLegal tells the query-builder to eager-load the nodes that are connected to
 // the "certify_legal" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithCertifyLegal(opts ...func(*CertifyLegalQuery)) *SourceNameQuery {
-	query := (&CertifyLegalClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithCertifyLegal(opts ...func(*CertifyLegalQuery)) *SourceNameQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withCertifyLegal = query
-	return snq
+	_q.withCertifyLegal = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -533,10 +533,10 @@ func (snq *SourceNameQuery) WithCertifyLegal(opts ...func(*CertifyLegalQuery)) *
 //		GroupBy(sourcename.FieldType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (snq *SourceNameQuery) GroupBy(field string, fields ...string) *SourceNameGroupBy {
-	snq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SourceNameGroupBy{build: snq}
-	grbuild.flds = &snq.ctx.Fields
+func (_q *SourceNameQuery) GroupBy(field string, fields ...string) *SourceNameGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SourceNameGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = sourcename.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -554,187 +554,187 @@ func (snq *SourceNameQuery) GroupBy(field string, fields ...string) *SourceNameG
 //	client.SourceName.Query().
 //		Select(sourcename.FieldType).
 //		Scan(ctx, &v)
-func (snq *SourceNameQuery) Select(fields ...string) *SourceNameSelect {
-	snq.ctx.Fields = append(snq.ctx.Fields, fields...)
-	sbuild := &SourceNameSelect{SourceNameQuery: snq}
+func (_q *SourceNameQuery) Select(fields ...string) *SourceNameSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &SourceNameSelect{SourceNameQuery: _q}
 	sbuild.label = sourcename.Label
-	sbuild.flds, sbuild.scan = &snq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a SourceNameSelect configured with the given aggregations.
-func (snq *SourceNameQuery) Aggregate(fns ...AggregateFunc) *SourceNameSelect {
-	return snq.Select().Aggregate(fns...)
+func (_q *SourceNameQuery) Aggregate(fns ...AggregateFunc) *SourceNameSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (snq *SourceNameQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range snq.inters {
+func (_q *SourceNameQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, snq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range snq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !sourcename.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if snq.path != nil {
-		prev, err := snq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		snq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SourceName, error) {
+func (_q *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SourceName, error) {
 	var (
 		nodes       = []*SourceName{}
-		_spec       = snq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [7]bool{
-			snq.withOccurrences != nil,
-			snq.withHasSourceAt != nil,
-			snq.withScorecard != nil,
-			snq.withCertification != nil,
-			snq.withMetadata != nil,
-			snq.withPoc != nil,
-			snq.withCertifyLegal != nil,
+			_q.withOccurrences != nil,
+			_q.withHasSourceAt != nil,
+			_q.withScorecard != nil,
+			_q.withCertification != nil,
+			_q.withMetadata != nil,
+			_q.withPoc != nil,
+			_q.withCertifyLegal != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*SourceName).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &SourceName{config: snq.config}
+		node := &SourceName{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(snq.modifiers) > 0 {
-		_spec.Modifiers = snq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, snq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := snq.withOccurrences; query != nil {
-		if err := snq.loadOccurrences(ctx, query, nodes,
+	if query := _q.withOccurrences; query != nil {
+		if err := _q.loadOccurrences(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Occurrences = []*Occurrence{} },
 			func(n *SourceName, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := snq.withHasSourceAt; query != nil {
-		if err := snq.loadHasSourceAt(ctx, query, nodes,
+	if query := _q.withHasSourceAt; query != nil {
+		if err := _q.loadHasSourceAt(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.HasSourceAt = []*HasSourceAt{} },
 			func(n *SourceName, e *HasSourceAt) { n.Edges.HasSourceAt = append(n.Edges.HasSourceAt, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := snq.withScorecard; query != nil {
-		if err := snq.loadScorecard(ctx, query, nodes,
+	if query := _q.withScorecard; query != nil {
+		if err := _q.loadScorecard(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Scorecard = []*CertifyScorecard{} },
 			func(n *SourceName, e *CertifyScorecard) { n.Edges.Scorecard = append(n.Edges.Scorecard, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := snq.withCertification; query != nil {
-		if err := snq.loadCertification(ctx, query, nodes,
+	if query := _q.withCertification; query != nil {
+		if err := _q.loadCertification(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Certification = []*Certification{} },
 			func(n *SourceName, e *Certification) { n.Edges.Certification = append(n.Edges.Certification, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := snq.withMetadata; query != nil {
-		if err := snq.loadMetadata(ctx, query, nodes,
+	if query := _q.withMetadata; query != nil {
+		if err := _q.loadMetadata(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Metadata = []*HasMetadata{} },
 			func(n *SourceName, e *HasMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := snq.withPoc; query != nil {
-		if err := snq.loadPoc(ctx, query, nodes,
+	if query := _q.withPoc; query != nil {
+		if err := _q.loadPoc(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Poc = []*PointOfContact{} },
 			func(n *SourceName, e *PointOfContact) { n.Edges.Poc = append(n.Edges.Poc, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := snq.withCertifyLegal; query != nil {
-		if err := snq.loadCertifyLegal(ctx, query, nodes,
+	if query := _q.withCertifyLegal; query != nil {
+		if err := _q.loadCertifyLegal(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.CertifyLegal = []*CertifyLegal{} },
 			func(n *SourceName, e *CertifyLegal) { n.Edges.CertifyLegal = append(n.Edges.CertifyLegal, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedOccurrences {
-		if err := snq.loadOccurrences(ctx, query, nodes,
+	for name, query := range _q.withNamedOccurrences {
+		if err := _q.loadOccurrences(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedOccurrences(name) },
 			func(n *SourceName, e *Occurrence) { n.appendNamedOccurrences(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedHasSourceAt {
-		if err := snq.loadHasSourceAt(ctx, query, nodes,
+	for name, query := range _q.withNamedHasSourceAt {
+		if err := _q.loadHasSourceAt(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedHasSourceAt(name) },
 			func(n *SourceName, e *HasSourceAt) { n.appendNamedHasSourceAt(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedScorecard {
-		if err := snq.loadScorecard(ctx, query, nodes,
+	for name, query := range _q.withNamedScorecard {
+		if err := _q.loadScorecard(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedScorecard(name) },
 			func(n *SourceName, e *CertifyScorecard) { n.appendNamedScorecard(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedCertification {
-		if err := snq.loadCertification(ctx, query, nodes,
+	for name, query := range _q.withNamedCertification {
+		if err := _q.loadCertification(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedCertification(name) },
 			func(n *SourceName, e *Certification) { n.appendNamedCertification(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedMetadata {
-		if err := snq.loadMetadata(ctx, query, nodes,
+	for name, query := range _q.withNamedMetadata {
+		if err := _q.loadMetadata(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedMetadata(name) },
 			func(n *SourceName, e *HasMetadata) { n.appendNamedMetadata(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedPoc {
-		if err := snq.loadPoc(ctx, query, nodes,
+	for name, query := range _q.withNamedPoc {
+		if err := _q.loadPoc(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedPoc(name) },
 			func(n *SourceName, e *PointOfContact) { n.appendNamedPoc(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range snq.withNamedCertifyLegal {
-		if err := snq.loadCertifyLegal(ctx, query, nodes,
+	for name, query := range _q.withNamedCertifyLegal {
+		if err := _q.loadCertifyLegal(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedCertifyLegal(name) },
 			func(n *SourceName, e *CertifyLegal) { n.appendNamedCertifyLegal(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range snq.loadTotal {
-		if err := snq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Occurrence)) error {
+func (_q *SourceNameQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -767,7 +767,7 @@ func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *Occurren
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadHasSourceAt(ctx context.Context, query *HasSourceAtQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *HasSourceAt)) error {
+func (_q *SourceNameQuery) loadHasSourceAt(ctx context.Context, query *HasSourceAtQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *HasSourceAt)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -797,7 +797,7 @@ func (snq *SourceNameQuery) loadHasSourceAt(ctx context.Context, query *HasSourc
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadScorecard(ctx context.Context, query *CertifyScorecardQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *CertifyScorecard)) error {
+func (_q *SourceNameQuery) loadScorecard(ctx context.Context, query *CertifyScorecardQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *CertifyScorecard)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -827,7 +827,7 @@ func (snq *SourceNameQuery) loadScorecard(ctx context.Context, query *CertifySco
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Certification)) error {
+func (_q *SourceNameQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Certification)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -860,7 +860,7 @@ func (snq *SourceNameQuery) loadCertification(ctx context.Context, query *Certif
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *HasMetadata)) error {
+func (_q *SourceNameQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *HasMetadata)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -893,7 +893,7 @@ func (snq *SourceNameQuery) loadMetadata(ctx context.Context, query *HasMetadata
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *PointOfContact)) error {
+func (_q *SourceNameQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *PointOfContact)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -926,7 +926,7 @@ func (snq *SourceNameQuery) loadPoc(ctx context.Context, query *PointOfContactQu
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadCertifyLegal(ctx context.Context, query *CertifyLegalQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *CertifyLegal)) error {
+func (_q *SourceNameQuery) loadCertifyLegal(ctx context.Context, query *CertifyLegalQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *CertifyLegal)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
 	for i := range nodes {
@@ -960,27 +960,27 @@ func (snq *SourceNameQuery) loadCertifyLegal(ctx context.Context, query *Certify
 	return nil
 }
 
-func (snq *SourceNameQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := snq.querySpec()
-	if len(snq.modifiers) > 0 {
-		_spec.Modifiers = snq.modifiers
+func (_q *SourceNameQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = snq.ctx.Fields
-	if len(snq.ctx.Fields) > 0 {
-		_spec.Unique = snq.ctx.Unique != nil && *snq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, snq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (snq *SourceNameQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *SourceNameQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
-	_spec.From = snq.sql
-	if unique := snq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if snq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := snq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, sourcename.FieldID)
 		for i := range fields {
@@ -989,20 +989,20 @@ func (snq *SourceNameQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := snq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := snq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := snq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := snq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -1012,33 +1012,33 @@ func (snq *SourceNameQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (snq *SourceNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(snq.driver.Dialect())
+func (_q *SourceNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(sourcename.Table)
-	columns := snq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = sourcename.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if snq.sql != nil {
-		selector = snq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if snq.ctx.Unique != nil && *snq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range snq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range snq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := snq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := snq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -1046,100 +1046,100 @@ func (snq *SourceNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // WithNamedOccurrences tells the query-builder to eager-load the nodes that are connected to the "occurrences"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedOccurrences(name string, opts ...func(*OccurrenceQuery)) *SourceNameQuery {
-	query := (&OccurrenceClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedOccurrences(name string, opts ...func(*OccurrenceQuery)) *SourceNameQuery {
+	query := (&OccurrenceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedOccurrences == nil {
-		snq.withNamedOccurrences = make(map[string]*OccurrenceQuery)
+	if _q.withNamedOccurrences == nil {
+		_q.withNamedOccurrences = make(map[string]*OccurrenceQuery)
 	}
-	snq.withNamedOccurrences[name] = query
-	return snq
+	_q.withNamedOccurrences[name] = query
+	return _q
 }
 
 // WithNamedHasSourceAt tells the query-builder to eager-load the nodes that are connected to the "has_source_at"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedHasSourceAt(name string, opts ...func(*HasSourceAtQuery)) *SourceNameQuery {
-	query := (&HasSourceAtClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedHasSourceAt(name string, opts ...func(*HasSourceAtQuery)) *SourceNameQuery {
+	query := (&HasSourceAtClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedHasSourceAt == nil {
-		snq.withNamedHasSourceAt = make(map[string]*HasSourceAtQuery)
+	if _q.withNamedHasSourceAt == nil {
+		_q.withNamedHasSourceAt = make(map[string]*HasSourceAtQuery)
 	}
-	snq.withNamedHasSourceAt[name] = query
-	return snq
+	_q.withNamedHasSourceAt[name] = query
+	return _q
 }
 
 // WithNamedScorecard tells the query-builder to eager-load the nodes that are connected to the "scorecard"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedScorecard(name string, opts ...func(*CertifyScorecardQuery)) *SourceNameQuery {
-	query := (&CertifyScorecardClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedScorecard(name string, opts ...func(*CertifyScorecardQuery)) *SourceNameQuery {
+	query := (&CertifyScorecardClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedScorecard == nil {
-		snq.withNamedScorecard = make(map[string]*CertifyScorecardQuery)
+	if _q.withNamedScorecard == nil {
+		_q.withNamedScorecard = make(map[string]*CertifyScorecardQuery)
 	}
-	snq.withNamedScorecard[name] = query
-	return snq
+	_q.withNamedScorecard[name] = query
+	return _q
 }
 
 // WithNamedCertification tells the query-builder to eager-load the nodes that are connected to the "certification"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *SourceNameQuery {
-	query := (&CertificationClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *SourceNameQuery {
+	query := (&CertificationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedCertification == nil {
-		snq.withNamedCertification = make(map[string]*CertificationQuery)
+	if _q.withNamedCertification == nil {
+		_q.withNamedCertification = make(map[string]*CertificationQuery)
 	}
-	snq.withNamedCertification[name] = query
-	return snq
+	_q.withNamedCertification[name] = query
+	return _q
 }
 
 // WithNamedMetadata tells the query-builder to eager-load the nodes that are connected to the "metadata"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *SourceNameQuery {
-	query := (&HasMetadataClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *SourceNameQuery {
+	query := (&HasMetadataClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedMetadata == nil {
-		snq.withNamedMetadata = make(map[string]*HasMetadataQuery)
+	if _q.withNamedMetadata == nil {
+		_q.withNamedMetadata = make(map[string]*HasMetadataQuery)
 	}
-	snq.withNamedMetadata[name] = query
-	return snq
+	_q.withNamedMetadata[name] = query
+	return _q
 }
 
 // WithNamedPoc tells the query-builder to eager-load the nodes that are connected to the "poc"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *SourceNameQuery {
-	query := (&PointOfContactClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *SourceNameQuery {
+	query := (&PointOfContactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedPoc == nil {
-		snq.withNamedPoc = make(map[string]*PointOfContactQuery)
+	if _q.withNamedPoc == nil {
+		_q.withNamedPoc = make(map[string]*PointOfContactQuery)
 	}
-	snq.withNamedPoc[name] = query
-	return snq
+	_q.withNamedPoc[name] = query
+	return _q
 }
 
 // WithNamedCertifyLegal tells the query-builder to eager-load the nodes that are connected to the "certify_legal"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamedCertifyLegal(name string, opts ...func(*CertifyLegalQuery)) *SourceNameQuery {
-	query := (&CertifyLegalClient{config: snq.config}).Query()
+func (_q *SourceNameQuery) WithNamedCertifyLegal(name string, opts ...func(*CertifyLegalQuery)) *SourceNameQuery {
+	query := (&CertifyLegalClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if snq.withNamedCertifyLegal == nil {
-		snq.withNamedCertifyLegal = make(map[string]*CertifyLegalQuery)
+	if _q.withNamedCertifyLegal == nil {
+		_q.withNamedCertifyLegal = make(map[string]*CertifyLegalQuery)
 	}
-	snq.withNamedCertifyLegal[name] = query
-	return snq
+	_q.withNamedCertifyLegal[name] = query
+	return _q
 }
 
 // SourceNameGroupBy is the group-by builder for SourceName entities.
@@ -1149,41 +1149,41 @@ type SourceNameGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sngb *SourceNameGroupBy) Aggregate(fns ...AggregateFunc) *SourceNameGroupBy {
-	sngb.fns = append(sngb.fns, fns...)
-	return sngb
+func (_g *SourceNameGroupBy) Aggregate(fns ...AggregateFunc) *SourceNameGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (sngb *SourceNameGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sngb.build.ctx, ent.OpQueryGroupBy)
-	if err := sngb.build.prepareQuery(ctx); err != nil {
+func (_g *SourceNameGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SourceNameQuery, *SourceNameGroupBy](ctx, sngb.build, sngb, sngb.build.inters, v)
+	return scanWithInterceptors[*SourceNameQuery, *SourceNameGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (sngb *SourceNameGroupBy) sqlScan(ctx context.Context, root *SourceNameQuery, v any) error {
+func (_g *SourceNameGroupBy) sqlScan(ctx context.Context, root *SourceNameQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(sngb.fns))
-	for _, fn := range sngb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*sngb.flds)+len(sngb.fns))
-		for _, f := range *sngb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*sngb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sngb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -1197,27 +1197,27 @@ type SourceNameSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (sns *SourceNameSelect) Aggregate(fns ...AggregateFunc) *SourceNameSelect {
-	sns.fns = append(sns.fns, fns...)
-	return sns
+func (_s *SourceNameSelect) Aggregate(fns ...AggregateFunc) *SourceNameSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (sns *SourceNameSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sns.ctx, ent.OpQuerySelect)
-	if err := sns.prepareQuery(ctx); err != nil {
+func (_s *SourceNameSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SourceNameQuery, *SourceNameSelect](ctx, sns.SourceNameQuery, sns, sns.inters, v)
+	return scanWithInterceptors[*SourceNameQuery, *SourceNameSelect](ctx, _s.SourceNameQuery, _s, _s.inters, v)
 }
 
-func (sns *SourceNameSelect) sqlScan(ctx context.Context, root *SourceNameQuery, v any) error {
+func (_s *SourceNameSelect) sqlScan(ctx context.Context, root *SourceNameQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(sns.fns))
-	for _, fn := range sns.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*sns.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -1225,7 +1225,7 @@ func (sns *SourceNameSelect) sqlScan(ctx context.Context, root *SourceNameQuery,
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sns.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

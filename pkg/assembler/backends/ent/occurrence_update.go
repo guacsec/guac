@@ -27,203 +27,203 @@ type OccurrenceUpdate struct {
 }
 
 // Where appends a list predicates to the OccurrenceUpdate builder.
-func (ou *OccurrenceUpdate) Where(ps ...predicate.Occurrence) *OccurrenceUpdate {
-	ou.mutation.Where(ps...)
-	return ou
+func (_u *OccurrenceUpdate) Where(ps ...predicate.Occurrence) *OccurrenceUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (ou *OccurrenceUpdate) SetArtifactID(u uuid.UUID) *OccurrenceUpdate {
-	ou.mutation.SetArtifactID(u)
-	return ou
+func (_u *OccurrenceUpdate) SetArtifactID(v uuid.UUID) *OccurrenceUpdate {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableArtifactID(u *uuid.UUID) *OccurrenceUpdate {
-	if u != nil {
-		ou.SetArtifactID(*u)
+func (_u *OccurrenceUpdate) SetNillableArtifactID(v *uuid.UUID) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return ou
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (ou *OccurrenceUpdate) SetJustification(s string) *OccurrenceUpdate {
-	ou.mutation.SetJustification(s)
-	return ou
+func (_u *OccurrenceUpdate) SetJustification(v string) *OccurrenceUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableJustification(s *string) *OccurrenceUpdate {
-	if s != nil {
-		ou.SetJustification(*s)
+func (_u *OccurrenceUpdate) SetNillableJustification(v *string) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return ou
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (ou *OccurrenceUpdate) SetOrigin(s string) *OccurrenceUpdate {
-	ou.mutation.SetOrigin(s)
-	return ou
+func (_u *OccurrenceUpdate) SetOrigin(v string) *OccurrenceUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableOrigin(s *string) *OccurrenceUpdate {
-	if s != nil {
-		ou.SetOrigin(*s)
+func (_u *OccurrenceUpdate) SetNillableOrigin(v *string) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return ou
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (ou *OccurrenceUpdate) SetCollector(s string) *OccurrenceUpdate {
-	ou.mutation.SetCollector(s)
-	return ou
+func (_u *OccurrenceUpdate) SetCollector(v string) *OccurrenceUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableCollector(s *string) *OccurrenceUpdate {
-	if s != nil {
-		ou.SetCollector(*s)
+func (_u *OccurrenceUpdate) SetNillableCollector(v *string) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return ou
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (ou *OccurrenceUpdate) SetDocumentRef(s string) *OccurrenceUpdate {
-	ou.mutation.SetDocumentRef(s)
-	return ou
+func (_u *OccurrenceUpdate) SetDocumentRef(v string) *OccurrenceUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableDocumentRef(s *string) *OccurrenceUpdate {
-	if s != nil {
-		ou.SetDocumentRef(*s)
+func (_u *OccurrenceUpdate) SetNillableDocumentRef(v *string) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return ou
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (ou *OccurrenceUpdate) SetSourceID(u uuid.UUID) *OccurrenceUpdate {
-	ou.mutation.SetSourceID(u)
-	return ou
+func (_u *OccurrenceUpdate) SetSourceID(v uuid.UUID) *OccurrenceUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableSourceID(u *uuid.UUID) *OccurrenceUpdate {
-	if u != nil {
-		ou.SetSourceID(*u)
+func (_u *OccurrenceUpdate) SetNillableSourceID(v *uuid.UUID) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return ou
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (ou *OccurrenceUpdate) ClearSourceID() *OccurrenceUpdate {
-	ou.mutation.ClearSourceID()
-	return ou
+func (_u *OccurrenceUpdate) ClearSourceID() *OccurrenceUpdate {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (ou *OccurrenceUpdate) SetPackageID(u uuid.UUID) *OccurrenceUpdate {
-	ou.mutation.SetPackageID(u)
-	return ou
+func (_u *OccurrenceUpdate) SetPackageID(v uuid.UUID) *OccurrenceUpdate {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillablePackageID(u *uuid.UUID) *OccurrenceUpdate {
-	if u != nil {
-		ou.SetPackageID(*u)
+func (_u *OccurrenceUpdate) SetNillablePackageID(v *uuid.UUID) *OccurrenceUpdate {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return ou
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (ou *OccurrenceUpdate) ClearPackageID() *OccurrenceUpdate {
-	ou.mutation.ClearPackageID()
-	return ou
+func (_u *OccurrenceUpdate) ClearPackageID() *OccurrenceUpdate {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (ou *OccurrenceUpdate) SetArtifact(a *Artifact) *OccurrenceUpdate {
-	return ou.SetArtifactID(a.ID)
+func (_u *OccurrenceUpdate) SetArtifact(v *Artifact) *OccurrenceUpdate {
+	return _u.SetArtifactID(v.ID)
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (ou *OccurrenceUpdate) SetPackage(p *PackageVersion) *OccurrenceUpdate {
-	return ou.SetPackageID(p.ID)
+func (_u *OccurrenceUpdate) SetPackage(v *PackageVersion) *OccurrenceUpdate {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (ou *OccurrenceUpdate) SetSource(s *SourceName) *OccurrenceUpdate {
-	return ou.SetSourceID(s.ID)
+func (_u *OccurrenceUpdate) SetSource(v *SourceName) *OccurrenceUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (ou *OccurrenceUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdate {
-	ou.mutation.AddIncludedInSbomIDs(ids...)
-	return ou
+func (_u *OccurrenceUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdate {
+	_u.mutation.AddIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (ou *OccurrenceUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *OccurrenceUpdate) AddIncludedInSboms(v ...*BillOfMaterials) *OccurrenceUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ou.AddIncludedInSbomIDs(ids...)
+	return _u.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the OccurrenceMutation object of the builder.
-func (ou *OccurrenceUpdate) Mutation() *OccurrenceMutation {
-	return ou.mutation
+func (_u *OccurrenceUpdate) Mutation() *OccurrenceMutation {
+	return _u.mutation
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (ou *OccurrenceUpdate) ClearArtifact() *OccurrenceUpdate {
-	ou.mutation.ClearArtifact()
-	return ou
+func (_u *OccurrenceUpdate) ClearArtifact() *OccurrenceUpdate {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (ou *OccurrenceUpdate) ClearPackage() *OccurrenceUpdate {
-	ou.mutation.ClearPackage()
-	return ou
+func (_u *OccurrenceUpdate) ClearPackage() *OccurrenceUpdate {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (ou *OccurrenceUpdate) ClearSource() *OccurrenceUpdate {
-	ou.mutation.ClearSource()
-	return ou
+func (_u *OccurrenceUpdate) ClearSource() *OccurrenceUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
-func (ou *OccurrenceUpdate) ClearIncludedInSboms() *OccurrenceUpdate {
-	ou.mutation.ClearIncludedInSboms()
-	return ou
+func (_u *OccurrenceUpdate) ClearIncludedInSboms() *OccurrenceUpdate {
+	_u.mutation.ClearIncludedInSboms()
+	return _u
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (ou *OccurrenceUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdate {
-	ou.mutation.RemoveIncludedInSbomIDs(ids...)
-	return ou
+func (_u *OccurrenceUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdate {
+	_u.mutation.RemoveIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
-func (ou *OccurrenceUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *OccurrenceUpdate) RemoveIncludedInSboms(v ...*BillOfMaterials) *OccurrenceUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ou.RemoveIncludedInSbomIDs(ids...)
+	return _u.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ou *OccurrenceUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ou.sqlSave, ou.mutation, ou.hooks)
+func (_u *OccurrenceUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ou *OccurrenceUpdate) SaveX(ctx context.Context) int {
-	affected, err := ou.Save(ctx)
+func (_u *OccurrenceUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -231,51 +231,51 @@ func (ou *OccurrenceUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ou *OccurrenceUpdate) Exec(ctx context.Context) error {
-	_, err := ou.Save(ctx)
+func (_u *OccurrenceUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ou *OccurrenceUpdate) ExecX(ctx context.Context) {
-	if err := ou.Exec(ctx); err != nil {
+func (_u *OccurrenceUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ou *OccurrenceUpdate) check() error {
-	if ou.mutation.ArtifactCleared() && len(ou.mutation.ArtifactIDs()) > 0 {
+func (_u *OccurrenceUpdate) check() error {
+	if _u.mutation.ArtifactCleared() && len(_u.mutation.ArtifactIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Occurrence.artifact"`)
 	}
 	return nil
 }
 
-func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := ou.check(); err != nil {
-		return n, err
+func (_u *OccurrenceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
-	if ps := ou.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ou.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(occurrence.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := ou.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(occurrence.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := ou.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := ou.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(occurrence.FieldDocumentRef, field.TypeString, value)
 	}
-	if ou.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -288,7 +288,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -304,7 +304,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ou.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -317,7 +317,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -333,7 +333,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ou.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -346,7 +346,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -362,7 +362,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ou.mutation.IncludedInSbomsCleared() {
+	if _u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -375,7 +375,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !ou.mutation.IncludedInSbomsCleared() {
+	if nodes := _u.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !_u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -391,7 +391,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -407,7 +407,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ou.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{occurrence.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -415,8 +415,8 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ou.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // OccurrenceUpdateOne is the builder for updating a single Occurrence entity.
@@ -428,210 +428,210 @@ type OccurrenceUpdateOne struct {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (ouo *OccurrenceUpdateOne) SetArtifactID(u uuid.UUID) *OccurrenceUpdateOne {
-	ouo.mutation.SetArtifactID(u)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetArtifactID(v uuid.UUID) *OccurrenceUpdateOne {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableArtifactID(u *uuid.UUID) *OccurrenceUpdateOne {
-	if u != nil {
-		ouo.SetArtifactID(*u)
+func (_u *OccurrenceUpdateOne) SetNillableArtifactID(v *uuid.UUID) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return ouo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (ouo *OccurrenceUpdateOne) SetJustification(s string) *OccurrenceUpdateOne {
-	ouo.mutation.SetJustification(s)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetJustification(v string) *OccurrenceUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableJustification(s *string) *OccurrenceUpdateOne {
-	if s != nil {
-		ouo.SetJustification(*s)
+func (_u *OccurrenceUpdateOne) SetNillableJustification(v *string) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return ouo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (ouo *OccurrenceUpdateOne) SetOrigin(s string) *OccurrenceUpdateOne {
-	ouo.mutation.SetOrigin(s)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetOrigin(v string) *OccurrenceUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableOrigin(s *string) *OccurrenceUpdateOne {
-	if s != nil {
-		ouo.SetOrigin(*s)
+func (_u *OccurrenceUpdateOne) SetNillableOrigin(v *string) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return ouo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (ouo *OccurrenceUpdateOne) SetCollector(s string) *OccurrenceUpdateOne {
-	ouo.mutation.SetCollector(s)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetCollector(v string) *OccurrenceUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableCollector(s *string) *OccurrenceUpdateOne {
-	if s != nil {
-		ouo.SetCollector(*s)
+func (_u *OccurrenceUpdateOne) SetNillableCollector(v *string) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return ouo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (ouo *OccurrenceUpdateOne) SetDocumentRef(s string) *OccurrenceUpdateOne {
-	ouo.mutation.SetDocumentRef(s)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetDocumentRef(v string) *OccurrenceUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableDocumentRef(s *string) *OccurrenceUpdateOne {
-	if s != nil {
-		ouo.SetDocumentRef(*s)
+func (_u *OccurrenceUpdateOne) SetNillableDocumentRef(v *string) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return ouo
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (ouo *OccurrenceUpdateOne) SetSourceID(u uuid.UUID) *OccurrenceUpdateOne {
-	ouo.mutation.SetSourceID(u)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetSourceID(v uuid.UUID) *OccurrenceUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableSourceID(u *uuid.UUID) *OccurrenceUpdateOne {
-	if u != nil {
-		ouo.SetSourceID(*u)
+func (_u *OccurrenceUpdateOne) SetNillableSourceID(v *uuid.UUID) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return ouo
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (ouo *OccurrenceUpdateOne) ClearSourceID() *OccurrenceUpdateOne {
-	ouo.mutation.ClearSourceID()
-	return ouo
+func (_u *OccurrenceUpdateOne) ClearSourceID() *OccurrenceUpdateOne {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (ouo *OccurrenceUpdateOne) SetPackageID(u uuid.UUID) *OccurrenceUpdateOne {
-	ouo.mutation.SetPackageID(u)
-	return ouo
+func (_u *OccurrenceUpdateOne) SetPackageID(v uuid.UUID) *OccurrenceUpdateOne {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillablePackageID(u *uuid.UUID) *OccurrenceUpdateOne {
-	if u != nil {
-		ouo.SetPackageID(*u)
+func (_u *OccurrenceUpdateOne) SetNillablePackageID(v *uuid.UUID) *OccurrenceUpdateOne {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return ouo
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (ouo *OccurrenceUpdateOne) ClearPackageID() *OccurrenceUpdateOne {
-	ouo.mutation.ClearPackageID()
-	return ouo
+func (_u *OccurrenceUpdateOne) ClearPackageID() *OccurrenceUpdateOne {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (ouo *OccurrenceUpdateOne) SetArtifact(a *Artifact) *OccurrenceUpdateOne {
-	return ouo.SetArtifactID(a.ID)
+func (_u *OccurrenceUpdateOne) SetArtifact(v *Artifact) *OccurrenceUpdateOne {
+	return _u.SetArtifactID(v.ID)
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (ouo *OccurrenceUpdateOne) SetPackage(p *PackageVersion) *OccurrenceUpdateOne {
-	return ouo.SetPackageID(p.ID)
+func (_u *OccurrenceUpdateOne) SetPackage(v *PackageVersion) *OccurrenceUpdateOne {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (ouo *OccurrenceUpdateOne) SetSource(s *SourceName) *OccurrenceUpdateOne {
-	return ouo.SetSourceID(s.ID)
+func (_u *OccurrenceUpdateOne) SetSource(v *SourceName) *OccurrenceUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (ouo *OccurrenceUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdateOne {
-	ouo.mutation.AddIncludedInSbomIDs(ids...)
-	return ouo
+func (_u *OccurrenceUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdateOne {
+	_u.mutation.AddIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (ouo *OccurrenceUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *OccurrenceUpdateOne) AddIncludedInSboms(v ...*BillOfMaterials) *OccurrenceUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ouo.AddIncludedInSbomIDs(ids...)
+	return _u.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the OccurrenceMutation object of the builder.
-func (ouo *OccurrenceUpdateOne) Mutation() *OccurrenceMutation {
-	return ouo.mutation
+func (_u *OccurrenceUpdateOne) Mutation() *OccurrenceMutation {
+	return _u.mutation
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (ouo *OccurrenceUpdateOne) ClearArtifact() *OccurrenceUpdateOne {
-	ouo.mutation.ClearArtifact()
-	return ouo
+func (_u *OccurrenceUpdateOne) ClearArtifact() *OccurrenceUpdateOne {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (ouo *OccurrenceUpdateOne) ClearPackage() *OccurrenceUpdateOne {
-	ouo.mutation.ClearPackage()
-	return ouo
+func (_u *OccurrenceUpdateOne) ClearPackage() *OccurrenceUpdateOne {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (ouo *OccurrenceUpdateOne) ClearSource() *OccurrenceUpdateOne {
-	ouo.mutation.ClearSource()
-	return ouo
+func (_u *OccurrenceUpdateOne) ClearSource() *OccurrenceUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
-func (ouo *OccurrenceUpdateOne) ClearIncludedInSboms() *OccurrenceUpdateOne {
-	ouo.mutation.ClearIncludedInSboms()
-	return ouo
+func (_u *OccurrenceUpdateOne) ClearIncludedInSboms() *OccurrenceUpdateOne {
+	_u.mutation.ClearIncludedInSboms()
+	return _u
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (ouo *OccurrenceUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdateOne {
-	ouo.mutation.RemoveIncludedInSbomIDs(ids...)
-	return ouo
+func (_u *OccurrenceUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdateOne {
+	_u.mutation.RemoveIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
-func (ouo *OccurrenceUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *OccurrenceUpdateOne) RemoveIncludedInSboms(v ...*BillOfMaterials) *OccurrenceUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ouo.RemoveIncludedInSbomIDs(ids...)
+	return _u.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the OccurrenceUpdate builder.
-func (ouo *OccurrenceUpdateOne) Where(ps ...predicate.Occurrence) *OccurrenceUpdateOne {
-	ouo.mutation.Where(ps...)
-	return ouo
+func (_u *OccurrenceUpdateOne) Where(ps ...predicate.Occurrence) *OccurrenceUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ouo *OccurrenceUpdateOne) Select(field string, fields ...string) *OccurrenceUpdateOne {
-	ouo.fields = append([]string{field}, fields...)
-	return ouo
+func (_u *OccurrenceUpdateOne) Select(field string, fields ...string) *OccurrenceUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Occurrence entity.
-func (ouo *OccurrenceUpdateOne) Save(ctx context.Context) (*Occurrence, error) {
-	return withHooks(ctx, ouo.sqlSave, ouo.mutation, ouo.hooks)
+func (_u *OccurrenceUpdateOne) Save(ctx context.Context) (*Occurrence, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ouo *OccurrenceUpdateOne) SaveX(ctx context.Context) *Occurrence {
-	node, err := ouo.Save(ctx)
+func (_u *OccurrenceUpdateOne) SaveX(ctx context.Context) *Occurrence {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -639,37 +639,37 @@ func (ouo *OccurrenceUpdateOne) SaveX(ctx context.Context) *Occurrence {
 }
 
 // Exec executes the query on the entity.
-func (ouo *OccurrenceUpdateOne) Exec(ctx context.Context) error {
-	_, err := ouo.Save(ctx)
+func (_u *OccurrenceUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ouo *OccurrenceUpdateOne) ExecX(ctx context.Context) {
-	if err := ouo.Exec(ctx); err != nil {
+func (_u *OccurrenceUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ouo *OccurrenceUpdateOne) check() error {
-	if ouo.mutation.ArtifactCleared() && len(ouo.mutation.ArtifactIDs()) > 0 {
+func (_u *OccurrenceUpdateOne) check() error {
+	if _u.mutation.ArtifactCleared() && len(_u.mutation.ArtifactIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Occurrence.artifact"`)
 	}
 	return nil
 }
 
-func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence, err error) {
-	if err := ouo.check(); err != nil {
+func (_u *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
-	id, ok := ouo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Occurrence.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ouo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, occurrence.FieldID)
 		for _, f := range fields {
@@ -681,26 +681,26 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			}
 		}
 	}
-	if ps := ouo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ouo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(occurrence.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := ouo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(occurrence.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := ouo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := ouo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(occurrence.FieldDocumentRef, field.TypeString, value)
 	}
-	if ouo.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -713,7 +713,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -729,7 +729,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ouo.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -742,7 +742,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -758,7 +758,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ouo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -771,7 +771,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -787,7 +787,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ouo.mutation.IncludedInSbomsCleared() {
+	if _u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -800,7 +800,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !ouo.mutation.IncludedInSbomsCleared() {
+	if nodes := _u.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !_u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -816,7 +816,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -832,10 +832,10 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Occurrence{config: ouo.config}
+	_node = &Occurrence{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ouo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{occurrence.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -843,6 +843,6 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 		}
 		return nil, err
 	}
-	ouo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

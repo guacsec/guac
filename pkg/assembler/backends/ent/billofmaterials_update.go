@@ -28,398 +28,398 @@ type BillOfMaterialsUpdate struct {
 }
 
 // Where appends a list predicates to the BillOfMaterialsUpdate builder.
-func (bomu *BillOfMaterialsUpdate) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsUpdate {
-	bomu.mutation.Where(ps...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (bomu *BillOfMaterialsUpdate) SetPackageID(u uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.SetPackageID(u)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetPackageID(v uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillablePackageID(u *uuid.UUID) *BillOfMaterialsUpdate {
-	if u != nil {
-		bomu.SetPackageID(*u)
+func (_u *BillOfMaterialsUpdate) SetNillablePackageID(v *uuid.UUID) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return bomu
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (bomu *BillOfMaterialsUpdate) ClearPackageID() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearPackageID()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearPackageID() *BillOfMaterialsUpdate {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (bomu *BillOfMaterialsUpdate) SetArtifactID(u uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.SetArtifactID(u)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetArtifactID(v uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableArtifactID(u *uuid.UUID) *BillOfMaterialsUpdate {
-	if u != nil {
-		bomu.SetArtifactID(*u)
+func (_u *BillOfMaterialsUpdate) SetNillableArtifactID(v *uuid.UUID) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return bomu
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (bomu *BillOfMaterialsUpdate) ClearArtifactID() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearArtifactID()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearArtifactID() *BillOfMaterialsUpdate {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetURI sets the "uri" field.
-func (bomu *BillOfMaterialsUpdate) SetURI(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetURI(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetURI(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetURI(v)
+	return _u
 }
 
 // SetNillableURI sets the "uri" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableURI(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetURI(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableURI(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetURI(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetAlgorithm sets the "algorithm" field.
-func (bomu *BillOfMaterialsUpdate) SetAlgorithm(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetAlgorithm(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetAlgorithm(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetAlgorithm(v)
+	return _u
 }
 
 // SetNillableAlgorithm sets the "algorithm" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableAlgorithm(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetAlgorithm(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableAlgorithm(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetAlgorithm(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetDigest sets the "digest" field.
-func (bomu *BillOfMaterialsUpdate) SetDigest(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetDigest(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetDigest(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetDigest(v)
+	return _u
 }
 
 // SetNillableDigest sets the "digest" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableDigest(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetDigest(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableDigest(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetDigest(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetDownloadLocation sets the "download_location" field.
-func (bomu *BillOfMaterialsUpdate) SetDownloadLocation(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetDownloadLocation(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetDownloadLocation(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetDownloadLocation(v)
+	return _u
 }
 
 // SetNillableDownloadLocation sets the "download_location" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableDownloadLocation(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetDownloadLocation(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableDownloadLocation(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetDownloadLocation(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (bomu *BillOfMaterialsUpdate) SetOrigin(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetOrigin(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetOrigin(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableOrigin(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetOrigin(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableOrigin(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (bomu *BillOfMaterialsUpdate) SetCollector(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetCollector(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetCollector(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableCollector(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetCollector(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableCollector(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (bomu *BillOfMaterialsUpdate) SetDocumentRef(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetDocumentRef(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetDocumentRef(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableDocumentRef(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetDocumentRef(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableDocumentRef(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (bomu *BillOfMaterialsUpdate) SetKnownSince(t time.Time) *BillOfMaterialsUpdate {
-	bomu.mutation.SetKnownSince(t)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetKnownSince(v time.Time) *BillOfMaterialsUpdate {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableKnownSince(t *time.Time) *BillOfMaterialsUpdate {
-	if t != nil {
-		bomu.SetKnownSince(*t)
+func (_u *BillOfMaterialsUpdate) SetNillableKnownSince(v *time.Time) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetIncludedPackagesHash sets the "included_packages_hash" field.
-func (bomu *BillOfMaterialsUpdate) SetIncludedPackagesHash(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetIncludedPackagesHash(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetIncludedPackagesHash(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetIncludedPackagesHash(v)
+	return _u
 }
 
 // SetNillableIncludedPackagesHash sets the "included_packages_hash" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableIncludedPackagesHash(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetIncludedPackagesHash(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableIncludedPackagesHash(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetIncludedPackagesHash(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
-func (bomu *BillOfMaterialsUpdate) SetIncludedArtifactsHash(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetIncludedArtifactsHash(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetIncludedArtifactsHash(v)
+	return _u
 }
 
 // SetNillableIncludedArtifactsHash sets the "included_artifacts_hash" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableIncludedArtifactsHash(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetIncludedArtifactsHash(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableIncludedArtifactsHash(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetIncludedArtifactsHash(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
-func (bomu *BillOfMaterialsUpdate) SetIncludedDependenciesHash(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetIncludedDependenciesHash(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetIncludedDependenciesHash(v)
+	return _u
 }
 
 // SetNillableIncludedDependenciesHash sets the "included_dependencies_hash" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableIncludedDependenciesHash(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetIncludedDependenciesHash(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableIncludedDependenciesHash(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetIncludedDependenciesHash(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
-func (bomu *BillOfMaterialsUpdate) SetIncludedOccurrencesHash(s string) *BillOfMaterialsUpdate {
-	bomu.mutation.SetIncludedOccurrencesHash(s)
-	return bomu
+func (_u *BillOfMaterialsUpdate) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpdate {
+	_u.mutation.SetIncludedOccurrencesHash(v)
+	return _u
 }
 
 // SetNillableIncludedOccurrencesHash sets the "included_occurrences_hash" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableIncludedOccurrencesHash(s *string) *BillOfMaterialsUpdate {
-	if s != nil {
-		bomu.SetIncludedOccurrencesHash(*s)
+func (_u *BillOfMaterialsUpdate) SetNillableIncludedOccurrencesHash(v *string) *BillOfMaterialsUpdate {
+	if v != nil {
+		_u.SetIncludedOccurrencesHash(*v)
 	}
-	return bomu
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (bomu *BillOfMaterialsUpdate) SetPackage(p *PackageVersion) *BillOfMaterialsUpdate {
-	return bomu.SetPackageID(p.ID)
+func (_u *BillOfMaterialsUpdate) SetPackage(v *PackageVersion) *BillOfMaterialsUpdate {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (bomu *BillOfMaterialsUpdate) SetArtifact(a *Artifact) *BillOfMaterialsUpdate {
-	return bomu.SetArtifactID(a.ID)
+func (_u *BillOfMaterialsUpdate) SetArtifact(v *Artifact) *BillOfMaterialsUpdate {
+	return _u.SetArtifactID(v.ID)
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.AddIncludedSoftwarePackageIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.AddIncludedSoftwarePackageIDs(ids...)
+	return _u
 }
 
 // AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
-func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *BillOfMaterialsUpdate) AddIncludedSoftwarePackages(v ...*PackageVersion) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.AddIncludedSoftwarePackageIDs(ids...)
+	return _u.AddIncludedSoftwarePackageIDs(ids...)
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.AddIncludedSoftwareArtifactIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.AddIncludedSoftwareArtifactIDs(ids...)
+	return _u
 }
 
 // AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
-func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *BillOfMaterialsUpdate) AddIncludedSoftwareArtifacts(v ...*Artifact) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.AddIncludedSoftwareArtifactIDs(ids...)
+	return _u.AddIncludedSoftwareArtifactIDs(ids...)
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.AddIncludedDependencyIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.AddIncludedDependencyIDs(ids...)
+	return _u
 }
 
 // AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
-func (bomu *BillOfMaterialsUpdate) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *BillOfMaterialsUpdate) AddIncludedDependencies(v ...*Dependency) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.AddIncludedDependencyIDs(ids...)
+	return _u.AddIncludedDependencyIDs(ids...)
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.AddIncludedOccurrenceIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.AddIncludedOccurrenceIDs(ids...)
+	return _u
 }
 
 // AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
-func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *BillOfMaterialsUpdate) AddIncludedOccurrences(v ...*Occurrence) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.AddIncludedOccurrenceIDs(ids...)
+	return _u.AddIncludedOccurrenceIDs(ids...)
 }
 
 // Mutation returns the BillOfMaterialsMutation object of the builder.
-func (bomu *BillOfMaterialsUpdate) Mutation() *BillOfMaterialsMutation {
-	return bomu.mutation
+func (_u *BillOfMaterialsUpdate) Mutation() *BillOfMaterialsMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (bomu *BillOfMaterialsUpdate) ClearPackage() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearPackage()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearPackage() *BillOfMaterialsUpdate {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (bomu *BillOfMaterialsUpdate) ClearArtifact() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearArtifact()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearArtifact() *BillOfMaterialsUpdate {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // ClearIncludedSoftwarePackages clears all "included_software_packages" edges to the PackageVersion entity.
-func (bomu *BillOfMaterialsUpdate) ClearIncludedSoftwarePackages() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearIncludedSoftwarePackages()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearIncludedSoftwarePackages() *BillOfMaterialsUpdate {
+	_u.mutation.ClearIncludedSoftwarePackages()
+	return _u
 }
 
 // RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to PackageVersion entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedSoftwarePackages removes "included_software_packages" edges to PackageVersion entities.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackages(v ...*PackageVersion) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.RemoveIncludedSoftwarePackageIDs(ids...)
+	return _u.RemoveIncludedSoftwarePackageIDs(ids...)
 }
 
 // ClearIncludedSoftwareArtifacts clears all "included_software_artifacts" edges to the Artifact entity.
-func (bomu *BillOfMaterialsUpdate) ClearIncludedSoftwareArtifacts() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearIncludedSoftwareArtifacts()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearIncludedSoftwareArtifacts() *BillOfMaterialsUpdate {
+	_u.mutation.ClearIncludedSoftwareArtifacts()
+	return _u
 }
 
 // RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to Artifact entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedSoftwareArtifacts removes "included_software_artifacts" edges to Artifact entities.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifacts(v ...*Artifact) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.RemoveIncludedSoftwareArtifactIDs(ids...)
+	return _u.RemoveIncludedSoftwareArtifactIDs(ids...)
 }
 
 // ClearIncludedDependencies clears all "included_dependencies" edges to the Dependency entity.
-func (bomu *BillOfMaterialsUpdate) ClearIncludedDependencies() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearIncludedDependencies()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearIncludedDependencies() *BillOfMaterialsUpdate {
+	_u.mutation.ClearIncludedDependencies()
+	return _u
 }
 
 // RemoveIncludedDependencyIDs removes the "included_dependencies" edge to Dependency entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.RemoveIncludedDependencyIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) RemoveIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.RemoveIncludedDependencyIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedDependencies removes "included_dependencies" edges to Dependency entities.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *BillOfMaterialsUpdate) RemoveIncludedDependencies(v ...*Dependency) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.RemoveIncludedDependencyIDs(ids...)
+	return _u.RemoveIncludedDependencyIDs(ids...)
 }
 
 // ClearIncludedOccurrences clears all "included_occurrences" edges to the Occurrence entity.
-func (bomu *BillOfMaterialsUpdate) ClearIncludedOccurrences() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearIncludedOccurrences()
-	return bomu
+func (_u *BillOfMaterialsUpdate) ClearIncludedOccurrences() *BillOfMaterialsUpdate {
+	_u.mutation.ClearIncludedOccurrences()
+	return _u
 }
 
 // RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to Occurrence entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
-	bomu.mutation.RemoveIncludedOccurrenceIDs(ids...)
-	return bomu
+func (_u *BillOfMaterialsUpdate) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
+	_u.mutation.RemoveIncludedOccurrenceIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedOccurrences removes "included_occurrences" edges to Occurrence entities.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *BillOfMaterialsUpdate) RemoveIncludedOccurrences(v ...*Occurrence) *BillOfMaterialsUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomu.RemoveIncludedOccurrenceIDs(ids...)
+	return _u.RemoveIncludedOccurrenceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (bomu *BillOfMaterialsUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, bomu.sqlSave, bomu.mutation, bomu.hooks)
+func (_u *BillOfMaterialsUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bomu *BillOfMaterialsUpdate) SaveX(ctx context.Context) int {
-	affected, err := bomu.Save(ctx)
+func (_u *BillOfMaterialsUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -427,64 +427,64 @@ func (bomu *BillOfMaterialsUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (bomu *BillOfMaterialsUpdate) Exec(ctx context.Context) error {
-	_, err := bomu.Save(ctx)
+func (_u *BillOfMaterialsUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bomu *BillOfMaterialsUpdate) ExecX(ctx context.Context) {
-	if err := bomu.Exec(ctx); err != nil {
+func (_u *BillOfMaterialsUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
-	if ps := bomu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := bomu.mutation.URI(); ok {
+	if value, ok := _u.mutation.URI(); ok {
 		_spec.SetField(billofmaterials.FieldURI, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.Algorithm(); ok {
+	if value, ok := _u.mutation.Algorithm(); ok {
 		_spec.SetField(billofmaterials.FieldAlgorithm, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.Digest(); ok {
+	if value, ok := _u.mutation.Digest(); ok {
 		_spec.SetField(billofmaterials.FieldDigest, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.DownloadLocation(); ok {
+	if value, ok := _u.mutation.DownloadLocation(); ok {
 		_spec.SetField(billofmaterials.FieldDownloadLocation, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(billofmaterials.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(billofmaterials.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := bomu.mutation.IncludedPackagesHash(); ok {
+	if value, ok := _u.mutation.IncludedPackagesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.IncludedArtifactsHash(); ok {
+	if value, ok := _u.mutation.IncludedArtifactsHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.IncludedDependenciesHash(); ok {
+	if value, ok := _u.mutation.IncludedDependenciesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
 	}
-	if value, ok := bomu.mutation.IncludedOccurrencesHash(); ok {
+	if value, ok := _u.mutation.IncludedOccurrencesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
 	}
-	if bomu.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -497,7 +497,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -513,7 +513,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomu.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -526,7 +526,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -542,7 +542,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomu.mutation.IncludedSoftwarePackagesCleared() {
+	if _u.mutation.IncludedSoftwarePackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -555,23 +555,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.RemovedIncludedSoftwarePackagesIDs(); len(nodes) > 0 && !bomu.mutation.IncludedSoftwarePackagesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   billofmaterials.IncludedSoftwarePackagesTable,
-			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := bomu.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedIncludedSoftwarePackagesIDs(); len(nodes) > 0 && !_u.mutation.IncludedSoftwarePackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -585,9 +569,25 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomu.mutation.IncludedSoftwareArtifactsCleared() {
+	if _u.mutation.IncludedSoftwareArtifactsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -600,7 +600,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.RemovedIncludedSoftwareArtifactsIDs(); len(nodes) > 0 && !bomu.mutation.IncludedSoftwareArtifactsCleared() {
+	if nodes := _u.mutation.RemovedIncludedSoftwareArtifactsIDs(); len(nodes) > 0 && !_u.mutation.IncludedSoftwareArtifactsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -616,7 +616,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -632,7 +632,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomu.mutation.IncludedDependenciesCleared() {
+	if _u.mutation.IncludedDependenciesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -645,7 +645,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.RemovedIncludedDependenciesIDs(); len(nodes) > 0 && !bomu.mutation.IncludedDependenciesCleared() {
+	if nodes := _u.mutation.RemovedIncludedDependenciesIDs(); len(nodes) > 0 && !_u.mutation.IncludedDependenciesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -661,7 +661,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -677,7 +677,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomu.mutation.IncludedOccurrencesCleared() {
+	if _u.mutation.IncludedOccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -690,7 +690,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.RemovedIncludedOccurrencesIDs(); len(nodes) > 0 && !bomu.mutation.IncludedOccurrencesCleared() {
+	if nodes := _u.mutation.RemovedIncludedOccurrencesIDs(); len(nodes) > 0 && !_u.mutation.IncludedOccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -706,7 +706,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomu.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -722,7 +722,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, bomu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{billofmaterials.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -730,8 +730,8 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		return 0, err
 	}
-	bomu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // BillOfMaterialsUpdateOne is the builder for updating a single BillOfMaterials entity.
@@ -743,405 +743,405 @@ type BillOfMaterialsUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetPackageID(u uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetPackageID(u)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetPackageID(v uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillablePackageID(u *uuid.UUID) *BillOfMaterialsUpdateOne {
-	if u != nil {
-		bomuo.SetPackageID(*u)
+func (_u *BillOfMaterialsUpdateOne) SetNillablePackageID(v *uuid.UUID) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (bomuo *BillOfMaterialsUpdateOne) ClearPackageID() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearPackageID()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearPackageID() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearPackageID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetArtifactID(u uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetArtifactID(u)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetArtifactID(v uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableArtifactID(u *uuid.UUID) *BillOfMaterialsUpdateOne {
-	if u != nil {
-		bomuo.SetArtifactID(*u)
+func (_u *BillOfMaterialsUpdateOne) SetNillableArtifactID(v *uuid.UUID) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (bomuo *BillOfMaterialsUpdateOne) ClearArtifactID() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearArtifactID()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearArtifactID() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetURI sets the "uri" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetURI(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetURI(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetURI(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetURI(v)
+	return _u
 }
 
 // SetNillableURI sets the "uri" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableURI(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetURI(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableURI(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetURI(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetAlgorithm sets the "algorithm" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetAlgorithm(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetAlgorithm(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetAlgorithm(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetAlgorithm(v)
+	return _u
 }
 
 // SetNillableAlgorithm sets the "algorithm" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableAlgorithm(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetAlgorithm(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableAlgorithm(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetAlgorithm(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetDigest sets the "digest" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetDigest(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetDigest(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetDigest(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetDigest(v)
+	return _u
 }
 
 // SetNillableDigest sets the "digest" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableDigest(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetDigest(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableDigest(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetDigest(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetDownloadLocation sets the "download_location" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetDownloadLocation(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetDownloadLocation(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetDownloadLocation(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetDownloadLocation(v)
+	return _u
 }
 
 // SetNillableDownloadLocation sets the "download_location" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableDownloadLocation(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetDownloadLocation(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableDownloadLocation(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetDownloadLocation(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetOrigin(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetOrigin(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetOrigin(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableOrigin(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetOrigin(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableOrigin(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetCollector(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetCollector(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetCollector(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableCollector(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetCollector(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableCollector(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetDocumentRef(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetDocumentRef(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetDocumentRef(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableDocumentRef(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetDocumentRef(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableDocumentRef(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetKnownSince(t time.Time) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetKnownSince(t)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetKnownSince(v time.Time) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableKnownSince(t *time.Time) *BillOfMaterialsUpdateOne {
-	if t != nil {
-		bomuo.SetKnownSince(*t)
+func (_u *BillOfMaterialsUpdateOne) SetNillableKnownSince(v *time.Time) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetIncludedPackagesHash sets the "included_packages_hash" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetIncludedPackagesHash(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetIncludedPackagesHash(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetIncludedPackagesHash(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetIncludedPackagesHash(v)
+	return _u
 }
 
 // SetNillableIncludedPackagesHash sets the "included_packages_hash" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedPackagesHash(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetIncludedPackagesHash(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableIncludedPackagesHash(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetIncludedPackagesHash(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetIncludedArtifactsHash(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetIncludedArtifactsHash(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetIncludedArtifactsHash(v)
+	return _u
 }
 
 // SetNillableIncludedArtifactsHash sets the "included_artifacts_hash" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedArtifactsHash(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetIncludedArtifactsHash(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableIncludedArtifactsHash(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetIncludedArtifactsHash(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetIncludedDependenciesHash(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetIncludedDependenciesHash(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetIncludedDependenciesHash(v)
+	return _u
 }
 
 // SetNillableIncludedDependenciesHash sets the "included_dependencies_hash" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedDependenciesHash(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetIncludedDependenciesHash(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableIncludedDependenciesHash(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetIncludedDependenciesHash(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetIncludedOccurrencesHash(s string) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetIncludedOccurrencesHash(s)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpdateOne {
+	_u.mutation.SetIncludedOccurrencesHash(v)
+	return _u
 }
 
 // SetNillableIncludedOccurrencesHash sets the "included_occurrences_hash" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedOccurrencesHash(s *string) *BillOfMaterialsUpdateOne {
-	if s != nil {
-		bomuo.SetIncludedOccurrencesHash(*s)
+func (_u *BillOfMaterialsUpdateOne) SetNillableIncludedOccurrencesHash(v *string) *BillOfMaterialsUpdateOne {
+	if v != nil {
+		_u.SetIncludedOccurrencesHash(*v)
 	}
-	return bomuo
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (bomuo *BillOfMaterialsUpdateOne) SetPackage(p *PackageVersion) *BillOfMaterialsUpdateOne {
-	return bomuo.SetPackageID(p.ID)
+func (_u *BillOfMaterialsUpdateOne) SetPackage(v *PackageVersion) *BillOfMaterialsUpdateOne {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (bomuo *BillOfMaterialsUpdateOne) SetArtifact(a *Artifact) *BillOfMaterialsUpdateOne {
-	return bomuo.SetArtifactID(a.ID)
+func (_u *BillOfMaterialsUpdateOne) SetArtifact(v *Artifact) *BillOfMaterialsUpdateOne {
+	return _u.SetArtifactID(v.ID)
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.AddIncludedSoftwarePackageIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.AddIncludedSoftwarePackageIDs(ids...)
+	return _u
 }
 
 // AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackages(v ...*PackageVersion) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.AddIncludedSoftwarePackageIDs(ids...)
+	return _u.AddIncludedSoftwarePackageIDs(ids...)
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.AddIncludedSoftwareArtifactIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.AddIncludedSoftwareArtifactIDs(ids...)
+	return _u
 }
 
 // AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifacts(v ...*Artifact) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.AddIncludedSoftwareArtifactIDs(ids...)
+	return _u.AddIncludedSoftwareArtifactIDs(ids...)
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.AddIncludedDependencyIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.AddIncludedDependencyIDs(ids...)
+	return _u
 }
 
 // AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *BillOfMaterialsUpdateOne) AddIncludedDependencies(v ...*Dependency) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.AddIncludedDependencyIDs(ids...)
+	return _u.AddIncludedDependencyIDs(ids...)
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.AddIncludedOccurrenceIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.AddIncludedOccurrenceIDs(ids...)
+	return _u
 }
 
 // AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *BillOfMaterialsUpdateOne) AddIncludedOccurrences(v ...*Occurrence) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.AddIncludedOccurrenceIDs(ids...)
+	return _u.AddIncludedOccurrenceIDs(ids...)
 }
 
 // Mutation returns the BillOfMaterialsMutation object of the builder.
-func (bomuo *BillOfMaterialsUpdateOne) Mutation() *BillOfMaterialsMutation {
-	return bomuo.mutation
+func (_u *BillOfMaterialsUpdateOne) Mutation() *BillOfMaterialsMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (bomuo *BillOfMaterialsUpdateOne) ClearPackage() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearPackage()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearPackage() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (bomuo *BillOfMaterialsUpdateOne) ClearArtifact() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearArtifact()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearArtifact() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // ClearIncludedSoftwarePackages clears all "included_software_packages" edges to the PackageVersion entity.
-func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedSoftwarePackages() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearIncludedSoftwarePackages()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearIncludedSoftwarePackages() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearIncludedSoftwarePackages()
+	return _u
 }
 
 // RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to PackageVersion entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedSoftwarePackages removes "included_software_packages" edges to PackageVersion entities.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackages(v ...*PackageVersion) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.RemoveIncludedSoftwarePackageIDs(ids...)
+	return _u.RemoveIncludedSoftwarePackageIDs(ids...)
 }
 
 // ClearIncludedSoftwareArtifacts clears all "included_software_artifacts" edges to the Artifact entity.
-func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedSoftwareArtifacts() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearIncludedSoftwareArtifacts()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearIncludedSoftwareArtifacts() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearIncludedSoftwareArtifacts()
+	return _u
 }
 
 // RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to Artifact entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedSoftwareArtifacts removes "included_software_artifacts" edges to Artifact entities.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifacts(v ...*Artifact) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.RemoveIncludedSoftwareArtifactIDs(ids...)
+	return _u.RemoveIncludedSoftwareArtifactIDs(ids...)
 }
 
 // ClearIncludedDependencies clears all "included_dependencies" edges to the Dependency entity.
-func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedDependencies() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearIncludedDependencies()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearIncludedDependencies() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearIncludedDependencies()
+	return _u
 }
 
 // RemoveIncludedDependencyIDs removes the "included_dependencies" edge to Dependency entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.RemoveIncludedDependencyIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.RemoveIncludedDependencyIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedDependencies removes "included_dependencies" edges to Dependency entities.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedDependencies(v ...*Dependency) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.RemoveIncludedDependencyIDs(ids...)
+	return _u.RemoveIncludedDependencyIDs(ids...)
 }
 
 // ClearIncludedOccurrences clears all "included_occurrences" edges to the Occurrence entity.
-func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedOccurrences() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearIncludedOccurrences()
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) ClearIncludedOccurrences() *BillOfMaterialsUpdateOne {
+	_u.mutation.ClearIncludedOccurrences()
+	return _u
 }
 
 // RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to Occurrence entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.RemoveIncludedOccurrenceIDs(ids...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
+	_u.mutation.RemoveIncludedOccurrenceIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedOccurrences removes "included_occurrences" edges to Occurrence entities.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdateOne {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_u *BillOfMaterialsUpdateOne) RemoveIncludedOccurrences(v ...*Occurrence) *BillOfMaterialsUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomuo.RemoveIncludedOccurrenceIDs(ids...)
+	return _u.RemoveIncludedOccurrenceIDs(ids...)
 }
 
 // Where appends a list predicates to the BillOfMaterialsUpdate builder.
-func (bomuo *BillOfMaterialsUpdateOne) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.Where(ps...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) Where(ps ...predicate.BillOfMaterials) *BillOfMaterialsUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (bomuo *BillOfMaterialsUpdateOne) Select(field string, fields ...string) *BillOfMaterialsUpdateOne {
-	bomuo.fields = append([]string{field}, fields...)
-	return bomuo
+func (_u *BillOfMaterialsUpdateOne) Select(field string, fields ...string) *BillOfMaterialsUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated BillOfMaterials entity.
-func (bomuo *BillOfMaterialsUpdateOne) Save(ctx context.Context) (*BillOfMaterials, error) {
-	return withHooks(ctx, bomuo.sqlSave, bomuo.mutation, bomuo.hooks)
+func (_u *BillOfMaterialsUpdateOne) Save(ctx context.Context) (*BillOfMaterials, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bomuo *BillOfMaterialsUpdateOne) SaveX(ctx context.Context) *BillOfMaterials {
-	node, err := bomuo.Save(ctx)
+func (_u *BillOfMaterialsUpdateOne) SaveX(ctx context.Context) *BillOfMaterials {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1149,26 +1149,26 @@ func (bomuo *BillOfMaterialsUpdateOne) SaveX(ctx context.Context) *BillOfMateria
 }
 
 // Exec executes the query on the entity.
-func (bomuo *BillOfMaterialsUpdateOne) Exec(ctx context.Context) error {
-	_, err := bomuo.Save(ctx)
+func (_u *BillOfMaterialsUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bomuo *BillOfMaterialsUpdateOne) ExecX(ctx context.Context) {
-	if err := bomuo.Exec(ctx); err != nil {
+func (_u *BillOfMaterialsUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *BillOfMaterials, err error) {
+func (_u *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *BillOfMaterials, err error) {
 	_spec := sqlgraph.NewUpdateSpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
-	id, ok := bomuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "BillOfMaterials.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := bomuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, billofmaterials.FieldID)
 		for _, f := range fields {
@@ -1180,50 +1180,50 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			}
 		}
 	}
-	if ps := bomuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := bomuo.mutation.URI(); ok {
+	if value, ok := _u.mutation.URI(); ok {
 		_spec.SetField(billofmaterials.FieldURI, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.Algorithm(); ok {
+	if value, ok := _u.mutation.Algorithm(); ok {
 		_spec.SetField(billofmaterials.FieldAlgorithm, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.Digest(); ok {
+	if value, ok := _u.mutation.Digest(); ok {
 		_spec.SetField(billofmaterials.FieldDigest, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.DownloadLocation(); ok {
+	if value, ok := _u.mutation.DownloadLocation(); ok {
 		_spec.SetField(billofmaterials.FieldDownloadLocation, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(billofmaterials.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(billofmaterials.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := bomuo.mutation.IncludedPackagesHash(); ok {
+	if value, ok := _u.mutation.IncludedPackagesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.IncludedArtifactsHash(); ok {
+	if value, ok := _u.mutation.IncludedArtifactsHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.IncludedDependenciesHash(); ok {
+	if value, ok := _u.mutation.IncludedDependenciesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
 	}
-	if value, ok := bomuo.mutation.IncludedOccurrencesHash(); ok {
+	if value, ok := _u.mutation.IncludedOccurrencesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
 	}
-	if bomuo.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1236,7 +1236,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1252,7 +1252,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomuo.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1265,7 +1265,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1281,7 +1281,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomuo.mutation.IncludedSoftwarePackagesCleared() {
+	if _u.mutation.IncludedSoftwarePackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1294,23 +1294,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.RemovedIncludedSoftwarePackagesIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedSoftwarePackagesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   billofmaterials.IncludedSoftwarePackagesTable,
-			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := bomuo.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedIncludedSoftwarePackagesIDs(); len(nodes) > 0 && !_u.mutation.IncludedSoftwarePackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1324,9 +1308,25 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomuo.mutation.IncludedSoftwareArtifactsCleared() {
+	if _u.mutation.IncludedSoftwareArtifactsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1339,7 +1339,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.RemovedIncludedSoftwareArtifactsIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedSoftwareArtifactsCleared() {
+	if nodes := _u.mutation.RemovedIncludedSoftwareArtifactsIDs(); len(nodes) > 0 && !_u.mutation.IncludedSoftwareArtifactsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1355,7 +1355,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1371,7 +1371,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomuo.mutation.IncludedDependenciesCleared() {
+	if _u.mutation.IncludedDependenciesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1384,7 +1384,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.RemovedIncludedDependenciesIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedDependenciesCleared() {
+	if nodes := _u.mutation.RemovedIncludedDependenciesIDs(); len(nodes) > 0 && !_u.mutation.IncludedDependenciesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1400,7 +1400,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1416,7 +1416,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bomuo.mutation.IncludedOccurrencesCleared() {
+	if _u.mutation.IncludedOccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1429,7 +1429,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.RemovedIncludedOccurrencesIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedOccurrencesCleared() {
+	if nodes := _u.mutation.RemovedIncludedOccurrencesIDs(); len(nodes) > 0 && !_u.mutation.IncludedOccurrencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1445,7 +1445,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bomuo.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1461,10 +1461,10 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &BillOfMaterials{config: bomuo.config}
+	_node = &BillOfMaterials{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, bomuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{billofmaterials.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1472,6 +1472,6 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 		}
 		return nil, err
 	}
-	bomuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

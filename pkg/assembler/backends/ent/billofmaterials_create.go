@@ -29,203 +29,203 @@ type BillOfMaterialsCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (bomc *BillOfMaterialsCreate) SetPackageID(u uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.SetPackageID(u)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetPackageID(v uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.SetPackageID(v)
+	return _c
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (bomc *BillOfMaterialsCreate) SetNillablePackageID(u *uuid.UUID) *BillOfMaterialsCreate {
-	if u != nil {
-		bomc.SetPackageID(*u)
+func (_c *BillOfMaterialsCreate) SetNillablePackageID(v *uuid.UUID) *BillOfMaterialsCreate {
+	if v != nil {
+		_c.SetPackageID(*v)
 	}
-	return bomc
+	return _c
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (bomc *BillOfMaterialsCreate) SetArtifactID(u uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.SetArtifactID(u)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetArtifactID(v uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.SetArtifactID(v)
+	return _c
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (bomc *BillOfMaterialsCreate) SetNillableArtifactID(u *uuid.UUID) *BillOfMaterialsCreate {
-	if u != nil {
-		bomc.SetArtifactID(*u)
+func (_c *BillOfMaterialsCreate) SetNillableArtifactID(v *uuid.UUID) *BillOfMaterialsCreate {
+	if v != nil {
+		_c.SetArtifactID(*v)
 	}
-	return bomc
+	return _c
 }
 
 // SetURI sets the "uri" field.
-func (bomc *BillOfMaterialsCreate) SetURI(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetURI(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetURI(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetURI(v)
+	return _c
 }
 
 // SetAlgorithm sets the "algorithm" field.
-func (bomc *BillOfMaterialsCreate) SetAlgorithm(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetAlgorithm(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetAlgorithm(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetAlgorithm(v)
+	return _c
 }
 
 // SetDigest sets the "digest" field.
-func (bomc *BillOfMaterialsCreate) SetDigest(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetDigest(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetDigest(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetDigest(v)
+	return _c
 }
 
 // SetDownloadLocation sets the "download_location" field.
-func (bomc *BillOfMaterialsCreate) SetDownloadLocation(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetDownloadLocation(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetDownloadLocation(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetDownloadLocation(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (bomc *BillOfMaterialsCreate) SetOrigin(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetOrigin(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetOrigin(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (bomc *BillOfMaterialsCreate) SetCollector(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetCollector(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetCollector(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (bomc *BillOfMaterialsCreate) SetDocumentRef(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetDocumentRef(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetDocumentRef(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetKnownSince sets the "known_since" field.
-func (bomc *BillOfMaterialsCreate) SetKnownSince(t time.Time) *BillOfMaterialsCreate {
-	bomc.mutation.SetKnownSince(t)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetKnownSince(v time.Time) *BillOfMaterialsCreate {
+	_c.mutation.SetKnownSince(v)
+	return _c
 }
 
 // SetIncludedPackagesHash sets the "included_packages_hash" field.
-func (bomc *BillOfMaterialsCreate) SetIncludedPackagesHash(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetIncludedPackagesHash(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetIncludedPackagesHash(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetIncludedPackagesHash(v)
+	return _c
 }
 
 // SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
-func (bomc *BillOfMaterialsCreate) SetIncludedArtifactsHash(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetIncludedArtifactsHash(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetIncludedArtifactsHash(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetIncludedArtifactsHash(v)
+	return _c
 }
 
 // SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
-func (bomc *BillOfMaterialsCreate) SetIncludedDependenciesHash(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetIncludedDependenciesHash(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetIncludedDependenciesHash(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetIncludedDependenciesHash(v)
+	return _c
 }
 
 // SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
-func (bomc *BillOfMaterialsCreate) SetIncludedOccurrencesHash(s string) *BillOfMaterialsCreate {
-	bomc.mutation.SetIncludedOccurrencesHash(s)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetIncludedOccurrencesHash(v string) *BillOfMaterialsCreate {
+	_c.mutation.SetIncludedOccurrencesHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (bomc *BillOfMaterialsCreate) SetID(u uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.SetID(u)
-	return bomc
+func (_c *BillOfMaterialsCreate) SetID(v uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (bomc *BillOfMaterialsCreate) SetNillableID(u *uuid.UUID) *BillOfMaterialsCreate {
-	if u != nil {
-		bomc.SetID(*u)
+func (_c *BillOfMaterialsCreate) SetNillableID(v *uuid.UUID) *BillOfMaterialsCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return bomc
+	return _c
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (bomc *BillOfMaterialsCreate) SetPackage(p *PackageVersion) *BillOfMaterialsCreate {
-	return bomc.SetPackageID(p.ID)
+func (_c *BillOfMaterialsCreate) SetPackage(v *PackageVersion) *BillOfMaterialsCreate {
+	return _c.SetPackageID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (bomc *BillOfMaterialsCreate) SetArtifact(a *Artifact) *BillOfMaterialsCreate {
-	return bomc.SetArtifactID(a.ID)
+func (_c *BillOfMaterialsCreate) SetArtifact(v *Artifact) *BillOfMaterialsCreate {
+	return _c.SetArtifactID(v.ID)
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.AddIncludedSoftwarePackageIDs(ids...)
-	return bomc
+func (_c *BillOfMaterialsCreate) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.AddIncludedSoftwarePackageIDs(ids...)
+	return _c
 }
 
 // AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
-func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *BillOfMaterialsCreate) AddIncludedSoftwarePackages(v ...*PackageVersion) *BillOfMaterialsCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomc.AddIncludedSoftwarePackageIDs(ids...)
+	return _c.AddIncludedSoftwarePackageIDs(ids...)
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.AddIncludedSoftwareArtifactIDs(ids...)
-	return bomc
+func (_c *BillOfMaterialsCreate) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.AddIncludedSoftwareArtifactIDs(ids...)
+	return _c
 }
 
 // AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
-func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsCreate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_c *BillOfMaterialsCreate) AddIncludedSoftwareArtifacts(v ...*Artifact) *BillOfMaterialsCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomc.AddIncludedSoftwareArtifactIDs(ids...)
+	return _c.AddIncludedSoftwareArtifactIDs(ids...)
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.AddIncludedDependencyIDs(ids...)
-	return bomc
+func (_c *BillOfMaterialsCreate) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.AddIncludedDependencyIDs(ids...)
+	return _c
 }
 
 // AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
-func (bomc *BillOfMaterialsCreate) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsCreate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_c *BillOfMaterialsCreate) AddIncludedDependencies(v ...*Dependency) *BillOfMaterialsCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomc.AddIncludedDependencyIDs(ids...)
+	return _c.AddIncludedDependencyIDs(ids...)
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
-	bomc.mutation.AddIncludedOccurrenceIDs(ids...)
-	return bomc
+func (_c *BillOfMaterialsCreate) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
+	_c.mutation.AddIncludedOccurrenceIDs(ids...)
+	return _c
 }
 
 // AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
-func (bomc *BillOfMaterialsCreate) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsCreate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_c *BillOfMaterialsCreate) AddIncludedOccurrences(v ...*Occurrence) *BillOfMaterialsCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return bomc.AddIncludedOccurrenceIDs(ids...)
+	return _c.AddIncludedOccurrenceIDs(ids...)
 }
 
 // Mutation returns the BillOfMaterialsMutation object of the builder.
-func (bomc *BillOfMaterialsCreate) Mutation() *BillOfMaterialsMutation {
-	return bomc.mutation
+func (_c *BillOfMaterialsCreate) Mutation() *BillOfMaterialsMutation {
+	return _c.mutation
 }
 
 // Save creates the BillOfMaterials in the database.
-func (bomc *BillOfMaterialsCreate) Save(ctx context.Context) (*BillOfMaterials, error) {
-	bomc.defaults()
-	return withHooks(ctx, bomc.sqlSave, bomc.mutation, bomc.hooks)
+func (_c *BillOfMaterialsCreate) Save(ctx context.Context) (*BillOfMaterials, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (bomc *BillOfMaterialsCreate) SaveX(ctx context.Context) *BillOfMaterials {
-	v, err := bomc.Save(ctx)
+func (_c *BillOfMaterialsCreate) SaveX(ctx context.Context) *BillOfMaterials {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -233,73 +233,73 @@ func (bomc *BillOfMaterialsCreate) SaveX(ctx context.Context) *BillOfMaterials {
 }
 
 // Exec executes the query.
-func (bomc *BillOfMaterialsCreate) Exec(ctx context.Context) error {
-	_, err := bomc.Save(ctx)
+func (_c *BillOfMaterialsCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bomc *BillOfMaterialsCreate) ExecX(ctx context.Context) {
-	if err := bomc.Exec(ctx); err != nil {
+func (_c *BillOfMaterialsCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (bomc *BillOfMaterialsCreate) defaults() {
-	if _, ok := bomc.mutation.ID(); !ok {
+func (_c *BillOfMaterialsCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := billofmaterials.DefaultID()
-		bomc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (bomc *BillOfMaterialsCreate) check() error {
-	if _, ok := bomc.mutation.URI(); !ok {
+func (_c *BillOfMaterialsCreate) check() error {
+	if _, ok := _c.mutation.URI(); !ok {
 		return &ValidationError{Name: "uri", err: errors.New(`ent: missing required field "BillOfMaterials.uri"`)}
 	}
-	if _, ok := bomc.mutation.Algorithm(); !ok {
+	if _, ok := _c.mutation.Algorithm(); !ok {
 		return &ValidationError{Name: "algorithm", err: errors.New(`ent: missing required field "BillOfMaterials.algorithm"`)}
 	}
-	if _, ok := bomc.mutation.Digest(); !ok {
+	if _, ok := _c.mutation.Digest(); !ok {
 		return &ValidationError{Name: "digest", err: errors.New(`ent: missing required field "BillOfMaterials.digest"`)}
 	}
-	if _, ok := bomc.mutation.DownloadLocation(); !ok {
+	if _, ok := _c.mutation.DownloadLocation(); !ok {
 		return &ValidationError{Name: "download_location", err: errors.New(`ent: missing required field "BillOfMaterials.download_location"`)}
 	}
-	if _, ok := bomc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "BillOfMaterials.origin"`)}
 	}
-	if _, ok := bomc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "BillOfMaterials.collector"`)}
 	}
-	if _, ok := bomc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "BillOfMaterials.document_ref"`)}
 	}
-	if _, ok := bomc.mutation.KnownSince(); !ok {
+	if _, ok := _c.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "BillOfMaterials.known_since"`)}
 	}
-	if _, ok := bomc.mutation.IncludedPackagesHash(); !ok {
+	if _, ok := _c.mutation.IncludedPackagesHash(); !ok {
 		return &ValidationError{Name: "included_packages_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_packages_hash"`)}
 	}
-	if _, ok := bomc.mutation.IncludedArtifactsHash(); !ok {
+	if _, ok := _c.mutation.IncludedArtifactsHash(); !ok {
 		return &ValidationError{Name: "included_artifacts_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_artifacts_hash"`)}
 	}
-	if _, ok := bomc.mutation.IncludedDependenciesHash(); !ok {
+	if _, ok := _c.mutation.IncludedDependenciesHash(); !ok {
 		return &ValidationError{Name: "included_dependencies_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_dependencies_hash"`)}
 	}
-	if _, ok := bomc.mutation.IncludedOccurrencesHash(); !ok {
+	if _, ok := _c.mutation.IncludedOccurrencesHash(); !ok {
 		return &ValidationError{Name: "included_occurrences_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_occurrences_hash"`)}
 	}
 	return nil
 }
 
-func (bomc *BillOfMaterialsCreate) sqlSave(ctx context.Context) (*BillOfMaterials, error) {
-	if err := bomc.check(); err != nil {
+func (_c *BillOfMaterialsCreate) sqlSave(ctx context.Context) (*BillOfMaterials, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := bomc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, bomc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -312,70 +312,70 @@ func (bomc *BillOfMaterialsCreate) sqlSave(ctx context.Context) (*BillOfMaterial
 			return nil, err
 		}
 	}
-	bomc.mutation.id = &_node.ID
-	bomc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.CreateSpec) {
+func (_c *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.CreateSpec) {
 	var (
-		_node = &BillOfMaterials{config: bomc.config}
+		_node = &BillOfMaterials{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(billofmaterials.Table, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = bomc.conflict
-	if id, ok := bomc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := bomc.mutation.URI(); ok {
+	if value, ok := _c.mutation.URI(); ok {
 		_spec.SetField(billofmaterials.FieldURI, field.TypeString, value)
 		_node.URI = value
 	}
-	if value, ok := bomc.mutation.Algorithm(); ok {
+	if value, ok := _c.mutation.Algorithm(); ok {
 		_spec.SetField(billofmaterials.FieldAlgorithm, field.TypeString, value)
 		_node.Algorithm = value
 	}
-	if value, ok := bomc.mutation.Digest(); ok {
+	if value, ok := _c.mutation.Digest(); ok {
 		_spec.SetField(billofmaterials.FieldDigest, field.TypeString, value)
 		_node.Digest = value
 	}
-	if value, ok := bomc.mutation.DownloadLocation(); ok {
+	if value, ok := _c.mutation.DownloadLocation(); ok {
 		_spec.SetField(billofmaterials.FieldDownloadLocation, field.TypeString, value)
 		_node.DownloadLocation = value
 	}
-	if value, ok := bomc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(billofmaterials.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := bomc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := bomc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(billofmaterials.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := bomc.mutation.KnownSince(); ok {
+	if value, ok := _c.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
 	}
-	if value, ok := bomc.mutation.IncludedPackagesHash(); ok {
+	if value, ok := _c.mutation.IncludedPackagesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
 		_node.IncludedPackagesHash = value
 	}
-	if value, ok := bomc.mutation.IncludedArtifactsHash(); ok {
+	if value, ok := _c.mutation.IncludedArtifactsHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
 		_node.IncludedArtifactsHash = value
 	}
-	if value, ok := bomc.mutation.IncludedDependenciesHash(); ok {
+	if value, ok := _c.mutation.IncludedDependenciesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
 		_node.IncludedDependenciesHash = value
 	}
-	if value, ok := bomc.mutation.IncludedOccurrencesHash(); ok {
+	if value, ok := _c.mutation.IncludedOccurrencesHash(); ok {
 		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
 		_node.IncludedOccurrencesHash = value
 	}
-	if nodes := bomc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -392,7 +392,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 		_node.PackageID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bomc.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -409,7 +409,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 		_node.ArtifactID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bomc.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -425,7 +425,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bomc.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -441,7 +441,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bomc.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -457,7 +457,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bomc.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -492,10 +492,10 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (bomc *BillOfMaterialsCreate) OnConflict(opts ...sql.ConflictOption) *BillOfMaterialsUpsertOne {
-	bomc.conflict = opts
+func (_c *BillOfMaterialsCreate) OnConflict(opts ...sql.ConflictOption) *BillOfMaterialsUpsertOne {
+	_c.conflict = opts
 	return &BillOfMaterialsUpsertOne{
-		create: bomc,
+		create: _c,
 	}
 }
 
@@ -505,10 +505,10 @@ func (bomc *BillOfMaterialsCreate) OnConflict(opts ...sql.ConflictOption) *BillO
 //	client.BillOfMaterials.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (bomc *BillOfMaterialsCreate) OnConflictColumns(columns ...string) *BillOfMaterialsUpsertOne {
-	bomc.conflict = append(bomc.conflict, sql.ConflictColumns(columns...))
+func (_c *BillOfMaterialsCreate) OnConflictColumns(columns ...string) *BillOfMaterialsUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &BillOfMaterialsUpsertOne{
-		create: bomc,
+		create: _c,
 	}
 }
 
@@ -1010,16 +1010,16 @@ type BillOfMaterialsCreateBulk struct {
 }
 
 // Save creates the BillOfMaterials entities in the database.
-func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMaterials, error) {
-	if bomcb.err != nil {
-		return nil, bomcb.err
+func (_c *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMaterials, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(bomcb.builders))
-	nodes := make([]*BillOfMaterials, len(bomcb.builders))
-	mutators := make([]Mutator, len(bomcb.builders))
-	for i := range bomcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*BillOfMaterials, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := bomcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BillOfMaterialsMutation)
@@ -1033,12 +1033,12 @@ func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMate
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, bomcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = bomcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bomcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -1058,7 +1058,7 @@ func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMate
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, bomcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -1066,8 +1066,8 @@ func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMate
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bomcb *BillOfMaterialsCreateBulk) SaveX(ctx context.Context) []*BillOfMaterials {
-	v, err := bomcb.Save(ctx)
+func (_c *BillOfMaterialsCreateBulk) SaveX(ctx context.Context) []*BillOfMaterials {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1075,14 +1075,14 @@ func (bomcb *BillOfMaterialsCreateBulk) SaveX(ctx context.Context) []*BillOfMate
 }
 
 // Exec executes the query.
-func (bomcb *BillOfMaterialsCreateBulk) Exec(ctx context.Context) error {
-	_, err := bomcb.Save(ctx)
+func (_c *BillOfMaterialsCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bomcb *BillOfMaterialsCreateBulk) ExecX(ctx context.Context) {
-	if err := bomcb.Exec(ctx); err != nil {
+func (_c *BillOfMaterialsCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -1102,10 +1102,10 @@ func (bomcb *BillOfMaterialsCreateBulk) ExecX(ctx context.Context) {
 //			SetPackageID(v+v).
 //		}).
 //		Exec(ctx)
-func (bomcb *BillOfMaterialsCreateBulk) OnConflict(opts ...sql.ConflictOption) *BillOfMaterialsUpsertBulk {
-	bomcb.conflict = opts
+func (_c *BillOfMaterialsCreateBulk) OnConflict(opts ...sql.ConflictOption) *BillOfMaterialsUpsertBulk {
+	_c.conflict = opts
 	return &BillOfMaterialsUpsertBulk{
-		create: bomcb,
+		create: _c,
 	}
 }
 
@@ -1115,10 +1115,10 @@ func (bomcb *BillOfMaterialsCreateBulk) OnConflict(opts ...sql.ConflictOption) *
 //	client.BillOfMaterials.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (bomcb *BillOfMaterialsCreateBulk) OnConflictColumns(columns ...string) *BillOfMaterialsUpsertBulk {
-	bomcb.conflict = append(bomcb.conflict, sql.ConflictColumns(columns...))
+func (_c *BillOfMaterialsCreateBulk) OnConflictColumns(columns ...string) *BillOfMaterialsUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &BillOfMaterialsUpsertBulk{
-		create: bomcb,
+		create: _c,
 	}
 }
 

@@ -25,97 +25,97 @@ type PkgEqualCreate struct {
 }
 
 // SetPkgID sets the "pkg_id" field.
-func (pec *PkgEqualCreate) SetPkgID(u uuid.UUID) *PkgEqualCreate {
-	pec.mutation.SetPkgID(u)
-	return pec
+func (_c *PkgEqualCreate) SetPkgID(v uuid.UUID) *PkgEqualCreate {
+	_c.mutation.SetPkgID(v)
+	return _c
 }
 
 // SetEqualPkgID sets the "equal_pkg_id" field.
-func (pec *PkgEqualCreate) SetEqualPkgID(u uuid.UUID) *PkgEqualCreate {
-	pec.mutation.SetEqualPkgID(u)
-	return pec
+func (_c *PkgEqualCreate) SetEqualPkgID(v uuid.UUID) *PkgEqualCreate {
+	_c.mutation.SetEqualPkgID(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (pec *PkgEqualCreate) SetOrigin(s string) *PkgEqualCreate {
-	pec.mutation.SetOrigin(s)
-	return pec
+func (_c *PkgEqualCreate) SetOrigin(v string) *PkgEqualCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (pec *PkgEqualCreate) SetCollector(s string) *PkgEqualCreate {
-	pec.mutation.SetCollector(s)
-	return pec
+func (_c *PkgEqualCreate) SetCollector(v string) *PkgEqualCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (pec *PkgEqualCreate) SetDocumentRef(s string) *PkgEqualCreate {
-	pec.mutation.SetDocumentRef(s)
-	return pec
+func (_c *PkgEqualCreate) SetDocumentRef(v string) *PkgEqualCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (pec *PkgEqualCreate) SetJustification(s string) *PkgEqualCreate {
-	pec.mutation.SetJustification(s)
-	return pec
+func (_c *PkgEqualCreate) SetJustification(v string) *PkgEqualCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetPackagesHash sets the "packages_hash" field.
-func (pec *PkgEqualCreate) SetPackagesHash(s string) *PkgEqualCreate {
-	pec.mutation.SetPackagesHash(s)
-	return pec
+func (_c *PkgEqualCreate) SetPackagesHash(v string) *PkgEqualCreate {
+	_c.mutation.SetPackagesHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (pec *PkgEqualCreate) SetID(u uuid.UUID) *PkgEqualCreate {
-	pec.mutation.SetID(u)
-	return pec
+func (_c *PkgEqualCreate) SetID(v uuid.UUID) *PkgEqualCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (pec *PkgEqualCreate) SetNillableID(u *uuid.UUID) *PkgEqualCreate {
-	if u != nil {
-		pec.SetID(*u)
+func (_c *PkgEqualCreate) SetNillableID(v *uuid.UUID) *PkgEqualCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return pec
+	return _c
 }
 
 // SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
-func (pec *PkgEqualCreate) SetPackageAID(id uuid.UUID) *PkgEqualCreate {
-	pec.mutation.SetPackageAID(id)
-	return pec
+func (_c *PkgEqualCreate) SetPackageAID(id uuid.UUID) *PkgEqualCreate {
+	_c.mutation.SetPackageAID(id)
+	return _c
 }
 
 // SetPackageA sets the "package_a" edge to the PackageVersion entity.
-func (pec *PkgEqualCreate) SetPackageA(p *PackageVersion) *PkgEqualCreate {
-	return pec.SetPackageAID(p.ID)
+func (_c *PkgEqualCreate) SetPackageA(v *PackageVersion) *PkgEqualCreate {
+	return _c.SetPackageAID(v.ID)
 }
 
 // SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
-func (pec *PkgEqualCreate) SetPackageBID(id uuid.UUID) *PkgEqualCreate {
-	pec.mutation.SetPackageBID(id)
-	return pec
+func (_c *PkgEqualCreate) SetPackageBID(id uuid.UUID) *PkgEqualCreate {
+	_c.mutation.SetPackageBID(id)
+	return _c
 }
 
 // SetPackageB sets the "package_b" edge to the PackageVersion entity.
-func (pec *PkgEqualCreate) SetPackageB(p *PackageVersion) *PkgEqualCreate {
-	return pec.SetPackageBID(p.ID)
+func (_c *PkgEqualCreate) SetPackageB(v *PackageVersion) *PkgEqualCreate {
+	return _c.SetPackageBID(v.ID)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
-func (pec *PkgEqualCreate) Mutation() *PkgEqualMutation {
-	return pec.mutation
+func (_c *PkgEqualCreate) Mutation() *PkgEqualMutation {
+	return _c.mutation
 }
 
 // Save creates the PkgEqual in the database.
-func (pec *PkgEqualCreate) Save(ctx context.Context) (*PkgEqual, error) {
-	pec.defaults()
-	return withHooks(ctx, pec.sqlSave, pec.mutation, pec.hooks)
+func (_c *PkgEqualCreate) Save(ctx context.Context) (*PkgEqual, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pec *PkgEqualCreate) SaveX(ctx context.Context) *PkgEqual {
-	v, err := pec.Save(ctx)
+func (_c *PkgEqualCreate) SaveX(ctx context.Context) *PkgEqual {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -123,64 +123,64 @@ func (pec *PkgEqualCreate) SaveX(ctx context.Context) *PkgEqual {
 }
 
 // Exec executes the query.
-func (pec *PkgEqualCreate) Exec(ctx context.Context) error {
-	_, err := pec.Save(ctx)
+func (_c *PkgEqualCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pec *PkgEqualCreate) ExecX(ctx context.Context) {
-	if err := pec.Exec(ctx); err != nil {
+func (_c *PkgEqualCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (pec *PkgEqualCreate) defaults() {
-	if _, ok := pec.mutation.ID(); !ok {
+func (_c *PkgEqualCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := pkgequal.DefaultID()
-		pec.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pec *PkgEqualCreate) check() error {
-	if _, ok := pec.mutation.PkgID(); !ok {
+func (_c *PkgEqualCreate) check() error {
+	if _, ok := _c.mutation.PkgID(); !ok {
 		return &ValidationError{Name: "pkg_id", err: errors.New(`ent: missing required field "PkgEqual.pkg_id"`)}
 	}
-	if _, ok := pec.mutation.EqualPkgID(); !ok {
+	if _, ok := _c.mutation.EqualPkgID(); !ok {
 		return &ValidationError{Name: "equal_pkg_id", err: errors.New(`ent: missing required field "PkgEqual.equal_pkg_id"`)}
 	}
-	if _, ok := pec.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "PkgEqual.origin"`)}
 	}
-	if _, ok := pec.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "PkgEqual.collector"`)}
 	}
-	if _, ok := pec.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "PkgEqual.document_ref"`)}
 	}
-	if _, ok := pec.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "PkgEqual.justification"`)}
 	}
-	if _, ok := pec.mutation.PackagesHash(); !ok {
+	if _, ok := _c.mutation.PackagesHash(); !ok {
 		return &ValidationError{Name: "packages_hash", err: errors.New(`ent: missing required field "PkgEqual.packages_hash"`)}
 	}
-	if len(pec.mutation.PackageAIDs()) == 0 {
+	if len(_c.mutation.PackageAIDs()) == 0 {
 		return &ValidationError{Name: "package_a", err: errors.New(`ent: missing required edge "PkgEqual.package_a"`)}
 	}
-	if len(pec.mutation.PackageBIDs()) == 0 {
+	if len(_c.mutation.PackageBIDs()) == 0 {
 		return &ValidationError{Name: "package_b", err: errors.New(`ent: missing required edge "PkgEqual.package_b"`)}
 	}
 	return nil
 }
 
-func (pec *PkgEqualCreate) sqlSave(ctx context.Context) (*PkgEqual, error) {
-	if err := pec.check(); err != nil {
+func (_c *PkgEqualCreate) sqlSave(ctx context.Context) (*PkgEqual, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pec.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pec.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -193,42 +193,42 @@ func (pec *PkgEqualCreate) sqlSave(ctx context.Context) (*PkgEqual, error) {
 			return nil, err
 		}
 	}
-	pec.mutation.id = &_node.ID
-	pec.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
+func (_c *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 	var (
-		_node = &PkgEqual{config: pec.config}
+		_node = &PkgEqual{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(pkgequal.Table, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = pec.conflict
-	if id, ok := pec.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := pec.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(pkgequal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := pec.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(pkgequal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := pec.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(pkgequal.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := pec.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := pec.mutation.PackagesHash(); ok {
+	if value, ok := _c.mutation.PackagesHash(); ok {
 		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
 		_node.PackagesHash = value
 	}
-	if nodes := pec.mutation.PackageAIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -245,7 +245,7 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 		_node.PkgID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pec.mutation.PackageBIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -281,10 +281,10 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 //			SetPkgID(v+v).
 //		}).
 //		Exec(ctx)
-func (pec *PkgEqualCreate) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertOne {
-	pec.conflict = opts
+func (_c *PkgEqualCreate) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertOne {
+	_c.conflict = opts
 	return &PkgEqualUpsertOne{
-		create: pec,
+		create: _c,
 	}
 }
 
@@ -294,10 +294,10 @@ func (pec *PkgEqualCreate) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpser
 //	client.PkgEqual.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pec *PkgEqualCreate) OnConflictColumns(columns ...string) *PkgEqualUpsertOne {
-	pec.conflict = append(pec.conflict, sql.ConflictColumns(columns...))
+func (_c *PkgEqualCreate) OnConflictColumns(columns ...string) *PkgEqualUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PkgEqualUpsertOne{
-		create: pec,
+		create: _c,
 	}
 }
 
@@ -591,16 +591,16 @@ type PkgEqualCreateBulk struct {
 }
 
 // Save creates the PkgEqual entities in the database.
-func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
-	if pecb.err != nil {
-		return nil, pecb.err
+func (_c *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pecb.builders))
-	nodes := make([]*PkgEqual, len(pecb.builders))
-	mutators := make([]Mutator, len(pecb.builders))
-	for i := range pecb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*PkgEqual, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := pecb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PkgEqualMutation)
@@ -614,12 +614,12 @@ func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pecb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = pecb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pecb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -639,7 +639,7 @@ func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pecb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -647,8 +647,8 @@ func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pecb *PkgEqualCreateBulk) SaveX(ctx context.Context) []*PkgEqual {
-	v, err := pecb.Save(ctx)
+func (_c *PkgEqualCreateBulk) SaveX(ctx context.Context) []*PkgEqual {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -656,14 +656,14 @@ func (pecb *PkgEqualCreateBulk) SaveX(ctx context.Context) []*PkgEqual {
 }
 
 // Exec executes the query.
-func (pecb *PkgEqualCreateBulk) Exec(ctx context.Context) error {
-	_, err := pecb.Save(ctx)
+func (_c *PkgEqualCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pecb *PkgEqualCreateBulk) ExecX(ctx context.Context) {
-	if err := pecb.Exec(ctx); err != nil {
+func (_c *PkgEqualCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -683,10 +683,10 @@ func (pecb *PkgEqualCreateBulk) ExecX(ctx context.Context) {
 //			SetPkgID(v+v).
 //		}).
 //		Exec(ctx)
-func (pecb *PkgEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertBulk {
-	pecb.conflict = opts
+func (_c *PkgEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertBulk {
+	_c.conflict = opts
 	return &PkgEqualUpsertBulk{
-		create: pecb,
+		create: _c,
 	}
 }
 
@@ -696,10 +696,10 @@ func (pecb *PkgEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *PkgEqual
 //	client.PkgEqual.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pecb *PkgEqualCreateBulk) OnConflictColumns(columns ...string) *PkgEqualUpsertBulk {
-	pecb.conflict = append(pecb.conflict, sql.ConflictColumns(columns...))
+func (_c *PkgEqualCreateBulk) OnConflictColumns(columns ...string) *PkgEqualUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PkgEqualUpsertBulk{
-		create: pecb,
+		create: _c,
 	}
 }
 

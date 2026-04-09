@@ -27,114 +27,114 @@ type CertifyScorecardCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (csc *CertifyScorecardCreate) SetSourceID(u uuid.UUID) *CertifyScorecardCreate {
-	csc.mutation.SetSourceID(u)
-	return csc
+func (_c *CertifyScorecardCreate) SetSourceID(v uuid.UUID) *CertifyScorecardCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetChecks sets the "checks" field.
-func (csc *CertifyScorecardCreate) SetChecks(mc []*model.ScorecardCheck) *CertifyScorecardCreate {
-	csc.mutation.SetChecks(mc)
-	return csc
+func (_c *CertifyScorecardCreate) SetChecks(v []*model.ScorecardCheck) *CertifyScorecardCreate {
+	_c.mutation.SetChecks(v)
+	return _c
 }
 
 // SetAggregateScore sets the "aggregate_score" field.
-func (csc *CertifyScorecardCreate) SetAggregateScore(f float64) *CertifyScorecardCreate {
-	csc.mutation.SetAggregateScore(f)
-	return csc
+func (_c *CertifyScorecardCreate) SetAggregateScore(v float64) *CertifyScorecardCreate {
+	_c.mutation.SetAggregateScore(v)
+	return _c
 }
 
 // SetNillableAggregateScore sets the "aggregate_score" field if the given value is not nil.
-func (csc *CertifyScorecardCreate) SetNillableAggregateScore(f *float64) *CertifyScorecardCreate {
-	if f != nil {
-		csc.SetAggregateScore(*f)
+func (_c *CertifyScorecardCreate) SetNillableAggregateScore(v *float64) *CertifyScorecardCreate {
+	if v != nil {
+		_c.SetAggregateScore(*v)
 	}
-	return csc
+	return _c
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (csc *CertifyScorecardCreate) SetTimeScanned(t time.Time) *CertifyScorecardCreate {
-	csc.mutation.SetTimeScanned(t)
-	return csc
+func (_c *CertifyScorecardCreate) SetTimeScanned(v time.Time) *CertifyScorecardCreate {
+	_c.mutation.SetTimeScanned(v)
+	return _c
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (csc *CertifyScorecardCreate) SetNillableTimeScanned(t *time.Time) *CertifyScorecardCreate {
-	if t != nil {
-		csc.SetTimeScanned(*t)
+func (_c *CertifyScorecardCreate) SetNillableTimeScanned(v *time.Time) *CertifyScorecardCreate {
+	if v != nil {
+		_c.SetTimeScanned(*v)
 	}
-	return csc
+	return _c
 }
 
 // SetScorecardVersion sets the "scorecard_version" field.
-func (csc *CertifyScorecardCreate) SetScorecardVersion(s string) *CertifyScorecardCreate {
-	csc.mutation.SetScorecardVersion(s)
-	return csc
+func (_c *CertifyScorecardCreate) SetScorecardVersion(v string) *CertifyScorecardCreate {
+	_c.mutation.SetScorecardVersion(v)
+	return _c
 }
 
 // SetScorecardCommit sets the "scorecard_commit" field.
-func (csc *CertifyScorecardCreate) SetScorecardCommit(s string) *CertifyScorecardCreate {
-	csc.mutation.SetScorecardCommit(s)
-	return csc
+func (_c *CertifyScorecardCreate) SetScorecardCommit(v string) *CertifyScorecardCreate {
+	_c.mutation.SetScorecardCommit(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (csc *CertifyScorecardCreate) SetOrigin(s string) *CertifyScorecardCreate {
-	csc.mutation.SetOrigin(s)
-	return csc
+func (_c *CertifyScorecardCreate) SetOrigin(v string) *CertifyScorecardCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (csc *CertifyScorecardCreate) SetCollector(s string) *CertifyScorecardCreate {
-	csc.mutation.SetCollector(s)
-	return csc
+func (_c *CertifyScorecardCreate) SetCollector(v string) *CertifyScorecardCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (csc *CertifyScorecardCreate) SetDocumentRef(s string) *CertifyScorecardCreate {
-	csc.mutation.SetDocumentRef(s)
-	return csc
+func (_c *CertifyScorecardCreate) SetDocumentRef(v string) *CertifyScorecardCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetChecksHash sets the "checks_hash" field.
-func (csc *CertifyScorecardCreate) SetChecksHash(s string) *CertifyScorecardCreate {
-	csc.mutation.SetChecksHash(s)
-	return csc
+func (_c *CertifyScorecardCreate) SetChecksHash(v string) *CertifyScorecardCreate {
+	_c.mutation.SetChecksHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (csc *CertifyScorecardCreate) SetID(u uuid.UUID) *CertifyScorecardCreate {
-	csc.mutation.SetID(u)
-	return csc
+func (_c *CertifyScorecardCreate) SetID(v uuid.UUID) *CertifyScorecardCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (csc *CertifyScorecardCreate) SetNillableID(u *uuid.UUID) *CertifyScorecardCreate {
-	if u != nil {
-		csc.SetID(*u)
+func (_c *CertifyScorecardCreate) SetNillableID(v *uuid.UUID) *CertifyScorecardCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return csc
+	return _c
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (csc *CertifyScorecardCreate) SetSource(s *SourceName) *CertifyScorecardCreate {
-	return csc.SetSourceID(s.ID)
+func (_c *CertifyScorecardCreate) SetSource(v *SourceName) *CertifyScorecardCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // Mutation returns the CertifyScorecardMutation object of the builder.
-func (csc *CertifyScorecardCreate) Mutation() *CertifyScorecardMutation {
-	return csc.mutation
+func (_c *CertifyScorecardCreate) Mutation() *CertifyScorecardMutation {
+	return _c.mutation
 }
 
 // Save creates the CertifyScorecard in the database.
-func (csc *CertifyScorecardCreate) Save(ctx context.Context) (*CertifyScorecard, error) {
-	csc.defaults()
-	return withHooks(ctx, csc.sqlSave, csc.mutation, csc.hooks)
+func (_c *CertifyScorecardCreate) Save(ctx context.Context) (*CertifyScorecard, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (csc *CertifyScorecardCreate) SaveX(ctx context.Context) *CertifyScorecard {
-	v, err := csc.Save(ctx)
+func (_c *CertifyScorecardCreate) SaveX(ctx context.Context) *CertifyScorecard {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -142,78 +142,78 @@ func (csc *CertifyScorecardCreate) SaveX(ctx context.Context) *CertifyScorecard 
 }
 
 // Exec executes the query.
-func (csc *CertifyScorecardCreate) Exec(ctx context.Context) error {
-	_, err := csc.Save(ctx)
+func (_c *CertifyScorecardCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (csc *CertifyScorecardCreate) ExecX(ctx context.Context) {
-	if err := csc.Exec(ctx); err != nil {
+func (_c *CertifyScorecardCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (csc *CertifyScorecardCreate) defaults() {
-	if _, ok := csc.mutation.AggregateScore(); !ok {
+func (_c *CertifyScorecardCreate) defaults() {
+	if _, ok := _c.mutation.AggregateScore(); !ok {
 		v := certifyscorecard.DefaultAggregateScore
-		csc.mutation.SetAggregateScore(v)
+		_c.mutation.SetAggregateScore(v)
 	}
-	if _, ok := csc.mutation.TimeScanned(); !ok {
+	if _, ok := _c.mutation.TimeScanned(); !ok {
 		v := certifyscorecard.DefaultTimeScanned()
-		csc.mutation.SetTimeScanned(v)
+		_c.mutation.SetTimeScanned(v)
 	}
-	if _, ok := csc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := certifyscorecard.DefaultID()
-		csc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (csc *CertifyScorecardCreate) check() error {
-	if _, ok := csc.mutation.SourceID(); !ok {
+func (_c *CertifyScorecardCreate) check() error {
+	if _, ok := _c.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source_id", err: errors.New(`ent: missing required field "CertifyScorecard.source_id"`)}
 	}
-	if _, ok := csc.mutation.Checks(); !ok {
+	if _, ok := _c.mutation.Checks(); !ok {
 		return &ValidationError{Name: "checks", err: errors.New(`ent: missing required field "CertifyScorecard.checks"`)}
 	}
-	if _, ok := csc.mutation.AggregateScore(); !ok {
+	if _, ok := _c.mutation.AggregateScore(); !ok {
 		return &ValidationError{Name: "aggregate_score", err: errors.New(`ent: missing required field "CertifyScorecard.aggregate_score"`)}
 	}
-	if _, ok := csc.mutation.TimeScanned(); !ok {
+	if _, ok := _c.mutation.TimeScanned(); !ok {
 		return &ValidationError{Name: "time_scanned", err: errors.New(`ent: missing required field "CertifyScorecard.time_scanned"`)}
 	}
-	if _, ok := csc.mutation.ScorecardVersion(); !ok {
+	if _, ok := _c.mutation.ScorecardVersion(); !ok {
 		return &ValidationError{Name: "scorecard_version", err: errors.New(`ent: missing required field "CertifyScorecard.scorecard_version"`)}
 	}
-	if _, ok := csc.mutation.ScorecardCommit(); !ok {
+	if _, ok := _c.mutation.ScorecardCommit(); !ok {
 		return &ValidationError{Name: "scorecard_commit", err: errors.New(`ent: missing required field "CertifyScorecard.scorecard_commit"`)}
 	}
-	if _, ok := csc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "CertifyScorecard.origin"`)}
 	}
-	if _, ok := csc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyScorecard.collector"`)}
 	}
-	if _, ok := csc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyScorecard.document_ref"`)}
 	}
-	if _, ok := csc.mutation.ChecksHash(); !ok {
+	if _, ok := _c.mutation.ChecksHash(); !ok {
 		return &ValidationError{Name: "checks_hash", err: errors.New(`ent: missing required field "CertifyScorecard.checks_hash"`)}
 	}
-	if len(csc.mutation.SourceIDs()) == 0 {
+	if len(_c.mutation.SourceIDs()) == 0 {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "CertifyScorecard.source"`)}
 	}
 	return nil
 }
 
-func (csc *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScorecard, error) {
-	if err := csc.check(); err != nil {
+func (_c *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScorecard, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := csc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, csc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -226,58 +226,58 @@ func (csc *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScoreca
 			return nil, err
 		}
 	}
-	csc.mutation.id = &_node.ID
-	csc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.CreateSpec) {
+func (_c *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.CreateSpec) {
 	var (
-		_node = &CertifyScorecard{config: csc.config}
+		_node = &CertifyScorecard{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = csc.conflict
-	if id, ok := csc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := csc.mutation.Checks(); ok {
+	if value, ok := _c.mutation.Checks(); ok {
 		_spec.SetField(certifyscorecard.FieldChecks, field.TypeJSON, value)
 		_node.Checks = value
 	}
-	if value, ok := csc.mutation.AggregateScore(); ok {
+	if value, ok := _c.mutation.AggregateScore(); ok {
 		_spec.SetField(certifyscorecard.FieldAggregateScore, field.TypeFloat64, value)
 		_node.AggregateScore = value
 	}
-	if value, ok := csc.mutation.TimeScanned(); ok {
+	if value, ok := _c.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyscorecard.FieldTimeScanned, field.TypeTime, value)
 		_node.TimeScanned = value
 	}
-	if value, ok := csc.mutation.ScorecardVersion(); ok {
+	if value, ok := _c.mutation.ScorecardVersion(); ok {
 		_spec.SetField(certifyscorecard.FieldScorecardVersion, field.TypeString, value)
 		_node.ScorecardVersion = value
 	}
-	if value, ok := csc.mutation.ScorecardCommit(); ok {
+	if value, ok := _c.mutation.ScorecardCommit(); ok {
 		_spec.SetField(certifyscorecard.FieldScorecardCommit, field.TypeString, value)
 		_node.ScorecardCommit = value
 	}
-	if value, ok := csc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(certifyscorecard.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := csc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := csc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyscorecard.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := csc.mutation.ChecksHash(); ok {
+	if value, ok := _c.mutation.ChecksHash(); ok {
 		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
 		_node.ChecksHash = value
 	}
-	if nodes := csc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -313,10 +313,10 @@ func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.Cr
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (csc *CertifyScorecardCreate) OnConflict(opts ...sql.ConflictOption) *CertifyScorecardUpsertOne {
-	csc.conflict = opts
+func (_c *CertifyScorecardCreate) OnConflict(opts ...sql.ConflictOption) *CertifyScorecardUpsertOne {
+	_c.conflict = opts
 	return &CertifyScorecardUpsertOne{
-		create: csc,
+		create: _c,
 	}
 }
 
@@ -326,10 +326,10 @@ func (csc *CertifyScorecardCreate) OnConflict(opts ...sql.ConflictOption) *Certi
 //	client.CertifyScorecard.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (csc *CertifyScorecardCreate) OnConflictColumns(columns ...string) *CertifyScorecardUpsertOne {
-	csc.conflict = append(csc.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyScorecardCreate) OnConflictColumns(columns ...string) *CertifyScorecardUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyScorecardUpsertOne{
-		create: csc,
+		create: _c,
 	}
 }
 
@@ -714,16 +714,16 @@ type CertifyScorecardCreateBulk struct {
 }
 
 // Save creates the CertifyScorecard entities in the database.
-func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifyScorecard, error) {
-	if cscb.err != nil {
-		return nil, cscb.err
+func (_c *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifyScorecard, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(cscb.builders))
-	nodes := make([]*CertifyScorecard, len(cscb.builders))
-	mutators := make([]Mutator, len(cscb.builders))
-	for i := range cscb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*CertifyScorecard, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := cscb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyScorecardMutation)
@@ -737,12 +737,12 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, cscb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = cscb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, cscb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -762,7 +762,7 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, cscb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -770,8 +770,8 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cscb *CertifyScorecardCreateBulk) SaveX(ctx context.Context) []*CertifyScorecard {
-	v, err := cscb.Save(ctx)
+func (_c *CertifyScorecardCreateBulk) SaveX(ctx context.Context) []*CertifyScorecard {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -779,14 +779,14 @@ func (cscb *CertifyScorecardCreateBulk) SaveX(ctx context.Context) []*CertifySco
 }
 
 // Exec executes the query.
-func (cscb *CertifyScorecardCreateBulk) Exec(ctx context.Context) error {
-	_, err := cscb.Save(ctx)
+func (_c *CertifyScorecardCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cscb *CertifyScorecardCreateBulk) ExecX(ctx context.Context) {
-	if err := cscb.Exec(ctx); err != nil {
+func (_c *CertifyScorecardCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -806,10 +806,10 @@ func (cscb *CertifyScorecardCreateBulk) ExecX(ctx context.Context) {
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (cscb *CertifyScorecardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyScorecardUpsertBulk {
-	cscb.conflict = opts
+func (_c *CertifyScorecardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyScorecardUpsertBulk {
+	_c.conflict = opts
 	return &CertifyScorecardUpsertBulk{
-		create: cscb,
+		create: _c,
 	}
 }
 
@@ -819,10 +819,10 @@ func (cscb *CertifyScorecardCreateBulk) OnConflict(opts ...sql.ConflictOption) *
 //	client.CertifyScorecard.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cscb *CertifyScorecardCreateBulk) OnConflictColumns(columns ...string) *CertifyScorecardUpsertBulk {
-	cscb.conflict = append(cscb.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyScorecardCreateBulk) OnConflictColumns(columns ...string) *CertifyScorecardUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyScorecardUpsertBulk{
-		create: cscb,
+		create: _c,
 	}
 }
 

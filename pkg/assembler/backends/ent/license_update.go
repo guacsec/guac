@@ -24,190 +24,190 @@ type LicenseUpdate struct {
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
-func (lu *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
-	lu.mutation.Where(ps...)
-	return lu
+func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (lu *LicenseUpdate) SetName(s string) *LicenseUpdate {
-	lu.mutation.SetName(s)
-	return lu
+func (_u *LicenseUpdate) SetName(v string) *LicenseUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (lu *LicenseUpdate) SetNillableName(s *string) *LicenseUpdate {
-	if s != nil {
-		lu.SetName(*s)
+func (_u *LicenseUpdate) SetNillableName(v *string) *LicenseUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return lu
+	return _u
 }
 
 // SetInline sets the "inline" field.
-func (lu *LicenseUpdate) SetInline(s string) *LicenseUpdate {
-	lu.mutation.SetInline(s)
-	return lu
+func (_u *LicenseUpdate) SetInline(v string) *LicenseUpdate {
+	_u.mutation.SetInline(v)
+	return _u
 }
 
 // SetNillableInline sets the "inline" field if the given value is not nil.
-func (lu *LicenseUpdate) SetNillableInline(s *string) *LicenseUpdate {
-	if s != nil {
-		lu.SetInline(*s)
+func (_u *LicenseUpdate) SetNillableInline(v *string) *LicenseUpdate {
+	if v != nil {
+		_u.SetInline(*v)
 	}
-	return lu
+	return _u
 }
 
 // ClearInline clears the value of the "inline" field.
-func (lu *LicenseUpdate) ClearInline() *LicenseUpdate {
-	lu.mutation.ClearInline()
-	return lu
+func (_u *LicenseUpdate) ClearInline() *LicenseUpdate {
+	_u.mutation.ClearInline()
+	return _u
 }
 
 // SetListVersion sets the "list_version" field.
-func (lu *LicenseUpdate) SetListVersion(s string) *LicenseUpdate {
-	lu.mutation.SetListVersion(s)
-	return lu
+func (_u *LicenseUpdate) SetListVersion(v string) *LicenseUpdate {
+	_u.mutation.SetListVersion(v)
+	return _u
 }
 
 // SetNillableListVersion sets the "list_version" field if the given value is not nil.
-func (lu *LicenseUpdate) SetNillableListVersion(s *string) *LicenseUpdate {
-	if s != nil {
-		lu.SetListVersion(*s)
+func (_u *LicenseUpdate) SetNillableListVersion(v *string) *LicenseUpdate {
+	if v != nil {
+		_u.SetListVersion(*v)
 	}
-	return lu
+	return _u
 }
 
 // ClearListVersion clears the value of the "list_version" field.
-func (lu *LicenseUpdate) ClearListVersion() *LicenseUpdate {
-	lu.mutation.ClearListVersion()
-	return lu
+func (_u *LicenseUpdate) ClearListVersion() *LicenseUpdate {
+	_u.mutation.ClearListVersion()
+	return _u
 }
 
 // SetInlineHash sets the "inline_hash" field.
-func (lu *LicenseUpdate) SetInlineHash(s string) *LicenseUpdate {
-	lu.mutation.SetInlineHash(s)
-	return lu
+func (_u *LicenseUpdate) SetInlineHash(v string) *LicenseUpdate {
+	_u.mutation.SetInlineHash(v)
+	return _u
 }
 
 // SetNillableInlineHash sets the "inline_hash" field if the given value is not nil.
-func (lu *LicenseUpdate) SetNillableInlineHash(s *string) *LicenseUpdate {
-	if s != nil {
-		lu.SetInlineHash(*s)
+func (_u *LicenseUpdate) SetNillableInlineHash(v *string) *LicenseUpdate {
+	if v != nil {
+		_u.SetInlineHash(*v)
 	}
-	return lu
+	return _u
 }
 
 // ClearInlineHash clears the value of the "inline_hash" field.
-func (lu *LicenseUpdate) ClearInlineHash() *LicenseUpdate {
-	lu.mutation.ClearInlineHash()
-	return lu
+func (_u *LicenseUpdate) ClearInlineHash() *LicenseUpdate {
+	_u.mutation.ClearInlineHash()
+	return _u
 }
 
 // SetListVersionHash sets the "list_version_hash" field.
-func (lu *LicenseUpdate) SetListVersionHash(s string) *LicenseUpdate {
-	lu.mutation.SetListVersionHash(s)
-	return lu
+func (_u *LicenseUpdate) SetListVersionHash(v string) *LicenseUpdate {
+	_u.mutation.SetListVersionHash(v)
+	return _u
 }
 
 // SetNillableListVersionHash sets the "list_version_hash" field if the given value is not nil.
-func (lu *LicenseUpdate) SetNillableListVersionHash(s *string) *LicenseUpdate {
-	if s != nil {
-		lu.SetListVersionHash(*s)
+func (_u *LicenseUpdate) SetNillableListVersionHash(v *string) *LicenseUpdate {
+	if v != nil {
+		_u.SetListVersionHash(*v)
 	}
-	return lu
+	return _u
 }
 
 // ClearListVersionHash clears the value of the "list_version_hash" field.
-func (lu *LicenseUpdate) ClearListVersionHash() *LicenseUpdate {
-	lu.mutation.ClearListVersionHash()
-	return lu
+func (_u *LicenseUpdate) ClearListVersionHash() *LicenseUpdate {
+	_u.mutation.ClearListVersionHash()
+	return _u
 }
 
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (lu *LicenseUpdate) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
-	lu.mutation.AddDeclaredInCertifyLegalIDs(ids...)
-	return lu
+func (_u *LicenseUpdate) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
+	_u.mutation.AddDeclaredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // AddDeclaredInCertifyLegals adds the "declared_in_certify_legals" edges to the CertifyLegal entity.
-func (lu *LicenseUpdate) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdate) AddDeclaredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return lu.AddDeclaredInCertifyLegalIDs(ids...)
+	return _u.AddDeclaredInCertifyLegalIDs(ids...)
 }
 
 // AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (lu *LicenseUpdate) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
-	lu.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
-	return lu
+func (_u *LicenseUpdate) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
+	_u.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // AddDiscoveredInCertifyLegals adds the "discovered_in_certify_legals" edges to the CertifyLegal entity.
-func (lu *LicenseUpdate) AddDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdate) AddDiscoveredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return lu.AddDiscoveredInCertifyLegalIDs(ids...)
+	return _u.AddDiscoveredInCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (lu *LicenseUpdate) Mutation() *LicenseMutation {
-	return lu.mutation
+func (_u *LicenseUpdate) Mutation() *LicenseMutation {
+	return _u.mutation
 }
 
 // ClearDeclaredInCertifyLegals clears all "declared_in_certify_legals" edges to the CertifyLegal entity.
-func (lu *LicenseUpdate) ClearDeclaredInCertifyLegals() *LicenseUpdate {
-	lu.mutation.ClearDeclaredInCertifyLegals()
-	return lu
+func (_u *LicenseUpdate) ClearDeclaredInCertifyLegals() *LicenseUpdate {
+	_u.mutation.ClearDeclaredInCertifyLegals()
+	return _u
 }
 
 // RemoveDeclaredInCertifyLegalIDs removes the "declared_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (lu *LicenseUpdate) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
-	lu.mutation.RemoveDeclaredInCertifyLegalIDs(ids...)
-	return lu
+func (_u *LicenseUpdate) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
+	_u.mutation.RemoveDeclaredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // RemoveDeclaredInCertifyLegals removes "declared_in_certify_legals" edges to CertifyLegal entities.
-func (lu *LicenseUpdate) RemoveDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdate) RemoveDeclaredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return lu.RemoveDeclaredInCertifyLegalIDs(ids...)
+	return _u.RemoveDeclaredInCertifyLegalIDs(ids...)
 }
 
 // ClearDiscoveredInCertifyLegals clears all "discovered_in_certify_legals" edges to the CertifyLegal entity.
-func (lu *LicenseUpdate) ClearDiscoveredInCertifyLegals() *LicenseUpdate {
-	lu.mutation.ClearDiscoveredInCertifyLegals()
-	return lu
+func (_u *LicenseUpdate) ClearDiscoveredInCertifyLegals() *LicenseUpdate {
+	_u.mutation.ClearDiscoveredInCertifyLegals()
+	return _u
 }
 
 // RemoveDiscoveredInCertifyLegalIDs removes the "discovered_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (lu *LicenseUpdate) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
-	lu.mutation.RemoveDiscoveredInCertifyLegalIDs(ids...)
-	return lu
+func (_u *LicenseUpdate) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
+	_u.mutation.RemoveDiscoveredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // RemoveDiscoveredInCertifyLegals removes "discovered_in_certify_legals" edges to CertifyLegal entities.
-func (lu *LicenseUpdate) RemoveDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdate) RemoveDiscoveredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return lu.RemoveDiscoveredInCertifyLegalIDs(ids...)
+	return _u.RemoveDiscoveredInCertifyLegalIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, lu.sqlSave, lu.mutation, lu.hooks)
+func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (lu *LicenseUpdate) SaveX(ctx context.Context) int {
-	affected, err := lu.Save(ctx)
+func (_u *LicenseUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -215,21 +215,21 @@ func (lu *LicenseUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (lu *LicenseUpdate) Exec(ctx context.Context) error {
-	_, err := lu.Save(ctx)
+func (_u *LicenseUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lu *LicenseUpdate) ExecX(ctx context.Context) {
-	if err := lu.Exec(ctx); err != nil {
+func (_u *LicenseUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (lu *LicenseUpdate) check() error {
-	if v, ok := lu.mutation.Name(); ok {
+func (_u *LicenseUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := license.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "License.name": %w`, err)}
 		}
@@ -237,46 +237,46 @@ func (lu *LicenseUpdate) check() error {
 	return nil
 }
 
-func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := lu.check(); err != nil {
-		return n, err
+func (_u *LicenseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
-	if ps := lu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := lu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(license.FieldName, field.TypeString, value)
 	}
-	if value, ok := lu.mutation.Inline(); ok {
+	if value, ok := _u.mutation.Inline(); ok {
 		_spec.SetField(license.FieldInline, field.TypeString, value)
 	}
-	if lu.mutation.InlineCleared() {
+	if _u.mutation.InlineCleared() {
 		_spec.ClearField(license.FieldInline, field.TypeString)
 	}
-	if value, ok := lu.mutation.ListVersion(); ok {
+	if value, ok := _u.mutation.ListVersion(); ok {
 		_spec.SetField(license.FieldListVersion, field.TypeString, value)
 	}
-	if lu.mutation.ListVersionCleared() {
+	if _u.mutation.ListVersionCleared() {
 		_spec.ClearField(license.FieldListVersion, field.TypeString)
 	}
-	if value, ok := lu.mutation.InlineHash(); ok {
+	if value, ok := _u.mutation.InlineHash(); ok {
 		_spec.SetField(license.FieldInlineHash, field.TypeString, value)
 	}
-	if lu.mutation.InlineHashCleared() {
+	if _u.mutation.InlineHashCleared() {
 		_spec.ClearField(license.FieldInlineHash, field.TypeString)
 	}
-	if value, ok := lu.mutation.ListVersionHash(); ok {
+	if value, ok := _u.mutation.ListVersionHash(); ok {
 		_spec.SetField(license.FieldListVersionHash, field.TypeString, value)
 	}
-	if lu.mutation.ListVersionHashCleared() {
+	if _u.mutation.ListVersionHashCleared() {
 		_spec.ClearField(license.FieldListVersionHash, field.TypeString)
 	}
-	if lu.mutation.DeclaredInCertifyLegalsCleared() {
+	if _u.mutation.DeclaredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -289,7 +289,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := lu.mutation.RemovedDeclaredInCertifyLegalsIDs(); len(nodes) > 0 && !lu.mutation.DeclaredInCertifyLegalsCleared() {
+	if nodes := _u.mutation.RemovedDeclaredInCertifyLegalsIDs(); len(nodes) > 0 && !_u.mutation.DeclaredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -305,7 +305,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := lu.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -321,7 +321,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if lu.mutation.DiscoveredInCertifyLegalsCleared() {
+	if _u.mutation.DiscoveredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -334,7 +334,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := lu.mutation.RemovedDiscoveredInCertifyLegalsIDs(); len(nodes) > 0 && !lu.mutation.DiscoveredInCertifyLegalsCleared() {
+	if nodes := _u.mutation.RemovedDiscoveredInCertifyLegalsIDs(); len(nodes) > 0 && !_u.mutation.DiscoveredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -350,7 +350,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := lu.mutation.DiscoveredInCertifyLegalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DiscoveredInCertifyLegalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -366,7 +366,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -374,8 +374,8 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	lu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // LicenseUpdateOne is the builder for updating a single License entity.
@@ -387,197 +387,197 @@ type LicenseUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (luo *LicenseUpdateOne) SetName(s string) *LicenseUpdateOne {
-	luo.mutation.SetName(s)
-	return luo
+func (_u *LicenseUpdateOne) SetName(v string) *LicenseUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (luo *LicenseUpdateOne) SetNillableName(s *string) *LicenseUpdateOne {
-	if s != nil {
-		luo.SetName(*s)
+func (_u *LicenseUpdateOne) SetNillableName(v *string) *LicenseUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return luo
+	return _u
 }
 
 // SetInline sets the "inline" field.
-func (luo *LicenseUpdateOne) SetInline(s string) *LicenseUpdateOne {
-	luo.mutation.SetInline(s)
-	return luo
+func (_u *LicenseUpdateOne) SetInline(v string) *LicenseUpdateOne {
+	_u.mutation.SetInline(v)
+	return _u
 }
 
 // SetNillableInline sets the "inline" field if the given value is not nil.
-func (luo *LicenseUpdateOne) SetNillableInline(s *string) *LicenseUpdateOne {
-	if s != nil {
-		luo.SetInline(*s)
+func (_u *LicenseUpdateOne) SetNillableInline(v *string) *LicenseUpdateOne {
+	if v != nil {
+		_u.SetInline(*v)
 	}
-	return luo
+	return _u
 }
 
 // ClearInline clears the value of the "inline" field.
-func (luo *LicenseUpdateOne) ClearInline() *LicenseUpdateOne {
-	luo.mutation.ClearInline()
-	return luo
+func (_u *LicenseUpdateOne) ClearInline() *LicenseUpdateOne {
+	_u.mutation.ClearInline()
+	return _u
 }
 
 // SetListVersion sets the "list_version" field.
-func (luo *LicenseUpdateOne) SetListVersion(s string) *LicenseUpdateOne {
-	luo.mutation.SetListVersion(s)
-	return luo
+func (_u *LicenseUpdateOne) SetListVersion(v string) *LicenseUpdateOne {
+	_u.mutation.SetListVersion(v)
+	return _u
 }
 
 // SetNillableListVersion sets the "list_version" field if the given value is not nil.
-func (luo *LicenseUpdateOne) SetNillableListVersion(s *string) *LicenseUpdateOne {
-	if s != nil {
-		luo.SetListVersion(*s)
+func (_u *LicenseUpdateOne) SetNillableListVersion(v *string) *LicenseUpdateOne {
+	if v != nil {
+		_u.SetListVersion(*v)
 	}
-	return luo
+	return _u
 }
 
 // ClearListVersion clears the value of the "list_version" field.
-func (luo *LicenseUpdateOne) ClearListVersion() *LicenseUpdateOne {
-	luo.mutation.ClearListVersion()
-	return luo
+func (_u *LicenseUpdateOne) ClearListVersion() *LicenseUpdateOne {
+	_u.mutation.ClearListVersion()
+	return _u
 }
 
 // SetInlineHash sets the "inline_hash" field.
-func (luo *LicenseUpdateOne) SetInlineHash(s string) *LicenseUpdateOne {
-	luo.mutation.SetInlineHash(s)
-	return luo
+func (_u *LicenseUpdateOne) SetInlineHash(v string) *LicenseUpdateOne {
+	_u.mutation.SetInlineHash(v)
+	return _u
 }
 
 // SetNillableInlineHash sets the "inline_hash" field if the given value is not nil.
-func (luo *LicenseUpdateOne) SetNillableInlineHash(s *string) *LicenseUpdateOne {
-	if s != nil {
-		luo.SetInlineHash(*s)
+func (_u *LicenseUpdateOne) SetNillableInlineHash(v *string) *LicenseUpdateOne {
+	if v != nil {
+		_u.SetInlineHash(*v)
 	}
-	return luo
+	return _u
 }
 
 // ClearInlineHash clears the value of the "inline_hash" field.
-func (luo *LicenseUpdateOne) ClearInlineHash() *LicenseUpdateOne {
-	luo.mutation.ClearInlineHash()
-	return luo
+func (_u *LicenseUpdateOne) ClearInlineHash() *LicenseUpdateOne {
+	_u.mutation.ClearInlineHash()
+	return _u
 }
 
 // SetListVersionHash sets the "list_version_hash" field.
-func (luo *LicenseUpdateOne) SetListVersionHash(s string) *LicenseUpdateOne {
-	luo.mutation.SetListVersionHash(s)
-	return luo
+func (_u *LicenseUpdateOne) SetListVersionHash(v string) *LicenseUpdateOne {
+	_u.mutation.SetListVersionHash(v)
+	return _u
 }
 
 // SetNillableListVersionHash sets the "list_version_hash" field if the given value is not nil.
-func (luo *LicenseUpdateOne) SetNillableListVersionHash(s *string) *LicenseUpdateOne {
-	if s != nil {
-		luo.SetListVersionHash(*s)
+func (_u *LicenseUpdateOne) SetNillableListVersionHash(v *string) *LicenseUpdateOne {
+	if v != nil {
+		_u.SetListVersionHash(*v)
 	}
-	return luo
+	return _u
 }
 
 // ClearListVersionHash clears the value of the "list_version_hash" field.
-func (luo *LicenseUpdateOne) ClearListVersionHash() *LicenseUpdateOne {
-	luo.mutation.ClearListVersionHash()
-	return luo
+func (_u *LicenseUpdateOne) ClearListVersionHash() *LicenseUpdateOne {
+	_u.mutation.ClearListVersionHash()
+	return _u
 }
 
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (luo *LicenseUpdateOne) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
-	luo.mutation.AddDeclaredInCertifyLegalIDs(ids...)
-	return luo
+func (_u *LicenseUpdateOne) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
+	_u.mutation.AddDeclaredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // AddDeclaredInCertifyLegals adds the "declared_in_certify_legals" edges to the CertifyLegal entity.
-func (luo *LicenseUpdateOne) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdateOne) AddDeclaredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return luo.AddDeclaredInCertifyLegalIDs(ids...)
+	return _u.AddDeclaredInCertifyLegalIDs(ids...)
 }
 
 // AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (luo *LicenseUpdateOne) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
-	luo.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
-	return luo
+func (_u *LicenseUpdateOne) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
+	_u.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // AddDiscoveredInCertifyLegals adds the "discovered_in_certify_legals" edges to the CertifyLegal entity.
-func (luo *LicenseUpdateOne) AddDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdateOne) AddDiscoveredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return luo.AddDiscoveredInCertifyLegalIDs(ids...)
+	return _u.AddDiscoveredInCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (luo *LicenseUpdateOne) Mutation() *LicenseMutation {
-	return luo.mutation
+func (_u *LicenseUpdateOne) Mutation() *LicenseMutation {
+	return _u.mutation
 }
 
 // ClearDeclaredInCertifyLegals clears all "declared_in_certify_legals" edges to the CertifyLegal entity.
-func (luo *LicenseUpdateOne) ClearDeclaredInCertifyLegals() *LicenseUpdateOne {
-	luo.mutation.ClearDeclaredInCertifyLegals()
-	return luo
+func (_u *LicenseUpdateOne) ClearDeclaredInCertifyLegals() *LicenseUpdateOne {
+	_u.mutation.ClearDeclaredInCertifyLegals()
+	return _u
 }
 
 // RemoveDeclaredInCertifyLegalIDs removes the "declared_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (luo *LicenseUpdateOne) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
-	luo.mutation.RemoveDeclaredInCertifyLegalIDs(ids...)
-	return luo
+func (_u *LicenseUpdateOne) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
+	_u.mutation.RemoveDeclaredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // RemoveDeclaredInCertifyLegals removes "declared_in_certify_legals" edges to CertifyLegal entities.
-func (luo *LicenseUpdateOne) RemoveDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdateOne) RemoveDeclaredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return luo.RemoveDeclaredInCertifyLegalIDs(ids...)
+	return _u.RemoveDeclaredInCertifyLegalIDs(ids...)
 }
 
 // ClearDiscoveredInCertifyLegals clears all "discovered_in_certify_legals" edges to the CertifyLegal entity.
-func (luo *LicenseUpdateOne) ClearDiscoveredInCertifyLegals() *LicenseUpdateOne {
-	luo.mutation.ClearDiscoveredInCertifyLegals()
-	return luo
+func (_u *LicenseUpdateOne) ClearDiscoveredInCertifyLegals() *LicenseUpdateOne {
+	_u.mutation.ClearDiscoveredInCertifyLegals()
+	return _u
 }
 
 // RemoveDiscoveredInCertifyLegalIDs removes the "discovered_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (luo *LicenseUpdateOne) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
-	luo.mutation.RemoveDiscoveredInCertifyLegalIDs(ids...)
-	return luo
+func (_u *LicenseUpdateOne) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
+	_u.mutation.RemoveDiscoveredInCertifyLegalIDs(ids...)
+	return _u
 }
 
 // RemoveDiscoveredInCertifyLegals removes "discovered_in_certify_legals" edges to CertifyLegal entities.
-func (luo *LicenseUpdateOne) RemoveDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *LicenseUpdateOne) RemoveDiscoveredInCertifyLegals(v ...*CertifyLegal) *LicenseUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return luo.RemoveDiscoveredInCertifyLegalIDs(ids...)
+	return _u.RemoveDiscoveredInCertifyLegalIDs(ids...)
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
-func (luo *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
-	luo.mutation.Where(ps...)
-	return luo
+func (_u *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
-	luo.fields = append([]string{field}, fields...)
-	return luo
+func (_u *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated License entity.
-func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
-	return withHooks(ctx, luo.sqlSave, luo.mutation, luo.hooks)
+func (_u *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (luo *LicenseUpdateOne) SaveX(ctx context.Context) *License {
-	node, err := luo.Save(ctx)
+func (_u *LicenseUpdateOne) SaveX(ctx context.Context) *License {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -585,21 +585,21 @@ func (luo *LicenseUpdateOne) SaveX(ctx context.Context) *License {
 }
 
 // Exec executes the query on the entity.
-func (luo *LicenseUpdateOne) Exec(ctx context.Context) error {
-	_, err := luo.Save(ctx)
+func (_u *LicenseUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (luo *LicenseUpdateOne) ExecX(ctx context.Context) {
-	if err := luo.Exec(ctx); err != nil {
+func (_u *LicenseUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (luo *LicenseUpdateOne) check() error {
-	if v, ok := luo.mutation.Name(); ok {
+func (_u *LicenseUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := license.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "License.name": %w`, err)}
 		}
@@ -607,17 +607,17 @@ func (luo *LicenseUpdateOne) check() error {
 	return nil
 }
 
-func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
-	if err := luo.check(); err != nil {
+func (_u *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
-	id, ok := luo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "License.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := luo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, license.FieldID)
 		for _, f := range fields {
@@ -629,41 +629,41 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			}
 		}
 	}
-	if ps := luo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := luo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(license.FieldName, field.TypeString, value)
 	}
-	if value, ok := luo.mutation.Inline(); ok {
+	if value, ok := _u.mutation.Inline(); ok {
 		_spec.SetField(license.FieldInline, field.TypeString, value)
 	}
-	if luo.mutation.InlineCleared() {
+	if _u.mutation.InlineCleared() {
 		_spec.ClearField(license.FieldInline, field.TypeString)
 	}
-	if value, ok := luo.mutation.ListVersion(); ok {
+	if value, ok := _u.mutation.ListVersion(); ok {
 		_spec.SetField(license.FieldListVersion, field.TypeString, value)
 	}
-	if luo.mutation.ListVersionCleared() {
+	if _u.mutation.ListVersionCleared() {
 		_spec.ClearField(license.FieldListVersion, field.TypeString)
 	}
-	if value, ok := luo.mutation.InlineHash(); ok {
+	if value, ok := _u.mutation.InlineHash(); ok {
 		_spec.SetField(license.FieldInlineHash, field.TypeString, value)
 	}
-	if luo.mutation.InlineHashCleared() {
+	if _u.mutation.InlineHashCleared() {
 		_spec.ClearField(license.FieldInlineHash, field.TypeString)
 	}
-	if value, ok := luo.mutation.ListVersionHash(); ok {
+	if value, ok := _u.mutation.ListVersionHash(); ok {
 		_spec.SetField(license.FieldListVersionHash, field.TypeString, value)
 	}
-	if luo.mutation.ListVersionHashCleared() {
+	if _u.mutation.ListVersionHashCleared() {
 		_spec.ClearField(license.FieldListVersionHash, field.TypeString)
 	}
-	if luo.mutation.DeclaredInCertifyLegalsCleared() {
+	if _u.mutation.DeclaredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -676,7 +676,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := luo.mutation.RemovedDeclaredInCertifyLegalsIDs(); len(nodes) > 0 && !luo.mutation.DeclaredInCertifyLegalsCleared() {
+	if nodes := _u.mutation.RemovedDeclaredInCertifyLegalsIDs(); len(nodes) > 0 && !_u.mutation.DeclaredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -692,7 +692,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := luo.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -708,7 +708,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if luo.mutation.DiscoveredInCertifyLegalsCleared() {
+	if _u.mutation.DiscoveredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -721,7 +721,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := luo.mutation.RemovedDiscoveredInCertifyLegalsIDs(); len(nodes) > 0 && !luo.mutation.DiscoveredInCertifyLegalsCleared() {
+	if nodes := _u.mutation.RemovedDiscoveredInCertifyLegalsIDs(); len(nodes) > 0 && !_u.mutation.DiscoveredInCertifyLegalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -737,7 +737,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := luo.mutation.DiscoveredInCertifyLegalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DiscoveredInCertifyLegalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -753,10 +753,10 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &License{config: luo.config}
+	_node = &License{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, luo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -764,6 +764,6 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		return nil, err
 	}
-	luo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

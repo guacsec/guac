@@ -39,44 +39,44 @@ type HasMetadataQuery struct {
 }
 
 // Where adds a new predicate for the HasMetadataQuery builder.
-func (hmq *HasMetadataQuery) Where(ps ...predicate.HasMetadata) *HasMetadataQuery {
-	hmq.predicates = append(hmq.predicates, ps...)
-	return hmq
+func (_q *HasMetadataQuery) Where(ps ...predicate.HasMetadata) *HasMetadataQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (hmq *HasMetadataQuery) Limit(limit int) *HasMetadataQuery {
-	hmq.ctx.Limit = &limit
-	return hmq
+func (_q *HasMetadataQuery) Limit(limit int) *HasMetadataQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (hmq *HasMetadataQuery) Offset(offset int) *HasMetadataQuery {
-	hmq.ctx.Offset = &offset
-	return hmq
+func (_q *HasMetadataQuery) Offset(offset int) *HasMetadataQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (hmq *HasMetadataQuery) Unique(unique bool) *HasMetadataQuery {
-	hmq.ctx.Unique = &unique
-	return hmq
+func (_q *HasMetadataQuery) Unique(unique bool) *HasMetadataQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (hmq *HasMetadataQuery) Order(o ...hasmetadata.OrderOption) *HasMetadataQuery {
-	hmq.order = append(hmq.order, o...)
-	return hmq
+func (_q *HasMetadataQuery) Order(o ...hasmetadata.OrderOption) *HasMetadataQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QuerySource chains the current query on the "source" edge.
-func (hmq *HasMetadataQuery) QuerySource() *SourceNameQuery {
-	query := (&SourceNameClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) QuerySource() *SourceNameQuery {
+	query := (&SourceNameClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := hmq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := hmq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -85,20 +85,20 @@ func (hmq *HasMetadataQuery) QuerySource() *SourceNameQuery {
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.SourceTable, hasmetadata.SourceColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(hmq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryPackageVersion chains the current query on the "package_version" edge.
-func (hmq *HasMetadataQuery) QueryPackageVersion() *PackageVersionQuery {
-	query := (&PackageVersionClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) QueryPackageVersion() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := hmq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := hmq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -107,20 +107,20 @@ func (hmq *HasMetadataQuery) QueryPackageVersion() *PackageVersionQuery {
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.PackageVersionTable, hasmetadata.PackageVersionColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(hmq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryAllVersions chains the current query on the "all_versions" edge.
-func (hmq *HasMetadataQuery) QueryAllVersions() *PackageNameQuery {
-	query := (&PackageNameClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) QueryAllVersions() *PackageNameQuery {
+	query := (&PackageNameClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := hmq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := hmq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -129,20 +129,20 @@ func (hmq *HasMetadataQuery) QueryAllVersions() *PackageNameQuery {
 			sqlgraph.To(packagename.Table, packagename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.AllVersionsTable, hasmetadata.AllVersionsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(hmq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryArtifact chains the current query on the "artifact" edge.
-func (hmq *HasMetadataQuery) QueryArtifact() *ArtifactQuery {
-	query := (&ArtifactClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) QueryArtifact() *ArtifactQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := hmq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := hmq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -151,7 +151,7 @@ func (hmq *HasMetadataQuery) QueryArtifact() *ArtifactQuery {
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, hasmetadata.ArtifactTable, hasmetadata.ArtifactColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(hmq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -159,8 +159,8 @@ func (hmq *HasMetadataQuery) QueryArtifact() *ArtifactQuery {
 
 // First returns the first HasMetadata entity from the query.
 // Returns a *NotFoundError when no HasMetadata was found.
-func (hmq *HasMetadataQuery) First(ctx context.Context) (*HasMetadata, error) {
-	nodes, err := hmq.Limit(1).All(setContextOp(ctx, hmq.ctx, ent.OpQueryFirst))
+func (_q *HasMetadataQuery) First(ctx context.Context) (*HasMetadata, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -171,8 +171,8 @@ func (hmq *HasMetadataQuery) First(ctx context.Context) (*HasMetadata, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (hmq *HasMetadataQuery) FirstX(ctx context.Context) *HasMetadata {
-	node, err := hmq.First(ctx)
+func (_q *HasMetadataQuery) FirstX(ctx context.Context) *HasMetadata {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -181,9 +181,9 @@ func (hmq *HasMetadataQuery) FirstX(ctx context.Context) *HasMetadata {
 
 // FirstID returns the first HasMetadata ID from the query.
 // Returns a *NotFoundError when no HasMetadata ID was found.
-func (hmq *HasMetadataQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *HasMetadataQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = hmq.Limit(1).IDs(setContextOp(ctx, hmq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -194,8 +194,8 @@ func (hmq *HasMetadataQuery) FirstID(ctx context.Context) (id uuid.UUID, err err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (hmq *HasMetadataQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := hmq.FirstID(ctx)
+func (_q *HasMetadataQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -205,8 +205,8 @@ func (hmq *HasMetadataQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single HasMetadata entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one HasMetadata entity is found.
 // Returns a *NotFoundError when no HasMetadata entities are found.
-func (hmq *HasMetadataQuery) Only(ctx context.Context) (*HasMetadata, error) {
-	nodes, err := hmq.Limit(2).All(setContextOp(ctx, hmq.ctx, ent.OpQueryOnly))
+func (_q *HasMetadataQuery) Only(ctx context.Context) (*HasMetadata, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -221,8 +221,8 @@ func (hmq *HasMetadataQuery) Only(ctx context.Context) (*HasMetadata, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (hmq *HasMetadataQuery) OnlyX(ctx context.Context) *HasMetadata {
-	node, err := hmq.Only(ctx)
+func (_q *HasMetadataQuery) OnlyX(ctx context.Context) *HasMetadata {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -232,9 +232,9 @@ func (hmq *HasMetadataQuery) OnlyX(ctx context.Context) *HasMetadata {
 // OnlyID is like Only, but returns the only HasMetadata ID in the query.
 // Returns a *NotSingularError when more than one HasMetadata ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (hmq *HasMetadataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *HasMetadataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = hmq.Limit(2).IDs(setContextOp(ctx, hmq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -249,8 +249,8 @@ func (hmq *HasMetadataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err erro
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (hmq *HasMetadataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := hmq.OnlyID(ctx)
+func (_q *HasMetadataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -258,18 +258,18 @@ func (hmq *HasMetadataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of HasMetadataSlice.
-func (hmq *HasMetadataQuery) All(ctx context.Context) ([]*HasMetadata, error) {
-	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryAll)
-	if err := hmq.prepareQuery(ctx); err != nil {
+func (_q *HasMetadataQuery) All(ctx context.Context) ([]*HasMetadata, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*HasMetadata, *HasMetadataQuery]()
-	return withInterceptors[[]*HasMetadata](ctx, hmq, qr, hmq.inters)
+	return withInterceptors[[]*HasMetadata](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (hmq *HasMetadataQuery) AllX(ctx context.Context) []*HasMetadata {
-	nodes, err := hmq.All(ctx)
+func (_q *HasMetadataQuery) AllX(ctx context.Context) []*HasMetadata {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -277,20 +277,20 @@ func (hmq *HasMetadataQuery) AllX(ctx context.Context) []*HasMetadata {
 }
 
 // IDs executes the query and returns a list of HasMetadata IDs.
-func (hmq *HasMetadataQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if hmq.ctx.Unique == nil && hmq.path != nil {
-		hmq.Unique(true)
+func (_q *HasMetadataQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryIDs)
-	if err = hmq.Select(hasmetadata.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(hasmetadata.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (hmq *HasMetadataQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := hmq.IDs(ctx)
+func (_q *HasMetadataQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -298,17 +298,17 @@ func (hmq *HasMetadataQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (hmq *HasMetadataQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryCount)
-	if err := hmq.prepareQuery(ctx); err != nil {
+func (_q *HasMetadataQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, hmq, querierCount[*HasMetadataQuery](), hmq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*HasMetadataQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (hmq *HasMetadataQuery) CountX(ctx context.Context) int {
-	count, err := hmq.Count(ctx)
+func (_q *HasMetadataQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -316,9 +316,9 @@ func (hmq *HasMetadataQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (hmq *HasMetadataQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, hmq.ctx, ent.OpQueryExist)
-	switch _, err := hmq.FirstID(ctx); {
+func (_q *HasMetadataQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -329,8 +329,8 @@ func (hmq *HasMetadataQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (hmq *HasMetadataQuery) ExistX(ctx context.Context) bool {
-	exist, err := hmq.Exist(ctx)
+func (_q *HasMetadataQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -339,68 +339,68 @@ func (hmq *HasMetadataQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the HasMetadataQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (hmq *HasMetadataQuery) Clone() *HasMetadataQuery {
-	if hmq == nil {
+func (_q *HasMetadataQuery) Clone() *HasMetadataQuery {
+	if _q == nil {
 		return nil
 	}
 	return &HasMetadataQuery{
-		config:             hmq.config,
-		ctx:                hmq.ctx.Clone(),
-		order:              append([]hasmetadata.OrderOption{}, hmq.order...),
-		inters:             append([]Interceptor{}, hmq.inters...),
-		predicates:         append([]predicate.HasMetadata{}, hmq.predicates...),
-		withSource:         hmq.withSource.Clone(),
-		withPackageVersion: hmq.withPackageVersion.Clone(),
-		withAllVersions:    hmq.withAllVersions.Clone(),
-		withArtifact:       hmq.withArtifact.Clone(),
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]hasmetadata.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.HasMetadata{}, _q.predicates...),
+		withSource:         _q.withSource.Clone(),
+		withPackageVersion: _q.withPackageVersion.Clone(),
+		withAllVersions:    _q.withAllVersions.Clone(),
+		withArtifact:       _q.withArtifact.Clone(),
 		// clone intermediate query.
-		sql:  hmq.sql.Clone(),
-		path: hmq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithSource tells the query-builder to eager-load the nodes that are connected to
 // the "source" edge. The optional arguments are used to configure the query builder of the edge.
-func (hmq *HasMetadataQuery) WithSource(opts ...func(*SourceNameQuery)) *HasMetadataQuery {
-	query := (&SourceNameClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) WithSource(opts ...func(*SourceNameQuery)) *HasMetadataQuery {
+	query := (&SourceNameClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	hmq.withSource = query
-	return hmq
+	_q.withSource = query
+	return _q
 }
 
 // WithPackageVersion tells the query-builder to eager-load the nodes that are connected to
 // the "package_version" edge. The optional arguments are used to configure the query builder of the edge.
-func (hmq *HasMetadataQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *HasMetadataQuery {
-	query := (&PackageVersionClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *HasMetadataQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	hmq.withPackageVersion = query
-	return hmq
+	_q.withPackageVersion = query
+	return _q
 }
 
 // WithAllVersions tells the query-builder to eager-load the nodes that are connected to
 // the "all_versions" edge. The optional arguments are used to configure the query builder of the edge.
-func (hmq *HasMetadataQuery) WithAllVersions(opts ...func(*PackageNameQuery)) *HasMetadataQuery {
-	query := (&PackageNameClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) WithAllVersions(opts ...func(*PackageNameQuery)) *HasMetadataQuery {
+	query := (&PackageNameClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	hmq.withAllVersions = query
-	return hmq
+	_q.withAllVersions = query
+	return _q
 }
 
 // WithArtifact tells the query-builder to eager-load the nodes that are connected to
 // the "artifact" edge. The optional arguments are used to configure the query builder of the edge.
-func (hmq *HasMetadataQuery) WithArtifact(opts ...func(*ArtifactQuery)) *HasMetadataQuery {
-	query := (&ArtifactClient{config: hmq.config}).Query()
+func (_q *HasMetadataQuery) WithArtifact(opts ...func(*ArtifactQuery)) *HasMetadataQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	hmq.withArtifact = query
-	return hmq
+	_q.withArtifact = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -417,10 +417,10 @@ func (hmq *HasMetadataQuery) WithArtifact(opts ...func(*ArtifactQuery)) *HasMeta
 //		GroupBy(hasmetadata.FieldSourceID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (hmq *HasMetadataQuery) GroupBy(field string, fields ...string) *HasMetadataGroupBy {
-	hmq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &HasMetadataGroupBy{build: hmq}
-	grbuild.flds = &hmq.ctx.Fields
+func (_q *HasMetadataQuery) GroupBy(field string, fields ...string) *HasMetadataGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &HasMetadataGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = hasmetadata.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -438,110 +438,110 @@ func (hmq *HasMetadataQuery) GroupBy(field string, fields ...string) *HasMetadat
 //	client.HasMetadata.Query().
 //		Select(hasmetadata.FieldSourceID).
 //		Scan(ctx, &v)
-func (hmq *HasMetadataQuery) Select(fields ...string) *HasMetadataSelect {
-	hmq.ctx.Fields = append(hmq.ctx.Fields, fields...)
-	sbuild := &HasMetadataSelect{HasMetadataQuery: hmq}
+func (_q *HasMetadataQuery) Select(fields ...string) *HasMetadataSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &HasMetadataSelect{HasMetadataQuery: _q}
 	sbuild.label = hasmetadata.Label
-	sbuild.flds, sbuild.scan = &hmq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a HasMetadataSelect configured with the given aggregations.
-func (hmq *HasMetadataQuery) Aggregate(fns ...AggregateFunc) *HasMetadataSelect {
-	return hmq.Select().Aggregate(fns...)
+func (_q *HasMetadataQuery) Aggregate(fns ...AggregateFunc) *HasMetadataSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (hmq *HasMetadataQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range hmq.inters {
+func (_q *HasMetadataQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, hmq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range hmq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !hasmetadata.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if hmq.path != nil {
-		prev, err := hmq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		hmq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (hmq *HasMetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*HasMetadata, error) {
+func (_q *HasMetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*HasMetadata, error) {
 	var (
 		nodes       = []*HasMetadata{}
-		_spec       = hmq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [4]bool{
-			hmq.withSource != nil,
-			hmq.withPackageVersion != nil,
-			hmq.withAllVersions != nil,
-			hmq.withArtifact != nil,
+			_q.withSource != nil,
+			_q.withPackageVersion != nil,
+			_q.withAllVersions != nil,
+			_q.withArtifact != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*HasMetadata).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &HasMetadata{config: hmq.config}
+		node := &HasMetadata{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(hmq.modifiers) > 0 {
-		_spec.Modifiers = hmq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, hmq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := hmq.withSource; query != nil {
-		if err := hmq.loadSource(ctx, query, nodes, nil,
+	if query := _q.withSource; query != nil {
+		if err := _q.loadSource(ctx, query, nodes, nil,
 			func(n *HasMetadata, e *SourceName) { n.Edges.Source = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := hmq.withPackageVersion; query != nil {
-		if err := hmq.loadPackageVersion(ctx, query, nodes, nil,
+	if query := _q.withPackageVersion; query != nil {
+		if err := _q.loadPackageVersion(ctx, query, nodes, nil,
 			func(n *HasMetadata, e *PackageVersion) { n.Edges.PackageVersion = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := hmq.withAllVersions; query != nil {
-		if err := hmq.loadAllVersions(ctx, query, nodes, nil,
+	if query := _q.withAllVersions; query != nil {
+		if err := _q.loadAllVersions(ctx, query, nodes, nil,
 			func(n *HasMetadata, e *PackageName) { n.Edges.AllVersions = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := hmq.withArtifact; query != nil {
-		if err := hmq.loadArtifact(ctx, query, nodes, nil,
+	if query := _q.withArtifact; query != nil {
+		if err := _q.loadArtifact(ctx, query, nodes, nil,
 			func(n *HasMetadata, e *Artifact) { n.Edges.Artifact = e }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range hmq.loadTotal {
-		if err := hmq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (hmq *HasMetadataQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *SourceName)) error {
+func (_q *HasMetadataQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *SourceName)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
@@ -573,7 +573,7 @@ func (hmq *HasMetadataQuery) loadSource(ctx context.Context, query *SourceNameQu
 	}
 	return nil
 }
-func (hmq *HasMetadataQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *PackageVersion)) error {
+func (_q *HasMetadataQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *PackageVersion)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
@@ -605,7 +605,7 @@ func (hmq *HasMetadataQuery) loadPackageVersion(ctx context.Context, query *Pack
 	}
 	return nil
 }
-func (hmq *HasMetadataQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *PackageName)) error {
+func (_q *HasMetadataQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *PackageName)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
@@ -637,7 +637,7 @@ func (hmq *HasMetadataQuery) loadAllVersions(ctx context.Context, query *Package
 	}
 	return nil
 }
-func (hmq *HasMetadataQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *Artifact)) error {
+func (_q *HasMetadataQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *Artifact)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
@@ -670,27 +670,27 @@ func (hmq *HasMetadataQuery) loadArtifact(ctx context.Context, query *ArtifactQu
 	return nil
 }
 
-func (hmq *HasMetadataQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := hmq.querySpec()
-	if len(hmq.modifiers) > 0 {
-		_spec.Modifiers = hmq.modifiers
+func (_q *HasMetadataQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = hmq.ctx.Fields
-	if len(hmq.ctx.Fields) > 0 {
-		_spec.Unique = hmq.ctx.Unique != nil && *hmq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, hmq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (hmq *HasMetadataQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *HasMetadataQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
-	_spec.From = hmq.sql
-	if unique := hmq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if hmq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := hmq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, hasmetadata.FieldID)
 		for i := range fields {
@@ -698,33 +698,33 @@ func (hmq *HasMetadataQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if hmq.withSource != nil {
+		if _q.withSource != nil {
 			_spec.Node.AddColumnOnce(hasmetadata.FieldSourceID)
 		}
-		if hmq.withPackageVersion != nil {
+		if _q.withPackageVersion != nil {
 			_spec.Node.AddColumnOnce(hasmetadata.FieldPackageVersionID)
 		}
-		if hmq.withAllVersions != nil {
+		if _q.withAllVersions != nil {
 			_spec.Node.AddColumnOnce(hasmetadata.FieldPackageNameID)
 		}
-		if hmq.withArtifact != nil {
+		if _q.withArtifact != nil {
 			_spec.Node.AddColumnOnce(hasmetadata.FieldArtifactID)
 		}
 	}
-	if ps := hmq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := hmq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := hmq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := hmq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -734,33 +734,33 @@ func (hmq *HasMetadataQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (hmq *HasMetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(hmq.driver.Dialect())
+func (_q *HasMetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(hasmetadata.Table)
-	columns := hmq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = hasmetadata.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if hmq.sql != nil {
-		selector = hmq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if hmq.ctx.Unique != nil && *hmq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range hmq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range hmq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := hmq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := hmq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -773,41 +773,41 @@ type HasMetadataGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (hmgb *HasMetadataGroupBy) Aggregate(fns ...AggregateFunc) *HasMetadataGroupBy {
-	hmgb.fns = append(hmgb.fns, fns...)
-	return hmgb
+func (_g *HasMetadataGroupBy) Aggregate(fns ...AggregateFunc) *HasMetadataGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (hmgb *HasMetadataGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hmgb.build.ctx, ent.OpQueryGroupBy)
-	if err := hmgb.build.prepareQuery(ctx); err != nil {
+func (_g *HasMetadataGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*HasMetadataQuery, *HasMetadataGroupBy](ctx, hmgb.build, hmgb, hmgb.build.inters, v)
+	return scanWithInterceptors[*HasMetadataQuery, *HasMetadataGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (hmgb *HasMetadataGroupBy) sqlScan(ctx context.Context, root *HasMetadataQuery, v any) error {
+func (_g *HasMetadataGroupBy) sqlScan(ctx context.Context, root *HasMetadataQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(hmgb.fns))
-	for _, fn := range hmgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*hmgb.flds)+len(hmgb.fns))
-		for _, f := range *hmgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*hmgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := hmgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -821,27 +821,27 @@ type HasMetadataSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (hms *HasMetadataSelect) Aggregate(fns ...AggregateFunc) *HasMetadataSelect {
-	hms.fns = append(hms.fns, fns...)
-	return hms
+func (_s *HasMetadataSelect) Aggregate(fns ...AggregateFunc) *HasMetadataSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (hms *HasMetadataSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hms.ctx, ent.OpQuerySelect)
-	if err := hms.prepareQuery(ctx); err != nil {
+func (_s *HasMetadataSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*HasMetadataQuery, *HasMetadataSelect](ctx, hms.HasMetadataQuery, hms, hms.inters, v)
+	return scanWithInterceptors[*HasMetadataQuery, *HasMetadataSelect](ctx, _s.HasMetadataQuery, _s, _s.inters, v)
 }
 
-func (hms *HasMetadataSelect) sqlScan(ctx context.Context, root *HasMetadataQuery, v any) error {
+func (_s *HasMetadataSelect) sqlScan(ctx context.Context, root *HasMetadataQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(hms.fns))
-	for _, fn := range hms.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*hms.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -849,7 +849,7 @@ func (hms *HasMetadataSelect) sqlScan(ctx context.Context, root *HasMetadataQuer
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := hms.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -28,246 +28,246 @@ type CertificationUpdate struct {
 }
 
 // Where appends a list predicates to the CertificationUpdate builder.
-func (cu *CertificationUpdate) Where(ps ...predicate.Certification) *CertificationUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (_u *CertificationUpdate) Where(ps ...predicate.Certification) *CertificationUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (cu *CertificationUpdate) SetSourceID(u uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetSourceID(u)
-	return cu
+func (_u *CertificationUpdate) SetSourceID(v uuid.UUID) *CertificationUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableSourceID(u *uuid.UUID) *CertificationUpdate {
-	if u != nil {
-		cu.SetSourceID(*u)
+func (_u *CertificationUpdate) SetNillableSourceID(v *uuid.UUID) *CertificationUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return cu
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (cu *CertificationUpdate) ClearSourceID() *CertificationUpdate {
-	cu.mutation.ClearSourceID()
-	return cu
+func (_u *CertificationUpdate) ClearSourceID() *CertificationUpdate {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (cu *CertificationUpdate) SetPackageVersionID(u uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetPackageVersionID(u)
-	return cu
+func (_u *CertificationUpdate) SetPackageVersionID(v uuid.UUID) *CertificationUpdate {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillablePackageVersionID(u *uuid.UUID) *CertificationUpdate {
-	if u != nil {
-		cu.SetPackageVersionID(*u)
+func (_u *CertificationUpdate) SetNillablePackageVersionID(v *uuid.UUID) *CertificationUpdate {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return cu
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (cu *CertificationUpdate) ClearPackageVersionID() *CertificationUpdate {
-	cu.mutation.ClearPackageVersionID()
-	return cu
+func (_u *CertificationUpdate) ClearPackageVersionID() *CertificationUpdate {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (cu *CertificationUpdate) SetPackageNameID(u uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetPackageNameID(u)
-	return cu
+func (_u *CertificationUpdate) SetPackageNameID(v uuid.UUID) *CertificationUpdate {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillablePackageNameID(u *uuid.UUID) *CertificationUpdate {
-	if u != nil {
-		cu.SetPackageNameID(*u)
+func (_u *CertificationUpdate) SetNillablePackageNameID(v *uuid.UUID) *CertificationUpdate {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return cu
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (cu *CertificationUpdate) ClearPackageNameID() *CertificationUpdate {
-	cu.mutation.ClearPackageNameID()
-	return cu
+func (_u *CertificationUpdate) ClearPackageNameID() *CertificationUpdate {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cu *CertificationUpdate) SetArtifactID(u uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetArtifactID(u)
-	return cu
+func (_u *CertificationUpdate) SetArtifactID(v uuid.UUID) *CertificationUpdate {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableArtifactID(u *uuid.UUID) *CertificationUpdate {
-	if u != nil {
-		cu.SetArtifactID(*u)
+func (_u *CertificationUpdate) SetNillableArtifactID(v *uuid.UUID) *CertificationUpdate {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return cu
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (cu *CertificationUpdate) ClearArtifactID() *CertificationUpdate {
-	cu.mutation.ClearArtifactID()
-	return cu
+func (_u *CertificationUpdate) ClearArtifactID() *CertificationUpdate {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetType sets the "type" field.
-func (cu *CertificationUpdate) SetType(c certification.Type) *CertificationUpdate {
-	cu.mutation.SetType(c)
-	return cu
+func (_u *CertificationUpdate) SetType(v certification.Type) *CertificationUpdate {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableType(c *certification.Type) *CertificationUpdate {
-	if c != nil {
-		cu.SetType(*c)
+func (_u *CertificationUpdate) SetNillableType(v *certification.Type) *CertificationUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (cu *CertificationUpdate) SetJustification(s string) *CertificationUpdate {
-	cu.mutation.SetJustification(s)
-	return cu
+func (_u *CertificationUpdate) SetJustification(v string) *CertificationUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableJustification(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetJustification(*s)
+func (_u *CertificationUpdate) SetNillableJustification(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (cu *CertificationUpdate) SetKnownSince(t time.Time) *CertificationUpdate {
-	cu.mutation.SetKnownSince(t)
-	return cu
+func (_u *CertificationUpdate) SetKnownSince(v time.Time) *CertificationUpdate {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableKnownSince(t *time.Time) *CertificationUpdate {
-	if t != nil {
-		cu.SetKnownSince(*t)
+func (_u *CertificationUpdate) SetNillableKnownSince(v *time.Time) *CertificationUpdate {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cu *CertificationUpdate) SetOrigin(s string) *CertificationUpdate {
-	cu.mutation.SetOrigin(s)
-	return cu
+func (_u *CertificationUpdate) SetOrigin(v string) *CertificationUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableOrigin(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetOrigin(*s)
+func (_u *CertificationUpdate) SetNillableOrigin(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cu *CertificationUpdate) SetCollector(s string) *CertificationUpdate {
-	cu.mutation.SetCollector(s)
-	return cu
+func (_u *CertificationUpdate) SetCollector(v string) *CertificationUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableCollector(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetCollector(*s)
+func (_u *CertificationUpdate) SetNillableCollector(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cu *CertificationUpdate) SetDocumentRef(s string) *CertificationUpdate {
-	cu.mutation.SetDocumentRef(s)
-	return cu
+func (_u *CertificationUpdate) SetDocumentRef(v string) *CertificationUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableDocumentRef(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetDocumentRef(*s)
+func (_u *CertificationUpdate) SetNillableDocumentRef(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (cu *CertificationUpdate) SetSource(s *SourceName) *CertificationUpdate {
-	return cu.SetSourceID(s.ID)
+func (_u *CertificationUpdate) SetSource(v *SourceName) *CertificationUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (cu *CertificationUpdate) SetPackageVersion(p *PackageVersion) *CertificationUpdate {
-	return cu.SetPackageVersionID(p.ID)
+func (_u *CertificationUpdate) SetPackageVersion(v *PackageVersion) *CertificationUpdate {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (cu *CertificationUpdate) SetAllVersionsID(id uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetAllVersionsID(id)
-	return cu
+func (_u *CertificationUpdate) SetAllVersionsID(id uuid.UUID) *CertificationUpdate {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableAllVersionsID(id *uuid.UUID) *CertificationUpdate {
+func (_u *CertificationUpdate) SetNillableAllVersionsID(id *uuid.UUID) *CertificationUpdate {
 	if id != nil {
-		cu = cu.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return cu
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (cu *CertificationUpdate) SetAllVersions(p *PackageName) *CertificationUpdate {
-	return cu.SetAllVersionsID(p.ID)
+func (_u *CertificationUpdate) SetAllVersions(v *PackageName) *CertificationUpdate {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (cu *CertificationUpdate) SetArtifact(a *Artifact) *CertificationUpdate {
-	return cu.SetArtifactID(a.ID)
+func (_u *CertificationUpdate) SetArtifact(v *Artifact) *CertificationUpdate {
+	return _u.SetArtifactID(v.ID)
 }
 
 // Mutation returns the CertificationMutation object of the builder.
-func (cu *CertificationUpdate) Mutation() *CertificationMutation {
-	return cu.mutation
+func (_u *CertificationUpdate) Mutation() *CertificationMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (cu *CertificationUpdate) ClearSource() *CertificationUpdate {
-	cu.mutation.ClearSource()
-	return cu
+func (_u *CertificationUpdate) ClearSource() *CertificationUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (cu *CertificationUpdate) ClearPackageVersion() *CertificationUpdate {
-	cu.mutation.ClearPackageVersion()
-	return cu
+func (_u *CertificationUpdate) ClearPackageVersion() *CertificationUpdate {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (cu *CertificationUpdate) ClearAllVersions() *CertificationUpdate {
-	cu.mutation.ClearAllVersions()
-	return cu
+func (_u *CertificationUpdate) ClearAllVersions() *CertificationUpdate {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (cu *CertificationUpdate) ClearArtifact() *CertificationUpdate {
-	cu.mutation.ClearArtifact()
-	return cu
+func (_u *CertificationUpdate) ClearArtifact() *CertificationUpdate {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CertificationUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (_u *CertificationUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CertificationUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (_u *CertificationUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -275,21 +275,21 @@ func (cu *CertificationUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CertificationUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (_u *CertificationUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CertificationUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (_u *CertificationUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cu *CertificationUpdate) check() error {
-	if v, ok := cu.mutation.GetType(); ok {
+func (_u *CertificationUpdate) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := certification.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Certification.type": %w`, err)}
 		}
@@ -297,37 +297,37 @@ func (cu *CertificationUpdate) check() error {
 	return nil
 }
 
-func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := cu.check(); err != nil {
-		return n, err
+func (_u *CertificationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cu.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(certification.FieldType, field.TypeEnum, value)
 	}
-	if value, ok := cu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(certification.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := cu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certification.FieldDocumentRef, field.TypeString, value)
 	}
-	if cu.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -340,7 +340,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -356,7 +356,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -369,7 +369,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -385,7 +385,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -398,7 +398,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -414,7 +414,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -427,7 +427,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -443,7 +443,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -451,8 +451,8 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // CertificationUpdateOne is the builder for updating a single Certification entity.
@@ -464,253 +464,253 @@ type CertificationUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (cuo *CertificationUpdateOne) SetSourceID(u uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetSourceID(u)
-	return cuo
+func (_u *CertificationUpdateOne) SetSourceID(v uuid.UUID) *CertificationUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableSourceID(u *uuid.UUID) *CertificationUpdateOne {
-	if u != nil {
-		cuo.SetSourceID(*u)
+func (_u *CertificationUpdateOne) SetNillableSourceID(v *uuid.UUID) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return cuo
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (cuo *CertificationUpdateOne) ClearSourceID() *CertificationUpdateOne {
-	cuo.mutation.ClearSourceID()
-	return cuo
+func (_u *CertificationUpdateOne) ClearSourceID() *CertificationUpdateOne {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (cuo *CertificationUpdateOne) SetPackageVersionID(u uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetPackageVersionID(u)
-	return cuo
+func (_u *CertificationUpdateOne) SetPackageVersionID(v uuid.UUID) *CertificationUpdateOne {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *CertificationUpdateOne {
-	if u != nil {
-		cuo.SetPackageVersionID(*u)
+func (_u *CertificationUpdateOne) SetNillablePackageVersionID(v *uuid.UUID) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return cuo
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (cuo *CertificationUpdateOne) ClearPackageVersionID() *CertificationUpdateOne {
-	cuo.mutation.ClearPackageVersionID()
-	return cuo
+func (_u *CertificationUpdateOne) ClearPackageVersionID() *CertificationUpdateOne {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (cuo *CertificationUpdateOne) SetPackageNameID(u uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetPackageNameID(u)
-	return cuo
+func (_u *CertificationUpdateOne) SetPackageNameID(v uuid.UUID) *CertificationUpdateOne {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *CertificationUpdateOne {
-	if u != nil {
-		cuo.SetPackageNameID(*u)
+func (_u *CertificationUpdateOne) SetNillablePackageNameID(v *uuid.UUID) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return cuo
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (cuo *CertificationUpdateOne) ClearPackageNameID() *CertificationUpdateOne {
-	cuo.mutation.ClearPackageNameID()
-	return cuo
+func (_u *CertificationUpdateOne) ClearPackageNameID() *CertificationUpdateOne {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cuo *CertificationUpdateOne) SetArtifactID(u uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetArtifactID(u)
-	return cuo
+func (_u *CertificationUpdateOne) SetArtifactID(v uuid.UUID) *CertificationUpdateOne {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableArtifactID(u *uuid.UUID) *CertificationUpdateOne {
-	if u != nil {
-		cuo.SetArtifactID(*u)
+func (_u *CertificationUpdateOne) SetNillableArtifactID(v *uuid.UUID) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return cuo
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (cuo *CertificationUpdateOne) ClearArtifactID() *CertificationUpdateOne {
-	cuo.mutation.ClearArtifactID()
-	return cuo
+func (_u *CertificationUpdateOne) ClearArtifactID() *CertificationUpdateOne {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetType sets the "type" field.
-func (cuo *CertificationUpdateOne) SetType(c certification.Type) *CertificationUpdateOne {
-	cuo.mutation.SetType(c)
-	return cuo
+func (_u *CertificationUpdateOne) SetType(v certification.Type) *CertificationUpdateOne {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableType(c *certification.Type) *CertificationUpdateOne {
-	if c != nil {
-		cuo.SetType(*c)
+func (_u *CertificationUpdateOne) SetNillableType(v *certification.Type) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (cuo *CertificationUpdateOne) SetJustification(s string) *CertificationUpdateOne {
-	cuo.mutation.SetJustification(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetJustification(v string) *CertificationUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableJustification(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetJustification(*s)
+func (_u *CertificationUpdateOne) SetNillableJustification(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetKnownSince sets the "known_since" field.
-func (cuo *CertificationUpdateOne) SetKnownSince(t time.Time) *CertificationUpdateOne {
-	cuo.mutation.SetKnownSince(t)
-	return cuo
+func (_u *CertificationUpdateOne) SetKnownSince(v time.Time) *CertificationUpdateOne {
+	_u.mutation.SetKnownSince(v)
+	return _u
 }
 
 // SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableKnownSince(t *time.Time) *CertificationUpdateOne {
-	if t != nil {
-		cuo.SetKnownSince(*t)
+func (_u *CertificationUpdateOne) SetNillableKnownSince(v *time.Time) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetKnownSince(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (cuo *CertificationUpdateOne) SetOrigin(s string) *CertificationUpdateOne {
-	cuo.mutation.SetOrigin(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetOrigin(v string) *CertificationUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableOrigin(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetOrigin(*s)
+func (_u *CertificationUpdateOne) SetNillableOrigin(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (cuo *CertificationUpdateOne) SetCollector(s string) *CertificationUpdateOne {
-	cuo.mutation.SetCollector(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetCollector(v string) *CertificationUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableCollector(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetCollector(*s)
+func (_u *CertificationUpdateOne) SetNillableCollector(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cuo *CertificationUpdateOne) SetDocumentRef(s string) *CertificationUpdateOne {
-	cuo.mutation.SetDocumentRef(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetDocumentRef(v string) *CertificationUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableDocumentRef(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetDocumentRef(*s)
+func (_u *CertificationUpdateOne) SetNillableDocumentRef(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (cuo *CertificationUpdateOne) SetSource(s *SourceName) *CertificationUpdateOne {
-	return cuo.SetSourceID(s.ID)
+func (_u *CertificationUpdateOne) SetSource(v *SourceName) *CertificationUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (cuo *CertificationUpdateOne) SetPackageVersion(p *PackageVersion) *CertificationUpdateOne {
-	return cuo.SetPackageVersionID(p.ID)
+func (_u *CertificationUpdateOne) SetPackageVersion(v *PackageVersion) *CertificationUpdateOne {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (cuo *CertificationUpdateOne) SetAllVersionsID(id uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetAllVersionsID(id)
-	return cuo
+func (_u *CertificationUpdateOne) SetAllVersionsID(id uuid.UUID) *CertificationUpdateOne {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *CertificationUpdateOne {
+func (_u *CertificationUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *CertificationUpdateOne {
 	if id != nil {
-		cuo = cuo.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return cuo
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (cuo *CertificationUpdateOne) SetAllVersions(p *PackageName) *CertificationUpdateOne {
-	return cuo.SetAllVersionsID(p.ID)
+func (_u *CertificationUpdateOne) SetAllVersions(v *PackageName) *CertificationUpdateOne {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (cuo *CertificationUpdateOne) SetArtifact(a *Artifact) *CertificationUpdateOne {
-	return cuo.SetArtifactID(a.ID)
+func (_u *CertificationUpdateOne) SetArtifact(v *Artifact) *CertificationUpdateOne {
+	return _u.SetArtifactID(v.ID)
 }
 
 // Mutation returns the CertificationMutation object of the builder.
-func (cuo *CertificationUpdateOne) Mutation() *CertificationMutation {
-	return cuo.mutation
+func (_u *CertificationUpdateOne) Mutation() *CertificationMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (cuo *CertificationUpdateOne) ClearSource() *CertificationUpdateOne {
-	cuo.mutation.ClearSource()
-	return cuo
+func (_u *CertificationUpdateOne) ClearSource() *CertificationUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (cuo *CertificationUpdateOne) ClearPackageVersion() *CertificationUpdateOne {
-	cuo.mutation.ClearPackageVersion()
-	return cuo
+func (_u *CertificationUpdateOne) ClearPackageVersion() *CertificationUpdateOne {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (cuo *CertificationUpdateOne) ClearAllVersions() *CertificationUpdateOne {
-	cuo.mutation.ClearAllVersions()
-	return cuo
+func (_u *CertificationUpdateOne) ClearAllVersions() *CertificationUpdateOne {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (cuo *CertificationUpdateOne) ClearArtifact() *CertificationUpdateOne {
-	cuo.mutation.ClearArtifact()
-	return cuo
+func (_u *CertificationUpdateOne) ClearArtifact() *CertificationUpdateOne {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // Where appends a list predicates to the CertificationUpdate builder.
-func (cuo *CertificationUpdateOne) Where(ps ...predicate.Certification) *CertificationUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (_u *CertificationUpdateOne) Where(ps ...predicate.Certification) *CertificationUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CertificationUpdateOne) Select(field string, fields ...string) *CertificationUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (_u *CertificationUpdateOne) Select(field string, fields ...string) *CertificationUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Certification entity.
-func (cuo *CertificationUpdateOne) Save(ctx context.Context) (*Certification, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (_u *CertificationUpdateOne) Save(ctx context.Context) (*Certification, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CertificationUpdateOne) SaveX(ctx context.Context) *Certification {
-	node, err := cuo.Save(ctx)
+func (_u *CertificationUpdateOne) SaveX(ctx context.Context) *Certification {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -718,21 +718,21 @@ func (cuo *CertificationUpdateOne) SaveX(ctx context.Context) *Certification {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CertificationUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (_u *CertificationUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CertificationUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (_u *CertificationUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cuo *CertificationUpdateOne) check() error {
-	if v, ok := cuo.mutation.GetType(); ok {
+func (_u *CertificationUpdateOne) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := certification.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Certification.type": %w`, err)}
 		}
@@ -740,17 +740,17 @@ func (cuo *CertificationUpdateOne) check() error {
 	return nil
 }
 
-func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certification, err error) {
-	if err := cuo.check(); err != nil {
+func (_u *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certification, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
-	id, ok := cuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Certification.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certification.FieldID)
 		for _, f := range fields {
@@ -762,32 +762,32 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cuo.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(certification.FieldType, field.TypeEnum, value)
 	}
-	if value, ok := cuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(certification.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.KnownSince(); ok {
+	if value, ok := _u.mutation.KnownSince(); ok {
 		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
 	}
-	if value, ok := cuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certification.FieldDocumentRef, field.TypeString, value)
 	}
-	if cuo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -800,7 +800,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -816,7 +816,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -829,7 +829,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -845,7 +845,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -858,7 +858,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -874,7 +874,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -887,7 +887,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -903,10 +903,10 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Certification{config: cuo.config}
+	_node = &Certification{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -914,6 +914,6 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

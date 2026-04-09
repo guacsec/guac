@@ -24,156 +24,156 @@ type HashEqualUpdate struct {
 }
 
 // Where appends a list predicates to the HashEqualUpdate builder.
-func (heu *HashEqualUpdate) Where(ps ...predicate.HashEqual) *HashEqualUpdate {
-	heu.mutation.Where(ps...)
-	return heu
+func (_u *HashEqualUpdate) Where(ps ...predicate.HashEqual) *HashEqualUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetArtID sets the "art_id" field.
-func (heu *HashEqualUpdate) SetArtID(u uuid.UUID) *HashEqualUpdate {
-	heu.mutation.SetArtID(u)
-	return heu
+func (_u *HashEqualUpdate) SetArtID(v uuid.UUID) *HashEqualUpdate {
+	_u.mutation.SetArtID(v)
+	return _u
 }
 
 // SetNillableArtID sets the "art_id" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableArtID(u *uuid.UUID) *HashEqualUpdate {
-	if u != nil {
-		heu.SetArtID(*u)
+func (_u *HashEqualUpdate) SetNillableArtID(v *uuid.UUID) *HashEqualUpdate {
+	if v != nil {
+		_u.SetArtID(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetEqualArtID sets the "equal_art_id" field.
-func (heu *HashEqualUpdate) SetEqualArtID(u uuid.UUID) *HashEqualUpdate {
-	heu.mutation.SetEqualArtID(u)
-	return heu
+func (_u *HashEqualUpdate) SetEqualArtID(v uuid.UUID) *HashEqualUpdate {
+	_u.mutation.SetEqualArtID(v)
+	return _u
 }
 
 // SetNillableEqualArtID sets the "equal_art_id" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableEqualArtID(u *uuid.UUID) *HashEqualUpdate {
-	if u != nil {
-		heu.SetEqualArtID(*u)
+func (_u *HashEqualUpdate) SetNillableEqualArtID(v *uuid.UUID) *HashEqualUpdate {
+	if v != nil {
+		_u.SetEqualArtID(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (heu *HashEqualUpdate) SetOrigin(s string) *HashEqualUpdate {
-	heu.mutation.SetOrigin(s)
-	return heu
+func (_u *HashEqualUpdate) SetOrigin(v string) *HashEqualUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableOrigin(s *string) *HashEqualUpdate {
-	if s != nil {
-		heu.SetOrigin(*s)
+func (_u *HashEqualUpdate) SetNillableOrigin(v *string) *HashEqualUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (heu *HashEqualUpdate) SetCollector(s string) *HashEqualUpdate {
-	heu.mutation.SetCollector(s)
-	return heu
+func (_u *HashEqualUpdate) SetCollector(v string) *HashEqualUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableCollector(s *string) *HashEqualUpdate {
-	if s != nil {
-		heu.SetCollector(*s)
+func (_u *HashEqualUpdate) SetNillableCollector(v *string) *HashEqualUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (heu *HashEqualUpdate) SetJustification(s string) *HashEqualUpdate {
-	heu.mutation.SetJustification(s)
-	return heu
+func (_u *HashEqualUpdate) SetJustification(v string) *HashEqualUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableJustification(s *string) *HashEqualUpdate {
-	if s != nil {
-		heu.SetJustification(*s)
+func (_u *HashEqualUpdate) SetNillableJustification(v *string) *HashEqualUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (heu *HashEqualUpdate) SetDocumentRef(s string) *HashEqualUpdate {
-	heu.mutation.SetDocumentRef(s)
-	return heu
+func (_u *HashEqualUpdate) SetDocumentRef(v string) *HashEqualUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableDocumentRef(s *string) *HashEqualUpdate {
-	if s != nil {
-		heu.SetDocumentRef(*s)
+func (_u *HashEqualUpdate) SetNillableDocumentRef(v *string) *HashEqualUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetArtifactsHash sets the "artifacts_hash" field.
-func (heu *HashEqualUpdate) SetArtifactsHash(s string) *HashEqualUpdate {
-	heu.mutation.SetArtifactsHash(s)
-	return heu
+func (_u *HashEqualUpdate) SetArtifactsHash(v string) *HashEqualUpdate {
+	_u.mutation.SetArtifactsHash(v)
+	return _u
 }
 
 // SetNillableArtifactsHash sets the "artifacts_hash" field if the given value is not nil.
-func (heu *HashEqualUpdate) SetNillableArtifactsHash(s *string) *HashEqualUpdate {
-	if s != nil {
-		heu.SetArtifactsHash(*s)
+func (_u *HashEqualUpdate) SetNillableArtifactsHash(v *string) *HashEqualUpdate {
+	if v != nil {
+		_u.SetArtifactsHash(*v)
 	}
-	return heu
+	return _u
 }
 
 // SetArtifactAID sets the "artifact_a" edge to the Artifact entity by ID.
-func (heu *HashEqualUpdate) SetArtifactAID(id uuid.UUID) *HashEqualUpdate {
-	heu.mutation.SetArtifactAID(id)
-	return heu
+func (_u *HashEqualUpdate) SetArtifactAID(id uuid.UUID) *HashEqualUpdate {
+	_u.mutation.SetArtifactAID(id)
+	return _u
 }
 
 // SetArtifactA sets the "artifact_a" edge to the Artifact entity.
-func (heu *HashEqualUpdate) SetArtifactA(a *Artifact) *HashEqualUpdate {
-	return heu.SetArtifactAID(a.ID)
+func (_u *HashEqualUpdate) SetArtifactA(v *Artifact) *HashEqualUpdate {
+	return _u.SetArtifactAID(v.ID)
 }
 
 // SetArtifactBID sets the "artifact_b" edge to the Artifact entity by ID.
-func (heu *HashEqualUpdate) SetArtifactBID(id uuid.UUID) *HashEqualUpdate {
-	heu.mutation.SetArtifactBID(id)
-	return heu
+func (_u *HashEqualUpdate) SetArtifactBID(id uuid.UUID) *HashEqualUpdate {
+	_u.mutation.SetArtifactBID(id)
+	return _u
 }
 
 // SetArtifactB sets the "artifact_b" edge to the Artifact entity.
-func (heu *HashEqualUpdate) SetArtifactB(a *Artifact) *HashEqualUpdate {
-	return heu.SetArtifactBID(a.ID)
+func (_u *HashEqualUpdate) SetArtifactB(v *Artifact) *HashEqualUpdate {
+	return _u.SetArtifactBID(v.ID)
 }
 
 // Mutation returns the HashEqualMutation object of the builder.
-func (heu *HashEqualUpdate) Mutation() *HashEqualMutation {
-	return heu.mutation
+func (_u *HashEqualUpdate) Mutation() *HashEqualMutation {
+	return _u.mutation
 }
 
 // ClearArtifactA clears the "artifact_a" edge to the Artifact entity.
-func (heu *HashEqualUpdate) ClearArtifactA() *HashEqualUpdate {
-	heu.mutation.ClearArtifactA()
-	return heu
+func (_u *HashEqualUpdate) ClearArtifactA() *HashEqualUpdate {
+	_u.mutation.ClearArtifactA()
+	return _u
 }
 
 // ClearArtifactB clears the "artifact_b" edge to the Artifact entity.
-func (heu *HashEqualUpdate) ClearArtifactB() *HashEqualUpdate {
-	heu.mutation.ClearArtifactB()
-	return heu
+func (_u *HashEqualUpdate) ClearArtifactB() *HashEqualUpdate {
+	_u.mutation.ClearArtifactB()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (heu *HashEqualUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, heu.sqlSave, heu.mutation, heu.hooks)
+func (_u *HashEqualUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (heu *HashEqualUpdate) SaveX(ctx context.Context) int {
-	affected, err := heu.Save(ctx)
+func (_u *HashEqualUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -181,57 +181,57 @@ func (heu *HashEqualUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (heu *HashEqualUpdate) Exec(ctx context.Context) error {
-	_, err := heu.Save(ctx)
+func (_u *HashEqualUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (heu *HashEqualUpdate) ExecX(ctx context.Context) {
-	if err := heu.Exec(ctx); err != nil {
+func (_u *HashEqualUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (heu *HashEqualUpdate) check() error {
-	if heu.mutation.ArtifactACleared() && len(heu.mutation.ArtifactAIDs()) > 0 {
+func (_u *HashEqualUpdate) check() error {
+	if _u.mutation.ArtifactACleared() && len(_u.mutation.ArtifactAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_a"`)
 	}
-	if heu.mutation.ArtifactBCleared() && len(heu.mutation.ArtifactBIDs()) > 0 {
+	if _u.mutation.ArtifactBCleared() && len(_u.mutation.ArtifactBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_b"`)
 	}
 	return nil
 }
 
-func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := heu.check(); err != nil {
-		return n, err
+func (_u *HashEqualUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
-	if ps := heu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := heu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(hashequal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := heu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(hashequal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := heu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := heu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(hashequal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := heu.mutation.ArtifactsHash(); ok {
+	if value, ok := _u.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 	}
-	if heu.mutation.ArtifactACleared() {
+	if _u.mutation.ArtifactACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -244,7 +244,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heu.mutation.ArtifactAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -260,7 +260,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if heu.mutation.ArtifactBCleared() {
+	if _u.mutation.ArtifactBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -273,7 +273,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heu.mutation.ArtifactBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -289,7 +289,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, heu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{hashequal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -297,8 +297,8 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	heu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // HashEqualUpdateOne is the builder for updating a single HashEqual entity.
@@ -310,163 +310,163 @@ type HashEqualUpdateOne struct {
 }
 
 // SetArtID sets the "art_id" field.
-func (heuo *HashEqualUpdateOne) SetArtID(u uuid.UUID) *HashEqualUpdateOne {
-	heuo.mutation.SetArtID(u)
-	return heuo
+func (_u *HashEqualUpdateOne) SetArtID(v uuid.UUID) *HashEqualUpdateOne {
+	_u.mutation.SetArtID(v)
+	return _u
 }
 
 // SetNillableArtID sets the "art_id" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableArtID(u *uuid.UUID) *HashEqualUpdateOne {
-	if u != nil {
-		heuo.SetArtID(*u)
+func (_u *HashEqualUpdateOne) SetNillableArtID(v *uuid.UUID) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetArtID(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetEqualArtID sets the "equal_art_id" field.
-func (heuo *HashEqualUpdateOne) SetEqualArtID(u uuid.UUID) *HashEqualUpdateOne {
-	heuo.mutation.SetEqualArtID(u)
-	return heuo
+func (_u *HashEqualUpdateOne) SetEqualArtID(v uuid.UUID) *HashEqualUpdateOne {
+	_u.mutation.SetEqualArtID(v)
+	return _u
 }
 
 // SetNillableEqualArtID sets the "equal_art_id" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableEqualArtID(u *uuid.UUID) *HashEqualUpdateOne {
-	if u != nil {
-		heuo.SetEqualArtID(*u)
+func (_u *HashEqualUpdateOne) SetNillableEqualArtID(v *uuid.UUID) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetEqualArtID(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (heuo *HashEqualUpdateOne) SetOrigin(s string) *HashEqualUpdateOne {
-	heuo.mutation.SetOrigin(s)
-	return heuo
+func (_u *HashEqualUpdateOne) SetOrigin(v string) *HashEqualUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableOrigin(s *string) *HashEqualUpdateOne {
-	if s != nil {
-		heuo.SetOrigin(*s)
+func (_u *HashEqualUpdateOne) SetNillableOrigin(v *string) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (heuo *HashEqualUpdateOne) SetCollector(s string) *HashEqualUpdateOne {
-	heuo.mutation.SetCollector(s)
-	return heuo
+func (_u *HashEqualUpdateOne) SetCollector(v string) *HashEqualUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableCollector(s *string) *HashEqualUpdateOne {
-	if s != nil {
-		heuo.SetCollector(*s)
+func (_u *HashEqualUpdateOne) SetNillableCollector(v *string) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (heuo *HashEqualUpdateOne) SetJustification(s string) *HashEqualUpdateOne {
-	heuo.mutation.SetJustification(s)
-	return heuo
+func (_u *HashEqualUpdateOne) SetJustification(v string) *HashEqualUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableJustification(s *string) *HashEqualUpdateOne {
-	if s != nil {
-		heuo.SetJustification(*s)
+func (_u *HashEqualUpdateOne) SetNillableJustification(v *string) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (heuo *HashEqualUpdateOne) SetDocumentRef(s string) *HashEqualUpdateOne {
-	heuo.mutation.SetDocumentRef(s)
-	return heuo
+func (_u *HashEqualUpdateOne) SetDocumentRef(v string) *HashEqualUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableDocumentRef(s *string) *HashEqualUpdateOne {
-	if s != nil {
-		heuo.SetDocumentRef(*s)
+func (_u *HashEqualUpdateOne) SetNillableDocumentRef(v *string) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetArtifactsHash sets the "artifacts_hash" field.
-func (heuo *HashEqualUpdateOne) SetArtifactsHash(s string) *HashEqualUpdateOne {
-	heuo.mutation.SetArtifactsHash(s)
-	return heuo
+func (_u *HashEqualUpdateOne) SetArtifactsHash(v string) *HashEqualUpdateOne {
+	_u.mutation.SetArtifactsHash(v)
+	return _u
 }
 
 // SetNillableArtifactsHash sets the "artifacts_hash" field if the given value is not nil.
-func (heuo *HashEqualUpdateOne) SetNillableArtifactsHash(s *string) *HashEqualUpdateOne {
-	if s != nil {
-		heuo.SetArtifactsHash(*s)
+func (_u *HashEqualUpdateOne) SetNillableArtifactsHash(v *string) *HashEqualUpdateOne {
+	if v != nil {
+		_u.SetArtifactsHash(*v)
 	}
-	return heuo
+	return _u
 }
 
 // SetArtifactAID sets the "artifact_a" edge to the Artifact entity by ID.
-func (heuo *HashEqualUpdateOne) SetArtifactAID(id uuid.UUID) *HashEqualUpdateOne {
-	heuo.mutation.SetArtifactAID(id)
-	return heuo
+func (_u *HashEqualUpdateOne) SetArtifactAID(id uuid.UUID) *HashEqualUpdateOne {
+	_u.mutation.SetArtifactAID(id)
+	return _u
 }
 
 // SetArtifactA sets the "artifact_a" edge to the Artifact entity.
-func (heuo *HashEqualUpdateOne) SetArtifactA(a *Artifact) *HashEqualUpdateOne {
-	return heuo.SetArtifactAID(a.ID)
+func (_u *HashEqualUpdateOne) SetArtifactA(v *Artifact) *HashEqualUpdateOne {
+	return _u.SetArtifactAID(v.ID)
 }
 
 // SetArtifactBID sets the "artifact_b" edge to the Artifact entity by ID.
-func (heuo *HashEqualUpdateOne) SetArtifactBID(id uuid.UUID) *HashEqualUpdateOne {
-	heuo.mutation.SetArtifactBID(id)
-	return heuo
+func (_u *HashEqualUpdateOne) SetArtifactBID(id uuid.UUID) *HashEqualUpdateOne {
+	_u.mutation.SetArtifactBID(id)
+	return _u
 }
 
 // SetArtifactB sets the "artifact_b" edge to the Artifact entity.
-func (heuo *HashEqualUpdateOne) SetArtifactB(a *Artifact) *HashEqualUpdateOne {
-	return heuo.SetArtifactBID(a.ID)
+func (_u *HashEqualUpdateOne) SetArtifactB(v *Artifact) *HashEqualUpdateOne {
+	return _u.SetArtifactBID(v.ID)
 }
 
 // Mutation returns the HashEqualMutation object of the builder.
-func (heuo *HashEqualUpdateOne) Mutation() *HashEqualMutation {
-	return heuo.mutation
+func (_u *HashEqualUpdateOne) Mutation() *HashEqualMutation {
+	return _u.mutation
 }
 
 // ClearArtifactA clears the "artifact_a" edge to the Artifact entity.
-func (heuo *HashEqualUpdateOne) ClearArtifactA() *HashEqualUpdateOne {
-	heuo.mutation.ClearArtifactA()
-	return heuo
+func (_u *HashEqualUpdateOne) ClearArtifactA() *HashEqualUpdateOne {
+	_u.mutation.ClearArtifactA()
+	return _u
 }
 
 // ClearArtifactB clears the "artifact_b" edge to the Artifact entity.
-func (heuo *HashEqualUpdateOne) ClearArtifactB() *HashEqualUpdateOne {
-	heuo.mutation.ClearArtifactB()
-	return heuo
+func (_u *HashEqualUpdateOne) ClearArtifactB() *HashEqualUpdateOne {
+	_u.mutation.ClearArtifactB()
+	return _u
 }
 
 // Where appends a list predicates to the HashEqualUpdate builder.
-func (heuo *HashEqualUpdateOne) Where(ps ...predicate.HashEqual) *HashEqualUpdateOne {
-	heuo.mutation.Where(ps...)
-	return heuo
+func (_u *HashEqualUpdateOne) Where(ps ...predicate.HashEqual) *HashEqualUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (heuo *HashEqualUpdateOne) Select(field string, fields ...string) *HashEqualUpdateOne {
-	heuo.fields = append([]string{field}, fields...)
-	return heuo
+func (_u *HashEqualUpdateOne) Select(field string, fields ...string) *HashEqualUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated HashEqual entity.
-func (heuo *HashEqualUpdateOne) Save(ctx context.Context) (*HashEqual, error) {
-	return withHooks(ctx, heuo.sqlSave, heuo.mutation, heuo.hooks)
+func (_u *HashEqualUpdateOne) Save(ctx context.Context) (*HashEqual, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (heuo *HashEqualUpdateOne) SaveX(ctx context.Context) *HashEqual {
-	node, err := heuo.Save(ctx)
+func (_u *HashEqualUpdateOne) SaveX(ctx context.Context) *HashEqual {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -474,40 +474,40 @@ func (heuo *HashEqualUpdateOne) SaveX(ctx context.Context) *HashEqual {
 }
 
 // Exec executes the query on the entity.
-func (heuo *HashEqualUpdateOne) Exec(ctx context.Context) error {
-	_, err := heuo.Save(ctx)
+func (_u *HashEqualUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (heuo *HashEqualUpdateOne) ExecX(ctx context.Context) {
-	if err := heuo.Exec(ctx); err != nil {
+func (_u *HashEqualUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (heuo *HashEqualUpdateOne) check() error {
-	if heuo.mutation.ArtifactACleared() && len(heuo.mutation.ArtifactAIDs()) > 0 {
+func (_u *HashEqualUpdateOne) check() error {
+	if _u.mutation.ArtifactACleared() && len(_u.mutation.ArtifactAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_a"`)
 	}
-	if heuo.mutation.ArtifactBCleared() && len(heuo.mutation.ArtifactBIDs()) > 0 {
+	if _u.mutation.ArtifactBCleared() && len(_u.mutation.ArtifactBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_b"`)
 	}
 	return nil
 }
 
-func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, err error) {
-	if err := heuo.check(); err != nil {
+func (_u *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
-	id, ok := heuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "HashEqual.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := heuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, hashequal.FieldID)
 		for _, f := range fields {
@@ -519,29 +519,29 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 			}
 		}
 	}
-	if ps := heuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := heuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(hashequal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := heuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(hashequal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := heuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := heuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(hashequal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := heuo.mutation.ArtifactsHash(); ok {
+	if value, ok := _u.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 	}
-	if heuo.mutation.ArtifactACleared() {
+	if _u.mutation.ArtifactACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -554,7 +554,7 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heuo.mutation.ArtifactAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -570,7 +570,7 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if heuo.mutation.ArtifactBCleared() {
+	if _u.mutation.ArtifactBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -583,7 +583,7 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heuo.mutation.ArtifactBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -599,10 +599,10 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &HashEqual{config: heuo.config}
+	_node = &HashEqual{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, heuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{hashequal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -610,6 +610,6 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		}
 		return nil, err
 	}
-	heuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -20,56 +20,56 @@ type PackageNameDelete struct {
 }
 
 // Where appends a list predicates to the PackageNameDelete builder.
-func (pnd *PackageNameDelete) Where(ps ...predicate.PackageName) *PackageNameDelete {
-	pnd.mutation.Where(ps...)
-	return pnd
+func (_d *PackageNameDelete) Where(ps ...predicate.PackageName) *PackageNameDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pnd *PackageNameDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pnd.sqlExec, pnd.mutation, pnd.hooks)
+func (_d *PackageNameDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pnd *PackageNameDelete) ExecX(ctx context.Context) int {
-	n, err := pnd.Exec(ctx)
+func (_d *PackageNameDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pnd *PackageNameDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *PackageNameDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(packagename.Table, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID))
-	if ps := pnd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pnd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pnd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // PackageNameDeleteOne is the builder for deleting a single PackageName entity.
 type PackageNameDeleteOne struct {
-	pnd *PackageNameDelete
+	_d *PackageNameDelete
 }
 
 // Where appends a list predicates to the PackageNameDelete builder.
-func (pndo *PackageNameDeleteOne) Where(ps ...predicate.PackageName) *PackageNameDeleteOne {
-	pndo.pnd.mutation.Where(ps...)
-	return pndo
+func (_d *PackageNameDeleteOne) Where(ps ...predicate.PackageName) *PackageNameDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (pndo *PackageNameDeleteOne) Exec(ctx context.Context) error {
-	n, err := pndo.pnd.Exec(ctx)
+func (_d *PackageNameDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (pndo *PackageNameDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pndo *PackageNameDeleteOne) ExecX(ctx context.Context) {
-	if err := pndo.Exec(ctx); err != nil {
+func (_d *PackageNameDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

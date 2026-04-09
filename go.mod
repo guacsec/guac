@@ -271,7 +271,7 @@ require (
 
 require (
 	deps.dev/api/v3 v3.0.0-20250917073939-6ff3dd7d2eea
-	entgo.io/contrib v0.6.0
+	entgo.io/contrib v0.7.0
 	entgo.io/ent v0.14.6
 	github.com/99designs/gqlgen v0.17.79
 	github.com/CycloneDX/cyclonedx-go v0.10.0

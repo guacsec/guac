@@ -35,44 +35,44 @@ type CertifyVulnQuery struct {
 }
 
 // Where adds a new predicate for the CertifyVulnQuery builder.
-func (cvq *CertifyVulnQuery) Where(ps ...predicate.CertifyVuln) *CertifyVulnQuery {
-	cvq.predicates = append(cvq.predicates, ps...)
-	return cvq
+func (_q *CertifyVulnQuery) Where(ps ...predicate.CertifyVuln) *CertifyVulnQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (cvq *CertifyVulnQuery) Limit(limit int) *CertifyVulnQuery {
-	cvq.ctx.Limit = &limit
-	return cvq
+func (_q *CertifyVulnQuery) Limit(limit int) *CertifyVulnQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (cvq *CertifyVulnQuery) Offset(offset int) *CertifyVulnQuery {
-	cvq.ctx.Offset = &offset
-	return cvq
+func (_q *CertifyVulnQuery) Offset(offset int) *CertifyVulnQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cvq *CertifyVulnQuery) Unique(unique bool) *CertifyVulnQuery {
-	cvq.ctx.Unique = &unique
-	return cvq
+func (_q *CertifyVulnQuery) Unique(unique bool) *CertifyVulnQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (cvq *CertifyVulnQuery) Order(o ...certifyvuln.OrderOption) *CertifyVulnQuery {
-	cvq.order = append(cvq.order, o...)
-	return cvq
+func (_q *CertifyVulnQuery) Order(o ...certifyvuln.OrderOption) *CertifyVulnQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryVulnerability chains the current query on the "vulnerability" edge.
-func (cvq *CertifyVulnQuery) QueryVulnerability() *VulnerabilityIDQuery {
-	query := (&VulnerabilityIDClient{config: cvq.config}).Query()
+func (_q *CertifyVulnQuery) QueryVulnerability() *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cvq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cvq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -81,20 +81,20 @@ func (cvq *CertifyVulnQuery) QueryVulnerability() *VulnerabilityIDQuery {
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.VulnerabilityTable, certifyvuln.VulnerabilityColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryPackage chains the current query on the "package" edge.
-func (cvq *CertifyVulnQuery) QueryPackage() *PackageVersionQuery {
-	query := (&PackageVersionClient{config: cvq.config}).Query()
+func (_q *CertifyVulnQuery) QueryPackage() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cvq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cvq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func (cvq *CertifyVulnQuery) QueryPackage() *PackageVersionQuery {
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.PackageTable, certifyvuln.PackageColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -111,8 +111,8 @@ func (cvq *CertifyVulnQuery) QueryPackage() *PackageVersionQuery {
 
 // First returns the first CertifyVuln entity from the query.
 // Returns a *NotFoundError when no CertifyVuln was found.
-func (cvq *CertifyVulnQuery) First(ctx context.Context) (*CertifyVuln, error) {
-	nodes, err := cvq.Limit(1).All(setContextOp(ctx, cvq.ctx, ent.OpQueryFirst))
+func (_q *CertifyVulnQuery) First(ctx context.Context) (*CertifyVuln, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +123,8 @@ func (cvq *CertifyVulnQuery) First(ctx context.Context) (*CertifyVuln, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) FirstX(ctx context.Context) *CertifyVuln {
-	node, err := cvq.First(ctx)
+func (_q *CertifyVulnQuery) FirstX(ctx context.Context) *CertifyVuln {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -133,9 +133,9 @@ func (cvq *CertifyVulnQuery) FirstX(ctx context.Context) *CertifyVuln {
 
 // FirstID returns the first CertifyVuln ID from the query.
 // Returns a *NotFoundError when no CertifyVuln ID was found.
-func (cvq *CertifyVulnQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *CertifyVulnQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -146,8 +146,8 @@ func (cvq *CertifyVulnQuery) FirstID(ctx context.Context) (id uuid.UUID, err err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := cvq.FirstID(ctx)
+func (_q *CertifyVulnQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -157,8 +157,8 @@ func (cvq *CertifyVulnQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single CertifyVuln entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one CertifyVuln entity is found.
 // Returns a *NotFoundError when no CertifyVuln entities are found.
-func (cvq *CertifyVulnQuery) Only(ctx context.Context) (*CertifyVuln, error) {
-	nodes, err := cvq.Limit(2).All(setContextOp(ctx, cvq.ctx, ent.OpQueryOnly))
+func (_q *CertifyVulnQuery) Only(ctx context.Context) (*CertifyVuln, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -173,8 +173,8 @@ func (cvq *CertifyVulnQuery) Only(ctx context.Context) (*CertifyVuln, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) OnlyX(ctx context.Context) *CertifyVuln {
-	node, err := cvq.Only(ctx)
+func (_q *CertifyVulnQuery) OnlyX(ctx context.Context) *CertifyVuln {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -184,9 +184,9 @@ func (cvq *CertifyVulnQuery) OnlyX(ctx context.Context) *CertifyVuln {
 // OnlyID is like Only, but returns the only CertifyVuln ID in the query.
 // Returns a *NotSingularError when more than one CertifyVuln ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cvq *CertifyVulnQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *CertifyVulnQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -201,8 +201,8 @@ func (cvq *CertifyVulnQuery) OnlyID(ctx context.Context) (id uuid.UUID, err erro
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := cvq.OnlyID(ctx)
+func (_q *CertifyVulnQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -210,18 +210,18 @@ func (cvq *CertifyVulnQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of CertifyVulns.
-func (cvq *CertifyVulnQuery) All(ctx context.Context) ([]*CertifyVuln, error) {
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryAll)
-	if err := cvq.prepareQuery(ctx); err != nil {
+func (_q *CertifyVulnQuery) All(ctx context.Context) ([]*CertifyVuln, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*CertifyVuln, *CertifyVulnQuery]()
-	return withInterceptors[[]*CertifyVuln](ctx, cvq, qr, cvq.inters)
+	return withInterceptors[[]*CertifyVuln](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) AllX(ctx context.Context) []*CertifyVuln {
-	nodes, err := cvq.All(ctx)
+func (_q *CertifyVulnQuery) AllX(ctx context.Context) []*CertifyVuln {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -229,20 +229,20 @@ func (cvq *CertifyVulnQuery) AllX(ctx context.Context) []*CertifyVuln {
 }
 
 // IDs executes the query and returns a list of CertifyVuln IDs.
-func (cvq *CertifyVulnQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if cvq.ctx.Unique == nil && cvq.path != nil {
-		cvq.Unique(true)
+func (_q *CertifyVulnQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryIDs)
-	if err = cvq.Select(certifyvuln.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(certifyvuln.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := cvq.IDs(ctx)
+func (_q *CertifyVulnQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -250,17 +250,17 @@ func (cvq *CertifyVulnQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (cvq *CertifyVulnQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryCount)
-	if err := cvq.prepareQuery(ctx); err != nil {
+func (_q *CertifyVulnQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cvq, querierCount[*CertifyVulnQuery](), cvq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*CertifyVulnQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) CountX(ctx context.Context) int {
-	count, err := cvq.Count(ctx)
+func (_q *CertifyVulnQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -268,9 +268,9 @@ func (cvq *CertifyVulnQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cvq *CertifyVulnQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cvq.ctx, ent.OpQueryExist)
-	switch _, err := cvq.FirstID(ctx); {
+func (_q *CertifyVulnQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -281,8 +281,8 @@ func (cvq *CertifyVulnQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) ExistX(ctx context.Context) bool {
-	exist, err := cvq.Exist(ctx)
+func (_q *CertifyVulnQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -291,44 +291,44 @@ func (cvq *CertifyVulnQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CertifyVulnQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cvq *CertifyVulnQuery) Clone() *CertifyVulnQuery {
-	if cvq == nil {
+func (_q *CertifyVulnQuery) Clone() *CertifyVulnQuery {
+	if _q == nil {
 		return nil
 	}
 	return &CertifyVulnQuery{
-		config:            cvq.config,
-		ctx:               cvq.ctx.Clone(),
-		order:             append([]certifyvuln.OrderOption{}, cvq.order...),
-		inters:            append([]Interceptor{}, cvq.inters...),
-		predicates:        append([]predicate.CertifyVuln{}, cvq.predicates...),
-		withVulnerability: cvq.withVulnerability.Clone(),
-		withPackage:       cvq.withPackage.Clone(),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]certifyvuln.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.CertifyVuln{}, _q.predicates...),
+		withVulnerability: _q.withVulnerability.Clone(),
+		withPackage:       _q.withPackage.Clone(),
 		// clone intermediate query.
-		sql:  cvq.sql.Clone(),
-		path: cvq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithVulnerability tells the query-builder to eager-load the nodes that are connected to
 // the "vulnerability" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVulnQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery)) *CertifyVulnQuery {
-	query := (&VulnerabilityIDClient{config: cvq.config}).Query()
+func (_q *CertifyVulnQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery)) *CertifyVulnQuery {
+	query := (&VulnerabilityIDClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cvq.withVulnerability = query
-	return cvq
+	_q.withVulnerability = query
+	return _q
 }
 
 // WithPackage tells the query-builder to eager-load the nodes that are connected to
 // the "package" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVulnQuery) WithPackage(opts ...func(*PackageVersionQuery)) *CertifyVulnQuery {
-	query := (&PackageVersionClient{config: cvq.config}).Query()
+func (_q *CertifyVulnQuery) WithPackage(opts ...func(*PackageVersionQuery)) *CertifyVulnQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cvq.withPackage = query
-	return cvq
+	_q.withPackage = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -345,10 +345,10 @@ func (cvq *CertifyVulnQuery) WithPackage(opts ...func(*PackageVersionQuery)) *Ce
 //		GroupBy(certifyvuln.FieldVulnerabilityID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (cvq *CertifyVulnQuery) GroupBy(field string, fields ...string) *CertifyVulnGroupBy {
-	cvq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CertifyVulnGroupBy{build: cvq}
-	grbuild.flds = &cvq.ctx.Fields
+func (_q *CertifyVulnQuery) GroupBy(field string, fields ...string) *CertifyVulnGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CertifyVulnGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = certifyvuln.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -366,96 +366,96 @@ func (cvq *CertifyVulnQuery) GroupBy(field string, fields ...string) *CertifyVul
 //	client.CertifyVuln.Query().
 //		Select(certifyvuln.FieldVulnerabilityID).
 //		Scan(ctx, &v)
-func (cvq *CertifyVulnQuery) Select(fields ...string) *CertifyVulnSelect {
-	cvq.ctx.Fields = append(cvq.ctx.Fields, fields...)
-	sbuild := &CertifyVulnSelect{CertifyVulnQuery: cvq}
+func (_q *CertifyVulnQuery) Select(fields ...string) *CertifyVulnSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &CertifyVulnSelect{CertifyVulnQuery: _q}
 	sbuild.label = certifyvuln.Label
-	sbuild.flds, sbuild.scan = &cvq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CertifyVulnSelect configured with the given aggregations.
-func (cvq *CertifyVulnQuery) Aggregate(fns ...AggregateFunc) *CertifyVulnSelect {
-	return cvq.Select().Aggregate(fns...)
+func (_q *CertifyVulnQuery) Aggregate(fns ...AggregateFunc) *CertifyVulnSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (cvq *CertifyVulnQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cvq.inters {
+func (_q *CertifyVulnQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cvq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range cvq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !certifyvuln.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if cvq.path != nil {
-		prev, err := cvq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cvq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CertifyVuln, error) {
+func (_q *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CertifyVuln, error) {
 	var (
 		nodes       = []*CertifyVuln{}
-		_spec       = cvq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			cvq.withVulnerability != nil,
-			cvq.withPackage != nil,
+			_q.withVulnerability != nil,
+			_q.withPackage != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CertifyVuln).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CertifyVuln{config: cvq.config}
+		node := &CertifyVuln{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(cvq.modifiers) > 0 {
-		_spec.Modifiers = cvq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cvq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := cvq.withVulnerability; query != nil {
-		if err := cvq.loadVulnerability(ctx, query, nodes, nil,
+	if query := _q.withVulnerability; query != nil {
+		if err := _q.loadVulnerability(ctx, query, nodes, nil,
 			func(n *CertifyVuln, e *VulnerabilityID) { n.Edges.Vulnerability = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := cvq.withPackage; query != nil {
-		if err := cvq.loadPackage(ctx, query, nodes, nil,
+	if query := _q.withPackage; query != nil {
+		if err := _q.loadPackage(ctx, query, nodes, nil,
 			func(n *CertifyVuln, e *PackageVersion) { n.Edges.Package = e }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range cvq.loadTotal {
-		if err := cvq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *VulnerabilityID)) error {
+func (_q *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *VulnerabilityID)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyVuln)
 	for i := range nodes {
@@ -484,7 +484,7 @@ func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *Vulne
 	}
 	return nil
 }
-func (cvq *CertifyVulnQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *PackageVersion)) error {
+func (_q *CertifyVulnQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *PackageVersion)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyVuln)
 	for i := range nodes {
@@ -514,27 +514,27 @@ func (cvq *CertifyVulnQuery) loadPackage(ctx context.Context, query *PackageVers
 	return nil
 }
 
-func (cvq *CertifyVulnQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := cvq.querySpec()
-	if len(cvq.modifiers) > 0 {
-		_spec.Modifiers = cvq.modifiers
+func (_q *CertifyVulnQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = cvq.ctx.Fields
-	if len(cvq.ctx.Fields) > 0 {
-		_spec.Unique = cvq.ctx.Unique != nil && *cvq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, cvq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (cvq *CertifyVulnQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *CertifyVulnQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(certifyvuln.Table, certifyvuln.Columns, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID))
-	_spec.From = cvq.sql
-	if unique := cvq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if cvq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := cvq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifyvuln.FieldID)
 		for i := range fields {
@@ -542,27 +542,27 @@ func (cvq *CertifyVulnQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if cvq.withVulnerability != nil {
+		if _q.withVulnerability != nil {
 			_spec.Node.AddColumnOnce(certifyvuln.FieldVulnerabilityID)
 		}
-		if cvq.withPackage != nil {
+		if _q.withPackage != nil {
 			_spec.Node.AddColumnOnce(certifyvuln.FieldPackageID)
 		}
 	}
-	if ps := cvq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := cvq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cvq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := cvq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -572,33 +572,33 @@ func (cvq *CertifyVulnQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cvq *CertifyVulnQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(cvq.driver.Dialect())
+func (_q *CertifyVulnQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(certifyvuln.Table)
-	columns := cvq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = certifyvuln.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if cvq.sql != nil {
-		selector = cvq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cvq.ctx.Unique != nil && *cvq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range cvq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range cvq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := cvq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cvq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -611,41 +611,41 @@ type CertifyVulnGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cvgb *CertifyVulnGroupBy) Aggregate(fns ...AggregateFunc) *CertifyVulnGroupBy {
-	cvgb.fns = append(cvgb.fns, fns...)
-	return cvgb
+func (_g *CertifyVulnGroupBy) Aggregate(fns ...AggregateFunc) *CertifyVulnGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cvgb *CertifyVulnGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvgb.build.ctx, ent.OpQueryGroupBy)
-	if err := cvgb.build.prepareQuery(ctx); err != nil {
+func (_g *CertifyVulnGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CertifyVulnQuery, *CertifyVulnGroupBy](ctx, cvgb.build, cvgb, cvgb.build.inters, v)
+	return scanWithInterceptors[*CertifyVulnQuery, *CertifyVulnGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (cvgb *CertifyVulnGroupBy) sqlScan(ctx context.Context, root *CertifyVulnQuery, v any) error {
+func (_g *CertifyVulnGroupBy) sqlScan(ctx context.Context, root *CertifyVulnQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(cvgb.fns))
-	for _, fn := range cvgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*cvgb.flds)+len(cvgb.fns))
-		for _, f := range *cvgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*cvgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cvgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -659,27 +659,27 @@ type CertifyVulnSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (cvs *CertifyVulnSelect) Aggregate(fns ...AggregateFunc) *CertifyVulnSelect {
-	cvs.fns = append(cvs.fns, fns...)
-	return cvs
+func (_s *CertifyVulnSelect) Aggregate(fns ...AggregateFunc) *CertifyVulnSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cvs *CertifyVulnSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cvs.ctx, ent.OpQuerySelect)
-	if err := cvs.prepareQuery(ctx); err != nil {
+func (_s *CertifyVulnSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CertifyVulnQuery, *CertifyVulnSelect](ctx, cvs.CertifyVulnQuery, cvs, cvs.inters, v)
+	return scanWithInterceptors[*CertifyVulnQuery, *CertifyVulnSelect](ctx, _s.CertifyVulnQuery, _s, _s.inters, v)
 }
 
-func (cvs *CertifyVulnSelect) sqlScan(ctx context.Context, root *CertifyVulnQuery, v any) error {
+func (_s *CertifyVulnSelect) sqlScan(ctx context.Context, root *CertifyVulnQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(cvs.fns))
-	for _, fn := range cvs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*cvs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -687,7 +687,7 @@ func (cvs *CertifyVulnSelect) sqlScan(ctx context.Context, root *CertifyVulnQuer
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cvs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

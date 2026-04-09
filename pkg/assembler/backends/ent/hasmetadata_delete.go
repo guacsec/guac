@@ -20,56 +20,56 @@ type HasMetadataDelete struct {
 }
 
 // Where appends a list predicates to the HasMetadataDelete builder.
-func (hmd *HasMetadataDelete) Where(ps ...predicate.HasMetadata) *HasMetadataDelete {
-	hmd.mutation.Where(ps...)
-	return hmd
+func (_d *HasMetadataDelete) Where(ps ...predicate.HasMetadata) *HasMetadataDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (hmd *HasMetadataDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, hmd.sqlExec, hmd.mutation, hmd.hooks)
+func (_d *HasMetadataDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hmd *HasMetadataDelete) ExecX(ctx context.Context) int {
-	n, err := hmd.Exec(ctx)
+func (_d *HasMetadataDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (hmd *HasMetadataDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *HasMetadataDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(hasmetadata.Table, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
-	if ps := hmd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, hmd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	hmd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // HasMetadataDeleteOne is the builder for deleting a single HasMetadata entity.
 type HasMetadataDeleteOne struct {
-	hmd *HasMetadataDelete
+	_d *HasMetadataDelete
 }
 
 // Where appends a list predicates to the HasMetadataDelete builder.
-func (hmdo *HasMetadataDeleteOne) Where(ps ...predicate.HasMetadata) *HasMetadataDeleteOne {
-	hmdo.hmd.mutation.Where(ps...)
-	return hmdo
+func (_d *HasMetadataDeleteOne) Where(ps ...predicate.HasMetadata) *HasMetadataDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (hmdo *HasMetadataDeleteOne) Exec(ctx context.Context) error {
-	n, err := hmdo.hmd.Exec(ctx)
+func (_d *HasMetadataDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (hmdo *HasMetadataDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hmdo *HasMetadataDeleteOne) ExecX(ctx context.Context) {
-	if err := hmdo.Exec(ctx); err != nil {
+func (_d *HasMetadataDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

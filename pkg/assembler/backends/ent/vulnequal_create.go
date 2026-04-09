@@ -25,97 +25,97 @@ type VulnEqualCreate struct {
 }
 
 // SetVulnID sets the "vuln_id" field.
-func (vec *VulnEqualCreate) SetVulnID(u uuid.UUID) *VulnEqualCreate {
-	vec.mutation.SetVulnID(u)
-	return vec
+func (_c *VulnEqualCreate) SetVulnID(v uuid.UUID) *VulnEqualCreate {
+	_c.mutation.SetVulnID(v)
+	return _c
 }
 
 // SetEqualVulnID sets the "equal_vuln_id" field.
-func (vec *VulnEqualCreate) SetEqualVulnID(u uuid.UUID) *VulnEqualCreate {
-	vec.mutation.SetEqualVulnID(u)
-	return vec
+func (_c *VulnEqualCreate) SetEqualVulnID(v uuid.UUID) *VulnEqualCreate {
+	_c.mutation.SetEqualVulnID(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (vec *VulnEqualCreate) SetJustification(s string) *VulnEqualCreate {
-	vec.mutation.SetJustification(s)
-	return vec
+func (_c *VulnEqualCreate) SetJustification(v string) *VulnEqualCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (vec *VulnEqualCreate) SetOrigin(s string) *VulnEqualCreate {
-	vec.mutation.SetOrigin(s)
-	return vec
+func (_c *VulnEqualCreate) SetOrigin(v string) *VulnEqualCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (vec *VulnEqualCreate) SetCollector(s string) *VulnEqualCreate {
-	vec.mutation.SetCollector(s)
-	return vec
+func (_c *VulnEqualCreate) SetCollector(v string) *VulnEqualCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (vec *VulnEqualCreate) SetDocumentRef(s string) *VulnEqualCreate {
-	vec.mutation.SetDocumentRef(s)
-	return vec
+func (_c *VulnEqualCreate) SetDocumentRef(v string) *VulnEqualCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
-func (vec *VulnEqualCreate) SetVulnerabilitiesHash(s string) *VulnEqualCreate {
-	vec.mutation.SetVulnerabilitiesHash(s)
-	return vec
+func (_c *VulnEqualCreate) SetVulnerabilitiesHash(v string) *VulnEqualCreate {
+	_c.mutation.SetVulnerabilitiesHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (vec *VulnEqualCreate) SetID(u uuid.UUID) *VulnEqualCreate {
-	vec.mutation.SetID(u)
-	return vec
+func (_c *VulnEqualCreate) SetID(v uuid.UUID) *VulnEqualCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (vec *VulnEqualCreate) SetNillableID(u *uuid.UUID) *VulnEqualCreate {
-	if u != nil {
-		vec.SetID(*u)
+func (_c *VulnEqualCreate) SetNillableID(v *uuid.UUID) *VulnEqualCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return vec
+	return _c
 }
 
 // SetVulnerabilityAID sets the "vulnerability_a" edge to the VulnerabilityID entity by ID.
-func (vec *VulnEqualCreate) SetVulnerabilityAID(id uuid.UUID) *VulnEqualCreate {
-	vec.mutation.SetVulnerabilityAID(id)
-	return vec
+func (_c *VulnEqualCreate) SetVulnerabilityAID(id uuid.UUID) *VulnEqualCreate {
+	_c.mutation.SetVulnerabilityAID(id)
+	return _c
 }
 
 // SetVulnerabilityA sets the "vulnerability_a" edge to the VulnerabilityID entity.
-func (vec *VulnEqualCreate) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualCreate {
-	return vec.SetVulnerabilityAID(v.ID)
+func (_c *VulnEqualCreate) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualCreate {
+	return _c.SetVulnerabilityAID(v.ID)
 }
 
 // SetVulnerabilityBID sets the "vulnerability_b" edge to the VulnerabilityID entity by ID.
-func (vec *VulnEqualCreate) SetVulnerabilityBID(id uuid.UUID) *VulnEqualCreate {
-	vec.mutation.SetVulnerabilityBID(id)
-	return vec
+func (_c *VulnEqualCreate) SetVulnerabilityBID(id uuid.UUID) *VulnEqualCreate {
+	_c.mutation.SetVulnerabilityBID(id)
+	return _c
 }
 
 // SetVulnerabilityB sets the "vulnerability_b" edge to the VulnerabilityID entity.
-func (vec *VulnEqualCreate) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualCreate {
-	return vec.SetVulnerabilityBID(v.ID)
+func (_c *VulnEqualCreate) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualCreate {
+	return _c.SetVulnerabilityBID(v.ID)
 }
 
 // Mutation returns the VulnEqualMutation object of the builder.
-func (vec *VulnEqualCreate) Mutation() *VulnEqualMutation {
-	return vec.mutation
+func (_c *VulnEqualCreate) Mutation() *VulnEqualMutation {
+	return _c.mutation
 }
 
 // Save creates the VulnEqual in the database.
-func (vec *VulnEqualCreate) Save(ctx context.Context) (*VulnEqual, error) {
-	vec.defaults()
-	return withHooks(ctx, vec.sqlSave, vec.mutation, vec.hooks)
+func (_c *VulnEqualCreate) Save(ctx context.Context) (*VulnEqual, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (vec *VulnEqualCreate) SaveX(ctx context.Context) *VulnEqual {
-	v, err := vec.Save(ctx)
+func (_c *VulnEqualCreate) SaveX(ctx context.Context) *VulnEqual {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -123,64 +123,64 @@ func (vec *VulnEqualCreate) SaveX(ctx context.Context) *VulnEqual {
 }
 
 // Exec executes the query.
-func (vec *VulnEqualCreate) Exec(ctx context.Context) error {
-	_, err := vec.Save(ctx)
+func (_c *VulnEqualCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (vec *VulnEqualCreate) ExecX(ctx context.Context) {
-	if err := vec.Exec(ctx); err != nil {
+func (_c *VulnEqualCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (vec *VulnEqualCreate) defaults() {
-	if _, ok := vec.mutation.ID(); !ok {
+func (_c *VulnEqualCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := vulnequal.DefaultID()
-		vec.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (vec *VulnEqualCreate) check() error {
-	if _, ok := vec.mutation.VulnID(); !ok {
+func (_c *VulnEqualCreate) check() error {
+	if _, ok := _c.mutation.VulnID(); !ok {
 		return &ValidationError{Name: "vuln_id", err: errors.New(`ent: missing required field "VulnEqual.vuln_id"`)}
 	}
-	if _, ok := vec.mutation.EqualVulnID(); !ok {
+	if _, ok := _c.mutation.EqualVulnID(); !ok {
 		return &ValidationError{Name: "equal_vuln_id", err: errors.New(`ent: missing required field "VulnEqual.equal_vuln_id"`)}
 	}
-	if _, ok := vec.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "VulnEqual.justification"`)}
 	}
-	if _, ok := vec.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "VulnEqual.origin"`)}
 	}
-	if _, ok := vec.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "VulnEqual.collector"`)}
 	}
-	if _, ok := vec.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "VulnEqual.document_ref"`)}
 	}
-	if _, ok := vec.mutation.VulnerabilitiesHash(); !ok {
+	if _, ok := _c.mutation.VulnerabilitiesHash(); !ok {
 		return &ValidationError{Name: "vulnerabilities_hash", err: errors.New(`ent: missing required field "VulnEqual.vulnerabilities_hash"`)}
 	}
-	if len(vec.mutation.VulnerabilityAIDs()) == 0 {
+	if len(_c.mutation.VulnerabilityAIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability_a", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_a"`)}
 	}
-	if len(vec.mutation.VulnerabilityBIDs()) == 0 {
+	if len(_c.mutation.VulnerabilityBIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability_b", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_b"`)}
 	}
 	return nil
 }
 
-func (vec *VulnEqualCreate) sqlSave(ctx context.Context) (*VulnEqual, error) {
-	if err := vec.check(); err != nil {
+func (_c *VulnEqualCreate) sqlSave(ctx context.Context) (*VulnEqual, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := vec.createSpec()
-	if err := sqlgraph.CreateNode(ctx, vec.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -193,42 +193,42 @@ func (vec *VulnEqualCreate) sqlSave(ctx context.Context) (*VulnEqual, error) {
 			return nil, err
 		}
 	}
-	vec.mutation.id = &_node.ID
-	vec.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
+func (_c *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 	var (
-		_node = &VulnEqual{config: vec.config}
+		_node = &VulnEqual{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(vulnequal.Table, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = vec.conflict
-	if id, ok := vec.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := vec.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(vulnequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := vec.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(vulnequal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := vec.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := vec.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(vulnequal.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := vec.mutation.VulnerabilitiesHash(); ok {
+	if value, ok := _c.mutation.VulnerabilitiesHash(); ok {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
 		_node.VulnerabilitiesHash = value
 	}
-	if nodes := vec.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -245,7 +245,7 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 		_node.VulnID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := vec.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -281,10 +281,10 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 //			SetVulnID(v+v).
 //		}).
 //		Exec(ctx)
-func (vec *VulnEqualCreate) OnConflict(opts ...sql.ConflictOption) *VulnEqualUpsertOne {
-	vec.conflict = opts
+func (_c *VulnEqualCreate) OnConflict(opts ...sql.ConflictOption) *VulnEqualUpsertOne {
+	_c.conflict = opts
 	return &VulnEqualUpsertOne{
-		create: vec,
+		create: _c,
 	}
 }
 
@@ -294,10 +294,10 @@ func (vec *VulnEqualCreate) OnConflict(opts ...sql.ConflictOption) *VulnEqualUps
 //	client.VulnEqual.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (vec *VulnEqualCreate) OnConflictColumns(columns ...string) *VulnEqualUpsertOne {
-	vec.conflict = append(vec.conflict, sql.ConflictColumns(columns...))
+func (_c *VulnEqualCreate) OnConflictColumns(columns ...string) *VulnEqualUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &VulnEqualUpsertOne{
-		create: vec,
+		create: _c,
 	}
 }
 
@@ -591,16 +591,16 @@ type VulnEqualCreateBulk struct {
 }
 
 // Save creates the VulnEqual entities in the database.
-func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error) {
-	if vecb.err != nil {
-		return nil, vecb.err
+func (_c *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(vecb.builders))
-	nodes := make([]*VulnEqual, len(vecb.builders))
-	mutators := make([]Mutator, len(vecb.builders))
-	for i := range vecb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*VulnEqual, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := vecb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*VulnEqualMutation)
@@ -614,12 +614,12 @@ func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error)
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, vecb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = vecb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, vecb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -639,7 +639,7 @@ func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error)
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, vecb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -647,8 +647,8 @@ func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (vecb *VulnEqualCreateBulk) SaveX(ctx context.Context) []*VulnEqual {
-	v, err := vecb.Save(ctx)
+func (_c *VulnEqualCreateBulk) SaveX(ctx context.Context) []*VulnEqual {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -656,14 +656,14 @@ func (vecb *VulnEqualCreateBulk) SaveX(ctx context.Context) []*VulnEqual {
 }
 
 // Exec executes the query.
-func (vecb *VulnEqualCreateBulk) Exec(ctx context.Context) error {
-	_, err := vecb.Save(ctx)
+func (_c *VulnEqualCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (vecb *VulnEqualCreateBulk) ExecX(ctx context.Context) {
-	if err := vecb.Exec(ctx); err != nil {
+func (_c *VulnEqualCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -683,10 +683,10 @@ func (vecb *VulnEqualCreateBulk) ExecX(ctx context.Context) {
 //			SetVulnID(v+v).
 //		}).
 //		Exec(ctx)
-func (vecb *VulnEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *VulnEqualUpsertBulk {
-	vecb.conflict = opts
+func (_c *VulnEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *VulnEqualUpsertBulk {
+	_c.conflict = opts
 	return &VulnEqualUpsertBulk{
-		create: vecb,
+		create: _c,
 	}
 }
 
@@ -696,10 +696,10 @@ func (vecb *VulnEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *VulnEqu
 //	client.VulnEqual.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (vecb *VulnEqualCreateBulk) OnConflictColumns(columns ...string) *VulnEqualUpsertBulk {
-	vecb.conflict = append(vecb.conflict, sql.ConflictColumns(columns...))
+func (_c *VulnEqualCreateBulk) OnConflictColumns(columns ...string) *VulnEqualUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &VulnEqualUpsertBulk{
-		create: vecb,
+		create: _c,
 	}
 }
 

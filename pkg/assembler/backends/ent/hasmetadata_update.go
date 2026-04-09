@@ -28,260 +28,260 @@ type HasMetadataUpdate struct {
 }
 
 // Where appends a list predicates to the HasMetadataUpdate builder.
-func (hmu *HasMetadataUpdate) Where(ps ...predicate.HasMetadata) *HasMetadataUpdate {
-	hmu.mutation.Where(ps...)
-	return hmu
+func (_u *HasMetadataUpdate) Where(ps ...predicate.HasMetadata) *HasMetadataUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (hmu *HasMetadataUpdate) SetSourceID(u uuid.UUID) *HasMetadataUpdate {
-	hmu.mutation.SetSourceID(u)
-	return hmu
+func (_u *HasMetadataUpdate) SetSourceID(v uuid.UUID) *HasMetadataUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableSourceID(u *uuid.UUID) *HasMetadataUpdate {
-	if u != nil {
-		hmu.SetSourceID(*u)
+func (_u *HasMetadataUpdate) SetNillableSourceID(v *uuid.UUID) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return hmu
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (hmu *HasMetadataUpdate) ClearSourceID() *HasMetadataUpdate {
-	hmu.mutation.ClearSourceID()
-	return hmu
+func (_u *HasMetadataUpdate) ClearSourceID() *HasMetadataUpdate {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hmu *HasMetadataUpdate) SetPackageVersionID(u uuid.UUID) *HasMetadataUpdate {
-	hmu.mutation.SetPackageVersionID(u)
-	return hmu
+func (_u *HasMetadataUpdate) SetPackageVersionID(v uuid.UUID) *HasMetadataUpdate {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillablePackageVersionID(u *uuid.UUID) *HasMetadataUpdate {
-	if u != nil {
-		hmu.SetPackageVersionID(*u)
+func (_u *HasMetadataUpdate) SetNillablePackageVersionID(v *uuid.UUID) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return hmu
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (hmu *HasMetadataUpdate) ClearPackageVersionID() *HasMetadataUpdate {
-	hmu.mutation.ClearPackageVersionID()
-	return hmu
+func (_u *HasMetadataUpdate) ClearPackageVersionID() *HasMetadataUpdate {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hmu *HasMetadataUpdate) SetPackageNameID(u uuid.UUID) *HasMetadataUpdate {
-	hmu.mutation.SetPackageNameID(u)
-	return hmu
+func (_u *HasMetadataUpdate) SetPackageNameID(v uuid.UUID) *HasMetadataUpdate {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillablePackageNameID(u *uuid.UUID) *HasMetadataUpdate {
-	if u != nil {
-		hmu.SetPackageNameID(*u)
+func (_u *HasMetadataUpdate) SetNillablePackageNameID(v *uuid.UUID) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return hmu
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (hmu *HasMetadataUpdate) ClearPackageNameID() *HasMetadataUpdate {
-	hmu.mutation.ClearPackageNameID()
-	return hmu
+func (_u *HasMetadataUpdate) ClearPackageNameID() *HasMetadataUpdate {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (hmu *HasMetadataUpdate) SetArtifactID(u uuid.UUID) *HasMetadataUpdate {
-	hmu.mutation.SetArtifactID(u)
-	return hmu
+func (_u *HasMetadataUpdate) SetArtifactID(v uuid.UUID) *HasMetadataUpdate {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableArtifactID(u *uuid.UUID) *HasMetadataUpdate {
-	if u != nil {
-		hmu.SetArtifactID(*u)
+func (_u *HasMetadataUpdate) SetNillableArtifactID(v *uuid.UUID) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return hmu
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (hmu *HasMetadataUpdate) ClearArtifactID() *HasMetadataUpdate {
-	hmu.mutation.ClearArtifactID()
-	return hmu
+func (_u *HasMetadataUpdate) ClearArtifactID() *HasMetadataUpdate {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetTimestamp sets the "timestamp" field.
-func (hmu *HasMetadataUpdate) SetTimestamp(t time.Time) *HasMetadataUpdate {
-	hmu.mutation.SetTimestamp(t)
-	return hmu
+func (_u *HasMetadataUpdate) SetTimestamp(v time.Time) *HasMetadataUpdate {
+	_u.mutation.SetTimestamp(v)
+	return _u
 }
 
 // SetNillableTimestamp sets the "timestamp" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableTimestamp(t *time.Time) *HasMetadataUpdate {
-	if t != nil {
-		hmu.SetTimestamp(*t)
+func (_u *HasMetadataUpdate) SetNillableTimestamp(v *time.Time) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetTimestamp(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetKey sets the "key" field.
-func (hmu *HasMetadataUpdate) SetKey(s string) *HasMetadataUpdate {
-	hmu.mutation.SetKey(s)
-	return hmu
+func (_u *HasMetadataUpdate) SetKey(v string) *HasMetadataUpdate {
+	_u.mutation.SetKey(v)
+	return _u
 }
 
 // SetNillableKey sets the "key" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableKey(s *string) *HasMetadataUpdate {
-	if s != nil {
-		hmu.SetKey(*s)
+func (_u *HasMetadataUpdate) SetNillableKey(v *string) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetKey(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetValue sets the "value" field.
-func (hmu *HasMetadataUpdate) SetValue(s string) *HasMetadataUpdate {
-	hmu.mutation.SetValue(s)
-	return hmu
+func (_u *HasMetadataUpdate) SetValue(v string) *HasMetadataUpdate {
+	_u.mutation.SetValue(v)
+	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableValue(s *string) *HasMetadataUpdate {
-	if s != nil {
-		hmu.SetValue(*s)
+func (_u *HasMetadataUpdate) SetNillableValue(v *string) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetValue(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (hmu *HasMetadataUpdate) SetJustification(s string) *HasMetadataUpdate {
-	hmu.mutation.SetJustification(s)
-	return hmu
+func (_u *HasMetadataUpdate) SetJustification(v string) *HasMetadataUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableJustification(s *string) *HasMetadataUpdate {
-	if s != nil {
-		hmu.SetJustification(*s)
+func (_u *HasMetadataUpdate) SetNillableJustification(v *string) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (hmu *HasMetadataUpdate) SetOrigin(s string) *HasMetadataUpdate {
-	hmu.mutation.SetOrigin(s)
-	return hmu
+func (_u *HasMetadataUpdate) SetOrigin(v string) *HasMetadataUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableOrigin(s *string) *HasMetadataUpdate {
-	if s != nil {
-		hmu.SetOrigin(*s)
+func (_u *HasMetadataUpdate) SetNillableOrigin(v *string) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (hmu *HasMetadataUpdate) SetCollector(s string) *HasMetadataUpdate {
-	hmu.mutation.SetCollector(s)
-	return hmu
+func (_u *HasMetadataUpdate) SetCollector(v string) *HasMetadataUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableCollector(s *string) *HasMetadataUpdate {
-	if s != nil {
-		hmu.SetCollector(*s)
+func (_u *HasMetadataUpdate) SetNillableCollector(v *string) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hmu *HasMetadataUpdate) SetDocumentRef(s string) *HasMetadataUpdate {
-	hmu.mutation.SetDocumentRef(s)
-	return hmu
+func (_u *HasMetadataUpdate) SetDocumentRef(v string) *HasMetadataUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableDocumentRef(s *string) *HasMetadataUpdate {
-	if s != nil {
-		hmu.SetDocumentRef(*s)
+func (_u *HasMetadataUpdate) SetNillableDocumentRef(v *string) *HasMetadataUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return hmu
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (hmu *HasMetadataUpdate) SetSource(s *SourceName) *HasMetadataUpdate {
-	return hmu.SetSourceID(s.ID)
+func (_u *HasMetadataUpdate) SetSource(v *SourceName) *HasMetadataUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (hmu *HasMetadataUpdate) SetPackageVersion(p *PackageVersion) *HasMetadataUpdate {
-	return hmu.SetPackageVersionID(p.ID)
+func (_u *HasMetadataUpdate) SetPackageVersion(v *PackageVersion) *HasMetadataUpdate {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hmu *HasMetadataUpdate) SetAllVersionsID(id uuid.UUID) *HasMetadataUpdate {
-	hmu.mutation.SetAllVersionsID(id)
-	return hmu
+func (_u *HasMetadataUpdate) SetAllVersionsID(id uuid.UUID) *HasMetadataUpdate {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataUpdate {
+func (_u *HasMetadataUpdate) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataUpdate {
 	if id != nil {
-		hmu = hmu.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return hmu
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (hmu *HasMetadataUpdate) SetAllVersions(p *PackageName) *HasMetadataUpdate {
-	return hmu.SetAllVersionsID(p.ID)
+func (_u *HasMetadataUpdate) SetAllVersions(v *PackageName) *HasMetadataUpdate {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (hmu *HasMetadataUpdate) SetArtifact(a *Artifact) *HasMetadataUpdate {
-	return hmu.SetArtifactID(a.ID)
+func (_u *HasMetadataUpdate) SetArtifact(v *Artifact) *HasMetadataUpdate {
+	return _u.SetArtifactID(v.ID)
 }
 
 // Mutation returns the HasMetadataMutation object of the builder.
-func (hmu *HasMetadataUpdate) Mutation() *HasMetadataMutation {
-	return hmu.mutation
+func (_u *HasMetadataUpdate) Mutation() *HasMetadataMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (hmu *HasMetadataUpdate) ClearSource() *HasMetadataUpdate {
-	hmu.mutation.ClearSource()
-	return hmu
+func (_u *HasMetadataUpdate) ClearSource() *HasMetadataUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (hmu *HasMetadataUpdate) ClearPackageVersion() *HasMetadataUpdate {
-	hmu.mutation.ClearPackageVersion()
-	return hmu
+func (_u *HasMetadataUpdate) ClearPackageVersion() *HasMetadataUpdate {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (hmu *HasMetadataUpdate) ClearAllVersions() *HasMetadataUpdate {
-	hmu.mutation.ClearAllVersions()
-	return hmu
+func (_u *HasMetadataUpdate) ClearAllVersions() *HasMetadataUpdate {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (hmu *HasMetadataUpdate) ClearArtifact() *HasMetadataUpdate {
-	hmu.mutation.ClearArtifact()
-	return hmu
+func (_u *HasMetadataUpdate) ClearArtifact() *HasMetadataUpdate {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (hmu *HasMetadataUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, hmu.sqlSave, hmu.mutation, hmu.hooks)
+func (_u *HasMetadataUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hmu *HasMetadataUpdate) SaveX(ctx context.Context) int {
-	affected, err := hmu.Save(ctx)
+func (_u *HasMetadataUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -289,49 +289,49 @@ func (hmu *HasMetadataUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (hmu *HasMetadataUpdate) Exec(ctx context.Context) error {
-	_, err := hmu.Save(ctx)
+func (_u *HasMetadataUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hmu *HasMetadataUpdate) ExecX(ctx context.Context) {
-	if err := hmu.Exec(ctx); err != nil {
+func (_u *HasMetadataUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *HasMetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
-	if ps := hmu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := hmu.mutation.Timestamp(); ok {
+	if value, ok := _u.mutation.Timestamp(); ok {
 		_spec.SetField(hasmetadata.FieldTimestamp, field.TypeTime, value)
 	}
-	if value, ok := hmu.mutation.Key(); ok {
+	if value, ok := _u.mutation.Key(); ok {
 		_spec.SetField(hasmetadata.FieldKey, field.TypeString, value)
 	}
-	if value, ok := hmu.mutation.Value(); ok {
+	if value, ok := _u.mutation.Value(); ok {
 		_spec.SetField(hasmetadata.FieldValue, field.TypeString, value)
 	}
-	if value, ok := hmu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(hasmetadata.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := hmu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(hasmetadata.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := hmu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(hasmetadata.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := hmu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(hasmetadata.FieldDocumentRef, field.TypeString, value)
 	}
-	if hmu.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -344,7 +344,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmu.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -360,7 +360,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hmu.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -373,7 +373,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmu.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -389,7 +389,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hmu.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -402,7 +402,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmu.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -418,7 +418,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hmu.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -431,7 +431,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmu.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -447,7 +447,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, hmu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{hasmetadata.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -455,8 +455,8 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	hmu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // HasMetadataUpdateOne is the builder for updating a single HasMetadata entity.
@@ -468,267 +468,267 @@ type HasMetadataUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (hmuo *HasMetadataUpdateOne) SetSourceID(u uuid.UUID) *HasMetadataUpdateOne {
-	hmuo.mutation.SetSourceID(u)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetSourceID(v uuid.UUID) *HasMetadataUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableSourceID(u *uuid.UUID) *HasMetadataUpdateOne {
-	if u != nil {
-		hmuo.SetSourceID(*u)
+func (_u *HasMetadataUpdateOne) SetNillableSourceID(v *uuid.UUID) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (hmuo *HasMetadataUpdateOne) ClearSourceID() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearSourceID()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearSourceID() *HasMetadataUpdateOne {
+	_u.mutation.ClearSourceID()
+	return _u
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hmuo *HasMetadataUpdateOne) SetPackageVersionID(u uuid.UUID) *HasMetadataUpdateOne {
-	hmuo.mutation.SetPackageVersionID(u)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetPackageVersionID(v uuid.UUID) *HasMetadataUpdateOne {
+	_u.mutation.SetPackageVersionID(v)
+	return _u
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *HasMetadataUpdateOne {
-	if u != nil {
-		hmuo.SetPackageVersionID(*u)
+func (_u *HasMetadataUpdateOne) SetNillablePackageVersionID(v *uuid.UUID) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetPackageVersionID(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // ClearPackageVersionID clears the value of the "package_version_id" field.
-func (hmuo *HasMetadataUpdateOne) ClearPackageVersionID() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearPackageVersionID()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearPackageVersionID() *HasMetadataUpdateOne {
+	_u.mutation.ClearPackageVersionID()
+	return _u
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hmuo *HasMetadataUpdateOne) SetPackageNameID(u uuid.UUID) *HasMetadataUpdateOne {
-	hmuo.mutation.SetPackageNameID(u)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetPackageNameID(v uuid.UUID) *HasMetadataUpdateOne {
+	_u.mutation.SetPackageNameID(v)
+	return _u
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *HasMetadataUpdateOne {
-	if u != nil {
-		hmuo.SetPackageNameID(*u)
+func (_u *HasMetadataUpdateOne) SetNillablePackageNameID(v *uuid.UUID) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetPackageNameID(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // ClearPackageNameID clears the value of the "package_name_id" field.
-func (hmuo *HasMetadataUpdateOne) ClearPackageNameID() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearPackageNameID()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearPackageNameID() *HasMetadataUpdateOne {
+	_u.mutation.ClearPackageNameID()
+	return _u
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (hmuo *HasMetadataUpdateOne) SetArtifactID(u uuid.UUID) *HasMetadataUpdateOne {
-	hmuo.mutation.SetArtifactID(u)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetArtifactID(v uuid.UUID) *HasMetadataUpdateOne {
+	_u.mutation.SetArtifactID(v)
+	return _u
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableArtifactID(u *uuid.UUID) *HasMetadataUpdateOne {
-	if u != nil {
-		hmuo.SetArtifactID(*u)
+func (_u *HasMetadataUpdateOne) SetNillableArtifactID(v *uuid.UUID) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetArtifactID(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // ClearArtifactID clears the value of the "artifact_id" field.
-func (hmuo *HasMetadataUpdateOne) ClearArtifactID() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearArtifactID()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearArtifactID() *HasMetadataUpdateOne {
+	_u.mutation.ClearArtifactID()
+	return _u
 }
 
 // SetTimestamp sets the "timestamp" field.
-func (hmuo *HasMetadataUpdateOne) SetTimestamp(t time.Time) *HasMetadataUpdateOne {
-	hmuo.mutation.SetTimestamp(t)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetTimestamp(v time.Time) *HasMetadataUpdateOne {
+	_u.mutation.SetTimestamp(v)
+	return _u
 }
 
 // SetNillableTimestamp sets the "timestamp" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableTimestamp(t *time.Time) *HasMetadataUpdateOne {
-	if t != nil {
-		hmuo.SetTimestamp(*t)
+func (_u *HasMetadataUpdateOne) SetNillableTimestamp(v *time.Time) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetTimestamp(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetKey sets the "key" field.
-func (hmuo *HasMetadataUpdateOne) SetKey(s string) *HasMetadataUpdateOne {
-	hmuo.mutation.SetKey(s)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetKey(v string) *HasMetadataUpdateOne {
+	_u.mutation.SetKey(v)
+	return _u
 }
 
 // SetNillableKey sets the "key" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableKey(s *string) *HasMetadataUpdateOne {
-	if s != nil {
-		hmuo.SetKey(*s)
+func (_u *HasMetadataUpdateOne) SetNillableKey(v *string) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetKey(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetValue sets the "value" field.
-func (hmuo *HasMetadataUpdateOne) SetValue(s string) *HasMetadataUpdateOne {
-	hmuo.mutation.SetValue(s)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetValue(v string) *HasMetadataUpdateOne {
+	_u.mutation.SetValue(v)
+	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableValue(s *string) *HasMetadataUpdateOne {
-	if s != nil {
-		hmuo.SetValue(*s)
+func (_u *HasMetadataUpdateOne) SetNillableValue(v *string) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetValue(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (hmuo *HasMetadataUpdateOne) SetJustification(s string) *HasMetadataUpdateOne {
-	hmuo.mutation.SetJustification(s)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetJustification(v string) *HasMetadataUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableJustification(s *string) *HasMetadataUpdateOne {
-	if s != nil {
-		hmuo.SetJustification(*s)
+func (_u *HasMetadataUpdateOne) SetNillableJustification(v *string) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (hmuo *HasMetadataUpdateOne) SetOrigin(s string) *HasMetadataUpdateOne {
-	hmuo.mutation.SetOrigin(s)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetOrigin(v string) *HasMetadataUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableOrigin(s *string) *HasMetadataUpdateOne {
-	if s != nil {
-		hmuo.SetOrigin(*s)
+func (_u *HasMetadataUpdateOne) SetNillableOrigin(v *string) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (hmuo *HasMetadataUpdateOne) SetCollector(s string) *HasMetadataUpdateOne {
-	hmuo.mutation.SetCollector(s)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetCollector(v string) *HasMetadataUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableCollector(s *string) *HasMetadataUpdateOne {
-	if s != nil {
-		hmuo.SetCollector(*s)
+func (_u *HasMetadataUpdateOne) SetNillableCollector(v *string) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hmuo *HasMetadataUpdateOne) SetDocumentRef(s string) *HasMetadataUpdateOne {
-	hmuo.mutation.SetDocumentRef(s)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetDocumentRef(v string) *HasMetadataUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableDocumentRef(s *string) *HasMetadataUpdateOne {
-	if s != nil {
-		hmuo.SetDocumentRef(*s)
+func (_u *HasMetadataUpdateOne) SetNillableDocumentRef(v *string) *HasMetadataUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return hmuo
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (hmuo *HasMetadataUpdateOne) SetSource(s *SourceName) *HasMetadataUpdateOne {
-	return hmuo.SetSourceID(s.ID)
+func (_u *HasMetadataUpdateOne) SetSource(v *SourceName) *HasMetadataUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (hmuo *HasMetadataUpdateOne) SetPackageVersion(p *PackageVersion) *HasMetadataUpdateOne {
-	return hmuo.SetPackageVersionID(p.ID)
+func (_u *HasMetadataUpdateOne) SetPackageVersion(v *PackageVersion) *HasMetadataUpdateOne {
+	return _u.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hmuo *HasMetadataUpdateOne) SetAllVersionsID(id uuid.UUID) *HasMetadataUpdateOne {
-	hmuo.mutation.SetAllVersionsID(id)
-	return hmuo
+func (_u *HasMetadataUpdateOne) SetAllVersionsID(id uuid.UUID) *HasMetadataUpdateOne {
+	_u.mutation.SetAllVersionsID(id)
+	return _u
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataUpdateOne {
+func (_u *HasMetadataUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataUpdateOne {
 	if id != nil {
-		hmuo = hmuo.SetAllVersionsID(*id)
+		_u = _u.SetAllVersionsID(*id)
 	}
-	return hmuo
+	return _u
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (hmuo *HasMetadataUpdateOne) SetAllVersions(p *PackageName) *HasMetadataUpdateOne {
-	return hmuo.SetAllVersionsID(p.ID)
+func (_u *HasMetadataUpdateOne) SetAllVersions(v *PackageName) *HasMetadataUpdateOne {
+	return _u.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (hmuo *HasMetadataUpdateOne) SetArtifact(a *Artifact) *HasMetadataUpdateOne {
-	return hmuo.SetArtifactID(a.ID)
+func (_u *HasMetadataUpdateOne) SetArtifact(v *Artifact) *HasMetadataUpdateOne {
+	return _u.SetArtifactID(v.ID)
 }
 
 // Mutation returns the HasMetadataMutation object of the builder.
-func (hmuo *HasMetadataUpdateOne) Mutation() *HasMetadataMutation {
-	return hmuo.mutation
+func (_u *HasMetadataUpdateOne) Mutation() *HasMetadataMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (hmuo *HasMetadataUpdateOne) ClearSource() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearSource()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearSource() *HasMetadataUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (hmuo *HasMetadataUpdateOne) ClearPackageVersion() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearPackageVersion()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearPackageVersion() *HasMetadataUpdateOne {
+	_u.mutation.ClearPackageVersion()
+	return _u
 }
 
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
-func (hmuo *HasMetadataUpdateOne) ClearAllVersions() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearAllVersions()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearAllVersions() *HasMetadataUpdateOne {
+	_u.mutation.ClearAllVersions()
+	return _u
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (hmuo *HasMetadataUpdateOne) ClearArtifact() *HasMetadataUpdateOne {
-	hmuo.mutation.ClearArtifact()
-	return hmuo
+func (_u *HasMetadataUpdateOne) ClearArtifact() *HasMetadataUpdateOne {
+	_u.mutation.ClearArtifact()
+	return _u
 }
 
 // Where appends a list predicates to the HasMetadataUpdate builder.
-func (hmuo *HasMetadataUpdateOne) Where(ps ...predicate.HasMetadata) *HasMetadataUpdateOne {
-	hmuo.mutation.Where(ps...)
-	return hmuo
+func (_u *HasMetadataUpdateOne) Where(ps ...predicate.HasMetadata) *HasMetadataUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (hmuo *HasMetadataUpdateOne) Select(field string, fields ...string) *HasMetadataUpdateOne {
-	hmuo.fields = append([]string{field}, fields...)
-	return hmuo
+func (_u *HasMetadataUpdateOne) Select(field string, fields ...string) *HasMetadataUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated HasMetadata entity.
-func (hmuo *HasMetadataUpdateOne) Save(ctx context.Context) (*HasMetadata, error) {
-	return withHooks(ctx, hmuo.sqlSave, hmuo.mutation, hmuo.hooks)
+func (_u *HasMetadataUpdateOne) Save(ctx context.Context) (*HasMetadata, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hmuo *HasMetadataUpdateOne) SaveX(ctx context.Context) *HasMetadata {
-	node, err := hmuo.Save(ctx)
+func (_u *HasMetadataUpdateOne) SaveX(ctx context.Context) *HasMetadata {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -736,26 +736,26 @@ func (hmuo *HasMetadataUpdateOne) SaveX(ctx context.Context) *HasMetadata {
 }
 
 // Exec executes the query on the entity.
-func (hmuo *HasMetadataUpdateOne) Exec(ctx context.Context) error {
-	_, err := hmuo.Save(ctx)
+func (_u *HasMetadataUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hmuo *HasMetadataUpdateOne) ExecX(ctx context.Context) {
-	if err := hmuo.Exec(ctx); err != nil {
+func (_u *HasMetadataUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetadata, err error) {
+func (_u *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetadata, err error) {
 	_spec := sqlgraph.NewUpdateSpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
-	id, ok := hmuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "HasMetadata.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := hmuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, hasmetadata.FieldID)
 		for _, f := range fields {
@@ -767,35 +767,35 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			}
 		}
 	}
-	if ps := hmuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := hmuo.mutation.Timestamp(); ok {
+	if value, ok := _u.mutation.Timestamp(); ok {
 		_spec.SetField(hasmetadata.FieldTimestamp, field.TypeTime, value)
 	}
-	if value, ok := hmuo.mutation.Key(); ok {
+	if value, ok := _u.mutation.Key(); ok {
 		_spec.SetField(hasmetadata.FieldKey, field.TypeString, value)
 	}
-	if value, ok := hmuo.mutation.Value(); ok {
+	if value, ok := _u.mutation.Value(); ok {
 		_spec.SetField(hasmetadata.FieldValue, field.TypeString, value)
 	}
-	if value, ok := hmuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(hasmetadata.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := hmuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(hasmetadata.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := hmuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(hasmetadata.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := hmuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(hasmetadata.FieldDocumentRef, field.TypeString, value)
 	}
-	if hmuo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -808,7 +808,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmuo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -824,7 +824,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hmuo.mutation.PackageVersionCleared() {
+	if _u.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -837,7 +837,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmuo.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -853,7 +853,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hmuo.mutation.AllVersionsCleared() {
+	if _u.mutation.AllVersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -866,7 +866,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmuo.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -882,7 +882,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if hmuo.mutation.ArtifactCleared() {
+	if _u.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -895,7 +895,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hmuo.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -911,10 +911,10 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &HasMetadata{config: hmuo.config}
+	_node = &HasMetadata{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, hmuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{hasmetadata.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -922,6 +922,6 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 		}
 		return nil, err
 	}
-	hmuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

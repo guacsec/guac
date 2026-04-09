@@ -29,126 +29,126 @@ type PackageNameCreate struct {
 }
 
 // SetType sets the "type" field.
-func (pnc *PackageNameCreate) SetType(s string) *PackageNameCreate {
-	pnc.mutation.SetType(s)
-	return pnc
+func (_c *PackageNameCreate) SetType(v string) *PackageNameCreate {
+	_c.mutation.SetType(v)
+	return _c
 }
 
 // SetNamespace sets the "namespace" field.
-func (pnc *PackageNameCreate) SetNamespace(s string) *PackageNameCreate {
-	pnc.mutation.SetNamespace(s)
-	return pnc
+func (_c *PackageNameCreate) SetNamespace(v string) *PackageNameCreate {
+	_c.mutation.SetNamespace(v)
+	return _c
 }
 
 // SetName sets the "name" field.
-func (pnc *PackageNameCreate) SetName(s string) *PackageNameCreate {
-	pnc.mutation.SetName(s)
-	return pnc
+func (_c *PackageNameCreate) SetName(v string) *PackageNameCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (pnc *PackageNameCreate) SetID(u uuid.UUID) *PackageNameCreate {
-	pnc.mutation.SetID(u)
-	return pnc
+func (_c *PackageNameCreate) SetID(v uuid.UUID) *PackageNameCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (pnc *PackageNameCreate) SetNillableID(u *uuid.UUID) *PackageNameCreate {
-	if u != nil {
-		pnc.SetID(*u)
+func (_c *PackageNameCreate) SetNillableID(v *uuid.UUID) *PackageNameCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return pnc
+	return _c
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
-func (pnc *PackageNameCreate) AddVersionIDs(ids ...uuid.UUID) *PackageNameCreate {
-	pnc.mutation.AddVersionIDs(ids...)
-	return pnc
+func (_c *PackageNameCreate) AddVersionIDs(ids ...uuid.UUID) *PackageNameCreate {
+	_c.mutation.AddVersionIDs(ids...)
+	return _c
 }
 
 // AddVersions adds the "versions" edges to the PackageVersion entity.
-func (pnc *PackageNameCreate) AddVersions(p ...*PackageVersion) *PackageNameCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *PackageNameCreate) AddVersions(v ...*PackageVersion) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnc.AddVersionIDs(ids...)
+	return _c.AddVersionIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (pnc *PackageNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameCreate {
-	pnc.mutation.AddHasSourceAtIDs(ids...)
-	return pnc
+func (_c *PackageNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameCreate {
+	_c.mutation.AddHasSourceAtIDs(ids...)
+	return _c
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (pnc *PackageNameCreate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *PackageNameCreate) AddHasSourceAt(v ...*HasSourceAt) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnc.AddHasSourceAtIDs(ids...)
+	return _c.AddHasSourceAtIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (pnc *PackageNameCreate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameCreate {
-	pnc.mutation.AddCertificationIDs(ids...)
-	return pnc
+func (_c *PackageNameCreate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameCreate {
+	_c.mutation.AddCertificationIDs(ids...)
+	return _c
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (pnc *PackageNameCreate) AddCertification(c ...*Certification) *PackageNameCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PackageNameCreate) AddCertification(v ...*Certification) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnc.AddCertificationIDs(ids...)
+	return _c.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (pnc *PackageNameCreate) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameCreate {
-	pnc.mutation.AddMetadatumIDs(ids...)
-	return pnc
+func (_c *PackageNameCreate) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameCreate {
+	_c.mutation.AddMetadatumIDs(ids...)
+	return _c
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (pnc *PackageNameCreate) AddMetadata(h ...*HasMetadata) *PackageNameCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *PackageNameCreate) AddMetadata(v ...*HasMetadata) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnc.AddMetadatumIDs(ids...)
+	return _c.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (pnc *PackageNameCreate) AddPocIDs(ids ...uuid.UUID) *PackageNameCreate {
-	pnc.mutation.AddPocIDs(ids...)
-	return pnc
+func (_c *PackageNameCreate) AddPocIDs(ids ...uuid.UUID) *PackageNameCreate {
+	_c.mutation.AddPocIDs(ids...)
+	return _c
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (pnc *PackageNameCreate) AddPoc(p ...*PointOfContact) *PackageNameCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *PackageNameCreate) AddPoc(v ...*PointOfContact) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnc.AddPocIDs(ids...)
+	return _c.AddPocIDs(ids...)
 }
 
 // Mutation returns the PackageNameMutation object of the builder.
-func (pnc *PackageNameCreate) Mutation() *PackageNameMutation {
-	return pnc.mutation
+func (_c *PackageNameCreate) Mutation() *PackageNameMutation {
+	return _c.mutation
 }
 
 // Save creates the PackageName in the database.
-func (pnc *PackageNameCreate) Save(ctx context.Context) (*PackageName, error) {
-	pnc.defaults()
-	return withHooks(ctx, pnc.sqlSave, pnc.mutation, pnc.hooks)
+func (_c *PackageNameCreate) Save(ctx context.Context) (*PackageName, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pnc *PackageNameCreate) SaveX(ctx context.Context) *PackageName {
-	v, err := pnc.Save(ctx)
+func (_c *PackageNameCreate) SaveX(ctx context.Context) *PackageName {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -156,43 +156,43 @@ func (pnc *PackageNameCreate) SaveX(ctx context.Context) *PackageName {
 }
 
 // Exec executes the query.
-func (pnc *PackageNameCreate) Exec(ctx context.Context) error {
-	_, err := pnc.Save(ctx)
+func (_c *PackageNameCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pnc *PackageNameCreate) ExecX(ctx context.Context) {
-	if err := pnc.Exec(ctx); err != nil {
+func (_c *PackageNameCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (pnc *PackageNameCreate) defaults() {
-	if _, ok := pnc.mutation.ID(); !ok {
+func (_c *PackageNameCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := packagename.DefaultID()
-		pnc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pnc *PackageNameCreate) check() error {
-	if _, ok := pnc.mutation.GetType(); !ok {
+func (_c *PackageNameCreate) check() error {
+	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "PackageName.type"`)}
 	}
-	if v, ok := pnc.mutation.GetType(); ok {
+	if v, ok := _c.mutation.GetType(); ok {
 		if err := packagename.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "PackageName.type": %w`, err)}
 		}
 	}
-	if _, ok := pnc.mutation.Namespace(); !ok {
+	if _, ok := _c.mutation.Namespace(); !ok {
 		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required field "PackageName.namespace"`)}
 	}
-	if _, ok := pnc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "PackageName.name"`)}
 	}
-	if v, ok := pnc.mutation.Name(); ok {
+	if v, ok := _c.mutation.Name(); ok {
 		if err := packagename.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PackageName.name": %w`, err)}
 		}
@@ -200,12 +200,12 @@ func (pnc *PackageNameCreate) check() error {
 	return nil
 }
 
-func (pnc *PackageNameCreate) sqlSave(ctx context.Context) (*PackageName, error) {
-	if err := pnc.check(); err != nil {
+func (_c *PackageNameCreate) sqlSave(ctx context.Context) (*PackageName, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pnc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pnc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -218,34 +218,34 @@ func (pnc *PackageNameCreate) sqlSave(ctx context.Context) (*PackageName, error)
 			return nil, err
 		}
 	}
-	pnc.mutation.id = &_node.ID
-	pnc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) {
+func (_c *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) {
 	var (
-		_node = &PackageName{config: pnc.config}
+		_node = &PackageName{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(packagename.Table, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = pnc.conflict
-	if id, ok := pnc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := pnc.mutation.GetType(); ok {
+	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(packagename.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
-	if value, ok := pnc.mutation.Namespace(); ok {
+	if value, ok := _c.mutation.Namespace(); ok {
 		_spec.SetField(packagename.FieldNamespace, field.TypeString, value)
 		_node.Namespace = value
 	}
-	if value, ok := pnc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := pnc.mutation.VersionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -261,7 +261,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pnc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -277,7 +277,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pnc.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -293,7 +293,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pnc.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -309,7 +309,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pnc.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -344,10 +344,10 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 //			SetType(v+v).
 //		}).
 //		Exec(ctx)
-func (pnc *PackageNameCreate) OnConflict(opts ...sql.ConflictOption) *PackageNameUpsertOne {
-	pnc.conflict = opts
+func (_c *PackageNameCreate) OnConflict(opts ...sql.ConflictOption) *PackageNameUpsertOne {
+	_c.conflict = opts
 	return &PackageNameUpsertOne{
-		create: pnc,
+		create: _c,
 	}
 }
 
@@ -357,10 +357,10 @@ func (pnc *PackageNameCreate) OnConflict(opts ...sql.ConflictOption) *PackageNam
 //	client.PackageName.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pnc *PackageNameCreate) OnConflictColumns(columns ...string) *PackageNameUpsertOne {
-	pnc.conflict = append(pnc.conflict, sql.ConflictColumns(columns...))
+func (_c *PackageNameCreate) OnConflictColumns(columns ...string) *PackageNameUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PackageNameUpsertOne{
-		create: pnc,
+		create: _c,
 	}
 }
 
@@ -550,16 +550,16 @@ type PackageNameCreateBulk struct {
 }
 
 // Save creates the PackageName entities in the database.
-func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, error) {
-	if pncb.err != nil {
-		return nil, pncb.err
+func (_c *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pncb.builders))
-	nodes := make([]*PackageName, len(pncb.builders))
-	mutators := make([]Mutator, len(pncb.builders))
-	for i := range pncb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*PackageName, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := pncb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PackageNameMutation)
@@ -573,12 +573,12 @@ func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, er
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pncb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = pncb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pncb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -598,7 +598,7 @@ func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, er
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pncb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -606,8 +606,8 @@ func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, er
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pncb *PackageNameCreateBulk) SaveX(ctx context.Context) []*PackageName {
-	v, err := pncb.Save(ctx)
+func (_c *PackageNameCreateBulk) SaveX(ctx context.Context) []*PackageName {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -615,14 +615,14 @@ func (pncb *PackageNameCreateBulk) SaveX(ctx context.Context) []*PackageName {
 }
 
 // Exec executes the query.
-func (pncb *PackageNameCreateBulk) Exec(ctx context.Context) error {
-	_, err := pncb.Save(ctx)
+func (_c *PackageNameCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pncb *PackageNameCreateBulk) ExecX(ctx context.Context) {
-	if err := pncb.Exec(ctx); err != nil {
+func (_c *PackageNameCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -642,10 +642,10 @@ func (pncb *PackageNameCreateBulk) ExecX(ctx context.Context) {
 //			SetType(v+v).
 //		}).
 //		Exec(ctx)
-func (pncb *PackageNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageNameUpsertBulk {
-	pncb.conflict = opts
+func (_c *PackageNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageNameUpsertBulk {
+	_c.conflict = opts
 	return &PackageNameUpsertBulk{
-		create: pncb,
+		create: _c,
 	}
 }
 
@@ -655,10 +655,10 @@ func (pncb *PackageNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *Packa
 //	client.PackageName.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pncb *PackageNameCreateBulk) OnConflictColumns(columns ...string) *PackageNameUpsertBulk {
-	pncb.conflict = append(pncb.conflict, sql.ConflictColumns(columns...))
+func (_c *PackageNameCreateBulk) OnConflictColumns(columns ...string) *PackageNameUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PackageNameUpsertBulk{
-		create: pncb,
+		create: _c,
 	}
 }
 

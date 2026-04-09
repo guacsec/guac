@@ -85,7 +85,7 @@ func (*License) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the License fields.
-func (l *License) assignValues(columns []string, values []any) error {
+func (_m *License) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -95,40 +95,40 @@ func (l *License) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				l.ID = *value
+				_m.ID = *value
 			}
 		case license.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				l.Name = value.String
+				_m.Name = value.String
 			}
 		case license.FieldInline:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field inline", values[i])
 			} else if value.Valid {
-				l.Inline = value.String
+				_m.Inline = value.String
 			}
 		case license.FieldListVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field list_version", values[i])
 			} else if value.Valid {
-				l.ListVersion = value.String
+				_m.ListVersion = value.String
 			}
 		case license.FieldInlineHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field inline_hash", values[i])
 			} else if value.Valid {
-				l.InlineHash = value.String
+				_m.InlineHash = value.String
 			}
 		case license.FieldListVersionHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field list_version_hash", values[i])
 			} else if value.Valid {
-				l.ListVersionHash = value.String
+				_m.ListVersionHash = value.String
 			}
 		default:
-			l.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -136,106 +136,106 @@ func (l *License) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the License.
 // This includes values selected through modifiers, order, etc.
-func (l *License) Value(name string) (ent.Value, error) {
-	return l.selectValues.Get(name)
+func (_m *License) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryDeclaredInCertifyLegals queries the "declared_in_certify_legals" edge of the License entity.
-func (l *License) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
-	return NewLicenseClient(l.config).QueryDeclaredInCertifyLegals(l)
+func (_m *License) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
+	return NewLicenseClient(_m.config).QueryDeclaredInCertifyLegals(_m)
 }
 
 // QueryDiscoveredInCertifyLegals queries the "discovered_in_certify_legals" edge of the License entity.
-func (l *License) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
-	return NewLicenseClient(l.config).QueryDiscoveredInCertifyLegals(l)
+func (_m *License) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
+	return NewLicenseClient(_m.config).QueryDiscoveredInCertifyLegals(_m)
 }
 
 // Update returns a builder for updating this License.
 // Note that you need to call License.Unwrap() before calling this method if this License
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (l *License) Update() *LicenseUpdateOne {
-	return NewLicenseClient(l.config).UpdateOne(l)
+func (_m *License) Update() *LicenseUpdateOne {
+	return NewLicenseClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the License entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (l *License) Unwrap() *License {
-	_tx, ok := l.config.driver.(*txDriver)
+func (_m *License) Unwrap() *License {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: License is not a transactional entity")
 	}
-	l.config.driver = _tx.drv
-	return l
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (l *License) String() string {
+func (_m *License) String() string {
 	var builder strings.Builder
 	builder.WriteString("License(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(l.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("inline=")
-	builder.WriteString(l.Inline)
+	builder.WriteString(_m.Inline)
 	builder.WriteString(", ")
 	builder.WriteString("list_version=")
-	builder.WriteString(l.ListVersion)
+	builder.WriteString(_m.ListVersion)
 	builder.WriteString(", ")
 	builder.WriteString("inline_hash=")
-	builder.WriteString(l.InlineHash)
+	builder.WriteString(_m.InlineHash)
 	builder.WriteString(", ")
 	builder.WriteString("list_version_hash=")
-	builder.WriteString(l.ListVersionHash)
+	builder.WriteString(_m.ListVersionHash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedDeclaredInCertifyLegals returns the DeclaredInCertifyLegals named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (l *License) NamedDeclaredInCertifyLegals(name string) ([]*CertifyLegal, error) {
-	if l.Edges.namedDeclaredInCertifyLegals == nil {
+func (_m *License) NamedDeclaredInCertifyLegals(name string) ([]*CertifyLegal, error) {
+	if _m.Edges.namedDeclaredInCertifyLegals == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := l.Edges.namedDeclaredInCertifyLegals[name]
+	nodes, ok := _m.Edges.namedDeclaredInCertifyLegals[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (l *License) appendNamedDeclaredInCertifyLegals(name string, edges ...*CertifyLegal) {
-	if l.Edges.namedDeclaredInCertifyLegals == nil {
-		l.Edges.namedDeclaredInCertifyLegals = make(map[string][]*CertifyLegal)
+func (_m *License) appendNamedDeclaredInCertifyLegals(name string, edges ...*CertifyLegal) {
+	if _m.Edges.namedDeclaredInCertifyLegals == nil {
+		_m.Edges.namedDeclaredInCertifyLegals = make(map[string][]*CertifyLegal)
 	}
 	if len(edges) == 0 {
-		l.Edges.namedDeclaredInCertifyLegals[name] = []*CertifyLegal{}
+		_m.Edges.namedDeclaredInCertifyLegals[name] = []*CertifyLegal{}
 	} else {
-		l.Edges.namedDeclaredInCertifyLegals[name] = append(l.Edges.namedDeclaredInCertifyLegals[name], edges...)
+		_m.Edges.namedDeclaredInCertifyLegals[name] = append(_m.Edges.namedDeclaredInCertifyLegals[name], edges...)
 	}
 }
 
 // NamedDiscoveredInCertifyLegals returns the DiscoveredInCertifyLegals named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (l *License) NamedDiscoveredInCertifyLegals(name string) ([]*CertifyLegal, error) {
-	if l.Edges.namedDiscoveredInCertifyLegals == nil {
+func (_m *License) NamedDiscoveredInCertifyLegals(name string) ([]*CertifyLegal, error) {
+	if _m.Edges.namedDiscoveredInCertifyLegals == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := l.Edges.namedDiscoveredInCertifyLegals[name]
+	nodes, ok := _m.Edges.namedDiscoveredInCertifyLegals[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (l *License) appendNamedDiscoveredInCertifyLegals(name string, edges ...*CertifyLegal) {
-	if l.Edges.namedDiscoveredInCertifyLegals == nil {
-		l.Edges.namedDiscoveredInCertifyLegals = make(map[string][]*CertifyLegal)
+func (_m *License) appendNamedDiscoveredInCertifyLegals(name string, edges ...*CertifyLegal) {
+	if _m.Edges.namedDiscoveredInCertifyLegals == nil {
+		_m.Edges.namedDiscoveredInCertifyLegals = make(map[string][]*CertifyLegal)
 	}
 	if len(edges) == 0 {
-		l.Edges.namedDiscoveredInCertifyLegals[name] = []*CertifyLegal{}
+		_m.Edges.namedDiscoveredInCertifyLegals[name] = []*CertifyLegal{}
 	} else {
-		l.Edges.namedDiscoveredInCertifyLegals[name] = append(l.Edges.namedDiscoveredInCertifyLegals[name], edges...)
+		_m.Edges.namedDiscoveredInCertifyLegals[name] = append(_m.Edges.namedDiscoveredInCertifyLegals[name], edges...)
 	}
 }
 

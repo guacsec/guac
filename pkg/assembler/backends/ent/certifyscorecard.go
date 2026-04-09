@@ -93,7 +93,7 @@ func (*CertifyScorecard) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CertifyScorecard fields.
-func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
+func (_m *CertifyScorecard) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -103,19 +103,19 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				cs.ID = *value
+				_m.ID = *value
 			}
 		case certifyscorecard.FieldSourceID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value != nil {
-				cs.SourceID = *value
+				_m.SourceID = *value
 			}
 		case certifyscorecard.FieldChecks:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field checks", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &cs.Checks); err != nil {
+				if err := json.Unmarshal(*value, &_m.Checks); err != nil {
 					return fmt.Errorf("unmarshal field checks: %w", err)
 				}
 			}
@@ -123,52 +123,52 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field aggregate_score", values[i])
 			} else if value.Valid {
-				cs.AggregateScore = value.Float64
+				_m.AggregateScore = value.Float64
 			}
 		case certifyscorecard.FieldTimeScanned:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field time_scanned", values[i])
 			} else if value.Valid {
-				cs.TimeScanned = value.Time
+				_m.TimeScanned = value.Time
 			}
 		case certifyscorecard.FieldScorecardVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scorecard_version", values[i])
 			} else if value.Valid {
-				cs.ScorecardVersion = value.String
+				_m.ScorecardVersion = value.String
 			}
 		case certifyscorecard.FieldScorecardCommit:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scorecard_commit", values[i])
 			} else if value.Valid {
-				cs.ScorecardCommit = value.String
+				_m.ScorecardCommit = value.String
 			}
 		case certifyscorecard.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				cs.Origin = value.String
+				_m.Origin = value.String
 			}
 		case certifyscorecard.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				cs.Collector = value.String
+				_m.Collector = value.String
 			}
 		case certifyscorecard.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				cs.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case certifyscorecard.FieldChecksHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field checks_hash", values[i])
 			} else if value.Valid {
-				cs.ChecksHash = value.String
+				_m.ChecksHash = value.String
 			}
 		default:
-			cs.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -176,67 +176,67 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CertifyScorecard.
 // This includes values selected through modifiers, order, etc.
-func (cs *CertifyScorecard) Value(name string) (ent.Value, error) {
-	return cs.selectValues.Get(name)
+func (_m *CertifyScorecard) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySource queries the "source" edge of the CertifyScorecard entity.
-func (cs *CertifyScorecard) QuerySource() *SourceNameQuery {
-	return NewCertifyScorecardClient(cs.config).QuerySource(cs)
+func (_m *CertifyScorecard) QuerySource() *SourceNameQuery {
+	return NewCertifyScorecardClient(_m.config).QuerySource(_m)
 }
 
 // Update returns a builder for updating this CertifyScorecard.
 // Note that you need to call CertifyScorecard.Unwrap() before calling this method if this CertifyScorecard
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (cs *CertifyScorecard) Update() *CertifyScorecardUpdateOne {
-	return NewCertifyScorecardClient(cs.config).UpdateOne(cs)
+func (_m *CertifyScorecard) Update() *CertifyScorecardUpdateOne {
+	return NewCertifyScorecardClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the CertifyScorecard entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (cs *CertifyScorecard) Unwrap() *CertifyScorecard {
-	_tx, ok := cs.config.driver.(*txDriver)
+func (_m *CertifyScorecard) Unwrap() *CertifyScorecard {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: CertifyScorecard is not a transactional entity")
 	}
-	cs.config.driver = _tx.drv
-	return cs
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (cs *CertifyScorecard) String() string {
+func (_m *CertifyScorecard) String() string {
 	var builder strings.Builder
 	builder.WriteString("CertifyScorecard(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", cs.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("source_id=")
-	builder.WriteString(fmt.Sprintf("%v", cs.SourceID))
+	builder.WriteString(fmt.Sprintf("%v", _m.SourceID))
 	builder.WriteString(", ")
 	builder.WriteString("checks=")
-	builder.WriteString(fmt.Sprintf("%v", cs.Checks))
+	builder.WriteString(fmt.Sprintf("%v", _m.Checks))
 	builder.WriteString(", ")
 	builder.WriteString("aggregate_score=")
-	builder.WriteString(fmt.Sprintf("%v", cs.AggregateScore))
+	builder.WriteString(fmt.Sprintf("%v", _m.AggregateScore))
 	builder.WriteString(", ")
 	builder.WriteString("time_scanned=")
-	builder.WriteString(cs.TimeScanned.Format(time.ANSIC))
+	builder.WriteString(_m.TimeScanned.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("scorecard_version=")
-	builder.WriteString(cs.ScorecardVersion)
+	builder.WriteString(_m.ScorecardVersion)
 	builder.WriteString(", ")
 	builder.WriteString("scorecard_commit=")
-	builder.WriteString(cs.ScorecardCommit)
+	builder.WriteString(_m.ScorecardCommit)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(cs.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(cs.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(cs.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("checks_hash=")
-	builder.WriteString(cs.ChecksHash)
+	builder.WriteString(_m.ChecksHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

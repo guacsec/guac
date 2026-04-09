@@ -27,103 +27,103 @@ type CertifyVulnCreate struct {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvc *CertifyVulnCreate) SetVulnerabilityID(u uuid.UUID) *CertifyVulnCreate {
-	cvc.mutation.SetVulnerabilityID(u)
-	return cvc
+func (_c *CertifyVulnCreate) SetVulnerabilityID(v uuid.UUID) *CertifyVulnCreate {
+	_c.mutation.SetVulnerabilityID(v)
+	return _c
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvc *CertifyVulnCreate) SetPackageID(u uuid.UUID) *CertifyVulnCreate {
-	cvc.mutation.SetPackageID(u)
-	return cvc
+func (_c *CertifyVulnCreate) SetPackageID(v uuid.UUID) *CertifyVulnCreate {
+	_c.mutation.SetPackageID(v)
+	return _c
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (cvc *CertifyVulnCreate) SetTimeScanned(t time.Time) *CertifyVulnCreate {
-	cvc.mutation.SetTimeScanned(t)
-	return cvc
+func (_c *CertifyVulnCreate) SetTimeScanned(v time.Time) *CertifyVulnCreate {
+	_c.mutation.SetTimeScanned(v)
+	return _c
 }
 
 // SetDbURI sets the "db_uri" field.
-func (cvc *CertifyVulnCreate) SetDbURI(s string) *CertifyVulnCreate {
-	cvc.mutation.SetDbURI(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetDbURI(v string) *CertifyVulnCreate {
+	_c.mutation.SetDbURI(v)
+	return _c
 }
 
 // SetDbVersion sets the "db_version" field.
-func (cvc *CertifyVulnCreate) SetDbVersion(s string) *CertifyVulnCreate {
-	cvc.mutation.SetDbVersion(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetDbVersion(v string) *CertifyVulnCreate {
+	_c.mutation.SetDbVersion(v)
+	return _c
 }
 
 // SetScannerURI sets the "scanner_uri" field.
-func (cvc *CertifyVulnCreate) SetScannerURI(s string) *CertifyVulnCreate {
-	cvc.mutation.SetScannerURI(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetScannerURI(v string) *CertifyVulnCreate {
+	_c.mutation.SetScannerURI(v)
+	return _c
 }
 
 // SetScannerVersion sets the "scanner_version" field.
-func (cvc *CertifyVulnCreate) SetScannerVersion(s string) *CertifyVulnCreate {
-	cvc.mutation.SetScannerVersion(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetScannerVersion(v string) *CertifyVulnCreate {
+	_c.mutation.SetScannerVersion(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (cvc *CertifyVulnCreate) SetOrigin(s string) *CertifyVulnCreate {
-	cvc.mutation.SetOrigin(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetOrigin(v string) *CertifyVulnCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (cvc *CertifyVulnCreate) SetCollector(s string) *CertifyVulnCreate {
-	cvc.mutation.SetCollector(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetCollector(v string) *CertifyVulnCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (cvc *CertifyVulnCreate) SetDocumentRef(s string) *CertifyVulnCreate {
-	cvc.mutation.SetDocumentRef(s)
-	return cvc
+func (_c *CertifyVulnCreate) SetDocumentRef(v string) *CertifyVulnCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (cvc *CertifyVulnCreate) SetID(u uuid.UUID) *CertifyVulnCreate {
-	cvc.mutation.SetID(u)
-	return cvc
+func (_c *CertifyVulnCreate) SetID(v uuid.UUID) *CertifyVulnCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (cvc *CertifyVulnCreate) SetNillableID(u *uuid.UUID) *CertifyVulnCreate {
-	if u != nil {
-		cvc.SetID(*u)
+func (_c *CertifyVulnCreate) SetNillableID(v *uuid.UUID) *CertifyVulnCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return cvc
+	return _c
 }
 
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
-func (cvc *CertifyVulnCreate) SetVulnerability(v *VulnerabilityID) *CertifyVulnCreate {
-	return cvc.SetVulnerabilityID(v.ID)
+func (_c *CertifyVulnCreate) SetVulnerability(v *VulnerabilityID) *CertifyVulnCreate {
+	return _c.SetVulnerabilityID(v.ID)
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (cvc *CertifyVulnCreate) SetPackage(p *PackageVersion) *CertifyVulnCreate {
-	return cvc.SetPackageID(p.ID)
+func (_c *CertifyVulnCreate) SetPackage(v *PackageVersion) *CertifyVulnCreate {
+	return _c.SetPackageID(v.ID)
 }
 
 // Mutation returns the CertifyVulnMutation object of the builder.
-func (cvc *CertifyVulnCreate) Mutation() *CertifyVulnMutation {
-	return cvc.mutation
+func (_c *CertifyVulnCreate) Mutation() *CertifyVulnMutation {
+	return _c.mutation
 }
 
 // Save creates the CertifyVuln in the database.
-func (cvc *CertifyVulnCreate) Save(ctx context.Context) (*CertifyVuln, error) {
-	cvc.defaults()
-	return withHooks(ctx, cvc.sqlSave, cvc.mutation, cvc.hooks)
+func (_c *CertifyVulnCreate) Save(ctx context.Context) (*CertifyVuln, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cvc *CertifyVulnCreate) SaveX(ctx context.Context) *CertifyVuln {
-	v, err := cvc.Save(ctx)
+func (_c *CertifyVulnCreate) SaveX(ctx context.Context) *CertifyVuln {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -131,73 +131,73 @@ func (cvc *CertifyVulnCreate) SaveX(ctx context.Context) *CertifyVuln {
 }
 
 // Exec executes the query.
-func (cvc *CertifyVulnCreate) Exec(ctx context.Context) error {
-	_, err := cvc.Save(ctx)
+func (_c *CertifyVulnCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvc *CertifyVulnCreate) ExecX(ctx context.Context) {
-	if err := cvc.Exec(ctx); err != nil {
+func (_c *CertifyVulnCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (cvc *CertifyVulnCreate) defaults() {
-	if _, ok := cvc.mutation.ID(); !ok {
+func (_c *CertifyVulnCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := certifyvuln.DefaultID()
-		cvc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cvc *CertifyVulnCreate) check() error {
-	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
+func (_c *CertifyVulnCreate) check() error {
+	if _, ok := _c.mutation.VulnerabilityID(); !ok {
 		return &ValidationError{Name: "vulnerability_id", err: errors.New(`ent: missing required field "CertifyVuln.vulnerability_id"`)}
 	}
-	if _, ok := cvc.mutation.PackageID(); !ok {
+	if _, ok := _c.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package_id", err: errors.New(`ent: missing required field "CertifyVuln.package_id"`)}
 	}
-	if _, ok := cvc.mutation.TimeScanned(); !ok {
+	if _, ok := _c.mutation.TimeScanned(); !ok {
 		return &ValidationError{Name: "time_scanned", err: errors.New(`ent: missing required field "CertifyVuln.time_scanned"`)}
 	}
-	if _, ok := cvc.mutation.DbURI(); !ok {
+	if _, ok := _c.mutation.DbURI(); !ok {
 		return &ValidationError{Name: "db_uri", err: errors.New(`ent: missing required field "CertifyVuln.db_uri"`)}
 	}
-	if _, ok := cvc.mutation.DbVersion(); !ok {
+	if _, ok := _c.mutation.DbVersion(); !ok {
 		return &ValidationError{Name: "db_version", err: errors.New(`ent: missing required field "CertifyVuln.db_version"`)}
 	}
-	if _, ok := cvc.mutation.ScannerURI(); !ok {
+	if _, ok := _c.mutation.ScannerURI(); !ok {
 		return &ValidationError{Name: "scanner_uri", err: errors.New(`ent: missing required field "CertifyVuln.scanner_uri"`)}
 	}
-	if _, ok := cvc.mutation.ScannerVersion(); !ok {
+	if _, ok := _c.mutation.ScannerVersion(); !ok {
 		return &ValidationError{Name: "scanner_version", err: errors.New(`ent: missing required field "CertifyVuln.scanner_version"`)}
 	}
-	if _, ok := cvc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "CertifyVuln.origin"`)}
 	}
-	if _, ok := cvc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyVuln.collector"`)}
 	}
-	if _, ok := cvc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyVuln.document_ref"`)}
 	}
-	if len(cvc.mutation.VulnerabilityIDs()) == 0 {
+	if len(_c.mutation.VulnerabilityIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability", err: errors.New(`ent: missing required edge "CertifyVuln.vulnerability"`)}
 	}
-	if len(cvc.mutation.PackageIDs()) == 0 {
+	if len(_c.mutation.PackageIDs()) == 0 {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "CertifyVuln.package"`)}
 	}
 	return nil
 }
 
-func (cvc *CertifyVulnCreate) sqlSave(ctx context.Context) (*CertifyVuln, error) {
-	if err := cvc.check(); err != nil {
+func (_c *CertifyVulnCreate) sqlSave(ctx context.Context) (*CertifyVuln, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cvc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cvc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -210,54 +210,54 @@ func (cvc *CertifyVulnCreate) sqlSave(ctx context.Context) (*CertifyVuln, error)
 			return nil, err
 		}
 	}
-	cvc.mutation.id = &_node.ID
-	cvc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) {
+func (_c *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) {
 	var (
-		_node = &CertifyVuln{config: cvc.config}
+		_node = &CertifyVuln{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(certifyvuln.Table, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = cvc.conflict
-	if id, ok := cvc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := cvc.mutation.TimeScanned(); ok {
+	if value, ok := _c.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyvuln.FieldTimeScanned, field.TypeTime, value)
 		_node.TimeScanned = value
 	}
-	if value, ok := cvc.mutation.DbURI(); ok {
+	if value, ok := _c.mutation.DbURI(); ok {
 		_spec.SetField(certifyvuln.FieldDbURI, field.TypeString, value)
 		_node.DbURI = value
 	}
-	if value, ok := cvc.mutation.DbVersion(); ok {
+	if value, ok := _c.mutation.DbVersion(); ok {
 		_spec.SetField(certifyvuln.FieldDbVersion, field.TypeString, value)
 		_node.DbVersion = value
 	}
-	if value, ok := cvc.mutation.ScannerURI(); ok {
+	if value, ok := _c.mutation.ScannerURI(); ok {
 		_spec.SetField(certifyvuln.FieldScannerURI, field.TypeString, value)
 		_node.ScannerURI = value
 	}
-	if value, ok := cvc.mutation.ScannerVersion(); ok {
+	if value, ok := _c.mutation.ScannerVersion(); ok {
 		_spec.SetField(certifyvuln.FieldScannerVersion, field.TypeString, value)
 		_node.ScannerVersion = value
 	}
-	if value, ok := cvc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(certifyvuln.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := cvc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(certifyvuln.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := cvc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyvuln.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := cvc.mutation.VulnerabilityIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -274,7 +274,7 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 		_node.VulnerabilityID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cvc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -310,10 +310,10 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 //			SetVulnerabilityID(v+v).
 //		}).
 //		Exec(ctx)
-func (cvc *CertifyVulnCreate) OnConflict(opts ...sql.ConflictOption) *CertifyVulnUpsertOne {
-	cvc.conflict = opts
+func (_c *CertifyVulnCreate) OnConflict(opts ...sql.ConflictOption) *CertifyVulnUpsertOne {
+	_c.conflict = opts
 	return &CertifyVulnUpsertOne{
-		create: cvc,
+		create: _c,
 	}
 }
 
@@ -323,10 +323,10 @@ func (cvc *CertifyVulnCreate) OnConflict(opts ...sql.ConflictOption) *CertifyVul
 //	client.CertifyVuln.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cvc *CertifyVulnCreate) OnConflictColumns(columns ...string) *CertifyVulnUpsertOne {
-	cvc.conflict = append(cvc.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyVulnCreate) OnConflictColumns(columns ...string) *CertifyVulnUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyVulnUpsertOne{
-		create: cvc,
+		create: _c,
 	}
 }
 
@@ -698,16 +698,16 @@ type CertifyVulnCreateBulk struct {
 }
 
 // Save creates the CertifyVuln entities in the database.
-func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, error) {
-	if cvcb.err != nil {
-		return nil, cvcb.err
+func (_c *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(cvcb.builders))
-	nodes := make([]*CertifyVuln, len(cvcb.builders))
-	mutators := make([]Mutator, len(cvcb.builders))
-	for i := range cvcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*CertifyVuln, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := cvcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyVulnMutation)
@@ -721,12 +721,12 @@ func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, er
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, cvcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = cvcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, cvcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -746,7 +746,7 @@ func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, er
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, cvcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -754,8 +754,8 @@ func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, er
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cvcb *CertifyVulnCreateBulk) SaveX(ctx context.Context) []*CertifyVuln {
-	v, err := cvcb.Save(ctx)
+func (_c *CertifyVulnCreateBulk) SaveX(ctx context.Context) []*CertifyVuln {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -763,14 +763,14 @@ func (cvcb *CertifyVulnCreateBulk) SaveX(ctx context.Context) []*CertifyVuln {
 }
 
 // Exec executes the query.
-func (cvcb *CertifyVulnCreateBulk) Exec(ctx context.Context) error {
-	_, err := cvcb.Save(ctx)
+func (_c *CertifyVulnCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvcb *CertifyVulnCreateBulk) ExecX(ctx context.Context) {
-	if err := cvcb.Exec(ctx); err != nil {
+func (_c *CertifyVulnCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -790,10 +790,10 @@ func (cvcb *CertifyVulnCreateBulk) ExecX(ctx context.Context) {
 //			SetVulnerabilityID(v+v).
 //		}).
 //		Exec(ctx)
-func (cvcb *CertifyVulnCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyVulnUpsertBulk {
-	cvcb.conflict = opts
+func (_c *CertifyVulnCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertifyVulnUpsertBulk {
+	_c.conflict = opts
 	return &CertifyVulnUpsertBulk{
-		create: cvcb,
+		create: _c,
 	}
 }
 
@@ -803,10 +803,10 @@ func (cvcb *CertifyVulnCreateBulk) OnConflict(opts ...sql.ConflictOption) *Certi
 //	client.CertifyVuln.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cvcb *CertifyVulnCreateBulk) OnConflictColumns(columns ...string) *CertifyVulnUpsertBulk {
-	cvcb.conflict = append(cvcb.conflict, sql.ConflictColumns(columns...))
+func (_c *CertifyVulnCreateBulk) OnConflictColumns(columns ...string) *CertifyVulnUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertifyVulnUpsertBulk{
-		create: cvcb,
+		create: _c,
 	}
 }
 

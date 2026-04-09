@@ -24,156 +24,156 @@ type VulnEqualUpdate struct {
 }
 
 // Where appends a list predicates to the VulnEqualUpdate builder.
-func (veu *VulnEqualUpdate) Where(ps ...predicate.VulnEqual) *VulnEqualUpdate {
-	veu.mutation.Where(ps...)
-	return veu
+func (_u *VulnEqualUpdate) Where(ps ...predicate.VulnEqual) *VulnEqualUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetVulnID sets the "vuln_id" field.
-func (veu *VulnEqualUpdate) SetVulnID(u uuid.UUID) *VulnEqualUpdate {
-	veu.mutation.SetVulnID(u)
-	return veu
+func (_u *VulnEqualUpdate) SetVulnID(v uuid.UUID) *VulnEqualUpdate {
+	_u.mutation.SetVulnID(v)
+	return _u
 }
 
 // SetNillableVulnID sets the "vuln_id" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableVulnID(u *uuid.UUID) *VulnEqualUpdate {
-	if u != nil {
-		veu.SetVulnID(*u)
+func (_u *VulnEqualUpdate) SetNillableVulnID(v *uuid.UUID) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetVulnID(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetEqualVulnID sets the "equal_vuln_id" field.
-func (veu *VulnEqualUpdate) SetEqualVulnID(u uuid.UUID) *VulnEqualUpdate {
-	veu.mutation.SetEqualVulnID(u)
-	return veu
+func (_u *VulnEqualUpdate) SetEqualVulnID(v uuid.UUID) *VulnEqualUpdate {
+	_u.mutation.SetEqualVulnID(v)
+	return _u
 }
 
 // SetNillableEqualVulnID sets the "equal_vuln_id" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableEqualVulnID(u *uuid.UUID) *VulnEqualUpdate {
-	if u != nil {
-		veu.SetEqualVulnID(*u)
+func (_u *VulnEqualUpdate) SetNillableEqualVulnID(v *uuid.UUID) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetEqualVulnID(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (veu *VulnEqualUpdate) SetJustification(s string) *VulnEqualUpdate {
-	veu.mutation.SetJustification(s)
-	return veu
+func (_u *VulnEqualUpdate) SetJustification(v string) *VulnEqualUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableJustification(s *string) *VulnEqualUpdate {
-	if s != nil {
-		veu.SetJustification(*s)
+func (_u *VulnEqualUpdate) SetNillableJustification(v *string) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (veu *VulnEqualUpdate) SetOrigin(s string) *VulnEqualUpdate {
-	veu.mutation.SetOrigin(s)
-	return veu
+func (_u *VulnEqualUpdate) SetOrigin(v string) *VulnEqualUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableOrigin(s *string) *VulnEqualUpdate {
-	if s != nil {
-		veu.SetOrigin(*s)
+func (_u *VulnEqualUpdate) SetNillableOrigin(v *string) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (veu *VulnEqualUpdate) SetCollector(s string) *VulnEqualUpdate {
-	veu.mutation.SetCollector(s)
-	return veu
+func (_u *VulnEqualUpdate) SetCollector(v string) *VulnEqualUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableCollector(s *string) *VulnEqualUpdate {
-	if s != nil {
-		veu.SetCollector(*s)
+func (_u *VulnEqualUpdate) SetNillableCollector(v *string) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (veu *VulnEqualUpdate) SetDocumentRef(s string) *VulnEqualUpdate {
-	veu.mutation.SetDocumentRef(s)
-	return veu
+func (_u *VulnEqualUpdate) SetDocumentRef(v string) *VulnEqualUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableDocumentRef(s *string) *VulnEqualUpdate {
-	if s != nil {
-		veu.SetDocumentRef(*s)
+func (_u *VulnEqualUpdate) SetNillableDocumentRef(v *string) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
-func (veu *VulnEqualUpdate) SetVulnerabilitiesHash(s string) *VulnEqualUpdate {
-	veu.mutation.SetVulnerabilitiesHash(s)
-	return veu
+func (_u *VulnEqualUpdate) SetVulnerabilitiesHash(v string) *VulnEqualUpdate {
+	_u.mutation.SetVulnerabilitiesHash(v)
+	return _u
 }
 
 // SetNillableVulnerabilitiesHash sets the "vulnerabilities_hash" field if the given value is not nil.
-func (veu *VulnEqualUpdate) SetNillableVulnerabilitiesHash(s *string) *VulnEqualUpdate {
-	if s != nil {
-		veu.SetVulnerabilitiesHash(*s)
+func (_u *VulnEqualUpdate) SetNillableVulnerabilitiesHash(v *string) *VulnEqualUpdate {
+	if v != nil {
+		_u.SetVulnerabilitiesHash(*v)
 	}
-	return veu
+	return _u
 }
 
 // SetVulnerabilityAID sets the "vulnerability_a" edge to the VulnerabilityID entity by ID.
-func (veu *VulnEqualUpdate) SetVulnerabilityAID(id uuid.UUID) *VulnEqualUpdate {
-	veu.mutation.SetVulnerabilityAID(id)
-	return veu
+func (_u *VulnEqualUpdate) SetVulnerabilityAID(id uuid.UUID) *VulnEqualUpdate {
+	_u.mutation.SetVulnerabilityAID(id)
+	return _u
 }
 
 // SetVulnerabilityA sets the "vulnerability_a" edge to the VulnerabilityID entity.
-func (veu *VulnEqualUpdate) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualUpdate {
-	return veu.SetVulnerabilityAID(v.ID)
+func (_u *VulnEqualUpdate) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualUpdate {
+	return _u.SetVulnerabilityAID(v.ID)
 }
 
 // SetVulnerabilityBID sets the "vulnerability_b" edge to the VulnerabilityID entity by ID.
-func (veu *VulnEqualUpdate) SetVulnerabilityBID(id uuid.UUID) *VulnEqualUpdate {
-	veu.mutation.SetVulnerabilityBID(id)
-	return veu
+func (_u *VulnEqualUpdate) SetVulnerabilityBID(id uuid.UUID) *VulnEqualUpdate {
+	_u.mutation.SetVulnerabilityBID(id)
+	return _u
 }
 
 // SetVulnerabilityB sets the "vulnerability_b" edge to the VulnerabilityID entity.
-func (veu *VulnEqualUpdate) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualUpdate {
-	return veu.SetVulnerabilityBID(v.ID)
+func (_u *VulnEqualUpdate) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualUpdate {
+	return _u.SetVulnerabilityBID(v.ID)
 }
 
 // Mutation returns the VulnEqualMutation object of the builder.
-func (veu *VulnEqualUpdate) Mutation() *VulnEqualMutation {
-	return veu.mutation
+func (_u *VulnEqualUpdate) Mutation() *VulnEqualMutation {
+	return _u.mutation
 }
 
 // ClearVulnerabilityA clears the "vulnerability_a" edge to the VulnerabilityID entity.
-func (veu *VulnEqualUpdate) ClearVulnerabilityA() *VulnEqualUpdate {
-	veu.mutation.ClearVulnerabilityA()
-	return veu
+func (_u *VulnEqualUpdate) ClearVulnerabilityA() *VulnEqualUpdate {
+	_u.mutation.ClearVulnerabilityA()
+	return _u
 }
 
 // ClearVulnerabilityB clears the "vulnerability_b" edge to the VulnerabilityID entity.
-func (veu *VulnEqualUpdate) ClearVulnerabilityB() *VulnEqualUpdate {
-	veu.mutation.ClearVulnerabilityB()
-	return veu
+func (_u *VulnEqualUpdate) ClearVulnerabilityB() *VulnEqualUpdate {
+	_u.mutation.ClearVulnerabilityB()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (veu *VulnEqualUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, veu.sqlSave, veu.mutation, veu.hooks)
+func (_u *VulnEqualUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (veu *VulnEqualUpdate) SaveX(ctx context.Context) int {
-	affected, err := veu.Save(ctx)
+func (_u *VulnEqualUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -181,57 +181,57 @@ func (veu *VulnEqualUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (veu *VulnEqualUpdate) Exec(ctx context.Context) error {
-	_, err := veu.Save(ctx)
+func (_u *VulnEqualUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (veu *VulnEqualUpdate) ExecX(ctx context.Context) {
-	if err := veu.Exec(ctx); err != nil {
+func (_u *VulnEqualUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (veu *VulnEqualUpdate) check() error {
-	if veu.mutation.VulnerabilityACleared() && len(veu.mutation.VulnerabilityAIDs()) > 0 {
+func (_u *VulnEqualUpdate) check() error {
+	if _u.mutation.VulnerabilityACleared() && len(_u.mutation.VulnerabilityAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_a"`)
 	}
-	if veu.mutation.VulnerabilityBCleared() && len(veu.mutation.VulnerabilityBIDs()) > 0 {
+	if _u.mutation.VulnerabilityBCleared() && len(_u.mutation.VulnerabilityBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_b"`)
 	}
 	return nil
 }
 
-func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := veu.check(); err != nil {
-		return n, err
+func (_u *VulnEqualUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
-	if ps := veu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := veu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(vulnequal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := veu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(vulnequal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := veu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := veu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(vulnequal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := veu.mutation.VulnerabilitiesHash(); ok {
+	if value, ok := _u.mutation.VulnerabilitiesHash(); ok {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
 	}
-	if veu.mutation.VulnerabilityACleared() {
+	if _u.mutation.VulnerabilityACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -244,7 +244,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := veu.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -260,7 +260,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if veu.mutation.VulnerabilityBCleared() {
+	if _u.mutation.VulnerabilityBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -273,7 +273,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := veu.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -289,7 +289,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, veu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{vulnequal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -297,8 +297,8 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	veu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // VulnEqualUpdateOne is the builder for updating a single VulnEqual entity.
@@ -310,163 +310,163 @@ type VulnEqualUpdateOne struct {
 }
 
 // SetVulnID sets the "vuln_id" field.
-func (veuo *VulnEqualUpdateOne) SetVulnID(u uuid.UUID) *VulnEqualUpdateOne {
-	veuo.mutation.SetVulnID(u)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetVulnID(v uuid.UUID) *VulnEqualUpdateOne {
+	_u.mutation.SetVulnID(v)
+	return _u
 }
 
 // SetNillableVulnID sets the "vuln_id" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableVulnID(u *uuid.UUID) *VulnEqualUpdateOne {
-	if u != nil {
-		veuo.SetVulnID(*u)
+func (_u *VulnEqualUpdateOne) SetNillableVulnID(v *uuid.UUID) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetVulnID(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetEqualVulnID sets the "equal_vuln_id" field.
-func (veuo *VulnEqualUpdateOne) SetEqualVulnID(u uuid.UUID) *VulnEqualUpdateOne {
-	veuo.mutation.SetEqualVulnID(u)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetEqualVulnID(v uuid.UUID) *VulnEqualUpdateOne {
+	_u.mutation.SetEqualVulnID(v)
+	return _u
 }
 
 // SetNillableEqualVulnID sets the "equal_vuln_id" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableEqualVulnID(u *uuid.UUID) *VulnEqualUpdateOne {
-	if u != nil {
-		veuo.SetEqualVulnID(*u)
+func (_u *VulnEqualUpdateOne) SetNillableEqualVulnID(v *uuid.UUID) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetEqualVulnID(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (veuo *VulnEqualUpdateOne) SetJustification(s string) *VulnEqualUpdateOne {
-	veuo.mutation.SetJustification(s)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetJustification(v string) *VulnEqualUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableJustification(s *string) *VulnEqualUpdateOne {
-	if s != nil {
-		veuo.SetJustification(*s)
+func (_u *VulnEqualUpdateOne) SetNillableJustification(v *string) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (veuo *VulnEqualUpdateOne) SetOrigin(s string) *VulnEqualUpdateOne {
-	veuo.mutation.SetOrigin(s)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetOrigin(v string) *VulnEqualUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableOrigin(s *string) *VulnEqualUpdateOne {
-	if s != nil {
-		veuo.SetOrigin(*s)
+func (_u *VulnEqualUpdateOne) SetNillableOrigin(v *string) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (veuo *VulnEqualUpdateOne) SetCollector(s string) *VulnEqualUpdateOne {
-	veuo.mutation.SetCollector(s)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetCollector(v string) *VulnEqualUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableCollector(s *string) *VulnEqualUpdateOne {
-	if s != nil {
-		veuo.SetCollector(*s)
+func (_u *VulnEqualUpdateOne) SetNillableCollector(v *string) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (veuo *VulnEqualUpdateOne) SetDocumentRef(s string) *VulnEqualUpdateOne {
-	veuo.mutation.SetDocumentRef(s)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetDocumentRef(v string) *VulnEqualUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableDocumentRef(s *string) *VulnEqualUpdateOne {
-	if s != nil {
-		veuo.SetDocumentRef(*s)
+func (_u *VulnEqualUpdateOne) SetNillableDocumentRef(v *string) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
-func (veuo *VulnEqualUpdateOne) SetVulnerabilitiesHash(s string) *VulnEqualUpdateOne {
-	veuo.mutation.SetVulnerabilitiesHash(s)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetVulnerabilitiesHash(v string) *VulnEqualUpdateOne {
+	_u.mutation.SetVulnerabilitiesHash(v)
+	return _u
 }
 
 // SetNillableVulnerabilitiesHash sets the "vulnerabilities_hash" field if the given value is not nil.
-func (veuo *VulnEqualUpdateOne) SetNillableVulnerabilitiesHash(s *string) *VulnEqualUpdateOne {
-	if s != nil {
-		veuo.SetVulnerabilitiesHash(*s)
+func (_u *VulnEqualUpdateOne) SetNillableVulnerabilitiesHash(v *string) *VulnEqualUpdateOne {
+	if v != nil {
+		_u.SetVulnerabilitiesHash(*v)
 	}
-	return veuo
+	return _u
 }
 
 // SetVulnerabilityAID sets the "vulnerability_a" edge to the VulnerabilityID entity by ID.
-func (veuo *VulnEqualUpdateOne) SetVulnerabilityAID(id uuid.UUID) *VulnEqualUpdateOne {
-	veuo.mutation.SetVulnerabilityAID(id)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetVulnerabilityAID(id uuid.UUID) *VulnEqualUpdateOne {
+	_u.mutation.SetVulnerabilityAID(id)
+	return _u
 }
 
 // SetVulnerabilityA sets the "vulnerability_a" edge to the VulnerabilityID entity.
-func (veuo *VulnEqualUpdateOne) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualUpdateOne {
-	return veuo.SetVulnerabilityAID(v.ID)
+func (_u *VulnEqualUpdateOne) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualUpdateOne {
+	return _u.SetVulnerabilityAID(v.ID)
 }
 
 // SetVulnerabilityBID sets the "vulnerability_b" edge to the VulnerabilityID entity by ID.
-func (veuo *VulnEqualUpdateOne) SetVulnerabilityBID(id uuid.UUID) *VulnEqualUpdateOne {
-	veuo.mutation.SetVulnerabilityBID(id)
-	return veuo
+func (_u *VulnEqualUpdateOne) SetVulnerabilityBID(id uuid.UUID) *VulnEqualUpdateOne {
+	_u.mutation.SetVulnerabilityBID(id)
+	return _u
 }
 
 // SetVulnerabilityB sets the "vulnerability_b" edge to the VulnerabilityID entity.
-func (veuo *VulnEqualUpdateOne) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualUpdateOne {
-	return veuo.SetVulnerabilityBID(v.ID)
+func (_u *VulnEqualUpdateOne) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualUpdateOne {
+	return _u.SetVulnerabilityBID(v.ID)
 }
 
 // Mutation returns the VulnEqualMutation object of the builder.
-func (veuo *VulnEqualUpdateOne) Mutation() *VulnEqualMutation {
-	return veuo.mutation
+func (_u *VulnEqualUpdateOne) Mutation() *VulnEqualMutation {
+	return _u.mutation
 }
 
 // ClearVulnerabilityA clears the "vulnerability_a" edge to the VulnerabilityID entity.
-func (veuo *VulnEqualUpdateOne) ClearVulnerabilityA() *VulnEqualUpdateOne {
-	veuo.mutation.ClearVulnerabilityA()
-	return veuo
+func (_u *VulnEqualUpdateOne) ClearVulnerabilityA() *VulnEqualUpdateOne {
+	_u.mutation.ClearVulnerabilityA()
+	return _u
 }
 
 // ClearVulnerabilityB clears the "vulnerability_b" edge to the VulnerabilityID entity.
-func (veuo *VulnEqualUpdateOne) ClearVulnerabilityB() *VulnEqualUpdateOne {
-	veuo.mutation.ClearVulnerabilityB()
-	return veuo
+func (_u *VulnEqualUpdateOne) ClearVulnerabilityB() *VulnEqualUpdateOne {
+	_u.mutation.ClearVulnerabilityB()
+	return _u
 }
 
 // Where appends a list predicates to the VulnEqualUpdate builder.
-func (veuo *VulnEqualUpdateOne) Where(ps ...predicate.VulnEqual) *VulnEqualUpdateOne {
-	veuo.mutation.Where(ps...)
-	return veuo
+func (_u *VulnEqualUpdateOne) Where(ps ...predicate.VulnEqual) *VulnEqualUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (veuo *VulnEqualUpdateOne) Select(field string, fields ...string) *VulnEqualUpdateOne {
-	veuo.fields = append([]string{field}, fields...)
-	return veuo
+func (_u *VulnEqualUpdateOne) Select(field string, fields ...string) *VulnEqualUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated VulnEqual entity.
-func (veuo *VulnEqualUpdateOne) Save(ctx context.Context) (*VulnEqual, error) {
-	return withHooks(ctx, veuo.sqlSave, veuo.mutation, veuo.hooks)
+func (_u *VulnEqualUpdateOne) Save(ctx context.Context) (*VulnEqual, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (veuo *VulnEqualUpdateOne) SaveX(ctx context.Context) *VulnEqual {
-	node, err := veuo.Save(ctx)
+func (_u *VulnEqualUpdateOne) SaveX(ctx context.Context) *VulnEqual {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -474,40 +474,40 @@ func (veuo *VulnEqualUpdateOne) SaveX(ctx context.Context) *VulnEqual {
 }
 
 // Exec executes the query on the entity.
-func (veuo *VulnEqualUpdateOne) Exec(ctx context.Context) error {
-	_, err := veuo.Save(ctx)
+func (_u *VulnEqualUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (veuo *VulnEqualUpdateOne) ExecX(ctx context.Context) {
-	if err := veuo.Exec(ctx); err != nil {
+func (_u *VulnEqualUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (veuo *VulnEqualUpdateOne) check() error {
-	if veuo.mutation.VulnerabilityACleared() && len(veuo.mutation.VulnerabilityAIDs()) > 0 {
+func (_u *VulnEqualUpdateOne) check() error {
+	if _u.mutation.VulnerabilityACleared() && len(_u.mutation.VulnerabilityAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_a"`)
 	}
-	if veuo.mutation.VulnerabilityBCleared() && len(veuo.mutation.VulnerabilityBIDs()) > 0 {
+	if _u.mutation.VulnerabilityBCleared() && len(_u.mutation.VulnerabilityBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "VulnEqual.vulnerability_b"`)
 	}
 	return nil
 }
 
-func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, err error) {
-	if err := veuo.check(); err != nil {
+func (_u *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
-	id, ok := veuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VulnEqual.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := veuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, vulnequal.FieldID)
 		for _, f := range fields {
@@ -519,29 +519,29 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 			}
 		}
 	}
-	if ps := veuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := veuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(vulnequal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := veuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(vulnequal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := veuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := veuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(vulnequal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := veuo.mutation.VulnerabilitiesHash(); ok {
+	if value, ok := _u.mutation.VulnerabilitiesHash(); ok {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
 	}
-	if veuo.mutation.VulnerabilityACleared() {
+	if _u.mutation.VulnerabilityACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -554,7 +554,7 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := veuo.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -570,7 +570,7 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if veuo.mutation.VulnerabilityBCleared() {
+	if _u.mutation.VulnerabilityBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -583,7 +583,7 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := veuo.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -599,10 +599,10 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &VulnEqual{config: veuo.config}
+	_node = &VulnEqual{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, veuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{vulnequal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -610,6 +610,6 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 		}
 		return nil, err
 	}
-	veuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }
