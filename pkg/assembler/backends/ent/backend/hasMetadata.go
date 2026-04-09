@@ -470,7 +470,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 		Subject:       sub,
 		Key:           v.Key,
 		Value:         v.Value,
-		Timestamp:     v.Timestamp,
+		Timestamp:     v.Timestamp.UTC(),
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,

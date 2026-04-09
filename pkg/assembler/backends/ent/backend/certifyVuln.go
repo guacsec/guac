@@ -183,7 +183,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		SetOrigin(certifyVuln.Origin).
 		SetScannerURI(certifyVuln.ScannerURI).
 		SetScannerVersion(certifyVuln.ScannerVersion).
-		SetTimeScanned(certifyVuln.TimeScanned).
+		SetTimeScanned(certifyVuln.TimeScanned.UTC()).
 		SetDocumentRef(certifyVuln.DocumentRef)
 
 	return certifyVulnCreate, nil
@@ -361,7 +361,7 @@ func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 		Package:       toModelPackage(backReferencePackageVersion(record.Edges.Package)),
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		Metadata: &model.ScanMetadata{
-			TimeScanned:    record.TimeScanned,
+			TimeScanned:    record.TimeScanned.UTC(),
 			DbURI:          record.DbURI,
 			DbVersion:      record.DbVersion,
 			ScannerURI:     record.ScannerURI,

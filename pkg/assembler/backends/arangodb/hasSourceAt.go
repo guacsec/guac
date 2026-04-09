@@ -534,7 +534,7 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 				ID:            createdValue.HasSourceAtID,
 				Package:       pkg,
 				Source:        src,
-				KnownSince:    createdValue.KnownSince,
+				KnownSince:    createdValue.KnownSince.UTC(),
 				Justification: createdValue.Justification,
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,

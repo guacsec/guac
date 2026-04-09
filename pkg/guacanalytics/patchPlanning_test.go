@@ -18,6 +18,7 @@ package guacanalytics
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"testing"
@@ -1220,7 +1221,7 @@ func GetPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 }
 
 func Test_SearchSubgraphFromVuln(t *testing.T) {
-	server, err := startTestServer()
+	server, addr, err := startTestServer()
 
 	if err != nil {
 		t.Errorf("error starting server: %s \n", err)
@@ -1230,7 +1231,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
 	httpClient := http.Client{}
-	gqlClient := graphql.NewClient("http://localhost:9090/query", &httpClient)
+	gqlClient := graphql.NewClient(fmt.Sprintf("http://%s/query", addr), &httpClient)
 
 	testCases := []struct {
 		name              string
@@ -1665,23 +1666,30 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	cf()
 }
 
-func startTestServer() (*http.Server, error) {
+func startTestServer() (*http.Server, string, error) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
 	srv, err := getGraphqlTestServer()
 	if err != nil {
-		return nil, fmt.Errorf("unable to initialize graphql server: %s", err)
+		return nil, "", fmt.Errorf("unable to initialize graphql server: %s", err)
 	}
-	http.Handle("/query", srv)
 
-	server := &http.Server{Addr: fmt.Sprintf(":%d", 9090)}
+	mux := http.NewServeMux()
+	mux.Handle("/query", srv)
+
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return nil, "", fmt.Errorf("unable to listen: %s", err)
+	}
+
+	server := &http.Server{Handler: mux}
 	logger.Info("starting server")
 
 	go func() {
-		logger.Infof("server finished: %s", server.ListenAndServe())
+		logger.Infof("server finished: %s", server.Serve(listener))
 	}()
-	return server, nil
+	return server, listener.Addr().String(), nil
 }
 
 func getGraphqlTestServer() (*handler.Server, error) {

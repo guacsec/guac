@@ -17,6 +17,8 @@ package neptune
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,9 +26,9 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	v4 "github.com/aws/aws-sdk-go/aws/signer/v4"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/spf13/cobra"
@@ -99,7 +101,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	}
 	neptuneRequestURL := fmt.Sprintf("https://%s:%d/opencypher",
 		config.Endpoint, config.Port)
-	neptuneToken, err := generateNeptuneToken(neptuneRequestURL,
+	neptuneToken, err := generateNeptuneToken(ctx, neptuneRequestURL,
 		config.Region)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create password for neptune: %w", err)
@@ -117,18 +119,22 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 }
 
 // generateNeptuneToken generates a token for neptune using the AWS SDK.
-func generateNeptuneToken(neptuneURL string, region string) (string, error) {
+func generateNeptuneToken(ctx context.Context, neptuneURL string, region string) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, neptuneURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("error creating http request for neptune: %w", err)
 	}
 
-	signer, err := getAWSRequestSigner()
+	signer, creds, err := getAWSRequestSigner(ctx)
 	if err != nil {
 		return "", fmt.Errorf("error creating AWS request signer: %w", err)
 	}
 
-	if _, err := signer.Sign(req, nil, neptuneServiceName, region, time.Now()); err != nil {
+	// SHA-256 hash of empty body (required by v4.SignHTTP)
+	emptyHash := sha256.Sum256([]byte{})
+	payloadHash := hex.EncodeToString(emptyHash[:])
+
+	if err := signer.SignHTTP(ctx, creds, req, payloadHash, neptuneServiceName, region, time.Now()); err != nil {
 		return "", fmt.Errorf("error signing neptune request: %w", err)
 	}
 
@@ -151,20 +157,29 @@ func generateNeptuneToken(neptuneURL string, region string) (string, error) {
 // This method returns the AWS signer to be used for signing the request to be
 // sent to Neptune Cluster.  It checks for the presence of AWS_ACCESS_KEY_ID,
 // AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN in the environment.  If not
-// found, it creates a new session and gets the credentials from the session.
-func getAWSRequestSigner() (*v4.Signer, error) {
+// found, it loads the default AWS config and gets the credentials from the config.
+func getAWSRequestSigner(ctx context.Context) (*v4.Signer, aws.Credentials, error) {
 	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
 
 	if accessKeyID != "" && secretAccessKey != "" && sessionToken != "" {
-		return v4.NewSigner(credentials.NewEnvCredentials()), nil
+		return v4.NewSigner(), aws.Credentials{
+			AccessKeyID:     accessKeyID,
+			SecretAccessKey: secretAccessKey,
+			SessionToken:    sessionToken,
+		}, nil
 	}
 
-	sess, err := session.NewSession()
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
-		return nil, err
+		return nil, aws.Credentials{}, err
 	}
 
-	return v4.NewSigner(sess.Config.Credentials), nil
+	creds, err := cfg.Credentials.Retrieve(ctx)
+	if err != nil {
+		return nil, aws.Credentials{}, err
+	}
+
+	return v4.NewSigner(), creds, nil
 }

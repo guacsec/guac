@@ -352,7 +352,7 @@ func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStateme
 		ID:               certifyVEXGlobalID(record.ID.String()),
 		Subject:          toPackageOrArtifact(record.Edges.Package, record.Edges.Artifact),
 		Vulnerability:    toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
-		KnownSince:       record.KnownSince,
+		KnownSince:       record.KnownSince.UTC(),
 		Status:           model.VexStatus(record.Status),
 		Statement:        record.Statement,
 		StatusNotes:      record.StatusNotes,

@@ -768,7 +768,7 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor, inge
 			ID:            createdValue.PointOfContactID,
 			Email:         createdValue.Email,
 			Info:          createdValue.Info,
-			Since:         createdValue.Since,
+			Since:         createdValue.Since.UTC(),
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Origin,
 			Collector:     createdValue.Collector,

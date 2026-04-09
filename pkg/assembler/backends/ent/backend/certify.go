@@ -652,7 +652,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 		Collector:     v.Collector,
 		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
-		KnownSince:    v.KnownSince,
+		KnownSince:    v.KnownSince.UTC(),
 	}
 }
 
@@ -680,7 +680,7 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 		Collector:     v.Collector,
 		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
-		KnownSince:    v.KnownSince,
+		KnownSince:    v.KnownSince.UTC(),
 	}
 }
 
