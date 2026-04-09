@@ -27,7 +27,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	sc "github.com/ossf/scorecard/v4/pkg"
+	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary

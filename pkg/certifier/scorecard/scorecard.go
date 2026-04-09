@@ -24,8 +24,9 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/events"
-	"github.com/ossf/scorecard/v4/docs/checks"
-	"github.com/ossf/scorecard/v4/log"
+	"github.com/ossf/scorecard/v5/docs/checks"
+	"github.com/ossf/scorecard/v5/log"
+	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -74,7 +75,7 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		return fmt.Errorf("error getting scorecard docs: %w", err)
 	}
 
-	if err = score.AsJSON2(true, log.DefaultLevel, docs, &scorecardResults); err != nil {
+	if err = score.AsJSON2(&scorecardResults, docs, &sc.AsJSON2ResultOption{Details: true, LogLevel: log.DefaultLevel}); err != nil {
 		return fmt.Errorf("error getting scorecard results: %w", err)
 	}
 

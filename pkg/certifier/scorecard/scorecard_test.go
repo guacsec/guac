@@ -26,14 +26,14 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/ossf/scorecard/v4/pkg"
+	scpkg "github.com/ossf/scorecard/v5/pkg/scorecard"
 	"go.uber.org/mock/gomock"
 )
 
 type mockScorecard struct{}
 
-func (m mockScorecard) GetScore(repoName, commitSHA, tag string) (*pkg.ScorecardResult, error) {
-	return &pkg.ScorecardResult{}, nil
+func (m mockScorecard) GetScore(repoName, commitSHA, tag string) (*scpkg.Result, error) {
+	return &scpkg.Result{}, nil
 }
 
 func TestNewScorecard(t *testing.T) {
@@ -185,7 +185,7 @@ func Test_CertifyComponent(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			sc := mocks.NewMockScorecard(ctrl)
 			sc.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
-				DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
+				DoAndReturn(func(a, b, c string) (*scpkg.Result, error) {
 					if test.getScoreShouldReturnErr {
 						return nil, fmt.Errorf("error")
 					}
@@ -210,8 +210,8 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	scMock := mocks.NewMockScorecard(ctrl)
 	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
-			return &pkg.ScorecardResult{}, nil
+		DoAndReturn(func(a, b, c string) (*scpkg.Result, error) {
+			return &scpkg.Result{}, nil
 		}).AnyTimes()
 
 	// Create a mock source.SourceNode to use as input
