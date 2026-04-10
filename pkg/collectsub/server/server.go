@@ -34,7 +34,10 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/reflection"
 )
 
 type server struct {
@@ -157,6 +160,15 @@ func (s *server) Serve(ctx context.Context) error {
 
 	pb.RegisterCollectSubscriberServiceServer(gs, s)
 
+	// Enable gRPC health checking
+	healthServer := health.NewServer()
+	healthpb.RegisterHealthServer(gs, healthServer)
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("guacsec.guac.collect_subscriber.schema.CollectSubscriberService", healthpb.HealthCheckResponse_SERVING)
+
+	// Enable gRPC reflection for tools like grpcurl
+	reflection.Register(gs)
+
 	var wg sync.WaitGroup
 	var retErr error
 	wg.Add(1)
@@ -168,6 +180,7 @@ func (s *server) Serve(ctx context.Context) error {
 		}
 	}()
 	<-ctx.Done()
+	healthServer.Shutdown()
 	logger.Infof("context cancelled, gracefully shutting down csub grpc server")
 	done := make(chan bool, 1)
 	go func() {
