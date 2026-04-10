@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {

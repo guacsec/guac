@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/storage v1.61.3
 	github.com/fsouza/fake-gcs-server v1.54.0
 	github.com/in-toto/in-toto-golang v0.10.0
-	github.com/neo4j/neo4j-go-driver/v4 v4.4.8
 	github.com/secure-systems-lab/go-securesystemslib v0.10.0
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
@@ -103,7 +102,6 @@ require (
 	github.com/bombsimon/logrusr/v2 v2.0.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.8.0 // indirect
 	github.com/caarlos0/env/v6 v6.10.1 // indirect
-	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
@@ -314,6 +312,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.11.15
 	github.com/nats-io/nats.go v1.49.0
+	github.com/neo4j/neo4j-go-driver/v5 v5.28.4
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/opencontainers/go-digest v1.0.0

@@ -23,7 +23,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 func (c *neo4jClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {

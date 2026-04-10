@@ -22,7 +22,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
