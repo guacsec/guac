@@ -181,7 +181,7 @@ func createAttestation(purl string, vulns []osv_models.Vulnerability, currentTim
 	attestation := &attestation_vuln.VulnerabilityStatement{
 		Statement: attestationv1.Statement{
 			Type:          attestationv1.StatementTypeUri,
-			PredicateType: attestation_vuln.PredicateVuln,
+			PredicateType: attestation_vuln.PredicateVulnV2,
 			Subject: []*attestationv1.ResourceDescriptor{
 				{
 					Uri: purl,
