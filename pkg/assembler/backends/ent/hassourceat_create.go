@@ -28,126 +28,126 @@ type HasSourceAtCreate struct {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hsac *HasSourceAtCreate) SetPackageVersionID(u uuid.UUID) *HasSourceAtCreate {
-	hsac.mutation.SetPackageVersionID(u)
-	return hsac
+func (_c *HasSourceAtCreate) SetPackageVersionID(v uuid.UUID) *HasSourceAtCreate {
+	_c.mutation.SetPackageVersionID(v)
+	return _c
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillablePackageVersionID(u *uuid.UUID) *HasSourceAtCreate {
-	if u != nil {
-		hsac.SetPackageVersionID(*u)
+func (_c *HasSourceAtCreate) SetNillablePackageVersionID(v *uuid.UUID) *HasSourceAtCreate {
+	if v != nil {
+		_c.SetPackageVersionID(*v)
 	}
-	return hsac
+	return _c
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hsac *HasSourceAtCreate) SetPackageNameID(u uuid.UUID) *HasSourceAtCreate {
-	hsac.mutation.SetPackageNameID(u)
-	return hsac
+func (_c *HasSourceAtCreate) SetPackageNameID(v uuid.UUID) *HasSourceAtCreate {
+	_c.mutation.SetPackageNameID(v)
+	return _c
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillablePackageNameID(u *uuid.UUID) *HasSourceAtCreate {
-	if u != nil {
-		hsac.SetPackageNameID(*u)
+func (_c *HasSourceAtCreate) SetNillablePackageNameID(v *uuid.UUID) *HasSourceAtCreate {
+	if v != nil {
+		_c.SetPackageNameID(*v)
 	}
-	return hsac
+	return _c
 }
 
 // SetSourceID sets the "source_id" field.
-func (hsac *HasSourceAtCreate) SetSourceID(u uuid.UUID) *HasSourceAtCreate {
-	hsac.mutation.SetSourceID(u)
-	return hsac
+func (_c *HasSourceAtCreate) SetSourceID(v uuid.UUID) *HasSourceAtCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetKnownSince sets the "known_since" field.
-func (hsac *HasSourceAtCreate) SetKnownSince(t time.Time) *HasSourceAtCreate {
-	hsac.mutation.SetKnownSince(t)
-	return hsac
+func (_c *HasSourceAtCreate) SetKnownSince(v time.Time) *HasSourceAtCreate {
+	_c.mutation.SetKnownSince(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (hsac *HasSourceAtCreate) SetJustification(s string) *HasSourceAtCreate {
-	hsac.mutation.SetJustification(s)
-	return hsac
+func (_c *HasSourceAtCreate) SetJustification(v string) *HasSourceAtCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (hsac *HasSourceAtCreate) SetOrigin(s string) *HasSourceAtCreate {
-	hsac.mutation.SetOrigin(s)
-	return hsac
+func (_c *HasSourceAtCreate) SetOrigin(v string) *HasSourceAtCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (hsac *HasSourceAtCreate) SetCollector(s string) *HasSourceAtCreate {
-	hsac.mutation.SetCollector(s)
-	return hsac
+func (_c *HasSourceAtCreate) SetCollector(v string) *HasSourceAtCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hsac *HasSourceAtCreate) SetDocumentRef(s string) *HasSourceAtCreate {
-	hsac.mutation.SetDocumentRef(s)
-	return hsac
+func (_c *HasSourceAtCreate) SetDocumentRef(v string) *HasSourceAtCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (hsac *HasSourceAtCreate) SetID(u uuid.UUID) *HasSourceAtCreate {
-	hsac.mutation.SetID(u)
-	return hsac
+func (_c *HasSourceAtCreate) SetID(v uuid.UUID) *HasSourceAtCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillableID(u *uuid.UUID) *HasSourceAtCreate {
-	if u != nil {
-		hsac.SetID(*u)
+func (_c *HasSourceAtCreate) SetNillableID(v *uuid.UUID) *HasSourceAtCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return hsac
+	return _c
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (hsac *HasSourceAtCreate) SetPackageVersion(p *PackageVersion) *HasSourceAtCreate {
-	return hsac.SetPackageVersionID(p.ID)
+func (_c *HasSourceAtCreate) SetPackageVersion(v *PackageVersion) *HasSourceAtCreate {
+	return _c.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hsac *HasSourceAtCreate) SetAllVersionsID(id uuid.UUID) *HasSourceAtCreate {
-	hsac.mutation.SetAllVersionsID(id)
-	return hsac
+func (_c *HasSourceAtCreate) SetAllVersionsID(id uuid.UUID) *HasSourceAtCreate {
+	_c.mutation.SetAllVersionsID(id)
+	return _c
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtCreate {
+func (_c *HasSourceAtCreate) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtCreate {
 	if id != nil {
-		hsac = hsac.SetAllVersionsID(*id)
+		_c = _c.SetAllVersionsID(*id)
 	}
-	return hsac
+	return _c
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (hsac *HasSourceAtCreate) SetAllVersions(p *PackageName) *HasSourceAtCreate {
-	return hsac.SetAllVersionsID(p.ID)
+func (_c *HasSourceAtCreate) SetAllVersions(v *PackageName) *HasSourceAtCreate {
+	return _c.SetAllVersionsID(v.ID)
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (hsac *HasSourceAtCreate) SetSource(s *SourceName) *HasSourceAtCreate {
-	return hsac.SetSourceID(s.ID)
+func (_c *HasSourceAtCreate) SetSource(v *SourceName) *HasSourceAtCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // Mutation returns the HasSourceAtMutation object of the builder.
-func (hsac *HasSourceAtCreate) Mutation() *HasSourceAtMutation {
-	return hsac.mutation
+func (_c *HasSourceAtCreate) Mutation() *HasSourceAtMutation {
+	return _c.mutation
 }
 
 // Save creates the HasSourceAt in the database.
-func (hsac *HasSourceAtCreate) Save(ctx context.Context) (*HasSourceAt, error) {
-	hsac.defaults()
-	return withHooks(ctx, hsac.sqlSave, hsac.mutation, hsac.hooks)
+func (_c *HasSourceAtCreate) Save(ctx context.Context) (*HasSourceAt, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (hsac *HasSourceAtCreate) SaveX(ctx context.Context) *HasSourceAt {
-	v, err := hsac.Save(ctx)
+func (_c *HasSourceAtCreate) SaveX(ctx context.Context) *HasSourceAt {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -155,58 +155,58 @@ func (hsac *HasSourceAtCreate) SaveX(ctx context.Context) *HasSourceAt {
 }
 
 // Exec executes the query.
-func (hsac *HasSourceAtCreate) Exec(ctx context.Context) error {
-	_, err := hsac.Save(ctx)
+func (_c *HasSourceAtCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hsac *HasSourceAtCreate) ExecX(ctx context.Context) {
-	if err := hsac.Exec(ctx); err != nil {
+func (_c *HasSourceAtCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (hsac *HasSourceAtCreate) defaults() {
-	if _, ok := hsac.mutation.ID(); !ok {
+func (_c *HasSourceAtCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := hassourceat.DefaultID()
-		hsac.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (hsac *HasSourceAtCreate) check() error {
-	if _, ok := hsac.mutation.SourceID(); !ok {
+func (_c *HasSourceAtCreate) check() error {
+	if _, ok := _c.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source_id", err: errors.New(`ent: missing required field "HasSourceAt.source_id"`)}
 	}
-	if _, ok := hsac.mutation.KnownSince(); !ok {
+	if _, ok := _c.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "HasSourceAt.known_since"`)}
 	}
-	if _, ok := hsac.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "HasSourceAt.justification"`)}
 	}
-	if _, ok := hsac.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "HasSourceAt.origin"`)}
 	}
-	if _, ok := hsac.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "HasSourceAt.collector"`)}
 	}
-	if _, ok := hsac.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HasSourceAt.document_ref"`)}
 	}
-	if len(hsac.mutation.SourceIDs()) == 0 {
+	if len(_c.mutation.SourceIDs()) == 0 {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "HasSourceAt.source"`)}
 	}
 	return nil
 }
 
-func (hsac *HasSourceAtCreate) sqlSave(ctx context.Context) (*HasSourceAt, error) {
-	if err := hsac.check(); err != nil {
+func (_c *HasSourceAtCreate) sqlSave(ctx context.Context) (*HasSourceAt, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := hsac.createSpec()
-	if err := sqlgraph.CreateNode(ctx, hsac.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -219,42 +219,42 @@ func (hsac *HasSourceAtCreate) sqlSave(ctx context.Context) (*HasSourceAt, error
 			return nil, err
 		}
 	}
-	hsac.mutation.id = &_node.ID
-	hsac.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec) {
+func (_c *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec) {
 	var (
-		_node = &HasSourceAt{config: hsac.config}
+		_node = &HasSourceAt{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(hassourceat.Table, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = hsac.conflict
-	if id, ok := hsac.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := hsac.mutation.KnownSince(); ok {
+	if value, ok := _c.mutation.KnownSince(); ok {
 		_spec.SetField(hassourceat.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
 	}
-	if value, ok := hsac.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(hassourceat.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := hsac.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(hassourceat.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := hsac.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(hassourceat.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := hsac.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(hassourceat.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := hsac.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -271,7 +271,7 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 		_node.PackageVersionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := hsac.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -288,7 +288,7 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 		_node.PackageNameID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := hsac.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -324,10 +324,10 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 //			SetPackageVersionID(v+v).
 //		}).
 //		Exec(ctx)
-func (hsac *HasSourceAtCreate) OnConflict(opts ...sql.ConflictOption) *HasSourceAtUpsertOne {
-	hsac.conflict = opts
+func (_c *HasSourceAtCreate) OnConflict(opts ...sql.ConflictOption) *HasSourceAtUpsertOne {
+	_c.conflict = opts
 	return &HasSourceAtUpsertOne{
-		create: hsac,
+		create: _c,
 	}
 }
 
@@ -337,10 +337,10 @@ func (hsac *HasSourceAtCreate) OnConflict(opts ...sql.ConflictOption) *HasSource
 //	client.HasSourceAt.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (hsac *HasSourceAtCreate) OnConflictColumns(columns ...string) *HasSourceAtUpsertOne {
-	hsac.conflict = append(hsac.conflict, sql.ConflictColumns(columns...))
+func (_c *HasSourceAtCreate) OnConflictColumns(columns ...string) *HasSourceAtUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &HasSourceAtUpsertOne{
-		create: hsac,
+		create: _c,
 	}
 }
 
@@ -686,16 +686,16 @@ type HasSourceAtCreateBulk struct {
 }
 
 // Save creates the HasSourceAt entities in the database.
-func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, error) {
-	if hsacb.err != nil {
-		return nil, hsacb.err
+func (_c *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(hsacb.builders))
-	nodes := make([]*HasSourceAt, len(hsacb.builders))
-	mutators := make([]Mutator, len(hsacb.builders))
-	for i := range hsacb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*HasSourceAt, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := hsacb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HasSourceAtMutation)
@@ -709,12 +709,12 @@ func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, e
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, hsacb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = hsacb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, hsacb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -734,7 +734,7 @@ func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, e
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, hsacb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -742,8 +742,8 @@ func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, e
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hsacb *HasSourceAtCreateBulk) SaveX(ctx context.Context) []*HasSourceAt {
-	v, err := hsacb.Save(ctx)
+func (_c *HasSourceAtCreateBulk) SaveX(ctx context.Context) []*HasSourceAt {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -751,14 +751,14 @@ func (hsacb *HasSourceAtCreateBulk) SaveX(ctx context.Context) []*HasSourceAt {
 }
 
 // Exec executes the query.
-func (hsacb *HasSourceAtCreateBulk) Exec(ctx context.Context) error {
-	_, err := hsacb.Save(ctx)
+func (_c *HasSourceAtCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hsacb *HasSourceAtCreateBulk) ExecX(ctx context.Context) {
-	if err := hsacb.Exec(ctx); err != nil {
+func (_c *HasSourceAtCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -778,10 +778,10 @@ func (hsacb *HasSourceAtCreateBulk) ExecX(ctx context.Context) {
 //			SetPackageVersionID(v+v).
 //		}).
 //		Exec(ctx)
-func (hsacb *HasSourceAtCreateBulk) OnConflict(opts ...sql.ConflictOption) *HasSourceAtUpsertBulk {
-	hsacb.conflict = opts
+func (_c *HasSourceAtCreateBulk) OnConflict(opts ...sql.ConflictOption) *HasSourceAtUpsertBulk {
+	_c.conflict = opts
 	return &HasSourceAtUpsertBulk{
-		create: hsacb,
+		create: _c,
 	}
 }
 
@@ -791,10 +791,10 @@ func (hsacb *HasSourceAtCreateBulk) OnConflict(opts ...sql.ConflictOption) *HasS
 //	client.HasSourceAt.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (hsacb *HasSourceAtCreateBulk) OnConflictColumns(columns ...string) *HasSourceAtUpsertBulk {
-	hsacb.conflict = append(hsacb.conflict, sql.ConflictColumns(columns...))
+func (_c *HasSourceAtCreateBulk) OnConflictColumns(columns ...string) *HasSourceAtUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &HasSourceAtUpsertBulk{
-		create: hsacb,
+		create: _c,
 	}
 }
 

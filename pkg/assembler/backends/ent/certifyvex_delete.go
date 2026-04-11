@@ -20,56 +20,56 @@ type CertifyVexDelete struct {
 }
 
 // Where appends a list predicates to the CertifyVexDelete builder.
-func (cvd *CertifyVexDelete) Where(ps ...predicate.CertifyVex) *CertifyVexDelete {
-	cvd.mutation.Where(ps...)
-	return cvd
+func (_d *CertifyVexDelete) Where(ps ...predicate.CertifyVex) *CertifyVexDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (cvd *CertifyVexDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, cvd.sqlExec, cvd.mutation, cvd.hooks)
+func (_d *CertifyVexDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvd *CertifyVexDelete) ExecX(ctx context.Context) int {
-	n, err := cvd.Exec(ctx)
+func (_d *CertifyVexDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (cvd *CertifyVexDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *CertifyVexDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(certifyvex.Table, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
-	if ps := cvd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, cvd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	cvd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // CertifyVexDeleteOne is the builder for deleting a single CertifyVex entity.
 type CertifyVexDeleteOne struct {
-	cvd *CertifyVexDelete
+	_d *CertifyVexDelete
 }
 
 // Where appends a list predicates to the CertifyVexDelete builder.
-func (cvdo *CertifyVexDeleteOne) Where(ps ...predicate.CertifyVex) *CertifyVexDeleteOne {
-	cvdo.cvd.mutation.Where(ps...)
-	return cvdo
+func (_d *CertifyVexDeleteOne) Where(ps ...predicate.CertifyVex) *CertifyVexDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (cvdo *CertifyVexDeleteOne) Exec(ctx context.Context) error {
-	n, err := cvdo.cvd.Exec(ctx)
+func (_d *CertifyVexDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (cvdo *CertifyVexDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cvdo *CertifyVexDeleteOne) ExecX(ctx context.Context) {
-	if err := cvdo.Exec(ctx); err != nil {
+func (_d *CertifyVexDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

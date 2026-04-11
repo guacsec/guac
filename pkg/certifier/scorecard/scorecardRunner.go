@@ -19,10 +19,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ossf/scorecard/v4/checker"
-	"github.com/ossf/scorecard/v4/checks"
-	"github.com/ossf/scorecard/v4/log"
-	sc "github.com/ossf/scorecard/v4/pkg"
+	"github.com/ossf/scorecard/v5/checker"
+	"github.com/ossf/scorecard/v5/checks"
+	"github.com/ossf/scorecard/v5/log"
+	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 )
 
 // scorecardRunner is a struct that implements the Scorecard interface.
@@ -30,40 +30,40 @@ type scorecardRunner struct {
 	ctx context.Context
 }
 
-func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
+func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Result, error) {
 	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
-	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
+	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, _, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
 
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to get clients: %w", err)
 	}
-	enabledChecks := map[string]checker.Check{
-		checks.CheckBinaryArtifacts:      {Fn: checks.BinaryArtifacts},
-		checks.CheckVulnerabilities:      {Fn: checks.Vulnerabilities},
-		checks.CheckPinnedDependencies:   {Fn: checks.PinningDependencies},
-		checks.CheckCITests:              {Fn: checks.CITests},
-		checks.CheckContributors:         {Fn: checks.Contributors},
-		checks.CheckBranchProtection:     {Fn: checks.BranchProtection},
-		checks.CheckLicense:              {Fn: checks.License},
-		checks.CheckCIIBestPractices:     {Fn: checks.CIIBestPractices},
-		checks.CheckCodeReview:           {Fn: checks.CodeReview},
-		checks.CheckDangerousWorkflow:    {Fn: checks.DangerousWorkflow},
-		checks.CheckDependencyUpdateTool: {Fn: checks.DependencyUpdateTool},
-		checks.CheckFuzzing:              {Fn: checks.Fuzzing},
-		checks.CheckMaintained:           {Fn: checks.Maintained},
-		checks.CheckPackaging:            {Fn: checks.Packaging},
-		checks.CheckSAST:                 {Fn: checks.SAST},
-		checks.CheckSecurityPolicy:       {Fn: checks.SecurityPolicy},
-		checks.CheckSignedReleases:       {Fn: checks.SignedReleases},
-		checks.CheckTokenPermissions:     {Fn: checks.TokenPermissions},
-		checks.CheckWebHooks:             {Fn: checks.WebHooks},
+	checkNames := []string{
+		checks.CheckBinaryArtifacts,
+		checks.CheckVulnerabilities,
+		checks.CheckPinnedDependencies,
+		checks.CheckCITests,
+		checks.CheckContributors,
+		checks.CheckBranchProtection,
+		checks.CheckLicense,
+		checks.CheckCIIBestPractices,
+		checks.CheckCodeReview,
+		checks.CheckDangerousWorkflow,
+		checks.CheckDependencyUpdateTool,
+		checks.CheckFuzzing,
+		checks.CheckMaintained,
+		checks.CheckPackaging,
+		checks.CheckSAST,
+		checks.CheckSecurityPolicy,
+		checks.CheckSignedReleases,
+		checks.CheckTokenPermissions,
+		checks.CheckWebHooks,
 	}
 	if tag != "" {
 		if err := repoClient.InitRepo(repo, commitSHA, 0); err != nil {
 			return nil, fmt.Errorf("error, failed to initialize repoClient: %w", err)
 		}
-		defer repoClient.Close()
+		defer func() { _ = repoClient.Close() }()
 
 		releases, err := repoClient.ListReleases()
 		if err != nil {
@@ -79,7 +79,16 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 		}
 	}
 
-	res, err := sc.RunScorecard(s.ctx, repo, commitSHA, 0, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
+	opts := []sc.Option{
+		sc.WithCommitSHA(commitSHA),
+		sc.WithChecks(checkNames),
+		sc.WithRepoClient(repoClient),
+		sc.WithOSSFuzzClient(ossFuzzClient),
+		sc.WithOpenSSFBestPraticesClient(ciiClient),
+		sc.WithVulnerabilitiesClient(vulnsClient),
+	}
+
+	res, err := sc.Run(s.ctx, repo, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}

@@ -187,7 +187,7 @@ func (*Artifact) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Artifact fields.
-func (a *Artifact) assignValues(columns []string, values []any) error {
+func (_m *Artifact) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -197,22 +197,22 @@ func (a *Artifact) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				a.ID = *value
+				_m.ID = *value
 			}
 		case artifact.FieldAlgorithm:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field algorithm", values[i])
 			} else if value.Valid {
-				a.Algorithm = value.String
+				_m.Algorithm = value.String
 			}
 		case artifact.FieldDigest:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field digest", values[i])
 			} else if value.Valid {
-				a.Digest = value.String
+				_m.Digest = value.String
 			}
 		default:
-			a.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -220,358 +220,358 @@ func (a *Artifact) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Artifact.
 // This includes values selected through modifiers, order, etc.
-func (a *Artifact) Value(name string) (ent.Value, error) {
-	return a.selectValues.Get(name)
+func (_m *Artifact) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryOccurrences queries the "occurrences" edge of the Artifact entity.
-func (a *Artifact) QueryOccurrences() *OccurrenceQuery {
-	return NewArtifactClient(a.config).QueryOccurrences(a)
+func (_m *Artifact) QueryOccurrences() *OccurrenceQuery {
+	return NewArtifactClient(_m.config).QueryOccurrences(_m)
 }
 
 // QuerySbom queries the "sbom" edge of the Artifact entity.
-func (a *Artifact) QuerySbom() *BillOfMaterialsQuery {
-	return NewArtifactClient(a.config).QuerySbom(a)
+func (_m *Artifact) QuerySbom() *BillOfMaterialsQuery {
+	return NewArtifactClient(_m.config).QuerySbom(_m)
 }
 
 // QueryAttestations queries the "attestations" edge of the Artifact entity.
-func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
-	return NewArtifactClient(a.config).QueryAttestations(a)
+func (_m *Artifact) QueryAttestations() *SLSAAttestationQuery {
+	return NewArtifactClient(_m.config).QueryAttestations(_m)
 }
 
 // QueryAttestationsSubject queries the "attestations_subject" edge of the Artifact entity.
-func (a *Artifact) QueryAttestationsSubject() *SLSAAttestationQuery {
-	return NewArtifactClient(a.config).QueryAttestationsSubject(a)
+func (_m *Artifact) QueryAttestationsSubject() *SLSAAttestationQuery {
+	return NewArtifactClient(_m.config).QueryAttestationsSubject(_m)
 }
 
 // QueryHashEqualArtA queries the "hash_equal_art_a" edge of the Artifact entity.
-func (a *Artifact) QueryHashEqualArtA() *HashEqualQuery {
-	return NewArtifactClient(a.config).QueryHashEqualArtA(a)
+func (_m *Artifact) QueryHashEqualArtA() *HashEqualQuery {
+	return NewArtifactClient(_m.config).QueryHashEqualArtA(_m)
 }
 
 // QueryHashEqualArtB queries the "hash_equal_art_b" edge of the Artifact entity.
-func (a *Artifact) QueryHashEqualArtB() *HashEqualQuery {
-	return NewArtifactClient(a.config).QueryHashEqualArtB(a)
+func (_m *Artifact) QueryHashEqualArtB() *HashEqualQuery {
+	return NewArtifactClient(_m.config).QueryHashEqualArtB(_m)
 }
 
 // QueryVex queries the "vex" edge of the Artifact entity.
-func (a *Artifact) QueryVex() *CertifyVexQuery {
-	return NewArtifactClient(a.config).QueryVex(a)
+func (_m *Artifact) QueryVex() *CertifyVexQuery {
+	return NewArtifactClient(_m.config).QueryVex(_m)
 }
 
 // QueryCertification queries the "certification" edge of the Artifact entity.
-func (a *Artifact) QueryCertification() *CertificationQuery {
-	return NewArtifactClient(a.config).QueryCertification(a)
+func (_m *Artifact) QueryCertification() *CertificationQuery {
+	return NewArtifactClient(_m.config).QueryCertification(_m)
 }
 
 // QueryMetadata queries the "metadata" edge of the Artifact entity.
-func (a *Artifact) QueryMetadata() *HasMetadataQuery {
-	return NewArtifactClient(a.config).QueryMetadata(a)
+func (_m *Artifact) QueryMetadata() *HasMetadataQuery {
+	return NewArtifactClient(_m.config).QueryMetadata(_m)
 }
 
 // QueryPoc queries the "poc" edge of the Artifact entity.
-func (a *Artifact) QueryPoc() *PointOfContactQuery {
-	return NewArtifactClient(a.config).QueryPoc(a)
+func (_m *Artifact) QueryPoc() *PointOfContactQuery {
+	return NewArtifactClient(_m.config).QueryPoc(_m)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the Artifact entity.
-func (a *Artifact) QueryIncludedInSboms() *BillOfMaterialsQuery {
-	return NewArtifactClient(a.config).QueryIncludedInSboms(a)
+func (_m *Artifact) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewArtifactClient(_m.config).QueryIncludedInSboms(_m)
 }
 
 // Update returns a builder for updating this Artifact.
 // Note that you need to call Artifact.Unwrap() before calling this method if this Artifact
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (a *Artifact) Update() *ArtifactUpdateOne {
-	return NewArtifactClient(a.config).UpdateOne(a)
+func (_m *Artifact) Update() *ArtifactUpdateOne {
+	return NewArtifactClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Artifact entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (a *Artifact) Unwrap() *Artifact {
-	_tx, ok := a.config.driver.(*txDriver)
+func (_m *Artifact) Unwrap() *Artifact {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Artifact is not a transactional entity")
 	}
-	a.config.driver = _tx.drv
-	return a
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (a *Artifact) String() string {
+func (_m *Artifact) String() string {
 	var builder strings.Builder
 	builder.WriteString("Artifact(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("algorithm=")
-	builder.WriteString(a.Algorithm)
+	builder.WriteString(_m.Algorithm)
 	builder.WriteString(", ")
 	builder.WriteString("digest=")
-	builder.WriteString(a.Digest)
+	builder.WriteString(_m.Digest)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedOccurrences returns the Occurrences named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedOccurrences(name string) ([]*Occurrence, error) {
-	if a.Edges.namedOccurrences == nil {
+func (_m *Artifact) NamedOccurrences(name string) ([]*Occurrence, error) {
+	if _m.Edges.namedOccurrences == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedOccurrences[name]
+	nodes, ok := _m.Edges.namedOccurrences[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedOccurrences(name string, edges ...*Occurrence) {
-	if a.Edges.namedOccurrences == nil {
-		a.Edges.namedOccurrences = make(map[string][]*Occurrence)
+func (_m *Artifact) appendNamedOccurrences(name string, edges ...*Occurrence) {
+	if _m.Edges.namedOccurrences == nil {
+		_m.Edges.namedOccurrences = make(map[string][]*Occurrence)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedOccurrences[name] = []*Occurrence{}
+		_m.Edges.namedOccurrences[name] = []*Occurrence{}
 	} else {
-		a.Edges.namedOccurrences[name] = append(a.Edges.namedOccurrences[name], edges...)
+		_m.Edges.namedOccurrences[name] = append(_m.Edges.namedOccurrences[name], edges...)
 	}
 }
 
 // NamedSbom returns the Sbom named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedSbom(name string) ([]*BillOfMaterials, error) {
-	if a.Edges.namedSbom == nil {
+func (_m *Artifact) NamedSbom(name string) ([]*BillOfMaterials, error) {
+	if _m.Edges.namedSbom == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedSbom[name]
+	nodes, ok := _m.Edges.namedSbom[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedSbom(name string, edges ...*BillOfMaterials) {
-	if a.Edges.namedSbom == nil {
-		a.Edges.namedSbom = make(map[string][]*BillOfMaterials)
+func (_m *Artifact) appendNamedSbom(name string, edges ...*BillOfMaterials) {
+	if _m.Edges.namedSbom == nil {
+		_m.Edges.namedSbom = make(map[string][]*BillOfMaterials)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedSbom[name] = []*BillOfMaterials{}
+		_m.Edges.namedSbom[name] = []*BillOfMaterials{}
 	} else {
-		a.Edges.namedSbom[name] = append(a.Edges.namedSbom[name], edges...)
+		_m.Edges.namedSbom[name] = append(_m.Edges.namedSbom[name], edges...)
 	}
 }
 
 // NamedAttestations returns the Attestations named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedAttestations(name string) ([]*SLSAAttestation, error) {
-	if a.Edges.namedAttestations == nil {
+func (_m *Artifact) NamedAttestations(name string) ([]*SLSAAttestation, error) {
+	if _m.Edges.namedAttestations == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedAttestations[name]
+	nodes, ok := _m.Edges.namedAttestations[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedAttestations(name string, edges ...*SLSAAttestation) {
-	if a.Edges.namedAttestations == nil {
-		a.Edges.namedAttestations = make(map[string][]*SLSAAttestation)
+func (_m *Artifact) appendNamedAttestations(name string, edges ...*SLSAAttestation) {
+	if _m.Edges.namedAttestations == nil {
+		_m.Edges.namedAttestations = make(map[string][]*SLSAAttestation)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedAttestations[name] = []*SLSAAttestation{}
+		_m.Edges.namedAttestations[name] = []*SLSAAttestation{}
 	} else {
-		a.Edges.namedAttestations[name] = append(a.Edges.namedAttestations[name], edges...)
+		_m.Edges.namedAttestations[name] = append(_m.Edges.namedAttestations[name], edges...)
 	}
 }
 
 // NamedAttestationsSubject returns the AttestationsSubject named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedAttestationsSubject(name string) ([]*SLSAAttestation, error) {
-	if a.Edges.namedAttestationsSubject == nil {
+func (_m *Artifact) NamedAttestationsSubject(name string) ([]*SLSAAttestation, error) {
+	if _m.Edges.namedAttestationsSubject == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedAttestationsSubject[name]
+	nodes, ok := _m.Edges.namedAttestationsSubject[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedAttestationsSubject(name string, edges ...*SLSAAttestation) {
-	if a.Edges.namedAttestationsSubject == nil {
-		a.Edges.namedAttestationsSubject = make(map[string][]*SLSAAttestation)
+func (_m *Artifact) appendNamedAttestationsSubject(name string, edges ...*SLSAAttestation) {
+	if _m.Edges.namedAttestationsSubject == nil {
+		_m.Edges.namedAttestationsSubject = make(map[string][]*SLSAAttestation)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedAttestationsSubject[name] = []*SLSAAttestation{}
+		_m.Edges.namedAttestationsSubject[name] = []*SLSAAttestation{}
 	} else {
-		a.Edges.namedAttestationsSubject[name] = append(a.Edges.namedAttestationsSubject[name], edges...)
+		_m.Edges.namedAttestationsSubject[name] = append(_m.Edges.namedAttestationsSubject[name], edges...)
 	}
 }
 
 // NamedHashEqualArtA returns the HashEqualArtA named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedHashEqualArtA(name string) ([]*HashEqual, error) {
-	if a.Edges.namedHashEqualArtA == nil {
+func (_m *Artifact) NamedHashEqualArtA(name string) ([]*HashEqual, error) {
+	if _m.Edges.namedHashEqualArtA == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedHashEqualArtA[name]
+	nodes, ok := _m.Edges.namedHashEqualArtA[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedHashEqualArtA(name string, edges ...*HashEqual) {
-	if a.Edges.namedHashEqualArtA == nil {
-		a.Edges.namedHashEqualArtA = make(map[string][]*HashEqual)
+func (_m *Artifact) appendNamedHashEqualArtA(name string, edges ...*HashEqual) {
+	if _m.Edges.namedHashEqualArtA == nil {
+		_m.Edges.namedHashEqualArtA = make(map[string][]*HashEqual)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedHashEqualArtA[name] = []*HashEqual{}
+		_m.Edges.namedHashEqualArtA[name] = []*HashEqual{}
 	} else {
-		a.Edges.namedHashEqualArtA[name] = append(a.Edges.namedHashEqualArtA[name], edges...)
+		_m.Edges.namedHashEqualArtA[name] = append(_m.Edges.namedHashEqualArtA[name], edges...)
 	}
 }
 
 // NamedHashEqualArtB returns the HashEqualArtB named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedHashEqualArtB(name string) ([]*HashEqual, error) {
-	if a.Edges.namedHashEqualArtB == nil {
+func (_m *Artifact) NamedHashEqualArtB(name string) ([]*HashEqual, error) {
+	if _m.Edges.namedHashEqualArtB == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedHashEqualArtB[name]
+	nodes, ok := _m.Edges.namedHashEqualArtB[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedHashEqualArtB(name string, edges ...*HashEqual) {
-	if a.Edges.namedHashEqualArtB == nil {
-		a.Edges.namedHashEqualArtB = make(map[string][]*HashEqual)
+func (_m *Artifact) appendNamedHashEqualArtB(name string, edges ...*HashEqual) {
+	if _m.Edges.namedHashEqualArtB == nil {
+		_m.Edges.namedHashEqualArtB = make(map[string][]*HashEqual)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedHashEqualArtB[name] = []*HashEqual{}
+		_m.Edges.namedHashEqualArtB[name] = []*HashEqual{}
 	} else {
-		a.Edges.namedHashEqualArtB[name] = append(a.Edges.namedHashEqualArtB[name], edges...)
+		_m.Edges.namedHashEqualArtB[name] = append(_m.Edges.namedHashEqualArtB[name], edges...)
 	}
 }
 
 // NamedVex returns the Vex named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedVex(name string) ([]*CertifyVex, error) {
-	if a.Edges.namedVex == nil {
+func (_m *Artifact) NamedVex(name string) ([]*CertifyVex, error) {
+	if _m.Edges.namedVex == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedVex[name]
+	nodes, ok := _m.Edges.namedVex[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedVex(name string, edges ...*CertifyVex) {
-	if a.Edges.namedVex == nil {
-		a.Edges.namedVex = make(map[string][]*CertifyVex)
+func (_m *Artifact) appendNamedVex(name string, edges ...*CertifyVex) {
+	if _m.Edges.namedVex == nil {
+		_m.Edges.namedVex = make(map[string][]*CertifyVex)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedVex[name] = []*CertifyVex{}
+		_m.Edges.namedVex[name] = []*CertifyVex{}
 	} else {
-		a.Edges.namedVex[name] = append(a.Edges.namedVex[name], edges...)
+		_m.Edges.namedVex[name] = append(_m.Edges.namedVex[name], edges...)
 	}
 }
 
 // NamedCertification returns the Certification named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedCertification(name string) ([]*Certification, error) {
-	if a.Edges.namedCertification == nil {
+func (_m *Artifact) NamedCertification(name string) ([]*Certification, error) {
+	if _m.Edges.namedCertification == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedCertification[name]
+	nodes, ok := _m.Edges.namedCertification[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedCertification(name string, edges ...*Certification) {
-	if a.Edges.namedCertification == nil {
-		a.Edges.namedCertification = make(map[string][]*Certification)
+func (_m *Artifact) appendNamedCertification(name string, edges ...*Certification) {
+	if _m.Edges.namedCertification == nil {
+		_m.Edges.namedCertification = make(map[string][]*Certification)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedCertification[name] = []*Certification{}
+		_m.Edges.namedCertification[name] = []*Certification{}
 	} else {
-		a.Edges.namedCertification[name] = append(a.Edges.namedCertification[name], edges...)
+		_m.Edges.namedCertification[name] = append(_m.Edges.namedCertification[name], edges...)
 	}
 }
 
 // NamedMetadata returns the Metadata named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedMetadata(name string) ([]*HasMetadata, error) {
-	if a.Edges.namedMetadata == nil {
+func (_m *Artifact) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if _m.Edges.namedMetadata == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedMetadata[name]
+	nodes, ok := _m.Edges.namedMetadata[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedMetadata(name string, edges ...*HasMetadata) {
-	if a.Edges.namedMetadata == nil {
-		a.Edges.namedMetadata = make(map[string][]*HasMetadata)
+func (_m *Artifact) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if _m.Edges.namedMetadata == nil {
+		_m.Edges.namedMetadata = make(map[string][]*HasMetadata)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedMetadata[name] = []*HasMetadata{}
+		_m.Edges.namedMetadata[name] = []*HasMetadata{}
 	} else {
-		a.Edges.namedMetadata[name] = append(a.Edges.namedMetadata[name], edges...)
+		_m.Edges.namedMetadata[name] = append(_m.Edges.namedMetadata[name], edges...)
 	}
 }
 
 // NamedPoc returns the Poc named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedPoc(name string) ([]*PointOfContact, error) {
-	if a.Edges.namedPoc == nil {
+func (_m *Artifact) NamedPoc(name string) ([]*PointOfContact, error) {
+	if _m.Edges.namedPoc == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedPoc[name]
+	nodes, ok := _m.Edges.namedPoc[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedPoc(name string, edges ...*PointOfContact) {
-	if a.Edges.namedPoc == nil {
-		a.Edges.namedPoc = make(map[string][]*PointOfContact)
+func (_m *Artifact) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if _m.Edges.namedPoc == nil {
+		_m.Edges.namedPoc = make(map[string][]*PointOfContact)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedPoc[name] = []*PointOfContact{}
+		_m.Edges.namedPoc[name] = []*PointOfContact{}
 	} else {
-		a.Edges.namedPoc[name] = append(a.Edges.namedPoc[name], edges...)
+		_m.Edges.namedPoc[name] = append(_m.Edges.namedPoc[name], edges...)
 	}
 }
 
 // NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
-	if a.Edges.namedIncludedInSboms == nil {
+func (_m *Artifact) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if _m.Edges.namedIncludedInSboms == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedIncludedInSboms[name]
+	nodes, ok := _m.Edges.namedIncludedInSboms[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
-	if a.Edges.namedIncludedInSboms == nil {
-		a.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+func (_m *Artifact) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if _m.Edges.namedIncludedInSboms == nil {
+		_m.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+		_m.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
 	} else {
-		a.Edges.namedIncludedInSboms[name] = append(a.Edges.namedIncludedInSboms[name], edges...)
+		_m.Edges.namedIncludedInSboms[name] = append(_m.Edges.namedIncludedInSboms[name], edges...)
 	}
 }
 

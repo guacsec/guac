@@ -38,44 +38,44 @@ type SLSAAttestationQuery struct {
 }
 
 // Where adds a new predicate for the SLSAAttestationQuery builder.
-func (saq *SLSAAttestationQuery) Where(ps ...predicate.SLSAAttestation) *SLSAAttestationQuery {
-	saq.predicates = append(saq.predicates, ps...)
-	return saq
+func (_q *SLSAAttestationQuery) Where(ps ...predicate.SLSAAttestation) *SLSAAttestationQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (saq *SLSAAttestationQuery) Limit(limit int) *SLSAAttestationQuery {
-	saq.ctx.Limit = &limit
-	return saq
+func (_q *SLSAAttestationQuery) Limit(limit int) *SLSAAttestationQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (saq *SLSAAttestationQuery) Offset(offset int) *SLSAAttestationQuery {
-	saq.ctx.Offset = &offset
-	return saq
+func (_q *SLSAAttestationQuery) Offset(offset int) *SLSAAttestationQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (saq *SLSAAttestationQuery) Unique(unique bool) *SLSAAttestationQuery {
-	saq.ctx.Unique = &unique
-	return saq
+func (_q *SLSAAttestationQuery) Unique(unique bool) *SLSAAttestationQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (saq *SLSAAttestationQuery) Order(o ...slsaattestation.OrderOption) *SLSAAttestationQuery {
-	saq.order = append(saq.order, o...)
-	return saq
+func (_q *SLSAAttestationQuery) Order(o ...slsaattestation.OrderOption) *SLSAAttestationQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryBuiltFrom chains the current query on the "built_from" edge.
-func (saq *SLSAAttestationQuery) QueryBuiltFrom() *ArtifactQuery {
-	query := (&ArtifactClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) QueryBuiltFrom() *ArtifactQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := saq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := saq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -84,20 +84,20 @@ func (saq *SLSAAttestationQuery) QueryBuiltFrom() *ArtifactQuery {
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryBuiltBy chains the current query on the "built_by" edge.
-func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderQuery {
-	query := (&BuilderClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) QueryBuiltBy() *BuilderQuery {
+	query := (&BuilderClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := saq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := saq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -106,20 +106,20 @@ func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderQuery {
 			sqlgraph.To(builder.Table, builder.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QuerySubject chains the current query on the "subject" edge.
-func (saq *SLSAAttestationQuery) QuerySubject() *ArtifactQuery {
-	query := (&ArtifactClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) QuerySubject() *ArtifactQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := saq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := saq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -128,7 +128,7 @@ func (saq *SLSAAttestationQuery) QuerySubject() *ArtifactQuery {
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.SubjectTable, slsaattestation.SubjectColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -136,8 +136,8 @@ func (saq *SLSAAttestationQuery) QuerySubject() *ArtifactQuery {
 
 // First returns the first SLSAAttestation entity from the query.
 // Returns a *NotFoundError when no SLSAAttestation was found.
-func (saq *SLSAAttestationQuery) First(ctx context.Context) (*SLSAAttestation, error) {
-	nodes, err := saq.Limit(1).All(setContextOp(ctx, saq.ctx, ent.OpQueryFirst))
+func (_q *SLSAAttestationQuery) First(ctx context.Context) (*SLSAAttestation, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -148,8 +148,8 @@ func (saq *SLSAAttestationQuery) First(ctx context.Context) (*SLSAAttestation, e
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) FirstX(ctx context.Context) *SLSAAttestation {
-	node, err := saq.First(ctx)
+func (_q *SLSAAttestationQuery) FirstX(ctx context.Context) *SLSAAttestation {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -158,9 +158,9 @@ func (saq *SLSAAttestationQuery) FirstX(ctx context.Context) *SLSAAttestation {
 
 // FirstID returns the first SLSAAttestation ID from the query.
 // Returns a *NotFoundError when no SLSAAttestation ID was found.
-func (saq *SLSAAttestationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *SLSAAttestationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = saq.Limit(1).IDs(setContextOp(ctx, saq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -171,8 +171,8 @@ func (saq *SLSAAttestationQuery) FirstID(ctx context.Context) (id uuid.UUID, err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := saq.FirstID(ctx)
+func (_q *SLSAAttestationQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -182,8 +182,8 @@ func (saq *SLSAAttestationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single SLSAAttestation entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one SLSAAttestation entity is found.
 // Returns a *NotFoundError when no SLSAAttestation entities are found.
-func (saq *SLSAAttestationQuery) Only(ctx context.Context) (*SLSAAttestation, error) {
-	nodes, err := saq.Limit(2).All(setContextOp(ctx, saq.ctx, ent.OpQueryOnly))
+func (_q *SLSAAttestationQuery) Only(ctx context.Context) (*SLSAAttestation, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -198,8 +198,8 @@ func (saq *SLSAAttestationQuery) Only(ctx context.Context) (*SLSAAttestation, er
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) OnlyX(ctx context.Context) *SLSAAttestation {
-	node, err := saq.Only(ctx)
+func (_q *SLSAAttestationQuery) OnlyX(ctx context.Context) *SLSAAttestation {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -209,9 +209,9 @@ func (saq *SLSAAttestationQuery) OnlyX(ctx context.Context) *SLSAAttestation {
 // OnlyID is like Only, but returns the only SLSAAttestation ID in the query.
 // Returns a *NotSingularError when more than one SLSAAttestation ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (saq *SLSAAttestationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *SLSAAttestationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = saq.Limit(2).IDs(setContextOp(ctx, saq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -226,8 +226,8 @@ func (saq *SLSAAttestationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := saq.OnlyID(ctx)
+func (_q *SLSAAttestationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -235,18 +235,18 @@ func (saq *SLSAAttestationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of SLSAAttestations.
-func (saq *SLSAAttestationQuery) All(ctx context.Context) ([]*SLSAAttestation, error) {
-	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryAll)
-	if err := saq.prepareQuery(ctx); err != nil {
+func (_q *SLSAAttestationQuery) All(ctx context.Context) ([]*SLSAAttestation, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*SLSAAttestation, *SLSAAttestationQuery]()
-	return withInterceptors[[]*SLSAAttestation](ctx, saq, qr, saq.inters)
+	return withInterceptors[[]*SLSAAttestation](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) AllX(ctx context.Context) []*SLSAAttestation {
-	nodes, err := saq.All(ctx)
+func (_q *SLSAAttestationQuery) AllX(ctx context.Context) []*SLSAAttestation {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -254,20 +254,20 @@ func (saq *SLSAAttestationQuery) AllX(ctx context.Context) []*SLSAAttestation {
 }
 
 // IDs executes the query and returns a list of SLSAAttestation IDs.
-func (saq *SLSAAttestationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if saq.ctx.Unique == nil && saq.path != nil {
-		saq.Unique(true)
+func (_q *SLSAAttestationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryIDs)
-	if err = saq.Select(slsaattestation.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(slsaattestation.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := saq.IDs(ctx)
+func (_q *SLSAAttestationQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -275,17 +275,17 @@ func (saq *SLSAAttestationQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (saq *SLSAAttestationQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryCount)
-	if err := saq.prepareQuery(ctx); err != nil {
+func (_q *SLSAAttestationQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, saq, querierCount[*SLSAAttestationQuery](), saq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*SLSAAttestationQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) CountX(ctx context.Context) int {
-	count, err := saq.Count(ctx)
+func (_q *SLSAAttestationQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -293,9 +293,9 @@ func (saq *SLSAAttestationQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (saq *SLSAAttestationQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, saq.ctx, ent.OpQueryExist)
-	switch _, err := saq.FirstID(ctx); {
+func (_q *SLSAAttestationQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -306,8 +306,8 @@ func (saq *SLSAAttestationQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) ExistX(ctx context.Context) bool {
-	exist, err := saq.Exist(ctx)
+func (_q *SLSAAttestationQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -316,56 +316,56 @@ func (saq *SLSAAttestationQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the SLSAAttestationQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (saq *SLSAAttestationQuery) Clone() *SLSAAttestationQuery {
-	if saq == nil {
+func (_q *SLSAAttestationQuery) Clone() *SLSAAttestationQuery {
+	if _q == nil {
 		return nil
 	}
 	return &SLSAAttestationQuery{
-		config:        saq.config,
-		ctx:           saq.ctx.Clone(),
-		order:         append([]slsaattestation.OrderOption{}, saq.order...),
-		inters:        append([]Interceptor{}, saq.inters...),
-		predicates:    append([]predicate.SLSAAttestation{}, saq.predicates...),
-		withBuiltFrom: saq.withBuiltFrom.Clone(),
-		withBuiltBy:   saq.withBuiltBy.Clone(),
-		withSubject:   saq.withSubject.Clone(),
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]slsaattestation.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.SLSAAttestation{}, _q.predicates...),
+		withBuiltFrom: _q.withBuiltFrom.Clone(),
+		withBuiltBy:   _q.withBuiltBy.Clone(),
+		withSubject:   _q.withSubject.Clone(),
 		// clone intermediate query.
-		sql:  saq.sql.Clone(),
-		path: saq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithBuiltFrom tells the query-builder to eager-load the nodes that are connected to
 // the "built_from" edge. The optional arguments are used to configure the query builder of the edge.
-func (saq *SLSAAttestationQuery) WithBuiltFrom(opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
-	query := (&ArtifactClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) WithBuiltFrom(opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	saq.withBuiltFrom = query
-	return saq
+	_q.withBuiltFrom = query
+	return _q
 }
 
 // WithBuiltBy tells the query-builder to eager-load the nodes that are connected to
 // the "built_by" edge. The optional arguments are used to configure the query builder of the edge.
-func (saq *SLSAAttestationQuery) WithBuiltBy(opts ...func(*BuilderQuery)) *SLSAAttestationQuery {
-	query := (&BuilderClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) WithBuiltBy(opts ...func(*BuilderQuery)) *SLSAAttestationQuery {
+	query := (&BuilderClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	saq.withBuiltBy = query
-	return saq
+	_q.withBuiltBy = query
+	return _q
 }
 
 // WithSubject tells the query-builder to eager-load the nodes that are connected to
 // the "subject" edge. The optional arguments are used to configure the query builder of the edge.
-func (saq *SLSAAttestationQuery) WithSubject(opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
-	query := (&ArtifactClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) WithSubject(opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	saq.withSubject = query
-	return saq
+	_q.withSubject = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -382,10 +382,10 @@ func (saq *SLSAAttestationQuery) WithSubject(opts ...func(*ArtifactQuery)) *SLSA
 //		GroupBy(slsaattestation.FieldBuildType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (saq *SLSAAttestationQuery) GroupBy(field string, fields ...string) *SLSAAttestationGroupBy {
-	saq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SLSAAttestationGroupBy{build: saq}
-	grbuild.flds = &saq.ctx.Fields
+func (_q *SLSAAttestationQuery) GroupBy(field string, fields ...string) *SLSAAttestationGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SLSAAttestationGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = slsaattestation.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -403,111 +403,111 @@ func (saq *SLSAAttestationQuery) GroupBy(field string, fields ...string) *SLSAAt
 //	client.SLSAAttestation.Query().
 //		Select(slsaattestation.FieldBuildType).
 //		Scan(ctx, &v)
-func (saq *SLSAAttestationQuery) Select(fields ...string) *SLSAAttestationSelect {
-	saq.ctx.Fields = append(saq.ctx.Fields, fields...)
-	sbuild := &SLSAAttestationSelect{SLSAAttestationQuery: saq}
+func (_q *SLSAAttestationQuery) Select(fields ...string) *SLSAAttestationSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &SLSAAttestationSelect{SLSAAttestationQuery: _q}
 	sbuild.label = slsaattestation.Label
-	sbuild.flds, sbuild.scan = &saq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a SLSAAttestationSelect configured with the given aggregations.
-func (saq *SLSAAttestationQuery) Aggregate(fns ...AggregateFunc) *SLSAAttestationSelect {
-	return saq.Select().Aggregate(fns...)
+func (_q *SLSAAttestationQuery) Aggregate(fns ...AggregateFunc) *SLSAAttestationSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (saq *SLSAAttestationQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range saq.inters {
+func (_q *SLSAAttestationQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, saq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range saq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !slsaattestation.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if saq.path != nil {
-		prev, err := saq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		saq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SLSAAttestation, error) {
+func (_q *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SLSAAttestation, error) {
 	var (
 		nodes       = []*SLSAAttestation{}
-		_spec       = saq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [3]bool{
-			saq.withBuiltFrom != nil,
-			saq.withBuiltBy != nil,
-			saq.withSubject != nil,
+			_q.withBuiltFrom != nil,
+			_q.withBuiltBy != nil,
+			_q.withSubject != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*SLSAAttestation).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &SLSAAttestation{config: saq.config}
+		node := &SLSAAttestation{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(saq.modifiers) > 0 {
-		_spec.Modifiers = saq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, saq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := saq.withBuiltFrom; query != nil {
-		if err := saq.loadBuiltFrom(ctx, query, nodes,
+	if query := _q.withBuiltFrom; query != nil {
+		if err := _q.loadBuiltFrom(ctx, query, nodes,
 			func(n *SLSAAttestation) { n.Edges.BuiltFrom = []*Artifact{} },
 			func(n *SLSAAttestation, e *Artifact) { n.Edges.BuiltFrom = append(n.Edges.BuiltFrom, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := saq.withBuiltBy; query != nil {
-		if err := saq.loadBuiltBy(ctx, query, nodes, nil,
+	if query := _q.withBuiltBy; query != nil {
+		if err := _q.loadBuiltBy(ctx, query, nodes, nil,
 			func(n *SLSAAttestation, e *Builder) { n.Edges.BuiltBy = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := saq.withSubject; query != nil {
-		if err := saq.loadSubject(ctx, query, nodes, nil,
+	if query := _q.withSubject; query != nil {
+		if err := _q.loadSubject(ctx, query, nodes, nil,
 			func(n *SLSAAttestation, e *Artifact) { n.Edges.Subject = e }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range saq.withNamedBuiltFrom {
-		if err := saq.loadBuiltFrom(ctx, query, nodes,
+	for name, query := range _q.withNamedBuiltFrom {
+		if err := _q.loadBuiltFrom(ctx, query, nodes,
 			func(n *SLSAAttestation) { n.appendNamedBuiltFrom(name) },
 			func(n *SLSAAttestation, e *Artifact) { n.appendNamedBuiltFrom(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range saq.loadTotal {
-		if err := saq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
+func (_q *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*SLSAAttestation)
 	nids := make(map[uuid.UUID]map[*SLSAAttestation]struct{})
@@ -568,7 +568,7 @@ func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *Artif
 	}
 	return nil
 }
-func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *BuilderQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Builder)) error {
+func (_q *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *BuilderQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Builder)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*SLSAAttestation)
 	for i := range nodes {
@@ -597,7 +597,7 @@ func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *Builder
 	}
 	return nil
 }
-func (saq *SLSAAttestationQuery) loadSubject(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
+func (_q *SLSAAttestationQuery) loadSubject(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*SLSAAttestation)
 	for i := range nodes {
@@ -627,27 +627,27 @@ func (saq *SLSAAttestationQuery) loadSubject(ctx context.Context, query *Artifac
 	return nil
 }
 
-func (saq *SLSAAttestationQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := saq.querySpec()
-	if len(saq.modifiers) > 0 {
-		_spec.Modifiers = saq.modifiers
+func (_q *SLSAAttestationQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = saq.ctx.Fields
-	if len(saq.ctx.Fields) > 0 {
-		_spec.Unique = saq.ctx.Unique != nil && *saq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, saq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (saq *SLSAAttestationQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *SLSAAttestationQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
-	_spec.From = saq.sql
-	if unique := saq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if saq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := saq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, slsaattestation.FieldID)
 		for i := range fields {
@@ -655,27 +655,27 @@ func (saq *SLSAAttestationQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if saq.withBuiltBy != nil {
+		if _q.withBuiltBy != nil {
 			_spec.Node.AddColumnOnce(slsaattestation.FieldBuiltByID)
 		}
-		if saq.withSubject != nil {
+		if _q.withSubject != nil {
 			_spec.Node.AddColumnOnce(slsaattestation.FieldSubjectID)
 		}
 	}
-	if ps := saq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := saq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := saq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := saq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -685,33 +685,33 @@ func (saq *SLSAAttestationQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (saq *SLSAAttestationQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(saq.driver.Dialect())
+func (_q *SLSAAttestationQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(slsaattestation.Table)
-	columns := saq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = slsaattestation.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if saq.sql != nil {
-		selector = saq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if saq.ctx.Unique != nil && *saq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range saq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range saq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := saq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := saq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -719,16 +719,16 @@ func (saq *SLSAAttestationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // WithNamedBuiltFrom tells the query-builder to eager-load the nodes that are connected to the "built_from"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (saq *SLSAAttestationQuery) WithNamedBuiltFrom(name string, opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
-	query := (&ArtifactClient{config: saq.config}).Query()
+func (_q *SLSAAttestationQuery) WithNamedBuiltFrom(name string, opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
+	query := (&ArtifactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if saq.withNamedBuiltFrom == nil {
-		saq.withNamedBuiltFrom = make(map[string]*ArtifactQuery)
+	if _q.withNamedBuiltFrom == nil {
+		_q.withNamedBuiltFrom = make(map[string]*ArtifactQuery)
 	}
-	saq.withNamedBuiltFrom[name] = query
-	return saq
+	_q.withNamedBuiltFrom[name] = query
+	return _q
 }
 
 // SLSAAttestationGroupBy is the group-by builder for SLSAAttestation entities.
@@ -738,41 +738,41 @@ type SLSAAttestationGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sagb *SLSAAttestationGroupBy) Aggregate(fns ...AggregateFunc) *SLSAAttestationGroupBy {
-	sagb.fns = append(sagb.fns, fns...)
-	return sagb
+func (_g *SLSAAttestationGroupBy) Aggregate(fns ...AggregateFunc) *SLSAAttestationGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (sagb *SLSAAttestationGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sagb.build.ctx, ent.OpQueryGroupBy)
-	if err := sagb.build.prepareQuery(ctx); err != nil {
+func (_g *SLSAAttestationGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SLSAAttestationQuery, *SLSAAttestationGroupBy](ctx, sagb.build, sagb, sagb.build.inters, v)
+	return scanWithInterceptors[*SLSAAttestationQuery, *SLSAAttestationGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (sagb *SLSAAttestationGroupBy) sqlScan(ctx context.Context, root *SLSAAttestationQuery, v any) error {
+func (_g *SLSAAttestationGroupBy) sqlScan(ctx context.Context, root *SLSAAttestationQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(sagb.fns))
-	for _, fn := range sagb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*sagb.flds)+len(sagb.fns))
-		for _, f := range *sagb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*sagb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sagb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -786,27 +786,27 @@ type SLSAAttestationSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (sas *SLSAAttestationSelect) Aggregate(fns ...AggregateFunc) *SLSAAttestationSelect {
-	sas.fns = append(sas.fns, fns...)
-	return sas
+func (_s *SLSAAttestationSelect) Aggregate(fns ...AggregateFunc) *SLSAAttestationSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (sas *SLSAAttestationSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sas.ctx, ent.OpQuerySelect)
-	if err := sas.prepareQuery(ctx); err != nil {
+func (_s *SLSAAttestationSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SLSAAttestationQuery, *SLSAAttestationSelect](ctx, sas.SLSAAttestationQuery, sas, sas.inters, v)
+	return scanWithInterceptors[*SLSAAttestationQuery, *SLSAAttestationSelect](ctx, _s.SLSAAttestationQuery, _s, _s.inters, v)
 }
 
-func (sas *SLSAAttestationSelect) sqlScan(ctx context.Context, root *SLSAAttestationQuery, v any) error {
+func (_s *SLSAAttestationSelect) sqlScan(ctx context.Context, root *SLSAAttestationQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(sas.fns))
-	for _, fn := range sas.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*sas.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -814,7 +814,7 @@ func (sas *SLSAAttestationSelect) sqlScan(ctx context.Context, root *SLSAAttesta
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sas.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

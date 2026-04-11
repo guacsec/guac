@@ -27,180 +27,180 @@ type CertifyScorecardUpdate struct {
 }
 
 // Where appends a list predicates to the CertifyScorecardUpdate builder.
-func (csu *CertifyScorecardUpdate) Where(ps ...predicate.CertifyScorecard) *CertifyScorecardUpdate {
-	csu.mutation.Where(ps...)
-	return csu
+func (_u *CertifyScorecardUpdate) Where(ps ...predicate.CertifyScorecard) *CertifyScorecardUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetSourceID sets the "source_id" field.
-func (csu *CertifyScorecardUpdate) SetSourceID(u uuid.UUID) *CertifyScorecardUpdate {
-	csu.mutation.SetSourceID(u)
-	return csu
+func (_u *CertifyScorecardUpdate) SetSourceID(v uuid.UUID) *CertifyScorecardUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableSourceID(u *uuid.UUID) *CertifyScorecardUpdate {
-	if u != nil {
-		csu.SetSourceID(*u)
+func (_u *CertifyScorecardUpdate) SetNillableSourceID(v *uuid.UUID) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetChecks sets the "checks" field.
-func (csu *CertifyScorecardUpdate) SetChecks(mc []*model.ScorecardCheck) *CertifyScorecardUpdate {
-	csu.mutation.SetChecks(mc)
-	return csu
+func (_u *CertifyScorecardUpdate) SetChecks(v []*model.ScorecardCheck) *CertifyScorecardUpdate {
+	_u.mutation.SetChecks(v)
+	return _u
 }
 
-// AppendChecks appends mc to the "checks" field.
-func (csu *CertifyScorecardUpdate) AppendChecks(mc []*model.ScorecardCheck) *CertifyScorecardUpdate {
-	csu.mutation.AppendChecks(mc)
-	return csu
+// AppendChecks appends value to the "checks" field.
+func (_u *CertifyScorecardUpdate) AppendChecks(v []*model.ScorecardCheck) *CertifyScorecardUpdate {
+	_u.mutation.AppendChecks(v)
+	return _u
 }
 
 // SetAggregateScore sets the "aggregate_score" field.
-func (csu *CertifyScorecardUpdate) SetAggregateScore(f float64) *CertifyScorecardUpdate {
-	csu.mutation.ResetAggregateScore()
-	csu.mutation.SetAggregateScore(f)
-	return csu
+func (_u *CertifyScorecardUpdate) SetAggregateScore(v float64) *CertifyScorecardUpdate {
+	_u.mutation.ResetAggregateScore()
+	_u.mutation.SetAggregateScore(v)
+	return _u
 }
 
 // SetNillableAggregateScore sets the "aggregate_score" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableAggregateScore(f *float64) *CertifyScorecardUpdate {
-	if f != nil {
-		csu.SetAggregateScore(*f)
+func (_u *CertifyScorecardUpdate) SetNillableAggregateScore(v *float64) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetAggregateScore(*v)
 	}
-	return csu
+	return _u
 }
 
-// AddAggregateScore adds f to the "aggregate_score" field.
-func (csu *CertifyScorecardUpdate) AddAggregateScore(f float64) *CertifyScorecardUpdate {
-	csu.mutation.AddAggregateScore(f)
-	return csu
+// AddAggregateScore adds value to the "aggregate_score" field.
+func (_u *CertifyScorecardUpdate) AddAggregateScore(v float64) *CertifyScorecardUpdate {
+	_u.mutation.AddAggregateScore(v)
+	return _u
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (csu *CertifyScorecardUpdate) SetTimeScanned(t time.Time) *CertifyScorecardUpdate {
-	csu.mutation.SetTimeScanned(t)
-	return csu
+func (_u *CertifyScorecardUpdate) SetTimeScanned(v time.Time) *CertifyScorecardUpdate {
+	_u.mutation.SetTimeScanned(v)
+	return _u
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableTimeScanned(t *time.Time) *CertifyScorecardUpdate {
-	if t != nil {
-		csu.SetTimeScanned(*t)
+func (_u *CertifyScorecardUpdate) SetNillableTimeScanned(v *time.Time) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetTimeScanned(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetScorecardVersion sets the "scorecard_version" field.
-func (csu *CertifyScorecardUpdate) SetScorecardVersion(s string) *CertifyScorecardUpdate {
-	csu.mutation.SetScorecardVersion(s)
-	return csu
+func (_u *CertifyScorecardUpdate) SetScorecardVersion(v string) *CertifyScorecardUpdate {
+	_u.mutation.SetScorecardVersion(v)
+	return _u
 }
 
 // SetNillableScorecardVersion sets the "scorecard_version" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableScorecardVersion(s *string) *CertifyScorecardUpdate {
-	if s != nil {
-		csu.SetScorecardVersion(*s)
+func (_u *CertifyScorecardUpdate) SetNillableScorecardVersion(v *string) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetScorecardVersion(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetScorecardCommit sets the "scorecard_commit" field.
-func (csu *CertifyScorecardUpdate) SetScorecardCommit(s string) *CertifyScorecardUpdate {
-	csu.mutation.SetScorecardCommit(s)
-	return csu
+func (_u *CertifyScorecardUpdate) SetScorecardCommit(v string) *CertifyScorecardUpdate {
+	_u.mutation.SetScorecardCommit(v)
+	return _u
 }
 
 // SetNillableScorecardCommit sets the "scorecard_commit" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableScorecardCommit(s *string) *CertifyScorecardUpdate {
-	if s != nil {
-		csu.SetScorecardCommit(*s)
+func (_u *CertifyScorecardUpdate) SetNillableScorecardCommit(v *string) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetScorecardCommit(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (csu *CertifyScorecardUpdate) SetOrigin(s string) *CertifyScorecardUpdate {
-	csu.mutation.SetOrigin(s)
-	return csu
+func (_u *CertifyScorecardUpdate) SetOrigin(v string) *CertifyScorecardUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableOrigin(s *string) *CertifyScorecardUpdate {
-	if s != nil {
-		csu.SetOrigin(*s)
+func (_u *CertifyScorecardUpdate) SetNillableOrigin(v *string) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (csu *CertifyScorecardUpdate) SetCollector(s string) *CertifyScorecardUpdate {
-	csu.mutation.SetCollector(s)
-	return csu
+func (_u *CertifyScorecardUpdate) SetCollector(v string) *CertifyScorecardUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableCollector(s *string) *CertifyScorecardUpdate {
-	if s != nil {
-		csu.SetCollector(*s)
+func (_u *CertifyScorecardUpdate) SetNillableCollector(v *string) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (csu *CertifyScorecardUpdate) SetDocumentRef(s string) *CertifyScorecardUpdate {
-	csu.mutation.SetDocumentRef(s)
-	return csu
+func (_u *CertifyScorecardUpdate) SetDocumentRef(v string) *CertifyScorecardUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableDocumentRef(s *string) *CertifyScorecardUpdate {
-	if s != nil {
-		csu.SetDocumentRef(*s)
+func (_u *CertifyScorecardUpdate) SetNillableDocumentRef(v *string) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetChecksHash sets the "checks_hash" field.
-func (csu *CertifyScorecardUpdate) SetChecksHash(s string) *CertifyScorecardUpdate {
-	csu.mutation.SetChecksHash(s)
-	return csu
+func (_u *CertifyScorecardUpdate) SetChecksHash(v string) *CertifyScorecardUpdate {
+	_u.mutation.SetChecksHash(v)
+	return _u
 }
 
 // SetNillableChecksHash sets the "checks_hash" field if the given value is not nil.
-func (csu *CertifyScorecardUpdate) SetNillableChecksHash(s *string) *CertifyScorecardUpdate {
-	if s != nil {
-		csu.SetChecksHash(*s)
+func (_u *CertifyScorecardUpdate) SetNillableChecksHash(v *string) *CertifyScorecardUpdate {
+	if v != nil {
+		_u.SetChecksHash(*v)
 	}
-	return csu
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (csu *CertifyScorecardUpdate) SetSource(s *SourceName) *CertifyScorecardUpdate {
-	return csu.SetSourceID(s.ID)
+func (_u *CertifyScorecardUpdate) SetSource(v *SourceName) *CertifyScorecardUpdate {
+	return _u.SetSourceID(v.ID)
 }
 
 // Mutation returns the CertifyScorecardMutation object of the builder.
-func (csu *CertifyScorecardUpdate) Mutation() *CertifyScorecardMutation {
-	return csu.mutation
+func (_u *CertifyScorecardUpdate) Mutation() *CertifyScorecardMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (csu *CertifyScorecardUpdate) ClearSource() *CertifyScorecardUpdate {
-	csu.mutation.ClearSource()
-	return csu
+func (_u *CertifyScorecardUpdate) ClearSource() *CertifyScorecardUpdate {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (csu *CertifyScorecardUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, csu.sqlSave, csu.mutation, csu.hooks)
+func (_u *CertifyScorecardUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (csu *CertifyScorecardUpdate) SaveX(ctx context.Context) int {
-	affected, err := csu.Save(ctx)
+func (_u *CertifyScorecardUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -208,74 +208,74 @@ func (csu *CertifyScorecardUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (csu *CertifyScorecardUpdate) Exec(ctx context.Context) error {
-	_, err := csu.Save(ctx)
+func (_u *CertifyScorecardUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (csu *CertifyScorecardUpdate) ExecX(ctx context.Context) {
-	if err := csu.Exec(ctx); err != nil {
+func (_u *CertifyScorecardUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (csu *CertifyScorecardUpdate) check() error {
-	if csu.mutation.SourceCleared() && len(csu.mutation.SourceIDs()) > 0 {
+func (_u *CertifyScorecardUpdate) check() error {
+	if _u.mutation.SourceCleared() && len(_u.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyScorecard.source"`)
 	}
 	return nil
 }
 
-func (csu *CertifyScorecardUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := csu.check(); err != nil {
-		return n, err
+func (_u *CertifyScorecardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certifyscorecard.Table, certifyscorecard.Columns, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
-	if ps := csu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := csu.mutation.Checks(); ok {
+	if value, ok := _u.mutation.Checks(); ok {
 		_spec.SetField(certifyscorecard.FieldChecks, field.TypeJSON, value)
 	}
-	if value, ok := csu.mutation.AppendedChecks(); ok {
+	if value, ok := _u.mutation.AppendedChecks(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, certifyscorecard.FieldChecks, value)
 		})
 	}
-	if value, ok := csu.mutation.AggregateScore(); ok {
+	if value, ok := _u.mutation.AggregateScore(); ok {
 		_spec.SetField(certifyscorecard.FieldAggregateScore, field.TypeFloat64, value)
 	}
-	if value, ok := csu.mutation.AddedAggregateScore(); ok {
+	if value, ok := _u.mutation.AddedAggregateScore(); ok {
 		_spec.AddField(certifyscorecard.FieldAggregateScore, field.TypeFloat64, value)
 	}
-	if value, ok := csu.mutation.TimeScanned(); ok {
+	if value, ok := _u.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyscorecard.FieldTimeScanned, field.TypeTime, value)
 	}
-	if value, ok := csu.mutation.ScorecardVersion(); ok {
+	if value, ok := _u.mutation.ScorecardVersion(); ok {
 		_spec.SetField(certifyscorecard.FieldScorecardVersion, field.TypeString, value)
 	}
-	if value, ok := csu.mutation.ScorecardCommit(); ok {
+	if value, ok := _u.mutation.ScorecardCommit(); ok {
 		_spec.SetField(certifyscorecard.FieldScorecardCommit, field.TypeString, value)
 	}
-	if value, ok := csu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifyscorecard.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := csu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := csu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyscorecard.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := csu.mutation.ChecksHash(); ok {
+	if value, ok := _u.mutation.ChecksHash(); ok {
 		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
 	}
-	if csu.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -288,7 +288,7 @@ func (csu *CertifyScorecardUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := csu.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -304,7 +304,7 @@ func (csu *CertifyScorecardUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, csu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifyscorecard.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -312,8 +312,8 @@ func (csu *CertifyScorecardUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		return 0, err
 	}
-	csu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // CertifyScorecardUpdateOne is the builder for updating a single CertifyScorecard entity.
@@ -325,187 +325,187 @@ type CertifyScorecardUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (csuo *CertifyScorecardUpdateOne) SetSourceID(u uuid.UUID) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetSourceID(u)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetSourceID(v uuid.UUID) *CertifyScorecardUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableSourceID(u *uuid.UUID) *CertifyScorecardUpdateOne {
-	if u != nil {
-		csuo.SetSourceID(*u)
+func (_u *CertifyScorecardUpdateOne) SetNillableSourceID(v *uuid.UUID) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetChecks sets the "checks" field.
-func (csuo *CertifyScorecardUpdateOne) SetChecks(mc []*model.ScorecardCheck) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetChecks(mc)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetChecks(v []*model.ScorecardCheck) *CertifyScorecardUpdateOne {
+	_u.mutation.SetChecks(v)
+	return _u
 }
 
-// AppendChecks appends mc to the "checks" field.
-func (csuo *CertifyScorecardUpdateOne) AppendChecks(mc []*model.ScorecardCheck) *CertifyScorecardUpdateOne {
-	csuo.mutation.AppendChecks(mc)
-	return csuo
+// AppendChecks appends value to the "checks" field.
+func (_u *CertifyScorecardUpdateOne) AppendChecks(v []*model.ScorecardCheck) *CertifyScorecardUpdateOne {
+	_u.mutation.AppendChecks(v)
+	return _u
 }
 
 // SetAggregateScore sets the "aggregate_score" field.
-func (csuo *CertifyScorecardUpdateOne) SetAggregateScore(f float64) *CertifyScorecardUpdateOne {
-	csuo.mutation.ResetAggregateScore()
-	csuo.mutation.SetAggregateScore(f)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetAggregateScore(v float64) *CertifyScorecardUpdateOne {
+	_u.mutation.ResetAggregateScore()
+	_u.mutation.SetAggregateScore(v)
+	return _u
 }
 
 // SetNillableAggregateScore sets the "aggregate_score" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableAggregateScore(f *float64) *CertifyScorecardUpdateOne {
-	if f != nil {
-		csuo.SetAggregateScore(*f)
+func (_u *CertifyScorecardUpdateOne) SetNillableAggregateScore(v *float64) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetAggregateScore(*v)
 	}
-	return csuo
+	return _u
 }
 
-// AddAggregateScore adds f to the "aggregate_score" field.
-func (csuo *CertifyScorecardUpdateOne) AddAggregateScore(f float64) *CertifyScorecardUpdateOne {
-	csuo.mutation.AddAggregateScore(f)
-	return csuo
+// AddAggregateScore adds value to the "aggregate_score" field.
+func (_u *CertifyScorecardUpdateOne) AddAggregateScore(v float64) *CertifyScorecardUpdateOne {
+	_u.mutation.AddAggregateScore(v)
+	return _u
 }
 
 // SetTimeScanned sets the "time_scanned" field.
-func (csuo *CertifyScorecardUpdateOne) SetTimeScanned(t time.Time) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetTimeScanned(t)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetTimeScanned(v time.Time) *CertifyScorecardUpdateOne {
+	_u.mutation.SetTimeScanned(v)
+	return _u
 }
 
 // SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableTimeScanned(t *time.Time) *CertifyScorecardUpdateOne {
-	if t != nil {
-		csuo.SetTimeScanned(*t)
+func (_u *CertifyScorecardUpdateOne) SetNillableTimeScanned(v *time.Time) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetTimeScanned(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetScorecardVersion sets the "scorecard_version" field.
-func (csuo *CertifyScorecardUpdateOne) SetScorecardVersion(s string) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetScorecardVersion(s)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetScorecardVersion(v string) *CertifyScorecardUpdateOne {
+	_u.mutation.SetScorecardVersion(v)
+	return _u
 }
 
 // SetNillableScorecardVersion sets the "scorecard_version" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableScorecardVersion(s *string) *CertifyScorecardUpdateOne {
-	if s != nil {
-		csuo.SetScorecardVersion(*s)
+func (_u *CertifyScorecardUpdateOne) SetNillableScorecardVersion(v *string) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetScorecardVersion(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetScorecardCommit sets the "scorecard_commit" field.
-func (csuo *CertifyScorecardUpdateOne) SetScorecardCommit(s string) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetScorecardCommit(s)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetScorecardCommit(v string) *CertifyScorecardUpdateOne {
+	_u.mutation.SetScorecardCommit(v)
+	return _u
 }
 
 // SetNillableScorecardCommit sets the "scorecard_commit" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableScorecardCommit(s *string) *CertifyScorecardUpdateOne {
-	if s != nil {
-		csuo.SetScorecardCommit(*s)
+func (_u *CertifyScorecardUpdateOne) SetNillableScorecardCommit(v *string) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetScorecardCommit(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (csuo *CertifyScorecardUpdateOne) SetOrigin(s string) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetOrigin(s)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetOrigin(v string) *CertifyScorecardUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableOrigin(s *string) *CertifyScorecardUpdateOne {
-	if s != nil {
-		csuo.SetOrigin(*s)
+func (_u *CertifyScorecardUpdateOne) SetNillableOrigin(v *string) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (csuo *CertifyScorecardUpdateOne) SetCollector(s string) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetCollector(s)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetCollector(v string) *CertifyScorecardUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableCollector(s *string) *CertifyScorecardUpdateOne {
-	if s != nil {
-		csuo.SetCollector(*s)
+func (_u *CertifyScorecardUpdateOne) SetNillableCollector(v *string) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (csuo *CertifyScorecardUpdateOne) SetDocumentRef(s string) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetDocumentRef(s)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetDocumentRef(v string) *CertifyScorecardUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableDocumentRef(s *string) *CertifyScorecardUpdateOne {
-	if s != nil {
-		csuo.SetDocumentRef(*s)
+func (_u *CertifyScorecardUpdateOne) SetNillableDocumentRef(v *string) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetChecksHash sets the "checks_hash" field.
-func (csuo *CertifyScorecardUpdateOne) SetChecksHash(s string) *CertifyScorecardUpdateOne {
-	csuo.mutation.SetChecksHash(s)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) SetChecksHash(v string) *CertifyScorecardUpdateOne {
+	_u.mutation.SetChecksHash(v)
+	return _u
 }
 
 // SetNillableChecksHash sets the "checks_hash" field if the given value is not nil.
-func (csuo *CertifyScorecardUpdateOne) SetNillableChecksHash(s *string) *CertifyScorecardUpdateOne {
-	if s != nil {
-		csuo.SetChecksHash(*s)
+func (_u *CertifyScorecardUpdateOne) SetNillableChecksHash(v *string) *CertifyScorecardUpdateOne {
+	if v != nil {
+		_u.SetChecksHash(*v)
 	}
-	return csuo
+	return _u
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (csuo *CertifyScorecardUpdateOne) SetSource(s *SourceName) *CertifyScorecardUpdateOne {
-	return csuo.SetSourceID(s.ID)
+func (_u *CertifyScorecardUpdateOne) SetSource(v *SourceName) *CertifyScorecardUpdateOne {
+	return _u.SetSourceID(v.ID)
 }
 
 // Mutation returns the CertifyScorecardMutation object of the builder.
-func (csuo *CertifyScorecardUpdateOne) Mutation() *CertifyScorecardMutation {
-	return csuo.mutation
+func (_u *CertifyScorecardUpdateOne) Mutation() *CertifyScorecardMutation {
+	return _u.mutation
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (csuo *CertifyScorecardUpdateOne) ClearSource() *CertifyScorecardUpdateOne {
-	csuo.mutation.ClearSource()
-	return csuo
+func (_u *CertifyScorecardUpdateOne) ClearSource() *CertifyScorecardUpdateOne {
+	_u.mutation.ClearSource()
+	return _u
 }
 
 // Where appends a list predicates to the CertifyScorecardUpdate builder.
-func (csuo *CertifyScorecardUpdateOne) Where(ps ...predicate.CertifyScorecard) *CertifyScorecardUpdateOne {
-	csuo.mutation.Where(ps...)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) Where(ps ...predicate.CertifyScorecard) *CertifyScorecardUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (csuo *CertifyScorecardUpdateOne) Select(field string, fields ...string) *CertifyScorecardUpdateOne {
-	csuo.fields = append([]string{field}, fields...)
-	return csuo
+func (_u *CertifyScorecardUpdateOne) Select(field string, fields ...string) *CertifyScorecardUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated CertifyScorecard entity.
-func (csuo *CertifyScorecardUpdateOne) Save(ctx context.Context) (*CertifyScorecard, error) {
-	return withHooks(ctx, csuo.sqlSave, csuo.mutation, csuo.hooks)
+func (_u *CertifyScorecardUpdateOne) Save(ctx context.Context) (*CertifyScorecard, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (csuo *CertifyScorecardUpdateOne) SaveX(ctx context.Context) *CertifyScorecard {
-	node, err := csuo.Save(ctx)
+func (_u *CertifyScorecardUpdateOne) SaveX(ctx context.Context) *CertifyScorecard {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -513,37 +513,37 @@ func (csuo *CertifyScorecardUpdateOne) SaveX(ctx context.Context) *CertifyScorec
 }
 
 // Exec executes the query on the entity.
-func (csuo *CertifyScorecardUpdateOne) Exec(ctx context.Context) error {
-	_, err := csuo.Save(ctx)
+func (_u *CertifyScorecardUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (csuo *CertifyScorecardUpdateOne) ExecX(ctx context.Context) {
-	if err := csuo.Exec(ctx); err != nil {
+func (_u *CertifyScorecardUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (csuo *CertifyScorecardUpdateOne) check() error {
-	if csuo.mutation.SourceCleared() && len(csuo.mutation.SourceIDs()) > 0 {
+func (_u *CertifyScorecardUpdateOne) check() error {
+	if _u.mutation.SourceCleared() && len(_u.mutation.SourceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "CertifyScorecard.source"`)
 	}
 	return nil
 }
 
-func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *CertifyScorecard, err error) {
-	if err := csuo.check(); err != nil {
+func (_u *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *CertifyScorecard, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certifyscorecard.Table, certifyscorecard.Columns, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
-	id, ok := csuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CertifyScorecard.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := csuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifyscorecard.FieldID)
 		for _, f := range fields {
@@ -555,49 +555,49 @@ func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Cert
 			}
 		}
 	}
-	if ps := csuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := csuo.mutation.Checks(); ok {
+	if value, ok := _u.mutation.Checks(); ok {
 		_spec.SetField(certifyscorecard.FieldChecks, field.TypeJSON, value)
 	}
-	if value, ok := csuo.mutation.AppendedChecks(); ok {
+	if value, ok := _u.mutation.AppendedChecks(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, certifyscorecard.FieldChecks, value)
 		})
 	}
-	if value, ok := csuo.mutation.AggregateScore(); ok {
+	if value, ok := _u.mutation.AggregateScore(); ok {
 		_spec.SetField(certifyscorecard.FieldAggregateScore, field.TypeFloat64, value)
 	}
-	if value, ok := csuo.mutation.AddedAggregateScore(); ok {
+	if value, ok := _u.mutation.AddedAggregateScore(); ok {
 		_spec.AddField(certifyscorecard.FieldAggregateScore, field.TypeFloat64, value)
 	}
-	if value, ok := csuo.mutation.TimeScanned(); ok {
+	if value, ok := _u.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyscorecard.FieldTimeScanned, field.TypeTime, value)
 	}
-	if value, ok := csuo.mutation.ScorecardVersion(); ok {
+	if value, ok := _u.mutation.ScorecardVersion(); ok {
 		_spec.SetField(certifyscorecard.FieldScorecardVersion, field.TypeString, value)
 	}
-	if value, ok := csuo.mutation.ScorecardCommit(); ok {
+	if value, ok := _u.mutation.ScorecardCommit(); ok {
 		_spec.SetField(certifyscorecard.FieldScorecardCommit, field.TypeString, value)
 	}
-	if value, ok := csuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(certifyscorecard.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := csuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := csuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(certifyscorecard.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := csuo.mutation.ChecksHash(); ok {
+	if value, ok := _u.mutation.ChecksHash(); ok {
 		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
 	}
-	if csuo.mutation.SourceCleared() {
+	if _u.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -610,7 +610,7 @@ func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Cert
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := csuo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -626,10 +626,10 @@ func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Cert
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &CertifyScorecard{config: csuo.config}
+	_node = &CertifyScorecard{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, csuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certifyscorecard.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -637,6 +637,6 @@ func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Cert
 		}
 		return nil, err
 	}
-	csuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

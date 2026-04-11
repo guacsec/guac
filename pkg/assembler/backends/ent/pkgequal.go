@@ -91,7 +91,7 @@ func (*PkgEqual) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the PkgEqual fields.
-func (pe *PkgEqual) assignValues(columns []string, values []any) error {
+func (_m *PkgEqual) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -101,52 +101,52 @@ func (pe *PkgEqual) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				pe.ID = *value
+				_m.ID = *value
 			}
 		case pkgequal.FieldPkgID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field pkg_id", values[i])
 			} else if value != nil {
-				pe.PkgID = *value
+				_m.PkgID = *value
 			}
 		case pkgequal.FieldEqualPkgID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field equal_pkg_id", values[i])
 			} else if value != nil {
-				pe.EqualPkgID = *value
+				_m.EqualPkgID = *value
 			}
 		case pkgequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				pe.Origin = value.String
+				_m.Origin = value.String
 			}
 		case pkgequal.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				pe.Collector = value.String
+				_m.Collector = value.String
 			}
 		case pkgequal.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				pe.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case pkgequal.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				pe.Justification = value.String
+				_m.Justification = value.String
 			}
 		case pkgequal.FieldPackagesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field packages_hash", values[i])
 			} else if value.Valid {
-				pe.PackagesHash = value.String
+				_m.PackagesHash = value.String
 			}
 		default:
-			pe.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -154,63 +154,63 @@ func (pe *PkgEqual) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the PkgEqual.
 // This includes values selected through modifiers, order, etc.
-func (pe *PkgEqual) Value(name string) (ent.Value, error) {
-	return pe.selectValues.Get(name)
+func (_m *PkgEqual) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPackageA queries the "package_a" edge of the PkgEqual entity.
-func (pe *PkgEqual) QueryPackageA() *PackageVersionQuery {
-	return NewPkgEqualClient(pe.config).QueryPackageA(pe)
+func (_m *PkgEqual) QueryPackageA() *PackageVersionQuery {
+	return NewPkgEqualClient(_m.config).QueryPackageA(_m)
 }
 
 // QueryPackageB queries the "package_b" edge of the PkgEqual entity.
-func (pe *PkgEqual) QueryPackageB() *PackageVersionQuery {
-	return NewPkgEqualClient(pe.config).QueryPackageB(pe)
+func (_m *PkgEqual) QueryPackageB() *PackageVersionQuery {
+	return NewPkgEqualClient(_m.config).QueryPackageB(_m)
 }
 
 // Update returns a builder for updating this PkgEqual.
 // Note that you need to call PkgEqual.Unwrap() before calling this method if this PkgEqual
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pe *PkgEqual) Update() *PkgEqualUpdateOne {
-	return NewPkgEqualClient(pe.config).UpdateOne(pe)
+func (_m *PkgEqual) Update() *PkgEqualUpdateOne {
+	return NewPkgEqualClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the PkgEqual entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pe *PkgEqual) Unwrap() *PkgEqual {
-	_tx, ok := pe.config.driver.(*txDriver)
+func (_m *PkgEqual) Unwrap() *PkgEqual {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: PkgEqual is not a transactional entity")
 	}
-	pe.config.driver = _tx.drv
-	return pe
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (pe *PkgEqual) String() string {
+func (_m *PkgEqual) String() string {
 	var builder strings.Builder
 	builder.WriteString("PkgEqual(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("pkg_id=")
-	builder.WriteString(fmt.Sprintf("%v", pe.PkgID))
+	builder.WriteString(fmt.Sprintf("%v", _m.PkgID))
 	builder.WriteString(", ")
 	builder.WriteString("equal_pkg_id=")
-	builder.WriteString(fmt.Sprintf("%v", pe.EqualPkgID))
+	builder.WriteString(fmt.Sprintf("%v", _m.EqualPkgID))
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(pe.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(pe.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(pe.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(pe.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("packages_hash=")
-	builder.WriteString(pe.PackagesHash)
+	builder.WriteString(_m.PackagesHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

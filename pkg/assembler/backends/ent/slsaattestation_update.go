@@ -28,240 +28,240 @@ type SLSAAttestationUpdate struct {
 }
 
 // Where appends a list predicates to the SLSAAttestationUpdate builder.
-func (sau *SLSAAttestationUpdate) Where(ps ...predicate.SLSAAttestation) *SLSAAttestationUpdate {
-	sau.mutation.Where(ps...)
-	return sau
+func (_u *SLSAAttestationUpdate) Where(ps ...predicate.SLSAAttestation) *SLSAAttestationUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetBuildType sets the "build_type" field.
-func (sau *SLSAAttestationUpdate) SetBuildType(s string) *SLSAAttestationUpdate {
-	sau.mutation.SetBuildType(s)
-	return sau
+func (_u *SLSAAttestationUpdate) SetBuildType(v string) *SLSAAttestationUpdate {
+	_u.mutation.SetBuildType(v)
+	return _u
 }
 
 // SetNillableBuildType sets the "build_type" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableBuildType(s *string) *SLSAAttestationUpdate {
-	if s != nil {
-		sau.SetBuildType(*s)
+func (_u *SLSAAttestationUpdate) SetNillableBuildType(v *string) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetBuildType(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (sau *SLSAAttestationUpdate) SetBuiltByID(u uuid.UUID) *SLSAAttestationUpdate {
-	sau.mutation.SetBuiltByID(u)
-	return sau
+func (_u *SLSAAttestationUpdate) SetBuiltByID(v uuid.UUID) *SLSAAttestationUpdate {
+	_u.mutation.SetBuiltByID(v)
+	return _u
 }
 
 // SetNillableBuiltByID sets the "built_by_id" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableBuiltByID(u *uuid.UUID) *SLSAAttestationUpdate {
-	if u != nil {
-		sau.SetBuiltByID(*u)
+func (_u *SLSAAttestationUpdate) SetNillableBuiltByID(v *uuid.UUID) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetBuiltByID(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (sau *SLSAAttestationUpdate) SetSubjectID(u uuid.UUID) *SLSAAttestationUpdate {
-	sau.mutation.SetSubjectID(u)
-	return sau
+func (_u *SLSAAttestationUpdate) SetSubjectID(v uuid.UUID) *SLSAAttestationUpdate {
+	_u.mutation.SetSubjectID(v)
+	return _u
 }
 
 // SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableSubjectID(u *uuid.UUID) *SLSAAttestationUpdate {
-	if u != nil {
-		sau.SetSubjectID(*u)
+func (_u *SLSAAttestationUpdate) SetNillableSubjectID(v *uuid.UUID) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetSubjectID(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetSlsaPredicate sets the "slsa_predicate" field.
-func (sau *SLSAAttestationUpdate) SetSlsaPredicate(mp []*model.SLSAPredicate) *SLSAAttestationUpdate {
-	sau.mutation.SetSlsaPredicate(mp)
-	return sau
+func (_u *SLSAAttestationUpdate) SetSlsaPredicate(v []*model.SLSAPredicate) *SLSAAttestationUpdate {
+	_u.mutation.SetSlsaPredicate(v)
+	return _u
 }
 
-// AppendSlsaPredicate appends mp to the "slsa_predicate" field.
-func (sau *SLSAAttestationUpdate) AppendSlsaPredicate(mp []*model.SLSAPredicate) *SLSAAttestationUpdate {
-	sau.mutation.AppendSlsaPredicate(mp)
-	return sau
+// AppendSlsaPredicate appends value to the "slsa_predicate" field.
+func (_u *SLSAAttestationUpdate) AppendSlsaPredicate(v []*model.SLSAPredicate) *SLSAAttestationUpdate {
+	_u.mutation.AppendSlsaPredicate(v)
+	return _u
 }
 
 // ClearSlsaPredicate clears the value of the "slsa_predicate" field.
-func (sau *SLSAAttestationUpdate) ClearSlsaPredicate() *SLSAAttestationUpdate {
-	sau.mutation.ClearSlsaPredicate()
-	return sau
+func (_u *SLSAAttestationUpdate) ClearSlsaPredicate() *SLSAAttestationUpdate {
+	_u.mutation.ClearSlsaPredicate()
+	return _u
 }
 
 // SetSlsaVersion sets the "slsa_version" field.
-func (sau *SLSAAttestationUpdate) SetSlsaVersion(s string) *SLSAAttestationUpdate {
-	sau.mutation.SetSlsaVersion(s)
-	return sau
+func (_u *SLSAAttestationUpdate) SetSlsaVersion(v string) *SLSAAttestationUpdate {
+	_u.mutation.SetSlsaVersion(v)
+	return _u
 }
 
 // SetNillableSlsaVersion sets the "slsa_version" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableSlsaVersion(s *string) *SLSAAttestationUpdate {
-	if s != nil {
-		sau.SetSlsaVersion(*s)
+func (_u *SLSAAttestationUpdate) SetNillableSlsaVersion(v *string) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetSlsaVersion(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetStartedOn sets the "started_on" field.
-func (sau *SLSAAttestationUpdate) SetStartedOn(t time.Time) *SLSAAttestationUpdate {
-	sau.mutation.SetStartedOn(t)
-	return sau
+func (_u *SLSAAttestationUpdate) SetStartedOn(v time.Time) *SLSAAttestationUpdate {
+	_u.mutation.SetStartedOn(v)
+	return _u
 }
 
 // SetNillableStartedOn sets the "started_on" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableStartedOn(t *time.Time) *SLSAAttestationUpdate {
-	if t != nil {
-		sau.SetStartedOn(*t)
+func (_u *SLSAAttestationUpdate) SetNillableStartedOn(v *time.Time) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetStartedOn(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetFinishedOn sets the "finished_on" field.
-func (sau *SLSAAttestationUpdate) SetFinishedOn(t time.Time) *SLSAAttestationUpdate {
-	sau.mutation.SetFinishedOn(t)
-	return sau
+func (_u *SLSAAttestationUpdate) SetFinishedOn(v time.Time) *SLSAAttestationUpdate {
+	_u.mutation.SetFinishedOn(v)
+	return _u
 }
 
 // SetNillableFinishedOn sets the "finished_on" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableFinishedOn(t *time.Time) *SLSAAttestationUpdate {
-	if t != nil {
-		sau.SetFinishedOn(*t)
+func (_u *SLSAAttestationUpdate) SetNillableFinishedOn(v *time.Time) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetFinishedOn(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (sau *SLSAAttestationUpdate) SetOrigin(s string) *SLSAAttestationUpdate {
-	sau.mutation.SetOrigin(s)
-	return sau
+func (_u *SLSAAttestationUpdate) SetOrigin(v string) *SLSAAttestationUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableOrigin(s *string) *SLSAAttestationUpdate {
-	if s != nil {
-		sau.SetOrigin(*s)
+func (_u *SLSAAttestationUpdate) SetNillableOrigin(v *string) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (sau *SLSAAttestationUpdate) SetCollector(s string) *SLSAAttestationUpdate {
-	sau.mutation.SetCollector(s)
-	return sau
+func (_u *SLSAAttestationUpdate) SetCollector(v string) *SLSAAttestationUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableCollector(s *string) *SLSAAttestationUpdate {
-	if s != nil {
-		sau.SetCollector(*s)
+func (_u *SLSAAttestationUpdate) SetNillableCollector(v *string) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (sau *SLSAAttestationUpdate) SetDocumentRef(s string) *SLSAAttestationUpdate {
-	sau.mutation.SetDocumentRef(s)
-	return sau
+func (_u *SLSAAttestationUpdate) SetDocumentRef(v string) *SLSAAttestationUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableDocumentRef(s *string) *SLSAAttestationUpdate {
-	if s != nil {
-		sau.SetDocumentRef(*s)
+func (_u *SLSAAttestationUpdate) SetNillableDocumentRef(v *string) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return sau
+	return _u
 }
 
 // SetBuiltFromHash sets the "built_from_hash" field.
-func (sau *SLSAAttestationUpdate) SetBuiltFromHash(s string) *SLSAAttestationUpdate {
-	sau.mutation.SetBuiltFromHash(s)
-	return sau
+func (_u *SLSAAttestationUpdate) SetBuiltFromHash(v string) *SLSAAttestationUpdate {
+	_u.mutation.SetBuiltFromHash(v)
+	return _u
 }
 
 // SetNillableBuiltFromHash sets the "built_from_hash" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableBuiltFromHash(s *string) *SLSAAttestationUpdate {
-	if s != nil {
-		sau.SetBuiltFromHash(*s)
+func (_u *SLSAAttestationUpdate) SetNillableBuiltFromHash(v *string) *SLSAAttestationUpdate {
+	if v != nil {
+		_u.SetBuiltFromHash(*v)
 	}
-	return sau
+	return _u
 }
 
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
-func (sau *SLSAAttestationUpdate) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdate {
-	sau.mutation.AddBuiltFromIDs(ids...)
-	return sau
+func (_u *SLSAAttestationUpdate) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdate {
+	_u.mutation.AddBuiltFromIDs(ids...)
+	return _u
 }
 
 // AddBuiltFrom adds the "built_from" edges to the Artifact entity.
-func (sau *SLSAAttestationUpdate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *SLSAAttestationUpdate) AddBuiltFrom(v ...*Artifact) *SLSAAttestationUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sau.AddBuiltFromIDs(ids...)
+	return _u.AddBuiltFromIDs(ids...)
 }
 
 // SetBuiltBy sets the "built_by" edge to the Builder entity.
-func (sau *SLSAAttestationUpdate) SetBuiltBy(b *Builder) *SLSAAttestationUpdate {
-	return sau.SetBuiltByID(b.ID)
+func (_u *SLSAAttestationUpdate) SetBuiltBy(v *Builder) *SLSAAttestationUpdate {
+	return _u.SetBuiltByID(v.ID)
 }
 
 // SetSubject sets the "subject" edge to the Artifact entity.
-func (sau *SLSAAttestationUpdate) SetSubject(a *Artifact) *SLSAAttestationUpdate {
-	return sau.SetSubjectID(a.ID)
+func (_u *SLSAAttestationUpdate) SetSubject(v *Artifact) *SLSAAttestationUpdate {
+	return _u.SetSubjectID(v.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
-func (sau *SLSAAttestationUpdate) Mutation() *SLSAAttestationMutation {
-	return sau.mutation
+func (_u *SLSAAttestationUpdate) Mutation() *SLSAAttestationMutation {
+	return _u.mutation
 }
 
 // ClearBuiltFrom clears all "built_from" edges to the Artifact entity.
-func (sau *SLSAAttestationUpdate) ClearBuiltFrom() *SLSAAttestationUpdate {
-	sau.mutation.ClearBuiltFrom()
-	return sau
+func (_u *SLSAAttestationUpdate) ClearBuiltFrom() *SLSAAttestationUpdate {
+	_u.mutation.ClearBuiltFrom()
+	return _u
 }
 
 // RemoveBuiltFromIDs removes the "built_from" edge to Artifact entities by IDs.
-func (sau *SLSAAttestationUpdate) RemoveBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdate {
-	sau.mutation.RemoveBuiltFromIDs(ids...)
-	return sau
+func (_u *SLSAAttestationUpdate) RemoveBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdate {
+	_u.mutation.RemoveBuiltFromIDs(ids...)
+	return _u
 }
 
 // RemoveBuiltFrom removes "built_from" edges to Artifact entities.
-func (sau *SLSAAttestationUpdate) RemoveBuiltFrom(a ...*Artifact) *SLSAAttestationUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *SLSAAttestationUpdate) RemoveBuiltFrom(v ...*Artifact) *SLSAAttestationUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sau.RemoveBuiltFromIDs(ids...)
+	return _u.RemoveBuiltFromIDs(ids...)
 }
 
 // ClearBuiltBy clears the "built_by" edge to the Builder entity.
-func (sau *SLSAAttestationUpdate) ClearBuiltBy() *SLSAAttestationUpdate {
-	sau.mutation.ClearBuiltBy()
-	return sau
+func (_u *SLSAAttestationUpdate) ClearBuiltBy() *SLSAAttestationUpdate {
+	_u.mutation.ClearBuiltBy()
+	return _u
 }
 
 // ClearSubject clears the "subject" edge to the Artifact entity.
-func (sau *SLSAAttestationUpdate) ClearSubject() *SLSAAttestationUpdate {
-	sau.mutation.ClearSubject()
-	return sau
+func (_u *SLSAAttestationUpdate) ClearSubject() *SLSAAttestationUpdate {
+	_u.mutation.ClearSubject()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (sau *SLSAAttestationUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, sau.sqlSave, sau.mutation, sau.hooks)
+func (_u *SLSAAttestationUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sau *SLSAAttestationUpdate) SaveX(ctx context.Context) int {
-	affected, err := sau.Save(ctx)
+func (_u *SLSAAttestationUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,77 +269,77 @@ func (sau *SLSAAttestationUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (sau *SLSAAttestationUpdate) Exec(ctx context.Context) error {
-	_, err := sau.Save(ctx)
+func (_u *SLSAAttestationUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sau *SLSAAttestationUpdate) ExecX(ctx context.Context) {
-	if err := sau.Exec(ctx); err != nil {
+func (_u *SLSAAttestationUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sau *SLSAAttestationUpdate) check() error {
-	if sau.mutation.BuiltByCleared() && len(sau.mutation.BuiltByIDs()) > 0 {
+func (_u *SLSAAttestationUpdate) check() error {
+	if _u.mutation.BuiltByCleared() && len(_u.mutation.BuiltByIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.built_by"`)
 	}
-	if sau.mutation.SubjectCleared() && len(sau.mutation.SubjectIDs()) > 0 {
+	if _u.mutation.SubjectCleared() && len(_u.mutation.SubjectIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.subject"`)
 	}
 	return nil
 }
 
-func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := sau.check(); err != nil {
-		return n, err
+func (_u *SLSAAttestationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
-	if ps := sau.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := sau.mutation.BuildType(); ok {
+	if value, ok := _u.mutation.BuildType(); ok {
 		_spec.SetField(slsaattestation.FieldBuildType, field.TypeString, value)
 	}
-	if value, ok := sau.mutation.SlsaPredicate(); ok {
+	if value, ok := _u.mutation.SlsaPredicate(); ok {
 		_spec.SetField(slsaattestation.FieldSlsaPredicate, field.TypeJSON, value)
 	}
-	if value, ok := sau.mutation.AppendedSlsaPredicate(); ok {
+	if value, ok := _u.mutation.AppendedSlsaPredicate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, slsaattestation.FieldSlsaPredicate, value)
 		})
 	}
-	if sau.mutation.SlsaPredicateCleared() {
+	if _u.mutation.SlsaPredicateCleared() {
 		_spec.ClearField(slsaattestation.FieldSlsaPredicate, field.TypeJSON)
 	}
-	if value, ok := sau.mutation.SlsaVersion(); ok {
+	if value, ok := _u.mutation.SlsaVersion(); ok {
 		_spec.SetField(slsaattestation.FieldSlsaVersion, field.TypeString, value)
 	}
-	if value, ok := sau.mutation.StartedOn(); ok {
+	if value, ok := _u.mutation.StartedOn(); ok {
 		_spec.SetField(slsaattestation.FieldStartedOn, field.TypeTime, value)
 	}
-	if value, ok := sau.mutation.FinishedOn(); ok {
+	if value, ok := _u.mutation.FinishedOn(); ok {
 		_spec.SetField(slsaattestation.FieldFinishedOn, field.TypeTime, value)
 	}
-	if value, ok := sau.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(slsaattestation.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := sau.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := sau.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(slsaattestation.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := sau.mutation.BuiltFromHash(); ok {
+	if value, ok := _u.mutation.BuiltFromHash(); ok {
 		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
 	}
-	if sau.mutation.BuiltFromCleared() {
+	if _u.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -352,7 +352,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sau.mutation.RemovedBuiltFromIDs(); len(nodes) > 0 && !sau.mutation.BuiltFromCleared() {
+	if nodes := _u.mutation.RemovedBuiltFromIDs(); len(nodes) > 0 && !_u.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -368,7 +368,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sau.mutation.BuiltFromIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -384,7 +384,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if sau.mutation.BuiltByCleared() {
+	if _u.mutation.BuiltByCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -397,7 +397,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sau.mutation.BuiltByIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -413,7 +413,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if sau.mutation.SubjectCleared() {
+	if _u.mutation.SubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -426,7 +426,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sau.mutation.SubjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -442,7 +442,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, sau.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{slsaattestation.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -450,8 +450,8 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		return 0, err
 	}
-	sau.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // SLSAAttestationUpdateOne is the builder for updating a single SLSAAttestation entity.
@@ -463,247 +463,247 @@ type SLSAAttestationUpdateOne struct {
 }
 
 // SetBuildType sets the "build_type" field.
-func (sauo *SLSAAttestationUpdateOne) SetBuildType(s string) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetBuildType(s)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetBuildType(v string) *SLSAAttestationUpdateOne {
+	_u.mutation.SetBuildType(v)
+	return _u
 }
 
 // SetNillableBuildType sets the "build_type" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableBuildType(s *string) *SLSAAttestationUpdateOne {
-	if s != nil {
-		sauo.SetBuildType(*s)
+func (_u *SLSAAttestationUpdateOne) SetNillableBuildType(v *string) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetBuildType(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (sauo *SLSAAttestationUpdateOne) SetBuiltByID(u uuid.UUID) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetBuiltByID(u)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetBuiltByID(v uuid.UUID) *SLSAAttestationUpdateOne {
+	_u.mutation.SetBuiltByID(v)
+	return _u
 }
 
 // SetNillableBuiltByID sets the "built_by_id" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltByID(u *uuid.UUID) *SLSAAttestationUpdateOne {
-	if u != nil {
-		sauo.SetBuiltByID(*u)
+func (_u *SLSAAttestationUpdateOne) SetNillableBuiltByID(v *uuid.UUID) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetBuiltByID(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (sauo *SLSAAttestationUpdateOne) SetSubjectID(u uuid.UUID) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetSubjectID(u)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetSubjectID(v uuid.UUID) *SLSAAttestationUpdateOne {
+	_u.mutation.SetSubjectID(v)
+	return _u
 }
 
 // SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableSubjectID(u *uuid.UUID) *SLSAAttestationUpdateOne {
-	if u != nil {
-		sauo.SetSubjectID(*u)
+func (_u *SLSAAttestationUpdateOne) SetNillableSubjectID(v *uuid.UUID) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetSubjectID(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetSlsaPredicate sets the "slsa_predicate" field.
-func (sauo *SLSAAttestationUpdateOne) SetSlsaPredicate(mp []*model.SLSAPredicate) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetSlsaPredicate(mp)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetSlsaPredicate(v []*model.SLSAPredicate) *SLSAAttestationUpdateOne {
+	_u.mutation.SetSlsaPredicate(v)
+	return _u
 }
 
-// AppendSlsaPredicate appends mp to the "slsa_predicate" field.
-func (sauo *SLSAAttestationUpdateOne) AppendSlsaPredicate(mp []*model.SLSAPredicate) *SLSAAttestationUpdateOne {
-	sauo.mutation.AppendSlsaPredicate(mp)
-	return sauo
+// AppendSlsaPredicate appends value to the "slsa_predicate" field.
+func (_u *SLSAAttestationUpdateOne) AppendSlsaPredicate(v []*model.SLSAPredicate) *SLSAAttestationUpdateOne {
+	_u.mutation.AppendSlsaPredicate(v)
+	return _u
 }
 
 // ClearSlsaPredicate clears the value of the "slsa_predicate" field.
-func (sauo *SLSAAttestationUpdateOne) ClearSlsaPredicate() *SLSAAttestationUpdateOne {
-	sauo.mutation.ClearSlsaPredicate()
-	return sauo
+func (_u *SLSAAttestationUpdateOne) ClearSlsaPredicate() *SLSAAttestationUpdateOne {
+	_u.mutation.ClearSlsaPredicate()
+	return _u
 }
 
 // SetSlsaVersion sets the "slsa_version" field.
-func (sauo *SLSAAttestationUpdateOne) SetSlsaVersion(s string) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetSlsaVersion(s)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetSlsaVersion(v string) *SLSAAttestationUpdateOne {
+	_u.mutation.SetSlsaVersion(v)
+	return _u
 }
 
 // SetNillableSlsaVersion sets the "slsa_version" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableSlsaVersion(s *string) *SLSAAttestationUpdateOne {
-	if s != nil {
-		sauo.SetSlsaVersion(*s)
+func (_u *SLSAAttestationUpdateOne) SetNillableSlsaVersion(v *string) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetSlsaVersion(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetStartedOn sets the "started_on" field.
-func (sauo *SLSAAttestationUpdateOne) SetStartedOn(t time.Time) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetStartedOn(t)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetStartedOn(v time.Time) *SLSAAttestationUpdateOne {
+	_u.mutation.SetStartedOn(v)
+	return _u
 }
 
 // SetNillableStartedOn sets the "started_on" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableStartedOn(t *time.Time) *SLSAAttestationUpdateOne {
-	if t != nil {
-		sauo.SetStartedOn(*t)
+func (_u *SLSAAttestationUpdateOne) SetNillableStartedOn(v *time.Time) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetStartedOn(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetFinishedOn sets the "finished_on" field.
-func (sauo *SLSAAttestationUpdateOne) SetFinishedOn(t time.Time) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetFinishedOn(t)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetFinishedOn(v time.Time) *SLSAAttestationUpdateOne {
+	_u.mutation.SetFinishedOn(v)
+	return _u
 }
 
 // SetNillableFinishedOn sets the "finished_on" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableFinishedOn(t *time.Time) *SLSAAttestationUpdateOne {
-	if t != nil {
-		sauo.SetFinishedOn(*t)
+func (_u *SLSAAttestationUpdateOne) SetNillableFinishedOn(v *time.Time) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetFinishedOn(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (sauo *SLSAAttestationUpdateOne) SetOrigin(s string) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetOrigin(s)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetOrigin(v string) *SLSAAttestationUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableOrigin(s *string) *SLSAAttestationUpdateOne {
-	if s != nil {
-		sauo.SetOrigin(*s)
+func (_u *SLSAAttestationUpdateOne) SetNillableOrigin(v *string) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (sauo *SLSAAttestationUpdateOne) SetCollector(s string) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetCollector(s)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetCollector(v string) *SLSAAttestationUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableCollector(s *string) *SLSAAttestationUpdateOne {
-	if s != nil {
-		sauo.SetCollector(*s)
+func (_u *SLSAAttestationUpdateOne) SetNillableCollector(v *string) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (sauo *SLSAAttestationUpdateOne) SetDocumentRef(s string) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetDocumentRef(s)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetDocumentRef(v string) *SLSAAttestationUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableDocumentRef(s *string) *SLSAAttestationUpdateOne {
-	if s != nil {
-		sauo.SetDocumentRef(*s)
+func (_u *SLSAAttestationUpdateOne) SetNillableDocumentRef(v *string) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return sauo
+	return _u
 }
 
 // SetBuiltFromHash sets the "built_from_hash" field.
-func (sauo *SLSAAttestationUpdateOne) SetBuiltFromHash(s string) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetBuiltFromHash(s)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) SetBuiltFromHash(v string) *SLSAAttestationUpdateOne {
+	_u.mutation.SetBuiltFromHash(v)
+	return _u
 }
 
 // SetNillableBuiltFromHash sets the "built_from_hash" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltFromHash(s *string) *SLSAAttestationUpdateOne {
-	if s != nil {
-		sauo.SetBuiltFromHash(*s)
+func (_u *SLSAAttestationUpdateOne) SetNillableBuiltFromHash(v *string) *SLSAAttestationUpdateOne {
+	if v != nil {
+		_u.SetBuiltFromHash(*v)
 	}
-	return sauo
+	return _u
 }
 
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
-func (sauo *SLSAAttestationUpdateOne) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdateOne {
-	sauo.mutation.AddBuiltFromIDs(ids...)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdateOne {
+	_u.mutation.AddBuiltFromIDs(ids...)
+	return _u
 }
 
 // AddBuiltFrom adds the "built_from" edges to the Artifact entity.
-func (sauo *SLSAAttestationUpdateOne) AddBuiltFrom(a ...*Artifact) *SLSAAttestationUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *SLSAAttestationUpdateOne) AddBuiltFrom(v ...*Artifact) *SLSAAttestationUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sauo.AddBuiltFromIDs(ids...)
+	return _u.AddBuiltFromIDs(ids...)
 }
 
 // SetBuiltBy sets the "built_by" edge to the Builder entity.
-func (sauo *SLSAAttestationUpdateOne) SetBuiltBy(b *Builder) *SLSAAttestationUpdateOne {
-	return sauo.SetBuiltByID(b.ID)
+func (_u *SLSAAttestationUpdateOne) SetBuiltBy(v *Builder) *SLSAAttestationUpdateOne {
+	return _u.SetBuiltByID(v.ID)
 }
 
 // SetSubject sets the "subject" edge to the Artifact entity.
-func (sauo *SLSAAttestationUpdateOne) SetSubject(a *Artifact) *SLSAAttestationUpdateOne {
-	return sauo.SetSubjectID(a.ID)
+func (_u *SLSAAttestationUpdateOne) SetSubject(v *Artifact) *SLSAAttestationUpdateOne {
+	return _u.SetSubjectID(v.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
-func (sauo *SLSAAttestationUpdateOne) Mutation() *SLSAAttestationMutation {
-	return sauo.mutation
+func (_u *SLSAAttestationUpdateOne) Mutation() *SLSAAttestationMutation {
+	return _u.mutation
 }
 
 // ClearBuiltFrom clears all "built_from" edges to the Artifact entity.
-func (sauo *SLSAAttestationUpdateOne) ClearBuiltFrom() *SLSAAttestationUpdateOne {
-	sauo.mutation.ClearBuiltFrom()
-	return sauo
+func (_u *SLSAAttestationUpdateOne) ClearBuiltFrom() *SLSAAttestationUpdateOne {
+	_u.mutation.ClearBuiltFrom()
+	return _u
 }
 
 // RemoveBuiltFromIDs removes the "built_from" edge to Artifact entities by IDs.
-func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdateOne {
-	sauo.mutation.RemoveBuiltFromIDs(ids...)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) RemoveBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdateOne {
+	_u.mutation.RemoveBuiltFromIDs(ids...)
+	return _u
 }
 
 // RemoveBuiltFrom removes "built_from" edges to Artifact entities.
-func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFrom(a ...*Artifact) *SLSAAttestationUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *SLSAAttestationUpdateOne) RemoveBuiltFrom(v ...*Artifact) *SLSAAttestationUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sauo.RemoveBuiltFromIDs(ids...)
+	return _u.RemoveBuiltFromIDs(ids...)
 }
 
 // ClearBuiltBy clears the "built_by" edge to the Builder entity.
-func (sauo *SLSAAttestationUpdateOne) ClearBuiltBy() *SLSAAttestationUpdateOne {
-	sauo.mutation.ClearBuiltBy()
-	return sauo
+func (_u *SLSAAttestationUpdateOne) ClearBuiltBy() *SLSAAttestationUpdateOne {
+	_u.mutation.ClearBuiltBy()
+	return _u
 }
 
 // ClearSubject clears the "subject" edge to the Artifact entity.
-func (sauo *SLSAAttestationUpdateOne) ClearSubject() *SLSAAttestationUpdateOne {
-	sauo.mutation.ClearSubject()
-	return sauo
+func (_u *SLSAAttestationUpdateOne) ClearSubject() *SLSAAttestationUpdateOne {
+	_u.mutation.ClearSubject()
+	return _u
 }
 
 // Where appends a list predicates to the SLSAAttestationUpdate builder.
-func (sauo *SLSAAttestationUpdateOne) Where(ps ...predicate.SLSAAttestation) *SLSAAttestationUpdateOne {
-	sauo.mutation.Where(ps...)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) Where(ps ...predicate.SLSAAttestation) *SLSAAttestationUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (sauo *SLSAAttestationUpdateOne) Select(field string, fields ...string) *SLSAAttestationUpdateOne {
-	sauo.fields = append([]string{field}, fields...)
-	return sauo
+func (_u *SLSAAttestationUpdateOne) Select(field string, fields ...string) *SLSAAttestationUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated SLSAAttestation entity.
-func (sauo *SLSAAttestationUpdateOne) Save(ctx context.Context) (*SLSAAttestation, error) {
-	return withHooks(ctx, sauo.sqlSave, sauo.mutation, sauo.hooks)
+func (_u *SLSAAttestationUpdateOne) Save(ctx context.Context) (*SLSAAttestation, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sauo *SLSAAttestationUpdateOne) SaveX(ctx context.Context) *SLSAAttestation {
-	node, err := sauo.Save(ctx)
+func (_u *SLSAAttestationUpdateOne) SaveX(ctx context.Context) *SLSAAttestation {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -711,40 +711,40 @@ func (sauo *SLSAAttestationUpdateOne) SaveX(ctx context.Context) *SLSAAttestatio
 }
 
 // Exec executes the query on the entity.
-func (sauo *SLSAAttestationUpdateOne) Exec(ctx context.Context) error {
-	_, err := sauo.Save(ctx)
+func (_u *SLSAAttestationUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sauo *SLSAAttestationUpdateOne) ExecX(ctx context.Context) {
-	if err := sauo.Exec(ctx); err != nil {
+func (_u *SLSAAttestationUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sauo *SLSAAttestationUpdateOne) check() error {
-	if sauo.mutation.BuiltByCleared() && len(sauo.mutation.BuiltByIDs()) > 0 {
+func (_u *SLSAAttestationUpdateOne) check() error {
+	if _u.mutation.BuiltByCleared() && len(_u.mutation.BuiltByIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.built_by"`)
 	}
-	if sauo.mutation.SubjectCleared() && len(sauo.mutation.SubjectIDs()) > 0 {
+	if _u.mutation.SubjectCleared() && len(_u.mutation.SubjectIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SLSAAttestation.subject"`)
 	}
 	return nil
 }
 
-func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAAttestation, err error) {
-	if err := sauo.check(); err != nil {
+func (_u *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAAttestation, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
-	id, ok := sauo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SLSAAttestation.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := sauo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, slsaattestation.FieldID)
 		for _, f := range fields {
@@ -756,49 +756,49 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			}
 		}
 	}
-	if ps := sauo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := sauo.mutation.BuildType(); ok {
+	if value, ok := _u.mutation.BuildType(); ok {
 		_spec.SetField(slsaattestation.FieldBuildType, field.TypeString, value)
 	}
-	if value, ok := sauo.mutation.SlsaPredicate(); ok {
+	if value, ok := _u.mutation.SlsaPredicate(); ok {
 		_spec.SetField(slsaattestation.FieldSlsaPredicate, field.TypeJSON, value)
 	}
-	if value, ok := sauo.mutation.AppendedSlsaPredicate(); ok {
+	if value, ok := _u.mutation.AppendedSlsaPredicate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, slsaattestation.FieldSlsaPredicate, value)
 		})
 	}
-	if sauo.mutation.SlsaPredicateCleared() {
+	if _u.mutation.SlsaPredicateCleared() {
 		_spec.ClearField(slsaattestation.FieldSlsaPredicate, field.TypeJSON)
 	}
-	if value, ok := sauo.mutation.SlsaVersion(); ok {
+	if value, ok := _u.mutation.SlsaVersion(); ok {
 		_spec.SetField(slsaattestation.FieldSlsaVersion, field.TypeString, value)
 	}
-	if value, ok := sauo.mutation.StartedOn(); ok {
+	if value, ok := _u.mutation.StartedOn(); ok {
 		_spec.SetField(slsaattestation.FieldStartedOn, field.TypeTime, value)
 	}
-	if value, ok := sauo.mutation.FinishedOn(); ok {
+	if value, ok := _u.mutation.FinishedOn(); ok {
 		_spec.SetField(slsaattestation.FieldFinishedOn, field.TypeTime, value)
 	}
-	if value, ok := sauo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(slsaattestation.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := sauo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := sauo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(slsaattestation.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := sauo.mutation.BuiltFromHash(); ok {
+	if value, ok := _u.mutation.BuiltFromHash(); ok {
 		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
 	}
-	if sauo.mutation.BuiltFromCleared() {
+	if _u.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -811,7 +811,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sauo.mutation.RemovedBuiltFromIDs(); len(nodes) > 0 && !sauo.mutation.BuiltFromCleared() {
+	if nodes := _u.mutation.RemovedBuiltFromIDs(); len(nodes) > 0 && !_u.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -827,7 +827,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sauo.mutation.BuiltFromIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -843,7 +843,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if sauo.mutation.BuiltByCleared() {
+	if _u.mutation.BuiltByCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -856,7 +856,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sauo.mutation.BuiltByIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -872,7 +872,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if sauo.mutation.SubjectCleared() {
+	if _u.mutation.SubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -885,7 +885,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sauo.mutation.SubjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -901,10 +901,10 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &SLSAAttestation{config: sauo.config}
+	_node = &SLSAAttestation{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, sauo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{slsaattestation.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -912,6 +912,6 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 		}
 		return nil, err
 	}
-	sauo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

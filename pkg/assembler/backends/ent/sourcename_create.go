@@ -31,184 +31,184 @@ type SourceNameCreate struct {
 }
 
 // SetType sets the "type" field.
-func (snc *SourceNameCreate) SetType(s string) *SourceNameCreate {
-	snc.mutation.SetType(s)
-	return snc
+func (_c *SourceNameCreate) SetType(v string) *SourceNameCreate {
+	_c.mutation.SetType(v)
+	return _c
 }
 
 // SetNamespace sets the "namespace" field.
-func (snc *SourceNameCreate) SetNamespace(s string) *SourceNameCreate {
-	snc.mutation.SetNamespace(s)
-	return snc
+func (_c *SourceNameCreate) SetNamespace(v string) *SourceNameCreate {
+	_c.mutation.SetNamespace(v)
+	return _c
 }
 
 // SetName sets the "name" field.
-func (snc *SourceNameCreate) SetName(s string) *SourceNameCreate {
-	snc.mutation.SetName(s)
-	return snc
+func (_c *SourceNameCreate) SetName(v string) *SourceNameCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetCommit sets the "commit" field.
-func (snc *SourceNameCreate) SetCommit(s string) *SourceNameCreate {
-	snc.mutation.SetCommit(s)
-	return snc
+func (_c *SourceNameCreate) SetCommit(v string) *SourceNameCreate {
+	_c.mutation.SetCommit(v)
+	return _c
 }
 
 // SetNillableCommit sets the "commit" field if the given value is not nil.
-func (snc *SourceNameCreate) SetNillableCommit(s *string) *SourceNameCreate {
-	if s != nil {
-		snc.SetCommit(*s)
+func (_c *SourceNameCreate) SetNillableCommit(v *string) *SourceNameCreate {
+	if v != nil {
+		_c.SetCommit(*v)
 	}
-	return snc
+	return _c
 }
 
 // SetTag sets the "tag" field.
-func (snc *SourceNameCreate) SetTag(s string) *SourceNameCreate {
-	snc.mutation.SetTag(s)
-	return snc
+func (_c *SourceNameCreate) SetTag(v string) *SourceNameCreate {
+	_c.mutation.SetTag(v)
+	return _c
 }
 
 // SetNillableTag sets the "tag" field if the given value is not nil.
-func (snc *SourceNameCreate) SetNillableTag(s *string) *SourceNameCreate {
-	if s != nil {
-		snc.SetTag(*s)
+func (_c *SourceNameCreate) SetNillableTag(v *string) *SourceNameCreate {
+	if v != nil {
+		_c.SetTag(*v)
 	}
-	return snc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (snc *SourceNameCreate) SetID(u uuid.UUID) *SourceNameCreate {
-	snc.mutation.SetID(u)
-	return snc
+func (_c *SourceNameCreate) SetID(v uuid.UUID) *SourceNameCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (snc *SourceNameCreate) SetNillableID(u *uuid.UUID) *SourceNameCreate {
-	if u != nil {
-		snc.SetID(*u)
+func (_c *SourceNameCreate) SetNillableID(v *uuid.UUID) *SourceNameCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return snc
+	return _c
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (snc *SourceNameCreate) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddOccurrenceIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddOccurrenceIDs(ids...)
+	return _c
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (snc *SourceNameCreate) AddOccurrences(o ...*Occurrence) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_c *SourceNameCreate) AddOccurrences(v ...*Occurrence) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddOccurrenceIDs(ids...)
+	return _c.AddOccurrenceIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (snc *SourceNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddHasSourceAtIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddHasSourceAtIDs(ids...)
+	return _c
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (snc *SourceNameCreate) AddHasSourceAt(h ...*HasSourceAt) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *SourceNameCreate) AddHasSourceAt(v ...*HasSourceAt) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddHasSourceAtIDs(ids...)
+	return _c.AddHasSourceAtIDs(ids...)
 }
 
 // AddScorecardIDs adds the "scorecard" edge to the CertifyScorecard entity by IDs.
-func (snc *SourceNameCreate) AddScorecardIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddScorecardIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddScorecardIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddScorecardIDs(ids...)
+	return _c
 }
 
 // AddScorecard adds the "scorecard" edges to the CertifyScorecard entity.
-func (snc *SourceNameCreate) AddScorecard(c ...*CertifyScorecard) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *SourceNameCreate) AddScorecard(v ...*CertifyScorecard) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddScorecardIDs(ids...)
+	return _c.AddScorecardIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (snc *SourceNameCreate) AddCertificationIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddCertificationIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddCertificationIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddCertificationIDs(ids...)
+	return _c
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (snc *SourceNameCreate) AddCertification(c ...*Certification) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *SourceNameCreate) AddCertification(v ...*Certification) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddCertificationIDs(ids...)
+	return _c.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (snc *SourceNameCreate) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddMetadatumIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddMetadatumIDs(ids...)
+	return _c
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (snc *SourceNameCreate) AddMetadata(h ...*HasMetadata) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *SourceNameCreate) AddMetadata(v ...*HasMetadata) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddMetadatumIDs(ids...)
+	return _c.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (snc *SourceNameCreate) AddPocIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddPocIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddPocIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddPocIDs(ids...)
+	return _c
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (snc *SourceNameCreate) AddPoc(p ...*PointOfContact) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *SourceNameCreate) AddPoc(v ...*PointOfContact) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddPocIDs(ids...)
+	return _c.AddPocIDs(ids...)
 }
 
 // AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
-func (snc *SourceNameCreate) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameCreate {
-	snc.mutation.AddCertifyLegalIDs(ids...)
-	return snc
+func (_c *SourceNameCreate) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameCreate {
+	_c.mutation.AddCertifyLegalIDs(ids...)
+	return _c
 }
 
 // AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
-func (snc *SourceNameCreate) AddCertifyLegal(c ...*CertifyLegal) *SourceNameCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *SourceNameCreate) AddCertifyLegal(v ...*CertifyLegal) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return snc.AddCertifyLegalIDs(ids...)
+	return _c.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the SourceNameMutation object of the builder.
-func (snc *SourceNameCreate) Mutation() *SourceNameMutation {
-	return snc.mutation
+func (_c *SourceNameCreate) Mutation() *SourceNameMutation {
+	return _c.mutation
 }
 
 // Save creates the SourceName in the database.
-func (snc *SourceNameCreate) Save(ctx context.Context) (*SourceName, error) {
-	snc.defaults()
-	return withHooks(ctx, snc.sqlSave, snc.mutation, snc.hooks)
+func (_c *SourceNameCreate) Save(ctx context.Context) (*SourceName, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (snc *SourceNameCreate) SaveX(ctx context.Context) *SourceName {
-	v, err := snc.Save(ctx)
+func (_c *SourceNameCreate) SaveX(ctx context.Context) *SourceName {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -216,46 +216,46 @@ func (snc *SourceNameCreate) SaveX(ctx context.Context) *SourceName {
 }
 
 // Exec executes the query.
-func (snc *SourceNameCreate) Exec(ctx context.Context) error {
-	_, err := snc.Save(ctx)
+func (_c *SourceNameCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (snc *SourceNameCreate) ExecX(ctx context.Context) {
-	if err := snc.Exec(ctx); err != nil {
+func (_c *SourceNameCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (snc *SourceNameCreate) defaults() {
-	if _, ok := snc.mutation.ID(); !ok {
+func (_c *SourceNameCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := sourcename.DefaultID()
-		snc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (snc *SourceNameCreate) check() error {
-	if _, ok := snc.mutation.GetType(); !ok {
+func (_c *SourceNameCreate) check() error {
+	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "SourceName.type"`)}
 	}
-	if _, ok := snc.mutation.Namespace(); !ok {
+	if _, ok := _c.mutation.Namespace(); !ok {
 		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required field "SourceName.namespace"`)}
 	}
-	if _, ok := snc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "SourceName.name"`)}
 	}
 	return nil
 }
 
-func (snc *SourceNameCreate) sqlSave(ctx context.Context) (*SourceName, error) {
-	if err := snc.check(); err != nil {
+func (_c *SourceNameCreate) sqlSave(ctx context.Context) (*SourceName, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := snc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, snc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -268,42 +268,42 @@ func (snc *SourceNameCreate) sqlSave(ctx context.Context) (*SourceName, error) {
 			return nil, err
 		}
 	}
-	snc.mutation.id = &_node.ID
-	snc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
+func (_c *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 	var (
-		_node = &SourceName{config: snc.config}
+		_node = &SourceName{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(sourcename.Table, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = snc.conflict
-	if id, ok := snc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := snc.mutation.GetType(); ok {
+	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(sourcename.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
-	if value, ok := snc.mutation.Namespace(); ok {
+	if value, ok := _c.mutation.Namespace(); ok {
 		_spec.SetField(sourcename.FieldNamespace, field.TypeString, value)
 		_node.Namespace = value
 	}
-	if value, ok := snc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(sourcename.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := snc.mutation.Commit(); ok {
+	if value, ok := _c.mutation.Commit(); ok {
 		_spec.SetField(sourcename.FieldCommit, field.TypeString, value)
 		_node.Commit = value
 	}
-	if value, ok := snc.mutation.Tag(); ok {
+	if value, ok := _c.mutation.Tag(); ok {
 		_spec.SetField(sourcename.FieldTag, field.TypeString, value)
 		_node.Tag = value
 	}
-	if nodes := snc.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.OccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -319,7 +319,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := snc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -335,7 +335,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := snc.mutation.ScorecardIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ScorecardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -351,7 +351,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := snc.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -367,7 +367,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := snc.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -383,7 +383,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := snc.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -399,7 +399,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := snc.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CertifyLegalIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -434,10 +434,10 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 //			SetType(v+v).
 //		}).
 //		Exec(ctx)
-func (snc *SourceNameCreate) OnConflict(opts ...sql.ConflictOption) *SourceNameUpsertOne {
-	snc.conflict = opts
+func (_c *SourceNameCreate) OnConflict(opts ...sql.ConflictOption) *SourceNameUpsertOne {
+	_c.conflict = opts
 	return &SourceNameUpsertOne{
-		create: snc,
+		create: _c,
 	}
 }
 
@@ -447,10 +447,10 @@ func (snc *SourceNameCreate) OnConflict(opts ...sql.ConflictOption) *SourceNameU
 //	client.SourceName.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (snc *SourceNameCreate) OnConflictColumns(columns ...string) *SourceNameUpsertOne {
-	snc.conflict = append(snc.conflict, sql.ConflictColumns(columns...))
+func (_c *SourceNameCreate) OnConflictColumns(columns ...string) *SourceNameUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &SourceNameUpsertOne{
-		create: snc,
+		create: _c,
 	}
 }
 
@@ -718,16 +718,16 @@ type SourceNameCreateBulk struct {
 }
 
 // Save creates the SourceName entities in the database.
-func (sncb *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, error) {
-	if sncb.err != nil {
-		return nil, sncb.err
+func (_c *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(sncb.builders))
-	nodes := make([]*SourceName, len(sncb.builders))
-	mutators := make([]Mutator, len(sncb.builders))
-	for i := range sncb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*SourceName, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := sncb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SourceNameMutation)
@@ -741,12 +741,12 @@ func (sncb *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, erro
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, sncb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = sncb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, sncb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -766,7 +766,7 @@ func (sncb *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, erro
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, sncb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -774,8 +774,8 @@ func (sncb *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, erro
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sncb *SourceNameCreateBulk) SaveX(ctx context.Context) []*SourceName {
-	v, err := sncb.Save(ctx)
+func (_c *SourceNameCreateBulk) SaveX(ctx context.Context) []*SourceName {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -783,14 +783,14 @@ func (sncb *SourceNameCreateBulk) SaveX(ctx context.Context) []*SourceName {
 }
 
 // Exec executes the query.
-func (sncb *SourceNameCreateBulk) Exec(ctx context.Context) error {
-	_, err := sncb.Save(ctx)
+func (_c *SourceNameCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sncb *SourceNameCreateBulk) ExecX(ctx context.Context) {
-	if err := sncb.Exec(ctx); err != nil {
+func (_c *SourceNameCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -810,10 +810,10 @@ func (sncb *SourceNameCreateBulk) ExecX(ctx context.Context) {
 //			SetType(v+v).
 //		}).
 //		Exec(ctx)
-func (sncb *SourceNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *SourceNameUpsertBulk {
-	sncb.conflict = opts
+func (_c *SourceNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *SourceNameUpsertBulk {
+	_c.conflict = opts
 	return &SourceNameUpsertBulk{
-		create: sncb,
+		create: _c,
 	}
 }
 
@@ -823,10 +823,10 @@ func (sncb *SourceNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *Source
 //	client.SourceName.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (sncb *SourceNameCreateBulk) OnConflictColumns(columns ...string) *SourceNameUpsertBulk {
-	sncb.conflict = append(sncb.conflict, sql.ConflictColumns(columns...))
+func (_c *SourceNameCreateBulk) OnConflictColumns(columns ...string) *SourceNameUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &SourceNameUpsertBulk{
-		create: sncb,
+		create: _c,
 	}
 }
 

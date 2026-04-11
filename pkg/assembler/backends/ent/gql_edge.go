@@ -8,970 +8,970 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func (a *Artifact) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
+func (_m *Artifact) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.OccurrencesOrErr()
+		result, err = _m.Edges.OccurrencesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryOccurrences().All(ctx)
+		result, err = _m.QueryOccurrences().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) Sbom(ctx context.Context) (result []*BillOfMaterials, err error) {
+func (_m *Artifact) Sbom(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedSbom(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedSbom(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.SbomOrErr()
+		result, err = _m.Edges.SbomOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QuerySbom().All(ctx)
+		result, err = _m.QuerySbom().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) Attestations(ctx context.Context) (result []*SLSAAttestation, err error) {
+func (_m *Artifact) Attestations(ctx context.Context) (result []*SLSAAttestation, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedAttestations(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedAttestations(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.AttestationsOrErr()
+		result, err = _m.Edges.AttestationsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryAttestations().All(ctx)
+		result, err = _m.QueryAttestations().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) AttestationsSubject(ctx context.Context) (result []*SLSAAttestation, err error) {
+func (_m *Artifact) AttestationsSubject(ctx context.Context) (result []*SLSAAttestation, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedAttestationsSubject(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedAttestationsSubject(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.AttestationsSubjectOrErr()
+		result, err = _m.Edges.AttestationsSubjectOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryAttestationsSubject().All(ctx)
+		result, err = _m.QueryAttestationsSubject().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) HashEqualArtA(ctx context.Context) (result []*HashEqual, err error) {
+func (_m *Artifact) HashEqualArtA(ctx context.Context) (result []*HashEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedHashEqualArtA(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedHashEqualArtA(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.HashEqualArtAOrErr()
+		result, err = _m.Edges.HashEqualArtAOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryHashEqualArtA().All(ctx)
+		result, err = _m.QueryHashEqualArtA().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) HashEqualArtB(ctx context.Context) (result []*HashEqual, err error) {
+func (_m *Artifact) HashEqualArtB(ctx context.Context) (result []*HashEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedHashEqualArtB(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedHashEqualArtB(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.HashEqualArtBOrErr()
+		result, err = _m.Edges.HashEqualArtBOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryHashEqualArtB().All(ctx)
+		result, err = _m.QueryHashEqualArtB().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) Vex(ctx context.Context) (result []*CertifyVex, err error) {
+func (_m *Artifact) Vex(ctx context.Context) (result []*CertifyVex, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.VexOrErr()
+		result, err = _m.Edges.VexOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryVex().All(ctx)
+		result, err = _m.QueryVex().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) Certification(ctx context.Context) (result []*Certification, err error) {
+func (_m *Artifact) Certification(ctx context.Context) (result []*Certification, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.CertificationOrErr()
+		result, err = _m.Edges.CertificationOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryCertification().All(ctx)
+		result, err = _m.QueryCertification().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+func (_m *Artifact) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.MetadataOrErr()
+		result, err = _m.Edges.MetadataOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryMetadata().All(ctx)
+		result, err = _m.QueryMetadata().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+func (_m *Artifact) Poc(ctx context.Context) (result []*PointOfContact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.PocOrErr()
+		result, err = _m.Edges.PocOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryPoc().All(ctx)
+		result, err = _m.QueryPoc().All(ctx)
 	}
 	return result, err
 }
 
-func (a *Artifact) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+func (_m *Artifact) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.IncludedInSbomsOrErr()
+		result, err = _m.Edges.IncludedInSbomsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QueryIncludedInSboms().All(ctx)
+		result, err = _m.QueryIncludedInSboms().All(ctx)
 	}
 	return result, err
 }
 
-func (bom *BillOfMaterials) Package(ctx context.Context) (*PackageVersion, error) {
-	result, err := bom.Edges.PackageOrErr()
+func (_m *BillOfMaterials) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageOrErr()
 	if IsNotLoaded(err) {
-		result, err = bom.QueryPackage().Only(ctx)
+		result, err = _m.QueryPackage().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (bom *BillOfMaterials) Artifact(ctx context.Context) (*Artifact, error) {
-	result, err := bom.Edges.ArtifactOrErr()
+func (_m *BillOfMaterials) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactOrErr()
 	if IsNotLoaded(err) {
-		result, err = bom.QueryArtifact().Only(ctx)
+		result, err = _m.QueryArtifact().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (bom *BillOfMaterials) IncludedSoftwarePackages(ctx context.Context) (result []*PackageVersion, err error) {
+func (_m *BillOfMaterials) IncludedSoftwarePackages(ctx context.Context) (result []*PackageVersion, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = bom.NamedIncludedSoftwarePackages(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedSoftwarePackages(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = bom.Edges.IncludedSoftwarePackagesOrErr()
+		result, err = _m.Edges.IncludedSoftwarePackagesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = bom.QueryIncludedSoftwarePackages().All(ctx)
+		result, err = _m.QueryIncludedSoftwarePackages().All(ctx)
 	}
 	return result, err
 }
 
-func (bom *BillOfMaterials) IncludedSoftwareArtifacts(ctx context.Context) (result []*Artifact, err error) {
+func (_m *BillOfMaterials) IncludedSoftwareArtifacts(ctx context.Context) (result []*Artifact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = bom.NamedIncludedSoftwareArtifacts(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedSoftwareArtifacts(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = bom.Edges.IncludedSoftwareArtifactsOrErr()
+		result, err = _m.Edges.IncludedSoftwareArtifactsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = bom.QueryIncludedSoftwareArtifacts().All(ctx)
+		result, err = _m.QueryIncludedSoftwareArtifacts().All(ctx)
 	}
 	return result, err
 }
 
-func (bom *BillOfMaterials) IncludedDependencies(ctx context.Context) (result []*Dependency, err error) {
+func (_m *BillOfMaterials) IncludedDependencies(ctx context.Context) (result []*Dependency, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = bom.NamedIncludedDependencies(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedDependencies(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = bom.Edges.IncludedDependenciesOrErr()
+		result, err = _m.Edges.IncludedDependenciesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = bom.QueryIncludedDependencies().All(ctx)
+		result, err = _m.QueryIncludedDependencies().All(ctx)
 	}
 	return result, err
 }
 
-func (bom *BillOfMaterials) IncludedOccurrences(ctx context.Context) (result []*Occurrence, err error) {
+func (_m *BillOfMaterials) IncludedOccurrences(ctx context.Context) (result []*Occurrence, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = bom.NamedIncludedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = bom.Edges.IncludedOccurrencesOrErr()
+		result, err = _m.Edges.IncludedOccurrencesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = bom.QueryIncludedOccurrences().All(ctx)
+		result, err = _m.QueryIncludedOccurrences().All(ctx)
 	}
 	return result, err
 }
 
-func (b *Builder) SlsaAttestations(ctx context.Context) (result []*SLSAAttestation, err error) {
+func (_m *Builder) SlsaAttestations(ctx context.Context) (result []*SLSAAttestation, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = b.NamedSlsaAttestations(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedSlsaAttestations(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = b.Edges.SlsaAttestationsOrErr()
+		result, err = _m.Edges.SlsaAttestationsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = b.QuerySlsaAttestations().All(ctx)
+		result, err = _m.QuerySlsaAttestations().All(ctx)
 	}
 	return result, err
 }
 
-func (c *Certification) Source(ctx context.Context) (*SourceName, error) {
-	result, err := c.Edges.SourceOrErr()
+func (_m *Certification) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
-		result, err = c.QuerySource().Only(ctx)
+		result, err = _m.QuerySource().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (c *Certification) PackageVersion(ctx context.Context) (*PackageVersion, error) {
-	result, err := c.Edges.PackageVersionOrErr()
+func (_m *Certification) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageVersionOrErr()
 	if IsNotLoaded(err) {
-		result, err = c.QueryPackageVersion().Only(ctx)
+		result, err = _m.QueryPackageVersion().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (c *Certification) AllVersions(ctx context.Context) (*PackageName, error) {
-	result, err := c.Edges.AllVersionsOrErr()
+func (_m *Certification) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := _m.Edges.AllVersionsOrErr()
 	if IsNotLoaded(err) {
-		result, err = c.QueryAllVersions().Only(ctx)
+		result, err = _m.QueryAllVersions().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (c *Certification) Artifact(ctx context.Context) (*Artifact, error) {
-	result, err := c.Edges.ArtifactOrErr()
+func (_m *Certification) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactOrErr()
 	if IsNotLoaded(err) {
-		result, err = c.QueryArtifact().Only(ctx)
+		result, err = _m.QueryArtifact().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (cl *CertifyLegal) Package(ctx context.Context) (*PackageVersion, error) {
-	result, err := cl.Edges.PackageOrErr()
+func (_m *CertifyLegal) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageOrErr()
 	if IsNotLoaded(err) {
-		result, err = cl.QueryPackage().Only(ctx)
+		result, err = _m.QueryPackage().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (cl *CertifyLegal) Source(ctx context.Context) (*SourceName, error) {
-	result, err := cl.Edges.SourceOrErr()
+func (_m *CertifyLegal) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
-		result, err = cl.QuerySource().Only(ctx)
+		result, err = _m.QuerySource().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (cl *CertifyLegal) DeclaredLicenses(ctx context.Context) (result []*License, err error) {
+func (_m *CertifyLegal) DeclaredLicenses(ctx context.Context) (result []*License, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = cl.NamedDeclaredLicenses(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedDeclaredLicenses(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = cl.Edges.DeclaredLicensesOrErr()
+		result, err = _m.Edges.DeclaredLicensesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = cl.QueryDeclaredLicenses().All(ctx)
+		result, err = _m.QueryDeclaredLicenses().All(ctx)
 	}
 	return result, err
 }
 
-func (cl *CertifyLegal) DiscoveredLicenses(ctx context.Context) (result []*License, err error) {
+func (_m *CertifyLegal) DiscoveredLicenses(ctx context.Context) (result []*License, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = cl.NamedDiscoveredLicenses(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedDiscoveredLicenses(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = cl.Edges.DiscoveredLicensesOrErr()
+		result, err = _m.Edges.DiscoveredLicensesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = cl.QueryDiscoveredLicenses().All(ctx)
-	}
-	return result, err
-}
-
-func (cs *CertifyScorecard) Source(ctx context.Context) (*SourceName, error) {
-	result, err := cs.Edges.SourceOrErr()
-	if IsNotLoaded(err) {
-		result, err = cs.QuerySource().Only(ctx)
+		result, err = _m.QueryDiscoveredLicenses().All(ctx)
 	}
 	return result, err
 }
 
-func (cv *CertifyVex) Package(ctx context.Context) (*PackageVersion, error) {
-	result, err := cv.Edges.PackageOrErr()
+func (_m *CertifyScorecard) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
-		result, err = cv.QueryPackage().Only(ctx)
+		result, err = _m.QuerySource().Only(ctx)
+	}
+	return result, err
+}
+
+func (_m *CertifyVex) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageOrErr()
+	if IsNotLoaded(err) {
+		result, err = _m.QueryPackage().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (cv *CertifyVex) Artifact(ctx context.Context) (*Artifact, error) {
-	result, err := cv.Edges.ArtifactOrErr()
+func (_m *CertifyVex) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactOrErr()
 	if IsNotLoaded(err) {
-		result, err = cv.QueryArtifact().Only(ctx)
+		result, err = _m.QueryArtifact().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (cv *CertifyVex) Vulnerability(ctx context.Context) (*VulnerabilityID, error) {
-	result, err := cv.Edges.VulnerabilityOrErr()
+func (_m *CertifyVex) Vulnerability(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := _m.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
-		result, err = cv.QueryVulnerability().Only(ctx)
+		result, err = _m.QueryVulnerability().Only(ctx)
 	}
 	return result, err
 }
 
-func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*VulnerabilityID, error) {
-	result, err := cv.Edges.VulnerabilityOrErr()
+func (_m *CertifyVuln) Vulnerability(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := _m.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
-		result, err = cv.QueryVulnerability().Only(ctx)
+		result, err = _m.QueryVulnerability().Only(ctx)
 	}
 	return result, err
 }
 
-func (cv *CertifyVuln) Package(ctx context.Context) (*PackageVersion, error) {
-	result, err := cv.Edges.PackageOrErr()
+func (_m *CertifyVuln) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageOrErr()
 	if IsNotLoaded(err) {
-		result, err = cv.QueryPackage().Only(ctx)
+		result, err = _m.QueryPackage().Only(ctx)
 	}
 	return result, err
 }
 
-func (d *Dependency) Package(ctx context.Context) (*PackageVersion, error) {
-	result, err := d.Edges.PackageOrErr()
+func (_m *Dependency) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageOrErr()
 	if IsNotLoaded(err) {
-		result, err = d.QueryPackage().Only(ctx)
+		result, err = _m.QueryPackage().Only(ctx)
 	}
 	return result, err
 }
 
-func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersion, error) {
-	result, err := d.Edges.DependentPackageVersionOrErr()
+func (_m *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.DependentPackageVersionOrErr()
 	if IsNotLoaded(err) {
-		result, err = d.QueryDependentPackageVersion().Only(ctx)
+		result, err = _m.QueryDependentPackageVersion().Only(ctx)
 	}
 	return result, err
 }
 
-func (d *Dependency) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+func (_m *Dependency) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = d.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = d.Edges.IncludedInSbomsOrErr()
+		result, err = _m.Edges.IncludedInSbomsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = d.QueryIncludedInSboms().All(ctx)
+		result, err = _m.QueryIncludedInSboms().All(ctx)
 	}
 	return result, err
 }
 
-func (hm *HasMetadata) Source(ctx context.Context) (*SourceName, error) {
-	result, err := hm.Edges.SourceOrErr()
+func (_m *HasMetadata) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
-		result, err = hm.QuerySource().Only(ctx)
+		result, err = _m.QuerySource().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (hm *HasMetadata) PackageVersion(ctx context.Context) (*PackageVersion, error) {
-	result, err := hm.Edges.PackageVersionOrErr()
+func (_m *HasMetadata) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageVersionOrErr()
 	if IsNotLoaded(err) {
-		result, err = hm.QueryPackageVersion().Only(ctx)
+		result, err = _m.QueryPackageVersion().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (hm *HasMetadata) AllVersions(ctx context.Context) (*PackageName, error) {
-	result, err := hm.Edges.AllVersionsOrErr()
+func (_m *HasMetadata) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := _m.Edges.AllVersionsOrErr()
 	if IsNotLoaded(err) {
-		result, err = hm.QueryAllVersions().Only(ctx)
+		result, err = _m.QueryAllVersions().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (hm *HasMetadata) Artifact(ctx context.Context) (*Artifact, error) {
-	result, err := hm.Edges.ArtifactOrErr()
+func (_m *HasMetadata) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactOrErr()
 	if IsNotLoaded(err) {
-		result, err = hm.QueryArtifact().Only(ctx)
+		result, err = _m.QueryArtifact().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (hsa *HasSourceAt) PackageVersion(ctx context.Context) (*PackageVersion, error) {
-	result, err := hsa.Edges.PackageVersionOrErr()
+func (_m *HasSourceAt) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageVersionOrErr()
 	if IsNotLoaded(err) {
-		result, err = hsa.QueryPackageVersion().Only(ctx)
+		result, err = _m.QueryPackageVersion().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (hsa *HasSourceAt) AllVersions(ctx context.Context) (*PackageName, error) {
-	result, err := hsa.Edges.AllVersionsOrErr()
+func (_m *HasSourceAt) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := _m.Edges.AllVersionsOrErr()
 	if IsNotLoaded(err) {
-		result, err = hsa.QueryAllVersions().Only(ctx)
+		result, err = _m.QueryAllVersions().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (hsa *HasSourceAt) Source(ctx context.Context) (*SourceName, error) {
-	result, err := hsa.Edges.SourceOrErr()
+func (_m *HasSourceAt) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
-		result, err = hsa.QuerySource().Only(ctx)
+		result, err = _m.QuerySource().Only(ctx)
 	}
 	return result, err
 }
 
-func (he *HashEqual) ArtifactA(ctx context.Context) (*Artifact, error) {
-	result, err := he.Edges.ArtifactAOrErr()
+func (_m *HashEqual) ArtifactA(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactAOrErr()
 	if IsNotLoaded(err) {
-		result, err = he.QueryArtifactA().Only(ctx)
+		result, err = _m.QueryArtifactA().Only(ctx)
 	}
 	return result, err
 }
 
-func (he *HashEqual) ArtifactB(ctx context.Context) (*Artifact, error) {
-	result, err := he.Edges.ArtifactBOrErr()
+func (_m *HashEqual) ArtifactB(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactBOrErr()
 	if IsNotLoaded(err) {
-		result, err = he.QueryArtifactB().Only(ctx)
+		result, err = _m.QueryArtifactB().Only(ctx)
 	}
 	return result, err
 }
 
-func (l *License) DeclaredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
+func (_m *License) DeclaredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = l.NamedDeclaredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedDeclaredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = l.Edges.DeclaredInCertifyLegalsOrErr()
+		result, err = _m.Edges.DeclaredInCertifyLegalsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = l.QueryDeclaredInCertifyLegals().All(ctx)
+		result, err = _m.QueryDeclaredInCertifyLegals().All(ctx)
 	}
 	return result, err
 }
 
-func (l *License) DiscoveredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
+func (_m *License) DiscoveredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = l.NamedDiscoveredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedDiscoveredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = l.Edges.DiscoveredInCertifyLegalsOrErr()
+		result, err = _m.Edges.DiscoveredInCertifyLegalsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = l.QueryDiscoveredInCertifyLegals().All(ctx)
-	}
-	return result, err
-}
-
-func (o *Occurrence) Artifact(ctx context.Context) (*Artifact, error) {
-	result, err := o.Edges.ArtifactOrErr()
-	if IsNotLoaded(err) {
-		result, err = o.QueryArtifact().Only(ctx)
+		result, err = _m.QueryDiscoveredInCertifyLegals().All(ctx)
 	}
 	return result, err
 }
 
-func (o *Occurrence) Package(ctx context.Context) (*PackageVersion, error) {
-	result, err := o.Edges.PackageOrErr()
+func (_m *Occurrence) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactOrErr()
 	if IsNotLoaded(err) {
-		result, err = o.QueryPackage().Only(ctx)
+		result, err = _m.QueryArtifact().Only(ctx)
+	}
+	return result, err
+}
+
+func (_m *Occurrence) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageOrErr()
+	if IsNotLoaded(err) {
+		result, err = _m.QueryPackage().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (o *Occurrence) Source(ctx context.Context) (*SourceName, error) {
-	result, err := o.Edges.SourceOrErr()
+func (_m *Occurrence) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
-		result, err = o.QuerySource().Only(ctx)
+		result, err = _m.QuerySource().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (o *Occurrence) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+func (_m *Occurrence) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = o.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = o.Edges.IncludedInSbomsOrErr()
+		result, err = _m.Edges.IncludedInSbomsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = o.QueryIncludedInSboms().All(ctx)
+		result, err = _m.QueryIncludedInSboms().All(ctx)
 	}
 	return result, err
 }
 
-func (pn *PackageName) Versions(ctx context.Context) (result []*PackageVersion, err error) {
+func (_m *PackageName) Versions(ctx context.Context) (result []*PackageVersion, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedVersions(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVersions(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pn.Edges.VersionsOrErr()
+		result, err = _m.Edges.VersionsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pn.QueryVersions().All(ctx)
+		result, err = _m.QueryVersions().All(ctx)
 	}
 	return result, err
 }
 
-func (pn *PackageName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
+func (_m *PackageName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pn.Edges.HasSourceAtOrErr()
+		result, err = _m.Edges.HasSourceAtOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pn.QueryHasSourceAt().All(ctx)
+		result, err = _m.QueryHasSourceAt().All(ctx)
 	}
 	return result, err
 }
 
-func (pn *PackageName) Certification(ctx context.Context) (result []*Certification, err error) {
+func (_m *PackageName) Certification(ctx context.Context) (result []*Certification, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pn.Edges.CertificationOrErr()
+		result, err = _m.Edges.CertificationOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pn.QueryCertification().All(ctx)
+		result, err = _m.QueryCertification().All(ctx)
 	}
 	return result, err
 }
 
-func (pn *PackageName) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+func (_m *PackageName) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pn.Edges.MetadataOrErr()
+		result, err = _m.Edges.MetadataOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pn.QueryMetadata().All(ctx)
+		result, err = _m.QueryMetadata().All(ctx)
 	}
 	return result, err
 }
 
-func (pn *PackageName) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+func (_m *PackageName) Poc(ctx context.Context) (result []*PointOfContact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pn.Edges.PocOrErr()
+		result, err = _m.Edges.PocOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pn.QueryPoc().All(ctx)
+		result, err = _m.QueryPoc().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Name(ctx context.Context) (*PackageName, error) {
-	result, err := pv.Edges.NameOrErr()
+func (_m *PackageVersion) Name(ctx context.Context) (*PackageName, error) {
+	result, err := _m.Edges.NameOrErr()
 	if IsNotLoaded(err) {
-		result, err = pv.QueryName().Only(ctx)
+		result, err = _m.QueryName().Only(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
+func (_m *PackageVersion) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.OccurrencesOrErr()
+		result, err = _m.Edges.OccurrencesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryOccurrences().All(ctx)
+		result, err = _m.QueryOccurrences().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Sbom(ctx context.Context) (result []*BillOfMaterials, err error) {
+func (_m *PackageVersion) Sbom(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedSbom(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedSbom(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.SbomOrErr()
+		result, err = _m.Edges.SbomOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QuerySbom().All(ctx)
+		result, err = _m.QuerySbom().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Vuln(ctx context.Context) (result []*CertifyVuln, err error) {
+func (_m *PackageVersion) Vuln(ctx context.Context) (result []*CertifyVuln, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedVuln(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVuln(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.VulnOrErr()
+		result, err = _m.Edges.VulnOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryVuln().All(ctx)
+		result, err = _m.QueryVuln().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Vex(ctx context.Context) (result []*CertifyVex, err error) {
+func (_m *PackageVersion) Vex(ctx context.Context) (result []*CertifyVex, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.VexOrErr()
+		result, err = _m.Edges.VexOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryVex().All(ctx)
+		result, err = _m.QueryVex().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
+func (_m *PackageVersion) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.HasSourceAtOrErr()
+		result, err = _m.Edges.HasSourceAtOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryHasSourceAt().All(ctx)
+		result, err = _m.QueryHasSourceAt().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Certification(ctx context.Context) (result []*Certification, err error) {
+func (_m *PackageVersion) Certification(ctx context.Context) (result []*Certification, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.CertificationOrErr()
+		result, err = _m.Edges.CertificationOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryCertification().All(ctx)
+		result, err = _m.QueryCertification().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+func (_m *PackageVersion) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.MetadataOrErr()
+		result, err = _m.Edges.MetadataOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryMetadata().All(ctx)
+		result, err = _m.QueryMetadata().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Dependency(ctx context.Context) (result []*Dependency, err error) {
+func (_m *PackageVersion) Dependency(ctx context.Context) (result []*Dependency, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedDependency(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedDependency(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.DependencyOrErr()
+		result, err = _m.Edges.DependencyOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryDependency().All(ctx)
+		result, err = _m.QueryDependency().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) DependencySubject(ctx context.Context) (result []*Dependency, err error) {
+func (_m *PackageVersion) DependencySubject(ctx context.Context) (result []*Dependency, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedDependencySubject(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedDependencySubject(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.DependencySubjectOrErr()
+		result, err = _m.Edges.DependencySubjectOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryDependencySubject().All(ctx)
+		result, err = _m.QueryDependencySubject().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+func (_m *PackageVersion) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.IncludedInSbomsOrErr()
+		result, err = _m.Edges.IncludedInSbomsOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryIncludedInSboms().All(ctx)
+		result, err = _m.QueryIncludedInSboms().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) PkgEqualPkgA(ctx context.Context) (result []*PkgEqual, err error) {
+func (_m *PackageVersion) PkgEqualPkgA(ctx context.Context) (result []*PkgEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedPkgEqualPkgA(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPkgEqualPkgA(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.PkgEqualPkgAOrErr()
+		result, err = _m.Edges.PkgEqualPkgAOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryPkgEqualPkgA().All(ctx)
+		result, err = _m.QueryPkgEqualPkgA().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) PkgEqualPkgB(ctx context.Context) (result []*PkgEqual, err error) {
+func (_m *PackageVersion) PkgEqualPkgB(ctx context.Context) (result []*PkgEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedPkgEqualPkgB(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPkgEqualPkgB(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.PkgEqualPkgBOrErr()
+		result, err = _m.Edges.PkgEqualPkgBOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryPkgEqualPkgB().All(ctx)
+		result, err = _m.QueryPkgEqualPkgB().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+func (_m *PackageVersion) Poc(ctx context.Context) (result []*PointOfContact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.PocOrErr()
+		result, err = _m.Edges.PocOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryPoc().All(ctx)
+		result, err = _m.QueryPoc().All(ctx)
 	}
 	return result, err
 }
 
-func (pv *PackageVersion) CertifyLegal(ctx context.Context) (result []*CertifyLegal, err error) {
+func (_m *PackageVersion) CertifyLegal(ctx context.Context) (result []*CertifyLegal, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedCertifyLegal(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertifyLegal(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.CertifyLegalOrErr()
+		result, err = _m.Edges.CertifyLegalOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryCertifyLegal().All(ctx)
-	}
-	return result, err
-}
-
-func (pe *PkgEqual) PackageA(ctx context.Context) (*PackageVersion, error) {
-	result, err := pe.Edges.PackageAOrErr()
-	if IsNotLoaded(err) {
-		result, err = pe.QueryPackageA().Only(ctx)
+		result, err = _m.QueryCertifyLegal().All(ctx)
 	}
 	return result, err
 }
 
-func (pe *PkgEqual) PackageB(ctx context.Context) (*PackageVersion, error) {
-	result, err := pe.Edges.PackageBOrErr()
+func (_m *PkgEqual) PackageA(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageAOrErr()
 	if IsNotLoaded(err) {
-		result, err = pe.QueryPackageB().Only(ctx)
+		result, err = _m.QueryPackageA().Only(ctx)
 	}
 	return result, err
 }
 
-func (poc *PointOfContact) Source(ctx context.Context) (*SourceName, error) {
-	result, err := poc.Edges.SourceOrErr()
+func (_m *PkgEqual) PackageB(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageBOrErr()
 	if IsNotLoaded(err) {
-		result, err = poc.QuerySource().Only(ctx)
+		result, err = _m.QueryPackageB().Only(ctx)
+	}
+	return result, err
+}
+
+func (_m *PointOfContact) Source(ctx context.Context) (*SourceName, error) {
+	result, err := _m.Edges.SourceOrErr()
+	if IsNotLoaded(err) {
+		result, err = _m.QuerySource().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (poc *PointOfContact) PackageVersion(ctx context.Context) (*PackageVersion, error) {
-	result, err := poc.Edges.PackageVersionOrErr()
+func (_m *PointOfContact) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.PackageVersionOrErr()
 	if IsNotLoaded(err) {
-		result, err = poc.QueryPackageVersion().Only(ctx)
+		result, err = _m.QueryPackageVersion().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (poc *PointOfContact) AllVersions(ctx context.Context) (*PackageName, error) {
-	result, err := poc.Edges.AllVersionsOrErr()
+func (_m *PointOfContact) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := _m.Edges.AllVersionsOrErr()
 	if IsNotLoaded(err) {
-		result, err = poc.QueryAllVersions().Only(ctx)
+		result, err = _m.QueryAllVersions().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (poc *PointOfContact) Artifact(ctx context.Context) (*Artifact, error) {
-	result, err := poc.Edges.ArtifactOrErr()
+func (_m *PointOfContact) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.ArtifactOrErr()
 	if IsNotLoaded(err) {
-		result, err = poc.QueryArtifact().Only(ctx)
+		result, err = _m.QueryArtifact().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (sa *SLSAAttestation) BuiltFrom(ctx context.Context) (result []*Artifact, err error) {
+func (_m *SLSAAttestation) BuiltFrom(ctx context.Context) (result []*Artifact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sa.NamedBuiltFrom(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedBuiltFrom(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sa.Edges.BuiltFromOrErr()
+		result, err = _m.Edges.BuiltFromOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sa.QueryBuiltFrom().All(ctx)
+		result, err = _m.QueryBuiltFrom().All(ctx)
 	}
 	return result, err
 }
 
-func (sa *SLSAAttestation) BuiltBy(ctx context.Context) (*Builder, error) {
-	result, err := sa.Edges.BuiltByOrErr()
+func (_m *SLSAAttestation) BuiltBy(ctx context.Context) (*Builder, error) {
+	result, err := _m.Edges.BuiltByOrErr()
 	if IsNotLoaded(err) {
-		result, err = sa.QueryBuiltBy().Only(ctx)
+		result, err = _m.QueryBuiltBy().Only(ctx)
 	}
 	return result, err
 }
 
-func (sa *SLSAAttestation) Subject(ctx context.Context) (*Artifact, error) {
-	result, err := sa.Edges.SubjectOrErr()
+func (_m *SLSAAttestation) Subject(ctx context.Context) (*Artifact, error) {
+	result, err := _m.Edges.SubjectOrErr()
 	if IsNotLoaded(err) {
-		result, err = sa.QuerySubject().Only(ctx)
+		result, err = _m.QuerySubject().Only(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
+func (_m *SourceName) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.OccurrencesOrErr()
+		result, err = _m.Edges.OccurrencesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryOccurrences().All(ctx)
+		result, err = _m.QueryOccurrences().All(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
+func (_m *SourceName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.HasSourceAtOrErr()
+		result, err = _m.Edges.HasSourceAtOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryHasSourceAt().All(ctx)
+		result, err = _m.QueryHasSourceAt().All(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) Scorecard(ctx context.Context) (result []*CertifyScorecard, err error) {
+func (_m *SourceName) Scorecard(ctx context.Context) (result []*CertifyScorecard, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedScorecard(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedScorecard(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.ScorecardOrErr()
+		result, err = _m.Edges.ScorecardOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryScorecard().All(ctx)
+		result, err = _m.QueryScorecard().All(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) Certification(ctx context.Context) (result []*Certification, err error) {
+func (_m *SourceName) Certification(ctx context.Context) (result []*Certification, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.CertificationOrErr()
+		result, err = _m.Edges.CertificationOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryCertification().All(ctx)
+		result, err = _m.QueryCertification().All(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+func (_m *SourceName) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.MetadataOrErr()
+		result, err = _m.Edges.MetadataOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryMetadata().All(ctx)
+		result, err = _m.QueryMetadata().All(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+func (_m *SourceName) Poc(ctx context.Context) (result []*PointOfContact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.PocOrErr()
+		result, err = _m.Edges.PocOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryPoc().All(ctx)
+		result, err = _m.QueryPoc().All(ctx)
 	}
 	return result, err
 }
 
-func (sn *SourceName) CertifyLegal(ctx context.Context) (result []*CertifyLegal, err error) {
+func (_m *SourceName) CertifyLegal(ctx context.Context) (result []*CertifyLegal, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedCertifyLegal(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertifyLegal(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = sn.Edges.CertifyLegalOrErr()
+		result, err = _m.Edges.CertifyLegalOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = sn.QueryCertifyLegal().All(ctx)
+		result, err = _m.QueryCertifyLegal().All(ctx)
 	}
 	return result, err
 }
 
-func (ve *VulnEqual) VulnerabilityA(ctx context.Context) (*VulnerabilityID, error) {
-	result, err := ve.Edges.VulnerabilityAOrErr()
+func (_m *VulnEqual) VulnerabilityA(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := _m.Edges.VulnerabilityAOrErr()
 	if IsNotLoaded(err) {
-		result, err = ve.QueryVulnerabilityA().Only(ctx)
+		result, err = _m.QueryVulnerabilityA().Only(ctx)
 	}
 	return result, err
 }
 
-func (ve *VulnEqual) VulnerabilityB(ctx context.Context) (*VulnerabilityID, error) {
-	result, err := ve.Edges.VulnerabilityBOrErr()
+func (_m *VulnEqual) VulnerabilityB(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := _m.Edges.VulnerabilityBOrErr()
 	if IsNotLoaded(err) {
-		result, err = ve.QueryVulnerabilityB().Only(ctx)
+		result, err = _m.QueryVulnerabilityB().Only(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) VulnEqualVulnA(ctx context.Context) (result []*VulnEqual, err error) {
+func (_m *VulnerabilityID) VulnEqualVulnA(ctx context.Context) (result []*VulnEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedVulnEqualVulnA(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVulnEqualVulnA(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.VulnEqualVulnAOrErr()
+		result, err = _m.Edges.VulnEqualVulnAOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVulnEqualVulnA().All(ctx)
+		result, err = _m.QueryVulnEqualVulnA().All(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) VulnEqualVulnB(ctx context.Context) (result []*VulnEqual, err error) {
+func (_m *VulnerabilityID) VulnEqualVulnB(ctx context.Context) (result []*VulnEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedVulnEqualVulnB(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVulnEqualVulnB(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.VulnEqualVulnBOrErr()
+		result, err = _m.Edges.VulnEqualVulnBOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVulnEqualVulnB().All(ctx)
+		result, err = _m.QueryVulnEqualVulnB().All(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) Metadata(ctx context.Context) (result []*VulnerabilityMetadata, err error) {
+func (_m *VulnerabilityID) Metadata(ctx context.Context) (result []*VulnerabilityMetadata, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.MetadataOrErr()
+		result, err = _m.Edges.MetadataOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryMetadata().All(ctx)
+		result, err = _m.QueryMetadata().All(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) CertifyVuln(ctx context.Context) (result []*CertifyVuln, err error) {
+func (_m *VulnerabilityID) CertifyVuln(ctx context.Context) (result []*CertifyVuln, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedCertifyVuln(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedCertifyVuln(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.CertifyVulnOrErr()
+		result, err = _m.Edges.CertifyVulnOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryCertifyVuln().All(ctx)
+		result, err = _m.QueryCertifyVuln().All(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) Vex(ctx context.Context) (result []*CertifyVex, err error) {
+func (_m *VulnerabilityID) Vex(ctx context.Context) (result []*CertifyVex, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.VexOrErr()
+		result, err = _m.Edges.VexOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVex().All(ctx)
+		result, err = _m.QueryVex().All(ctx)
 	}
 	return result, err
 }
 
-func (vm *VulnerabilityMetadata) VulnerabilityID(ctx context.Context) (*VulnerabilityID, error) {
-	result, err := vm.Edges.VulnerabilityIDOrErr()
+func (_m *VulnerabilityMetadata) VulnerabilityID(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := _m.Edges.VulnerabilityIDOrErr()
 	if IsNotLoaded(err) {
-		result, err = vm.QueryVulnerabilityID().Only(ctx)
+		result, err = _m.QueryVulnerabilityID().Only(ctx)
 	}
 	return result, err
 }

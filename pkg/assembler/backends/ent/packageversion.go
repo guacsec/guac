@@ -247,7 +247,7 @@ func (*PackageVersion) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the PackageVersion fields.
-func (pv *PackageVersion) assignValues(columns []string, values []any) error {
+func (_m *PackageVersion) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -257,31 +257,31 @@ func (pv *PackageVersion) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				pv.ID = *value
+				_m.ID = *value
 			}
 		case packageversion.FieldNameID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field name_id", values[i])
 			} else if value != nil {
-				pv.NameID = *value
+				_m.NameID = *value
 			}
 		case packageversion.FieldVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field version", values[i])
 			} else if value.Valid {
-				pv.Version = value.String
+				_m.Version = value.String
 			}
 		case packageversion.FieldSubpath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field subpath", values[i])
 			} else if value.Valid {
-				pv.Subpath = value.String
+				_m.Subpath = value.String
 			}
 		case packageversion.FieldQualifiers:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field qualifiers", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &pv.Qualifiers); err != nil {
+				if err := json.Unmarshal(*value, &_m.Qualifiers); err != nil {
 					return fmt.Errorf("unmarshal field qualifiers: %w", err)
 				}
 			}
@@ -289,10 +289,10 @@ func (pv *PackageVersion) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
-				pv.Hash = value.String
+				_m.Hash = value.String
 			}
 		default:
-			pv.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -300,459 +300,459 @@ func (pv *PackageVersion) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the PackageVersion.
 // This includes values selected through modifiers, order, etc.
-func (pv *PackageVersion) Value(name string) (ent.Value, error) {
-	return pv.selectValues.Get(name)
+func (_m *PackageVersion) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryName queries the "name" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryName() *PackageNameQuery {
-	return NewPackageVersionClient(pv.config).QueryName(pv)
+func (_m *PackageVersion) QueryName() *PackageNameQuery {
+	return NewPackageVersionClient(_m.config).QueryName(_m)
 }
 
 // QueryOccurrences queries the "occurrences" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryOccurrences() *OccurrenceQuery {
-	return NewPackageVersionClient(pv.config).QueryOccurrences(pv)
+func (_m *PackageVersion) QueryOccurrences() *OccurrenceQuery {
+	return NewPackageVersionClient(_m.config).QueryOccurrences(_m)
 }
 
 // QuerySbom queries the "sbom" edge of the PackageVersion entity.
-func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
-	return NewPackageVersionClient(pv.config).QuerySbom(pv)
+func (_m *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
+	return NewPackageVersionClient(_m.config).QuerySbom(_m)
 }
 
 // QueryVuln queries the "vuln" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryVuln() *CertifyVulnQuery {
-	return NewPackageVersionClient(pv.config).QueryVuln(pv)
+func (_m *PackageVersion) QueryVuln() *CertifyVulnQuery {
+	return NewPackageVersionClient(_m.config).QueryVuln(_m)
 }
 
 // QueryVex queries the "vex" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryVex() *CertifyVexQuery {
-	return NewPackageVersionClient(pv.config).QueryVex(pv)
+func (_m *PackageVersion) QueryVex() *CertifyVexQuery {
+	return NewPackageVersionClient(_m.config).QueryVex(_m)
 }
 
 // QueryHasSourceAt queries the "has_source_at" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryHasSourceAt() *HasSourceAtQuery {
-	return NewPackageVersionClient(pv.config).QueryHasSourceAt(pv)
+func (_m *PackageVersion) QueryHasSourceAt() *HasSourceAtQuery {
+	return NewPackageVersionClient(_m.config).QueryHasSourceAt(_m)
 }
 
 // QueryCertification queries the "certification" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryCertification() *CertificationQuery {
-	return NewPackageVersionClient(pv.config).QueryCertification(pv)
+func (_m *PackageVersion) QueryCertification() *CertificationQuery {
+	return NewPackageVersionClient(_m.config).QueryCertification(_m)
 }
 
 // QueryMetadata queries the "metadata" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryMetadata() *HasMetadataQuery {
-	return NewPackageVersionClient(pv.config).QueryMetadata(pv)
+func (_m *PackageVersion) QueryMetadata() *HasMetadataQuery {
+	return NewPackageVersionClient(_m.config).QueryMetadata(_m)
 }
 
 // QueryDependency queries the "dependency" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryDependency() *DependencyQuery {
-	return NewPackageVersionClient(pv.config).QueryDependency(pv)
+func (_m *PackageVersion) QueryDependency() *DependencyQuery {
+	return NewPackageVersionClient(_m.config).QueryDependency(_m)
 }
 
 // QueryDependencySubject queries the "dependency_subject" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryDependencySubject() *DependencyQuery {
-	return NewPackageVersionClient(pv.config).QueryDependencySubject(pv)
+func (_m *PackageVersion) QueryDependencySubject() *DependencyQuery {
+	return NewPackageVersionClient(_m.config).QueryDependencySubject(_m)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryIncludedInSboms() *BillOfMaterialsQuery {
-	return NewPackageVersionClient(pv.config).QueryIncludedInSboms(pv)
+func (_m *PackageVersion) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewPackageVersionClient(_m.config).QueryIncludedInSboms(_m)
 }
 
 // QueryPkgEqualPkgA queries the "pkg_equal_pkg_a" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryPkgEqualPkgA() *PkgEqualQuery {
-	return NewPackageVersionClient(pv.config).QueryPkgEqualPkgA(pv)
+func (_m *PackageVersion) QueryPkgEqualPkgA() *PkgEqualQuery {
+	return NewPackageVersionClient(_m.config).QueryPkgEqualPkgA(_m)
 }
 
 // QueryPkgEqualPkgB queries the "pkg_equal_pkg_b" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryPkgEqualPkgB() *PkgEqualQuery {
-	return NewPackageVersionClient(pv.config).QueryPkgEqualPkgB(pv)
+func (_m *PackageVersion) QueryPkgEqualPkgB() *PkgEqualQuery {
+	return NewPackageVersionClient(_m.config).QueryPkgEqualPkgB(_m)
 }
 
 // QueryPoc queries the "poc" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryPoc() *PointOfContactQuery {
-	return NewPackageVersionClient(pv.config).QueryPoc(pv)
+func (_m *PackageVersion) QueryPoc() *PointOfContactQuery {
+	return NewPackageVersionClient(_m.config).QueryPoc(_m)
 }
 
 // QueryCertifyLegal queries the "certify_legal" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryCertifyLegal() *CertifyLegalQuery {
-	return NewPackageVersionClient(pv.config).QueryCertifyLegal(pv)
+func (_m *PackageVersion) QueryCertifyLegal() *CertifyLegalQuery {
+	return NewPackageVersionClient(_m.config).QueryCertifyLegal(_m)
 }
 
 // Update returns a builder for updating this PackageVersion.
 // Note that you need to call PackageVersion.Unwrap() before calling this method if this PackageVersion
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pv *PackageVersion) Update() *PackageVersionUpdateOne {
-	return NewPackageVersionClient(pv.config).UpdateOne(pv)
+func (_m *PackageVersion) Update() *PackageVersionUpdateOne {
+	return NewPackageVersionClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the PackageVersion entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pv *PackageVersion) Unwrap() *PackageVersion {
-	_tx, ok := pv.config.driver.(*txDriver)
+func (_m *PackageVersion) Unwrap() *PackageVersion {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: PackageVersion is not a transactional entity")
 	}
-	pv.config.driver = _tx.drv
-	return pv
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (pv *PackageVersion) String() string {
+func (_m *PackageVersion) String() string {
 	var builder strings.Builder
 	builder.WriteString("PackageVersion(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pv.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name_id=")
-	builder.WriteString(fmt.Sprintf("%v", pv.NameID))
+	builder.WriteString(fmt.Sprintf("%v", _m.NameID))
 	builder.WriteString(", ")
 	builder.WriteString("version=")
-	builder.WriteString(pv.Version)
+	builder.WriteString(_m.Version)
 	builder.WriteString(", ")
 	builder.WriteString("subpath=")
-	builder.WriteString(pv.Subpath)
+	builder.WriteString(_m.Subpath)
 	builder.WriteString(", ")
 	builder.WriteString("qualifiers=")
-	builder.WriteString(fmt.Sprintf("%v", pv.Qualifiers))
+	builder.WriteString(fmt.Sprintf("%v", _m.Qualifiers))
 	builder.WriteString(", ")
 	builder.WriteString("hash=")
-	builder.WriteString(pv.Hash)
+	builder.WriteString(_m.Hash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedOccurrences returns the Occurrences named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedOccurrences(name string) ([]*Occurrence, error) {
-	if pv.Edges.namedOccurrences == nil {
+func (_m *PackageVersion) NamedOccurrences(name string) ([]*Occurrence, error) {
+	if _m.Edges.namedOccurrences == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedOccurrences[name]
+	nodes, ok := _m.Edges.namedOccurrences[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedOccurrences(name string, edges ...*Occurrence) {
-	if pv.Edges.namedOccurrences == nil {
-		pv.Edges.namedOccurrences = make(map[string][]*Occurrence)
+func (_m *PackageVersion) appendNamedOccurrences(name string, edges ...*Occurrence) {
+	if _m.Edges.namedOccurrences == nil {
+		_m.Edges.namedOccurrences = make(map[string][]*Occurrence)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedOccurrences[name] = []*Occurrence{}
+		_m.Edges.namedOccurrences[name] = []*Occurrence{}
 	} else {
-		pv.Edges.namedOccurrences[name] = append(pv.Edges.namedOccurrences[name], edges...)
+		_m.Edges.namedOccurrences[name] = append(_m.Edges.namedOccurrences[name], edges...)
 	}
 }
 
 // NamedSbom returns the Sbom named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedSbom(name string) ([]*BillOfMaterials, error) {
-	if pv.Edges.namedSbom == nil {
+func (_m *PackageVersion) NamedSbom(name string) ([]*BillOfMaterials, error) {
+	if _m.Edges.namedSbom == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedSbom[name]
+	nodes, ok := _m.Edges.namedSbom[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedSbom(name string, edges ...*BillOfMaterials) {
-	if pv.Edges.namedSbom == nil {
-		pv.Edges.namedSbom = make(map[string][]*BillOfMaterials)
+func (_m *PackageVersion) appendNamedSbom(name string, edges ...*BillOfMaterials) {
+	if _m.Edges.namedSbom == nil {
+		_m.Edges.namedSbom = make(map[string][]*BillOfMaterials)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedSbom[name] = []*BillOfMaterials{}
+		_m.Edges.namedSbom[name] = []*BillOfMaterials{}
 	} else {
-		pv.Edges.namedSbom[name] = append(pv.Edges.namedSbom[name], edges...)
+		_m.Edges.namedSbom[name] = append(_m.Edges.namedSbom[name], edges...)
 	}
 }
 
 // NamedVuln returns the Vuln named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedVuln(name string) ([]*CertifyVuln, error) {
-	if pv.Edges.namedVuln == nil {
+func (_m *PackageVersion) NamedVuln(name string) ([]*CertifyVuln, error) {
+	if _m.Edges.namedVuln == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedVuln[name]
+	nodes, ok := _m.Edges.namedVuln[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedVuln(name string, edges ...*CertifyVuln) {
-	if pv.Edges.namedVuln == nil {
-		pv.Edges.namedVuln = make(map[string][]*CertifyVuln)
+func (_m *PackageVersion) appendNamedVuln(name string, edges ...*CertifyVuln) {
+	if _m.Edges.namedVuln == nil {
+		_m.Edges.namedVuln = make(map[string][]*CertifyVuln)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedVuln[name] = []*CertifyVuln{}
+		_m.Edges.namedVuln[name] = []*CertifyVuln{}
 	} else {
-		pv.Edges.namedVuln[name] = append(pv.Edges.namedVuln[name], edges...)
+		_m.Edges.namedVuln[name] = append(_m.Edges.namedVuln[name], edges...)
 	}
 }
 
 // NamedVex returns the Vex named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedVex(name string) ([]*CertifyVex, error) {
-	if pv.Edges.namedVex == nil {
+func (_m *PackageVersion) NamedVex(name string) ([]*CertifyVex, error) {
+	if _m.Edges.namedVex == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedVex[name]
+	nodes, ok := _m.Edges.namedVex[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedVex(name string, edges ...*CertifyVex) {
-	if pv.Edges.namedVex == nil {
-		pv.Edges.namedVex = make(map[string][]*CertifyVex)
+func (_m *PackageVersion) appendNamedVex(name string, edges ...*CertifyVex) {
+	if _m.Edges.namedVex == nil {
+		_m.Edges.namedVex = make(map[string][]*CertifyVex)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedVex[name] = []*CertifyVex{}
+		_m.Edges.namedVex[name] = []*CertifyVex{}
 	} else {
-		pv.Edges.namedVex[name] = append(pv.Edges.namedVex[name], edges...)
+		_m.Edges.namedVex[name] = append(_m.Edges.namedVex[name], edges...)
 	}
 }
 
 // NamedHasSourceAt returns the HasSourceAt named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
-	if pv.Edges.namedHasSourceAt == nil {
+func (_m *PackageVersion) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
+	if _m.Edges.namedHasSourceAt == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedHasSourceAt[name]
+	nodes, ok := _m.Edges.namedHasSourceAt[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
-	if pv.Edges.namedHasSourceAt == nil {
-		pv.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
+func (_m *PackageVersion) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
+	if _m.Edges.namedHasSourceAt == nil {
+		_m.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
+		_m.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
 	} else {
-		pv.Edges.namedHasSourceAt[name] = append(pv.Edges.namedHasSourceAt[name], edges...)
+		_m.Edges.namedHasSourceAt[name] = append(_m.Edges.namedHasSourceAt[name], edges...)
 	}
 }
 
 // NamedCertification returns the Certification named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedCertification(name string) ([]*Certification, error) {
-	if pv.Edges.namedCertification == nil {
+func (_m *PackageVersion) NamedCertification(name string) ([]*Certification, error) {
+	if _m.Edges.namedCertification == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedCertification[name]
+	nodes, ok := _m.Edges.namedCertification[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedCertification(name string, edges ...*Certification) {
-	if pv.Edges.namedCertification == nil {
-		pv.Edges.namedCertification = make(map[string][]*Certification)
+func (_m *PackageVersion) appendNamedCertification(name string, edges ...*Certification) {
+	if _m.Edges.namedCertification == nil {
+		_m.Edges.namedCertification = make(map[string][]*Certification)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedCertification[name] = []*Certification{}
+		_m.Edges.namedCertification[name] = []*Certification{}
 	} else {
-		pv.Edges.namedCertification[name] = append(pv.Edges.namedCertification[name], edges...)
+		_m.Edges.namedCertification[name] = append(_m.Edges.namedCertification[name], edges...)
 	}
 }
 
 // NamedMetadata returns the Metadata named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedMetadata(name string) ([]*HasMetadata, error) {
-	if pv.Edges.namedMetadata == nil {
+func (_m *PackageVersion) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if _m.Edges.namedMetadata == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedMetadata[name]
+	nodes, ok := _m.Edges.namedMetadata[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedMetadata(name string, edges ...*HasMetadata) {
-	if pv.Edges.namedMetadata == nil {
-		pv.Edges.namedMetadata = make(map[string][]*HasMetadata)
+func (_m *PackageVersion) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if _m.Edges.namedMetadata == nil {
+		_m.Edges.namedMetadata = make(map[string][]*HasMetadata)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedMetadata[name] = []*HasMetadata{}
+		_m.Edges.namedMetadata[name] = []*HasMetadata{}
 	} else {
-		pv.Edges.namedMetadata[name] = append(pv.Edges.namedMetadata[name], edges...)
+		_m.Edges.namedMetadata[name] = append(_m.Edges.namedMetadata[name], edges...)
 	}
 }
 
 // NamedDependency returns the Dependency named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedDependency(name string) ([]*Dependency, error) {
-	if pv.Edges.namedDependency == nil {
+func (_m *PackageVersion) NamedDependency(name string) ([]*Dependency, error) {
+	if _m.Edges.namedDependency == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedDependency[name]
+	nodes, ok := _m.Edges.namedDependency[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedDependency(name string, edges ...*Dependency) {
-	if pv.Edges.namedDependency == nil {
-		pv.Edges.namedDependency = make(map[string][]*Dependency)
+func (_m *PackageVersion) appendNamedDependency(name string, edges ...*Dependency) {
+	if _m.Edges.namedDependency == nil {
+		_m.Edges.namedDependency = make(map[string][]*Dependency)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedDependency[name] = []*Dependency{}
+		_m.Edges.namedDependency[name] = []*Dependency{}
 	} else {
-		pv.Edges.namedDependency[name] = append(pv.Edges.namedDependency[name], edges...)
+		_m.Edges.namedDependency[name] = append(_m.Edges.namedDependency[name], edges...)
 	}
 }
 
 // NamedDependencySubject returns the DependencySubject named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedDependencySubject(name string) ([]*Dependency, error) {
-	if pv.Edges.namedDependencySubject == nil {
+func (_m *PackageVersion) NamedDependencySubject(name string) ([]*Dependency, error) {
+	if _m.Edges.namedDependencySubject == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedDependencySubject[name]
+	nodes, ok := _m.Edges.namedDependencySubject[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedDependencySubject(name string, edges ...*Dependency) {
-	if pv.Edges.namedDependencySubject == nil {
-		pv.Edges.namedDependencySubject = make(map[string][]*Dependency)
+func (_m *PackageVersion) appendNamedDependencySubject(name string, edges ...*Dependency) {
+	if _m.Edges.namedDependencySubject == nil {
+		_m.Edges.namedDependencySubject = make(map[string][]*Dependency)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedDependencySubject[name] = []*Dependency{}
+		_m.Edges.namedDependencySubject[name] = []*Dependency{}
 	} else {
-		pv.Edges.namedDependencySubject[name] = append(pv.Edges.namedDependencySubject[name], edges...)
+		_m.Edges.namedDependencySubject[name] = append(_m.Edges.namedDependencySubject[name], edges...)
 	}
 }
 
 // NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
-	if pv.Edges.namedIncludedInSboms == nil {
+func (_m *PackageVersion) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if _m.Edges.namedIncludedInSboms == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedIncludedInSboms[name]
+	nodes, ok := _m.Edges.namedIncludedInSboms[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
-	if pv.Edges.namedIncludedInSboms == nil {
-		pv.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+func (_m *PackageVersion) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if _m.Edges.namedIncludedInSboms == nil {
+		_m.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+		_m.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
 	} else {
-		pv.Edges.namedIncludedInSboms[name] = append(pv.Edges.namedIncludedInSboms[name], edges...)
+		_m.Edges.namedIncludedInSboms[name] = append(_m.Edges.namedIncludedInSboms[name], edges...)
 	}
 }
 
 // NamedPkgEqualPkgA returns the PkgEqualPkgA named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedPkgEqualPkgA(name string) ([]*PkgEqual, error) {
-	if pv.Edges.namedPkgEqualPkgA == nil {
+func (_m *PackageVersion) NamedPkgEqualPkgA(name string) ([]*PkgEqual, error) {
+	if _m.Edges.namedPkgEqualPkgA == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedPkgEqualPkgA[name]
+	nodes, ok := _m.Edges.namedPkgEqualPkgA[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedPkgEqualPkgA(name string, edges ...*PkgEqual) {
-	if pv.Edges.namedPkgEqualPkgA == nil {
-		pv.Edges.namedPkgEqualPkgA = make(map[string][]*PkgEqual)
+func (_m *PackageVersion) appendNamedPkgEqualPkgA(name string, edges ...*PkgEqual) {
+	if _m.Edges.namedPkgEqualPkgA == nil {
+		_m.Edges.namedPkgEqualPkgA = make(map[string][]*PkgEqual)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedPkgEqualPkgA[name] = []*PkgEqual{}
+		_m.Edges.namedPkgEqualPkgA[name] = []*PkgEqual{}
 	} else {
-		pv.Edges.namedPkgEqualPkgA[name] = append(pv.Edges.namedPkgEqualPkgA[name], edges...)
+		_m.Edges.namedPkgEqualPkgA[name] = append(_m.Edges.namedPkgEqualPkgA[name], edges...)
 	}
 }
 
 // NamedPkgEqualPkgB returns the PkgEqualPkgB named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedPkgEqualPkgB(name string) ([]*PkgEqual, error) {
-	if pv.Edges.namedPkgEqualPkgB == nil {
+func (_m *PackageVersion) NamedPkgEqualPkgB(name string) ([]*PkgEqual, error) {
+	if _m.Edges.namedPkgEqualPkgB == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedPkgEqualPkgB[name]
+	nodes, ok := _m.Edges.namedPkgEqualPkgB[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedPkgEqualPkgB(name string, edges ...*PkgEqual) {
-	if pv.Edges.namedPkgEqualPkgB == nil {
-		pv.Edges.namedPkgEqualPkgB = make(map[string][]*PkgEqual)
+func (_m *PackageVersion) appendNamedPkgEqualPkgB(name string, edges ...*PkgEqual) {
+	if _m.Edges.namedPkgEqualPkgB == nil {
+		_m.Edges.namedPkgEqualPkgB = make(map[string][]*PkgEqual)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedPkgEqualPkgB[name] = []*PkgEqual{}
+		_m.Edges.namedPkgEqualPkgB[name] = []*PkgEqual{}
 	} else {
-		pv.Edges.namedPkgEqualPkgB[name] = append(pv.Edges.namedPkgEqualPkgB[name], edges...)
+		_m.Edges.namedPkgEqualPkgB[name] = append(_m.Edges.namedPkgEqualPkgB[name], edges...)
 	}
 }
 
 // NamedPoc returns the Poc named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedPoc(name string) ([]*PointOfContact, error) {
-	if pv.Edges.namedPoc == nil {
+func (_m *PackageVersion) NamedPoc(name string) ([]*PointOfContact, error) {
+	if _m.Edges.namedPoc == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedPoc[name]
+	nodes, ok := _m.Edges.namedPoc[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedPoc(name string, edges ...*PointOfContact) {
-	if pv.Edges.namedPoc == nil {
-		pv.Edges.namedPoc = make(map[string][]*PointOfContact)
+func (_m *PackageVersion) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if _m.Edges.namedPoc == nil {
+		_m.Edges.namedPoc = make(map[string][]*PointOfContact)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedPoc[name] = []*PointOfContact{}
+		_m.Edges.namedPoc[name] = []*PointOfContact{}
 	} else {
-		pv.Edges.namedPoc[name] = append(pv.Edges.namedPoc[name], edges...)
+		_m.Edges.namedPoc[name] = append(_m.Edges.namedPoc[name], edges...)
 	}
 }
 
 // NamedCertifyLegal returns the CertifyLegal named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedCertifyLegal(name string) ([]*CertifyLegal, error) {
-	if pv.Edges.namedCertifyLegal == nil {
+func (_m *PackageVersion) NamedCertifyLegal(name string) ([]*CertifyLegal, error) {
+	if _m.Edges.namedCertifyLegal == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := pv.Edges.namedCertifyLegal[name]
+	nodes, ok := _m.Edges.namedCertifyLegal[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (pv *PackageVersion) appendNamedCertifyLegal(name string, edges ...*CertifyLegal) {
-	if pv.Edges.namedCertifyLegal == nil {
-		pv.Edges.namedCertifyLegal = make(map[string][]*CertifyLegal)
+func (_m *PackageVersion) appendNamedCertifyLegal(name string, edges ...*CertifyLegal) {
+	if _m.Edges.namedCertifyLegal == nil {
+		_m.Edges.namedCertifyLegal = make(map[string][]*CertifyLegal)
 	}
 	if len(edges) == 0 {
-		pv.Edges.namedCertifyLegal[name] = []*CertifyLegal{}
+		_m.Edges.namedCertifyLegal[name] = []*CertifyLegal{}
 	} else {
-		pv.Edges.namedCertifyLegal[name] = append(pv.Edges.namedCertifyLegal[name], edges...)
+		_m.Edges.namedCertifyLegal[name] = append(_m.Edges.namedCertifyLegal[name], edges...)
 	}
 }
 

@@ -33,44 +33,44 @@ type CertifyScorecardQuery struct {
 }
 
 // Where adds a new predicate for the CertifyScorecardQuery builder.
-func (csq *CertifyScorecardQuery) Where(ps ...predicate.CertifyScorecard) *CertifyScorecardQuery {
-	csq.predicates = append(csq.predicates, ps...)
-	return csq
+func (_q *CertifyScorecardQuery) Where(ps ...predicate.CertifyScorecard) *CertifyScorecardQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (csq *CertifyScorecardQuery) Limit(limit int) *CertifyScorecardQuery {
-	csq.ctx.Limit = &limit
-	return csq
+func (_q *CertifyScorecardQuery) Limit(limit int) *CertifyScorecardQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (csq *CertifyScorecardQuery) Offset(offset int) *CertifyScorecardQuery {
-	csq.ctx.Offset = &offset
-	return csq
+func (_q *CertifyScorecardQuery) Offset(offset int) *CertifyScorecardQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (csq *CertifyScorecardQuery) Unique(unique bool) *CertifyScorecardQuery {
-	csq.ctx.Unique = &unique
-	return csq
+func (_q *CertifyScorecardQuery) Unique(unique bool) *CertifyScorecardQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (csq *CertifyScorecardQuery) Order(o ...certifyscorecard.OrderOption) *CertifyScorecardQuery {
-	csq.order = append(csq.order, o...)
-	return csq
+func (_q *CertifyScorecardQuery) Order(o ...certifyscorecard.OrderOption) *CertifyScorecardQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QuerySource chains the current query on the "source" edge.
-func (csq *CertifyScorecardQuery) QuerySource() *SourceNameQuery {
-	query := (&SourceNameClient{config: csq.config}).Query()
+func (_q *CertifyScorecardQuery) QuerySource() *SourceNameQuery {
+	query := (&SourceNameClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := csq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := csq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -79,7 +79,7 @@ func (csq *CertifyScorecardQuery) QuerySource() *SourceNameQuery {
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyscorecard.SourceTable, certifyscorecard.SourceColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(csq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -87,8 +87,8 @@ func (csq *CertifyScorecardQuery) QuerySource() *SourceNameQuery {
 
 // First returns the first CertifyScorecard entity from the query.
 // Returns a *NotFoundError when no CertifyScorecard was found.
-func (csq *CertifyScorecardQuery) First(ctx context.Context) (*CertifyScorecard, error) {
-	nodes, err := csq.Limit(1).All(setContextOp(ctx, csq.ctx, ent.OpQueryFirst))
+func (_q *CertifyScorecardQuery) First(ctx context.Context) (*CertifyScorecard, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +99,8 @@ func (csq *CertifyScorecardQuery) First(ctx context.Context) (*CertifyScorecard,
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) FirstX(ctx context.Context) *CertifyScorecard {
-	node, err := csq.First(ctx)
+func (_q *CertifyScorecardQuery) FirstX(ctx context.Context) *CertifyScorecard {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -109,9 +109,9 @@ func (csq *CertifyScorecardQuery) FirstX(ctx context.Context) *CertifyScorecard 
 
 // FirstID returns the first CertifyScorecard ID from the query.
 // Returns a *NotFoundError when no CertifyScorecard ID was found.
-func (csq *CertifyScorecardQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *CertifyScorecardQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = csq.Limit(1).IDs(setContextOp(ctx, csq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -122,8 +122,8 @@ func (csq *CertifyScorecardQuery) FirstID(ctx context.Context) (id uuid.UUID, er
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := csq.FirstID(ctx)
+func (_q *CertifyScorecardQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -133,8 +133,8 @@ func (csq *CertifyScorecardQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single CertifyScorecard entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one CertifyScorecard entity is found.
 // Returns a *NotFoundError when no CertifyScorecard entities are found.
-func (csq *CertifyScorecardQuery) Only(ctx context.Context) (*CertifyScorecard, error) {
-	nodes, err := csq.Limit(2).All(setContextOp(ctx, csq.ctx, ent.OpQueryOnly))
+func (_q *CertifyScorecardQuery) Only(ctx context.Context) (*CertifyScorecard, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -149,8 +149,8 @@ func (csq *CertifyScorecardQuery) Only(ctx context.Context) (*CertifyScorecard, 
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) OnlyX(ctx context.Context) *CertifyScorecard {
-	node, err := csq.Only(ctx)
+func (_q *CertifyScorecardQuery) OnlyX(ctx context.Context) *CertifyScorecard {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -160,9 +160,9 @@ func (csq *CertifyScorecardQuery) OnlyX(ctx context.Context) *CertifyScorecard {
 // OnlyID is like Only, but returns the only CertifyScorecard ID in the query.
 // Returns a *NotSingularError when more than one CertifyScorecard ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (csq *CertifyScorecardQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *CertifyScorecardQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = csq.Limit(2).IDs(setContextOp(ctx, csq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -177,8 +177,8 @@ func (csq *CertifyScorecardQuery) OnlyID(ctx context.Context) (id uuid.UUID, err
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := csq.OnlyID(ctx)
+func (_q *CertifyScorecardQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -186,18 +186,18 @@ func (csq *CertifyScorecardQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of CertifyScorecards.
-func (csq *CertifyScorecardQuery) All(ctx context.Context) ([]*CertifyScorecard, error) {
-	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryAll)
-	if err := csq.prepareQuery(ctx); err != nil {
+func (_q *CertifyScorecardQuery) All(ctx context.Context) ([]*CertifyScorecard, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*CertifyScorecard, *CertifyScorecardQuery]()
-	return withInterceptors[[]*CertifyScorecard](ctx, csq, qr, csq.inters)
+	return withInterceptors[[]*CertifyScorecard](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) AllX(ctx context.Context) []*CertifyScorecard {
-	nodes, err := csq.All(ctx)
+func (_q *CertifyScorecardQuery) AllX(ctx context.Context) []*CertifyScorecard {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -205,20 +205,20 @@ func (csq *CertifyScorecardQuery) AllX(ctx context.Context) []*CertifyScorecard 
 }
 
 // IDs executes the query and returns a list of CertifyScorecard IDs.
-func (csq *CertifyScorecardQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if csq.ctx.Unique == nil && csq.path != nil {
-		csq.Unique(true)
+func (_q *CertifyScorecardQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryIDs)
-	if err = csq.Select(certifyscorecard.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(certifyscorecard.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := csq.IDs(ctx)
+func (_q *CertifyScorecardQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -226,17 +226,17 @@ func (csq *CertifyScorecardQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (csq *CertifyScorecardQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryCount)
-	if err := csq.prepareQuery(ctx); err != nil {
+func (_q *CertifyScorecardQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, csq, querierCount[*CertifyScorecardQuery](), csq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*CertifyScorecardQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) CountX(ctx context.Context) int {
-	count, err := csq.Count(ctx)
+func (_q *CertifyScorecardQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -244,9 +244,9 @@ func (csq *CertifyScorecardQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (csq *CertifyScorecardQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, csq.ctx, ent.OpQueryExist)
-	switch _, err := csq.FirstID(ctx); {
+func (_q *CertifyScorecardQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -257,8 +257,8 @@ func (csq *CertifyScorecardQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) ExistX(ctx context.Context) bool {
-	exist, err := csq.Exist(ctx)
+func (_q *CertifyScorecardQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -267,32 +267,32 @@ func (csq *CertifyScorecardQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CertifyScorecardQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (csq *CertifyScorecardQuery) Clone() *CertifyScorecardQuery {
-	if csq == nil {
+func (_q *CertifyScorecardQuery) Clone() *CertifyScorecardQuery {
+	if _q == nil {
 		return nil
 	}
 	return &CertifyScorecardQuery{
-		config:     csq.config,
-		ctx:        csq.ctx.Clone(),
-		order:      append([]certifyscorecard.OrderOption{}, csq.order...),
-		inters:     append([]Interceptor{}, csq.inters...),
-		predicates: append([]predicate.CertifyScorecard{}, csq.predicates...),
-		withSource: csq.withSource.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]certifyscorecard.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.CertifyScorecard{}, _q.predicates...),
+		withSource: _q.withSource.Clone(),
 		// clone intermediate query.
-		sql:  csq.sql.Clone(),
-		path: csq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithSource tells the query-builder to eager-load the nodes that are connected to
 // the "source" edge. The optional arguments are used to configure the query builder of the edge.
-func (csq *CertifyScorecardQuery) WithSource(opts ...func(*SourceNameQuery)) *CertifyScorecardQuery {
-	query := (&SourceNameClient{config: csq.config}).Query()
+func (_q *CertifyScorecardQuery) WithSource(opts ...func(*SourceNameQuery)) *CertifyScorecardQuery {
+	query := (&SourceNameClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	csq.withSource = query
-	return csq
+	_q.withSource = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -309,10 +309,10 @@ func (csq *CertifyScorecardQuery) WithSource(opts ...func(*SourceNameQuery)) *Ce
 //		GroupBy(certifyscorecard.FieldSourceID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (csq *CertifyScorecardQuery) GroupBy(field string, fields ...string) *CertifyScorecardGroupBy {
-	csq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CertifyScorecardGroupBy{build: csq}
-	grbuild.flds = &csq.ctx.Fields
+func (_q *CertifyScorecardQuery) GroupBy(field string, fields ...string) *CertifyScorecardGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CertifyScorecardGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = certifyscorecard.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -330,89 +330,89 @@ func (csq *CertifyScorecardQuery) GroupBy(field string, fields ...string) *Certi
 //	client.CertifyScorecard.Query().
 //		Select(certifyscorecard.FieldSourceID).
 //		Scan(ctx, &v)
-func (csq *CertifyScorecardQuery) Select(fields ...string) *CertifyScorecardSelect {
-	csq.ctx.Fields = append(csq.ctx.Fields, fields...)
-	sbuild := &CertifyScorecardSelect{CertifyScorecardQuery: csq}
+func (_q *CertifyScorecardQuery) Select(fields ...string) *CertifyScorecardSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &CertifyScorecardSelect{CertifyScorecardQuery: _q}
 	sbuild.label = certifyscorecard.Label
-	sbuild.flds, sbuild.scan = &csq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CertifyScorecardSelect configured with the given aggregations.
-func (csq *CertifyScorecardQuery) Aggregate(fns ...AggregateFunc) *CertifyScorecardSelect {
-	return csq.Select().Aggregate(fns...)
+func (_q *CertifyScorecardQuery) Aggregate(fns ...AggregateFunc) *CertifyScorecardSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (csq *CertifyScorecardQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range csq.inters {
+func (_q *CertifyScorecardQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, csq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range csq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !certifyscorecard.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if csq.path != nil {
-		prev, err := csq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		csq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (csq *CertifyScorecardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CertifyScorecard, error) {
+func (_q *CertifyScorecardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CertifyScorecard, error) {
 	var (
 		nodes       = []*CertifyScorecard{}
-		_spec       = csq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			csq.withSource != nil,
+			_q.withSource != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CertifyScorecard).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CertifyScorecard{config: csq.config}
+		node := &CertifyScorecard{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(csq.modifiers) > 0 {
-		_spec.Modifiers = csq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, csq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := csq.withSource; query != nil {
-		if err := csq.loadSource(ctx, query, nodes, nil,
+	if query := _q.withSource; query != nil {
+		if err := _q.loadSource(ctx, query, nodes, nil,
 			func(n *CertifyScorecard, e *SourceName) { n.Edges.Source = e }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range csq.loadTotal {
-		if err := csq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (csq *CertifyScorecardQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*CertifyScorecard, init func(*CertifyScorecard), assign func(*CertifyScorecard, *SourceName)) error {
+func (_q *CertifyScorecardQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*CertifyScorecard, init func(*CertifyScorecard), assign func(*CertifyScorecard, *SourceName)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyScorecard)
 	for i := range nodes {
@@ -442,27 +442,27 @@ func (csq *CertifyScorecardQuery) loadSource(ctx context.Context, query *SourceN
 	return nil
 }
 
-func (csq *CertifyScorecardQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := csq.querySpec()
-	if len(csq.modifiers) > 0 {
-		_spec.Modifiers = csq.modifiers
+func (_q *CertifyScorecardQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = csq.ctx.Fields
-	if len(csq.ctx.Fields) > 0 {
-		_spec.Unique = csq.ctx.Unique != nil && *csq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, csq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (csq *CertifyScorecardQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *CertifyScorecardQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(certifyscorecard.Table, certifyscorecard.Columns, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
-	_spec.From = csq.sql
-	if unique := csq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if csq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := csq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certifyscorecard.FieldID)
 		for i := range fields {
@@ -470,24 +470,24 @@ func (csq *CertifyScorecardQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if csq.withSource != nil {
+		if _q.withSource != nil {
 			_spec.Node.AddColumnOnce(certifyscorecard.FieldSourceID)
 		}
 	}
-	if ps := csq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := csq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := csq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := csq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -497,33 +497,33 @@ func (csq *CertifyScorecardQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (csq *CertifyScorecardQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(csq.driver.Dialect())
+func (_q *CertifyScorecardQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(certifyscorecard.Table)
-	columns := csq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = certifyscorecard.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if csq.sql != nil {
-		selector = csq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if csq.ctx.Unique != nil && *csq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range csq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range csq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := csq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := csq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -536,41 +536,41 @@ type CertifyScorecardGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (csgb *CertifyScorecardGroupBy) Aggregate(fns ...AggregateFunc) *CertifyScorecardGroupBy {
-	csgb.fns = append(csgb.fns, fns...)
-	return csgb
+func (_g *CertifyScorecardGroupBy) Aggregate(fns ...AggregateFunc) *CertifyScorecardGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (csgb *CertifyScorecardGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, csgb.build.ctx, ent.OpQueryGroupBy)
-	if err := csgb.build.prepareQuery(ctx); err != nil {
+func (_g *CertifyScorecardGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CertifyScorecardQuery, *CertifyScorecardGroupBy](ctx, csgb.build, csgb, csgb.build.inters, v)
+	return scanWithInterceptors[*CertifyScorecardQuery, *CertifyScorecardGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (csgb *CertifyScorecardGroupBy) sqlScan(ctx context.Context, root *CertifyScorecardQuery, v any) error {
+func (_g *CertifyScorecardGroupBy) sqlScan(ctx context.Context, root *CertifyScorecardQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(csgb.fns))
-	for _, fn := range csgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*csgb.flds)+len(csgb.fns))
-		for _, f := range *csgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*csgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := csgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -584,27 +584,27 @@ type CertifyScorecardSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (css *CertifyScorecardSelect) Aggregate(fns ...AggregateFunc) *CertifyScorecardSelect {
-	css.fns = append(css.fns, fns...)
-	return css
+func (_s *CertifyScorecardSelect) Aggregate(fns ...AggregateFunc) *CertifyScorecardSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (css *CertifyScorecardSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, css.ctx, ent.OpQuerySelect)
-	if err := css.prepareQuery(ctx); err != nil {
+func (_s *CertifyScorecardSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CertifyScorecardQuery, *CertifyScorecardSelect](ctx, css.CertifyScorecardQuery, css, css.inters, v)
+	return scanWithInterceptors[*CertifyScorecardQuery, *CertifyScorecardSelect](ctx, _s.CertifyScorecardQuery, _s, _s.inters, v)
 }
 
-func (css *CertifyScorecardSelect) sqlScan(ctx context.Context, root *CertifyScorecardQuery, v any) error {
+func (_s *CertifyScorecardSelect) sqlScan(ctx context.Context, root *CertifyScorecardQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(css.fns))
-	for _, fn := range css.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*css.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -612,7 +612,7 @@ func (css *CertifyScorecardSelect) sqlScan(ctx context.Context, root *CertifySco
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := css.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

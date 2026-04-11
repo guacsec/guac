@@ -29,165 +29,165 @@ type HasMetadataCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (hmc *HasMetadataCreate) SetSourceID(u uuid.UUID) *HasMetadataCreate {
-	hmc.mutation.SetSourceID(u)
-	return hmc
+func (_c *HasMetadataCreate) SetSourceID(v uuid.UUID) *HasMetadataCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableSourceID(u *uuid.UUID) *HasMetadataCreate {
-	if u != nil {
-		hmc.SetSourceID(*u)
+func (_c *HasMetadataCreate) SetNillableSourceID(v *uuid.UUID) *HasMetadataCreate {
+	if v != nil {
+		_c.SetSourceID(*v)
 	}
-	return hmc
+	return _c
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hmc *HasMetadataCreate) SetPackageVersionID(u uuid.UUID) *HasMetadataCreate {
-	hmc.mutation.SetPackageVersionID(u)
-	return hmc
+func (_c *HasMetadataCreate) SetPackageVersionID(v uuid.UUID) *HasMetadataCreate {
+	_c.mutation.SetPackageVersionID(v)
+	return _c
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillablePackageVersionID(u *uuid.UUID) *HasMetadataCreate {
-	if u != nil {
-		hmc.SetPackageVersionID(*u)
+func (_c *HasMetadataCreate) SetNillablePackageVersionID(v *uuid.UUID) *HasMetadataCreate {
+	if v != nil {
+		_c.SetPackageVersionID(*v)
 	}
-	return hmc
+	return _c
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hmc *HasMetadataCreate) SetPackageNameID(u uuid.UUID) *HasMetadataCreate {
-	hmc.mutation.SetPackageNameID(u)
-	return hmc
+func (_c *HasMetadataCreate) SetPackageNameID(v uuid.UUID) *HasMetadataCreate {
+	_c.mutation.SetPackageNameID(v)
+	return _c
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillablePackageNameID(u *uuid.UUID) *HasMetadataCreate {
-	if u != nil {
-		hmc.SetPackageNameID(*u)
+func (_c *HasMetadataCreate) SetNillablePackageNameID(v *uuid.UUID) *HasMetadataCreate {
+	if v != nil {
+		_c.SetPackageNameID(*v)
 	}
-	return hmc
+	return _c
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (hmc *HasMetadataCreate) SetArtifactID(u uuid.UUID) *HasMetadataCreate {
-	hmc.mutation.SetArtifactID(u)
-	return hmc
+func (_c *HasMetadataCreate) SetArtifactID(v uuid.UUID) *HasMetadataCreate {
+	_c.mutation.SetArtifactID(v)
+	return _c
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableArtifactID(u *uuid.UUID) *HasMetadataCreate {
-	if u != nil {
-		hmc.SetArtifactID(*u)
+func (_c *HasMetadataCreate) SetNillableArtifactID(v *uuid.UUID) *HasMetadataCreate {
+	if v != nil {
+		_c.SetArtifactID(*v)
 	}
-	return hmc
+	return _c
 }
 
 // SetTimestamp sets the "timestamp" field.
-func (hmc *HasMetadataCreate) SetTimestamp(t time.Time) *HasMetadataCreate {
-	hmc.mutation.SetTimestamp(t)
-	return hmc
+func (_c *HasMetadataCreate) SetTimestamp(v time.Time) *HasMetadataCreate {
+	_c.mutation.SetTimestamp(v)
+	return _c
 }
 
 // SetKey sets the "key" field.
-func (hmc *HasMetadataCreate) SetKey(s string) *HasMetadataCreate {
-	hmc.mutation.SetKey(s)
-	return hmc
+func (_c *HasMetadataCreate) SetKey(v string) *HasMetadataCreate {
+	_c.mutation.SetKey(v)
+	return _c
 }
 
 // SetValue sets the "value" field.
-func (hmc *HasMetadataCreate) SetValue(s string) *HasMetadataCreate {
-	hmc.mutation.SetValue(s)
-	return hmc
+func (_c *HasMetadataCreate) SetValue(v string) *HasMetadataCreate {
+	_c.mutation.SetValue(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (hmc *HasMetadataCreate) SetJustification(s string) *HasMetadataCreate {
-	hmc.mutation.SetJustification(s)
-	return hmc
+func (_c *HasMetadataCreate) SetJustification(v string) *HasMetadataCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (hmc *HasMetadataCreate) SetOrigin(s string) *HasMetadataCreate {
-	hmc.mutation.SetOrigin(s)
-	return hmc
+func (_c *HasMetadataCreate) SetOrigin(v string) *HasMetadataCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (hmc *HasMetadataCreate) SetCollector(s string) *HasMetadataCreate {
-	hmc.mutation.SetCollector(s)
-	return hmc
+func (_c *HasMetadataCreate) SetCollector(v string) *HasMetadataCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hmc *HasMetadataCreate) SetDocumentRef(s string) *HasMetadataCreate {
-	hmc.mutation.SetDocumentRef(s)
-	return hmc
+func (_c *HasMetadataCreate) SetDocumentRef(v string) *HasMetadataCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (hmc *HasMetadataCreate) SetID(u uuid.UUID) *HasMetadataCreate {
-	hmc.mutation.SetID(u)
-	return hmc
+func (_c *HasMetadataCreate) SetID(v uuid.UUID) *HasMetadataCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableID(u *uuid.UUID) *HasMetadataCreate {
-	if u != nil {
-		hmc.SetID(*u)
+func (_c *HasMetadataCreate) SetNillableID(v *uuid.UUID) *HasMetadataCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return hmc
+	return _c
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (hmc *HasMetadataCreate) SetSource(s *SourceName) *HasMetadataCreate {
-	return hmc.SetSourceID(s.ID)
+func (_c *HasMetadataCreate) SetSource(v *SourceName) *HasMetadataCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (hmc *HasMetadataCreate) SetPackageVersion(p *PackageVersion) *HasMetadataCreate {
-	return hmc.SetPackageVersionID(p.ID)
+func (_c *HasMetadataCreate) SetPackageVersion(v *PackageVersion) *HasMetadataCreate {
+	return _c.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hmc *HasMetadataCreate) SetAllVersionsID(id uuid.UUID) *HasMetadataCreate {
-	hmc.mutation.SetAllVersionsID(id)
-	return hmc
+func (_c *HasMetadataCreate) SetAllVersionsID(id uuid.UUID) *HasMetadataCreate {
+	_c.mutation.SetAllVersionsID(id)
+	return _c
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataCreate {
+func (_c *HasMetadataCreate) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataCreate {
 	if id != nil {
-		hmc = hmc.SetAllVersionsID(*id)
+		_c = _c.SetAllVersionsID(*id)
 	}
-	return hmc
+	return _c
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (hmc *HasMetadataCreate) SetAllVersions(p *PackageName) *HasMetadataCreate {
-	return hmc.SetAllVersionsID(p.ID)
+func (_c *HasMetadataCreate) SetAllVersions(v *PackageName) *HasMetadataCreate {
+	return _c.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (hmc *HasMetadataCreate) SetArtifact(a *Artifact) *HasMetadataCreate {
-	return hmc.SetArtifactID(a.ID)
+func (_c *HasMetadataCreate) SetArtifact(v *Artifact) *HasMetadataCreate {
+	return _c.SetArtifactID(v.ID)
 }
 
 // Mutation returns the HasMetadataMutation object of the builder.
-func (hmc *HasMetadataCreate) Mutation() *HasMetadataMutation {
-	return hmc.mutation
+func (_c *HasMetadataCreate) Mutation() *HasMetadataMutation {
+	return _c.mutation
 }
 
 // Save creates the HasMetadata in the database.
-func (hmc *HasMetadataCreate) Save(ctx context.Context) (*HasMetadata, error) {
-	hmc.defaults()
-	return withHooks(ctx, hmc.sqlSave, hmc.mutation, hmc.hooks)
+func (_c *HasMetadataCreate) Save(ctx context.Context) (*HasMetadata, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (hmc *HasMetadataCreate) SaveX(ctx context.Context) *HasMetadata {
-	v, err := hmc.Save(ctx)
+func (_c *HasMetadataCreate) SaveX(ctx context.Context) *HasMetadata {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -195,58 +195,58 @@ func (hmc *HasMetadataCreate) SaveX(ctx context.Context) *HasMetadata {
 }
 
 // Exec executes the query.
-func (hmc *HasMetadataCreate) Exec(ctx context.Context) error {
-	_, err := hmc.Save(ctx)
+func (_c *HasMetadataCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hmc *HasMetadataCreate) ExecX(ctx context.Context) {
-	if err := hmc.Exec(ctx); err != nil {
+func (_c *HasMetadataCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (hmc *HasMetadataCreate) defaults() {
-	if _, ok := hmc.mutation.ID(); !ok {
+func (_c *HasMetadataCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := hasmetadata.DefaultID()
-		hmc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (hmc *HasMetadataCreate) check() error {
-	if _, ok := hmc.mutation.Timestamp(); !ok {
+func (_c *HasMetadataCreate) check() error {
+	if _, ok := _c.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "HasMetadata.timestamp"`)}
 	}
-	if _, ok := hmc.mutation.Key(); !ok {
+	if _, ok := _c.mutation.Key(); !ok {
 		return &ValidationError{Name: "key", err: errors.New(`ent: missing required field "HasMetadata.key"`)}
 	}
-	if _, ok := hmc.mutation.Value(); !ok {
+	if _, ok := _c.mutation.Value(); !ok {
 		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "HasMetadata.value"`)}
 	}
-	if _, ok := hmc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "HasMetadata.justification"`)}
 	}
-	if _, ok := hmc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "HasMetadata.origin"`)}
 	}
-	if _, ok := hmc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "HasMetadata.collector"`)}
 	}
-	if _, ok := hmc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HasMetadata.document_ref"`)}
 	}
 	return nil
 }
 
-func (hmc *HasMetadataCreate) sqlSave(ctx context.Context) (*HasMetadata, error) {
-	if err := hmc.check(); err != nil {
+func (_c *HasMetadataCreate) sqlSave(ctx context.Context) (*HasMetadata, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := hmc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, hmc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -259,50 +259,50 @@ func (hmc *HasMetadataCreate) sqlSave(ctx context.Context) (*HasMetadata, error)
 			return nil, err
 		}
 	}
-	hmc.mutation.id = &_node.ID
-	hmc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) {
+func (_c *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) {
 	var (
-		_node = &HasMetadata{config: hmc.config}
+		_node = &HasMetadata{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(hasmetadata.Table, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = hmc.conflict
-	if id, ok := hmc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := hmc.mutation.Timestamp(); ok {
+	if value, ok := _c.mutation.Timestamp(); ok {
 		_spec.SetField(hasmetadata.FieldTimestamp, field.TypeTime, value)
 		_node.Timestamp = value
 	}
-	if value, ok := hmc.mutation.Key(); ok {
+	if value, ok := _c.mutation.Key(); ok {
 		_spec.SetField(hasmetadata.FieldKey, field.TypeString, value)
 		_node.Key = value
 	}
-	if value, ok := hmc.mutation.Value(); ok {
+	if value, ok := _c.mutation.Value(); ok {
 		_spec.SetField(hasmetadata.FieldValue, field.TypeString, value)
 		_node.Value = value
 	}
-	if value, ok := hmc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(hasmetadata.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := hmc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(hasmetadata.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := hmc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(hasmetadata.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := hmc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(hasmetadata.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := hmc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -319,7 +319,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := hmc.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -336,7 +336,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 		_node.PackageVersionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := hmc.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -353,7 +353,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 		_node.PackageNameID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := hmc.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -389,10 +389,10 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (hmc *HasMetadataCreate) OnConflict(opts ...sql.ConflictOption) *HasMetadataUpsertOne {
-	hmc.conflict = opts
+func (_c *HasMetadataCreate) OnConflict(opts ...sql.ConflictOption) *HasMetadataUpsertOne {
+	_c.conflict = opts
 	return &HasMetadataUpsertOne{
-		create: hmc,
+		create: _c,
 	}
 }
 
@@ -402,10 +402,10 @@ func (hmc *HasMetadataCreate) OnConflict(opts ...sql.ConflictOption) *HasMetadat
 //	client.HasMetadata.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (hmc *HasMetadataCreate) OnConflictColumns(columns ...string) *HasMetadataUpsertOne {
-	hmc.conflict = append(hmc.conflict, sql.ConflictColumns(columns...))
+func (_c *HasMetadataCreate) OnConflictColumns(columns ...string) *HasMetadataUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &HasMetadataUpsertOne{
-		create: hmc,
+		create: _c,
 	}
 }
 
@@ -855,16 +855,16 @@ type HasMetadataCreateBulk struct {
 }
 
 // Save creates the HasMetadata entities in the database.
-func (hmcb *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, error) {
-	if hmcb.err != nil {
-		return nil, hmcb.err
+func (_c *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(hmcb.builders))
-	nodes := make([]*HasMetadata, len(hmcb.builders))
-	mutators := make([]Mutator, len(hmcb.builders))
-	for i := range hmcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*HasMetadata, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := hmcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HasMetadataMutation)
@@ -878,12 +878,12 @@ func (hmcb *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, er
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, hmcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = hmcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, hmcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -903,7 +903,7 @@ func (hmcb *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, er
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, hmcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -911,8 +911,8 @@ func (hmcb *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, er
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hmcb *HasMetadataCreateBulk) SaveX(ctx context.Context) []*HasMetadata {
-	v, err := hmcb.Save(ctx)
+func (_c *HasMetadataCreateBulk) SaveX(ctx context.Context) []*HasMetadata {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -920,14 +920,14 @@ func (hmcb *HasMetadataCreateBulk) SaveX(ctx context.Context) []*HasMetadata {
 }
 
 // Exec executes the query.
-func (hmcb *HasMetadataCreateBulk) Exec(ctx context.Context) error {
-	_, err := hmcb.Save(ctx)
+func (_c *HasMetadataCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hmcb *HasMetadataCreateBulk) ExecX(ctx context.Context) {
-	if err := hmcb.Exec(ctx); err != nil {
+func (_c *HasMetadataCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -947,10 +947,10 @@ func (hmcb *HasMetadataCreateBulk) ExecX(ctx context.Context) {
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (hmcb *HasMetadataCreateBulk) OnConflict(opts ...sql.ConflictOption) *HasMetadataUpsertBulk {
-	hmcb.conflict = opts
+func (_c *HasMetadataCreateBulk) OnConflict(opts ...sql.ConflictOption) *HasMetadataUpsertBulk {
+	_c.conflict = opts
 	return &HasMetadataUpsertBulk{
-		create: hmcb,
+		create: _c,
 	}
 }
 
@@ -960,10 +960,10 @@ func (hmcb *HasMetadataCreateBulk) OnConflict(opts ...sql.ConflictOption) *HasMe
 //	client.HasMetadata.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (hmcb *HasMetadataCreateBulk) OnConflictColumns(columns ...string) *HasMetadataUpsertBulk {
-	hmcb.conflict = append(hmcb.conflict, sql.ConflictColumns(columns...))
+func (_c *HasMetadataCreateBulk) OnConflictColumns(columns ...string) *HasMetadataUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &HasMetadataUpsertBulk{
-		create: hmcb,
+		create: _c,
 	}
 }
 

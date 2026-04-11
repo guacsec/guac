@@ -28,246 +28,246 @@ type PackageNameUpdate struct {
 }
 
 // Where appends a list predicates to the PackageNameUpdate builder.
-func (pnu *PackageNameUpdate) Where(ps ...predicate.PackageName) *PackageNameUpdate {
-	pnu.mutation.Where(ps...)
-	return pnu
+func (_u *PackageNameUpdate) Where(ps ...predicate.PackageName) *PackageNameUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetType sets the "type" field.
-func (pnu *PackageNameUpdate) SetType(s string) *PackageNameUpdate {
-	pnu.mutation.SetType(s)
-	return pnu
+func (_u *PackageNameUpdate) SetType(v string) *PackageNameUpdate {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (pnu *PackageNameUpdate) SetNillableType(s *string) *PackageNameUpdate {
-	if s != nil {
-		pnu.SetType(*s)
+func (_u *PackageNameUpdate) SetNillableType(v *string) *PackageNameUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return pnu
+	return _u
 }
 
 // SetNamespace sets the "namespace" field.
-func (pnu *PackageNameUpdate) SetNamespace(s string) *PackageNameUpdate {
-	pnu.mutation.SetNamespace(s)
-	return pnu
+func (_u *PackageNameUpdate) SetNamespace(v string) *PackageNameUpdate {
+	_u.mutation.SetNamespace(v)
+	return _u
 }
 
 // SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (pnu *PackageNameUpdate) SetNillableNamespace(s *string) *PackageNameUpdate {
-	if s != nil {
-		pnu.SetNamespace(*s)
+func (_u *PackageNameUpdate) SetNillableNamespace(v *string) *PackageNameUpdate {
+	if v != nil {
+		_u.SetNamespace(*v)
 	}
-	return pnu
+	return _u
 }
 
 // SetName sets the "name" field.
-func (pnu *PackageNameUpdate) SetName(s string) *PackageNameUpdate {
-	pnu.mutation.SetName(s)
-	return pnu
+func (_u *PackageNameUpdate) SetName(v string) *PackageNameUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (pnu *PackageNameUpdate) SetNillableName(s *string) *PackageNameUpdate {
-	if s != nil {
-		pnu.SetName(*s)
+func (_u *PackageNameUpdate) SetNillableName(v *string) *PackageNameUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return pnu
+	return _u
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
-func (pnu *PackageNameUpdate) AddVersionIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.AddVersionIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) AddVersionIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.AddVersionIDs(ids...)
+	return _u
 }
 
 // AddVersions adds the "versions" edges to the PackageVersion entity.
-func (pnu *PackageNameUpdate) AddVersions(p ...*PackageVersion) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdate) AddVersions(v ...*PackageVersion) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.AddVersionIDs(ids...)
+	return _u.AddVersionIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (pnu *PackageNameUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.AddHasSourceAtIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.AddHasSourceAtIDs(ids...)
+	return _u
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (pnu *PackageNameUpdate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdate) AddHasSourceAt(v ...*HasSourceAt) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.AddHasSourceAtIDs(ids...)
+	return _u.AddHasSourceAtIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (pnu *PackageNameUpdate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.AddCertificationIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.AddCertificationIDs(ids...)
+	return _u
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (pnu *PackageNameUpdate) AddCertification(c ...*Certification) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PackageNameUpdate) AddCertification(v ...*Certification) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.AddCertificationIDs(ids...)
+	return _u.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (pnu *PackageNameUpdate) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.AddMetadatumIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.AddMetadatumIDs(ids...)
+	return _u
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (pnu *PackageNameUpdate) AddMetadata(h ...*HasMetadata) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdate) AddMetadata(v ...*HasMetadata) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.AddMetadatumIDs(ids...)
+	return _u.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (pnu *PackageNameUpdate) AddPocIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.AddPocIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) AddPocIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.AddPocIDs(ids...)
+	return _u
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (pnu *PackageNameUpdate) AddPoc(p ...*PointOfContact) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdate) AddPoc(v ...*PointOfContact) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.AddPocIDs(ids...)
+	return _u.AddPocIDs(ids...)
 }
 
 // Mutation returns the PackageNameMutation object of the builder.
-func (pnu *PackageNameUpdate) Mutation() *PackageNameMutation {
-	return pnu.mutation
+func (_u *PackageNameUpdate) Mutation() *PackageNameMutation {
+	return _u.mutation
 }
 
 // ClearVersions clears all "versions" edges to the PackageVersion entity.
-func (pnu *PackageNameUpdate) ClearVersions() *PackageNameUpdate {
-	pnu.mutation.ClearVersions()
-	return pnu
+func (_u *PackageNameUpdate) ClearVersions() *PackageNameUpdate {
+	_u.mutation.ClearVersions()
+	return _u
 }
 
 // RemoveVersionIDs removes the "versions" edge to PackageVersion entities by IDs.
-func (pnu *PackageNameUpdate) RemoveVersionIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.RemoveVersionIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) RemoveVersionIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.RemoveVersionIDs(ids...)
+	return _u
 }
 
 // RemoveVersions removes "versions" edges to PackageVersion entities.
-func (pnu *PackageNameUpdate) RemoveVersions(p ...*PackageVersion) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdate) RemoveVersions(v ...*PackageVersion) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.RemoveVersionIDs(ids...)
+	return _u.RemoveVersionIDs(ids...)
 }
 
 // ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
-func (pnu *PackageNameUpdate) ClearHasSourceAt() *PackageNameUpdate {
-	pnu.mutation.ClearHasSourceAt()
-	return pnu
+func (_u *PackageNameUpdate) ClearHasSourceAt() *PackageNameUpdate {
+	_u.mutation.ClearHasSourceAt()
+	return _u
 }
 
 // RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
-func (pnu *PackageNameUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.RemoveHasSourceAtIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.RemoveHasSourceAtIDs(ids...)
+	return _u
 }
 
 // RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
-func (pnu *PackageNameUpdate) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdate) RemoveHasSourceAt(v ...*HasSourceAt) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.RemoveHasSourceAtIDs(ids...)
+	return _u.RemoveHasSourceAtIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
-func (pnu *PackageNameUpdate) ClearCertification() *PackageNameUpdate {
-	pnu.mutation.ClearCertification()
-	return pnu
+func (_u *PackageNameUpdate) ClearCertification() *PackageNameUpdate {
+	_u.mutation.ClearCertification()
+	return _u
 }
 
 // RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
-func (pnu *PackageNameUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.RemoveCertificationIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.RemoveCertificationIDs(ids...)
+	return _u
 }
 
 // RemoveCertification removes "certification" edges to Certification entities.
-func (pnu *PackageNameUpdate) RemoveCertification(c ...*Certification) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PackageNameUpdate) RemoveCertification(v ...*Certification) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.RemoveCertificationIDs(ids...)
+	return _u.RemoveCertificationIDs(ids...)
 }
 
 // ClearMetadata clears all "metadata" edges to the HasMetadata entity.
-func (pnu *PackageNameUpdate) ClearMetadata() *PackageNameUpdate {
-	pnu.mutation.ClearMetadata()
-	return pnu
+func (_u *PackageNameUpdate) ClearMetadata() *PackageNameUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
-func (pnu *PackageNameUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.RemoveMetadatumIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.RemoveMetadatumIDs(ids...)
+	return _u
 }
 
 // RemoveMetadata removes "metadata" edges to HasMetadata entities.
-func (pnu *PackageNameUpdate) RemoveMetadata(h ...*HasMetadata) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdate) RemoveMetadata(v ...*HasMetadata) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.RemoveMetadatumIDs(ids...)
+	return _u.RemoveMetadatumIDs(ids...)
 }
 
 // ClearPoc clears all "poc" edges to the PointOfContact entity.
-func (pnu *PackageNameUpdate) ClearPoc() *PackageNameUpdate {
-	pnu.mutation.ClearPoc()
-	return pnu
+func (_u *PackageNameUpdate) ClearPoc() *PackageNameUpdate {
+	_u.mutation.ClearPoc()
+	return _u
 }
 
 // RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
-func (pnu *PackageNameUpdate) RemovePocIDs(ids ...uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.RemovePocIDs(ids...)
-	return pnu
+func (_u *PackageNameUpdate) RemovePocIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	_u.mutation.RemovePocIDs(ids...)
+	return _u
 }
 
 // RemovePoc removes "poc" edges to PointOfContact entities.
-func (pnu *PackageNameUpdate) RemovePoc(p ...*PointOfContact) *PackageNameUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdate) RemovePoc(v ...*PointOfContact) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnu.RemovePocIDs(ids...)
+	return _u.RemovePocIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (pnu *PackageNameUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, pnu.sqlSave, pnu.mutation, pnu.hooks)
+func (_u *PackageNameUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pnu *PackageNameUpdate) SaveX(ctx context.Context) int {
-	affected, err := pnu.Save(ctx)
+func (_u *PackageNameUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -275,26 +275,26 @@ func (pnu *PackageNameUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (pnu *PackageNameUpdate) Exec(ctx context.Context) error {
-	_, err := pnu.Save(ctx)
+func (_u *PackageNameUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pnu *PackageNameUpdate) ExecX(ctx context.Context) {
-	if err := pnu.Exec(ctx); err != nil {
+func (_u *PackageNameUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pnu *PackageNameUpdate) check() error {
-	if v, ok := pnu.mutation.GetType(); ok {
+func (_u *PackageNameUpdate) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := packagename.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "PackageName.type": %w`, err)}
 		}
 	}
-	if v, ok := pnu.mutation.Name(); ok {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := packagename.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PackageName.name": %w`, err)}
 		}
@@ -302,28 +302,28 @@ func (pnu *PackageNameUpdate) check() error {
 	return nil
 }
 
-func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := pnu.check(); err != nil {
-		return n, err
+func (_u *PackageNameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(packagename.Table, packagename.Columns, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID))
-	if ps := pnu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := pnu.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(packagename.FieldType, field.TypeString, value)
 	}
-	if value, ok := pnu.mutation.Namespace(); ok {
+	if value, ok := _u.mutation.Namespace(); ok {
 		_spec.SetField(packagename.FieldNamespace, field.TypeString, value)
 	}
-	if value, ok := pnu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
 	}
-	if pnu.mutation.VersionsCleared() {
+	if _u.mutation.VersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -336,23 +336,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.RemovedVersionsIDs(); len(nodes) > 0 && !pnu.mutation.VersionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   packagename.VersionsTable,
-			Columns: []string{packagename.VersionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnu.mutation.VersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedVersionsIDs(); len(nodes) > 0 && !_u.mutation.VersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -366,9 +350,25 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   packagename.VersionsTable,
+			Columns: []string{packagename.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnu.mutation.HasSourceAtCleared() {
+	if _u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -381,7 +381,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pnu.mutation.HasSourceAtCleared() {
+	if nodes := _u.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !_u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -397,7 +397,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -413,7 +413,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnu.mutation.CertificationCleared() {
+	if _u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -426,7 +426,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !pnu.mutation.CertificationCleared() {
+	if nodes := _u.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !_u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -442,7 +442,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -458,7 +458,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnu.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -471,7 +471,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !pnu.mutation.MetadataCleared() {
+	if nodes := _u.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !_u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -487,7 +487,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -503,7 +503,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnu.mutation.PocCleared() {
+	if _u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -516,7 +516,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.RemovedPocIDs(); len(nodes) > 0 && !pnu.mutation.PocCleared() {
+	if nodes := _u.mutation.RemovedPocIDs(); len(nodes) > 0 && !_u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -532,7 +532,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnu.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -548,7 +548,7 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, pnu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packagename.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -556,8 +556,8 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	pnu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // PackageNameUpdateOne is the builder for updating a single PackageName entity.
@@ -569,253 +569,253 @@ type PackageNameUpdateOne struct {
 }
 
 // SetType sets the "type" field.
-func (pnuo *PackageNameUpdateOne) SetType(s string) *PackageNameUpdateOne {
-	pnuo.mutation.SetType(s)
-	return pnuo
+func (_u *PackageNameUpdateOne) SetType(v string) *PackageNameUpdateOne {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (pnuo *PackageNameUpdateOne) SetNillableType(s *string) *PackageNameUpdateOne {
-	if s != nil {
-		pnuo.SetType(*s)
+func (_u *PackageNameUpdateOne) SetNillableType(v *string) *PackageNameUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return pnuo
+	return _u
 }
 
 // SetNamespace sets the "namespace" field.
-func (pnuo *PackageNameUpdateOne) SetNamespace(s string) *PackageNameUpdateOne {
-	pnuo.mutation.SetNamespace(s)
-	return pnuo
+func (_u *PackageNameUpdateOne) SetNamespace(v string) *PackageNameUpdateOne {
+	_u.mutation.SetNamespace(v)
+	return _u
 }
 
 // SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (pnuo *PackageNameUpdateOne) SetNillableNamespace(s *string) *PackageNameUpdateOne {
-	if s != nil {
-		pnuo.SetNamespace(*s)
+func (_u *PackageNameUpdateOne) SetNillableNamespace(v *string) *PackageNameUpdateOne {
+	if v != nil {
+		_u.SetNamespace(*v)
 	}
-	return pnuo
+	return _u
 }
 
 // SetName sets the "name" field.
-func (pnuo *PackageNameUpdateOne) SetName(s string) *PackageNameUpdateOne {
-	pnuo.mutation.SetName(s)
-	return pnuo
+func (_u *PackageNameUpdateOne) SetName(v string) *PackageNameUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (pnuo *PackageNameUpdateOne) SetNillableName(s *string) *PackageNameUpdateOne {
-	if s != nil {
-		pnuo.SetName(*s)
+func (_u *PackageNameUpdateOne) SetNillableName(v *string) *PackageNameUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return pnuo
+	return _u
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
-func (pnuo *PackageNameUpdateOne) AddVersionIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.AddVersionIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) AddVersionIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.AddVersionIDs(ids...)
+	return _u
 }
 
 // AddVersions adds the "versions" edges to the PackageVersion entity.
-func (pnuo *PackageNameUpdateOne) AddVersions(p ...*PackageVersion) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdateOne) AddVersions(v ...*PackageVersion) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.AddVersionIDs(ids...)
+	return _u.AddVersionIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (pnuo *PackageNameUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.AddHasSourceAtIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.AddHasSourceAtIDs(ids...)
+	return _u
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (pnuo *PackageNameUpdateOne) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdateOne) AddHasSourceAt(v ...*HasSourceAt) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.AddHasSourceAtIDs(ids...)
+	return _u.AddHasSourceAtIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (pnuo *PackageNameUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.AddCertificationIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.AddCertificationIDs(ids...)
+	return _u
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (pnuo *PackageNameUpdateOne) AddCertification(c ...*Certification) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PackageNameUpdateOne) AddCertification(v ...*Certification) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.AddCertificationIDs(ids...)
+	return _u.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (pnuo *PackageNameUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.AddMetadatumIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.AddMetadatumIDs(ids...)
+	return _u
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (pnuo *PackageNameUpdateOne) AddMetadata(h ...*HasMetadata) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdateOne) AddMetadata(v ...*HasMetadata) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.AddMetadatumIDs(ids...)
+	return _u.AddMetadatumIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (pnuo *PackageNameUpdateOne) AddPocIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.AddPocIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) AddPocIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.AddPocIDs(ids...)
+	return _u
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (pnuo *PackageNameUpdateOne) AddPoc(p ...*PointOfContact) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdateOne) AddPoc(v ...*PointOfContact) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.AddPocIDs(ids...)
+	return _u.AddPocIDs(ids...)
 }
 
 // Mutation returns the PackageNameMutation object of the builder.
-func (pnuo *PackageNameUpdateOne) Mutation() *PackageNameMutation {
-	return pnuo.mutation
+func (_u *PackageNameUpdateOne) Mutation() *PackageNameMutation {
+	return _u.mutation
 }
 
 // ClearVersions clears all "versions" edges to the PackageVersion entity.
-func (pnuo *PackageNameUpdateOne) ClearVersions() *PackageNameUpdateOne {
-	pnuo.mutation.ClearVersions()
-	return pnuo
+func (_u *PackageNameUpdateOne) ClearVersions() *PackageNameUpdateOne {
+	_u.mutation.ClearVersions()
+	return _u
 }
 
 // RemoveVersionIDs removes the "versions" edge to PackageVersion entities by IDs.
-func (pnuo *PackageNameUpdateOne) RemoveVersionIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.RemoveVersionIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) RemoveVersionIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.RemoveVersionIDs(ids...)
+	return _u
 }
 
 // RemoveVersions removes "versions" edges to PackageVersion entities.
-func (pnuo *PackageNameUpdateOne) RemoveVersions(p ...*PackageVersion) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdateOne) RemoveVersions(v ...*PackageVersion) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.RemoveVersionIDs(ids...)
+	return _u.RemoveVersionIDs(ids...)
 }
 
 // ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
-func (pnuo *PackageNameUpdateOne) ClearHasSourceAt() *PackageNameUpdateOne {
-	pnuo.mutation.ClearHasSourceAt()
-	return pnuo
+func (_u *PackageNameUpdateOne) ClearHasSourceAt() *PackageNameUpdateOne {
+	_u.mutation.ClearHasSourceAt()
+	return _u
 }
 
 // RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
-func (pnuo *PackageNameUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.RemoveHasSourceAtIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.RemoveHasSourceAtIDs(ids...)
+	return _u
 }
 
 // RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
-func (pnuo *PackageNameUpdateOne) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdateOne) RemoveHasSourceAt(v ...*HasSourceAt) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.RemoveHasSourceAtIDs(ids...)
+	return _u.RemoveHasSourceAtIDs(ids...)
 }
 
 // ClearCertification clears all "certification" edges to the Certification entity.
-func (pnuo *PackageNameUpdateOne) ClearCertification() *PackageNameUpdateOne {
-	pnuo.mutation.ClearCertification()
-	return pnuo
+func (_u *PackageNameUpdateOne) ClearCertification() *PackageNameUpdateOne {
+	_u.mutation.ClearCertification()
+	return _u
 }
 
 // RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
-func (pnuo *PackageNameUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.RemoveCertificationIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.RemoveCertificationIDs(ids...)
+	return _u
 }
 
 // RemoveCertification removes "certification" edges to Certification entities.
-func (pnuo *PackageNameUpdateOne) RemoveCertification(c ...*Certification) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PackageNameUpdateOne) RemoveCertification(v ...*Certification) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.RemoveCertificationIDs(ids...)
+	return _u.RemoveCertificationIDs(ids...)
 }
 
 // ClearMetadata clears all "metadata" edges to the HasMetadata entity.
-func (pnuo *PackageNameUpdateOne) ClearMetadata() *PackageNameUpdateOne {
-	pnuo.mutation.ClearMetadata()
-	return pnuo
+func (_u *PackageNameUpdateOne) ClearMetadata() *PackageNameUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
-func (pnuo *PackageNameUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.RemoveMetadatumIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.RemoveMetadatumIDs(ids...)
+	return _u
 }
 
 // RemoveMetadata removes "metadata" edges to HasMetadata entities.
-func (pnuo *PackageNameUpdateOne) RemoveMetadata(h ...*HasMetadata) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_u *PackageNameUpdateOne) RemoveMetadata(v ...*HasMetadata) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.RemoveMetadatumIDs(ids...)
+	return _u.RemoveMetadatumIDs(ids...)
 }
 
 // ClearPoc clears all "poc" edges to the PointOfContact entity.
-func (pnuo *PackageNameUpdateOne) ClearPoc() *PackageNameUpdateOne {
-	pnuo.mutation.ClearPoc()
-	return pnuo
+func (_u *PackageNameUpdateOne) ClearPoc() *PackageNameUpdateOne {
+	_u.mutation.ClearPoc()
+	return _u
 }
 
 // RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
-func (pnuo *PackageNameUpdateOne) RemovePocIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.RemovePocIDs(ids...)
-	return pnuo
+func (_u *PackageNameUpdateOne) RemovePocIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	_u.mutation.RemovePocIDs(ids...)
+	return _u
 }
 
 // RemovePoc removes "poc" edges to PointOfContact entities.
-func (pnuo *PackageNameUpdateOne) RemovePoc(p ...*PointOfContact) *PackageNameUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PackageNameUpdateOne) RemovePoc(v ...*PointOfContact) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pnuo.RemovePocIDs(ids...)
+	return _u.RemovePocIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageNameUpdate builder.
-func (pnuo *PackageNameUpdateOne) Where(ps ...predicate.PackageName) *PackageNameUpdateOne {
-	pnuo.mutation.Where(ps...)
-	return pnuo
+func (_u *PackageNameUpdateOne) Where(ps ...predicate.PackageName) *PackageNameUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (pnuo *PackageNameUpdateOne) Select(field string, fields ...string) *PackageNameUpdateOne {
-	pnuo.fields = append([]string{field}, fields...)
-	return pnuo
+func (_u *PackageNameUpdateOne) Select(field string, fields ...string) *PackageNameUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated PackageName entity.
-func (pnuo *PackageNameUpdateOne) Save(ctx context.Context) (*PackageName, error) {
-	return withHooks(ctx, pnuo.sqlSave, pnuo.mutation, pnuo.hooks)
+func (_u *PackageNameUpdateOne) Save(ctx context.Context) (*PackageName, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pnuo *PackageNameUpdateOne) SaveX(ctx context.Context) *PackageName {
-	node, err := pnuo.Save(ctx)
+func (_u *PackageNameUpdateOne) SaveX(ctx context.Context) *PackageName {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -823,26 +823,26 @@ func (pnuo *PackageNameUpdateOne) SaveX(ctx context.Context) *PackageName {
 }
 
 // Exec executes the query on the entity.
-func (pnuo *PackageNameUpdateOne) Exec(ctx context.Context) error {
-	_, err := pnuo.Save(ctx)
+func (_u *PackageNameUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pnuo *PackageNameUpdateOne) ExecX(ctx context.Context) {
-	if err := pnuo.Exec(ctx); err != nil {
+func (_u *PackageNameUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pnuo *PackageNameUpdateOne) check() error {
-	if v, ok := pnuo.mutation.GetType(); ok {
+func (_u *PackageNameUpdateOne) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := packagename.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "PackageName.type": %w`, err)}
 		}
 	}
-	if v, ok := pnuo.mutation.Name(); ok {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := packagename.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PackageName.name": %w`, err)}
 		}
@@ -850,17 +850,17 @@ func (pnuo *PackageNameUpdateOne) check() error {
 	return nil
 }
 
-func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageName, err error) {
-	if err := pnuo.check(); err != nil {
+func (_u *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageName, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(packagename.Table, packagename.Columns, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID))
-	id, ok := pnuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PackageName.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := pnuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, packagename.FieldID)
 		for _, f := range fields {
@@ -872,23 +872,23 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 			}
 		}
 	}
-	if ps := pnuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := pnuo.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(packagename.FieldType, field.TypeString, value)
 	}
-	if value, ok := pnuo.mutation.Namespace(); ok {
+	if value, ok := _u.mutation.Namespace(); ok {
 		_spec.SetField(packagename.FieldNamespace, field.TypeString, value)
 	}
-	if value, ok := pnuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
 	}
-	if pnuo.mutation.VersionsCleared() {
+	if _u.mutation.VersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -901,23 +901,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.RemovedVersionsIDs(); len(nodes) > 0 && !pnuo.mutation.VersionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   packagename.VersionsTable,
-			Columns: []string{packagename.VersionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnuo.mutation.VersionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedVersionsIDs(); len(nodes) > 0 && !_u.mutation.VersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -931,9 +915,25 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   packagename.VersionsTable,
+			Columns: []string{packagename.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnuo.mutation.HasSourceAtCleared() {
+	if _u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -946,7 +946,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pnuo.mutation.HasSourceAtCleared() {
+	if nodes := _u.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !_u.mutation.HasSourceAtCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -962,7 +962,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -978,7 +978,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnuo.mutation.CertificationCleared() {
+	if _u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -991,7 +991,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !pnuo.mutation.CertificationCleared() {
+	if nodes := _u.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !_u.mutation.CertificationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1007,7 +1007,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1023,7 +1023,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnuo.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1036,7 +1036,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !pnuo.mutation.MetadataCleared() {
+	if nodes := _u.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !_u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1052,7 +1052,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1068,7 +1068,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pnuo.mutation.PocCleared() {
+	if _u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1081,7 +1081,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.RemovedPocIDs(); len(nodes) > 0 && !pnuo.mutation.PocCleared() {
+	if nodes := _u.mutation.RemovedPocIDs(); len(nodes) > 0 && !_u.mutation.PocCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1097,7 +1097,7 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pnuo.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1113,10 +1113,10 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &PackageName{config: pnuo.config}
+	_node = &PackageName{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, pnuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packagename.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1124,6 +1124,6 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 		}
 		return nil, err
 	}
-	pnuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -20,56 +20,56 @@ type PointOfContactDelete struct {
 }
 
 // Where appends a list predicates to the PointOfContactDelete builder.
-func (pocd *PointOfContactDelete) Where(ps ...predicate.PointOfContact) *PointOfContactDelete {
-	pocd.mutation.Where(ps...)
-	return pocd
+func (_d *PointOfContactDelete) Where(ps ...predicate.PointOfContact) *PointOfContactDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pocd *PointOfContactDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pocd.sqlExec, pocd.mutation, pocd.hooks)
+func (_d *PointOfContactDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pocd *PointOfContactDelete) ExecX(ctx context.Context) int {
-	n, err := pocd.Exec(ctx)
+func (_d *PointOfContactDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pocd *PointOfContactDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *PointOfContactDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(pointofcontact.Table, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
-	if ps := pocd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pocd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pocd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // PointOfContactDeleteOne is the builder for deleting a single PointOfContact entity.
 type PointOfContactDeleteOne struct {
-	pocd *PointOfContactDelete
+	_d *PointOfContactDelete
 }
 
 // Where appends a list predicates to the PointOfContactDelete builder.
-func (pocdo *PointOfContactDeleteOne) Where(ps ...predicate.PointOfContact) *PointOfContactDeleteOne {
-	pocdo.pocd.mutation.Where(ps...)
-	return pocdo
+func (_d *PointOfContactDeleteOne) Where(ps ...predicate.PointOfContact) *PointOfContactDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (pocdo *PointOfContactDeleteOne) Exec(ctx context.Context) error {
-	n, err := pocdo.pocd.Exec(ctx)
+func (_d *PointOfContactDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (pocdo *PointOfContactDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pocdo *PointOfContactDeleteOne) ExecX(ctx context.Context) {
-	if err := pocdo.Exec(ctx); err != nil {
+func (_d *PointOfContactDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

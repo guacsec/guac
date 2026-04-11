@@ -29,165 +29,165 @@ type PointOfContactCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (pocc *PointOfContactCreate) SetSourceID(u uuid.UUID) *PointOfContactCreate {
-	pocc.mutation.SetSourceID(u)
-	return pocc
+func (_c *PointOfContactCreate) SetSourceID(v uuid.UUID) *PointOfContactCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableSourceID(u *uuid.UUID) *PointOfContactCreate {
-	if u != nil {
-		pocc.SetSourceID(*u)
+func (_c *PointOfContactCreate) SetNillableSourceID(v *uuid.UUID) *PointOfContactCreate {
+	if v != nil {
+		_c.SetSourceID(*v)
 	}
-	return pocc
+	return _c
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (pocc *PointOfContactCreate) SetPackageVersionID(u uuid.UUID) *PointOfContactCreate {
-	pocc.mutation.SetPackageVersionID(u)
-	return pocc
+func (_c *PointOfContactCreate) SetPackageVersionID(v uuid.UUID) *PointOfContactCreate {
+	_c.mutation.SetPackageVersionID(v)
+	return _c
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillablePackageVersionID(u *uuid.UUID) *PointOfContactCreate {
-	if u != nil {
-		pocc.SetPackageVersionID(*u)
+func (_c *PointOfContactCreate) SetNillablePackageVersionID(v *uuid.UUID) *PointOfContactCreate {
+	if v != nil {
+		_c.SetPackageVersionID(*v)
 	}
-	return pocc
+	return _c
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (pocc *PointOfContactCreate) SetPackageNameID(u uuid.UUID) *PointOfContactCreate {
-	pocc.mutation.SetPackageNameID(u)
-	return pocc
+func (_c *PointOfContactCreate) SetPackageNameID(v uuid.UUID) *PointOfContactCreate {
+	_c.mutation.SetPackageNameID(v)
+	return _c
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillablePackageNameID(u *uuid.UUID) *PointOfContactCreate {
-	if u != nil {
-		pocc.SetPackageNameID(*u)
+func (_c *PointOfContactCreate) SetNillablePackageNameID(v *uuid.UUID) *PointOfContactCreate {
+	if v != nil {
+		_c.SetPackageNameID(*v)
 	}
-	return pocc
+	return _c
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (pocc *PointOfContactCreate) SetArtifactID(u uuid.UUID) *PointOfContactCreate {
-	pocc.mutation.SetArtifactID(u)
-	return pocc
+func (_c *PointOfContactCreate) SetArtifactID(v uuid.UUID) *PointOfContactCreate {
+	_c.mutation.SetArtifactID(v)
+	return _c
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableArtifactID(u *uuid.UUID) *PointOfContactCreate {
-	if u != nil {
-		pocc.SetArtifactID(*u)
+func (_c *PointOfContactCreate) SetNillableArtifactID(v *uuid.UUID) *PointOfContactCreate {
+	if v != nil {
+		_c.SetArtifactID(*v)
 	}
-	return pocc
+	return _c
 }
 
 // SetEmail sets the "email" field.
-func (pocc *PointOfContactCreate) SetEmail(s string) *PointOfContactCreate {
-	pocc.mutation.SetEmail(s)
-	return pocc
+func (_c *PointOfContactCreate) SetEmail(v string) *PointOfContactCreate {
+	_c.mutation.SetEmail(v)
+	return _c
 }
 
 // SetInfo sets the "info" field.
-func (pocc *PointOfContactCreate) SetInfo(s string) *PointOfContactCreate {
-	pocc.mutation.SetInfo(s)
-	return pocc
+func (_c *PointOfContactCreate) SetInfo(v string) *PointOfContactCreate {
+	_c.mutation.SetInfo(v)
+	return _c
 }
 
 // SetSince sets the "since" field.
-func (pocc *PointOfContactCreate) SetSince(t time.Time) *PointOfContactCreate {
-	pocc.mutation.SetSince(t)
-	return pocc
+func (_c *PointOfContactCreate) SetSince(v time.Time) *PointOfContactCreate {
+	_c.mutation.SetSince(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (pocc *PointOfContactCreate) SetJustification(s string) *PointOfContactCreate {
-	pocc.mutation.SetJustification(s)
-	return pocc
+func (_c *PointOfContactCreate) SetJustification(v string) *PointOfContactCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (pocc *PointOfContactCreate) SetOrigin(s string) *PointOfContactCreate {
-	pocc.mutation.SetOrigin(s)
-	return pocc
+func (_c *PointOfContactCreate) SetOrigin(v string) *PointOfContactCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (pocc *PointOfContactCreate) SetCollector(s string) *PointOfContactCreate {
-	pocc.mutation.SetCollector(s)
-	return pocc
+func (_c *PointOfContactCreate) SetCollector(v string) *PointOfContactCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (pocc *PointOfContactCreate) SetDocumentRef(s string) *PointOfContactCreate {
-	pocc.mutation.SetDocumentRef(s)
-	return pocc
+func (_c *PointOfContactCreate) SetDocumentRef(v string) *PointOfContactCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (pocc *PointOfContactCreate) SetID(u uuid.UUID) *PointOfContactCreate {
-	pocc.mutation.SetID(u)
-	return pocc
+func (_c *PointOfContactCreate) SetID(v uuid.UUID) *PointOfContactCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableID(u *uuid.UUID) *PointOfContactCreate {
-	if u != nil {
-		pocc.SetID(*u)
+func (_c *PointOfContactCreate) SetNillableID(v *uuid.UUID) *PointOfContactCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return pocc
+	return _c
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
-func (pocc *PointOfContactCreate) SetSource(s *SourceName) *PointOfContactCreate {
-	return pocc.SetSourceID(s.ID)
+func (_c *PointOfContactCreate) SetSource(v *SourceName) *PointOfContactCreate {
+	return _c.SetSourceID(v.ID)
 }
 
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
-func (pocc *PointOfContactCreate) SetPackageVersion(p *PackageVersion) *PointOfContactCreate {
-	return pocc.SetPackageVersionID(p.ID)
+func (_c *PointOfContactCreate) SetPackageVersion(v *PackageVersion) *PointOfContactCreate {
+	return _c.SetPackageVersionID(v.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (pocc *PointOfContactCreate) SetAllVersionsID(id uuid.UUID) *PointOfContactCreate {
-	pocc.mutation.SetAllVersionsID(id)
-	return pocc
+func (_c *PointOfContactCreate) SetAllVersionsID(id uuid.UUID) *PointOfContactCreate {
+	_c.mutation.SetAllVersionsID(id)
+	return _c
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactCreate {
+func (_c *PointOfContactCreate) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactCreate {
 	if id != nil {
-		pocc = pocc.SetAllVersionsID(*id)
+		_c = _c.SetAllVersionsID(*id)
 	}
-	return pocc
+	return _c
 }
 
 // SetAllVersions sets the "all_versions" edge to the PackageName entity.
-func (pocc *PointOfContactCreate) SetAllVersions(p *PackageName) *PointOfContactCreate {
-	return pocc.SetAllVersionsID(p.ID)
+func (_c *PointOfContactCreate) SetAllVersions(v *PackageName) *PointOfContactCreate {
+	return _c.SetAllVersionsID(v.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
-func (pocc *PointOfContactCreate) SetArtifact(a *Artifact) *PointOfContactCreate {
-	return pocc.SetArtifactID(a.ID)
+func (_c *PointOfContactCreate) SetArtifact(v *Artifact) *PointOfContactCreate {
+	return _c.SetArtifactID(v.ID)
 }
 
 // Mutation returns the PointOfContactMutation object of the builder.
-func (pocc *PointOfContactCreate) Mutation() *PointOfContactMutation {
-	return pocc.mutation
+func (_c *PointOfContactCreate) Mutation() *PointOfContactMutation {
+	return _c.mutation
 }
 
 // Save creates the PointOfContact in the database.
-func (pocc *PointOfContactCreate) Save(ctx context.Context) (*PointOfContact, error) {
-	pocc.defaults()
-	return withHooks(ctx, pocc.sqlSave, pocc.mutation, pocc.hooks)
+func (_c *PointOfContactCreate) Save(ctx context.Context) (*PointOfContact, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pocc *PointOfContactCreate) SaveX(ctx context.Context) *PointOfContact {
-	v, err := pocc.Save(ctx)
+func (_c *PointOfContactCreate) SaveX(ctx context.Context) *PointOfContact {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -195,58 +195,58 @@ func (pocc *PointOfContactCreate) SaveX(ctx context.Context) *PointOfContact {
 }
 
 // Exec executes the query.
-func (pocc *PointOfContactCreate) Exec(ctx context.Context) error {
-	_, err := pocc.Save(ctx)
+func (_c *PointOfContactCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pocc *PointOfContactCreate) ExecX(ctx context.Context) {
-	if err := pocc.Exec(ctx); err != nil {
+func (_c *PointOfContactCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (pocc *PointOfContactCreate) defaults() {
-	if _, ok := pocc.mutation.ID(); !ok {
+func (_c *PointOfContactCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := pointofcontact.DefaultID()
-		pocc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pocc *PointOfContactCreate) check() error {
-	if _, ok := pocc.mutation.Email(); !ok {
+func (_c *PointOfContactCreate) check() error {
+	if _, ok := _c.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "PointOfContact.email"`)}
 	}
-	if _, ok := pocc.mutation.Info(); !ok {
+	if _, ok := _c.mutation.Info(); !ok {
 		return &ValidationError{Name: "info", err: errors.New(`ent: missing required field "PointOfContact.info"`)}
 	}
-	if _, ok := pocc.mutation.Since(); !ok {
+	if _, ok := _c.mutation.Since(); !ok {
 		return &ValidationError{Name: "since", err: errors.New(`ent: missing required field "PointOfContact.since"`)}
 	}
-	if _, ok := pocc.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "PointOfContact.justification"`)}
 	}
-	if _, ok := pocc.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "PointOfContact.origin"`)}
 	}
-	if _, ok := pocc.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "PointOfContact.collector"`)}
 	}
-	if _, ok := pocc.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "PointOfContact.document_ref"`)}
 	}
 	return nil
 }
 
-func (pocc *PointOfContactCreate) sqlSave(ctx context.Context) (*PointOfContact, error) {
-	if err := pocc.check(); err != nil {
+func (_c *PointOfContactCreate) sqlSave(ctx context.Context) (*PointOfContact, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pocc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pocc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -259,50 +259,50 @@ func (pocc *PointOfContactCreate) sqlSave(ctx context.Context) (*PointOfContact,
 			return nil, err
 		}
 	}
-	pocc.mutation.id = &_node.ID
-	pocc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.CreateSpec) {
+func (_c *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.CreateSpec) {
 	var (
-		_node = &PointOfContact{config: pocc.config}
+		_node = &PointOfContact{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(pointofcontact.Table, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = pocc.conflict
-	if id, ok := pocc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := pocc.mutation.Email(); ok {
+	if value, ok := _c.mutation.Email(); ok {
 		_spec.SetField(pointofcontact.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
-	if value, ok := pocc.mutation.Info(); ok {
+	if value, ok := _c.mutation.Info(); ok {
 		_spec.SetField(pointofcontact.FieldInfo, field.TypeString, value)
 		_node.Info = value
 	}
-	if value, ok := pocc.mutation.Since(); ok {
+	if value, ok := _c.mutation.Since(); ok {
 		_spec.SetField(pointofcontact.FieldSince, field.TypeTime, value)
 		_node.Since = value
 	}
-	if value, ok := pocc.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(pointofcontact.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := pocc.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(pointofcontact.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := pocc.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(pointofcontact.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := pocc.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(pointofcontact.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if nodes := pocc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -319,7 +319,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pocc.mutation.PackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -336,7 +336,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 		_node.PackageVersionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pocc.mutation.AllVersionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AllVersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -353,7 +353,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 		_node.PackageNameID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pocc.mutation.ArtifactIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -389,10 +389,10 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (pocc *PointOfContactCreate) OnConflict(opts ...sql.ConflictOption) *PointOfContactUpsertOne {
-	pocc.conflict = opts
+func (_c *PointOfContactCreate) OnConflict(opts ...sql.ConflictOption) *PointOfContactUpsertOne {
+	_c.conflict = opts
 	return &PointOfContactUpsertOne{
-		create: pocc,
+		create: _c,
 	}
 }
 
@@ -402,10 +402,10 @@ func (pocc *PointOfContactCreate) OnConflict(opts ...sql.ConflictOption) *PointO
 //	client.PointOfContact.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pocc *PointOfContactCreate) OnConflictColumns(columns ...string) *PointOfContactUpsertOne {
-	pocc.conflict = append(pocc.conflict, sql.ConflictColumns(columns...))
+func (_c *PointOfContactCreate) OnConflictColumns(columns ...string) *PointOfContactUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PointOfContactUpsertOne{
-		create: pocc,
+		create: _c,
 	}
 }
 
@@ -855,16 +855,16 @@ type PointOfContactCreateBulk struct {
 }
 
 // Save creates the PointOfContact entities in the database.
-func (poccb *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfContact, error) {
-	if poccb.err != nil {
-		return nil, poccb.err
+func (_c *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfContact, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(poccb.builders))
-	nodes := make([]*PointOfContact, len(poccb.builders))
-	mutators := make([]Mutator, len(poccb.builders))
-	for i := range poccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*PointOfContact, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := poccb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PointOfContactMutation)
@@ -878,12 +878,12 @@ func (poccb *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfCont
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, poccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = poccb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, poccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -903,7 +903,7 @@ func (poccb *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfCont
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, poccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -911,8 +911,8 @@ func (poccb *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfCont
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (poccb *PointOfContactCreateBulk) SaveX(ctx context.Context) []*PointOfContact {
-	v, err := poccb.Save(ctx)
+func (_c *PointOfContactCreateBulk) SaveX(ctx context.Context) []*PointOfContact {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -920,14 +920,14 @@ func (poccb *PointOfContactCreateBulk) SaveX(ctx context.Context) []*PointOfCont
 }
 
 // Exec executes the query.
-func (poccb *PointOfContactCreateBulk) Exec(ctx context.Context) error {
-	_, err := poccb.Save(ctx)
+func (_c *PointOfContactCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (poccb *PointOfContactCreateBulk) ExecX(ctx context.Context) {
-	if err := poccb.Exec(ctx); err != nil {
+func (_c *PointOfContactCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -947,10 +947,10 @@ func (poccb *PointOfContactCreateBulk) ExecX(ctx context.Context) {
 //			SetSourceID(v+v).
 //		}).
 //		Exec(ctx)
-func (poccb *PointOfContactCreateBulk) OnConflict(opts ...sql.ConflictOption) *PointOfContactUpsertBulk {
-	poccb.conflict = opts
+func (_c *PointOfContactCreateBulk) OnConflict(opts ...sql.ConflictOption) *PointOfContactUpsertBulk {
+	_c.conflict = opts
 	return &PointOfContactUpsertBulk{
-		create: poccb,
+		create: _c,
 	}
 }
 
@@ -960,10 +960,10 @@ func (poccb *PointOfContactCreateBulk) OnConflict(opts ...sql.ConflictOption) *P
 //	client.PointOfContact.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (poccb *PointOfContactCreateBulk) OnConflictColumns(columns ...string) *PointOfContactUpsertBulk {
-	poccb.conflict = append(poccb.conflict, sql.ConflictColumns(columns...))
+func (_c *PointOfContactCreateBulk) OnConflictColumns(columns ...string) *PointOfContactUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PointOfContactUpsertBulk{
-		create: poccb,
+		create: _c,
 	}
 }
 

@@ -37,294 +37,294 @@ type PackageVersionCreate struct {
 }
 
 // SetNameID sets the "name_id" field.
-func (pvc *PackageVersionCreate) SetNameID(u uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.SetNameID(u)
-	return pvc
+func (_c *PackageVersionCreate) SetNameID(v uuid.UUID) *PackageVersionCreate {
+	_c.mutation.SetNameID(v)
+	return _c
 }
 
 // SetVersion sets the "version" field.
-func (pvc *PackageVersionCreate) SetVersion(s string) *PackageVersionCreate {
-	pvc.mutation.SetVersion(s)
-	return pvc
+func (_c *PackageVersionCreate) SetVersion(v string) *PackageVersionCreate {
+	_c.mutation.SetVersion(v)
+	return _c
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (pvc *PackageVersionCreate) SetNillableVersion(s *string) *PackageVersionCreate {
-	if s != nil {
-		pvc.SetVersion(*s)
+func (_c *PackageVersionCreate) SetNillableVersion(v *string) *PackageVersionCreate {
+	if v != nil {
+		_c.SetVersion(*v)
 	}
-	return pvc
+	return _c
 }
 
 // SetSubpath sets the "subpath" field.
-func (pvc *PackageVersionCreate) SetSubpath(s string) *PackageVersionCreate {
-	pvc.mutation.SetSubpath(s)
-	return pvc
+func (_c *PackageVersionCreate) SetSubpath(v string) *PackageVersionCreate {
+	_c.mutation.SetSubpath(v)
+	return _c
 }
 
 // SetNillableSubpath sets the "subpath" field if the given value is not nil.
-func (pvc *PackageVersionCreate) SetNillableSubpath(s *string) *PackageVersionCreate {
-	if s != nil {
-		pvc.SetSubpath(*s)
+func (_c *PackageVersionCreate) SetNillableSubpath(v *string) *PackageVersionCreate {
+	if v != nil {
+		_c.SetSubpath(*v)
 	}
-	return pvc
+	return _c
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (pvc *PackageVersionCreate) SetQualifiers(mq []model.PackageQualifier) *PackageVersionCreate {
-	pvc.mutation.SetQualifiers(mq)
-	return pvc
+func (_c *PackageVersionCreate) SetQualifiers(v []model.PackageQualifier) *PackageVersionCreate {
+	_c.mutation.SetQualifiers(v)
+	return _c
 }
 
 // SetHash sets the "hash" field.
-func (pvc *PackageVersionCreate) SetHash(s string) *PackageVersionCreate {
-	pvc.mutation.SetHash(s)
-	return pvc
+func (_c *PackageVersionCreate) SetHash(v string) *PackageVersionCreate {
+	_c.mutation.SetHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (pvc *PackageVersionCreate) SetID(u uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.SetID(u)
-	return pvc
+func (_c *PackageVersionCreate) SetID(v uuid.UUID) *PackageVersionCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (pvc *PackageVersionCreate) SetNillableID(u *uuid.UUID) *PackageVersionCreate {
-	if u != nil {
-		pvc.SetID(*u)
+func (_c *PackageVersionCreate) SetNillableID(v *uuid.UUID) *PackageVersionCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return pvc
+	return _c
 }
 
 // SetName sets the "name" edge to the PackageName entity.
-func (pvc *PackageVersionCreate) SetName(p *PackageName) *PackageVersionCreate {
-	return pvc.SetNameID(p.ID)
+func (_c *PackageVersionCreate) SetName(v *PackageName) *PackageVersionCreate {
+	return _c.SetNameID(v.ID)
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (pvc *PackageVersionCreate) AddOccurrenceIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddOccurrenceIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddOccurrenceIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddOccurrenceIDs(ids...)
+	return _c
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
-func (pvc *PackageVersionCreate) AddOccurrences(o ...*Occurrence) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+func (_c *PackageVersionCreate) AddOccurrences(v ...*Occurrence) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddOccurrenceIDs(ids...)
+	return _c.AddOccurrenceIDs(ids...)
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (pvc *PackageVersionCreate) AddSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddSbomIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddSbomIDs(ids...)
+	return _c
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
-func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *PackageVersionCreate) AddSbom(v ...*BillOfMaterials) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddSbomIDs(ids...)
+	return _c.AddSbomIDs(ids...)
 }
 
 // AddVulnIDs adds the "vuln" edge to the CertifyVuln entity by IDs.
-func (pvc *PackageVersionCreate) AddVulnIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddVulnIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddVulnIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddVulnIDs(ids...)
+	return _c
 }
 
 // AddVuln adds the "vuln" edges to the CertifyVuln entity.
-func (pvc *PackageVersionCreate) AddVuln(c ...*CertifyVuln) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PackageVersionCreate) AddVuln(v ...*CertifyVuln) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddVulnIDs(ids...)
+	return _c.AddVulnIDs(ids...)
 }
 
 // AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
-func (pvc *PackageVersionCreate) AddVexIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddVexIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddVexIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddVexIDs(ids...)
+	return _c
 }
 
 // AddVex adds the "vex" edges to the CertifyVex entity.
-func (pvc *PackageVersionCreate) AddVex(c ...*CertifyVex) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PackageVersionCreate) AddVex(v ...*CertifyVex) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddVexIDs(ids...)
+	return _c.AddVexIDs(ids...)
 }
 
 // AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
-func (pvc *PackageVersionCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddHasSourceAtIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddHasSourceAtIDs(ids...)
+	return _c
 }
 
 // AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
-func (pvc *PackageVersionCreate) AddHasSourceAt(h ...*HasSourceAt) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *PackageVersionCreate) AddHasSourceAt(v ...*HasSourceAt) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddHasSourceAtIDs(ids...)
+	return _c.AddHasSourceAtIDs(ids...)
 }
 
 // AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
-func (pvc *PackageVersionCreate) AddCertificationIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddCertificationIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddCertificationIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddCertificationIDs(ids...)
+	return _c
 }
 
 // AddCertification adds the "certification" edges to the Certification entity.
-func (pvc *PackageVersionCreate) AddCertification(c ...*Certification) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PackageVersionCreate) AddCertification(v ...*Certification) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddCertificationIDs(ids...)
+	return _c.AddCertificationIDs(ids...)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
-func (pvc *PackageVersionCreate) AddMetadatumIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddMetadatumIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddMetadatumIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddMetadatumIDs(ids...)
+	return _c
 }
 
 // AddMetadata adds the "metadata" edges to the HasMetadata entity.
-func (pvc *PackageVersionCreate) AddMetadata(h ...*HasMetadata) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *PackageVersionCreate) AddMetadata(v ...*HasMetadata) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddMetadatumIDs(ids...)
+	return _c.AddMetadatumIDs(ids...)
 }
 
 // AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
-func (pvc *PackageVersionCreate) AddDependencyIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddDependencyIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddDependencyIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddDependencyIDs(ids...)
+	return _c
 }
 
 // AddDependency adds the "dependency" edges to the Dependency entity.
-func (pvc *PackageVersionCreate) AddDependency(d ...*Dependency) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_c *PackageVersionCreate) AddDependency(v ...*Dependency) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddDependencyIDs(ids...)
+	return _c.AddDependencyIDs(ids...)
 }
 
 // AddDependencySubjectIDs adds the "dependency_subject" edge to the Dependency entity by IDs.
-func (pvc *PackageVersionCreate) AddDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddDependencySubjectIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddDependencySubjectIDs(ids...)
+	return _c
 }
 
 // AddDependencySubject adds the "dependency_subject" edges to the Dependency entity.
-func (pvc *PackageVersionCreate) AddDependencySubject(d ...*Dependency) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_c *PackageVersionCreate) AddDependencySubject(v ...*Dependency) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddDependencySubjectIDs(ids...)
+	return _c.AddDependencySubjectIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (pvc *PackageVersionCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddIncludedInSbomIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddIncludedInSbomIDs(ids...)
+	return _c
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (pvc *PackageVersionCreate) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *PackageVersionCreate) AddIncludedInSboms(v ...*BillOfMaterials) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddIncludedInSbomIDs(ids...)
+	return _c.AddIncludedInSbomIDs(ids...)
 }
 
 // AddPkgEqualPkgAIDs adds the "pkg_equal_pkg_a" edge to the PkgEqual entity by IDs.
-func (pvc *PackageVersionCreate) AddPkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddPkgEqualPkgAIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddPkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddPkgEqualPkgAIDs(ids...)
+	return _c
 }
 
 // AddPkgEqualPkgA adds the "pkg_equal_pkg_a" edges to the PkgEqual entity.
-func (pvc *PackageVersionCreate) AddPkgEqualPkgA(p ...*PkgEqual) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *PackageVersionCreate) AddPkgEqualPkgA(v ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddPkgEqualPkgAIDs(ids...)
+	return _c.AddPkgEqualPkgAIDs(ids...)
 }
 
 // AddPkgEqualPkgBIDs adds the "pkg_equal_pkg_b" edge to the PkgEqual entity by IDs.
-func (pvc *PackageVersionCreate) AddPkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddPkgEqualPkgBIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddPkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddPkgEqualPkgBIDs(ids...)
+	return _c
 }
 
 // AddPkgEqualPkgB adds the "pkg_equal_pkg_b" edges to the PkgEqual entity.
-func (pvc *PackageVersionCreate) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *PackageVersionCreate) AddPkgEqualPkgB(v ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddPkgEqualPkgBIDs(ids...)
+	return _c.AddPkgEqualPkgBIDs(ids...)
 }
 
 // AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
-func (pvc *PackageVersionCreate) AddPocIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddPocIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddPocIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddPocIDs(ids...)
+	return _c
 }
 
 // AddPoc adds the "poc" edges to the PointOfContact entity.
-func (pvc *PackageVersionCreate) AddPoc(p ...*PointOfContact) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *PackageVersionCreate) AddPoc(v ...*PointOfContact) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddPocIDs(ids...)
+	return _c.AddPocIDs(ids...)
 }
 
 // AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
-func (pvc *PackageVersionCreate) AddCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddCertifyLegalIDs(ids...)
-	return pvc
+func (_c *PackageVersionCreate) AddCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	_c.mutation.AddCertifyLegalIDs(ids...)
+	return _c
 }
 
 // AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
-func (pvc *PackageVersionCreate) AddCertifyLegal(c ...*CertifyLegal) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PackageVersionCreate) AddCertifyLegal(v ...*CertifyLegal) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pvc.AddCertifyLegalIDs(ids...)
+	return _c.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
-func (pvc *PackageVersionCreate) Mutation() *PackageVersionMutation {
-	return pvc.mutation
+func (_c *PackageVersionCreate) Mutation() *PackageVersionMutation {
+	return _c.mutation
 }
 
 // Save creates the PackageVersion in the database.
-func (pvc *PackageVersionCreate) Save(ctx context.Context) (*PackageVersion, error) {
-	pvc.defaults()
-	return withHooks(ctx, pvc.sqlSave, pvc.mutation, pvc.hooks)
+func (_c *PackageVersionCreate) Save(ctx context.Context) (*PackageVersion, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pvc *PackageVersionCreate) SaveX(ctx context.Context) *PackageVersion {
-	v, err := pvc.Save(ctx)
+func (_c *PackageVersionCreate) SaveX(ctx context.Context) *PackageVersion {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -332,60 +332,60 @@ func (pvc *PackageVersionCreate) SaveX(ctx context.Context) *PackageVersion {
 }
 
 // Exec executes the query.
-func (pvc *PackageVersionCreate) Exec(ctx context.Context) error {
-	_, err := pvc.Save(ctx)
+func (_c *PackageVersionCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pvc *PackageVersionCreate) ExecX(ctx context.Context) {
-	if err := pvc.Exec(ctx); err != nil {
+func (_c *PackageVersionCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (pvc *PackageVersionCreate) defaults() {
-	if _, ok := pvc.mutation.Version(); !ok {
+func (_c *PackageVersionCreate) defaults() {
+	if _, ok := _c.mutation.Version(); !ok {
 		v := packageversion.DefaultVersion
-		pvc.mutation.SetVersion(v)
+		_c.mutation.SetVersion(v)
 	}
-	if _, ok := pvc.mutation.Subpath(); !ok {
+	if _, ok := _c.mutation.Subpath(); !ok {
 		v := packageversion.DefaultSubpath
-		pvc.mutation.SetSubpath(v)
+		_c.mutation.SetSubpath(v)
 	}
-	if _, ok := pvc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := packageversion.DefaultID()
-		pvc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pvc *PackageVersionCreate) check() error {
-	if _, ok := pvc.mutation.NameID(); !ok {
+func (_c *PackageVersionCreate) check() error {
+	if _, ok := _c.mutation.NameID(); !ok {
 		return &ValidationError{Name: "name_id", err: errors.New(`ent: missing required field "PackageVersion.name_id"`)}
 	}
-	if _, ok := pvc.mutation.Version(); !ok {
+	if _, ok := _c.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "PackageVersion.version"`)}
 	}
-	if _, ok := pvc.mutation.Subpath(); !ok {
+	if _, ok := _c.mutation.Subpath(); !ok {
 		return &ValidationError{Name: "subpath", err: errors.New(`ent: missing required field "PackageVersion.subpath"`)}
 	}
-	if _, ok := pvc.mutation.Hash(); !ok {
+	if _, ok := _c.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "PackageVersion.hash"`)}
 	}
-	if len(pvc.mutation.NameIDs()) == 0 {
+	if len(_c.mutation.NameIDs()) == 0 {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required edge "PackageVersion.name"`)}
 	}
 	return nil
 }
 
-func (pvc *PackageVersionCreate) sqlSave(ctx context.Context) (*PackageVersion, error) {
-	if err := pvc.check(); err != nil {
+func (_c *PackageVersionCreate) sqlSave(ctx context.Context) (*PackageVersion, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pvc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pvc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -398,38 +398,38 @@ func (pvc *PackageVersionCreate) sqlSave(ctx context.Context) (*PackageVersion, 
 			return nil, err
 		}
 	}
-	pvc.mutation.id = &_node.ID
-	pvc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.CreateSpec) {
+func (_c *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.CreateSpec) {
 	var (
-		_node = &PackageVersion{config: pvc.config}
+		_node = &PackageVersion{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(packageversion.Table, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = pvc.conflict
-	if id, ok := pvc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := pvc.mutation.Version(); ok {
+	if value, ok := _c.mutation.Version(); ok {
 		_spec.SetField(packageversion.FieldVersion, field.TypeString, value)
 		_node.Version = value
 	}
-	if value, ok := pvc.mutation.Subpath(); ok {
+	if value, ok := _c.mutation.Subpath(); ok {
 		_spec.SetField(packageversion.FieldSubpath, field.TypeString, value)
 		_node.Subpath = value
 	}
-	if value, ok := pvc.mutation.Qualifiers(); ok {
+	if value, ok := _c.mutation.Qualifiers(); ok {
 		_spec.SetField(packageversion.FieldQualifiers, field.TypeJSON, value)
 		_node.Qualifiers = value
 	}
-	if value, ok := pvc.mutation.Hash(); ok {
+	if value, ok := _c.mutation.Hash(); ok {
 		_spec.SetField(packageversion.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
-	if nodes := pvc.mutation.NameIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.NameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -446,7 +446,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		_node.NameID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.OccurrencesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.OccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -462,7 +462,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.SbomIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SbomIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -478,7 +478,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.VulnIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VulnIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -494,7 +494,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.VexIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.VexIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -510,7 +510,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.HasSourceAtIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -526,7 +526,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.CertificationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CertificationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -542,7 +542,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -558,7 +558,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.DependencyIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DependencyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -574,7 +574,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.DependencySubjectIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DependencySubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -590,7 +590,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -606,7 +606,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.PkgEqualPkgAIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PkgEqualPkgAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -622,7 +622,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.PkgEqualPkgBIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PkgEqualPkgBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -638,7 +638,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.PocIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PocIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -654,7 +654,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CertifyLegalIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -689,10 +689,10 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 //			SetNameID(v+v).
 //		}).
 //		Exec(ctx)
-func (pvc *PackageVersionCreate) OnConflict(opts ...sql.ConflictOption) *PackageVersionUpsertOne {
-	pvc.conflict = opts
+func (_c *PackageVersionCreate) OnConflict(opts ...sql.ConflictOption) *PackageVersionUpsertOne {
+	_c.conflict = opts
 	return &PackageVersionUpsertOne{
-		create: pvc,
+		create: _c,
 	}
 }
 
@@ -702,10 +702,10 @@ func (pvc *PackageVersionCreate) OnConflict(opts ...sql.ConflictOption) *Package
 //	client.PackageVersion.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pvc *PackageVersionCreate) OnConflictColumns(columns ...string) *PackageVersionUpsertOne {
-	pvc.conflict = append(pvc.conflict, sql.ConflictColumns(columns...))
+func (_c *PackageVersionCreate) OnConflictColumns(columns ...string) *PackageVersionUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PackageVersionUpsertOne{
-		create: pvc,
+		create: _c,
 	}
 }
 
@@ -960,16 +960,16 @@ type PackageVersionCreateBulk struct {
 }
 
 // Save creates the PackageVersion entities in the database.
-func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersion, error) {
-	if pvcb.err != nil {
-		return nil, pvcb.err
+func (_c *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersion, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pvcb.builders))
-	nodes := make([]*PackageVersion, len(pvcb.builders))
-	mutators := make([]Mutator, len(pvcb.builders))
-	for i := range pvcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*PackageVersion, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := pvcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PackageVersionMutation)
@@ -983,12 +983,12 @@ func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersi
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pvcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = pvcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pvcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -1008,7 +1008,7 @@ func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersi
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pvcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -1016,8 +1016,8 @@ func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersi
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pvcb *PackageVersionCreateBulk) SaveX(ctx context.Context) []*PackageVersion {
-	v, err := pvcb.Save(ctx)
+func (_c *PackageVersionCreateBulk) SaveX(ctx context.Context) []*PackageVersion {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1025,14 +1025,14 @@ func (pvcb *PackageVersionCreateBulk) SaveX(ctx context.Context) []*PackageVersi
 }
 
 // Exec executes the query.
-func (pvcb *PackageVersionCreateBulk) Exec(ctx context.Context) error {
-	_, err := pvcb.Save(ctx)
+func (_c *PackageVersionCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pvcb *PackageVersionCreateBulk) ExecX(ctx context.Context) {
-	if err := pvcb.Exec(ctx); err != nil {
+func (_c *PackageVersionCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -1052,10 +1052,10 @@ func (pvcb *PackageVersionCreateBulk) ExecX(ctx context.Context) {
 //			SetNameID(v+v).
 //		}).
 //		Exec(ctx)
-func (pvcb *PackageVersionCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageVersionUpsertBulk {
-	pvcb.conflict = opts
+func (_c *PackageVersionCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageVersionUpsertBulk {
+	_c.conflict = opts
 	return &PackageVersionUpsertBulk{
-		create: pvcb,
+		create: _c,
 	}
 }
 
@@ -1065,10 +1065,10 @@ func (pvcb *PackageVersionCreateBulk) OnConflict(opts ...sql.ConflictOption) *Pa
 //	client.PackageVersion.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pvcb *PackageVersionCreateBulk) OnConflictColumns(columns ...string) *PackageVersionUpsertBulk {
-	pvcb.conflict = append(pvcb.conflict, sql.ConflictColumns(columns...))
+func (_c *PackageVersionCreateBulk) OnConflictColumns(columns ...string) *PackageVersionUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PackageVersionUpsertBulk{
-		create: pvcb,
+		create: _c,
 	}
 }
 

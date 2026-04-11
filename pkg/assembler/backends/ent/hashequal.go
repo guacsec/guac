@@ -91,7 +91,7 @@ func (*HashEqual) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the HashEqual fields.
-func (he *HashEqual) assignValues(columns []string, values []any) error {
+func (_m *HashEqual) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -101,52 +101,52 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				he.ID = *value
+				_m.ID = *value
 			}
 		case hashequal.FieldArtID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field art_id", values[i])
 			} else if value != nil {
-				he.ArtID = *value
+				_m.ArtID = *value
 			}
 		case hashequal.FieldEqualArtID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field equal_art_id", values[i])
 			} else if value != nil {
-				he.EqualArtID = *value
+				_m.EqualArtID = *value
 			}
 		case hashequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				he.Origin = value.String
+				_m.Origin = value.String
 			}
 		case hashequal.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				he.Collector = value.String
+				_m.Collector = value.String
 			}
 		case hashequal.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				he.Justification = value.String
+				_m.Justification = value.String
 			}
 		case hashequal.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				he.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case hashequal.FieldArtifactsHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field artifacts_hash", values[i])
 			} else if value.Valid {
-				he.ArtifactsHash = value.String
+				_m.ArtifactsHash = value.String
 			}
 		default:
-			he.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -154,63 +154,63 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the HashEqual.
 // This includes values selected through modifiers, order, etc.
-func (he *HashEqual) Value(name string) (ent.Value, error) {
-	return he.selectValues.Get(name)
+func (_m *HashEqual) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryArtifactA queries the "artifact_a" edge of the HashEqual entity.
-func (he *HashEqual) QueryArtifactA() *ArtifactQuery {
-	return NewHashEqualClient(he.config).QueryArtifactA(he)
+func (_m *HashEqual) QueryArtifactA() *ArtifactQuery {
+	return NewHashEqualClient(_m.config).QueryArtifactA(_m)
 }
 
 // QueryArtifactB queries the "artifact_b" edge of the HashEqual entity.
-func (he *HashEqual) QueryArtifactB() *ArtifactQuery {
-	return NewHashEqualClient(he.config).QueryArtifactB(he)
+func (_m *HashEqual) QueryArtifactB() *ArtifactQuery {
+	return NewHashEqualClient(_m.config).QueryArtifactB(_m)
 }
 
 // Update returns a builder for updating this HashEqual.
 // Note that you need to call HashEqual.Unwrap() before calling this method if this HashEqual
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (he *HashEqual) Update() *HashEqualUpdateOne {
-	return NewHashEqualClient(he.config).UpdateOne(he)
+func (_m *HashEqual) Update() *HashEqualUpdateOne {
+	return NewHashEqualClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the HashEqual entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (he *HashEqual) Unwrap() *HashEqual {
-	_tx, ok := he.config.driver.(*txDriver)
+func (_m *HashEqual) Unwrap() *HashEqual {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: HashEqual is not a transactional entity")
 	}
-	he.config.driver = _tx.drv
-	return he
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (he *HashEqual) String() string {
+func (_m *HashEqual) String() string {
 	var builder strings.Builder
 	builder.WriteString("HashEqual(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", he.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("art_id=")
-	builder.WriteString(fmt.Sprintf("%v", he.ArtID))
+	builder.WriteString(fmt.Sprintf("%v", _m.ArtID))
 	builder.WriteString(", ")
 	builder.WriteString("equal_art_id=")
-	builder.WriteString(fmt.Sprintf("%v", he.EqualArtID))
+	builder.WriteString(fmt.Sprintf("%v", _m.EqualArtID))
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(he.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(he.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(he.Justification)
+	builder.WriteString(_m.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(he.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("artifacts_hash=")
-	builder.WriteString(he.ArtifactsHash)
+	builder.WriteString(_m.ArtifactsHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

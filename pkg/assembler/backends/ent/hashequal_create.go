@@ -25,97 +25,97 @@ type HashEqualCreate struct {
 }
 
 // SetArtID sets the "art_id" field.
-func (hec *HashEqualCreate) SetArtID(u uuid.UUID) *HashEqualCreate {
-	hec.mutation.SetArtID(u)
-	return hec
+func (_c *HashEqualCreate) SetArtID(v uuid.UUID) *HashEqualCreate {
+	_c.mutation.SetArtID(v)
+	return _c
 }
 
 // SetEqualArtID sets the "equal_art_id" field.
-func (hec *HashEqualCreate) SetEqualArtID(u uuid.UUID) *HashEqualCreate {
-	hec.mutation.SetEqualArtID(u)
-	return hec
+func (_c *HashEqualCreate) SetEqualArtID(v uuid.UUID) *HashEqualCreate {
+	_c.mutation.SetEqualArtID(v)
+	return _c
 }
 
 // SetOrigin sets the "origin" field.
-func (hec *HashEqualCreate) SetOrigin(s string) *HashEqualCreate {
-	hec.mutation.SetOrigin(s)
-	return hec
+func (_c *HashEqualCreate) SetOrigin(v string) *HashEqualCreate {
+	_c.mutation.SetOrigin(v)
+	return _c
 }
 
 // SetCollector sets the "collector" field.
-func (hec *HashEqualCreate) SetCollector(s string) *HashEqualCreate {
-	hec.mutation.SetCollector(s)
-	return hec
+func (_c *HashEqualCreate) SetCollector(v string) *HashEqualCreate {
+	_c.mutation.SetCollector(v)
+	return _c
 }
 
 // SetJustification sets the "justification" field.
-func (hec *HashEqualCreate) SetJustification(s string) *HashEqualCreate {
-	hec.mutation.SetJustification(s)
-	return hec
+func (_c *HashEqualCreate) SetJustification(v string) *HashEqualCreate {
+	_c.mutation.SetJustification(v)
+	return _c
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (hec *HashEqualCreate) SetDocumentRef(s string) *HashEqualCreate {
-	hec.mutation.SetDocumentRef(s)
-	return hec
+func (_c *HashEqualCreate) SetDocumentRef(v string) *HashEqualCreate {
+	_c.mutation.SetDocumentRef(v)
+	return _c
 }
 
 // SetArtifactsHash sets the "artifacts_hash" field.
-func (hec *HashEqualCreate) SetArtifactsHash(s string) *HashEqualCreate {
-	hec.mutation.SetArtifactsHash(s)
-	return hec
+func (_c *HashEqualCreate) SetArtifactsHash(v string) *HashEqualCreate {
+	_c.mutation.SetArtifactsHash(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (hec *HashEqualCreate) SetID(u uuid.UUID) *HashEqualCreate {
-	hec.mutation.SetID(u)
-	return hec
+func (_c *HashEqualCreate) SetID(v uuid.UUID) *HashEqualCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (hec *HashEqualCreate) SetNillableID(u *uuid.UUID) *HashEqualCreate {
-	if u != nil {
-		hec.SetID(*u)
+func (_c *HashEqualCreate) SetNillableID(v *uuid.UUID) *HashEqualCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return hec
+	return _c
 }
 
 // SetArtifactAID sets the "artifact_a" edge to the Artifact entity by ID.
-func (hec *HashEqualCreate) SetArtifactAID(id uuid.UUID) *HashEqualCreate {
-	hec.mutation.SetArtifactAID(id)
-	return hec
+func (_c *HashEqualCreate) SetArtifactAID(id uuid.UUID) *HashEqualCreate {
+	_c.mutation.SetArtifactAID(id)
+	return _c
 }
 
 // SetArtifactA sets the "artifact_a" edge to the Artifact entity.
-func (hec *HashEqualCreate) SetArtifactA(a *Artifact) *HashEqualCreate {
-	return hec.SetArtifactAID(a.ID)
+func (_c *HashEqualCreate) SetArtifactA(v *Artifact) *HashEqualCreate {
+	return _c.SetArtifactAID(v.ID)
 }
 
 // SetArtifactBID sets the "artifact_b" edge to the Artifact entity by ID.
-func (hec *HashEqualCreate) SetArtifactBID(id uuid.UUID) *HashEqualCreate {
-	hec.mutation.SetArtifactBID(id)
-	return hec
+func (_c *HashEqualCreate) SetArtifactBID(id uuid.UUID) *HashEqualCreate {
+	_c.mutation.SetArtifactBID(id)
+	return _c
 }
 
 // SetArtifactB sets the "artifact_b" edge to the Artifact entity.
-func (hec *HashEqualCreate) SetArtifactB(a *Artifact) *HashEqualCreate {
-	return hec.SetArtifactBID(a.ID)
+func (_c *HashEqualCreate) SetArtifactB(v *Artifact) *HashEqualCreate {
+	return _c.SetArtifactBID(v.ID)
 }
 
 // Mutation returns the HashEqualMutation object of the builder.
-func (hec *HashEqualCreate) Mutation() *HashEqualMutation {
-	return hec.mutation
+func (_c *HashEqualCreate) Mutation() *HashEqualMutation {
+	return _c.mutation
 }
 
 // Save creates the HashEqual in the database.
-func (hec *HashEqualCreate) Save(ctx context.Context) (*HashEqual, error) {
-	hec.defaults()
-	return withHooks(ctx, hec.sqlSave, hec.mutation, hec.hooks)
+func (_c *HashEqualCreate) Save(ctx context.Context) (*HashEqual, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (hec *HashEqualCreate) SaveX(ctx context.Context) *HashEqual {
-	v, err := hec.Save(ctx)
+func (_c *HashEqualCreate) SaveX(ctx context.Context) *HashEqual {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -123,64 +123,64 @@ func (hec *HashEqualCreate) SaveX(ctx context.Context) *HashEqual {
 }
 
 // Exec executes the query.
-func (hec *HashEqualCreate) Exec(ctx context.Context) error {
-	_, err := hec.Save(ctx)
+func (_c *HashEqualCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hec *HashEqualCreate) ExecX(ctx context.Context) {
-	if err := hec.Exec(ctx); err != nil {
+func (_c *HashEqualCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (hec *HashEqualCreate) defaults() {
-	if _, ok := hec.mutation.ID(); !ok {
+func (_c *HashEqualCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := hashequal.DefaultID()
-		hec.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (hec *HashEqualCreate) check() error {
-	if _, ok := hec.mutation.ArtID(); !ok {
+func (_c *HashEqualCreate) check() error {
+	if _, ok := _c.mutation.ArtID(); !ok {
 		return &ValidationError{Name: "art_id", err: errors.New(`ent: missing required field "HashEqual.art_id"`)}
 	}
-	if _, ok := hec.mutation.EqualArtID(); !ok {
+	if _, ok := _c.mutation.EqualArtID(); !ok {
 		return &ValidationError{Name: "equal_art_id", err: errors.New(`ent: missing required field "HashEqual.equal_art_id"`)}
 	}
-	if _, ok := hec.mutation.Origin(); !ok {
+	if _, ok := _c.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "HashEqual.origin"`)}
 	}
-	if _, ok := hec.mutation.Collector(); !ok {
+	if _, ok := _c.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "HashEqual.collector"`)}
 	}
-	if _, ok := hec.mutation.Justification(); !ok {
+	if _, ok := _c.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "HashEqual.justification"`)}
 	}
-	if _, ok := hec.mutation.DocumentRef(); !ok {
+	if _, ok := _c.mutation.DocumentRef(); !ok {
 		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HashEqual.document_ref"`)}
 	}
-	if _, ok := hec.mutation.ArtifactsHash(); !ok {
+	if _, ok := _c.mutation.ArtifactsHash(); !ok {
 		return &ValidationError{Name: "artifacts_hash", err: errors.New(`ent: missing required field "HashEqual.artifacts_hash"`)}
 	}
-	if len(hec.mutation.ArtifactAIDs()) == 0 {
+	if len(_c.mutation.ArtifactAIDs()) == 0 {
 		return &ValidationError{Name: "artifact_a", err: errors.New(`ent: missing required edge "HashEqual.artifact_a"`)}
 	}
-	if len(hec.mutation.ArtifactBIDs()) == 0 {
+	if len(_c.mutation.ArtifactBIDs()) == 0 {
 		return &ValidationError{Name: "artifact_b", err: errors.New(`ent: missing required edge "HashEqual.artifact_b"`)}
 	}
 	return nil
 }
 
-func (hec *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
-	if err := hec.check(); err != nil {
+func (_c *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := hec.createSpec()
-	if err := sqlgraph.CreateNode(ctx, hec.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -193,42 +193,42 @@ func (hec *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
 			return nil, err
 		}
 	}
-	hec.mutation.id = &_node.ID
-	hec.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
+func (_c *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 	var (
-		_node = &HashEqual{config: hec.config}
+		_node = &HashEqual{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = hec.conflict
-	if id, ok := hec.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := hec.mutation.Origin(); ok {
+	if value, ok := _c.mutation.Origin(); ok {
 		_spec.SetField(hashequal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
 	}
-	if value, ok := hec.mutation.Collector(); ok {
+	if value, ok := _c.mutation.Collector(); ok {
 		_spec.SetField(hashequal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := hec.mutation.Justification(); ok {
+	if value, ok := _c.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if value, ok := hec.mutation.DocumentRef(); ok {
+	if value, ok := _c.mutation.DocumentRef(); ok {
 		_spec.SetField(hashequal.FieldDocumentRef, field.TypeString, value)
 		_node.DocumentRef = value
 	}
-	if value, ok := hec.mutation.ArtifactsHash(); ok {
+	if value, ok := _c.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 		_node.ArtifactsHash = value
 	}
-	if nodes := hec.mutation.ArtifactAIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -245,7 +245,7 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 		_node.ArtID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := hec.mutation.ArtifactBIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ArtifactBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -281,10 +281,10 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 //			SetArtID(v+v).
 //		}).
 //		Exec(ctx)
-func (hec *HashEqualCreate) OnConflict(opts ...sql.ConflictOption) *HashEqualUpsertOne {
-	hec.conflict = opts
+func (_c *HashEqualCreate) OnConflict(opts ...sql.ConflictOption) *HashEqualUpsertOne {
+	_c.conflict = opts
 	return &HashEqualUpsertOne{
-		create: hec,
+		create: _c,
 	}
 }
 
@@ -294,10 +294,10 @@ func (hec *HashEqualCreate) OnConflict(opts ...sql.ConflictOption) *HashEqualUps
 //	client.HashEqual.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (hec *HashEqualCreate) OnConflictColumns(columns ...string) *HashEqualUpsertOne {
-	hec.conflict = append(hec.conflict, sql.ConflictColumns(columns...))
+func (_c *HashEqualCreate) OnConflictColumns(columns ...string) *HashEqualUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &HashEqualUpsertOne{
-		create: hec,
+		create: _c,
 	}
 }
 
@@ -591,16 +591,16 @@ type HashEqualCreateBulk struct {
 }
 
 // Save creates the HashEqual entities in the database.
-func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error) {
-	if hecb.err != nil {
-		return nil, hecb.err
+func (_c *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(hecb.builders))
-	nodes := make([]*HashEqual, len(hecb.builders))
-	mutators := make([]Mutator, len(hecb.builders))
-	for i := range hecb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*HashEqual, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := hecb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HashEqualMutation)
@@ -614,12 +614,12 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, hecb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = hecb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, hecb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -639,7 +639,7 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, hecb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -647,8 +647,8 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hecb *HashEqualCreateBulk) SaveX(ctx context.Context) []*HashEqual {
-	v, err := hecb.Save(ctx)
+func (_c *HashEqualCreateBulk) SaveX(ctx context.Context) []*HashEqual {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -656,14 +656,14 @@ func (hecb *HashEqualCreateBulk) SaveX(ctx context.Context) []*HashEqual {
 }
 
 // Exec executes the query.
-func (hecb *HashEqualCreateBulk) Exec(ctx context.Context) error {
-	_, err := hecb.Save(ctx)
+func (_c *HashEqualCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hecb *HashEqualCreateBulk) ExecX(ctx context.Context) {
-	if err := hecb.Exec(ctx); err != nil {
+func (_c *HashEqualCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -683,10 +683,10 @@ func (hecb *HashEqualCreateBulk) ExecX(ctx context.Context) {
 //			SetArtID(v+v).
 //		}).
 //		Exec(ctx)
-func (hecb *HashEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *HashEqualUpsertBulk {
-	hecb.conflict = opts
+func (_c *HashEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *HashEqualUpsertBulk {
+	_c.conflict = opts
 	return &HashEqualUpsertBulk{
-		create: hecb,
+		create: _c,
 	}
 }
 
@@ -696,10 +696,10 @@ func (hecb *HashEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *HashEqu
 //	client.HashEqual.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (hecb *HashEqualCreateBulk) OnConflictColumns(columns ...string) *HashEqualUpsertBulk {
-	hecb.conflict = append(hecb.conflict, sql.ConflictColumns(columns...))
+func (_c *HashEqualCreateBulk) OnConflictColumns(columns ...string) *HashEqualUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &HashEqualUpsertBulk{
-		create: hecb,
+		create: _c,
 	}
 }
 

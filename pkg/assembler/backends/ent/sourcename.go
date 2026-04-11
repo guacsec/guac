@@ -145,7 +145,7 @@ func (*SourceName) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the SourceName fields.
-func (sn *SourceName) assignValues(columns []string, values []any) error {
+func (_m *SourceName) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -155,40 +155,40 @@ func (sn *SourceName) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				sn.ID = *value
+				_m.ID = *value
 			}
 		case sourcename.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				sn.Type = value.String
+				_m.Type = value.String
 			}
 		case sourcename.FieldNamespace:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field namespace", values[i])
 			} else if value.Valid {
-				sn.Namespace = value.String
+				_m.Namespace = value.String
 			}
 		case sourcename.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				sn.Name = value.String
+				_m.Name = value.String
 			}
 		case sourcename.FieldCommit:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field commit", values[i])
 			} else if value.Valid {
-				sn.Commit = value.String
+				_m.Commit = value.String
 			}
 		case sourcename.FieldTag:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field tag", values[i])
 			} else if value.Valid {
-				sn.Tag = value.String
+				_m.Tag = value.String
 			}
 		default:
-			sn.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -196,251 +196,251 @@ func (sn *SourceName) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the SourceName.
 // This includes values selected through modifiers, order, etc.
-func (sn *SourceName) Value(name string) (ent.Value, error) {
-	return sn.selectValues.Get(name)
+func (_m *SourceName) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryOccurrences queries the "occurrences" edge of the SourceName entity.
-func (sn *SourceName) QueryOccurrences() *OccurrenceQuery {
-	return NewSourceNameClient(sn.config).QueryOccurrences(sn)
+func (_m *SourceName) QueryOccurrences() *OccurrenceQuery {
+	return NewSourceNameClient(_m.config).QueryOccurrences(_m)
 }
 
 // QueryHasSourceAt queries the "has_source_at" edge of the SourceName entity.
-func (sn *SourceName) QueryHasSourceAt() *HasSourceAtQuery {
-	return NewSourceNameClient(sn.config).QueryHasSourceAt(sn)
+func (_m *SourceName) QueryHasSourceAt() *HasSourceAtQuery {
+	return NewSourceNameClient(_m.config).QueryHasSourceAt(_m)
 }
 
 // QueryScorecard queries the "scorecard" edge of the SourceName entity.
-func (sn *SourceName) QueryScorecard() *CertifyScorecardQuery {
-	return NewSourceNameClient(sn.config).QueryScorecard(sn)
+func (_m *SourceName) QueryScorecard() *CertifyScorecardQuery {
+	return NewSourceNameClient(_m.config).QueryScorecard(_m)
 }
 
 // QueryCertification queries the "certification" edge of the SourceName entity.
-func (sn *SourceName) QueryCertification() *CertificationQuery {
-	return NewSourceNameClient(sn.config).QueryCertification(sn)
+func (_m *SourceName) QueryCertification() *CertificationQuery {
+	return NewSourceNameClient(_m.config).QueryCertification(_m)
 }
 
 // QueryMetadata queries the "metadata" edge of the SourceName entity.
-func (sn *SourceName) QueryMetadata() *HasMetadataQuery {
-	return NewSourceNameClient(sn.config).QueryMetadata(sn)
+func (_m *SourceName) QueryMetadata() *HasMetadataQuery {
+	return NewSourceNameClient(_m.config).QueryMetadata(_m)
 }
 
 // QueryPoc queries the "poc" edge of the SourceName entity.
-func (sn *SourceName) QueryPoc() *PointOfContactQuery {
-	return NewSourceNameClient(sn.config).QueryPoc(sn)
+func (_m *SourceName) QueryPoc() *PointOfContactQuery {
+	return NewSourceNameClient(_m.config).QueryPoc(_m)
 }
 
 // QueryCertifyLegal queries the "certify_legal" edge of the SourceName entity.
-func (sn *SourceName) QueryCertifyLegal() *CertifyLegalQuery {
-	return NewSourceNameClient(sn.config).QueryCertifyLegal(sn)
+func (_m *SourceName) QueryCertifyLegal() *CertifyLegalQuery {
+	return NewSourceNameClient(_m.config).QueryCertifyLegal(_m)
 }
 
 // Update returns a builder for updating this SourceName.
 // Note that you need to call SourceName.Unwrap() before calling this method if this SourceName
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (sn *SourceName) Update() *SourceNameUpdateOne {
-	return NewSourceNameClient(sn.config).UpdateOne(sn)
+func (_m *SourceName) Update() *SourceNameUpdateOne {
+	return NewSourceNameClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the SourceName entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (sn *SourceName) Unwrap() *SourceName {
-	_tx, ok := sn.config.driver.(*txDriver)
+func (_m *SourceName) Unwrap() *SourceName {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: SourceName is not a transactional entity")
 	}
-	sn.config.driver = _tx.drv
-	return sn
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (sn *SourceName) String() string {
+func (_m *SourceName) String() string {
 	var builder strings.Builder
 	builder.WriteString("SourceName(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", sn.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("type=")
-	builder.WriteString(sn.Type)
+	builder.WriteString(_m.Type)
 	builder.WriteString(", ")
 	builder.WriteString("namespace=")
-	builder.WriteString(sn.Namespace)
+	builder.WriteString(_m.Namespace)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(sn.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("commit=")
-	builder.WriteString(sn.Commit)
+	builder.WriteString(_m.Commit)
 	builder.WriteString(", ")
 	builder.WriteString("tag=")
-	builder.WriteString(sn.Tag)
+	builder.WriteString(_m.Tag)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedOccurrences returns the Occurrences named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedOccurrences(name string) ([]*Occurrence, error) {
-	if sn.Edges.namedOccurrences == nil {
+func (_m *SourceName) NamedOccurrences(name string) ([]*Occurrence, error) {
+	if _m.Edges.namedOccurrences == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedOccurrences[name]
+	nodes, ok := _m.Edges.namedOccurrences[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedOccurrences(name string, edges ...*Occurrence) {
-	if sn.Edges.namedOccurrences == nil {
-		sn.Edges.namedOccurrences = make(map[string][]*Occurrence)
+func (_m *SourceName) appendNamedOccurrences(name string, edges ...*Occurrence) {
+	if _m.Edges.namedOccurrences == nil {
+		_m.Edges.namedOccurrences = make(map[string][]*Occurrence)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedOccurrences[name] = []*Occurrence{}
+		_m.Edges.namedOccurrences[name] = []*Occurrence{}
 	} else {
-		sn.Edges.namedOccurrences[name] = append(sn.Edges.namedOccurrences[name], edges...)
+		_m.Edges.namedOccurrences[name] = append(_m.Edges.namedOccurrences[name], edges...)
 	}
 }
 
 // NamedHasSourceAt returns the HasSourceAt named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
-	if sn.Edges.namedHasSourceAt == nil {
+func (_m *SourceName) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
+	if _m.Edges.namedHasSourceAt == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedHasSourceAt[name]
+	nodes, ok := _m.Edges.namedHasSourceAt[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
-	if sn.Edges.namedHasSourceAt == nil {
-		sn.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
+func (_m *SourceName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
+	if _m.Edges.namedHasSourceAt == nil {
+		_m.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
+		_m.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
 	} else {
-		sn.Edges.namedHasSourceAt[name] = append(sn.Edges.namedHasSourceAt[name], edges...)
+		_m.Edges.namedHasSourceAt[name] = append(_m.Edges.namedHasSourceAt[name], edges...)
 	}
 }
 
 // NamedScorecard returns the Scorecard named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedScorecard(name string) ([]*CertifyScorecard, error) {
-	if sn.Edges.namedScorecard == nil {
+func (_m *SourceName) NamedScorecard(name string) ([]*CertifyScorecard, error) {
+	if _m.Edges.namedScorecard == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedScorecard[name]
+	nodes, ok := _m.Edges.namedScorecard[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedScorecard(name string, edges ...*CertifyScorecard) {
-	if sn.Edges.namedScorecard == nil {
-		sn.Edges.namedScorecard = make(map[string][]*CertifyScorecard)
+func (_m *SourceName) appendNamedScorecard(name string, edges ...*CertifyScorecard) {
+	if _m.Edges.namedScorecard == nil {
+		_m.Edges.namedScorecard = make(map[string][]*CertifyScorecard)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedScorecard[name] = []*CertifyScorecard{}
+		_m.Edges.namedScorecard[name] = []*CertifyScorecard{}
 	} else {
-		sn.Edges.namedScorecard[name] = append(sn.Edges.namedScorecard[name], edges...)
+		_m.Edges.namedScorecard[name] = append(_m.Edges.namedScorecard[name], edges...)
 	}
 }
 
 // NamedCertification returns the Certification named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedCertification(name string) ([]*Certification, error) {
-	if sn.Edges.namedCertification == nil {
+func (_m *SourceName) NamedCertification(name string) ([]*Certification, error) {
+	if _m.Edges.namedCertification == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedCertification[name]
+	nodes, ok := _m.Edges.namedCertification[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedCertification(name string, edges ...*Certification) {
-	if sn.Edges.namedCertification == nil {
-		sn.Edges.namedCertification = make(map[string][]*Certification)
+func (_m *SourceName) appendNamedCertification(name string, edges ...*Certification) {
+	if _m.Edges.namedCertification == nil {
+		_m.Edges.namedCertification = make(map[string][]*Certification)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedCertification[name] = []*Certification{}
+		_m.Edges.namedCertification[name] = []*Certification{}
 	} else {
-		sn.Edges.namedCertification[name] = append(sn.Edges.namedCertification[name], edges...)
+		_m.Edges.namedCertification[name] = append(_m.Edges.namedCertification[name], edges...)
 	}
 }
 
 // NamedMetadata returns the Metadata named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedMetadata(name string) ([]*HasMetadata, error) {
-	if sn.Edges.namedMetadata == nil {
+func (_m *SourceName) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if _m.Edges.namedMetadata == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedMetadata[name]
+	nodes, ok := _m.Edges.namedMetadata[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedMetadata(name string, edges ...*HasMetadata) {
-	if sn.Edges.namedMetadata == nil {
-		sn.Edges.namedMetadata = make(map[string][]*HasMetadata)
+func (_m *SourceName) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if _m.Edges.namedMetadata == nil {
+		_m.Edges.namedMetadata = make(map[string][]*HasMetadata)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedMetadata[name] = []*HasMetadata{}
+		_m.Edges.namedMetadata[name] = []*HasMetadata{}
 	} else {
-		sn.Edges.namedMetadata[name] = append(sn.Edges.namedMetadata[name], edges...)
+		_m.Edges.namedMetadata[name] = append(_m.Edges.namedMetadata[name], edges...)
 	}
 }
 
 // NamedPoc returns the Poc named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedPoc(name string) ([]*PointOfContact, error) {
-	if sn.Edges.namedPoc == nil {
+func (_m *SourceName) NamedPoc(name string) ([]*PointOfContact, error) {
+	if _m.Edges.namedPoc == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedPoc[name]
+	nodes, ok := _m.Edges.namedPoc[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedPoc(name string, edges ...*PointOfContact) {
-	if sn.Edges.namedPoc == nil {
-		sn.Edges.namedPoc = make(map[string][]*PointOfContact)
+func (_m *SourceName) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if _m.Edges.namedPoc == nil {
+		_m.Edges.namedPoc = make(map[string][]*PointOfContact)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedPoc[name] = []*PointOfContact{}
+		_m.Edges.namedPoc[name] = []*PointOfContact{}
 	} else {
-		sn.Edges.namedPoc[name] = append(sn.Edges.namedPoc[name], edges...)
+		_m.Edges.namedPoc[name] = append(_m.Edges.namedPoc[name], edges...)
 	}
 }
 
 // NamedCertifyLegal returns the CertifyLegal named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (sn *SourceName) NamedCertifyLegal(name string) ([]*CertifyLegal, error) {
-	if sn.Edges.namedCertifyLegal == nil {
+func (_m *SourceName) NamedCertifyLegal(name string) ([]*CertifyLegal, error) {
+	if _m.Edges.namedCertifyLegal == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := sn.Edges.namedCertifyLegal[name]
+	nodes, ok := _m.Edges.namedCertifyLegal[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (sn *SourceName) appendNamedCertifyLegal(name string, edges ...*CertifyLegal) {
-	if sn.Edges.namedCertifyLegal == nil {
-		sn.Edges.namedCertifyLegal = make(map[string][]*CertifyLegal)
+func (_m *SourceName) appendNamedCertifyLegal(name string, edges ...*CertifyLegal) {
+	if _m.Edges.namedCertifyLegal == nil {
+		_m.Edges.namedCertifyLegal = make(map[string][]*CertifyLegal)
 	}
 	if len(edges) == 0 {
-		sn.Edges.namedCertifyLegal[name] = []*CertifyLegal{}
+		_m.Edges.namedCertifyLegal[name] = []*CertifyLegal{}
 	} else {
-		sn.Edges.namedCertifyLegal[name] = append(sn.Edges.namedCertifyLegal[name], edges...)
+		_m.Edges.namedCertifyLegal[name] = append(_m.Edges.namedCertifyLegal[name], edges...)
 	}
 }
 

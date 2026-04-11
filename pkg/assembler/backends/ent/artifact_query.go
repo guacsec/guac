@@ -62,44 +62,44 @@ type ArtifactQuery struct {
 }
 
 // Where adds a new predicate for the ArtifactQuery builder.
-func (aq *ArtifactQuery) Where(ps ...predicate.Artifact) *ArtifactQuery {
-	aq.predicates = append(aq.predicates, ps...)
-	return aq
+func (_q *ArtifactQuery) Where(ps ...predicate.Artifact) *ArtifactQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (aq *ArtifactQuery) Limit(limit int) *ArtifactQuery {
-	aq.ctx.Limit = &limit
-	return aq
+func (_q *ArtifactQuery) Limit(limit int) *ArtifactQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (aq *ArtifactQuery) Offset(offset int) *ArtifactQuery {
-	aq.ctx.Offset = &offset
-	return aq
+func (_q *ArtifactQuery) Offset(offset int) *ArtifactQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (aq *ArtifactQuery) Unique(unique bool) *ArtifactQuery {
-	aq.ctx.Unique = &unique
-	return aq
+func (_q *ArtifactQuery) Unique(unique bool) *ArtifactQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (aq *ArtifactQuery) Order(o ...artifact.OrderOption) *ArtifactQuery {
-	aq.order = append(aq.order, o...)
-	return aq
+func (_q *ArtifactQuery) Order(o ...artifact.OrderOption) *ArtifactQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryOccurrences chains the current query on the "occurrences" edge.
-func (aq *ArtifactQuery) QueryOccurrences() *OccurrenceQuery {
-	query := (&OccurrenceClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryOccurrences() *OccurrenceQuery {
+	query := (&OccurrenceClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -108,20 +108,20 @@ func (aq *ArtifactQuery) QueryOccurrences() *OccurrenceQuery {
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QuerySbom chains the current query on the "sbom" edge.
-func (aq *ArtifactQuery) QuerySbom() *BillOfMaterialsQuery {
-	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QuerySbom() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -130,20 +130,20 @@ func (aq *ArtifactQuery) QuerySbom() *BillOfMaterialsQuery {
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryAttestations chains the current query on the "attestations" edge.
-func (aq *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
-	query := (&SLSAAttestationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -152,20 +152,20 @@ func (aq *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryAttestationsSubject chains the current query on the "attestations_subject" edge.
-func (aq *ArtifactQuery) QueryAttestationsSubject() *SLSAAttestationQuery {
-	query := (&SLSAAttestationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryAttestationsSubject() *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -174,20 +174,20 @@ func (aq *ArtifactQuery) QueryAttestationsSubject() *SLSAAttestationQuery {
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.AttestationsSubjectTable, artifact.AttestationsSubjectColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryHashEqualArtA chains the current query on the "hash_equal_art_a" edge.
-func (aq *ArtifactQuery) QueryHashEqualArtA() *HashEqualQuery {
-	query := (&HashEqualClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryHashEqualArtA() *HashEqualQuery {
+	query := (&HashEqualClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -196,20 +196,20 @@ func (aq *ArtifactQuery) QueryHashEqualArtA() *HashEqualQuery {
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtATable, artifact.HashEqualArtAColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryHashEqualArtB chains the current query on the "hash_equal_art_b" edge.
-func (aq *ArtifactQuery) QueryHashEqualArtB() *HashEqualQuery {
-	query := (&HashEqualClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryHashEqualArtB() *HashEqualQuery {
+	query := (&HashEqualClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -218,20 +218,20 @@ func (aq *ArtifactQuery) QueryHashEqualArtB() *HashEqualQuery {
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtBTable, artifact.HashEqualArtBColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryVex chains the current query on the "vex" edge.
-func (aq *ArtifactQuery) QueryVex() *CertifyVexQuery {
-	query := (&CertifyVexClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryVex() *CertifyVexQuery {
+	query := (&CertifyVexClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -240,20 +240,20 @@ func (aq *ArtifactQuery) QueryVex() *CertifyVexQuery {
 			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.VexTable, artifact.VexColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryCertification chains the current query on the "certification" edge.
-func (aq *ArtifactQuery) QueryCertification() *CertificationQuery {
-	query := (&CertificationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryCertification() *CertificationQuery {
+	query := (&CertificationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -262,20 +262,20 @@ func (aq *ArtifactQuery) QueryCertification() *CertificationQuery {
 			sqlgraph.To(certification.Table, certification.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.CertificationTable, artifact.CertificationColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryMetadata chains the current query on the "metadata" edge.
-func (aq *ArtifactQuery) QueryMetadata() *HasMetadataQuery {
-	query := (&HasMetadataClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryMetadata() *HasMetadataQuery {
+	query := (&HasMetadataClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -284,20 +284,20 @@ func (aq *ArtifactQuery) QueryMetadata() *HasMetadataQuery {
 			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.MetadataTable, artifact.MetadataColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryPoc chains the current query on the "poc" edge.
-func (aq *ArtifactQuery) QueryPoc() *PointOfContactQuery {
-	query := (&PointOfContactClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryPoc() *PointOfContactQuery {
+	query := (&PointOfContactClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -306,20 +306,20 @@ func (aq *ArtifactQuery) QueryPoc() *PointOfContactQuery {
 			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.PocTable, artifact.PocColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryIncludedInSboms chains the current query on the "included_in_sboms" edge.
-func (aq *ArtifactQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
-	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := aq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -328,7 +328,7 @@ func (aq *ArtifactQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.IncludedInSbomsTable, artifact.IncludedInSbomsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -336,8 +336,8 @@ func (aq *ArtifactQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
 
 // First returns the first Artifact entity from the query.
 // Returns a *NotFoundError when no Artifact was found.
-func (aq *ArtifactQuery) First(ctx context.Context) (*Artifact, error) {
-	nodes, err := aq.Limit(1).All(setContextOp(ctx, aq.ctx, ent.OpQueryFirst))
+func (_q *ArtifactQuery) First(ctx context.Context) (*Artifact, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -348,8 +348,8 @@ func (aq *ArtifactQuery) First(ctx context.Context) (*Artifact, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (aq *ArtifactQuery) FirstX(ctx context.Context) *Artifact {
-	node, err := aq.First(ctx)
+func (_q *ArtifactQuery) FirstX(ctx context.Context) *Artifact {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -358,9 +358,9 @@ func (aq *ArtifactQuery) FirstX(ctx context.Context) *Artifact {
 
 // FirstID returns the first Artifact ID from the query.
 // Returns a *NotFoundError when no Artifact ID was found.
-func (aq *ArtifactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ArtifactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -371,8 +371,8 @@ func (aq *ArtifactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) 
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *ArtifactQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := aq.FirstID(ctx)
+func (_q *ArtifactQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -382,8 +382,8 @@ func (aq *ArtifactQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single Artifact entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Artifact entity is found.
 // Returns a *NotFoundError when no Artifact entities are found.
-func (aq *ArtifactQuery) Only(ctx context.Context) (*Artifact, error) {
-	nodes, err := aq.Limit(2).All(setContextOp(ctx, aq.ctx, ent.OpQueryOnly))
+func (_q *ArtifactQuery) Only(ctx context.Context) (*Artifact, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -398,8 +398,8 @@ func (aq *ArtifactQuery) Only(ctx context.Context) (*Artifact, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (aq *ArtifactQuery) OnlyX(ctx context.Context) *Artifact {
-	node, err := aq.Only(ctx)
+func (_q *ArtifactQuery) OnlyX(ctx context.Context) *Artifact {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -409,9 +409,9 @@ func (aq *ArtifactQuery) OnlyX(ctx context.Context) *Artifact {
 // OnlyID is like Only, but returns the only Artifact ID in the query.
 // Returns a *NotSingularError when more than one Artifact ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ArtifactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -426,8 +426,8 @@ func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := aq.OnlyID(ctx)
+func (_q *ArtifactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -435,18 +435,18 @@ func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of Artifacts.
-func (aq *ArtifactQuery) All(ctx context.Context) ([]*Artifact, error) {
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryAll)
-	if err := aq.prepareQuery(ctx); err != nil {
+func (_q *ArtifactQuery) All(ctx context.Context) ([]*Artifact, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Artifact, *ArtifactQuery]()
-	return withInterceptors[[]*Artifact](ctx, aq, qr, aq.inters)
+	return withInterceptors[[]*Artifact](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (aq *ArtifactQuery) AllX(ctx context.Context) []*Artifact {
-	nodes, err := aq.All(ctx)
+func (_q *ArtifactQuery) AllX(ctx context.Context) []*Artifact {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -454,20 +454,20 @@ func (aq *ArtifactQuery) AllX(ctx context.Context) []*Artifact {
 }
 
 // IDs executes the query and returns a list of Artifact IDs.
-func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if aq.ctx.Unique == nil && aq.path != nil {
-		aq.Unique(true)
+func (_q *ArtifactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryIDs)
-	if err = aq.Select(artifact.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(artifact.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *ArtifactQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := aq.IDs(ctx)
+func (_q *ArtifactQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -475,17 +475,17 @@ func (aq *ArtifactQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (aq *ArtifactQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryCount)
-	if err := aq.prepareQuery(ctx); err != nil {
+func (_q *ArtifactQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, aq, querierCount[*ArtifactQuery](), aq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*ArtifactQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (aq *ArtifactQuery) CountX(ctx context.Context) int {
-	count, err := aq.Count(ctx)
+func (_q *ArtifactQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -493,9 +493,9 @@ func (aq *ArtifactQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (aq *ArtifactQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryExist)
-	switch _, err := aq.FirstID(ctx); {
+func (_q *ArtifactQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -506,8 +506,8 @@ func (aq *ArtifactQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (aq *ArtifactQuery) ExistX(ctx context.Context) bool {
-	exist, err := aq.Exist(ctx)
+func (_q *ArtifactQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -516,152 +516,152 @@ func (aq *ArtifactQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the ArtifactQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (aq *ArtifactQuery) Clone() *ArtifactQuery {
-	if aq == nil {
+func (_q *ArtifactQuery) Clone() *ArtifactQuery {
+	if _q == nil {
 		return nil
 	}
 	return &ArtifactQuery{
-		config:                  aq.config,
-		ctx:                     aq.ctx.Clone(),
-		order:                   append([]artifact.OrderOption{}, aq.order...),
-		inters:                  append([]Interceptor{}, aq.inters...),
-		predicates:              append([]predicate.Artifact{}, aq.predicates...),
-		withOccurrences:         aq.withOccurrences.Clone(),
-		withSbom:                aq.withSbom.Clone(),
-		withAttestations:        aq.withAttestations.Clone(),
-		withAttestationsSubject: aq.withAttestationsSubject.Clone(),
-		withHashEqualArtA:       aq.withHashEqualArtA.Clone(),
-		withHashEqualArtB:       aq.withHashEqualArtB.Clone(),
-		withVex:                 aq.withVex.Clone(),
-		withCertification:       aq.withCertification.Clone(),
-		withMetadata:            aq.withMetadata.Clone(),
-		withPoc:                 aq.withPoc.Clone(),
-		withIncludedInSboms:     aq.withIncludedInSboms.Clone(),
+		config:                  _q.config,
+		ctx:                     _q.ctx.Clone(),
+		order:                   append([]artifact.OrderOption{}, _q.order...),
+		inters:                  append([]Interceptor{}, _q.inters...),
+		predicates:              append([]predicate.Artifact{}, _q.predicates...),
+		withOccurrences:         _q.withOccurrences.Clone(),
+		withSbom:                _q.withSbom.Clone(),
+		withAttestations:        _q.withAttestations.Clone(),
+		withAttestationsSubject: _q.withAttestationsSubject.Clone(),
+		withHashEqualArtA:       _q.withHashEqualArtA.Clone(),
+		withHashEqualArtB:       _q.withHashEqualArtB.Clone(),
+		withVex:                 _q.withVex.Clone(),
+		withCertification:       _q.withCertification.Clone(),
+		withMetadata:            _q.withMetadata.Clone(),
+		withPoc:                 _q.withPoc.Clone(),
+		withIncludedInSboms:     _q.withIncludedInSboms.Clone(),
 		// clone intermediate query.
-		sql:  aq.sql.Clone(),
-		path: aq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithOccurrences tells the query-builder to eager-load the nodes that are connected to
 // the "occurrences" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *ArtifactQuery {
-	query := (&OccurrenceClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *ArtifactQuery {
+	query := (&OccurrenceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withOccurrences = query
-	return aq
+	_q.withOccurrences = query
+	return _q
 }
 
 // WithSbom tells the query-builder to eager-load the nodes that are connected to
 // the "sbom" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
-	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withSbom = query
-	return aq
+	_q.withSbom = query
+	return _q
 }
 
 // WithAttestations tells the query-builder to eager-load the nodes that are connected to
 // the "attestations" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithAttestations(opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
-	query := (&SLSAAttestationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithAttestations(opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withAttestations = query
-	return aq
+	_q.withAttestations = query
+	return _q
 }
 
 // WithAttestationsSubject tells the query-builder to eager-load the nodes that are connected to
 // the "attestations_subject" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithAttestationsSubject(opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
-	query := (&SLSAAttestationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithAttestationsSubject(opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withAttestationsSubject = query
-	return aq
+	_q.withAttestationsSubject = query
+	return _q
 }
 
 // WithHashEqualArtA tells the query-builder to eager-load the nodes that are connected to
 // the "hash_equal_art_a" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithHashEqualArtA(opts ...func(*HashEqualQuery)) *ArtifactQuery {
-	query := (&HashEqualClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithHashEqualArtA(opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withHashEqualArtA = query
-	return aq
+	_q.withHashEqualArtA = query
+	return _q
 }
 
 // WithHashEqualArtB tells the query-builder to eager-load the nodes that are connected to
 // the "hash_equal_art_b" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithHashEqualArtB(opts ...func(*HashEqualQuery)) *ArtifactQuery {
-	query := (&HashEqualClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithHashEqualArtB(opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withHashEqualArtB = query
-	return aq
+	_q.withHashEqualArtB = query
+	return _q
 }
 
 // WithVex tells the query-builder to eager-load the nodes that are connected to
 // the "vex" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithVex(opts ...func(*CertifyVexQuery)) *ArtifactQuery {
-	query := (&CertifyVexClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithVex(opts ...func(*CertifyVexQuery)) *ArtifactQuery {
+	query := (&CertifyVexClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withVex = query
-	return aq
+	_q.withVex = query
+	return _q
 }
 
 // WithCertification tells the query-builder to eager-load the nodes that are connected to
 // the "certification" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithCertification(opts ...func(*CertificationQuery)) *ArtifactQuery {
-	query := (&CertificationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithCertification(opts ...func(*CertificationQuery)) *ArtifactQuery {
+	query := (&CertificationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withCertification = query
-	return aq
+	_q.withCertification = query
+	return _q
 }
 
 // WithMetadata tells the query-builder to eager-load the nodes that are connected to
 // the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *ArtifactQuery {
-	query := (&HasMetadataClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *ArtifactQuery {
+	query := (&HasMetadataClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withMetadata = query
-	return aq
+	_q.withMetadata = query
+	return _q
 }
 
 // WithPoc tells the query-builder to eager-load the nodes that are connected to
 // the "poc" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithPoc(opts ...func(*PointOfContactQuery)) *ArtifactQuery {
-	query := (&PointOfContactClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithPoc(opts ...func(*PointOfContactQuery)) *ArtifactQuery {
+	query := (&PointOfContactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withPoc = query
-	return aq
+	_q.withPoc = query
+	return _q
 }
 
 // WithIncludedInSboms tells the query-builder to eager-load the nodes that are connected to
 // the "included_in_sboms" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
-	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withIncludedInSboms = query
-	return aq
+	_q.withIncludedInSboms = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -678,10 +678,10 @@ func (aq *ArtifactQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)
 //		GroupBy(artifact.FieldAlgorithm).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (aq *ArtifactQuery) GroupBy(field string, fields ...string) *ArtifactGroupBy {
-	aq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ArtifactGroupBy{build: aq}
-	grbuild.flds = &aq.ctx.Fields
+func (_q *ArtifactQuery) GroupBy(field string, fields ...string) *ArtifactGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ArtifactGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = artifact.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -699,107 +699,107 @@ func (aq *ArtifactQuery) GroupBy(field string, fields ...string) *ArtifactGroupB
 //	client.Artifact.Query().
 //		Select(artifact.FieldAlgorithm).
 //		Scan(ctx, &v)
-func (aq *ArtifactQuery) Select(fields ...string) *ArtifactSelect {
-	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
-	sbuild := &ArtifactSelect{ArtifactQuery: aq}
+func (_q *ArtifactQuery) Select(fields ...string) *ArtifactSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &ArtifactSelect{ArtifactQuery: _q}
 	sbuild.label = artifact.Label
-	sbuild.flds, sbuild.scan = &aq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a ArtifactSelect configured with the given aggregations.
-func (aq *ArtifactQuery) Aggregate(fns ...AggregateFunc) *ArtifactSelect {
-	return aq.Select().Aggregate(fns...)
+func (_q *ArtifactQuery) Aggregate(fns ...AggregateFunc) *ArtifactSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (aq *ArtifactQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range aq.inters {
+func (_q *ArtifactQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, aq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range aq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !artifact.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if aq.path != nil {
-		prev, err := aq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		aq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Artifact, error) {
+func (_q *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Artifact, error) {
 	var (
 		nodes       = []*Artifact{}
-		_spec       = aq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [11]bool{
-			aq.withOccurrences != nil,
-			aq.withSbom != nil,
-			aq.withAttestations != nil,
-			aq.withAttestationsSubject != nil,
-			aq.withHashEqualArtA != nil,
-			aq.withHashEqualArtB != nil,
-			aq.withVex != nil,
-			aq.withCertification != nil,
-			aq.withMetadata != nil,
-			aq.withPoc != nil,
-			aq.withIncludedInSboms != nil,
+			_q.withOccurrences != nil,
+			_q.withSbom != nil,
+			_q.withAttestations != nil,
+			_q.withAttestationsSubject != nil,
+			_q.withHashEqualArtA != nil,
+			_q.withHashEqualArtB != nil,
+			_q.withVex != nil,
+			_q.withCertification != nil,
+			_q.withMetadata != nil,
+			_q.withPoc != nil,
+			_q.withIncludedInSboms != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Artifact).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Artifact{config: aq.config}
+		node := &Artifact{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(aq.modifiers) > 0 {
-		_spec.Modifiers = aq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, aq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := aq.withOccurrences; query != nil {
-		if err := aq.loadOccurrences(ctx, query, nodes,
+	if query := _q.withOccurrences; query != nil {
+		if err := _q.loadOccurrences(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Occurrences = []*Occurrence{} },
 			func(n *Artifact, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withSbom; query != nil {
-		if err := aq.loadSbom(ctx, query, nodes,
+	if query := _q.withSbom; query != nil {
+		if err := _q.loadSbom(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Sbom = []*BillOfMaterials{} },
 			func(n *Artifact, e *BillOfMaterials) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withAttestations; query != nil {
-		if err := aq.loadAttestations(ctx, query, nodes,
+	if query := _q.withAttestations; query != nil {
+		if err := _q.loadAttestations(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Attestations = []*SLSAAttestation{} },
 			func(n *Artifact, e *SLSAAttestation) { n.Edges.Attestations = append(n.Edges.Attestations, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withAttestationsSubject; query != nil {
-		if err := aq.loadAttestationsSubject(ctx, query, nodes,
+	if query := _q.withAttestationsSubject; query != nil {
+		if err := _q.loadAttestationsSubject(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.AttestationsSubject = []*SLSAAttestation{} },
 			func(n *Artifact, e *SLSAAttestation) {
 				n.Edges.AttestationsSubject = append(n.Edges.AttestationsSubject, e)
@@ -807,141 +807,141 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 			return nil, err
 		}
 	}
-	if query := aq.withHashEqualArtA; query != nil {
-		if err := aq.loadHashEqualArtA(ctx, query, nodes,
+	if query := _q.withHashEqualArtA; query != nil {
+		if err := _q.loadHashEqualArtA(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.HashEqualArtA = []*HashEqual{} },
 			func(n *Artifact, e *HashEqual) { n.Edges.HashEqualArtA = append(n.Edges.HashEqualArtA, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withHashEqualArtB; query != nil {
-		if err := aq.loadHashEqualArtB(ctx, query, nodes,
+	if query := _q.withHashEqualArtB; query != nil {
+		if err := _q.loadHashEqualArtB(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.HashEqualArtB = []*HashEqual{} },
 			func(n *Artifact, e *HashEqual) { n.Edges.HashEqualArtB = append(n.Edges.HashEqualArtB, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withVex; query != nil {
-		if err := aq.loadVex(ctx, query, nodes,
+	if query := _q.withVex; query != nil {
+		if err := _q.loadVex(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Vex = []*CertifyVex{} },
 			func(n *Artifact, e *CertifyVex) { n.Edges.Vex = append(n.Edges.Vex, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withCertification; query != nil {
-		if err := aq.loadCertification(ctx, query, nodes,
+	if query := _q.withCertification; query != nil {
+		if err := _q.loadCertification(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Certification = []*Certification{} },
 			func(n *Artifact, e *Certification) { n.Edges.Certification = append(n.Edges.Certification, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withMetadata; query != nil {
-		if err := aq.loadMetadata(ctx, query, nodes,
+	if query := _q.withMetadata; query != nil {
+		if err := _q.loadMetadata(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Metadata = []*HasMetadata{} },
 			func(n *Artifact, e *HasMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withPoc; query != nil {
-		if err := aq.loadPoc(ctx, query, nodes,
+	if query := _q.withPoc; query != nil {
+		if err := _q.loadPoc(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Poc = []*PointOfContact{} },
 			func(n *Artifact, e *PointOfContact) { n.Edges.Poc = append(n.Edges.Poc, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := aq.withIncludedInSboms; query != nil {
-		if err := aq.loadIncludedInSboms(ctx, query, nodes,
+	if query := _q.withIncludedInSboms; query != nil {
+		if err := _q.loadIncludedInSboms(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
 			func(n *Artifact, e *BillOfMaterials) { n.Edges.IncludedInSboms = append(n.Edges.IncludedInSboms, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedOccurrences {
-		if err := aq.loadOccurrences(ctx, query, nodes,
+	for name, query := range _q.withNamedOccurrences {
+		if err := _q.loadOccurrences(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedOccurrences(name) },
 			func(n *Artifact, e *Occurrence) { n.appendNamedOccurrences(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedSbom {
-		if err := aq.loadSbom(ctx, query, nodes,
+	for name, query := range _q.withNamedSbom {
+		if err := _q.loadSbom(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedSbom(name) },
 			func(n *Artifact, e *BillOfMaterials) { n.appendNamedSbom(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedAttestations {
-		if err := aq.loadAttestations(ctx, query, nodes,
+	for name, query := range _q.withNamedAttestations {
+		if err := _q.loadAttestations(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedAttestations(name) },
 			func(n *Artifact, e *SLSAAttestation) { n.appendNamedAttestations(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedAttestationsSubject {
-		if err := aq.loadAttestationsSubject(ctx, query, nodes,
+	for name, query := range _q.withNamedAttestationsSubject {
+		if err := _q.loadAttestationsSubject(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedAttestationsSubject(name) },
 			func(n *Artifact, e *SLSAAttestation) { n.appendNamedAttestationsSubject(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedHashEqualArtA {
-		if err := aq.loadHashEqualArtA(ctx, query, nodes,
+	for name, query := range _q.withNamedHashEqualArtA {
+		if err := _q.loadHashEqualArtA(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedHashEqualArtA(name) },
 			func(n *Artifact, e *HashEqual) { n.appendNamedHashEqualArtA(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedHashEqualArtB {
-		if err := aq.loadHashEqualArtB(ctx, query, nodes,
+	for name, query := range _q.withNamedHashEqualArtB {
+		if err := _q.loadHashEqualArtB(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedHashEqualArtB(name) },
 			func(n *Artifact, e *HashEqual) { n.appendNamedHashEqualArtB(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedVex {
-		if err := aq.loadVex(ctx, query, nodes,
+	for name, query := range _q.withNamedVex {
+		if err := _q.loadVex(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedVex(name) },
 			func(n *Artifact, e *CertifyVex) { n.appendNamedVex(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedCertification {
-		if err := aq.loadCertification(ctx, query, nodes,
+	for name, query := range _q.withNamedCertification {
+		if err := _q.loadCertification(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedCertification(name) },
 			func(n *Artifact, e *Certification) { n.appendNamedCertification(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedMetadata {
-		if err := aq.loadMetadata(ctx, query, nodes,
+	for name, query := range _q.withNamedMetadata {
+		if err := _q.loadMetadata(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedMetadata(name) },
 			func(n *Artifact, e *HasMetadata) { n.appendNamedMetadata(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedPoc {
-		if err := aq.loadPoc(ctx, query, nodes,
+	for name, query := range _q.withNamedPoc {
+		if err := _q.loadPoc(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedPoc(name) },
 			func(n *Artifact, e *PointOfContact) { n.appendNamedPoc(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedIncludedInSboms {
-		if err := aq.loadIncludedInSboms(ctx, query, nodes,
+	for name, query := range _q.withNamedIncludedInSboms {
+		if err := _q.loadIncludedInSboms(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedIncludedInSboms(name) },
 			func(n *Artifact, e *BillOfMaterials) { n.appendNamedIncludedInSboms(name, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for i := range aq.loadTotal {
-		if err := aq.loadTotal[i](ctx, nodes); err != nil {
+	for i := range _q.loadTotal {
+		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Occurrence)) error {
+func (_q *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -971,7 +971,7 @@ func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQ
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
+func (_q *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1004,7 +1004,7 @@ func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQue
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
+func (_q *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*Artifact)
 	nids := make(map[uuid.UUID]map[*Artifact]struct{})
@@ -1065,7 +1065,7 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadAttestationsSubject(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
+func (_q *ArtifactQuery) loadAttestationsSubject(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1095,7 +1095,7 @@ func (aq *ArtifactQuery) loadAttestationsSubject(ctx context.Context, query *SLS
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadHashEqualArtA(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
+func (_q *ArtifactQuery) loadHashEqualArtA(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1125,7 +1125,7 @@ func (aq *ArtifactQuery) loadHashEqualArtA(ctx context.Context, query *HashEqual
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadHashEqualArtB(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
+func (_q *ArtifactQuery) loadHashEqualArtB(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1155,7 +1155,7 @@ func (aq *ArtifactQuery) loadHashEqualArtB(ctx context.Context, query *HashEqual
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadVex(ctx context.Context, query *CertifyVexQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *CertifyVex)) error {
+func (_q *ArtifactQuery) loadVex(ctx context.Context, query *CertifyVexQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *CertifyVex)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1188,7 +1188,7 @@ func (aq *ArtifactQuery) loadVex(ctx context.Context, query *CertifyVexQuery, no
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Certification)) error {
+func (_q *ArtifactQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Certification)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1221,7 +1221,7 @@ func (aq *ArtifactQuery) loadCertification(ctx context.Context, query *Certifica
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HasMetadata)) error {
+func (_q *ArtifactQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HasMetadata)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1254,7 +1254,7 @@ func (aq *ArtifactQuery) loadMetadata(ctx context.Context, query *HasMetadataQue
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *PointOfContact)) error {
+func (_q *ArtifactQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *PointOfContact)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
@@ -1287,7 +1287,7 @@ func (aq *ArtifactQuery) loadPoc(ctx context.Context, query *PointOfContactQuery
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
+func (_q *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*Artifact)
 	nids := make(map[uuid.UUID]map[*Artifact]struct{})
@@ -1349,27 +1349,27 @@ func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfM
 	return nil
 }
 
-func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := aq.querySpec()
-	if len(aq.modifiers) > 0 {
-		_spec.Modifiers = aq.modifiers
+func (_q *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = aq.ctx.Fields
-	if len(aq.ctx.Fields) > 0 {
-		_spec.Unique = aq.ctx.Unique != nil && *aq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, aq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (aq *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
-	_spec.From = aq.sql
-	if unique := aq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if aq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := aq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, artifact.FieldID)
 		for i := range fields {
@@ -1378,20 +1378,20 @@ func (aq *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := aq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := aq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := aq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := aq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -1401,33 +1401,33 @@ func (aq *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (aq *ArtifactQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(aq.driver.Dialect())
+func (_q *ArtifactQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(artifact.Table)
-	columns := aq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = artifact.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if aq.sql != nil {
-		selector = aq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if aq.ctx.Unique != nil && *aq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range aq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range aq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := aq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := aq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -1435,156 +1435,156 @@ func (aq *ArtifactQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // WithNamedOccurrences tells the query-builder to eager-load the nodes that are connected to the "occurrences"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedOccurrences(name string, opts ...func(*OccurrenceQuery)) *ArtifactQuery {
-	query := (&OccurrenceClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedOccurrences(name string, opts ...func(*OccurrenceQuery)) *ArtifactQuery {
+	query := (&OccurrenceClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedOccurrences == nil {
-		aq.withNamedOccurrences = make(map[string]*OccurrenceQuery)
+	if _q.withNamedOccurrences == nil {
+		_q.withNamedOccurrences = make(map[string]*OccurrenceQuery)
 	}
-	aq.withNamedOccurrences[name] = query
-	return aq
+	_q.withNamedOccurrences[name] = query
+	return _q
 }
 
 // WithNamedSbom tells the query-builder to eager-load the nodes that are connected to the "sbom"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedSbom(name string, opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
-	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedSbom(name string, opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedSbom == nil {
-		aq.withNamedSbom = make(map[string]*BillOfMaterialsQuery)
+	if _q.withNamedSbom == nil {
+		_q.withNamedSbom = make(map[string]*BillOfMaterialsQuery)
 	}
-	aq.withNamedSbom[name] = query
-	return aq
+	_q.withNamedSbom[name] = query
+	return _q
 }
 
 // WithNamedAttestations tells the query-builder to eager-load the nodes that are connected to the "attestations"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedAttestations(name string, opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
-	query := (&SLSAAttestationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedAttestations(name string, opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedAttestations == nil {
-		aq.withNamedAttestations = make(map[string]*SLSAAttestationQuery)
+	if _q.withNamedAttestations == nil {
+		_q.withNamedAttestations = make(map[string]*SLSAAttestationQuery)
 	}
-	aq.withNamedAttestations[name] = query
-	return aq
+	_q.withNamedAttestations[name] = query
+	return _q
 }
 
 // WithNamedAttestationsSubject tells the query-builder to eager-load the nodes that are connected to the "attestations_subject"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedAttestationsSubject(name string, opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
-	query := (&SLSAAttestationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedAttestationsSubject(name string, opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedAttestationsSubject == nil {
-		aq.withNamedAttestationsSubject = make(map[string]*SLSAAttestationQuery)
+	if _q.withNamedAttestationsSubject == nil {
+		_q.withNamedAttestationsSubject = make(map[string]*SLSAAttestationQuery)
 	}
-	aq.withNamedAttestationsSubject[name] = query
-	return aq
+	_q.withNamedAttestationsSubject[name] = query
+	return _q
 }
 
 // WithNamedHashEqualArtA tells the query-builder to eager-load the nodes that are connected to the "hash_equal_art_a"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedHashEqualArtA(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
-	query := (&HashEqualClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedHashEqualArtA(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedHashEqualArtA == nil {
-		aq.withNamedHashEqualArtA = make(map[string]*HashEqualQuery)
+	if _q.withNamedHashEqualArtA == nil {
+		_q.withNamedHashEqualArtA = make(map[string]*HashEqualQuery)
 	}
-	aq.withNamedHashEqualArtA[name] = query
-	return aq
+	_q.withNamedHashEqualArtA[name] = query
+	return _q
 }
 
 // WithNamedHashEqualArtB tells the query-builder to eager-load the nodes that are connected to the "hash_equal_art_b"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedHashEqualArtB(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
-	query := (&HashEqualClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedHashEqualArtB(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedHashEqualArtB == nil {
-		aq.withNamedHashEqualArtB = make(map[string]*HashEqualQuery)
+	if _q.withNamedHashEqualArtB == nil {
+		_q.withNamedHashEqualArtB = make(map[string]*HashEqualQuery)
 	}
-	aq.withNamedHashEqualArtB[name] = query
-	return aq
+	_q.withNamedHashEqualArtB[name] = query
+	return _q
 }
 
 // WithNamedVex tells the query-builder to eager-load the nodes that are connected to the "vex"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedVex(name string, opts ...func(*CertifyVexQuery)) *ArtifactQuery {
-	query := (&CertifyVexClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedVex(name string, opts ...func(*CertifyVexQuery)) *ArtifactQuery {
+	query := (&CertifyVexClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedVex == nil {
-		aq.withNamedVex = make(map[string]*CertifyVexQuery)
+	if _q.withNamedVex == nil {
+		_q.withNamedVex = make(map[string]*CertifyVexQuery)
 	}
-	aq.withNamedVex[name] = query
-	return aq
+	_q.withNamedVex[name] = query
+	return _q
 }
 
 // WithNamedCertification tells the query-builder to eager-load the nodes that are connected to the "certification"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *ArtifactQuery {
-	query := (&CertificationClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *ArtifactQuery {
+	query := (&CertificationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedCertification == nil {
-		aq.withNamedCertification = make(map[string]*CertificationQuery)
+	if _q.withNamedCertification == nil {
+		_q.withNamedCertification = make(map[string]*CertificationQuery)
 	}
-	aq.withNamedCertification[name] = query
-	return aq
+	_q.withNamedCertification[name] = query
+	return _q
 }
 
 // WithNamedMetadata tells the query-builder to eager-load the nodes that are connected to the "metadata"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *ArtifactQuery {
-	query := (&HasMetadataClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *ArtifactQuery {
+	query := (&HasMetadataClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedMetadata == nil {
-		aq.withNamedMetadata = make(map[string]*HasMetadataQuery)
+	if _q.withNamedMetadata == nil {
+		_q.withNamedMetadata = make(map[string]*HasMetadataQuery)
 	}
-	aq.withNamedMetadata[name] = query
-	return aq
+	_q.withNamedMetadata[name] = query
+	return _q
 }
 
 // WithNamedPoc tells the query-builder to eager-load the nodes that are connected to the "poc"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *ArtifactQuery {
-	query := (&PointOfContactClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *ArtifactQuery {
+	query := (&PointOfContactClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedPoc == nil {
-		aq.withNamedPoc = make(map[string]*PointOfContactQuery)
+	if _q.withNamedPoc == nil {
+		_q.withNamedPoc = make(map[string]*PointOfContactQuery)
 	}
-	aq.withNamedPoc[name] = query
-	return aq
+	_q.withNamedPoc[name] = query
+	return _q
 }
 
 // WithNamedIncludedInSboms tells the query-builder to eager-load the nodes that are connected to the "included_in_sboms"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedIncludedInSboms(name string, opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
-	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+func (_q *ArtifactQuery) WithNamedIncludedInSboms(name string, opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedIncludedInSboms == nil {
-		aq.withNamedIncludedInSboms = make(map[string]*BillOfMaterialsQuery)
+	if _q.withNamedIncludedInSboms == nil {
+		_q.withNamedIncludedInSboms = make(map[string]*BillOfMaterialsQuery)
 	}
-	aq.withNamedIncludedInSboms[name] = query
-	return aq
+	_q.withNamedIncludedInSboms[name] = query
+	return _q
 }
 
 // ArtifactGroupBy is the group-by builder for Artifact entities.
@@ -1594,41 +1594,41 @@ type ArtifactGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (agb *ArtifactGroupBy) Aggregate(fns ...AggregateFunc) *ArtifactGroupBy {
-	agb.fns = append(agb.fns, fns...)
-	return agb
+func (_g *ArtifactGroupBy) Aggregate(fns ...AggregateFunc) *ArtifactGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (agb *ArtifactGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, agb.build.ctx, ent.OpQueryGroupBy)
-	if err := agb.build.prepareQuery(ctx); err != nil {
+func (_g *ArtifactGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ArtifactQuery, *ArtifactGroupBy](ctx, agb.build, agb, agb.build.inters, v)
+	return scanWithInterceptors[*ArtifactQuery, *ArtifactGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (agb *ArtifactGroupBy) sqlScan(ctx context.Context, root *ArtifactQuery, v any) error {
+func (_g *ArtifactGroupBy) sqlScan(ctx context.Context, root *ArtifactQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(agb.fns))
-	for _, fn := range agb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*agb.flds)+len(agb.fns))
-		for _, f := range *agb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*agb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := agb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -1642,27 +1642,27 @@ type ArtifactSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (as *ArtifactSelect) Aggregate(fns ...AggregateFunc) *ArtifactSelect {
-	as.fns = append(as.fns, fns...)
-	return as
+func (_s *ArtifactSelect) Aggregate(fns ...AggregateFunc) *ArtifactSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (as *ArtifactSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, as.ctx, ent.OpQuerySelect)
-	if err := as.prepareQuery(ctx); err != nil {
+func (_s *ArtifactSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ArtifactQuery, *ArtifactSelect](ctx, as.ArtifactQuery, as, as.inters, v)
+	return scanWithInterceptors[*ArtifactQuery, *ArtifactSelect](ctx, _s.ArtifactQuery, _s, _s.inters, v)
 }
 
-func (as *ArtifactSelect) sqlScan(ctx context.Context, root *ArtifactQuery, v any) error {
+func (_s *ArtifactSelect) sqlScan(ctx context.Context, root *ArtifactQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(as.fns))
-	for _, fn := range as.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*as.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -1670,7 +1670,7 @@ func (as *ArtifactSelect) sqlScan(ctx context.Context, root *ArtifactQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := as.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

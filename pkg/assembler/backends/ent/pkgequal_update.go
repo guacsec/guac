@@ -24,156 +24,156 @@ type PkgEqualUpdate struct {
 }
 
 // Where appends a list predicates to the PkgEqualUpdate builder.
-func (peu *PkgEqualUpdate) Where(ps ...predicate.PkgEqual) *PkgEqualUpdate {
-	peu.mutation.Where(ps...)
-	return peu
+func (_u *PkgEqualUpdate) Where(ps ...predicate.PkgEqual) *PkgEqualUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetPkgID sets the "pkg_id" field.
-func (peu *PkgEqualUpdate) SetPkgID(u uuid.UUID) *PkgEqualUpdate {
-	peu.mutation.SetPkgID(u)
-	return peu
+func (_u *PkgEqualUpdate) SetPkgID(v uuid.UUID) *PkgEqualUpdate {
+	_u.mutation.SetPkgID(v)
+	return _u
 }
 
 // SetNillablePkgID sets the "pkg_id" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillablePkgID(u *uuid.UUID) *PkgEqualUpdate {
-	if u != nil {
-		peu.SetPkgID(*u)
+func (_u *PkgEqualUpdate) SetNillablePkgID(v *uuid.UUID) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetPkgID(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetEqualPkgID sets the "equal_pkg_id" field.
-func (peu *PkgEqualUpdate) SetEqualPkgID(u uuid.UUID) *PkgEqualUpdate {
-	peu.mutation.SetEqualPkgID(u)
-	return peu
+func (_u *PkgEqualUpdate) SetEqualPkgID(v uuid.UUID) *PkgEqualUpdate {
+	_u.mutation.SetEqualPkgID(v)
+	return _u
 }
 
 // SetNillableEqualPkgID sets the "equal_pkg_id" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillableEqualPkgID(u *uuid.UUID) *PkgEqualUpdate {
-	if u != nil {
-		peu.SetEqualPkgID(*u)
+func (_u *PkgEqualUpdate) SetNillableEqualPkgID(v *uuid.UUID) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetEqualPkgID(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (peu *PkgEqualUpdate) SetOrigin(s string) *PkgEqualUpdate {
-	peu.mutation.SetOrigin(s)
-	return peu
+func (_u *PkgEqualUpdate) SetOrigin(v string) *PkgEqualUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillableOrigin(s *string) *PkgEqualUpdate {
-	if s != nil {
-		peu.SetOrigin(*s)
+func (_u *PkgEqualUpdate) SetNillableOrigin(v *string) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (peu *PkgEqualUpdate) SetCollector(s string) *PkgEqualUpdate {
-	peu.mutation.SetCollector(s)
-	return peu
+func (_u *PkgEqualUpdate) SetCollector(v string) *PkgEqualUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillableCollector(s *string) *PkgEqualUpdate {
-	if s != nil {
-		peu.SetCollector(*s)
+func (_u *PkgEqualUpdate) SetNillableCollector(v *string) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (peu *PkgEqualUpdate) SetDocumentRef(s string) *PkgEqualUpdate {
-	peu.mutation.SetDocumentRef(s)
-	return peu
+func (_u *PkgEqualUpdate) SetDocumentRef(v string) *PkgEqualUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillableDocumentRef(s *string) *PkgEqualUpdate {
-	if s != nil {
-		peu.SetDocumentRef(*s)
+func (_u *PkgEqualUpdate) SetNillableDocumentRef(v *string) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (peu *PkgEqualUpdate) SetJustification(s string) *PkgEqualUpdate {
-	peu.mutation.SetJustification(s)
-	return peu
+func (_u *PkgEqualUpdate) SetJustification(v string) *PkgEqualUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillableJustification(s *string) *PkgEqualUpdate {
-	if s != nil {
-		peu.SetJustification(*s)
+func (_u *PkgEqualUpdate) SetNillableJustification(v *string) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetPackagesHash sets the "packages_hash" field.
-func (peu *PkgEqualUpdate) SetPackagesHash(s string) *PkgEqualUpdate {
-	peu.mutation.SetPackagesHash(s)
-	return peu
+func (_u *PkgEqualUpdate) SetPackagesHash(v string) *PkgEqualUpdate {
+	_u.mutation.SetPackagesHash(v)
+	return _u
 }
 
 // SetNillablePackagesHash sets the "packages_hash" field if the given value is not nil.
-func (peu *PkgEqualUpdate) SetNillablePackagesHash(s *string) *PkgEqualUpdate {
-	if s != nil {
-		peu.SetPackagesHash(*s)
+func (_u *PkgEqualUpdate) SetNillablePackagesHash(v *string) *PkgEqualUpdate {
+	if v != nil {
+		_u.SetPackagesHash(*v)
 	}
-	return peu
+	return _u
 }
 
 // SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
-func (peu *PkgEqualUpdate) SetPackageAID(id uuid.UUID) *PkgEqualUpdate {
-	peu.mutation.SetPackageAID(id)
-	return peu
+func (_u *PkgEqualUpdate) SetPackageAID(id uuid.UUID) *PkgEqualUpdate {
+	_u.mutation.SetPackageAID(id)
+	return _u
 }
 
 // SetPackageA sets the "package_a" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) SetPackageA(p *PackageVersion) *PkgEqualUpdate {
-	return peu.SetPackageAID(p.ID)
+func (_u *PkgEqualUpdate) SetPackageA(v *PackageVersion) *PkgEqualUpdate {
+	return _u.SetPackageAID(v.ID)
 }
 
 // SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
-func (peu *PkgEqualUpdate) SetPackageBID(id uuid.UUID) *PkgEqualUpdate {
-	peu.mutation.SetPackageBID(id)
-	return peu
+func (_u *PkgEqualUpdate) SetPackageBID(id uuid.UUID) *PkgEqualUpdate {
+	_u.mutation.SetPackageBID(id)
+	return _u
 }
 
 // SetPackageB sets the "package_b" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) SetPackageB(p *PackageVersion) *PkgEqualUpdate {
-	return peu.SetPackageBID(p.ID)
+func (_u *PkgEqualUpdate) SetPackageB(v *PackageVersion) *PkgEqualUpdate {
+	return _u.SetPackageBID(v.ID)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
-func (peu *PkgEqualUpdate) Mutation() *PkgEqualMutation {
-	return peu.mutation
+func (_u *PkgEqualUpdate) Mutation() *PkgEqualMutation {
+	return _u.mutation
 }
 
 // ClearPackageA clears the "package_a" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) ClearPackageA() *PkgEqualUpdate {
-	peu.mutation.ClearPackageA()
-	return peu
+func (_u *PkgEqualUpdate) ClearPackageA() *PkgEqualUpdate {
+	_u.mutation.ClearPackageA()
+	return _u
 }
 
 // ClearPackageB clears the "package_b" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) ClearPackageB() *PkgEqualUpdate {
-	peu.mutation.ClearPackageB()
-	return peu
+func (_u *PkgEqualUpdate) ClearPackageB() *PkgEqualUpdate {
+	_u.mutation.ClearPackageB()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (peu *PkgEqualUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, peu.sqlSave, peu.mutation, peu.hooks)
+func (_u *PkgEqualUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (peu *PkgEqualUpdate) SaveX(ctx context.Context) int {
-	affected, err := peu.Save(ctx)
+func (_u *PkgEqualUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -181,57 +181,57 @@ func (peu *PkgEqualUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (peu *PkgEqualUpdate) Exec(ctx context.Context) error {
-	_, err := peu.Save(ctx)
+func (_u *PkgEqualUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (peu *PkgEqualUpdate) ExecX(ctx context.Context) {
-	if err := peu.Exec(ctx); err != nil {
+func (_u *PkgEqualUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (peu *PkgEqualUpdate) check() error {
-	if peu.mutation.PackageACleared() && len(peu.mutation.PackageAIDs()) > 0 {
+func (_u *PkgEqualUpdate) check() error {
+	if _u.mutation.PackageACleared() && len(_u.mutation.PackageAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_a"`)
 	}
-	if peu.mutation.PackageBCleared() && len(peu.mutation.PackageBIDs()) > 0 {
+	if _u.mutation.PackageBCleared() && len(_u.mutation.PackageBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_b"`)
 	}
 	return nil
 }
 
-func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := peu.check(); err != nil {
-		return n, err
+func (_u *PkgEqualUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(pkgequal.Table, pkgequal.Columns, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID))
-	if ps := peu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := peu.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(pkgequal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := peu.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(pkgequal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := peu.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(pkgequal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := peu.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := peu.mutation.PackagesHash(); ok {
+	if value, ok := _u.mutation.PackagesHash(); ok {
 		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
 	}
-	if peu.mutation.PackageACleared() {
+	if _u.mutation.PackageACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -244,7 +244,7 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peu.mutation.PackageAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -260,7 +260,7 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if peu.mutation.PackageBCleared() {
+	if _u.mutation.PackageBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -273,7 +273,7 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peu.mutation.PackageBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -289,7 +289,7 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, peu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pkgequal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -297,8 +297,8 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	peu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // PkgEqualUpdateOne is the builder for updating a single PkgEqual entity.
@@ -310,163 +310,163 @@ type PkgEqualUpdateOne struct {
 }
 
 // SetPkgID sets the "pkg_id" field.
-func (peuo *PkgEqualUpdateOne) SetPkgID(u uuid.UUID) *PkgEqualUpdateOne {
-	peuo.mutation.SetPkgID(u)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetPkgID(v uuid.UUID) *PkgEqualUpdateOne {
+	_u.mutation.SetPkgID(v)
+	return _u
 }
 
 // SetNillablePkgID sets the "pkg_id" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillablePkgID(u *uuid.UUID) *PkgEqualUpdateOne {
-	if u != nil {
-		peuo.SetPkgID(*u)
+func (_u *PkgEqualUpdateOne) SetNillablePkgID(v *uuid.UUID) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetPkgID(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetEqualPkgID sets the "equal_pkg_id" field.
-func (peuo *PkgEqualUpdateOne) SetEqualPkgID(u uuid.UUID) *PkgEqualUpdateOne {
-	peuo.mutation.SetEqualPkgID(u)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetEqualPkgID(v uuid.UUID) *PkgEqualUpdateOne {
+	_u.mutation.SetEqualPkgID(v)
+	return _u
 }
 
 // SetNillableEqualPkgID sets the "equal_pkg_id" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillableEqualPkgID(u *uuid.UUID) *PkgEqualUpdateOne {
-	if u != nil {
-		peuo.SetEqualPkgID(*u)
+func (_u *PkgEqualUpdateOne) SetNillableEqualPkgID(v *uuid.UUID) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetEqualPkgID(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (peuo *PkgEqualUpdateOne) SetOrigin(s string) *PkgEqualUpdateOne {
-	peuo.mutation.SetOrigin(s)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetOrigin(v string) *PkgEqualUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillableOrigin(s *string) *PkgEqualUpdateOne {
-	if s != nil {
-		peuo.SetOrigin(*s)
+func (_u *PkgEqualUpdateOne) SetNillableOrigin(v *string) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (peuo *PkgEqualUpdateOne) SetCollector(s string) *PkgEqualUpdateOne {
-	peuo.mutation.SetCollector(s)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetCollector(v string) *PkgEqualUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillableCollector(s *string) *PkgEqualUpdateOne {
-	if s != nil {
-		peuo.SetCollector(*s)
+func (_u *PkgEqualUpdateOne) SetNillableCollector(v *string) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (peuo *PkgEqualUpdateOne) SetDocumentRef(s string) *PkgEqualUpdateOne {
-	peuo.mutation.SetDocumentRef(s)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetDocumentRef(v string) *PkgEqualUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillableDocumentRef(s *string) *PkgEqualUpdateOne {
-	if s != nil {
-		peuo.SetDocumentRef(*s)
+func (_u *PkgEqualUpdateOne) SetNillableDocumentRef(v *string) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (peuo *PkgEqualUpdateOne) SetJustification(s string) *PkgEqualUpdateOne {
-	peuo.mutation.SetJustification(s)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetJustification(v string) *PkgEqualUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillableJustification(s *string) *PkgEqualUpdateOne {
-	if s != nil {
-		peuo.SetJustification(*s)
+func (_u *PkgEqualUpdateOne) SetNillableJustification(v *string) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetPackagesHash sets the "packages_hash" field.
-func (peuo *PkgEqualUpdateOne) SetPackagesHash(s string) *PkgEqualUpdateOne {
-	peuo.mutation.SetPackagesHash(s)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetPackagesHash(v string) *PkgEqualUpdateOne {
+	_u.mutation.SetPackagesHash(v)
+	return _u
 }
 
 // SetNillablePackagesHash sets the "packages_hash" field if the given value is not nil.
-func (peuo *PkgEqualUpdateOne) SetNillablePackagesHash(s *string) *PkgEqualUpdateOne {
-	if s != nil {
-		peuo.SetPackagesHash(*s)
+func (_u *PkgEqualUpdateOne) SetNillablePackagesHash(v *string) *PkgEqualUpdateOne {
+	if v != nil {
+		_u.SetPackagesHash(*v)
 	}
-	return peuo
+	return _u
 }
 
 // SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
-func (peuo *PkgEqualUpdateOne) SetPackageAID(id uuid.UUID) *PkgEqualUpdateOne {
-	peuo.mutation.SetPackageAID(id)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetPackageAID(id uuid.UUID) *PkgEqualUpdateOne {
+	_u.mutation.SetPackageAID(id)
+	return _u
 }
 
 // SetPackageA sets the "package_a" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) SetPackageA(p *PackageVersion) *PkgEqualUpdateOne {
-	return peuo.SetPackageAID(p.ID)
+func (_u *PkgEqualUpdateOne) SetPackageA(v *PackageVersion) *PkgEqualUpdateOne {
+	return _u.SetPackageAID(v.ID)
 }
 
 // SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
-func (peuo *PkgEqualUpdateOne) SetPackageBID(id uuid.UUID) *PkgEqualUpdateOne {
-	peuo.mutation.SetPackageBID(id)
-	return peuo
+func (_u *PkgEqualUpdateOne) SetPackageBID(id uuid.UUID) *PkgEqualUpdateOne {
+	_u.mutation.SetPackageBID(id)
+	return _u
 }
 
 // SetPackageB sets the "package_b" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) SetPackageB(p *PackageVersion) *PkgEqualUpdateOne {
-	return peuo.SetPackageBID(p.ID)
+func (_u *PkgEqualUpdateOne) SetPackageB(v *PackageVersion) *PkgEqualUpdateOne {
+	return _u.SetPackageBID(v.ID)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
-func (peuo *PkgEqualUpdateOne) Mutation() *PkgEqualMutation {
-	return peuo.mutation
+func (_u *PkgEqualUpdateOne) Mutation() *PkgEqualMutation {
+	return _u.mutation
 }
 
 // ClearPackageA clears the "package_a" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) ClearPackageA() *PkgEqualUpdateOne {
-	peuo.mutation.ClearPackageA()
-	return peuo
+func (_u *PkgEqualUpdateOne) ClearPackageA() *PkgEqualUpdateOne {
+	_u.mutation.ClearPackageA()
+	return _u
 }
 
 // ClearPackageB clears the "package_b" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) ClearPackageB() *PkgEqualUpdateOne {
-	peuo.mutation.ClearPackageB()
-	return peuo
+func (_u *PkgEqualUpdateOne) ClearPackageB() *PkgEqualUpdateOne {
+	_u.mutation.ClearPackageB()
+	return _u
 }
 
 // Where appends a list predicates to the PkgEqualUpdate builder.
-func (peuo *PkgEqualUpdateOne) Where(ps ...predicate.PkgEqual) *PkgEqualUpdateOne {
-	peuo.mutation.Where(ps...)
-	return peuo
+func (_u *PkgEqualUpdateOne) Where(ps ...predicate.PkgEqual) *PkgEqualUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (peuo *PkgEqualUpdateOne) Select(field string, fields ...string) *PkgEqualUpdateOne {
-	peuo.fields = append([]string{field}, fields...)
-	return peuo
+func (_u *PkgEqualUpdateOne) Select(field string, fields ...string) *PkgEqualUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated PkgEqual entity.
-func (peuo *PkgEqualUpdateOne) Save(ctx context.Context) (*PkgEqual, error) {
-	return withHooks(ctx, peuo.sqlSave, peuo.mutation, peuo.hooks)
+func (_u *PkgEqualUpdateOne) Save(ctx context.Context) (*PkgEqual, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (peuo *PkgEqualUpdateOne) SaveX(ctx context.Context) *PkgEqual {
-	node, err := peuo.Save(ctx)
+func (_u *PkgEqualUpdateOne) SaveX(ctx context.Context) *PkgEqual {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -474,40 +474,40 @@ func (peuo *PkgEqualUpdateOne) SaveX(ctx context.Context) *PkgEqual {
 }
 
 // Exec executes the query on the entity.
-func (peuo *PkgEqualUpdateOne) Exec(ctx context.Context) error {
-	_, err := peuo.Save(ctx)
+func (_u *PkgEqualUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (peuo *PkgEqualUpdateOne) ExecX(ctx context.Context) {
-	if err := peuo.Exec(ctx); err != nil {
+func (_u *PkgEqualUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (peuo *PkgEqualUpdateOne) check() error {
-	if peuo.mutation.PackageACleared() && len(peuo.mutation.PackageAIDs()) > 0 {
+func (_u *PkgEqualUpdateOne) check() error {
+	if _u.mutation.PackageACleared() && len(_u.mutation.PackageAIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_a"`)
 	}
-	if peuo.mutation.PackageBCleared() && len(peuo.mutation.PackageBIDs()) > 0 {
+	if _u.mutation.PackageBCleared() && len(_u.mutation.PackageBIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_b"`)
 	}
 	return nil
 }
 
-func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, err error) {
-	if err := peuo.check(); err != nil {
+func (_u *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(pkgequal.Table, pkgequal.Columns, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID))
-	id, ok := peuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PkgEqual.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := peuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pkgequal.FieldID)
 		for _, f := range fields {
@@ -519,29 +519,29 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 			}
 		}
 	}
-	if ps := peuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := peuo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(pkgequal.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := peuo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(pkgequal.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := peuo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(pkgequal.FieldDocumentRef, field.TypeString, value)
 	}
-	if value, ok := peuo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := peuo.mutation.PackagesHash(); ok {
+	if value, ok := _u.mutation.PackagesHash(); ok {
 		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
 	}
-	if peuo.mutation.PackageACleared() {
+	if _u.mutation.PackageACleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -554,7 +554,7 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peuo.mutation.PackageAIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -570,7 +570,7 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if peuo.mutation.PackageBCleared() {
+	if _u.mutation.PackageBCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -583,7 +583,7 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peuo.mutation.PackageBIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -599,10 +599,10 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &PkgEqual{config: peuo.config}
+	_node = &PkgEqual{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, peuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pkgequal.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -610,6 +610,6 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		}
 		return nil, err
 	}
-	peuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

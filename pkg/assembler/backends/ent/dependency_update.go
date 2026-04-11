@@ -25,180 +25,180 @@ type DependencyUpdate struct {
 }
 
 // Where appends a list predicates to the DependencyUpdate builder.
-func (du *DependencyUpdate) Where(ps ...predicate.Dependency) *DependencyUpdate {
-	du.mutation.Where(ps...)
-	return du
+func (_u *DependencyUpdate) Where(ps ...predicate.Dependency) *DependencyUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetPackageID sets the "package_id" field.
-func (du *DependencyUpdate) SetPackageID(u uuid.UUID) *DependencyUpdate {
-	du.mutation.SetPackageID(u)
-	return du
+func (_u *DependencyUpdate) SetPackageID(v uuid.UUID) *DependencyUpdate {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillablePackageID(u *uuid.UUID) *DependencyUpdate {
-	if u != nil {
-		du.SetPackageID(*u)
+func (_u *DependencyUpdate) SetNillablePackageID(v *uuid.UUID) *DependencyUpdate {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return du
+	return _u
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (du *DependencyUpdate) SetDependentPackageVersionID(u uuid.UUID) *DependencyUpdate {
-	du.mutation.SetDependentPackageVersionID(u)
-	return du
+func (_u *DependencyUpdate) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpdate {
+	_u.mutation.SetDependentPackageVersionID(v)
+	return _u
 }
 
 // SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableDependentPackageVersionID(u *uuid.UUID) *DependencyUpdate {
-	if u != nil {
-		du.SetDependentPackageVersionID(*u)
+func (_u *DependencyUpdate) SetNillableDependentPackageVersionID(v *uuid.UUID) *DependencyUpdate {
+	if v != nil {
+		_u.SetDependentPackageVersionID(*v)
 	}
-	return du
+	return _u
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (du *DependencyUpdate) SetDependencyType(dt dependency.DependencyType) *DependencyUpdate {
-	du.mutation.SetDependencyType(dt)
-	return du
+func (_u *DependencyUpdate) SetDependencyType(v dependency.DependencyType) *DependencyUpdate {
+	_u.mutation.SetDependencyType(v)
+	return _u
 }
 
 // SetNillableDependencyType sets the "dependency_type" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableDependencyType(dt *dependency.DependencyType) *DependencyUpdate {
-	if dt != nil {
-		du.SetDependencyType(*dt)
+func (_u *DependencyUpdate) SetNillableDependencyType(v *dependency.DependencyType) *DependencyUpdate {
+	if v != nil {
+		_u.SetDependencyType(*v)
 	}
-	return du
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (du *DependencyUpdate) SetJustification(s string) *DependencyUpdate {
-	du.mutation.SetJustification(s)
-	return du
+func (_u *DependencyUpdate) SetJustification(v string) *DependencyUpdate {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableJustification(s *string) *DependencyUpdate {
-	if s != nil {
-		du.SetJustification(*s)
+func (_u *DependencyUpdate) SetNillableJustification(v *string) *DependencyUpdate {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return du
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (du *DependencyUpdate) SetOrigin(s string) *DependencyUpdate {
-	du.mutation.SetOrigin(s)
-	return du
+func (_u *DependencyUpdate) SetOrigin(v string) *DependencyUpdate {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableOrigin(s *string) *DependencyUpdate {
-	if s != nil {
-		du.SetOrigin(*s)
+func (_u *DependencyUpdate) SetNillableOrigin(v *string) *DependencyUpdate {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return du
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (du *DependencyUpdate) SetCollector(s string) *DependencyUpdate {
-	du.mutation.SetCollector(s)
-	return du
+func (_u *DependencyUpdate) SetCollector(v string) *DependencyUpdate {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableCollector(s *string) *DependencyUpdate {
-	if s != nil {
-		du.SetCollector(*s)
+func (_u *DependencyUpdate) SetNillableCollector(v *string) *DependencyUpdate {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return du
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (du *DependencyUpdate) SetDocumentRef(s string) *DependencyUpdate {
-	du.mutation.SetDocumentRef(s)
-	return du
+func (_u *DependencyUpdate) SetDocumentRef(v string) *DependencyUpdate {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableDocumentRef(s *string) *DependencyUpdate {
-	if s != nil {
-		du.SetDocumentRef(*s)
+func (_u *DependencyUpdate) SetNillableDocumentRef(v *string) *DependencyUpdate {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return du
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (du *DependencyUpdate) SetPackage(p *PackageVersion) *DependencyUpdate {
-	return du.SetPackageID(p.ID)
+func (_u *DependencyUpdate) SetPackage(v *PackageVersion) *DependencyUpdate {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
-func (du *DependencyUpdate) SetDependentPackageVersion(p *PackageVersion) *DependencyUpdate {
-	return du.SetDependentPackageVersionID(p.ID)
+func (_u *DependencyUpdate) SetDependentPackageVersion(v *PackageVersion) *DependencyUpdate {
+	return _u.SetDependentPackageVersionID(v.ID)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (du *DependencyUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdate {
-	du.mutation.AddIncludedInSbomIDs(ids...)
-	return du
+func (_u *DependencyUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdate {
+	_u.mutation.AddIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (du *DependencyUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *DependencyUpdate) AddIncludedInSboms(v ...*BillOfMaterials) *DependencyUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return du.AddIncludedInSbomIDs(ids...)
+	return _u.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the DependencyMutation object of the builder.
-func (du *DependencyUpdate) Mutation() *DependencyMutation {
-	return du.mutation
+func (_u *DependencyUpdate) Mutation() *DependencyMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (du *DependencyUpdate) ClearPackage() *DependencyUpdate {
-	du.mutation.ClearPackage()
-	return du
+func (_u *DependencyUpdate) ClearPackage() *DependencyUpdate {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
-func (du *DependencyUpdate) ClearDependentPackageVersion() *DependencyUpdate {
-	du.mutation.ClearDependentPackageVersion()
-	return du
+func (_u *DependencyUpdate) ClearDependentPackageVersion() *DependencyUpdate {
+	_u.mutation.ClearDependentPackageVersion()
+	return _u
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
-func (du *DependencyUpdate) ClearIncludedInSboms() *DependencyUpdate {
-	du.mutation.ClearIncludedInSboms()
-	return du
+func (_u *DependencyUpdate) ClearIncludedInSboms() *DependencyUpdate {
+	_u.mutation.ClearIncludedInSboms()
+	return _u
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (du *DependencyUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdate {
-	du.mutation.RemoveIncludedInSbomIDs(ids...)
-	return du
+func (_u *DependencyUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdate {
+	_u.mutation.RemoveIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
-func (du *DependencyUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *DependencyUpdate) RemoveIncludedInSboms(v ...*BillOfMaterials) *DependencyUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return du.RemoveIncludedInSbomIDs(ids...)
+	return _u.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (du *DependencyUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, du.sqlSave, du.mutation, du.hooks)
+func (_u *DependencyUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (du *DependencyUpdate) SaveX(ctx context.Context) int {
-	affected, err := du.Save(ctx)
+func (_u *DependencyUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -206,62 +206,62 @@ func (du *DependencyUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (du *DependencyUpdate) Exec(ctx context.Context) error {
-	_, err := du.Save(ctx)
+func (_u *DependencyUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (du *DependencyUpdate) ExecX(ctx context.Context) {
-	if err := du.Exec(ctx); err != nil {
+func (_u *DependencyUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (du *DependencyUpdate) check() error {
-	if v, ok := du.mutation.DependencyType(); ok {
+func (_u *DependencyUpdate) check() error {
+	if v, ok := _u.mutation.DependencyType(); ok {
 		if err := dependency.DependencyTypeValidator(v); err != nil {
 			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
 		}
 	}
-	if du.mutation.PackageCleared() && len(du.mutation.PackageIDs()) > 0 {
+	if _u.mutation.PackageCleared() && len(_u.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
 	}
-	if du.mutation.DependentPackageVersionCleared() && len(du.mutation.DependentPackageVersionIDs()) > 0 {
+	if _u.mutation.DependentPackageVersionCleared() && len(_u.mutation.DependentPackageVersionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.dependent_package_version"`)
 	}
 	return nil
 }
 
-func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := du.check(); err != nil {
-		return n, err
+func (_u *DependencyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
-	if ps := du.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := du.mutation.DependencyType(); ok {
+	if value, ok := _u.mutation.DependencyType(); ok {
 		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 	}
-	if value, ok := du.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(dependency.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := du.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(dependency.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := du.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(dependency.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := du.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(dependency.FieldDocumentRef, field.TypeString, value)
 	}
-	if du.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -274,7 +274,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -290,7 +290,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if du.mutation.DependentPackageVersionCleared() {
+	if _u.mutation.DependentPackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -303,7 +303,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -319,7 +319,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if du.mutation.IncludedInSbomsCleared() {
+	if _u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -332,7 +332,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !du.mutation.IncludedInSbomsCleared() {
+	if nodes := _u.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !_u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -348,7 +348,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -364,7 +364,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{dependency.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -372,8 +372,8 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	du.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // DependencyUpdateOne is the builder for updating a single Dependency entity.
@@ -385,187 +385,187 @@ type DependencyUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (duo *DependencyUpdateOne) SetPackageID(u uuid.UUID) *DependencyUpdateOne {
-	duo.mutation.SetPackageID(u)
-	return duo
+func (_u *DependencyUpdateOne) SetPackageID(v uuid.UUID) *DependencyUpdateOne {
+	_u.mutation.SetPackageID(v)
+	return _u
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillablePackageID(u *uuid.UUID) *DependencyUpdateOne {
-	if u != nil {
-		duo.SetPackageID(*u)
+func (_u *DependencyUpdateOne) SetNillablePackageID(v *uuid.UUID) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetPackageID(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (duo *DependencyUpdateOne) SetDependentPackageVersionID(u uuid.UUID) *DependencyUpdateOne {
-	duo.mutation.SetDependentPackageVersionID(u)
-	return duo
+func (_u *DependencyUpdateOne) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpdateOne {
+	_u.mutation.SetDependentPackageVersionID(v)
+	return _u
 }
 
 // SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableDependentPackageVersionID(u *uuid.UUID) *DependencyUpdateOne {
-	if u != nil {
-		duo.SetDependentPackageVersionID(*u)
+func (_u *DependencyUpdateOne) SetNillableDependentPackageVersionID(v *uuid.UUID) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetDependentPackageVersionID(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (duo *DependencyUpdateOne) SetDependencyType(dt dependency.DependencyType) *DependencyUpdateOne {
-	duo.mutation.SetDependencyType(dt)
-	return duo
+func (_u *DependencyUpdateOne) SetDependencyType(v dependency.DependencyType) *DependencyUpdateOne {
+	_u.mutation.SetDependencyType(v)
+	return _u
 }
 
 // SetNillableDependencyType sets the "dependency_type" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableDependencyType(dt *dependency.DependencyType) *DependencyUpdateOne {
-	if dt != nil {
-		duo.SetDependencyType(*dt)
+func (_u *DependencyUpdateOne) SetNillableDependencyType(v *dependency.DependencyType) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetDependencyType(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetJustification sets the "justification" field.
-func (duo *DependencyUpdateOne) SetJustification(s string) *DependencyUpdateOne {
-	duo.mutation.SetJustification(s)
-	return duo
+func (_u *DependencyUpdateOne) SetJustification(v string) *DependencyUpdateOne {
+	_u.mutation.SetJustification(v)
+	return _u
 }
 
 // SetNillableJustification sets the "justification" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableJustification(s *string) *DependencyUpdateOne {
-	if s != nil {
-		duo.SetJustification(*s)
+func (_u *DependencyUpdateOne) SetNillableJustification(v *string) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetJustification(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetOrigin sets the "origin" field.
-func (duo *DependencyUpdateOne) SetOrigin(s string) *DependencyUpdateOne {
-	duo.mutation.SetOrigin(s)
-	return duo
+func (_u *DependencyUpdateOne) SetOrigin(v string) *DependencyUpdateOne {
+	_u.mutation.SetOrigin(v)
+	return _u
 }
 
 // SetNillableOrigin sets the "origin" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableOrigin(s *string) *DependencyUpdateOne {
-	if s != nil {
-		duo.SetOrigin(*s)
+func (_u *DependencyUpdateOne) SetNillableOrigin(v *string) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetOrigin(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetCollector sets the "collector" field.
-func (duo *DependencyUpdateOne) SetCollector(s string) *DependencyUpdateOne {
-	duo.mutation.SetCollector(s)
-	return duo
+func (_u *DependencyUpdateOne) SetCollector(v string) *DependencyUpdateOne {
+	_u.mutation.SetCollector(v)
+	return _u
 }
 
 // SetNillableCollector sets the "collector" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableCollector(s *string) *DependencyUpdateOne {
-	if s != nil {
-		duo.SetCollector(*s)
+func (_u *DependencyUpdateOne) SetNillableCollector(v *string) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetCollector(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetDocumentRef sets the "document_ref" field.
-func (duo *DependencyUpdateOne) SetDocumentRef(s string) *DependencyUpdateOne {
-	duo.mutation.SetDocumentRef(s)
-	return duo
+func (_u *DependencyUpdateOne) SetDocumentRef(v string) *DependencyUpdateOne {
+	_u.mutation.SetDocumentRef(v)
+	return _u
 }
 
 // SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableDocumentRef(s *string) *DependencyUpdateOne {
-	if s != nil {
-		duo.SetDocumentRef(*s)
+func (_u *DependencyUpdateOne) SetNillableDocumentRef(v *string) *DependencyUpdateOne {
+	if v != nil {
+		_u.SetDocumentRef(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetPackage sets the "package" edge to the PackageVersion entity.
-func (duo *DependencyUpdateOne) SetPackage(p *PackageVersion) *DependencyUpdateOne {
-	return duo.SetPackageID(p.ID)
+func (_u *DependencyUpdateOne) SetPackage(v *PackageVersion) *DependencyUpdateOne {
+	return _u.SetPackageID(v.ID)
 }
 
 // SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
-func (duo *DependencyUpdateOne) SetDependentPackageVersion(p *PackageVersion) *DependencyUpdateOne {
-	return duo.SetDependentPackageVersionID(p.ID)
+func (_u *DependencyUpdateOne) SetDependentPackageVersion(v *PackageVersion) *DependencyUpdateOne {
+	return _u.SetDependentPackageVersionID(v.ID)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (duo *DependencyUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdateOne {
-	duo.mutation.AddIncludedInSbomIDs(ids...)
-	return duo
+func (_u *DependencyUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdateOne {
+	_u.mutation.AddIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
-func (duo *DependencyUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *DependencyUpdateOne) AddIncludedInSboms(v ...*BillOfMaterials) *DependencyUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return duo.AddIncludedInSbomIDs(ids...)
+	return _u.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the DependencyMutation object of the builder.
-func (duo *DependencyUpdateOne) Mutation() *DependencyMutation {
-	return duo.mutation
+func (_u *DependencyUpdateOne) Mutation() *DependencyMutation {
+	return _u.mutation
 }
 
 // ClearPackage clears the "package" edge to the PackageVersion entity.
-func (duo *DependencyUpdateOne) ClearPackage() *DependencyUpdateOne {
-	duo.mutation.ClearPackage()
-	return duo
+func (_u *DependencyUpdateOne) ClearPackage() *DependencyUpdateOne {
+	_u.mutation.ClearPackage()
+	return _u
 }
 
 // ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
-func (duo *DependencyUpdateOne) ClearDependentPackageVersion() *DependencyUpdateOne {
-	duo.mutation.ClearDependentPackageVersion()
-	return duo
+func (_u *DependencyUpdateOne) ClearDependentPackageVersion() *DependencyUpdateOne {
+	_u.mutation.ClearDependentPackageVersion()
+	return _u
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
-func (duo *DependencyUpdateOne) ClearIncludedInSboms() *DependencyUpdateOne {
-	duo.mutation.ClearIncludedInSboms()
-	return duo
+func (_u *DependencyUpdateOne) ClearIncludedInSboms() *DependencyUpdateOne {
+	_u.mutation.ClearIncludedInSboms()
+	return _u
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (duo *DependencyUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdateOne {
-	duo.mutation.RemoveIncludedInSbomIDs(ids...)
-	return duo
+func (_u *DependencyUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdateOne {
+	_u.mutation.RemoveIncludedInSbomIDs(ids...)
+	return _u
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
-func (duo *DependencyUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *DependencyUpdateOne) RemoveIncludedInSboms(v ...*BillOfMaterials) *DependencyUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return duo.RemoveIncludedInSbomIDs(ids...)
+	return _u.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the DependencyUpdate builder.
-func (duo *DependencyUpdateOne) Where(ps ...predicate.Dependency) *DependencyUpdateOne {
-	duo.mutation.Where(ps...)
-	return duo
+func (_u *DependencyUpdateOne) Where(ps ...predicate.Dependency) *DependencyUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (duo *DependencyUpdateOne) Select(field string, fields ...string) *DependencyUpdateOne {
-	duo.fields = append([]string{field}, fields...)
-	return duo
+func (_u *DependencyUpdateOne) Select(field string, fields ...string) *DependencyUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Dependency entity.
-func (duo *DependencyUpdateOne) Save(ctx context.Context) (*Dependency, error) {
-	return withHooks(ctx, duo.sqlSave, duo.mutation, duo.hooks)
+func (_u *DependencyUpdateOne) Save(ctx context.Context) (*Dependency, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (duo *DependencyUpdateOne) SaveX(ctx context.Context) *Dependency {
-	node, err := duo.Save(ctx)
+func (_u *DependencyUpdateOne) SaveX(ctx context.Context) *Dependency {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -573,45 +573,45 @@ func (duo *DependencyUpdateOne) SaveX(ctx context.Context) *Dependency {
 }
 
 // Exec executes the query on the entity.
-func (duo *DependencyUpdateOne) Exec(ctx context.Context) error {
-	_, err := duo.Save(ctx)
+func (_u *DependencyUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (duo *DependencyUpdateOne) ExecX(ctx context.Context) {
-	if err := duo.Exec(ctx); err != nil {
+func (_u *DependencyUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (duo *DependencyUpdateOne) check() error {
-	if v, ok := duo.mutation.DependencyType(); ok {
+func (_u *DependencyUpdateOne) check() error {
+	if v, ok := _u.mutation.DependencyType(); ok {
 		if err := dependency.DependencyTypeValidator(v); err != nil {
 			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
 		}
 	}
-	if duo.mutation.PackageCleared() && len(duo.mutation.PackageIDs()) > 0 {
+	if _u.mutation.PackageCleared() && len(_u.mutation.PackageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
 	}
-	if duo.mutation.DependentPackageVersionCleared() && len(duo.mutation.DependentPackageVersionIDs()) > 0 {
+	if _u.mutation.DependentPackageVersionCleared() && len(_u.mutation.DependentPackageVersionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Dependency.dependent_package_version"`)
 	}
 	return nil
 }
 
-func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency, err error) {
-	if err := duo.check(); err != nil {
+func (_u *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
-	id, ok := duo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Dependency.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := duo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, dependency.FieldID)
 		for _, f := range fields {
@@ -623,29 +623,29 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			}
 		}
 	}
-	if ps := duo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := duo.mutation.DependencyType(); ok {
+	if value, ok := _u.mutation.DependencyType(); ok {
 		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 	}
-	if value, ok := duo.mutation.Justification(); ok {
+	if value, ok := _u.mutation.Justification(); ok {
 		_spec.SetField(dependency.FieldJustification, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.Origin(); ok {
+	if value, ok := _u.mutation.Origin(); ok {
 		_spec.SetField(dependency.FieldOrigin, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.Collector(); ok {
+	if value, ok := _u.mutation.Collector(); ok {
 		_spec.SetField(dependency.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.DocumentRef(); ok {
+	if value, ok := _u.mutation.DocumentRef(); ok {
 		_spec.SetField(dependency.FieldDocumentRef, field.TypeString, value)
 	}
-	if duo.mutation.PackageCleared() {
+	if _u.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -658,7 +658,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -674,7 +674,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if duo.mutation.DependentPackageVersionCleared() {
+	if _u.mutation.DependentPackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -687,7 +687,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -703,7 +703,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if duo.mutation.IncludedInSbomsCleared() {
+	if _u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -716,7 +716,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !duo.mutation.IncludedInSbomsCleared() {
+	if nodes := _u.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !_u.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -732,7 +732,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -748,10 +748,10 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Dependency{config: duo.config}
+	_node = &Dependency{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, duo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{dependency.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -759,6 +759,6 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		return nil, err
 	}
-	duo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

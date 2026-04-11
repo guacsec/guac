@@ -12,7 +12,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	pkg "github.com/ossf/scorecard/v4/pkg"
+	scorecard "github.com/ossf/scorecard/v5/pkg/scorecard"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,10 +41,10 @@ func (m *MockScorecard) EXPECT() *MockScorecardMockRecorder {
 }
 
 // GetScore mocks base method.
-func (m *MockScorecard) GetScore(repoName, commitSHA, tag string) (*pkg.ScorecardResult, error) {
+func (m *MockScorecard) GetScore(repoName, commitSHA, tag string) (*scorecard.Result, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetScore", repoName, commitSHA, tag)
-	ret0, _ := ret[0].(*pkg.ScorecardResult)
+	ret0, _ := ret[0].(*scorecard.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

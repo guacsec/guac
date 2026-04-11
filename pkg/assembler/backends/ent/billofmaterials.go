@@ -160,7 +160,7 @@ func (*BillOfMaterials) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the BillOfMaterials fields.
-func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
+func (_m *BillOfMaterials) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -170,96 +170,96 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				bom.ID = *value
+				_m.ID = *value
 			}
 		case billofmaterials.FieldPackageID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				bom.PackageID = new(uuid.UUID)
-				*bom.PackageID = *value.S.(*uuid.UUID)
+				_m.PackageID = new(uuid.UUID)
+				*_m.PackageID = *value.S.(*uuid.UUID)
 			}
 		case billofmaterials.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				bom.ArtifactID = new(uuid.UUID)
-				*bom.ArtifactID = *value.S.(*uuid.UUID)
+				_m.ArtifactID = new(uuid.UUID)
+				*_m.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case billofmaterials.FieldURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uri", values[i])
 			} else if value.Valid {
-				bom.URI = value.String
+				_m.URI = value.String
 			}
 		case billofmaterials.FieldAlgorithm:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field algorithm", values[i])
 			} else if value.Valid {
-				bom.Algorithm = value.String
+				_m.Algorithm = value.String
 			}
 		case billofmaterials.FieldDigest:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field digest", values[i])
 			} else if value.Valid {
-				bom.Digest = value.String
+				_m.Digest = value.String
 			}
 		case billofmaterials.FieldDownloadLocation:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field download_location", values[i])
 			} else if value.Valid {
-				bom.DownloadLocation = value.String
+				_m.DownloadLocation = value.String
 			}
 		case billofmaterials.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				bom.Origin = value.String
+				_m.Origin = value.String
 			}
 		case billofmaterials.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				bom.Collector = value.String
+				_m.Collector = value.String
 			}
 		case billofmaterials.FieldDocumentRef:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				bom.DocumentRef = value.String
+				_m.DocumentRef = value.String
 			}
 		case billofmaterials.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field known_since", values[i])
 			} else if value.Valid {
-				bom.KnownSince = value.Time
+				_m.KnownSince = value.Time
 			}
 		case billofmaterials.FieldIncludedPackagesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field included_packages_hash", values[i])
 			} else if value.Valid {
-				bom.IncludedPackagesHash = value.String
+				_m.IncludedPackagesHash = value.String
 			}
 		case billofmaterials.FieldIncludedArtifactsHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field included_artifacts_hash", values[i])
 			} else if value.Valid {
-				bom.IncludedArtifactsHash = value.String
+				_m.IncludedArtifactsHash = value.String
 			}
 		case billofmaterials.FieldIncludedDependenciesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field included_dependencies_hash", values[i])
 			} else if value.Valid {
-				bom.IncludedDependenciesHash = value.String
+				_m.IncludedDependenciesHash = value.String
 			}
 		case billofmaterials.FieldIncludedOccurrencesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field included_occurrences_hash", values[i])
 			} else if value.Valid {
-				bom.IncludedOccurrencesHash = value.String
+				_m.IncludedOccurrencesHash = value.String
 			}
 		default:
-			bom.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -267,205 +267,205 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the BillOfMaterials.
 // This includes values selected through modifiers, order, etc.
-func (bom *BillOfMaterials) Value(name string) (ent.Value, error) {
-	return bom.selectValues.Get(name)
+func (_m *BillOfMaterials) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPackage queries the "package" edge of the BillOfMaterials entity.
-func (bom *BillOfMaterials) QueryPackage() *PackageVersionQuery {
-	return NewBillOfMaterialsClient(bom.config).QueryPackage(bom)
+func (_m *BillOfMaterials) QueryPackage() *PackageVersionQuery {
+	return NewBillOfMaterialsClient(_m.config).QueryPackage(_m)
 }
 
 // QueryArtifact queries the "artifact" edge of the BillOfMaterials entity.
-func (bom *BillOfMaterials) QueryArtifact() *ArtifactQuery {
-	return NewBillOfMaterialsClient(bom.config).QueryArtifact(bom)
+func (_m *BillOfMaterials) QueryArtifact() *ArtifactQuery {
+	return NewBillOfMaterialsClient(_m.config).QueryArtifact(_m)
 }
 
 // QueryIncludedSoftwarePackages queries the "included_software_packages" edge of the BillOfMaterials entity.
-func (bom *BillOfMaterials) QueryIncludedSoftwarePackages() *PackageVersionQuery {
-	return NewBillOfMaterialsClient(bom.config).QueryIncludedSoftwarePackages(bom)
+func (_m *BillOfMaterials) QueryIncludedSoftwarePackages() *PackageVersionQuery {
+	return NewBillOfMaterialsClient(_m.config).QueryIncludedSoftwarePackages(_m)
 }
 
 // QueryIncludedSoftwareArtifacts queries the "included_software_artifacts" edge of the BillOfMaterials entity.
-func (bom *BillOfMaterials) QueryIncludedSoftwareArtifacts() *ArtifactQuery {
-	return NewBillOfMaterialsClient(bom.config).QueryIncludedSoftwareArtifacts(bom)
+func (_m *BillOfMaterials) QueryIncludedSoftwareArtifacts() *ArtifactQuery {
+	return NewBillOfMaterialsClient(_m.config).QueryIncludedSoftwareArtifacts(_m)
 }
 
 // QueryIncludedDependencies queries the "included_dependencies" edge of the BillOfMaterials entity.
-func (bom *BillOfMaterials) QueryIncludedDependencies() *DependencyQuery {
-	return NewBillOfMaterialsClient(bom.config).QueryIncludedDependencies(bom)
+func (_m *BillOfMaterials) QueryIncludedDependencies() *DependencyQuery {
+	return NewBillOfMaterialsClient(_m.config).QueryIncludedDependencies(_m)
 }
 
 // QueryIncludedOccurrences queries the "included_occurrences" edge of the BillOfMaterials entity.
-func (bom *BillOfMaterials) QueryIncludedOccurrences() *OccurrenceQuery {
-	return NewBillOfMaterialsClient(bom.config).QueryIncludedOccurrences(bom)
+func (_m *BillOfMaterials) QueryIncludedOccurrences() *OccurrenceQuery {
+	return NewBillOfMaterialsClient(_m.config).QueryIncludedOccurrences(_m)
 }
 
 // Update returns a builder for updating this BillOfMaterials.
 // Note that you need to call BillOfMaterials.Unwrap() before calling this method if this BillOfMaterials
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (bom *BillOfMaterials) Update() *BillOfMaterialsUpdateOne {
-	return NewBillOfMaterialsClient(bom.config).UpdateOne(bom)
+func (_m *BillOfMaterials) Update() *BillOfMaterialsUpdateOne {
+	return NewBillOfMaterialsClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the BillOfMaterials entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (bom *BillOfMaterials) Unwrap() *BillOfMaterials {
-	_tx, ok := bom.config.driver.(*txDriver)
+func (_m *BillOfMaterials) Unwrap() *BillOfMaterials {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: BillOfMaterials is not a transactional entity")
 	}
-	bom.config.driver = _tx.drv
-	return bom
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (bom *BillOfMaterials) String() string {
+func (_m *BillOfMaterials) String() string {
 	var builder strings.Builder
 	builder.WriteString("BillOfMaterials(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", bom.ID))
-	if v := bom.PackageID; v != nil {
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	if v := _m.PackageID; v != nil {
 		builder.WriteString("package_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := bom.ArtifactID; v != nil {
+	if v := _m.ArtifactID; v != nil {
 		builder.WriteString("artifact_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("uri=")
-	builder.WriteString(bom.URI)
+	builder.WriteString(_m.URI)
 	builder.WriteString(", ")
 	builder.WriteString("algorithm=")
-	builder.WriteString(bom.Algorithm)
+	builder.WriteString(_m.Algorithm)
 	builder.WriteString(", ")
 	builder.WriteString("digest=")
-	builder.WriteString(bom.Digest)
+	builder.WriteString(_m.Digest)
 	builder.WriteString(", ")
 	builder.WriteString("download_location=")
-	builder.WriteString(bom.DownloadLocation)
+	builder.WriteString(_m.DownloadLocation)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(bom.Origin)
+	builder.WriteString(_m.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(bom.Collector)
+	builder.WriteString(_m.Collector)
 	builder.WriteString(", ")
 	builder.WriteString("document_ref=")
-	builder.WriteString(bom.DocumentRef)
+	builder.WriteString(_m.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("known_since=")
-	builder.WriteString(bom.KnownSince.Format(time.ANSIC))
+	builder.WriteString(_m.KnownSince.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("included_packages_hash=")
-	builder.WriteString(bom.IncludedPackagesHash)
+	builder.WriteString(_m.IncludedPackagesHash)
 	builder.WriteString(", ")
 	builder.WriteString("included_artifacts_hash=")
-	builder.WriteString(bom.IncludedArtifactsHash)
+	builder.WriteString(_m.IncludedArtifactsHash)
 	builder.WriteString(", ")
 	builder.WriteString("included_dependencies_hash=")
-	builder.WriteString(bom.IncludedDependenciesHash)
+	builder.WriteString(_m.IncludedDependenciesHash)
 	builder.WriteString(", ")
 	builder.WriteString("included_occurrences_hash=")
-	builder.WriteString(bom.IncludedOccurrencesHash)
+	builder.WriteString(_m.IncludedOccurrencesHash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedIncludedSoftwarePackages returns the IncludedSoftwarePackages named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (bom *BillOfMaterials) NamedIncludedSoftwarePackages(name string) ([]*PackageVersion, error) {
-	if bom.Edges.namedIncludedSoftwarePackages == nil {
+func (_m *BillOfMaterials) NamedIncludedSoftwarePackages(name string) ([]*PackageVersion, error) {
+	if _m.Edges.namedIncludedSoftwarePackages == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := bom.Edges.namedIncludedSoftwarePackages[name]
+	nodes, ok := _m.Edges.namedIncludedSoftwarePackages[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (bom *BillOfMaterials) appendNamedIncludedSoftwarePackages(name string, edges ...*PackageVersion) {
-	if bom.Edges.namedIncludedSoftwarePackages == nil {
-		bom.Edges.namedIncludedSoftwarePackages = make(map[string][]*PackageVersion)
+func (_m *BillOfMaterials) appendNamedIncludedSoftwarePackages(name string, edges ...*PackageVersion) {
+	if _m.Edges.namedIncludedSoftwarePackages == nil {
+		_m.Edges.namedIncludedSoftwarePackages = make(map[string][]*PackageVersion)
 	}
 	if len(edges) == 0 {
-		bom.Edges.namedIncludedSoftwarePackages[name] = []*PackageVersion{}
+		_m.Edges.namedIncludedSoftwarePackages[name] = []*PackageVersion{}
 	} else {
-		bom.Edges.namedIncludedSoftwarePackages[name] = append(bom.Edges.namedIncludedSoftwarePackages[name], edges...)
+		_m.Edges.namedIncludedSoftwarePackages[name] = append(_m.Edges.namedIncludedSoftwarePackages[name], edges...)
 	}
 }
 
 // NamedIncludedSoftwareArtifacts returns the IncludedSoftwareArtifacts named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (bom *BillOfMaterials) NamedIncludedSoftwareArtifacts(name string) ([]*Artifact, error) {
-	if bom.Edges.namedIncludedSoftwareArtifacts == nil {
+func (_m *BillOfMaterials) NamedIncludedSoftwareArtifacts(name string) ([]*Artifact, error) {
+	if _m.Edges.namedIncludedSoftwareArtifacts == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := bom.Edges.namedIncludedSoftwareArtifacts[name]
+	nodes, ok := _m.Edges.namedIncludedSoftwareArtifacts[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (bom *BillOfMaterials) appendNamedIncludedSoftwareArtifacts(name string, edges ...*Artifact) {
-	if bom.Edges.namedIncludedSoftwareArtifacts == nil {
-		bom.Edges.namedIncludedSoftwareArtifacts = make(map[string][]*Artifact)
+func (_m *BillOfMaterials) appendNamedIncludedSoftwareArtifacts(name string, edges ...*Artifact) {
+	if _m.Edges.namedIncludedSoftwareArtifacts == nil {
+		_m.Edges.namedIncludedSoftwareArtifacts = make(map[string][]*Artifact)
 	}
 	if len(edges) == 0 {
-		bom.Edges.namedIncludedSoftwareArtifacts[name] = []*Artifact{}
+		_m.Edges.namedIncludedSoftwareArtifacts[name] = []*Artifact{}
 	} else {
-		bom.Edges.namedIncludedSoftwareArtifacts[name] = append(bom.Edges.namedIncludedSoftwareArtifacts[name], edges...)
+		_m.Edges.namedIncludedSoftwareArtifacts[name] = append(_m.Edges.namedIncludedSoftwareArtifacts[name], edges...)
 	}
 }
 
 // NamedIncludedDependencies returns the IncludedDependencies named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (bom *BillOfMaterials) NamedIncludedDependencies(name string) ([]*Dependency, error) {
-	if bom.Edges.namedIncludedDependencies == nil {
+func (_m *BillOfMaterials) NamedIncludedDependencies(name string) ([]*Dependency, error) {
+	if _m.Edges.namedIncludedDependencies == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := bom.Edges.namedIncludedDependencies[name]
+	nodes, ok := _m.Edges.namedIncludedDependencies[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (bom *BillOfMaterials) appendNamedIncludedDependencies(name string, edges ...*Dependency) {
-	if bom.Edges.namedIncludedDependencies == nil {
-		bom.Edges.namedIncludedDependencies = make(map[string][]*Dependency)
+func (_m *BillOfMaterials) appendNamedIncludedDependencies(name string, edges ...*Dependency) {
+	if _m.Edges.namedIncludedDependencies == nil {
+		_m.Edges.namedIncludedDependencies = make(map[string][]*Dependency)
 	}
 	if len(edges) == 0 {
-		bom.Edges.namedIncludedDependencies[name] = []*Dependency{}
+		_m.Edges.namedIncludedDependencies[name] = []*Dependency{}
 	} else {
-		bom.Edges.namedIncludedDependencies[name] = append(bom.Edges.namedIncludedDependencies[name], edges...)
+		_m.Edges.namedIncludedDependencies[name] = append(_m.Edges.namedIncludedDependencies[name], edges...)
 	}
 }
 
 // NamedIncludedOccurrences returns the IncludedOccurrences named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (bom *BillOfMaterials) NamedIncludedOccurrences(name string) ([]*Occurrence, error) {
-	if bom.Edges.namedIncludedOccurrences == nil {
+func (_m *BillOfMaterials) NamedIncludedOccurrences(name string) ([]*Occurrence, error) {
+	if _m.Edges.namedIncludedOccurrences == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := bom.Edges.namedIncludedOccurrences[name]
+	nodes, ok := _m.Edges.namedIncludedOccurrences[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (bom *BillOfMaterials) appendNamedIncludedOccurrences(name string, edges ...*Occurrence) {
-	if bom.Edges.namedIncludedOccurrences == nil {
-		bom.Edges.namedIncludedOccurrences = make(map[string][]*Occurrence)
+func (_m *BillOfMaterials) appendNamedIncludedOccurrences(name string, edges ...*Occurrence) {
+	if _m.Edges.namedIncludedOccurrences == nil {
+		_m.Edges.namedIncludedOccurrences = make(map[string][]*Occurrence)
 	}
 	if len(edges) == 0 {
-		bom.Edges.namedIncludedOccurrences[name] = []*Occurrence{}
+		_m.Edges.namedIncludedOccurrences[name] = []*Occurrence{}
 	} else {
-		bom.Edges.namedIncludedOccurrences[name] = append(bom.Edges.namedIncludedOccurrences[name], edges...)
+		_m.Edges.namedIncludedOccurrences[name] = append(_m.Edges.namedIncludedOccurrences[name], edges...)
 	}
 }
 
