@@ -2260,6 +2260,9 @@ var (
 			  },
 			  "result":[
 				 {
+					"id":"GHSA-3pxv-7cmr-fjr4"
+				 },
+				 {
 					"id":"GHSA-7rjr-3q55-vv33"
 				 },
 				 {
@@ -2368,6 +2371,9 @@ var (
 			  "db":{
 			  },
 			  "result":[
+				 {
+					"id":"GHSA-3pxv-7cmr-fjr4"
+				 },
 				 {
 					"id":"GHSA-7rjr-3q55-vv33"
 				 },
