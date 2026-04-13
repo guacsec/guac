@@ -31,7 +31,7 @@ import (
 
 func TestNewBlobCollector(t *testing.T) {
 	bkt := memblob.OpenBucket(nil)
-	defer bkt.Close()
+	defer func() { _ = bkt.Close() }()
 
 	tests := []struct {
 		name    string
@@ -74,7 +74,7 @@ func TestBlobCollector_RetrieveArtifacts(t *testing.T) {
 	content := []byte("test document content")
 
 	bkt := memblob.OpenBucket(nil)
-	defer bkt.Close()
+	defer func() { _ = bkt.Close() }()
 
 	if err := bkt.WriteAll(ctx, "test/doc1.json", content, nil); err != nil {
 		t.Fatalf("failed to write test object: %v", err)
@@ -160,7 +160,7 @@ func TestBlobCollector_RetrieveArtifacts_Polling(t *testing.T) {
 	content := []byte("polling test content")
 
 	bkt := memblob.OpenBucket(nil)
-	defer bkt.Close()
+	defer func() { _ = bkt.Close() }()
 
 	if err := bkt.WriteAll(ctx, "poll-doc.json", content, nil); err != nil {
 		t.Fatalf("failed to write test object: %v", err)
@@ -193,7 +193,7 @@ func TestBlobCollector_MultipleObjects(t *testing.T) {
 	ctx := context.Background()
 
 	bkt := memblob.OpenBucket(nil)
-	defer bkt.Close()
+	defer func() { _ = bkt.Close() }()
 
 	files := map[string][]byte{
 		"sbom1.json":        []byte("sbom content 1"),

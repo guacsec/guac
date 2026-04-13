@@ -178,7 +178,7 @@ func (b *blobCollector) getObject(ctx context.Context, key string) ([]byte, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to create reader for %q: %w", key, err)
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	data, err := io.ReadAll(reader)
 	if err != nil {

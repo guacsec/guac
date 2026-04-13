@@ -101,7 +101,7 @@ respective blob store.`,
 		if err != nil {
 			logger.Fatalf("unable to create blob collector: %v", err)
 		}
-		defer bc.Close()
+		defer func() { _ = bc.Close() }()
 
 		if err := collector.RegisterDocumentCollector(bc, blobCollector.CollectorBlob); err != nil {
 			logger.Fatalf("unable to register blob collector: %v", err)
