@@ -314,7 +314,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/openvex/go-vex v0.2.7
 	github.com/ossf/scorecard/v5 v5.4.0
-	github.com/package-url/packageurl-go v0.1.3
+	github.com/package-url/packageurl-go v0.1.5
 	github.com/pandatix/go-cvss v0.6.2
 	github.com/pitabwire/natspubsub v0.1.9
 	github.com/pkg/errors v0.9.1
