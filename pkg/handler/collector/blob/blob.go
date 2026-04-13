@@ -1,0 +1,196 @@
+//
+// Copyright 2024 The GUAC Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package blob
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"time"
+
+	"gocloud.dev/blob"
+	_ "gocloud.dev/blob/azureblob"
+	_ "gocloud.dev/blob/fileblob"
+	_ "gocloud.dev/blob/gcsblob"
+	_ "gocloud.dev/blob/memblob"
+	_ "gocloud.dev/blob/s3blob"
+
+	"github.com/guacsec/guac/pkg/events"
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+)
+
+const CollectorBlob = "BlobCollector"
+
+type blobCollector struct {
+	url          string
+	bucket       *blob.Bucket
+	lastDownload time.Time
+	poll         bool
+	interval     time.Duration
+}
+
+type Opt func(*blobCollector)
+
+func WithURL(url string) Opt {
+	return func(b *blobCollector) {
+		b.url = url
+	}
+}
+
+func WithBucket(bucket *blob.Bucket) Opt {
+	return func(b *blobCollector) {
+		b.bucket = bucket
+	}
+}
+
+func WithPolling(interval time.Duration) Opt {
+	return func(b *blobCollector) {
+		b.poll = true
+		b.interval = interval
+	}
+}
+
+// NewBlobCollector creates a cloud-agnostic collector that can collect
+// documents from any blob storage supported by gocloud.dev/blob (S3, GCS,
+// Azure Blob Storage, filesystem, etc).
+
+// Authentication is handled via environment variables per cloud provider.
+// See https://gocloud.dev/howto/blob/ for details.
+func NewBlobCollector(ctx context.Context, opts ...Opt) (*blobCollector, error) {
+	bc := &blobCollector{}
+
+	for _, opt := range opts {
+		opt(bc)
+	}
+
+	if bc.bucket == nil {
+		if bc.url == "" {
+			return nil, errors.New("blob URL not specified")
+		}
+		bucket, err := blob.OpenBucket(ctx, bc.url)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open bucket %q: %w", bc.url, err)
+		}
+		bc.bucket = bucket
+	}
+
+	return bc, nil
+}
+
+func (b *blobCollector) Type() string {
+	return CollectorBlob
+}
+
+// RetrieveArtifacts lists objects from the blob store and sends each as a
+// document through the channel. Supports one-shot and polling modes.
+func (b *blobCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+	if b.bucket == nil {
+		return errors.New("blob collector not initialized")
+	}
+
+	getArtifacts := func() error {
+		if err := b.getArtifacts(ctx, docChannel); err != nil {
+			return fmt.Errorf("failed to get artifacts from blob store: %w", err)
+		}
+		b.lastDownload = time.Now()
+		return nil
+	}
+
+	if b.poll {
+		for {
+			if err := getArtifacts(); err != nil {
+				return err
+			}
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(b.interval):
+			}
+		}
+	}
+
+	return getArtifacts()
+}
+
+func (b *blobCollector) getArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	iter := b.bucket.List(nil)
+
+	for {
+		obj, err := iter.Next(ctx)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("failed to list objects: %w", err)
+		}
+
+		if obj.IsDir {
+			continue
+		}
+
+		if !b.lastDownload.IsZero() && !obj.ModTime.After(b.lastDownload) {
+			continue
+		}
+
+		payload, err := b.getObject(ctx, obj.Key)
+		if err != nil {
+			logger.Warnf("failed to retrieve object %q: %v", obj.Key, err)
+			continue
+		}
+		if len(payload) == 0 {
+			continue
+		}
+
+		doc := &processor.Document{
+			Blob:   payload,
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector:   CollectorBlob,
+				Source:      b.url + "/" + obj.Key,
+				DocumentRef: events.GetDocRef(payload),
+			},
+		}
+		docChannel <- doc
+	}
+
+	return nil
+}
+
+func (b *blobCollector) getObject(ctx context.Context, key string) ([]byte, error) {
+	reader, err := b.bucket.NewReader(ctx, key, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create reader for %q: %w", key, err)
+	}
+	defer reader.Close()
+
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read %q: %w", key, err)
+	}
+	return data, nil
+}
+
+// Close closes the underlying bucket connection.
+func (b *blobCollector) Close() error {
+	if b.bucket != nil {
+		return b.bucket.Close()
+	}
+	return nil
+}
