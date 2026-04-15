@@ -37,13 +37,14 @@ func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []TrustInf
 }
 
 // CreateAssemblerInput creates the GuacNodes and GuacEdges that are needed by the assembler
-func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []TrustInformation, srcInfo processor.SourceInformation) *assembler.AssemblerInput {
+func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []TrustInformation, srcInfo processor.SourceInformation, labels map[string]string) *assembler.AssemblerInput {
 	predicates := b.docParser.GetPredicates(ctx)
 
 	if predicates == nil {
 		predicates = &assembler.IngestPredicates{}
 	}
 	AddMetadata(predicates, foundIdentities, srcInfo)
+	AddLabels(predicates, srcInfo, labels)
 
 	return predicates
 }

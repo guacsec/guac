@@ -96,7 +96,7 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, scan
 	}
 
 	for _, builder := range docTreeBuilder.graphBuilders {
-		assemblerInput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities, docTree.Document.SourceInformation)
+		assemblerInput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities, docTree.Document.SourceInformation, docTree.Document.Labels)
 		assemblerInputs = append(assemblerInputs, *assemblerInput)
 		if idStrings, err := builder.GetIdentifiers(ctx); err == nil {
 			identifierStrings = append(identifierStrings, idStrings)

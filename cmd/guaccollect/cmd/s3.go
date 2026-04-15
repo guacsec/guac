@@ -122,7 +122,11 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr, s3Opts.publishToQueue)
+		labels, err := parseLabels(viper.GetStringSlice("label"))
+		if err != nil {
+			logger.Fatalf("unable to parse labels: %v", err)
+		}
+		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr, s3Opts.publishToQueue, labels)
 	},
 }
 

@@ -39,6 +39,7 @@ type Document struct {
 	Encoding          EncodingType
 	SourceInformation SourceInformation
 	ChildLogger       *zap.SugaredLogger
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 // DocumentTree describes the output of a document tree that resulted from

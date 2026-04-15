@@ -41,6 +41,7 @@ func init() {
 		"publish-to-queue",
 		"gql-addr",
 		"enable-otel",
+		"label",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

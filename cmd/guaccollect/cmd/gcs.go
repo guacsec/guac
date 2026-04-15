@@ -87,7 +87,11 @@ var gcsCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue)
+		labels, err := parseLabels(viper.GetStringSlice("label"))
+		if err != nil {
+			logger.Fatalf("unable to parse labels: %v", err)
+		}
+		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue, labels)
 	},
 }
 

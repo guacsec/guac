@@ -46,6 +46,8 @@ type filesOptions struct {
 	poll bool
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// labels to attach to collected documents as HasMetadata
+	labels map[string]string
 }
 
 var filesCmd = &cobra.Command{
@@ -54,11 +56,11 @@ var filesCmd = &cobra.Command{
 	Long: `
 guaccollect files takes in a file path to ingest all documents that are found
 via the GUAC files collector. Ingestion to GUAC happens via an event stream (NATS)
-to allow for decoupling of the collectors from the ingestion into GUAC. 
+to allow for decoupling of the collectors from the ingestion into GUAC.
 
 Each collector collects the "document" and stores it in the blob store for further
-evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via 
-the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for 
+evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via
+the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for
 processing and ingestion.
 
 Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as documented here: https://gocloud.dev/howto/blob/
@@ -73,6 +75,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetStringSlice("label"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -90,11 +93,11 @@ you have access to read and write to the respective blob store.`,
 			logger.Fatalf("unable to register file collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue, opts.labels)
 	},
 }
 
-func validateFilesFlags(pubsubAddr, blobAddr string, poll bool, pubToQueue bool, args []string) (filesOptions, error) {
+func validateFilesFlags(pubsubAddr, blobAddr string, poll bool, pubToQueue bool, labelArgs []string, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.pubsubAddr = pubsubAddr
@@ -108,7 +111,28 @@ func validateFilesFlags(pubsubAddr, blobAddr string, poll bool, pubToQueue bool,
 
 	opts.path = args[0]
 
+	labels, err := parseLabels(labelArgs)
+	if err != nil {
+		return opts, err
+	}
+	opts.labels = labels
+
 	return opts, nil
+}
+
+func parseLabels(labelArgs []string) (map[string]string, error) {
+	if len(labelArgs) == 0 {
+		return nil, nil
+	}
+	labels := make(map[string]string, len(labelArgs))
+	for _, l := range labelArgs {
+		parts := strings.SplitN(l, "=", 2)
+		if len(parts) != 2 || parts[0] == "" {
+			return nil, fmt.Errorf("invalid label format %q, expected key=value", l)
+		}
+		labels[parts[0]] = parts[1]
+	}
+	return labels, nil
 }
 
 func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, publishToQueue bool) (func(*processor.Document) error, error) {
@@ -117,7 +141,7 @@ func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string, publishToQueue bool) {
+func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string, publishToQueue bool, labels map[string]string) {
 	logger := logging.FromContext(ctx)
 
 	// initialize blob store
@@ -150,6 +174,9 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 
 	// Set emit function to go through the entire pipeline
 	emit := func(d *processor.Document) error {
+		if len(labels) > 0 {
+			d.Labels = labels
+		}
 		err = collectorPubFunc(d)
 		// updating the logger to the child logger so that if there is an error we which document has it
 		logger = d.ChildLogger
