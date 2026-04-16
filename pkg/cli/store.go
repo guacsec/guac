@@ -143,6 +143,8 @@ func init() {
 
 	set.String("header-file", "", "a text file containing HTTP headers to send to the GQL server, in RFC 822 format")
 
+	set.StringSlice("label", []string{}, "label to attach to collected documents as HasMetadata, in key=value format (can be specified multiple times)")
+
 	set.String("kubescape-namespace", "kubescape", "Kubernetes namespace to get/watch sboms from.")
 	set.Bool("kubescape-filtered", false, "If false: get/watch \"sbomsyfts\", if true: get/watch \"sbomsyftfiltereds\"")
 

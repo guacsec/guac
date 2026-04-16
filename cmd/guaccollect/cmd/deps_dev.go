@@ -133,7 +133,7 @@ you have access to read and write to the respective blob store.`,
 			}()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue, nil)
 	},
 }
 

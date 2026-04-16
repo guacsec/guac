@@ -169,7 +169,11 @@ you have access to read and write to the respective blob store.`,
 			logger.Fatalf("unable to register Github collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
+		labels, err := parseLabels(viper.GetStringSlice("label"))
+		if err != nil {
+			logger.Fatalf("unable to parse labels: %v", err)
+		}
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue, labels)
 	},
 }
 

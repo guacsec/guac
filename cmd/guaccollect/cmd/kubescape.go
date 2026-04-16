@@ -80,7 +80,11 @@ $ guaccollect kubescape --service-poll=false --kubescape-filtered --kubescape-na
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue)
+		labels, err := parseLabels(viper.GetStringSlice("label"))
+		if err != nil {
+			logger.Fatalf("unable to parse labels: %v", err)
+		}
+		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue, labels)
 	},
 }
 
