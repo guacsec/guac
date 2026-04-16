@@ -183,16 +183,16 @@ func Test_RetrieveDependencies_ByPurl(t *testing.T) {
 			name: "Endpoint works for OCI purl",
 			data: GuacData{
 				Packages: []string{
-					"pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
-					"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest",
+					"pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+					"pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest",
 				},
 				HasSboms: []HasSbom{{
-					Subject:          "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
-					IncludedSoftware: []string{"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
+					Subject:          "pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+					IncludedSoftware: []string{"pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
 				}},
 			},
-			purl:           "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
-			expectedByName: []string{"pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
+			purl:           "pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+			expectedByName: []string{"pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io%2Fdistroless&tag=latest"},
 		},
 		{
 			name: "Non-canonical purl may not round trip",

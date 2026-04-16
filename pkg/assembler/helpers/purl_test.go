@@ -215,8 +215,8 @@ func TestPurlConvert(t *testing.T) {
 				"arch": "core2-32",
 			}),
 		}, {
-			purlUri:  "pkg:cpan/Pod-Perldoc@3.20",
-			expected: pkg("cpan", "", "Pod-Perldoc", "3.20", "", map[string]string{}),
+			purlUri:  "pkg:cpan/MALLEN/Pod-Perldoc@3.20",
+			expected: pkg("cpan", "MALLEN", "Pod-Perldoc", "3.20", "", map[string]string{}),
 		}, {
 			purlUri:  "pkg:bitnami/apache@2.4.57",
 			expected: pkg("bitnami", "", "apache", "2.4.57", "", map[string]string{}),
@@ -323,7 +323,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			}),
 		}, {
 			// The following are for docker PURLs
-			expectedPurlUri: "pkg:docker/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fcustomer",
+			expectedPurlUri: "pkg:docker/dockerimage@sha256:244fd47e07d10?repository_url=gcr.io%2Fcustomer",
 			input:           pkg("docker", "gcr.io/customer", "dockerimage", "sha256:244fd47e07d10", "", map[string]string{}),
 		}, {
 			expectedPurlUri: "pkg:docker/debian@dc437cc87d10?repository_url=smartentry",
@@ -336,13 +336,13 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			input:           pkg("gem", "", "ruby-advisory-db-check", "0.12.4", "", map[string]string{}),
 		}, {
 			// TODO (Issue #635): url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
-			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256%3Ade4d501267da&download_url=https%3A%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
+			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256:de4d501267da&download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
 			input: pkg("generic", "", "openssl", "1.1.10g", "", map[string]string{
 				"download_url": "https://openssl.org/source/openssl-1.1.0g.tar.gz",
 				"checksum":     "sha256:de4d501267da",
 			}),
 		}, {
-			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps%3A%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
+			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps:%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
 			input: pkg("generic", "", "bitwarderl", "", "", map[string]string{
 				"vcs_url": "git+https://git.fsfe.org/dxtr/bitwarderl@cc55108da32",
 			}),
@@ -356,7 +356,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			expectedPurlUri: "pkg:hackage/3d-graphics-examples@0.0.0.2",
 			input:           pkg("hackage", "", "3d-graphics-examples", "0.0.0.2", "", map[string]string{}),
 		}, {
-			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https%3A%2F%2Fmyrepo.example.com",
+			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https:%2F%2Fmyrepo.example.com",
 			input: pkg("hex", "", "bar", "1.2.3", "", map[string]string{
 				"repository_url": "https://myrepo.example.com",
 			}),
@@ -373,7 +373,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 				"classifier": "dist",
 			}),
 		}, {
-			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https:%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
 			input: pkg("mlflow", "", "trafficsigns", "10", "", map[string]string{
 				"model_uuid":     "36233173b22f4c89b451f1228d700d49",
 				"run_id":         "410a3121-2709-4f88-98dd-dba0ef056b0a",
@@ -393,18 +393,18 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			input:           pkg("qpkg", "blackberry", "com.qnx.sdp", "7.0.0.SGA201702151847", "", map[string]string{}),
 		}, {
 			// Special OCI case
-			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
 			input: pkg("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"arch": "amd64",
 				"tag":  "latest",
 			}),
 		}, {
-			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
 			input: pkg("oci", "ghcr.io", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "bullseye",
 			}),
 		}, {
-			expectedPurlUri: "pkg:oci/hello-wasm@sha256%3A244fd47e07d10?tag=v1",
+			expectedPurlUri: "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1",
 			input: pkg("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "v1",
 			}),
@@ -526,7 +526,7 @@ func TestAllPkgTreeToPurl(t *testing.T) {
 			}),
 		}, {
 			// The following are for docker PURLs
-			expectedPurlUri: "pkg:docker/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fcustomer",
+			expectedPurlUri: "pkg:docker/dockerimage@sha256:244fd47e07d10?repository_url=gcr.io%2Fcustomer",
 			input:           allPkgTree("docker", "gcr.io/customer", "dockerimage", "sha256:244fd47e07d10", "", map[string]string{}),
 		}, {
 			expectedPurlUri: "pkg:docker/debian@dc437cc87d10?repository_url=smartentry",
@@ -539,13 +539,13 @@ func TestAllPkgTreeToPurl(t *testing.T) {
 			input:           allPkgTree("gem", "", "ruby-advisory-db-check", "0.12.4", "", map[string]string{}),
 		}, {
 			// TODO (Issue #635): url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
-			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256%3Ade4d501267da&download_url=https%3A%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
+			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256:de4d501267da&download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
 			input: allPkgTree("generic", "", "openssl", "1.1.10g", "", map[string]string{
 				"download_url": "https://openssl.org/source/openssl-1.1.0g.tar.gz",
 				"checksum":     "sha256:de4d501267da",
 			}),
 		}, {
-			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps%3A%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
+			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps:%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
 			input: allPkgTree("generic", "", "bitwarderl", "", "", map[string]string{
 				"vcs_url": "git+https://git.fsfe.org/dxtr/bitwarderl@cc55108da32",
 			}),
@@ -559,7 +559,7 @@ func TestAllPkgTreeToPurl(t *testing.T) {
 			expectedPurlUri: "pkg:hackage/3d-graphics-examples@0.0.0.2",
 			input:           allPkgTree("hackage", "", "3d-graphics-examples", "0.0.0.2", "", map[string]string{}),
 		}, {
-			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https%3A%2F%2Fmyrepo.example.com",
+			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https:%2F%2Fmyrepo.example.com",
 			input: allPkgTree("hex", "", "bar", "1.2.3", "", map[string]string{
 				"repository_url": "https://myrepo.example.com",
 			}),
@@ -576,7 +576,7 @@ func TestAllPkgTreeToPurl(t *testing.T) {
 				"classifier": "dist",
 			}),
 		}, {
-			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https:%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
 			input: allPkgTree("mlflow", "", "trafficsigns", "10", "", map[string]string{
 				"model_uuid":     "36233173b22f4c89b451f1228d700d49",
 				"run_id":         "410a3121-2709-4f88-98dd-dba0ef056b0a",
@@ -596,18 +596,18 @@ func TestAllPkgTreeToPurl(t *testing.T) {
 			input:           allPkgTree("qpkg", "blackberry", "com.qnx.sdp", "7.0.0.SGA201702151847", "", map[string]string{}),
 		}, {
 			// Special OCI case
-			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
 			input: allPkgTree("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"arch": "amd64",
 				"tag":  "latest",
 			}),
 		}, {
-			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
 			input: allPkgTree("oci", "ghcr.io", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "bullseye",
 			}),
 		}, {
-			expectedPurlUri: "pkg:oci/hello-wasm@sha256%3A244fd47e07d10?tag=v1",
+			expectedPurlUri: "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1",
 			input: allPkgTree("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "v1",
 			}),
@@ -736,7 +736,7 @@ func TestPkgToPurl(t *testing.T) {
 			qualifiers:      []string{"arch", "amd64", "distro", "stretch"},
 		}, {
 			// The following are for docker PURLs
-			expectedPurlUri: "pkg:docker/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fcustomer",
+			expectedPurlUri: "pkg:docker/dockerimage@sha256:244fd47e07d10?repository_url=gcr.io%2Fcustomer",
 			pkgType:         "docker",
 			namespace:       "gcr.io/customer",
 			name:            "dockerimage",
@@ -768,7 +768,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{},
 		}, {
-			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256%3Ade4d501267da&download_url=https%3A%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
+			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256:de4d501267da&download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
 			pkgType:         "generic",
 			namespace:       "",
 			name:            "openssl",
@@ -776,7 +776,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{"download_url", "https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum", "sha256:de4d501267da"},
 		}, {
-			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps%3A%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
+			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps:%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
 			pkgType:         "generic",
 			namespace:       "",
 			name:            "bitwarderl",
@@ -808,7 +808,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{},
 		}, {
-			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https%3A%2F%2Fmyrepo.example.com",
+			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https:%2F%2Fmyrepo.example.com",
 			pkgType:         "hex",
 			namespace:       "",
 			name:            "bar",
@@ -840,7 +840,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{"type", "zip", "classifier", "dist"},
 		}, {
-			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https:%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
 			pkgType:         "mlflow",
 			namespace:       "",
 			name:            "trafficsigns",
@@ -881,7 +881,7 @@ func TestPkgToPurl(t *testing.T) {
 			qualifiers:      []string{},
 		}, {
 			// Special OCI case
-			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
 			pkgType:         "oci",
 			namespace:       "docker.io/library",
 			name:            "debian",
@@ -889,7 +889,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{"arch", "amd64", "tag", "latest"},
 		}, {
-			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
 			pkgType:         "oci",
 			namespace:       "ghcr.io",
 			name:            "debian",
@@ -897,7 +897,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{"tag", "bullseye"},
 		}, {
-			expectedPurlUri: "pkg:oci/hello-wasm@sha256%3A244fd47e07d10?tag=v1",
+			expectedPurlUri: "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1",
 			pkgType:         "oci",
 			namespace:       "",
 			name:            "hello-wasm",
