@@ -171,10 +171,30 @@ func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPacka
 }
 
 func (s *DefaultServer) GetArtifactVulns(ctx context.Context, request gen.GetArtifactVulnsRequestObject) (gen.GetArtifactVulnsResponseObject, error) {
-	return gen.GetArtifactVulns500JSONResponse{
-		InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
-			Message: "GetArtifactVulns not implemented",
-		},
+	unescapedDigest, err := url.PathUnescape(request.Digest)
+	if err != nil {
+		return gen.GetArtifactVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("failed to unescape digest: %v", err),
+			},
+		}, nil
+	}
+
+	vulns, err := GetVulnsForArtifact(ctx, s.gqlClient, unescapedDigest)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetArtifactVulns).(gen.GetArtifactVulnsResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.GetArtifactVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return gen.GetArtifactVulns200JSONResponse{
+		VulnerabilityListJSONResponse: vulns,
 	}, nil
 }
 
