@@ -179,6 +179,8 @@ func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArti
 	for _, depPurl := range purls {
 		result.PurlList = append(result.PurlList, depPurl)
 	}
+	totalCount := len(result.PurlList)
+	result.PaginationInfo = gen.PaginationInfo{TotalCount: &totalCount}
 
 	return result, nil
 }
