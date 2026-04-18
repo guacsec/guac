@@ -36,21 +36,21 @@ func TestListSBOMs(t *testing.T) {
 		return nil, nil
 	}
 	var listCalled int
-	list = func(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSyftList, error) {
+	list = func(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSPDXv2p3List, error) {
 		listCalled++
-		return &scv1beta1.SBOMSyftList{
-			Items: []scv1beta1.SBOMSyft{{ObjectMeta: metav1.ObjectMeta{Name: "sbom1"}}},
+		return &scv1beta1.SBOMSPDXv2p3List{
+			Items: []scv1beta1.SBOMSPDXv2p3{{ObjectMeta: metav1.ObjectMeta{Name: "sbom1"}}},
 		}, nil
 	}
 	var getCalled int
 	var getCalledName string
-	get = func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSyft, error) {
+	get = func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3, error) {
 		getCalled++
 		getCalledName = name
-		return &scv1beta1.SBOMSyft{
+		return &scv1beta1.SBOMSPDXv2p3{
 			ObjectMeta: metav1.ObjectMeta{Name: "sbom1"},
-			Spec: scv1beta1.SBOMSyftSpec{
-				Syft: scv1beta1.SyftDocument{},
+			Spec: scv1beta1.SBOMSPDXv2p3Spec{
+				SPDX: scv1beta1.Document{},
 			},
 		}, nil
 	}
