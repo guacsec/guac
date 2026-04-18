@@ -36,12 +36,22 @@ import (
 
 const CollectorBlob = "BlobCollector"
 
+// DefaultMaxObjectSize caps the per-object read in bytes when no explicit
+// limit is configured, defaults to 100 MiB.
+const DefaultMaxObjectSize int64 = 100 * 1024 * 1024
+
+// ErrObjectTooLarge is returned by getObject when the object's size
+// exceeds maxObjectSize. Callers log and skip; this is not a fatal error.
+var ErrObjectTooLarge = errors.New("object exceeds max object size")
+
 type blobCollector struct {
-	url          string
-	bucket       *blob.Bucket
-	lastDownload time.Time
-	poll         bool
-	interval     time.Duration
+	url           string
+	bucket        *blob.Bucket
+	lastDownload  time.Time
+	poll          bool
+	interval      time.Duration
+	prefix        string
+	maxObjectSize int64
 }
 
 type Opt func(*blobCollector)
@@ -65,6 +75,20 @@ func WithPolling(interval time.Duration) Opt {
 	}
 }
 
+// WithPrefix limits collection to objects whose key begins with prefix.
+func WithPrefix(prefix string) Opt {
+	return func(b *blobCollector) {
+		b.prefix = prefix
+	}
+}
+
+// WithMaxObjectSize caps the number of bytes read per object.
+func WithMaxObjectSize(n int64) Opt {
+	return func(b *blobCollector) {
+		b.maxObjectSize = n
+	}
+}
+
 // NewBlobCollector creates a cloud-agnostic collector that can collect
 // documents from any blob storage supported by gocloud.dev/blob (S3, GCS,
 // Azure Blob Storage, filesystem, etc).
@@ -76,6 +100,10 @@ func NewBlobCollector(ctx context.Context, opts ...Opt) (*blobCollector, error) 
 
 	for _, opt := range opts {
 		opt(bc)
+	}
+
+	if bc.maxObjectSize <= 0 {
+		bc.maxObjectSize = DefaultMaxObjectSize
 	}
 
 	if bc.bucket == nil {
@@ -129,7 +157,11 @@ func (b *blobCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 func (b *blobCollector) getArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
-	iter := b.bucket.List(nil)
+	var listOpts *blob.ListOptions
+	if b.prefix != "" {
+		listOpts = &blob.ListOptions{Prefix: b.prefix}
+	}
+	iter := b.bucket.List(listOpts)
 
 	for {
 		obj, err := iter.Next(ctx)
@@ -150,7 +182,11 @@ func (b *blobCollector) getArtifacts(ctx context.Context, docChannel chan<- *pro
 
 		payload, err := b.getObject(ctx, obj.Key)
 		if err != nil {
-			logger.Warnf("failed to retrieve object %q: %v", obj.Key, err)
+			if errors.Is(err, ErrObjectTooLarge) {
+				logger.Warnf("skipping %q: %v (max %d bytes)", obj.Key, err, b.maxObjectSize)
+			} else {
+				logger.Warnf("failed to retrieve object %q: %v", obj.Key, err)
+			}
 			continue
 		}
 		if len(payload) == 0 {
@@ -180,9 +216,13 @@ func (b *blobCollector) getObject(ctx context.Context, key string) ([]byte, erro
 	}
 	defer func() { _ = reader.Close() }()
 
-	data, err := io.ReadAll(reader)
+	limited := io.LimitReader(reader, b.maxObjectSize+1)
+	data, err := io.ReadAll(limited)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %q: %w", key, err)
+	}
+	if int64(len(data)) > b.maxObjectSize {
+		return nil, ErrObjectTooLarge
 	}
 	return data, nil
 }

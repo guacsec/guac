@@ -234,6 +234,112 @@ func TestBlobCollector_MultipleObjects(t *testing.T) {
 	}
 }
 
+func TestBlobCollector_WithPrefix(t *testing.T) {
+	ctx := context.Background()
+
+	bkt := memblob.OpenBucket(nil)
+	defer func() { _ = bkt.Close() }()
+
+	files := map[string][]byte{
+		"sboms/a.json":  []byte("a"),
+		"sboms/b.json":  []byte("b"),
+		"other/c.json":  []byte("c"),
+		"toplevel.json": []byte("d"),
+	}
+	for key, content := range files {
+		if err := bkt.WriteAll(ctx, key, content, nil); err != nil {
+			t.Fatalf("failed to write %s: %v", key, err)
+		}
+	}
+
+	bc, err := NewBlobCollector(ctx, WithBucket(bkt), WithPrefix("sboms/"))
+	if err != nil {
+		t.Fatalf("failed to create collector: %v", err)
+	}
+
+	docChan := make(chan *processor.Document, 10)
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- bc.RetrieveArtifacts(ctx, docChan)
+		close(docChan)
+	}()
+
+	var got []string
+	for doc := range docChan {
+		got = append(got, string(doc.Blob))
+	}
+	if err := <-errChan; err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+
+	if len(got) != 2 {
+		t.Fatalf("got %d documents, want 2 (only sboms/ prefix); got payloads: %v", len(got), got)
+	}
+	for _, payload := range got {
+		if payload != "a" && payload != "b" {
+			t.Errorf("unexpected document %q — prefix filter leaked", payload)
+		}
+	}
+}
+
+func TestBlobCollector_MaxObjectSize_SkipsOversized(t *testing.T) {
+	ctx := context.Background()
+
+	bkt := memblob.OpenBucket(nil)
+	defer func() { _ = bkt.Close() }()
+
+	small := []byte("tiny")
+	big := make([]byte, 4096)
+	for i := range big {
+		big[i] = 'x'
+	}
+	if err := bkt.WriteAll(ctx, "small.json", small, nil); err != nil {
+		t.Fatalf("write small: %v", err)
+	}
+	if err := bkt.WriteAll(ctx, "big.json", big, nil); err != nil {
+		t.Fatalf("write big: %v", err)
+	}
+
+	// Cap at 1024 bytes — big.json (4096 bytes) should be skipped.
+	bc, err := NewBlobCollector(ctx, WithBucket(bkt), WithMaxObjectSize(1024))
+	if err != nil {
+		t.Fatalf("failed to create collector: %v", err)
+	}
+
+	docChan := make(chan *processor.Document, 10)
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- bc.RetrieveArtifacts(ctx, docChan)
+		close(docChan)
+	}()
+
+	var got []string
+	for doc := range docChan {
+		got = append(got, string(doc.Blob))
+	}
+	if err := <-errChan; err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+
+	if len(got) != 1 || got[0] != "tiny" {
+		t.Fatalf("expected only 'small.json' to pass the size cap; got %v", got)
+	}
+}
+
+func TestBlobCollector_DefaultMaxObjectSize(t *testing.T) {
+	ctx := context.Background()
+	bkt := memblob.OpenBucket(nil)
+	defer func() { _ = bkt.Close() }()
+
+	bc, err := NewBlobCollector(ctx, WithBucket(bkt))
+	if err != nil {
+		t.Fatalf("failed to create collector: %v", err)
+	}
+	if bc.maxObjectSize != DefaultMaxObjectSize {
+		t.Errorf("default maxObjectSize = %d, want %d", bc.maxObjectSize, DefaultMaxObjectSize)
+	}
+}
+
 // checkWhileIgnoringLogger compares documents ignoring the ChildLogger field.
 func checkWhileIgnoringLogger(collectedDoc, want []*processor.Document) bool {
 	if len(collectedDoc) != len(want) {
