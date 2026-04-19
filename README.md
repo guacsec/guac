@@ -39,15 +39,14 @@ Starting the GUAC services with our
 
 ### Try in a Dev Container
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/guacsec/guac)
-
 The repo ships a [`.devcontainer`](./.devcontainer/devcontainer.json)
-config that brings up a full GUAC stack (GraphQL, REST, collectsub,
+config that brings up the full GUAC stack (GraphQL, REST, collectsub,
 ingestor, NATS, and the deps_dev / osv / ClearlyDefined collectors)
-backed by the published GUAC release image -- no local setup required.
-The GraphQL playground auto-previews on port 8080 and the REST API is
-on 8081. The same config also works with the VS Code Dev Containers
-extension (local, fully offline), JetBrains Gateway, and DevPod.
+locally on Docker, backed by the published GUAC release image. Open
+the repo in VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+and select "Reopen in Container" -- the GraphQL playground forwards
+to port 8080 and the REST API to 8081. Also works with JetBrains
+Gateway and [DevPod](https://devpod.sh).
 
 ## Docs
 
