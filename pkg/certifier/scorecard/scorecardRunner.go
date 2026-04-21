@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,7 +33,17 @@ import (
 	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 )
 
-const githubPrefix = "github.com/"
+const (
+	githubPrefix = "github.com/"
+	maxRetries   = 3
+)
+
+// Retry backoff for the scorecard API. The scorecard API is rate-limited,
+// so an exponential backoff retry is implemented on 429 and 5xx responses
+var (
+	initialRetryBackoff = 1 * time.Second
+	maxRetryBackoff     = 30 * time.Second
+)
 
 // scorecardRunner is a struct that implements the Scorecard interface.
 type scorecardRunner struct {
@@ -117,22 +128,12 @@ func (s scorecardRunner) fetchFromAPI(apiURL string) (*sc.Result, error) {
 		Timeout: 30 * time.Second,
 	}
 
-	req, err := http.NewRequestWithContext(s.ctx, http.MethodGet, apiURL, nil)
+	resp, err := s.requestWithRetry(httpClient, apiURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("User-Agent", "guac-scorecard-certifier/1.0")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("scorecard request failed: %w", err)
+		return nil, err
 	}
 	defer func() {
-		if resp != nil && resp.Body != nil {
-			_ = resp.Body.Close()
-		}
+		_ = resp.Body.Close()
 	}()
 
 	logger.Debugf("API response status code: %d", resp.StatusCode)
@@ -156,6 +157,81 @@ func (s scorecardRunner) fetchFromAPI(apiURL string) (*sc.Result, error) {
 	return &result, nil
 }
 
+// requestWithRetry makes a GET against the scorecard API and retries on 429 and 5xx responses
+// with exponential backoff, honoring Retry-After when the server provides it.
+func (s scorecardRunner) requestWithRetry(client *http.Client, apiURL string) (*http.Response, error) {
+	logger := logging.FromContext(s.ctx)
+	backoff := initialRetryBackoff
+	var lastErr error
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		req, err := http.NewRequestWithContext(s.ctx, http.MethodGet, apiURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create request: %w", err)
+		}
+		req.Header.Set("User-Agent", "guac-scorecard-certifier/1.0")
+		req.Header.Set("Accept", "application/json")
+
+		resp, requestError := client.Do(req)
+		if requestError == nil && !isRetryableStatus(resp.StatusCode) {
+			return resp, nil
+		}
+
+		wait := backoff
+		if requestError != nil {
+			lastErr = requestError
+		} else {
+			lastErr = fmt.Errorf("scorecard API returned retryable status %d", resp.StatusCode)
+			if ra, ok := parseRetryAfter(resp.Header.Get("Retry-After"), time.Now()); ok {
+				wait = ra
+			}
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+		}
+
+		if attempt == maxRetries {
+			break
+		}
+
+		logger.Warnf("scorecard API request failed (attempt %d/%d), retrying in %s: %v",
+			attempt+1, maxRetries+1, wait, lastErr)
+
+		select {
+		case <-s.ctx.Done():
+			return nil, s.ctx.Err()
+		case <-time.After(wait):
+		}
+
+		backoff = min(backoff*2, maxRetryBackoff)
+	}
+
+	return nil, fmt.Errorf("scorecard request failed after %d attempts: %w", maxRetries+1, lastErr)
+}
+
+func isRetryableStatus(code int) bool {
+	return code == http.StatusTooManyRequests || (code >= 500 && code <= 599)
+}
+
+// parseRetryAfter parses an HTTP Retry-After header value, which per RFC 7231
+// is either a delay in seconds or an HTTP-date.
+func parseRetryAfter(value string, now time.Time) (time.Duration, bool) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return 0, false
+	}
+	if secs, err := strconv.Atoi(value); err == nil && secs >= 0 {
+		return time.Duration(secs) * time.Second, true
+	}
+	if t, err := http.ParseTime(value); err == nil {
+		d := t.Sub(now)
+		if d <= 0 {
+			return 0, true
+		}
+		return d, true
+	}
+	return 0, false
+}
+
 func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
 	logger := logging.FromContext(s.ctx)
 	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
@@ -163,7 +239,6 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, _, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
-
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to get clients: %w", err)
 	}
@@ -197,7 +272,6 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 		releases, err := repoClient.ListReleases()
 		if err != nil {
 			return nil, fmt.Errorf("error, failed to run releases: %w", err)
-
 		}
 
 		for _, release := range releases {
