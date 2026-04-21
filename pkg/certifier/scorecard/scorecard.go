@@ -102,7 +102,8 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 }
 
 // NewScorecardCertifier initializes the scorecard certifier.
-// It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not, it returns an error.w
+// It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not,
+// a warning is logged; the scorecard API path still works without the token.
 // The token is used to access the GitHub API, https://github.com/ossf/scorecard#authentication.
 func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 	if sc == nil {
