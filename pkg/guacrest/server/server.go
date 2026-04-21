@@ -102,9 +102,33 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 }
 
 func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPackagePurlsRequestObject) (gen.GetPackagePurlsResponseObject, error) {
-	return gen.GetPackagePurls500JSONResponse{
-		InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
-			Message: "GetPackagePurls not implemented",
+	unescapedPurl, err := url.PathUnescape(request.Purl)
+	if err != nil {
+		return gen.GetPackagePurls400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("failed to unescape package url: %v", err),
+			},
+		}, nil
+	}
+
+	purls, err := FindMatchingPurls(ctx, s.gqlClient, unescapedPurl)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetPackagePurls).(gen.GetPackagePurlsResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.GetPackagePurls400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	totalCount := len(purls)
+	return gen.GetPackagePurls200JSONResponse{
+		PurlListJSONResponse: gen.PurlListJSONResponse{
+			PaginationInfo: gen.PaginationInfo{TotalCount: &totalCount},
+			PurlList:       purls,
 		},
 	}, nil
 }
