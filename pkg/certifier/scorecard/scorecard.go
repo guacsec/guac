@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/events"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v5/docs/checks"
 	"github.com/ossf/scorecard/v5/log"
 	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
@@ -101,7 +102,8 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 }
 
 // NewScorecardCertifier initializes the scorecard certifier.
-// It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not, it returns an error.w
+// It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not,
+// a warning is logged; the scorecard API path still works without the token.
 // The token is used to access the GitHub API, https://github.com/ossf/scorecard#authentication.
 func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 	if sc == nil {
@@ -111,7 +113,10 @@ func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 	// check if the GITHUB_AUTH_TOKEN is set
 	s, ok := os.LookupEnv("GITHUB_AUTH_TOKEN")
 	if !ok || s == "" {
-		return nil, fmt.Errorf("GITHUB_AUTH_TOKEN is not set")
+		// Log warning but allow initialization without token
+		// The API path will still work, only local computation will fail
+		logger := logging.FromContext(context.Background())
+		logger.Warnf("GITHUB_AUTH_TOKEN not set - scorecard API will work, but local computation fallback will be disabled")
 	}
 
 	return &scorecard{
