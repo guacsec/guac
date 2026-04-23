@@ -52,4 +52,5 @@ const (
 	CertifierScorecard      CertifierType = "scorecard"
 	CertifierEOL            CertifierType = "EOL"
 	CertifierDatadogMalware CertifierType = "DATADOG_MALWARE"
+	CertifierVEXHub         CertifierType = "vexhub"
 )
