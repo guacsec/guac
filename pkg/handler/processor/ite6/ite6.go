@@ -21,10 +21,15 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+// ite6Statement is used for unmarshalling in-toto statement headers.
+type ite6Statement struct {
+	Type          string `json:"_type"`
+	PredicateType string `json:"predicateType"`
+}
 
 type ITE6Processor struct {
 }
@@ -53,8 +58,8 @@ func (e *ITE6Processor) Unpack(i *processor.Document) ([]*processor.Document, er
 	return nil, nil
 }
 
-func parseStatement(p []byte) (*in_toto.Statement, error) {
-	ps := in_toto.Statement{}
+func parseStatement(p []byte) (*ite6Statement, error) {
+	ps := ite6Statement{}
 	if err := json.Unmarshal(p, &ps); err != nil {
 		return nil, err
 	}
