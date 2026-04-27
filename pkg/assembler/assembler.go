@@ -64,7 +64,7 @@ type IsOccurrenceIngest struct {
 	Pkg *generated.PkgInputSpec    `json:"pkg,omitempty"`
 	Src *generated.SourceInputSpec `json:"src,omitempty"`
 
-	// Artifact is the required object of the occurence
+	// Artifact is the required object of the occurrence
 	Artifact *generated.ArtifactInputSpec `json:"artifact,omitempty"`
 
 	IsOccurrence *generated.IsOccurrenceInputSpec `json:"isOccurrence,omitempty"`
