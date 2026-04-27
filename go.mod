@@ -323,7 +323,7 @@ require (
 	github.com/regclient/regclient v0.8.3
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sigstore/sigstore v1.10.4
+	github.com/sigstore/sigstore v1.10.5
 	github.com/spdx/tools-golang v0.5.7
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.11.1
@@ -500,7 +500,7 @@ require (
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/thoas/go-funk v0.9.3 // indirect
 	github.com/tidwall/jsonc v0.3.2 // indirect
-	github.com/tink-crypto/tink-go/v2 v2.5.0 // indirect
+	github.com/tink-crypto/tink-go/v2 v2.6.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/tonistiigi/go-csvvalue v0.0.0-20240814133006-030d3b2625d0 // indirect
