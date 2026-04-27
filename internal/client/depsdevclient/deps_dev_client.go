@@ -67,7 +67,7 @@ type PackageComponent struct {
 type DepsClient struct {
 	client  pb.InsightsClient
 	Metrics metrics.MetricCollector
-	// chekcedDepsPurls is a cache for depedency queries since they
+	// checkedDepsPurls is a cache for dependency queries since they
 	// can be rather large
 	checkedDepsPurls map[string]*PackageComponent
 
