@@ -137,7 +137,7 @@ func findPurlSearch(ctx context.Context, tree csaf.ProductBranch, product_ref st
 // findProductRef searches for a product reference string for the given product ID
 // by recursively traversing the CSAF product tree.
 //
-// findProductRefSearch was seperated from findProductRef so that the code can use
+// findProductRefSearch was separated from findProductRef so that the code can use
 // a visited map and avoid infinite recursion.
 //
 // It returns a pointer to the product reference string if found,

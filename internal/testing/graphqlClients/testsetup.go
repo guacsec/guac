@@ -48,7 +48,7 @@ func SetupTest(t *testing.T) graphql.Client {
 func startGraphqlServer(t *testing.T, gqlHandler *handler.Server) string {
 	srv := http.Server{Handler: gqlHandler}
 
-	// Create the listener explicitely in order to find the port it listens on
+	// Create the listener explicitly in order to find the port it listens on
 	listener, err := net.Listen("tcp", "")
 	if err != nil {
 		t.Fatalf("Error initializing listener for graphql server: %v", err)

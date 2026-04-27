@@ -10,8 +10,8 @@ GUAC is using Otel instrumented libraries for the following parts:
 - GRPC client for Deps.dev.
 
 Any cli that runs one of the above will have the `enable-otel` cli option
-available to setup the defult metric and trace providers. These are configured
-to connect to an Otel collector over GRPC. Config uses the below defualt env
+available to setup the default metric and trace providers. These are configured
+to connect to an Otel collector over GRPC. Config uses the below default env
 vars:
 
 - `OTEL_EXPORTER_OTLP_ENDPOINT`: Address of Otel collector to connect to

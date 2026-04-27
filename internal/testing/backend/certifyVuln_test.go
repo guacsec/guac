@@ -630,7 +630,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Query No Vuln - with novuln boolen",
+			Name:   "Query No Vuln - with novuln boolean",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
 			Calls: []call{
@@ -678,7 +678,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Query only cve (exclude novuln) - with novuln boolen",
+			Name:   "Query only cve (exclude novuln) - with novuln boolean",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
 			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
 			Calls: []call{
