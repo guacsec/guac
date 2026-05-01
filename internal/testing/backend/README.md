@@ -28,7 +28,7 @@ TestHasSBOM`
 * Tests should receive a `backends.Backend` object by calling
   `setupTest(t)`. All testing is done on the received backend.
 
-* Use `github.com/google/go-cmp/cmp` to compare expected and recieved
+* Use `github.com/google/go-cmp/cmp` to compare expected and received
   values. The `commonOpts` global is used for any `Diff()` calls to that
   library. Add any needed options to that global in `setupOpts()`.
 

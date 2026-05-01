@@ -475,7 +475,7 @@ func Test_ClientErrorsForPurl(t *testing.T) {
 				t.Fatalf("RetrieveDependencies returned unexpected error: %v", err)
 			}
 			if _, ok := res.(gen.GetPackageDeps400JSONResponse); !ok {
-				t.Fatalf("Did not receive a 400 Response: recieved %v of type %T", res, res)
+				t.Fatalf("Did not receive a 400 Response: received %v of type %T", res, res)
 			}
 
 		})

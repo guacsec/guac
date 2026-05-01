@@ -179,7 +179,7 @@ func Test_getSlsaEntity(t *testing.T) {
 					Version:   &version,
 					Subpath:   &emptyString,
 				},
-				occurence: &model.IsOccurrenceInputSpec{
+				occurrence: &model.IsOccurrenceInputSpec{
 					Justification: "from SLSA definition of checksums for subject/materials",
 				},
 			},
@@ -205,7 +205,7 @@ func Test_getSlsaEntity(t *testing.T) {
 					Subpath:   &emptyString,
 					Version:   &emptyString,
 				},
-				occurence: &model.IsOccurrenceInputSpec{
+				occurrence: &model.IsOccurrenceInputSpec{
 					Justification: "from SLSA definition of checksums for subject/materials",
 				},
 			},
@@ -236,8 +236,8 @@ func Test_getSlsaEntity(t *testing.T) {
 			if !reflect.DeepEqual(s.source, test.expected.source) {
 				t.Errorf("getSlsaEntity() source is not as expected. Expected: %v, Got: %v", s.source, test.expected.source)
 			}
-			if !reflect.DeepEqual(s.occurence, test.expected.occurence) {
-				t.Errorf("getSlsaEntity() occurence is not as expected. Expected: %v, Got: %v", s.occurence, test.expected.occurence)
+			if !reflect.DeepEqual(s.occurrence, test.expected.occurrence) {
+				t.Errorf("getSlsaEntity() occurrence is not as expected. Expected: %v, Got: %v", s.occurrence, test.expected.occurrence)
 			}
 			if !reflect.DeepEqual(s.artifacts, test.expected.artifacts) {
 				t.Errorf("getSlsaEntity() artifact is not as expected. Expected: %v, Got: %v", s.artifacts, test.expected.artifacts)

@@ -43,7 +43,7 @@ import (
 // each subject or object is made of:
 // - A artifact for each digest information
 // - a pkg or source depending on what is represented by the name/URI
-// - An IsOccurence input spec which will generate a predicate for each occurence
+// - An IsOccurrence input spec which will generate a predicate for each occurrence
 
 const PredicateSLSAProvenancev1 = "https://slsa.dev/provenance/v1"
 
@@ -52,8 +52,8 @@ var ErrBuilderNil = errors.New("SLSA Builder is nil")
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type slsaEntity struct {
-	artifacts []*model.ArtifactInputSpec
-	occurence *model.IsOccurrenceInputSpec
+	artifacts  []*model.ArtifactInputSpec
+	occurrence *model.IsOccurrenceInputSpec
 
 	// Either pkg or source
 	pkg    *model.PkgInputSpec
@@ -202,7 +202,7 @@ func getSlsaEntity(name, uri string, digests scommon.DigestSet) (*slsaEntity, er
 	artifacts := getArtifacts(digests)
 	slsa := &slsaEntity{
 		artifacts: artifacts,
-		occurence: &model.IsOccurrenceInputSpec{
+		occurrence: &model.IsOccurrenceInputSpec{
 			Justification: "from SLSA definition of checksums for subject/materials",
 		},
 	}
@@ -391,7 +391,7 @@ func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 				Pkg:          o.pkg,
 				Src:          o.source,
 				Artifact:     a,
-				IsOccurrence: o.occurence,
+				IsOccurrence: o.occurrence,
 			})
 		}
 	}
@@ -402,7 +402,7 @@ func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 				Pkg:          o.pkg,
 				Src:          o.source,
 				Artifact:     a,
-				IsOccurrence: o.occurence,
+				IsOccurrence: o.occurrence,
 			})
 		}
 	}

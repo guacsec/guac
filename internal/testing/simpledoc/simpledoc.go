@@ -37,7 +37,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 // Schema check should include:
 // issuer (required) - string
 // info (optional) - string
-// nested - list of objects that match currnet schema
+// nested - list of objects that match current schema
 //
 // and no other fields
 //

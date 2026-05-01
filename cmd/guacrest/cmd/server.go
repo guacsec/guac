@@ -74,7 +74,7 @@ func startServer() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	s := <-sigs
-	logger.Infof("signal recieved: %s, shutting down gracefully\n", s.String())
+	logger.Infof("signal received: %s, shutting down gracefully\n", s.String())
 
 	done := make(chan bool, 1)
 	ctx, cf := context.WithCancel(ctx)
