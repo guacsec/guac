@@ -25,7 +25,7 @@
             "name": "python",
             "versions": [
               {
-                "purl": "pkg:guac/cdx/docker.io/library/python@sha256%3Ae9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d?tag=latest",
+                "purl": "pkg:guac/cdx/docker.io/library/python@sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d?tag=latest",
                 "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",
                 "subpath": ""
               }
@@ -48,7 +48,7 @@
               "name": "python",
               "versions": [
                 {
-                  "purl": "pkg:guac/cdx/docker.io/library/python@sha256%3Ae9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d?tag=latest",
+                  "purl": "pkg:guac/cdx/docker.io/library/python@sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d?tag=latest",
                   "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",
                   "subpath": ""
                 }
