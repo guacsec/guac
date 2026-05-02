@@ -134,10 +134,35 @@ func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPack
 }
 
 func (s *DefaultServer) GetPackageVulns(ctx context.Context, request gen.GetPackageVulnsRequestObject) (gen.GetPackageVulnsResponseObject, error) {
-	return gen.GetPackageVulns500JSONResponse{
-		InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
-			Message: "GetPackageVulns not implemented",
-		},
+	unescapedPurl, err := url.PathUnescape(request.Purl)
+	if err != nil {
+		return gen.GetPackageVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("failed to unescape package url: %v", err),
+			},
+		}, nil
+	}
+
+	includeDeps := false
+	if request.Params.IncludeDependencies != nil {
+		includeDeps = *request.Params.IncludeDependencies
+	}
+
+	vulns, err := GetVulnsForPackage(ctx, s.gqlClient, unescapedPurl, includeDeps)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetPackageVulns).(gen.GetPackageVulnsResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.GetPackageVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return gen.GetPackageVulns200JSONResponse{
+		VulnerabilityListJSONResponse: vulns,
 	}, nil
 }
 

@@ -41,6 +41,31 @@ func GetVulnsForArtifact(ctx context.Context, gqlClient graphql.Client, digest s
 	return vulnsForPackageIDs(ctx, gqlClient, pkgIDs)
 }
 
+// GetVulnsForPackage returns the vulnerabilities certified against the
+// package identified by purl. When includeDependencies is true the returned
+// list also contains vulnerabilities certified against any transitive
+// dependency of that package.
+func GetVulnsForPackage(ctx context.Context, gqlClient graphql.Client, purl string, includeDependencies bool) ([]gen.Vulnerability, error) {
+	pkg, err := helpers.FindPackageWithPurl(ctx, gqlClient, purl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find package: %w", err)
+	}
+	pkgIDs := []string{pkg.Id}
+	if includeDependencies {
+		deps, err := GetDepsForPackage(ctx, gqlClient, purl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get dependencies: %w", err)
+		}
+		for depID := range deps {
+			if depID == pkg.Id {
+				continue
+			}
+			pkgIDs = append(pkgIDs, depID)
+		}
+	}
+	return vulnsForPackageIDs(ctx, gqlClient, pkgIDs)
+}
+
 // packageIDsForArtifact walks artifact -> IsOccurrence -> package and
 // returns the de-duplicated set of package version IDs.
 func packageIDsForArtifact(ctx context.Context, gqlClient graphql.Client, artID string) ([]string, error) {
