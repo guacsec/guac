@@ -41,38 +41,53 @@ import (
 const PayloadType = "application/vnd.in-toto+json"
 
 // StatementInTotoV01 is the in-toto v0.1 statement type.
+// Mirrors the canonical upstream type URI from github.com/in-toto/in-toto-golang.
 const StatementInTotoV01 = "https://in-toto.io/Statement/v0.1"
 
 // predicateSLSAProvenanceV02 is the predicate type for SLSAv0.2 provenance.
+// Mirrors parser_slsa.PredicateSLSAProvenanceV02.
 const predicateSLSAProvenanceV02 = "https://slsa.dev/provenance/v0.2"
 
-// digestSet is a set of digests keyed by algorithm name.
+// digestSet is a set of digests keyed by algorithm name (e.g. "sha256").
+// Mirrors the DigestSet type from github.com/in-toto/in-toto-golang/in_toto.
 type digestSet = map[string]string
 
 // provenanceBuilder identifies the entity that executed the build steps.
+// Mirrors the ProvenanceBuilder type from github.com/in-toto/in-toto-golang/in_toto
+// with the same JSON field name to ensure the test exercises the correct wire format.
 type provenanceBuilder struct {
 	ID string `json:"id"`
 }
 
 // subject describes the set of software artifacts the statement applies to.
+// Mirrors the Subject type from github.com/in-toto/in-toto-golang/in_toto
+// with the same JSON field names to ensure the test exercises the correct wire format.
 type subject struct {
 	Name   string    `json:"name"`
 	Digest digestSet `json:"digest"`
 }
 
-// statementHeader defines the common fields for all statements.
+// statementHeader defines the common fields for all in-toto v0.1 statements.
+// Mirrors the StatementHeader type from github.com/in-toto/in-toto-golang/in_toto
+// with identical JSON tags (_type, predicateType, subject) to exercise the
+// exact wire format the verifier processes in production.
 type statementHeader struct {
 	Type          string    `json:"_type"`
 	PredicateType string    `json:"predicateType"`
 	Subject       []subject `json:"subject"`
 }
 
-// provenancePredicate is the SLSA v0.2 provenance predicate (simplified for testing).
+// provenancePredicate is the SLSA v0.2 provenance predicate.
+// Mirrors the ProvenancePredicate type from github.com/in-toto/in-toto-golang/in_toto
+// (simplified to only the fields needed for signing/verification testing).
 type provenancePredicate struct {
 	Builder provenanceBuilder `json:"builder"`
 }
 
-// provenanceStatement is the definition for an entire provenance statement (for testing).
+// provenanceStatement is the complete in-toto v0.1 provenance statement.
+// Mirrors the ProvenanceStatement type from github.com/in-toto/in-toto-golang/in_toto
+// with the same embedded statementHeader and JSON field names to ensure
+// the test exercises the exact format the verifier consumes in production.
 type provenanceStatement struct {
 	statementHeader
 	Predicate provenancePredicate `json:"predicate"`

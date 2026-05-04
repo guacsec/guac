@@ -19,9 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"strings"
-	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -42,80 +40,13 @@ import (
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurrence input spec which will generate a predicate for each occurrence
 
-// DigestSet is a set of digests keyed by algorithm name (e.g. "sha256").
-type DigestSet = map[string]string
-
-// ProvenanceMaterial represents a material used in a provenance attestation.
-type ProvenanceMaterial struct {
-	URI    string    `json:"uri"`
-	Digest DigestSet `json:"digest,omitempty"`
-}
-
-// ProvenanceBuilder identifies the entity that executed the build steps.
-type ProvenanceBuilder struct {
-	ID string `json:"id"`
-}
-
 const (
 	PredicateSLSAProvenanceV01 = "https://slsa.dev/provenance/v0.1"
 	PredicateSLSAProvenanceV02 = "https://slsa.dev/provenance/v0.2"
 
-	// PredicateSLSAProvenancev1 is the predicate type for SLSAv1.0 provenance.
-	PredicateSLSAProvenancev1 = "https://slsa.dev/provenance/v1"
+	// PredicateSLSAProvenanceV1 is the predicate type for SLSAv1.0 provenance.
+	PredicateSLSAProvenanceV1 = "https://slsa.dev/provenance/v1"
 )
-
-// ProvenancePredicateV01 is the SLSA v0.1 provenance predicate.
-type ProvenancePredicateV01 struct {
-	Builder   ProvenanceBuilder       `json:"builder"`
-	Recipe    ProvenanceRecipe        `json:"recipe"`
-	Metadata  *ProvenanceMetadataV01  `json:"metadata,omitempty"`
-	Materials []ProvenanceMaterial    `json:"materials,omitempty"`
-}
-
-// ProvenanceRecipe describes how the artifact was produced (SLSA v0.1).
-type ProvenanceRecipe struct {
-	Type              string      `json:"type"`
-	DefinedInMaterial *int        `json:"definedInMaterial,omitempty"`
-	EntryPoint        string      `json:"entryPoint,omitempty"`
-	Arguments         interface{} `json:"arguments,omitempty"`
-	Environment       interface{} `json:"environment,omitempty"`
-}
-
-// ProvenanceMetadataV01 holds build metadata for SLSA v0.1 provenance.
-type ProvenanceMetadataV01 struct {
-	BuildInvocationID string     `json:"buildInvocationId,omitempty"`
-	BuildStartedOn    *time.Time `json:"buildStartedOn,omitempty"`
-	BuildFinishedOn   *time.Time `json:"buildFinishedOn,omitempty"`
-	Completeness      struct {
-		Arguments   bool `json:"arguments"`
-		Environment bool `json:"environment"`
-		Materials   bool `json:"materials"`
-	} `json:"completeness"`
-	Reproducible bool `json:"reproducible"`
-}
-
-// ProvenancePredicateV02 is the SLSA v0.2 provenance predicate.
-type ProvenancePredicateV02 struct {
-	Builder     ProvenanceBuilder       `json:"builder"`
-	BuildType   string                  `json:"buildType"`
-	Invocation  interface{}             `json:"invocation,omitempty"`
-	BuildConfig interface{}             `json:"buildConfig,omitempty"`
-	Metadata    *ProvenanceMetadataV02  `json:"metadata,omitempty"`
-	Materials   []ProvenanceMaterial    `json:"materials,omitempty"`
-}
-
-// ProvenanceMetadataV02 holds build metadata for SLSA v0.2 provenance.
-type ProvenanceMetadataV02 struct {
-	BuildInvocationID string     `json:"buildInvocationId,omitempty"`
-	BuildStartedOn    *time.Time `json:"buildStartedOn,omitempty"`
-	BuildFinishedOn   *time.Time `json:"buildFinishedOn,omitempty"`
-	Completeness      struct {
-		Parameters  bool `json:"parameters"`
-		Environment bool `json:"environment"`
-		Materials   bool `json:"materials"`
-	} `json:"completeness"`
-	Reproducible bool `json:"reproducible"`
-}
 
 var ErrMetadataNil = errors.New("SLSA Metadata is nil")
 var ErrBuilderNil = errors.New("SLSA Builder is nil")
@@ -209,7 +140,7 @@ func (s *slsaParser) getMaterials() error {
 		if err := s.getMaterials0(s.pred02.Materials); err != nil {
 			return err
 		}
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		if s.pred1.BuildDefinition == nil {
 			return errors.New("SLSA1 buildDefinition is nil")
 		}
@@ -370,7 +301,7 @@ func (s *slsaParser) getSLSA() error {
 		if data, err = json.Marshal(s.pred02); err != nil {
 			return fmt.Errorf("could not marshal SLSA02: %w", err)
 		}
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		if err := fillSLSA1(inp, s.pred1); err != nil {
 			return fmt.Errorf("could not fill SLSA1: %w", err)
 		}
@@ -409,7 +340,7 @@ func (s *slsaParser) getBuilder() error {
 		s.builder.Uri = s.pred01.Builder.ID
 	case PredicateSLSAProvenanceV02:
 		s.builder.Uri = s.pred02.Builder.ID
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		if s.pred1.RunDetails == nil || s.pred1.RunDetails.Builder == nil {
 			return ErrBuilderNil
 		}
@@ -440,7 +371,7 @@ func (s *slsaParser) parseSlsaPredicate(p []byte) error {
 		if err := json.Unmarshal(predBytes, s.pred02); err != nil {
 			return fmt.Errorf("Could not unmarshal v0.2 SLSA provenance statement : %w", err)
 		}
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		s.pred1 = &slsa1.Provenance{}
 		if err := protojson.Unmarshal(predBytes, s.pred1); err != nil {
 			return fmt.Errorf("Could not unmarshal v1.0 SLSA provenance statement : %w", err)

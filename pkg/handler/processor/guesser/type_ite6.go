@@ -35,19 +35,32 @@ type ite6Statement struct {
 }
 
 // getType returns the statement type from whichever format was used.
+// in-toto v1 is the current standard; v0.1 is supported for backwards
+// compatibility. A document that populates both _type and type is malformed.
 func (s *ite6Statement) getType() string {
-	if s.TypeV01 != "" {
-		return s.TypeV01
+	if s.TypeV1 != "" && s.TypeV01 != "" {
+		// Both fields set: reject the ambiguous/malformed document.
+		return ""
 	}
-	return s.TypeV1
+	if s.TypeV1 != "" {
+		return s.TypeV1
+	}
+	return s.TypeV01
 }
 
 // getPredicateType returns the predicate type from whichever format was used.
+// in-toto v1 is the current standard; v0.1 is supported for backwards
+// compatibility. A document that populates both predicateType and predicate_type
+// is malformed.
 func (s *ite6Statement) getPredicateType() string {
-	if s.PredicateTypeV01 != "" {
-		return s.PredicateTypeV01
+	if s.PredicateTypeV1 != "" && s.PredicateTypeV01 != "" {
+		// Both fields set: reject the ambiguous/malformed document.
+		return ""
 	}
-	return s.PredicateTypeV1
+	if s.PredicateTypeV1 != "" {
+		return s.PredicateTypeV1
+	}
+	return s.PredicateTypeV01
 }
 
 type ite6TypeGuesser struct{}
