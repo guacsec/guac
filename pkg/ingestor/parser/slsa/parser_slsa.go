@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -258,7 +259,7 @@ func fillSLSA02(inp *model.SLSAInputSpec, pred *ProvenancePredicateV02) error {
 		inp.StartedOn = pred.Metadata.BuildStartedOn
 	}
 	if pred.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = pred.Metadata.BuildStartedOn
+		inp.FinishedOn = pred.Metadata.BuildFinishedOn
 	}
 	return nil
 }
@@ -273,7 +274,7 @@ func fillSLSA1(inp *model.SLSAInputSpec, pred *slsa1.Provenance) error {
 		inp.StartedOn = &startTimePB
 	}
 	if pred.RunDetails.Metadata.FinishedOn != nil {
-		finishTimePB := time.Unix(pred.RunDetails.Metadata.StartedOn.GetSeconds(), int64(pred.RunDetails.Metadata.StartedOn.GetNanos()))
+		finishTimePB := time.Unix(pred.RunDetails.Metadata.FinishedOn.GetSeconds(), int64(pred.RunDetails.Metadata.FinishedOn.GetNanos()))
 		inp.FinishedOn = &finishTimePB
 	}
 	return nil
