@@ -71,7 +71,7 @@ func buildTopicURL(serviceURL string) string {
 // If using NATS, additional parameters are needed for jetstream
 func buildSubscriptionURL(serviceURL string) string {
 	if strings.HasPrefix(serviceURL, "nats://") {
-		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", serviceURL, "jetstream", subjectNameDocCollected, durableProcessor, streamName, streamSubjects)
+		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable_name=%s&stream_name=%s&stream_subjects=%s", serviceURL, "jetstream", subjectNameDocCollected, durableProcessor, streamName, streamSubjects)
 	} else {
 		return serviceURL
 	}
