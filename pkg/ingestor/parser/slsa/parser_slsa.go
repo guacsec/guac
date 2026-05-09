@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"strings"
 	"time"
 
@@ -27,9 +26,6 @@ import (
 
 	slsa1 "github.com/in-toto/attestation/go/predicates/provenance/v1"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
-	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
-	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
-	slsa02 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
 	"github.com/jeremywohl/flatten"
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -45,7 +41,13 @@ import (
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurrence input spec which will generate a predicate for each occurrence
 
-const PredicateSLSAProvenancev1 = "https://slsa.dev/provenance/v1"
+const (
+	PredicateSLSAProvenanceV01 = "https://slsa.dev/provenance/v0.1"
+	PredicateSLSAProvenanceV02 = "https://slsa.dev/provenance/v0.2"
+
+	// PredicateSLSAProvenanceV1 is the predicate type for SLSAv1.0 provenance.
+	PredicateSLSAProvenanceV1 = "https://slsa.dev/provenance/v1"
+)
 
 var ErrMetadataNil = errors.New("SLSA Metadata is nil")
 var ErrBuilderNil = errors.New("SLSA Builder is nil")
@@ -61,8 +63,8 @@ type slsaEntity struct {
 }
 
 type slsaParser struct {
-	pred01            *slsa01.ProvenancePredicate
-	pred02            *slsa02.ProvenancePredicate
+	pred01            *ProvenancePredicateV01
+	pred02            *ProvenancePredicateV02
 	pred1             *slsa1.Provenance
 	smt               *attestationv1.Statement
 	subjects          []*slsaEntity
@@ -131,15 +133,15 @@ func (s *slsaParser) getSubject() error {
 
 func (s *slsaParser) getMaterials() error {
 	switch s.smt.PredicateType {
-	case slsa01.PredicateSLSAProvenance:
+	case PredicateSLSAProvenanceV01:
 		if err := s.getMaterials0(s.pred01.Materials); err != nil {
 			return err
 		}
-	case slsa02.PredicateSLSAProvenance:
+	case PredicateSLSAProvenanceV02:
 		if err := s.getMaterials0(s.pred02.Materials); err != nil {
 			return err
 		}
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		if s.pred1.BuildDefinition == nil {
 			return errors.New("SLSA1 buildDefinition is nil")
 		}
@@ -174,7 +176,7 @@ func (s *slsaParser) getMaterials1(rds []*attestationv1.ResourceDescriptor) erro
 	return nil
 }
 
-func (s *slsaParser) getMaterials0(materials []scommon.ProvenanceMaterial) error {
+func (s *slsaParser) getMaterials0(materials []ProvenanceMaterial) error {
 	// append dependency nodes for the materials
 	for _, mat := range materials {
 		s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, mat.URI)
@@ -187,7 +189,7 @@ func (s *slsaParser) getMaterials0(materials []scommon.ProvenanceMaterial) error
 	return nil
 }
 
-func getArtifacts(digests scommon.DigestSet) []*model.ArtifactInputSpec {
+func getArtifacts(digests DigestSet) []*model.ArtifactInputSpec {
 	var artifacts []*model.ArtifactInputSpec
 	for alg, ds := range digests {
 		artifacts = append(artifacts, &model.ArtifactInputSpec{
@@ -198,7 +200,7 @@ func getArtifacts(digests scommon.DigestSet) []*model.ArtifactInputSpec {
 	return artifacts
 }
 
-func getSlsaEntity(name, uri string, digests scommon.DigestSet) (*slsaEntity, error) {
+func getSlsaEntity(name, uri string, digests DigestSet) (*slsaEntity, error) {
 	artifacts := getArtifacts(digests)
 	slsa := &slsaEntity{
 		artifacts: artifacts,
@@ -231,7 +233,7 @@ func getSlsaEntity(name, uri string, digests scommon.DigestSet) (*slsaEntity, er
 	return nil, fmt.Errorf("%w unable to get Guac Generic Purl, this should not happen", err)
 }
 
-func fillSLSA01(inp *model.SLSAInputSpec, pred *slsa01.ProvenancePredicate) error {
+func fillSLSA01(inp *model.SLSAInputSpec, pred *ProvenancePredicateV01) error {
 	inp.BuildType = pred.Recipe.Type
 
 	if pred.Metadata == nil {
@@ -247,7 +249,7 @@ func fillSLSA01(inp *model.SLSAInputSpec, pred *slsa01.ProvenancePredicate) erro
 	return nil
 }
 
-func fillSLSA02(inp *model.SLSAInputSpec, pred *slsa02.ProvenancePredicate) error {
+func fillSLSA02(inp *model.SLSAInputSpec, pred *ProvenancePredicateV02) error {
 	inp.BuildType = pred.BuildType
 
 	if pred.Metadata == nil {
@@ -257,7 +259,7 @@ func fillSLSA02(inp *model.SLSAInputSpec, pred *slsa02.ProvenancePredicate) erro
 		inp.StartedOn = pred.Metadata.BuildStartedOn
 	}
 	if pred.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = pred.Metadata.BuildStartedOn
+		inp.FinishedOn = pred.Metadata.BuildFinishedOn
 	}
 	return nil
 }
@@ -272,7 +274,7 @@ func fillSLSA1(inp *model.SLSAInputSpec, pred *slsa1.Provenance) error {
 		inp.StartedOn = &startTimePB
 	}
 	if pred.RunDetails.Metadata.FinishedOn != nil {
-		finishTimePB := time.Unix(pred.RunDetails.Metadata.StartedOn.GetSeconds(), int64(pred.RunDetails.Metadata.StartedOn.GetNanos()))
+		finishTimePB := time.Unix(pred.RunDetails.Metadata.FinishedOn.GetSeconds(), int64(pred.RunDetails.Metadata.FinishedOn.GetNanos()))
 		inp.FinishedOn = &finishTimePB
 	}
 	return nil
@@ -286,21 +288,21 @@ func (s *slsaParser) getSLSA() error {
 	var data []byte
 	var err error
 	switch s.smt.PredicateType {
-	case slsa01.PredicateSLSAProvenance:
+	case PredicateSLSAProvenanceV01:
 		if err := fillSLSA01(inp, s.pred01); err != nil {
 			return fmt.Errorf("could not fill SLSA01: %w", err)
 		}
 		if data, err = json.Marshal(s.pred01); err != nil {
 			return fmt.Errorf("could not marshal SLSA01: %w", err)
 		}
-	case slsa02.PredicateSLSAProvenance:
+	case PredicateSLSAProvenanceV02:
 		if err := fillSLSA02(inp, s.pred02); err != nil {
 			return fmt.Errorf("could not fill SLSA02: %w", err)
 		}
 		if data, err = json.Marshal(s.pred02); err != nil {
 			return fmt.Errorf("could not marshal SLSA02: %w", err)
 		}
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		if err := fillSLSA1(inp, s.pred1); err != nil {
 			return fmt.Errorf("could not fill SLSA1: %w", err)
 		}
@@ -335,11 +337,11 @@ func (s *slsaParser) getSLSA() error {
 func (s *slsaParser) getBuilder() error {
 	s.builder = &model.BuilderInputSpec{}
 	switch s.smt.PredicateType {
-	case slsa01.PredicateSLSAProvenance:
+	case PredicateSLSAProvenanceV01:
 		s.builder.Uri = s.pred01.Builder.ID
-	case slsa02.PredicateSLSAProvenance:
+	case PredicateSLSAProvenanceV02:
 		s.builder.Uri = s.pred02.Builder.ID
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		if s.pred1.RunDetails == nil || s.pred1.RunDetails.Builder == nil {
 			return ErrBuilderNil
 		}
@@ -360,17 +362,17 @@ func (s *slsaParser) parseSlsaPredicate(p []byte) error {
 	}
 
 	switch s.smt.PredicateType {
-	case slsa01.PredicateSLSAProvenance:
-		s.pred01 = &slsa01.ProvenancePredicate{}
+	case PredicateSLSAProvenanceV01:
+		s.pred01 = &ProvenancePredicateV01{}
 		if err := json.Unmarshal(predBytes, s.pred01); err != nil {
 			return fmt.Errorf("Could not unmarshal v0.1 SLSA provenance statement : %w", err)
 		}
-	case slsa02.PredicateSLSAProvenance:
-		s.pred02 = &slsa02.ProvenancePredicate{}
+	case PredicateSLSAProvenanceV02:
+		s.pred02 = &ProvenancePredicateV02{}
 		if err := json.Unmarshal(predBytes, s.pred02); err != nil {
 			return fmt.Errorf("Could not unmarshal v0.2 SLSA provenance statement : %w", err)
 		}
-	case PredicateSLSAProvenancev1:
+	case PredicateSLSAProvenanceV1:
 		s.pred1 = &slsa1.Provenance{}
 		if err := protojson.Unmarshal(predBytes, s.pred1); err != nil {
 			return fmt.Errorf("Could not unmarshal v1.0 SLSA provenance statement : %w", err)

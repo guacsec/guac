@@ -21,40 +21,66 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	attestationv1 "github.com/in-toto/attestation/go/v1"
-	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+// ite6Statement supports unmarshalling both v0.1 ("_type", "predicateType")
+// and v1 ("type", "predicate_type") in-toto statement formats.
+type ite6Statement struct {
+	TypeV01          string `json:"_type"`
+	PredicateTypeV01 string `json:"predicateType"`
+	TypeV1           string `json:"type"`
+	PredicateTypeV1  string `json:"predicate_type"`
+}
+
+// getType returns the statement type from whichever format was used.
+// in-toto v1 is the current standard; v0.1 is supported for backwards
+// compatibility. A document that populates both _type and type is malformed.
+func (s *ite6Statement) getType() string {
+	if s.TypeV1 != "" && s.TypeV01 != "" {
+		// Both fields set: reject the ambiguous/malformed document.
+		return ""
+	}
+	if s.TypeV1 != "" {
+		return s.TypeV1
+	}
+	return s.TypeV01
+}
+
+// getPredicateType returns the predicate type from whichever format was used.
+// in-toto v1 is the current standard; v0.1 is supported for backwards
+// compatibility. A document that populates both predicateType and predicate_type
+// is malformed.
+func (s *ite6Statement) getPredicateType() string {
+	if s.PredicateTypeV1 != "" && s.PredicateTypeV01 != "" {
+		// Both fields set: reject the ambiguous/malformed document.
+		return ""
+	}
+	if s.PredicateTypeV1 != "" {
+		return s.PredicateTypeV1
+	}
+	return s.PredicateTypeV01
+}
+
 type ite6TypeGuesser struct{}
 
 func (_ *ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	var statement in_toto.Statement
+	var statement ite6Statement
 	if json.Unmarshal(blob, &statement) == nil && format == processor.FormatJSON {
-		if strings.HasPrefix(statement.Type, "https://in-toto.io/Statement") {
-			if strings.HasPrefix(statement.PredicateType, "https://slsa.dev/provenance") {
+		stmtType := statement.getType()
+		predicateType := statement.getPredicateType()
+		if strings.HasPrefix(stmtType, "https://in-toto.io/Statement") {
+			if strings.HasPrefix(predicateType, "https://slsa.dev/provenance") {
 				return processor.DocumentITE6SLSA
-			} else if strings.HasPrefix(statement.PredicateType, "https://crev.dev/in-toto-scheme") {
+			} else if strings.HasPrefix(predicateType, "https://crev.dev/in-toto-scheme") {
 				return processor.DocumentITE6Generic
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/certify/v0.1") {
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/certify/v0.1") {
 				return processor.DocumentITE6Generic
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.1") ||
-				strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.2") {
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/vulns/v0.1") ||
+				strings.HasPrefix(predicateType, "https://in-toto.io/attestation/vulns/v0.2") {
 				return processor.DocumentITE6Vul
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
-				return processor.DocumentITE6ClearlyDefined
-			}
-			return processor.DocumentITE6Generic
-		}
-	}
-	var attV1Statement attestationv1.Statement
-	if json.Unmarshal(blob, &attV1Statement) == nil && format == processor.FormatJSON {
-		if strings.HasPrefix(attV1Statement.Type, "https://in-toto.io/Statement") {
-			if strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.1") ||
-				strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.2") {
-				return processor.DocumentITE6Vul
-			} else if strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
 				return processor.DocumentITE6ClearlyDefined
 			}
 			return processor.DocumentITE6Generic
