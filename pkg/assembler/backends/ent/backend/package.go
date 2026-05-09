@@ -249,16 +249,17 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			return nil, errors.Wrap(err, "bulk upsert pkgName node")
 		}
 
-		if err := tx.PackageVersion.CreateBulk(pkgVersionCreates...).
-			OnConflict(
-				sql.ConflictColumns(
-					packageversion.FieldHash,
-					packageversion.FieldNameID,
-				),
-			).
-			DoNothing().
-			Exec(ctx); err != nil && err != stdsql.ErrNoRows {
-
+		if err := retryOnFKViolation(ctx, func() error {
+			return tx.PackageVersion.CreateBulk(pkgVersionCreates...).
+				OnConflict(
+					sql.ConflictColumns(
+						packageversion.FieldHash,
+						packageversion.FieldNameID,
+					),
+				).
+				DoNothing().
+				Exec(ctx)
+		}); err != nil && err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "bulk upsert pkgVersion node")
 		}
 	}
@@ -293,18 +294,18 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, &pkg)
 
-	if err := pkgVersionCreate.
-		OnConflict(
-			sql.ConflictColumns(
-				packageversion.FieldHash,
-				packageversion.FieldNameID,
-			),
-		).
-		DoNothing().
-		Exec(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package version")
-		}
+	if err := retryOnFKViolation(ctx, func() error {
+		return pkgVersionCreate.
+			OnConflict(
+				sql.ConflictColumns(
+					packageversion.FieldHash,
+					packageversion.FieldNameID,
+				),
+			).
+			DoNothing().
+			Exec(ctx)
+	}); err != nil && err != stdsql.ErrNoRows {
+		return nil, errors.Wrap(err, "upsert package version")
 	}
 
 	return &model.PackageIDs{
