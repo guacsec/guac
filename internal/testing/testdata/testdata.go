@@ -2512,6 +2512,9 @@ var (
 				"version": "0.0.14",
 				"result": [
 					{
+						"id": "GHSA-3g76-f9xq-8vp6"
+					},
+					{
 						"id": "GHSA-9ph3-v2vh-3qx7"
 					},
 					{
@@ -2631,6 +2634,9 @@ var (
 				"uri": "osv.dev",
 				"version": "0.0.14",
 				"result": [
+					{
+						"id": "GHSA-3g76-f9xq-8vp6"
+					},
 					{
 						"id": "GHSA-9ph3-v2vh-3qx7"
 					},
