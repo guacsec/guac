@@ -574,8 +574,8 @@ github.com/fxamacker/cbor/v2 v2.9.0 h1:NpKPmjDBgUfBms6tr6JZkTHtfFGcMKsw3eGcmD/sa
 github.com/fxamacker/cbor/v2 v2.9.0/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
 github.com/gabriel-vasile/mimetype v1.4.13 h1:46nXokslUBsAJE/wMsp5gtO500a4F3Nkz9Ufpk2AcUM=
 github.com/gabriel-vasile/mimetype v1.4.13/go.mod h1:d+9Oxyo1wTzWdyVUPMmXFvp4F9tea18J8ufA774AB3s=
-github.com/getkin/kin-openapi v0.131.0 h1:NO2UeHnFKRYhZ8wg6Nyh5Cq7dHk4suQQr72a4pMrDxE=
-github.com/getkin/kin-openapi v0.131.0/go.mod h1:3OlG51PCYNsPByuiMB0t4fjnNlIDnaEDsjiKUV8nL58=
+github.com/getkin/kin-openapi v0.138.0 h1:ebfE0JAmF6AqHrNBy1KO3Fs68K9tPs48HalvLPo7Rv4=
+github.com/getkin/kin-openapi v0.138.0/go.mod h1:vUYWaKyMqj7PfTybelXtLuLN9tReS12vxnzMRK+z2GY=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/github/go-spdx/v2 v2.4.0 h1:+4IwVwJJbm3rzvrQ6P1nI9BDMcy3la4RchRy5uehV/M=
 github.com/github/go-spdx/v2 v2.4.0/go.mod h1:/5rwgS0txhGtRdUZwc02bTglzg6HK3FfuEbECKlK2Sg=
@@ -1143,10 +1143,10 @@ github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 h1:ykgG34472DWey7TSjd8vIfNykXgjOg
 github.com/oapi-codegen/oapi-codegen/v2 v2.4.1/go.mod h1:N5+lY1tiTDV3V1BeHtOxeWXHoPVeApvsvjJqegfoaz8=
 github.com/oapi-codegen/runtime v1.1.1 h1:EXLHh0DXIJnWhdRPN2w4MXAzFyE4CskzhNLUmtpMYro=
 github.com/oapi-codegen/runtime v1.1.1/go.mod h1:SK9X900oXmPWilYR5/WKPzt3Kqxn/uS/+lbpREv+eCg=
-github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 h1:G7ERwszslrBzRxj//JalHPu/3yz+De2J+4aLtSRlHiY=
-github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037/go.mod h1:2bpvgLBZEtENV5scfDFEtB/5+1M4hkQhDQrccEJ/qGw=
-github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 h1:bQx3WeLcUWy+RletIKwUIt4x3t8n2SxavmoclizMb8c=
-github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90/go.mod h1:y5+oSEHCPT/DGrS++Wc/479ERge0zTFxaF8PbGKcg2o=
+github.com/oasdiff/yaml v0.0.9 h1:zQOvd2UKoozsSsAknnWoDJlSK4lC0mpmjfDsfqNwX48=
+github.com/oasdiff/yaml v0.0.9/go.mod h1:8lvhgJG4xiKPj3HN5lDow4jZHPlx1i7dIwzkdAo6oAM=
+github.com/oasdiff/yaml3 v0.0.12 h1:75urAtPeDg2/iDEWwzNrLOWxI9N/dCh81nTTJtokt2M=
+github.com/oasdiff/yaml3 v0.0.12/go.mod h1:y5+oSEHCPT/DGrS++Wc/479ERge0zTFxaF8PbGKcg2o=
 github.com/olareg/olareg v0.1.2 h1:75G8X6E9FUlzL/CSjgFcYfMgNzlc7CxULpUUNsZBIvI=
 github.com/olareg/olareg v0.1.2/go.mod h1:TWs+N6pO1S4bdB6eerzUm/ITRQ6kw91mVf9ZYeGtw+Y=
 github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 h1:zrbMGy9YXpIeTnGj4EljqMiZsIcE09mmF8XsD5AYOJc=
@@ -1307,8 +1307,8 @@ github.com/sagikazarmark/locafero v0.11.0 h1:1iurJgmM9G3PA/I+wWYIOw/5SyBtxapeHDc
 github.com/sagikazarmark/locafero v0.11.0/go.mod h1:nVIGvgyzw595SUSUE6tvCp3YYTeHs15MvlmU87WwIik=
 github.com/sanity-io/litter v1.5.8 h1:uM/2lKrWdGbRXDrIq08Lh9XtVYoeGtcQxk9rtQ7+rYg=
 github.com/sanity-io/litter v1.5.8/go.mod h1:9gzJgR2i4ZpjZHsKvUXIRQVk7P+yM3e+jAF7bU2UI5U=
-github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 h1:PKK9DyHxif4LZo+uQSgXNqs0jj5+xZwwfKHgph2lxBw=
-github.com/santhosh-tekuri/jsonschema/v6 v6.0.1/go.mod h1:JXeL+ps8p7/KNMjDQk3TCwPpBy0wYklyWTfbkIzdIFU=
+github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 h1:KRzFb2m7YtdldCEkzs6KqmJw4nqEVZGK7IN2kJkjTuQ=
+github.com/santhosh-tekuri/jsonschema/v6 v6.0.2/go.mod h1:JXeL+ps8p7/KNMjDQk3TCwPpBy0wYklyWTfbkIzdIFU=
 github.com/scylladb/go-set v1.0.3-0.20200225121959-cc7b2070d91e h1:7q6NSFZDeGfvvtIRwBrU/aegEYJYmvev0cHAwo17zZQ=
 github.com/scylladb/go-set v1.0.3-0.20200225121959-cc7b2070d91e/go.mod h1:DkpGd78rljTxKAnTDPFqXSGxvETQnJyuSOQwsHycqfs=
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529/go.mod h1:DxrIzT+xaE7yg65j358z/aeFdxmN0P9QXhEzd20vsDc=
@@ -1474,6 +1474,8 @@ github.com/wagoodman/go-partybus v0.0.0-20230516145632-8ccac152c651 h1:jIVmlAFIq
 github.com/wagoodman/go-partybus v0.0.0-20230516145632-8ccac152c651/go.mod h1:b26F2tHLqaoRQf8DywqzVaV1MQ9yvjb0OMcNl7Nxu20=
 github.com/wagoodman/go-progress v0.0.0-20260303201901-10176f79b2c0 h1:EHsPe0Q0ANoLOZff1dBLAyeWLTA4sbPTpGI+2zb0FnM=
 github.com/wagoodman/go-progress v0.0.0-20260303201901-10176f79b2c0/go.mod h1:g/D9uEUFp5YLyciwCpVsSOZOm56hfv4rzGJod6MlqIM=
+github.com/woodsbury/decimal128 v1.3.0 h1:8pffMNWIlC0O5vbyHWFZAt5yWvWcrHA+3ovIIjVWss0=
+github.com/woodsbury/decimal128 v1.3.0/go.mod h1:C5UTmyTjW3JftjUFzOVhC20BEQa2a4ZKOB5I6Zjb+ds=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 github.com/xanzy/ssh-agent v0.3.3 h1:+/15pJfg/RsTxqYcX6fHqOXZwwMP+2VyYWJeWM2qQFM=
