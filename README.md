@@ -122,12 +122,6 @@ The other backends are:
   optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/arangodb):
   a persistent backend based on [ArangoDB](https://arangodb.com/)
 
-- [neo4j/openCypher (unsupported,
-  incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/neo4j):
-  a persistent backend based on [neo4j](https://neo4j.com/) and
-  [openCypher](https://opencypher.org/). This backend should work with any
-  database that supported openCypher queries.
-
 - [keyvalue: Redis (experimental, complete)](/pkg/assembler/kv/redis): The
   default keyvalue backend, but using Redis as storage.
 

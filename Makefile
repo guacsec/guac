@@ -159,9 +159,6 @@ container: check-docker-tool-check check-docker-buildx-tool-check check-goreleas
 # making the container is a longer process and thus not a dependency of service.
 .PHONY: start-service
 start-service: check-docker-compose-tool-check
-	# requires force recreate since docker compose reuses containers and neo4j does
-	# not handle that well.
-	#
 	# if container images are missing, run `make container` first
 	$(CONTAINER) compose -f docker-compose.yml -f container_files/mem.yaml up --force-recreate
 	@echo "Waiting for the service to start"

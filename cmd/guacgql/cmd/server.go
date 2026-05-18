@@ -37,8 +37,6 @@ import (
 	_ "github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/neptune"
 	"github.com/guacsec/guac/pkg/assembler/server"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
