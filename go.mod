@@ -302,7 +302,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/klauspost/compress v1.18.5
 	github.com/kubescape/storage v0.0.185
-	github.com/lib/pq v1.11.2
+	github.com/lib/pq v1.12.3
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.11.15
