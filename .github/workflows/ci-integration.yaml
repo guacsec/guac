@@ -36,7 +36,7 @@ jobs:
     name: CI for integration tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go
@@ -82,7 +82,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       with:
         persist-credentials: false
     - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
@@ -165,11 +165,11 @@ jobs:
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/kind
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
+        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
         with:
           install-only: true
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go

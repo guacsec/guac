@@ -36,7 +36,7 @@ jobs:
     name: CI for unit tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go
@@ -90,7 +90,7 @@ jobs:
       - name: Install atlas
         uses: ariga/setup-atlas@2f3c785c89a15e1c0d07bcae3900fb5feb969eea # v0.3
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # 9.2.0
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # 9.2.1
         with:
           only-new-issues: true
           skip-cache: true
