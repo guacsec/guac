@@ -21,10 +21,20 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+// ite6Statement is used for unmarshalling in-toto statement headers.
+// It handles both v0.1 (_type/predicateType) and v1 (type/predicate_type)
+// in-toto statement formats. Exactly one set of fields should be populated;
+// if neither is set after unmarshalling, the document is rejected with an error.
+type ite6Statement struct {
+	TypeV01          string `json:"_type"`
+	PredicateTypeV01 string `json:"predicateType"`
+	TypeV1           string `json:"type"`
+	PredicateTypeV1  string `json:"predicate_type"`
+}
 
 type ITE6Processor struct {
 }
@@ -53,10 +63,14 @@ func (e *ITE6Processor) Unpack(i *processor.Document) ([]*processor.Document, er
 	return nil, nil
 }
 
-func parseStatement(p []byte) (*in_toto.Statement, error) {
-	ps := in_toto.Statement{}
+func parseStatement(p []byte) (*ite6Statement, error) {
+	ps := ite6Statement{}
 	if err := json.Unmarshal(p, &ps); err != nil {
 		return nil, err
+	}
+	// Reject documents where neither format's fields are populated.
+	if ps.TypeV01 == "" && ps.TypeV1 == "" {
+		return nil, fmt.Errorf("in-toto statement has neither v0.1 (_type) nor v1 (type) statement type field")
 	}
 	return &ps, nil
 }
