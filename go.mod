@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	cloud.google.com/go/storage v1.61.3
 	github.com/fsouza/fake-gcs-server v1.54.0
-	github.com/in-toto/in-toto-golang v0.10.0
+	github.com/in-toto/in-toto-golang v0.11.0
 	github.com/secure-systems-lab/go-securesystemslib v0.10.0
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
