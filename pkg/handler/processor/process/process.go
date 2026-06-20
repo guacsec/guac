@@ -308,10 +308,17 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 	return nil
 }
 
+// maxDecompressedSize caps how many bytes a document may decompress to, so a
+// small blob cannot expand without bound (a decompression bomb).
+var maxDecompressedSize int64 = 1 << 30 // 1 GiB
+
 func decompressDocument(i *processor.Document, reader io.Reader) error {
-	uncompressed, err := io.ReadAll(reader)
+	uncompressed, err := io.ReadAll(io.LimitReader(reader, maxDecompressedSize+1))
 	if err != nil {
 		return fmt.Errorf("unable to decompress document: %w", err)
+	}
+	if int64(len(uncompressed)) > maxDecompressedSize {
+		return fmt.Errorf("decompressed document exceeds the %d byte limit", maxDecompressedSize)
 	}
 	i.Blob = uncompressed
 	return nil

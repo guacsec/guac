@@ -35,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/klauspost/compress/zstd"
 )
 
 func Test_SimpleDocProcessTest(t *testing.T) {
@@ -851,4 +852,52 @@ func testPublish(ctx context.Context, d *processor.Document, blobStore *blob.Blo
 
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
+}
+
+func zstdOfZeros(t *testing.T, size int) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	enc, err := zstd.NewWriter(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	chunk := make([]byte, 1<<16)
+	for written := 0; written < size; written += len(chunk) {
+		if _, err := enc.Write(chunk); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := enc.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
+func Test_DecompressDocumentLimit(t *testing.T) {
+	orig := maxDecompressedSize
+	maxDecompressedSize = 1 << 20 // 1 MiB for the test
+	defer func() { maxDecompressedSize = orig }()
+
+	t.Run("decompression bomb is rejected", func(t *testing.T) {
+		bomb := zstdOfZeros(t, 5<<20)
+		doc := &processor.Document{Blob: bomb, Encoding: processor.EncodingZstd}
+		err := decodeDocument(context.Background(), doc)
+		if err == nil {
+			t.Fatalf("expected error for over-limit decompression, got nil (blob=%d bytes)", len(doc.Blob))
+		}
+		if !strings.Contains(err.Error(), "limit") {
+			t.Fatalf("expected limit error, got: %v", err)
+		}
+	})
+
+	t.Run("document under the limit still decodes", func(t *testing.T) {
+		small := zstdOfZeros(t, 256<<10)
+		doc := &processor.Document{Blob: small, Encoding: processor.EncodingZstd}
+		if err := decodeDocument(context.Background(), doc); err != nil {
+			t.Fatalf("unexpected error for under-limit document: %v", err)
+		}
+		if len(doc.Blob) != 256<<10 {
+			t.Fatalf("expected 262144 bytes decoded, got %d", len(doc.Blob))
+		}
+	})
 }
