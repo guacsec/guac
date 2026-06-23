@@ -299,7 +299,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/json-iterator/go v1.1.12
-	github.com/klauspost/compress v1.18.5
+	github.com/klauspost/compress v1.18.6
 	github.com/kubescape/storage v0.2.0
 	github.com/lib/pq v1.12.3
 	github.com/manifoldco/promptui v0.9.0
