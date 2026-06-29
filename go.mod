@@ -8,7 +8,7 @@ require (
 	github.com/in-toto/in-toto-golang v0.11.0
 	github.com/secure-systems-lab/go-securesystemslib v0.10.0
 	github.com/spf13/cobra v1.10.2
-	go.uber.org/zap v1.27.1
+	go.uber.org/zap v1.28.0
 	google.golang.org/api v0.274.0
 )
 
