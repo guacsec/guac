@@ -781,8 +781,6 @@ func getFilterQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string 
 }
 
 func removeInvalidCharFromProperty(key string) string {
-	// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
-	// be replaced by an "-"
 	return strings.ReplaceAll(key, ".", "_")
 }
 

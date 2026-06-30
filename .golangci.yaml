@@ -15,9 +15,5 @@ linters:
       - path: _test\.go
         linters:
         - forcetypeassert # test files use mocks
-      - path: pkg/assembler/backends/neo4j
-        linters:
-        - unused # getting many unused false positives in neo4j backend
-        - forcetypeassert # this backend does this a lot
 issues:
   max-same-issues: 50

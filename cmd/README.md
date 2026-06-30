@@ -32,8 +32,8 @@ services:
 
 - what it does: runs a GraphQL server
 - options:
-  - backend: keyvalue, neo4j, arango, ent, or future DB
-  - backend-specific options: neo4j connection options
+  - backend: keyvalue, arango, ent, or future DB
+  - backend-specific options: backend connection options
   - playground / debug: also start playground
 
 **guaccsub**
@@ -103,7 +103,7 @@ not required.
   be short: ex: interval.
 
 - Namespaced - If appropriate, group a group of flags that go together with a
-  prefix, ex: neo4j.
+  prefix, ex: arango.
 
 - Short versions - Service oriented flags don't need short versions, user
   oriented flags should.
