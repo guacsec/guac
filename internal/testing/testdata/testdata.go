@@ -81,6 +81,21 @@ var (
 	//go:embed exampledata/distroless-cyclonedx-invalid-version.json
 	CycloneDXDistrolessInvalidVersionExample []byte
 
+	//go:embed exampledata/cyclonedx-1.7-basic.json
+	CycloneDX17BasicExample []byte
+
+	//go:embed exampledata/cyclonedx-1.7-streebog.json
+	CycloneDX17StreebogExample []byte
+
+	//go:embed exampledata/cyclonedx-1.7-citations.json
+	CycloneDX17CitationsExample []byte
+
+	//go:embed exampledata/cyclonedx-1.7-patents.json
+	CycloneDX17PatentsExample []byte
+
+	//go:embed exampledata/cyclonedx-1.7-tlp.json
+	CycloneDX17TLPExample []byte
+
 	//go:embed exampledata/busybox-cyclonedx.json
 	CycloneDXBusyboxExample []byte
 
@@ -1962,6 +1977,69 @@ var (
 			},
 		},
 		HasSBOM: flatComponentsHasSBOM,
+	}
+
+	CycloneDX17StreebogTime, _ = time.Parse(time.RFC3339, "2025-10-21T10:01:23Z")
+
+	CycloneDX17StreebogPredicates = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "golang",
+					Namespace: ptrfrom.String("github.com/example"),
+					Name:      "app",
+					Version:   ptrfrom.String("1.0.0"),
+					Subpath:   ptrfrom.String(""),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "golang",
+					Namespace: ptrfrom.String("github.com/example"),
+					Name:      "lib",
+					Version:   ptrfrom.String("2.3.4"),
+					Subpath:   ptrfrom.String(""),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "CDX BOM Dependency",
+				},
+			},
+		},
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "golang",
+					Namespace: ptrfrom.String("github.com/example"),
+					Name:      "lib",
+					Version:   ptrfrom.String("2.3.4"),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "streebog-256",
+					Digest:    "9a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "cdx package with checksum",
+				},
+			},
+		},
+		HasSBOM: []assembler.HasSBOMIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "golang",
+					Namespace: ptrfrom.String("github.com/example"),
+					Name:      "app",
+					Version:   ptrfrom.String("1.0.0"),
+					Subpath:   ptrfrom.String(""),
+				},
+				HasSBOM: &model.HasSBOMInputSpec{
+					Uri:              "urn:uuid:1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9",
+					Algorithm:        "sha256",
+					Digest:           "024128082a70d503ed4f383d9fb01c376da016c9b3e86dd904774d602a3d0715",
+					DownloadLocation: "TestSource",
+					KnownSince:       CycloneDX17StreebogTime,
+				},
+			},
+		},
 	}
 
 	XRayComponentsTime, _ = time.Parse(time.RFC3339, "2024-12-11T10:06:41+00:00")

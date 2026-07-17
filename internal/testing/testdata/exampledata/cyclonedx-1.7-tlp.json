@@ -1,0 +1,36 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:4e5f6071-8293-4a4b-95c6-d7e8f9012345",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-21T10:01:23Z",
+    "distributionConstraints": {
+      "tlp": "AMBER"
+    },
+    "component": {
+      "bom-ref": "pkg:golang/github.com/example/app@1.0.0",
+      "type": "application",
+      "name": "github.com/example/app",
+      "version": "1.0.0",
+      "purl": "pkg:golang/github.com/example/app@1.0.0"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:golang/github.com/example/lib@2.3.4",
+      "type": "library",
+      "name": "github.com/example/lib",
+      "version": "2.3.4",
+      "purl": "pkg:golang/github.com/example/lib@2.3.4"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:golang/github.com/example/app@1.0.0",
+      "dependsOn": [
+        "pkg:golang/github.com/example/lib@2.3.4"
+      ]
+    }
+  ]
+}
