@@ -1,0 +1,43 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:9f8b6c3d-1a2e-4b5c-9d7e-0f1a2b3c4d5e",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-21T10:01:23-04:00",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "author": "guac",
+          "name": "guac-test",
+          "version": "1.7.0"
+        }
+      ]
+    },
+    "component": {
+      "bom-ref": "pkg:golang/github.com/example/app@1.0.0",
+      "type": "application",
+      "name": "github.com/example/app",
+      "version": "1.0.0",
+      "purl": "pkg:golang/github.com/example/app@1.0.0"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:golang/github.com/example/lib@2.3.4",
+      "type": "library",
+      "name": "github.com/example/lib",
+      "version": "2.3.4",
+      "purl": "pkg:golang/github.com/example/lib@2.3.4"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:golang/github.com/example/app@1.0.0",
+      "dependsOn": [
+        "pkg:golang/github.com/example/lib@2.3.4"
+      ]
+    }
+  ]
+}

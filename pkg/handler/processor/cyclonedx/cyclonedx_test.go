@@ -134,6 +134,42 @@ func TestCycloneDXProcessor_ValidateSchema(t *testing.T) {
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: false,
+	}, {
+		name: "valid CycloneDX 1.7 document",
+		doc: processor.Document{
+			Blob:              testdata.CycloneDX17BasicExample,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: false,
+	}, {
+		name: "valid CycloneDX 1.7 document with citations",
+		doc: processor.Document{
+			Blob:              testdata.CycloneDX17CitationsExample,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: false,
+	}, {
+		name: "valid CycloneDX 1.7 document with patents",
+		doc: processor.Document{
+			Blob:              testdata.CycloneDX17PatentsExample,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: false,
+	}, {
+		name: "valid CycloneDX 1.7 document with TLP distribution constraints",
+		doc: processor.Document{
+			Blob:              testdata.CycloneDX17TLPExample,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: false,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {

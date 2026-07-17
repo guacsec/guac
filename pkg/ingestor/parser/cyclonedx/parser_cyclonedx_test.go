@@ -214,6 +214,19 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.CycloneDXFalsePositivePredicates,
 		wantErr:        false,
+	}, {
+		name: "valid CycloneDX 1.7 document with a Streebog-256 hash",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDX17StreebogExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantPredicates: &testdata.CycloneDX17StreebogPredicates,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
