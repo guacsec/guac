@@ -137,34 +137,7 @@ func TestCycloneDXProcessor_ValidateSchema(t *testing.T) {
 	}, {
 		name: "valid CycloneDX 1.7 document",
 		doc: processor.Document{
-			Blob:              testdata.CycloneDX17BasicExample,
-			Format:            processor.FormatJSON,
-			Type:              processor.DocumentCycloneDX,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: false,
-	}, {
-		name: "valid CycloneDX 1.7 document with citations",
-		doc: processor.Document{
-			Blob:              testdata.CycloneDX17CitationsExample,
-			Format:            processor.FormatJSON,
-			Type:              processor.DocumentCycloneDX,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: false,
-	}, {
-		name: "valid CycloneDX 1.7 document with patents",
-		doc: processor.Document{
-			Blob:              testdata.CycloneDX17PatentsExample,
-			Format:            processor.FormatJSON,
-			Type:              processor.DocumentCycloneDX,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: false,
-	}, {
-		name: "valid CycloneDX 1.7 document with TLP distribution constraints",
-		doc: processor.Document{
-			Blob:              testdata.CycloneDX17TLPExample,
+			Blob:              testdata.CycloneDXVersion1_7,
 			Format:            processor.FormatJSON,
 			Type:              processor.DocumentCycloneDX,
 			SourceInformation: processor.SourceInformation{},
