@@ -1,10 +1,23 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:2c3d4e5f-6071-4829-93a4-b5c6d7e8f901",
+  "serialNumber": "urn:uuid:1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9",
   "version": 1,
   "metadata": {
     "timestamp": "2025-10-21T10:01:23Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "author": "guac",
+          "name": "guac-test",
+          "version": "1.7.0"
+        }
+      ]
+    },
+    "distributionConstraints": {
+      "tlp": "AMBER"
+    },
     "component": {
       "bom-ref": "pkg:golang/github.com/example/app@1.0.0",
       "type": "application",
@@ -20,10 +33,33 @@
       "name": "github.com/example/lib",
       "version": "2.3.4",
       "purl": "pkg:golang/github.com/example/lib@2.3.4",
+      "hashes": [
+        {
+          "alg": "Streebog-256",
+          "content": "9a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9"
+        }
+      ],
+      "patentAssertions": [
+        {
+          "bom-ref": "assertion-1",
+          "patentRefs": [
+            "patent-1"
+          ],
+          "assertionType": "license",
+          "asserter": {
+            "ref": "pkg:golang/github.com/example/app@1.0.0"
+          },
+          "notes": "Licensed under a royalty-free grant."
+        }
+      ],
       "externalReferences": [
         {
           "type": "citation",
           "url": "https://example.com/citations/lib-provenance"
+        },
+        {
+          "type": "patent",
+          "url": "https://patents.example.com/US1234567B2"
         }
       ]
     }
@@ -47,5 +83,16 @@
       "process": "automated enrichment",
       "note": "Version determined from the upstream release tag."
     }
-  ]
+  ],
+  "definitions": {
+    "patents": [
+      {
+        "bom-ref": "patent-1",
+        "patentNumber": "US1234567B2",
+        "jurisdiction": "US",
+        "title": "Method for deterministic dependency resolution",
+        "patentLegalStatus": "granted"
+      }
+    ]
+  }
 }

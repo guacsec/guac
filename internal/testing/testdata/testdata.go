@@ -81,20 +81,8 @@ var (
 	//go:embed exampledata/distroless-cyclonedx-invalid-version.json
 	CycloneDXDistrolessInvalidVersionExample []byte
 
-	//go:embed exampledata/cyclonedx-1.7-basic.json
-	CycloneDX17BasicExample []byte
-
-	//go:embed exampledata/cyclonedx-1.7-streebog.json
-	CycloneDX17StreebogExample []byte
-
-	//go:embed exampledata/cyclonedx-1.7-citations.json
-	CycloneDX17CitationsExample []byte
-
-	//go:embed exampledata/cyclonedx-1.7-patents.json
-	CycloneDX17PatentsExample []byte
-
-	//go:embed exampledata/cyclonedx-1.7-tlp.json
-	CycloneDX17TLPExample []byte
+	//go:embed exampledata/cyclonedx-1.7.json
+	CycloneDXVersion1_7 []byte
 
 	//go:embed exampledata/busybox-cyclonedx.json
 	CycloneDXBusyboxExample []byte
@@ -1979,9 +1967,9 @@ var (
 		HasSBOM: flatComponentsHasSBOM,
 	}
 
-	CycloneDX17StreebogTime, _ = time.Parse(time.RFC3339, "2025-10-21T10:01:23Z")
+	CycloneDX17Time, _ = time.Parse(time.RFC3339, "2025-10-21T10:01:23Z")
 
-	CycloneDX17StreebogPredicates = assembler.IngestPredicates{
+	CycloneDX17Predicates = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
 				Pkg: &model.PkgInputSpec{
@@ -2034,9 +2022,9 @@ var (
 				HasSBOM: &model.HasSBOMInputSpec{
 					Uri:              "urn:uuid:1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9",
 					Algorithm:        "sha256",
-					Digest:           "024128082a70d503ed4f383d9fb01c376da016c9b3e86dd904774d602a3d0715",
+					Digest:           "7b3c0dcb4a769fb5171b38d558033c5f6d61ada348952d2fd0d6ce71f25edc16",
 					DownloadLocation: "TestSource",
-					KnownSince:       CycloneDX17StreebogTime,
+					KnownSince:       CycloneDX17Time,
 				},
 			},
 		},
