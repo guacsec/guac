@@ -134,6 +134,15 @@ func TestCycloneDXProcessor_ValidateSchema(t *testing.T) {
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: false,
+	}, {
+		name: "valid CycloneDX 1.7 document",
+		doc: processor.Document{
+			Blob:              testdata.CycloneDXVersion1_7,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: false,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
