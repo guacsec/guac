@@ -450,6 +450,10 @@ func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if cg == nil {
+					continue
+				}
+
 				out = append(out, cg)
 			}
 		}

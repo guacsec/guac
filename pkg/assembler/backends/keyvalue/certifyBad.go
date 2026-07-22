@@ -451,6 +451,10 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if cb == nil {
+					continue
+				}
+
 				out = append(out, cb)
 			}
 		}
