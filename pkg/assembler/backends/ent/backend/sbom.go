@@ -896,10 +896,12 @@ func updateHasSBOMWithIncludePackageIDs(ctx context.Context, client *ent.Client,
 	batches := chunk(sortedPkgUUIDs, 10000)
 
 	for _, batchedPkgUUIDs := range batches {
-		err := client.BillOfMaterials.
-			UpdateOneID(hasSBOMID).
-			AddIncludedSoftwarePackageIDs(batchedPkgUUIDs...).
-			Exec(ctx)
+		err := retryOnFKViolation(ctx, func() error {
+			return client.BillOfMaterials.
+				UpdateOneID(hasSBOMID).
+				AddIncludedSoftwarePackageIDs(batchedPkgUUIDs...).
+				Exec(ctx)
+		})
 		if err != nil {
 			return fmt.Errorf("update for IncludedSoftwarePackageIDs hasSBOM node failed with error: %w", err)
 		}
@@ -911,10 +913,12 @@ func updateHasSBOMWithIncludeArtifacts(ctx context.Context, client *ent.Client, 
 	batches := chunk(sortedArtUUIDs, 10000)
 
 	for _, batchedArtUUIDs := range batches {
-		err := client.BillOfMaterials.
-			UpdateOneID(hasSBOMID).
-			AddIncludedSoftwareArtifactIDs(batchedArtUUIDs...).
-			Exec(ctx)
+		err := retryOnFKViolation(ctx, func() error {
+			return client.BillOfMaterials.
+				UpdateOneID(hasSBOMID).
+				AddIncludedSoftwareArtifactIDs(batchedArtUUIDs...).
+				Exec(ctx)
+		})
 		if err != nil {
 			return fmt.Errorf("update for IncludedSoftwareArtifactIDs hasSBOM node failed with error: %w", err)
 		}
@@ -926,10 +930,12 @@ func updateHasSBOMWithIncludeDependencies(ctx context.Context, client *ent.Clien
 	batches := chunk(sortedIsDepUUIDs, 10000)
 
 	for _, batchedIsDepUUIDs := range batches {
-		err := client.BillOfMaterials.
-			UpdateOneID(hasSBOMID).
-			AddIncludedDependencyIDs(batchedIsDepUUIDs...).
-			Exec(ctx)
+		err := retryOnFKViolation(ctx, func() error {
+			return client.BillOfMaterials.
+				UpdateOneID(hasSBOMID).
+				AddIncludedDependencyIDs(batchedIsDepUUIDs...).
+				Exec(ctx)
+		})
 		if err != nil {
 			return fmt.Errorf("update for IncludedDependencyIDs hasSBOM node failed with error: %w", err)
 		}
@@ -941,10 +947,12 @@ func updateHasSBOMWithIncludeOccurrences(ctx context.Context, client *ent.Client
 	batches := chunk(sortedIsOccurrenceUUIDs, 10000)
 
 	for _, batchedIsOccurUUIDs := range batches {
-		err := client.BillOfMaterials.
-			UpdateOneID(hasSBOMID).
-			AddIncludedOccurrenceIDs(batchedIsOccurUUIDs...).
-			Exec(ctx)
+		err := retryOnFKViolation(ctx, func() error {
+			return client.BillOfMaterials.
+				UpdateOneID(hasSBOMID).
+				AddIncludedOccurrenceIDs(batchedIsOccurUUIDs...).
+				Exec(ctx)
+		})
 		if err != nil {
 			return fmt.Errorf("update for IncludedOccurrenceIDs hasSBOM node failed with error: %w", err)
 		}
