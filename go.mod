@@ -324,7 +324,7 @@ require (
 	go.uber.org/ratelimit v0.3.1
 	gocloud.dev v0.46.0
 	gocloud.dev/pubsub/kafkapubsub v0.46.0
-	gocloud.dev/pubsub/rabbitpubsub v0.40.0
+	gocloud.dev/pubsub/rabbitpubsub v0.46.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/time v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
