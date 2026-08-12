@@ -50,13 +50,13 @@ type collector struct {
 type Config struct {
 	Watch     bool   // True will watch for sbom objects, false will just list once and return
 	Namespace string // NS to search in, Should be "kubescape"
-	Filtered  bool   // True to search for SBOMSyftFiltereds, otherwise SBOMSyfts
+	Filtered  bool   // True to search for SBOMSPDXv2p3Filtereds, otherwise SBOMSPDXv2p3s
 }
 
-var list func(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSyftList, error)
-var listFiltered func(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSyftFilteredList, error)
-var get func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSyft, error)
-var getFiltered func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSyftFiltered, error)
+var list func(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSPDXv2p3List, error)
+var listFiltered func(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSPDXv2p3FilteredList, error)
+var get func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3, error)
+var getFiltered func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3Filtered, error)
 var ksscNewForConfig func(c *rest.Config) (*kssc.Clientset, error)
 var restInClusterConfig func() (*rest.Config, error)
 var formatDecode func(reader io.Reader) (*sbom.SBOM, sbom.FormatID, string, error)
@@ -136,13 +136,13 @@ func (coll *collector) watch(ctx context.Context, dc chan<- *processor.Document,
 	for ctx.Err() == nil {
 		var w watch.Interface
 		if coll.config.Filtered {
-			watch, err := sc.SpdxV1beta1().SBOMSyftFiltereds(coll.config.Namespace).Watch(ctx, metav1.ListOptions{})
+			watch, err := sc.SpdxV1beta1().SBOMSPDXv2p3Filtereds(coll.config.Namespace).Watch(ctx, metav1.ListOptions{})
 			if err != nil {
 				return fmt.Errorf("error watching sboms: %w", err)
 			}
 			w = watch
 		} else {
-			watch, err := sc.SpdxV1beta1().SBOMSyfts(coll.config.Namespace).Watch(ctx, metav1.ListOptions{})
+			watch, err := sc.SpdxV1beta1().SBOMSPDXv2p3s(coll.config.Namespace).Watch(ctx, metav1.ListOptions{})
 			if err != nil {
 				return fmt.Errorf("error watching sboms: %w", err)
 			}
@@ -156,11 +156,11 @@ func (coll *collector) watch(ctx context.Context, dc chan<- *processor.Document,
 			case e, open := <-ch:
 				if e.Type == watch.Added || e.Type == watch.Modified {
 					var name string
-					obj, ok := e.Object.(*scv1beta1.SBOMSyft)
+					obj, ok := e.Object.(*scv1beta1.SBOMSPDXv2p3)
 					if ok {
 						name = obj.Name
 					} else {
-						obj, ok := e.Object.(*scv1beta1.SBOMSyft)
+						obj, ok := e.Object.(*scv1beta1.SBOMSPDXv2p3Filtered)
 						if ok {
 							name = obj.Name
 						} else {
@@ -196,7 +196,7 @@ func (coll *collector) get(ctx context.Context, dc chan<- *processor.Document, s
 	logger := logging.FromContext(ctx)
 
 	// Get SBOM
-	var sft *scv1beta1.SyftDocument
+	var spdx *scv1beta1.Document
 	if coll.config.Filtered {
 		s, err := getFiltered(ctx, sc, coll.config.Namespace, name)
 		if err != nil {
@@ -206,7 +206,7 @@ func (coll *collector) get(ctx context.Context, dc chan<- *processor.Document, s
 			logger.Warnf("Found sbom object but was too large for api server %q", name)
 			return nil
 		}
-		sft = &s.Spec.Syft
+		spdx = &s.Spec.SPDX
 	} else {
 		s, err := get(ctx, sc, coll.config.Namespace, name)
 		if err != nil {
@@ -216,26 +216,26 @@ func (coll *collector) get(ctx context.Context, dc chan<- *processor.Document, s
 			logger.Warnf("Found sbom object but was too large for api server %q", name)
 			return nil
 		}
-		sft = &s.Spec.Syft
+		spdx = &s.Spec.SPDX
 	}
 
-	// Convert from Syft to CDX
-	bts, err := json.Marshal(sft)
+	// Convert from SPDX to CDX
+	bts, err := json.Marshal(spdx)
 	if err != nil {
 		return fmt.Errorf("error unmarshaling sbom: %w", err)
 	}
 	reader := bytes.NewReader(bts)
-	syft, _, _, err := formatDecode(reader)
+	decoded, _, _, err := formatDecode(reader)
 	if err != nil {
-		return fmt.Errorf("could not decode sbom as syft format: %w", err)
+		return fmt.Errorf("could not decode sbom as spdx format: %w", err)
 	}
 	enc, err := cyclonedxjson.NewFormatEncoderWithConfig(cyclonedxjson.DefaultEncoderConfig())
 	if err != nil {
 		return fmt.Errorf("could not create cyclonedx encoder: %w", err)
 	}
-	cdxBts, err := formatEncode(*syft, enc)
+	cdxBts, err := formatEncode(*decoded, enc)
 	if err != nil {
-		return fmt.Errorf("could not encode syft sbom as cyclonedx: %w", err)
+		return fmt.Errorf("could not encode spdx sbom as cyclonedx: %w", err)
 	}
 
 	// Send to GUAC
@@ -259,18 +259,18 @@ func (s *collector) Type() string {
 	return Type
 }
 
-func listReal(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSyftList, error) {
-	return sc.SpdxV1beta1().SBOMSyfts(ns).List(ctx, metav1.ListOptions{})
+func listReal(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSPDXv2p3List, error) {
+	return sc.SpdxV1beta1().SBOMSPDXv2p3s(ns).List(ctx, metav1.ListOptions{})
 }
 
-func listFilteredReal(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSyftFilteredList, error) {
-	return sc.SpdxV1beta1().SBOMSyftFiltereds(ns).List(ctx, metav1.ListOptions{})
+func listFilteredReal(ctx context.Context, sc *kssc.Clientset, ns string) (*scv1beta1.SBOMSPDXv2p3FilteredList, error) {
+	return sc.SpdxV1beta1().SBOMSPDXv2p3Filtereds(ns).List(ctx, metav1.ListOptions{})
 }
 
-func getReal(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSyft, error) {
-	return sc.SpdxV1beta1().SBOMSyfts(ns).Get(ctx, name, metav1.GetOptions{})
+func getReal(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3, error) {
+	return sc.SpdxV1beta1().SBOMSPDXv2p3s(ns).Get(ctx, name, metav1.GetOptions{})
 }
 
-func getFilteredReal(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSyftFiltered, error) {
-	return sc.SpdxV1beta1().SBOMSyftFiltereds(ns).Get(ctx, name, metav1.GetOptions{})
+func getFilteredReal(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3Filtered, error) {
+	return sc.SpdxV1beta1().SBOMSPDXv2p3Filtereds(ns).Get(ctx, name, metav1.GetOptions{})
 }
