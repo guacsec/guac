@@ -36,14 +36,14 @@ jobs:
     name: CI for integration tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # tag=v3.2.1
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # tag=v3.2.1
         with:
           go-version: '1.26.0'
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/go/pkg/mod
           key: test-integration-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -82,13 +82,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with:
         persist-credentials: false
-    - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
       with:
         go-version: '1.26.0'
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
       with:
         python-version: '3.10'
     - name: Install PostgreSQL client tools
@@ -165,18 +165,18 @@ jobs:
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/kind
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           install-only: true
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag=v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # tag=v3
         with:
           persist-credentials: false
       - name: setup-go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # tag=v3.2.1
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # tag=v3.2.1
         with:
           go-version: '1.26.0'
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/go/pkg/mod
           key: tilt-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}

@@ -276,7 +276,8 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		// Create a copy of the request body
+		// Create a copy of the request body so we can both inspect it here and
+		// still hand the original bytes to the downstream GraphQL handler.
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -284,18 +285,17 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 		}
 		r.Body = io.NopCloser(bytes.NewBuffer(body)) // Replace the request body with a copy
 
-		// Create another copy for JSON unmarshalling
-		bodyCopy := make([]byte, len(body))
-		copy(bodyCopy, body)
-
-		// Parse the operation name from the request body copy
+		// Best-effort parse of the operation name for the metric label. An empty
+		// or malformed body must not be turned into an error here: validating the
+		// request payload is the GraphQL server's job, and it already responds
+		// with 400 Bad Request for bad input. Returning 500 from this metrics
+		// middleware short-circuited that and was misleading (see issue #2195),
+		// so we only record the operation name when the body parses and otherwise
+		// let the request flow through unchanged.
 		var graphqlRequest struct {
 			OperationName string `json:"operationName"`
 		}
-		if err := json.Unmarshal(bodyCopy, &graphqlRequest); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		_ = json.Unmarshal(body, &graphqlRequest)
 
 		rec := statusRecorder{w, http.StatusOK}
 
