@@ -261,3 +261,49 @@ jobs:
           gh release upload ${{ github.ref_name }} guac-postgres-compose.yaml
           rm guac-postgres-compose.yaml
         shell: bash
+
+  bump-devcontainer:
+    runs-on: ubuntu-latest
+    name: bump devcontainer GUAC_IMAGE
+    needs: [goreleaser]
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'nightly')
+    permissions:
+      contents: write # To push the bump branch
+      pull-requests: write # To open the bump PR
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Open PR bumping the devcontainer image pin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY}:${TAG}"
+          sed -i -E "s#(\"GUAC_IMAGE\": \")[^\"]*#\1${image}#" .devcontainer/devcontainer.json
+          if git diff --quiet; then
+            echo "devcontainer already pins ${image}"
+            exit 0
+          fi
+          branch="chore/devcontainer-guac-image-${TAG}"
+          existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')
+          if [ -n "${existing}" ]; then
+            echo "PR #${existing} already open for ${branch}"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${branch}"
+          git commit -a -s -m "chore(devcontainer): bump GUAC_IMAGE to ${TAG}"
+          # --force is safe: this branch name is unique per tag and only ever
+          # written by this job, so the only thing it can overwrite is a stale
+          # branch left behind by a closed bump PR.
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${branch}"
+          gh pr create --base main --head "${branch}" \
+            --title "chore(devcontainer): bump GUAC_IMAGE to ${TAG}" \
+            --body "Automated by the release workflow so the devcontainer trial pulls the newest release. Refs #3006."
+        shell: bash
