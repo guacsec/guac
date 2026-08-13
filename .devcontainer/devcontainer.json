@@ -40,7 +40,7 @@
     "GUAC_API_PORT": "8080"
   },
 
-  "onCreateCommand": "docker pull ghcr.io/guacsec/guac:v1.1.0",
+  "onCreateCommand": "docker pull $GUAC_IMAGE",
 
   "postStartCommand": "docker compose -f docker-compose.yml -f container_files/mem.yaml up -d && bash -c 'c=0; until curl --silent --head --fail http://localhost:8080 >/dev/null; do if [ $c -ge 60 ]; then echo \"GUAC did not become ready in time\"; docker compose logs --tail=100; exit 1; fi; sleep 2; c=$((c+1)); done; echo; echo \"GUAC is ready.\"; echo \"  - GraphQL playground: port 8080 (auto-previewed)\"; echo \"  - REST API:           port 8081 (e.g. /healthz)\"; echo \"  - Tail logs:          docker compose logs -f\"; echo \"  - Stop:               docker compose down\"'",
 
