@@ -19,6 +19,7 @@ project-lifecycle:
   - github:pxp928
   - github:SantiagoTorres
   - github:jeffmendoza
+  - github:gaganhr94
 contribution-policy:
   accepts-pull-requests: true
   accepts-automated-pull-requests: true
