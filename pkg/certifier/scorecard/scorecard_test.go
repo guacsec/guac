@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/ossf/scorecard/v5/checks"
 	scpkg "github.com/ossf/scorecard/v5/pkg/scorecard"
 	"go.uber.org/mock/gomock"
 )
@@ -247,5 +248,33 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	if len(res.Blob) < 100 {
 		// the test scorecard result is less than 100 bytes
 		t.Errorf("unexpected document blob size: %v", len(res.Blob))
+	}
+}
+
+func Test_scorecardRunner_supportedChecks(t *testing.T) {
+	runner := scorecardRunner{ctx: context.Background()}
+	// License reads file content so it runs at any commit, while Contributors
+	// needs repository history and scorecard only offers it at HEAD.
+	input := []string{checks.CheckContributors, checks.CheckLicense}
+
+	tests := []struct {
+		name      string
+		commitSHA string
+		want      []string
+	}{
+		{name: "empty commit keeps every check", commitSHA: "", want: input},
+		{name: "HEAD keeps every check", commitSHA: "HEAD", want: input},
+		{name: "pinned commit drops unsupported checks", commitSHA: "98316298749fdd62d3cc99423baec45ae11af662", want: []string{checks.CheckLicense}},
+		// A release's TargetCommitish is a branch name, which scorecard also
+		// treats as a pinned commit.
+		{name: "branch name drops unsupported checks", commitSHA: "main", want: []string{checks.CheckLicense}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := runner.supportedChecks(input, test.commitSHA); !reflect.DeepEqual(got, test.want) {
+				t.Errorf("supportedChecks() = %v, want %v", got, test.want)
+			}
+		})
 	}
 }

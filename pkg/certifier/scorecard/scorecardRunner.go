@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v5/checker"
 	"github.com/ossf/scorecard/v5/checks"
+	"github.com/ossf/scorecard/v5/clients"
 	"github.com/ossf/scorecard/v5/log"
 	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 )
@@ -250,6 +251,35 @@ func parseRetryAfter(value string, now time.Time) (time.Duration, bool) {
 	return 0, false
 }
 
+// supportedChecks drops the checks scorecard cannot evaluate at a non-HEAD
+// commit. Scorecard treats any commit other than HEAD as a CommitBased request
+// and rejects the whole run if an explicitly requested check does not support
+// that request type, so an unfiltered list fails with "Unsupported RequestType
+// [1] by check: Contributors" rather than scoring the checks that do work.
+func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) []string {
+	if commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA) {
+		return checkNames
+	}
+
+	required := []checker.RequestType{checker.CommitBased}
+	allChecks := checks.GetAllWithExperimental()
+	supported := make([]string, 0, len(checkNames))
+	var skipped []string
+	for _, name := range checkNames {
+		if len(checker.ListUnsupported(required, allChecks[name].SupportedRequestTypes)) == 0 {
+			supported = append(supported, name)
+			continue
+		}
+		skipped = append(skipped, name)
+	}
+
+	if len(skipped) > 0 {
+		logging.FromContext(s.ctx).Infof("Skipping scorecard checks unsupported at commit %s: %s",
+			commitSHA, strings.Join(skipped, ", "))
+	}
+	return supported
+}
+
 func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
 	logger := logging.FromContext(s.ctx)
 	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
@@ -299,6 +329,8 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 			}
 		}
 	}
+
+	checkNames = s.supportedChecks(checkNames, commitSHA)
 
 	opts := []sc.Option{
 		sc.WithCommitSHA(commitSHA),
