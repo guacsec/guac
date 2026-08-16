@@ -95,6 +95,9 @@ func init() {
 	// add artificial latency to throttle the certifier
 	set.String("certifier-latency", "", "sets artificial latency on the certifier. Defaults to empty string (not enabled) but can set m, h, s...etc")
 
+	// scorecard certifier
+	set.Bool("compute", false, "only compute the scorecard with the scorecard package, skipping the scorecard API. Requires GITHUB_AUTH_TOKEN")
+
 	// deps.dev
 	// add artificial latency to throttle deps.dev
 	set.String("deps-dev-latency", "", "sets artificial latency on the deps.dev collector. Defaults to empty string (not enabled) but can set m, h, s...etc")

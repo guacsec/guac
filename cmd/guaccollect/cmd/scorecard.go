@@ -50,6 +50,8 @@ type scorecardOptions struct {
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
 	batchSize int
+	// only compute the scorecard locally, skipping the scorecard API
+	computeOnly bool
 }
 
 var scorecardCmd = &cobra.Command{
@@ -81,6 +83,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("publish-to-queue"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetBool("compute"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -92,7 +95,7 @@ you have access to read and write to the respective blob store.`,
 		logger := logging.FromContext(ctx)
 
 		// scorecard runner is the scorecard library that runs the scorecard checks
-		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
+		scorecardRunner, err := scorecard.NewScorecardRunner(ctx, scorecard.WithComputeOnly(opts.computeOnly))
 		if err != nil {
 			fmt.Printf("unable to create scorecard runner: %v\n", err)
 			_ = cmd.Help()
@@ -136,7 +139,8 @@ func validateScorecardFlags(
 	poll bool,
 	pubToQueue bool,
 	certifierLatencyStr string,
-	batchSize int) (scorecardOptions, error) {
+	batchSize int,
+	computeOnly bool) (scorecardOptions, error) {
 
 	var opts scorecardOptions
 
@@ -164,6 +168,7 @@ func validateScorecardFlags(
 	}
 
 	opts.batchSize = batchSize
+	opts.computeOnly = computeOnly
 
 	return opts, nil
 }
@@ -171,7 +176,7 @@ func validateScorecardFlags(
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
 		"header-file", "certifier-latency",
-		"certifier-batch-size"})
+		"certifier-batch-size", "compute"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
