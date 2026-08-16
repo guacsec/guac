@@ -270,8 +270,11 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			// the conflict columns (name, namespace, type), so an existing row
 			// never actually changes on conflict. DoNothing avoids taking an
 			// unnecessary row-exclusive lock on the most frequently-written rows.
+			// DoNothing means Postgres returns no row via RETURNING on an actual
+			// conflict, which ent surfaces as stdsql.ErrNoRows; that's expected
+			// here, matching the PackageVersion upsert below.
 			DoNothing().
-			Exec(ctx); err != nil {
+			Exec(ctx); err != nil && err != stdsql.ErrNoRows {
 
 			return nil, errors.Wrap(err, "bulk upsert pkgName node")
 		}
@@ -315,9 +318,11 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
 		// See upsertBulkPackage: PackageName's ID and fields are deterministically
 		// derived from the conflict columns, so DoNothing avoids an unnecessary
-		// row-exclusive lock on conflict.
+		// row-exclusive lock on conflict. As with the PackageVersion upsert
+		// below, a real conflict makes Postgres return no row via RETURNING,
+		// which ent surfaces as stdsql.ErrNoRows; that's expected, not an error.
 		DoNothing().
-		Exec(ctx); err != nil {
+		Exec(ctx); err != nil && err != stdsql.ErrNoRows {
 
 		return nil, errors.Wrap(err, "upsert package name")
 	}
