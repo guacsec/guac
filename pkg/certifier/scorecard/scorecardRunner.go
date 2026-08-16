@@ -48,6 +48,19 @@ var (
 // scorecardRunner is a struct that implements the Scorecard interface.
 type scorecardRunner struct {
 	ctx context.Context
+	// computeOnly skips the scorecard API entirely and always computes the
+	// score locally with the scorecard package.
+	computeOnly bool
+}
+
+// RunnerOption configures a scorecard runner.
+type RunnerOption func(*scorecardRunner)
+
+// WithComputeOnly restricts the runner to local computation with the scorecard
+// package, skipping the scorecard API. Local computation needs GITHUB_AUTH_TOKEN,
+// so NewScorecardRunner fails fast when the token is missing.
+func WithComputeOnly(computeOnly bool) RunnerOption {
+	return func(r *scorecardRunner) { r.computeOnly = computeOnly }
 }
 
 // normalizeRepoName ensures the repo name has the github.com/ prefix required by the Scorecard API.
@@ -63,25 +76,30 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Result, 
 	logger := logging.FromContext(s.ctx)
 	repoName = normalizeRepoName(repoName)
 
-	// First try API approach
-	logger.Debugf("Attempting to fetch scorecard from API for repo: %s, commit: %s", repoName, commitSHA)
-	result, err := s.getScoreFromAPI(repoName, commitSHA, tag)
-	if err == nil {
-		logger.Infof("Successfully fetched scorecard from API for repo: %s", repoName)
-		return result, nil
+	if s.computeOnly {
+		logger.Infof("Compute-only mode - skipping scorecard API for repo: %s", repoName)
+	} else {
+		// First try API approach
+		logger.Debugf("Attempting to fetch scorecard from API for repo: %s, commit: %s", repoName, commitSHA)
+		result, err := s.getScoreFromAPI(repoName, commitSHA, tag)
+		if err == nil {
+			logger.Infof("Successfully fetched scorecard from API for repo: %s", repoName)
+			return result, nil
+		}
+
+		// Log API failure and check if we can fallback to local computation
+		logger.Warnf("API fetch failed for repo %s: %v", repoName, err)
+
+		// Check if GitHub token is available for local computation
+		if _, ok := os.LookupEnv("GITHUB_AUTH_TOKEN"); !ok {
+			logger.Errorf("Cannot fall back to local computation - GITHUB_AUTH_TOKEN not set")
+			return nil, fmt.Errorf("scorecard API failed and GITHUB_AUTH_TOKEN not available for local computation: %w", err)
+		}
+
+		logger.Infof("Falling back to local computation for repo: %s", repoName)
 	}
 
-	// Log API failure and check if we can fallback to local computation
-	logger.Warnf("API fetch failed for repo %s: %v", repoName, err)
-
-	// Check if GitHub token is available for local computation
-	if _, ok := os.LookupEnv("GITHUB_AUTH_TOKEN"); !ok {
-		logger.Errorf("Cannot fall back to local computation - GITHUB_AUTH_TOKEN not set")
-		return nil, fmt.Errorf("scorecard API failed and GITHUB_AUTH_TOKEN not available for local computation: %w", err)
-	}
-
-	logger.Infof("Falling back to local computation for repo: %s", repoName)
-	result, err = s.computeScore(repoName, commitSHA, tag)
+	result, err := s.computeScore(repoName, commitSHA, tag)
 	if err != nil {
 		logger.Errorf("Failed to compute scorecard locally for repo %s: %v", repoName, err)
 	}
@@ -304,8 +322,21 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 	return &res, nil
 }
 
-func NewScorecardRunner(ctx context.Context) (Scorecard, error) {
-	return scorecardRunner{
-		ctx,
-	}, nil
+// NewScorecardRunner returns a runner that fetches the score from the scorecard
+// API and falls back to local computation when the API call fails. Pass
+// WithComputeOnly to skip the API and always compute locally, which requires
+// GITHUB_AUTH_TOKEN and is validated here so misconfiguration fails at startup.
+func NewScorecardRunner(ctx context.Context, opts ...RunnerOption) (Scorecard, error) {
+	runner := scorecardRunner{ctx: ctx}
+	for _, opt := range opts {
+		opt(&runner)
+	}
+
+	if runner.computeOnly {
+		if token, ok := os.LookupEnv("GITHUB_AUTH_TOKEN"); !ok || token == "" {
+			return nil, fmt.Errorf("compute-only mode requires GITHUB_AUTH_TOKEN to be set for local scorecard computation")
+		}
+	}
+
+	return runner, nil
 }
