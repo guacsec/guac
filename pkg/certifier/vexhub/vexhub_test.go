@@ -24,21 +24,35 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
-// noopLogger satisfies the logger interface used by getArchiveURL in tests.
-type noopLogger struct{}
-
-func (n noopLogger) Infof(_ string, _ ...interface{}) {}
+// newTestCertifier returns a vexHubCertifier with all maps initialised,
+// suitable for direct use in white-box tests.
+func newTestCertifier(client *http.Client, manifestURL string) *vexHubCertifier {
+	return &vexHubCertifier{
+		httpClient:  client,
+		manifestURL: manifestURL,
+		cache:       make(map[string]*manifestCacheEntry),
+		seen:        make(map[string]struct{}),
+	}
+}
 
 // buildTestArchive creates a tar.gz archive with index.json and optional VEX files.
 // All entries are nested under a "vexhub-main/" top-level directory (simulating a
 // GitHub archive download).
 func buildTestArchive(t *testing.T, indexJSON string, vexFiles map[string]string) []byte {
+	t.Helper()
+	return buildTestArchiveWithPrefix(t, "vexhub-main/", indexJSON, vexFiles)
+}
+
+// buildTestArchiveWithPrefix creates a tar.gz archive with index.json and optional VEX files
+// prefixed by prefix.
+func buildTestArchiveWithPrefix(t *testing.T, prefix string, indexJSON string, vexFiles map[string]string) []byte {
 	t.Helper()
 	var buf bytes.Buffer
 	gw := gzip.NewWriter(&buf)
@@ -46,7 +60,7 @@ func buildTestArchive(t *testing.T, indexJSON string, vexFiles map[string]string
 
 	writeFile := func(name, content string) {
 		hdr := &tar.Header{
-			Name: "vexhub-main/" + name,
+			Name: prefix + name,
 			Mode: 0644,
 			Size: int64(len(content)),
 		}
@@ -97,7 +111,13 @@ func buildArchiveWithoutIndex(t *testing.T) []byte {
 // TestGetArchiveURL verifies that getArchiveURL correctly filters spec versions
 // and parses the // subdirectory separator.
 func TestGetArchiveURL(t *testing.T) {
-	logger := noopLogger{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+		}
+	}))
+	defer srv.Close()
+
 	tests := []struct {
 		name       string
 		manifest   Manifest
@@ -109,10 +129,10 @@ func TestGetArchiveURL(t *testing.T) {
 			manifest: Manifest{
 				Versions: []ManifestVersion{{
 					SpecVersion: "0.1",
-					Locations:   []ManifestLocation{{URL: "https://example.com/vex.tar.gz"}},
+					Locations:   []ManifestLocation{{URL: srv.URL + "/vex.tar.gz"}},
 				}},
 			},
-			wantURL:    "https://example.com/vex.tar.gz",
+			wantURL:    srv.URL + "/vex.tar.gz",
 			wantSubdir: "",
 		},
 		{
@@ -126,48 +146,47 @@ func TestGetArchiveURL(t *testing.T) {
 			manifest: Manifest{
 				Versions: []ManifestVersion{{
 					SpecVersion: "0.1",
-					Locations:   []ManifestLocation{{URL: "https://github.com/org/repo/archive/refs/heads/main.tar.gz//vexhub-main"}},
+					Locations:   []ManifestLocation{{URL: srv.URL + "/archive.tar.gz//vexhub-main"}},
 				}},
 			},
-			wantURL:    "https://github.com/org/repo/archive/refs/heads/main.tar.gz",
+			wantURL:    srv.URL + "/archive.tar.gz",
 			wantSubdir: "vexhub-main",
 		},
 		{
-			// P1 fix: unknown spec version must be skipped; no URL returned.
 			name: "unsupported spec version is skipped",
 			manifest: Manifest{
-				Versions: []ManifestVersion{
-					{
-						SpecVersion: "99.0",
-						Locations:   []ManifestLocation{{URL: "https://example.com/new.tar.gz"}},
-					},
-				},
+				Versions: []ManifestVersion{{
+					SpecVersion: "99.0",
+					Locations:   []ManifestLocation{{URL: srv.URL + "/new.tar.gz"}},
+				}},
 			},
 			wantURL:    "",
 			wantSubdir: "",
 		},
 		{
-			// First entry is unsupported, second entry is supported — should pick the second.
 			name: "multi-version manifest picks first compatible",
 			manifest: Manifest{
 				Versions: []ManifestVersion{
 					{
 						SpecVersion: "99.0",
-						Locations:   []ManifestLocation{{URL: "https://example.com/new.tar.gz"}},
+						Locations:   []ManifestLocation{{URL: srv.URL + "/new.tar.gz"}},
 					},
 					{
 						SpecVersion: "0.1",
-						Locations:   []ManifestLocation{{URL: "https://example.com/old.tar.gz"}},
+						Locations:   []ManifestLocation{{URL: srv.URL + "/old.tar.gz"}},
 					},
 				},
 			},
-			wantURL:    "https://example.com/old.tar.gz",
+			wantURL:    srv.URL + "/old.tar.gz",
 			wantSubdir: "",
 		},
 	}
+
+	ctx := context.Background()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotURL, gotSubdir := getArchiveURL(logger, &tt.manifest)
+			gotURL, gotSubdir := getArchiveURL(ctx, srv.Client(), &tt.manifest)
 			if gotURL != tt.wantURL {
 				t.Errorf("URL = %q, want %q", gotURL, tt.wantURL)
 			}
@@ -189,12 +208,9 @@ func TestEmitVEXDocuments(t *testing.T) {
 	}
 
 	t.Run("exact versioned purl matches via version-stripped fallback", func(t *testing.T) {
+		c := newTestCertifier(http.DefaultClient, "")
 		docChan := make(chan *processor.Document, 10)
-		docs, err := emitVEXDocuments(
-			[]string{"pkg:npm/lodash@4.17.21"},
-			vexDocs,
-			docChan,
-		)
+		docs, err := c.emitVEXDocuments(context.Background(), []string{"pkg:npm/lodash@4.17.21"}, vexDocs, docChan)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -207,11 +223,8 @@ func TestEmitVEXDocuments(t *testing.T) {
 	})
 
 	t.Run("no match emits nothing", func(t *testing.T) {
-		docs, err := emitVEXDocuments(
-			[]string{"pkg:npm/express@1.0.0"},
-			vexDocs,
-			nil,
-		)
+		c := newTestCertifier(http.DefaultClient, "")
+		docs, err := c.emitVEXDocuments(context.Background(), []string{"pkg:npm/express@1.0.0"}, vexDocs, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -221,11 +234,8 @@ func TestEmitVEXDocuments(t *testing.T) {
 	})
 
 	t.Run("guac purls are skipped", func(t *testing.T) {
-		docs, err := emitVEXDocuments(
-			[]string{"pkg:guac/test@1.0"},
-			vexDocs,
-			nil,
-		)
+		c := newTestCertifier(http.DefaultClient, "")
+		docs, err := c.emitVEXDocuments(context.Background(), []string{"pkg:guac/test@1.0"}, vexDocs, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -235,8 +245,10 @@ func TestEmitVEXDocuments(t *testing.T) {
 	})
 
 	t.Run("duplicate purls only emit once", func(t *testing.T) {
+		c := newTestCertifier(http.DefaultClient, "")
 		docChan := make(chan *processor.Document, 10)
-		docs, err := emitVEXDocuments(
+		docs, err := c.emitVEXDocuments(
+			context.Background(),
 			[]string{"pkg:npm/lodash@4.17.21", "pkg:npm/lodash@4.17.20"},
 			vexDocs,
 			docChan,
@@ -249,13 +261,30 @@ func TestEmitVEXDocuments(t *testing.T) {
 		}
 	})
 
+	t.Run("cross-batch deduplication via struct-level seen map", func(t *testing.T) {
+		c := newTestCertifier(http.DefaultClient, "")
+		docChan := make(chan *processor.Document, 10)
+		// First batch emits one doc.
+		docs1, err := c.emitVEXDocuments(context.Background(), []string{"pkg:npm/lodash@4.17.21"}, vexDocs, docChan)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(docs1) != 1 {
+			t.Fatalf("batch 1: expected 1 doc, got %d", len(docs1))
+		}
+		// Second batch with same PURL should emit nothing.
+		docs2, err := c.emitVEXDocuments(context.Background(), []string{"pkg:npm/lodash@4.17.20"}, vexDocs, docChan)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(docs2) != 0 {
+			t.Fatalf("batch 2: expected 0 docs (dedup across batches), got %d", len(docs2))
+		}
+	})
+
 	t.Run("stripped-version-still-misses for unknown package", func(t *testing.T) {
-		// A versioned PURL that, even after stripping, has no index entry.
-		docs, err := emitVEXDocuments(
-			[]string{"pkg:npm/totally-unknown@1.2.3"},
-			vexDocs,
-			nil,
-		)
+		c := newTestCertifier(http.DefaultClient, "")
+		docs, err := c.emitVEXDocuments(context.Background(), []string{"pkg:npm/totally-unknown@1.2.3"}, vexDocs, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -263,12 +292,23 @@ func TestEmitVEXDocuments(t *testing.T) {
 			t.Fatalf("expected 0 docs for unknown package, got %d", len(docs))
 		}
 	})
+
+	t.Run("context cancellation aborts emission", func(t *testing.T) {
+		c := newTestCertifier(http.DefaultClient, "")
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel() // cancel immediately
+		unbufferedChan := make(chan *processor.Document)
+		_, err := c.emitVEXDocuments(ctx, []string{"pkg:npm/lodash@4.17.21"}, vexDocs, unbufferedChan)
+		if err == nil {
+			t.Fatal("expected error on cancelled context, got nil")
+		}
+	})
 }
 
 // TestCertifyComponentTypeMismatch checks that a wrong component type returns
 // the expected sentinel error.
 func TestCertifyComponentTypeMismatch(t *testing.T) {
-	c := &vexHubCertifier{httpClient: http.DefaultClient, manifestURL: "http://example.com"}
+	c := newTestCertifier(http.DefaultClient, "http://example.com")
 	err := c.CertifyComponent(context.Background(), "wrong type", nil)
 	if err == nil || err != ErrComponentTypeMismatch {
 		t.Errorf("expected ErrComponentTypeMismatch, got %v", err)
@@ -291,16 +331,17 @@ func TestCertifyComponentEndToEnd(t *testing.T) {
 		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
 	})
 	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		w.Header().Set("Content-Type", "application/gzip")
 		_, _ = w.Write(archive)
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	certifier := &vexHubCertifier{
-		httpClient:  server.Client(),
-		manifestURL: server.URL + "/vex-repository.json",
-	}
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
 
 	docChan := make(chan *processor.Document, 10)
 	nodes := []*root_package.PackageNode{
@@ -308,7 +349,7 @@ func TestCertifyComponentEndToEnd(t *testing.T) {
 		{Purl: "pkg:npm/express@1.0.0"},
 	}
 
-	err := certifier.CertifyComponent(context.Background(), nodes, docChan)
+	err := c.CertifyComponent(context.Background(), nodes, docChan)
 	if err != nil {
 		t.Fatalf("CertifyComponent failed: %v", err)
 	}
@@ -337,10 +378,7 @@ func TestMalformedManifest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := &vexHubCertifier{
-		httpClient:  server.Client(),
-		manifestURL: server.URL + "/vex-repository.json",
-	}
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
 	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@1.0"}}, nil)
 	if err == nil {
 		t.Fatal("expected error for malformed manifest, got nil")
@@ -356,15 +394,16 @@ func TestMissingIndexJSON(t *testing.T) {
 		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
 	})
 	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		_, _ = w.Write(archive)
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	c := &vexHubCertifier{
-		httpClient:  server.Client(),
-		manifestURL: server.URL + "/vex-repository.json",
-	}
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
 	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@1.0"}}, nil)
 	if err == nil || !strings.Contains(err.Error(), "index.json") {
 		t.Fatalf("expected index.json error, got: %v", err)
@@ -378,8 +417,11 @@ func TestOversizedArchive(t *testing.T) {
 		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
 	})
 	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
-		// Send more than maxArchiveBytes of zeros (uncompressed, but enough to trigger the limit check).
-		chunk := make([]byte, 1024*1024) // 1 MiB chunk
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		chunk := make([]byte, 1024*1024) // 1 MiB chunks
 		for i := 0; i <= int(maxArchiveBytes/int64(len(chunk)))+1; i++ {
 			_, _ = w.Write(chunk)
 		}
@@ -387,10 +429,7 @@ func TestOversizedArchive(t *testing.T) {
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	c := &vexHubCertifier{
-		httpClient:  server.Client(),
-		manifestURL: server.URL + "/vex-repository.json",
-	}
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
 	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@1.0"}}, nil)
 	if err == nil {
 		t.Fatal("expected error for oversized archive, got nil")
@@ -405,7 +444,11 @@ func TestNetworkError(t *testing.T) {
 		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
 	})
 	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
-		// Hijack the connection to force a network error mid-response.
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		// Hijack the connection on GET to force a network error.
 		hj, ok := w.(http.Hijacker)
 		if !ok {
 			http.Error(w, "no hijack", http.StatusInternalServerError)
@@ -417,10 +460,7 @@ func TestNetworkError(t *testing.T) {
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	c := &vexHubCertifier{
-		httpClient:  server.Client(),
-		manifestURL: server.URL + "/vex-repository.json",
-	}
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
 	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@1.0"}}, nil)
 	if err == nil {
 		t.Fatal("expected error for network failure, got nil")
@@ -438,26 +478,25 @@ func TestMultiVersionManifest(t *testing.T) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
-		// Serve an unsupported version first; the certifier should skip it.
 		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[
 			{"spec_version":"99.0","locations":[{"url":"%s/should-not-be-used.tar.gz"}]},
 			{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}
 		]}`, "http://"+r.Host, "http://"+r.Host)
 	})
 	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		_, _ = w.Write(archive)
 	})
-	// Crash if the wrong archive is requested.
 	mux.HandleFunc("/should-not-be-used.tar.gz", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "wrong version selected", http.StatusBadRequest)
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	c := &vexHubCertifier{
-		httpClient:  server.Client(),
-		manifestURL: server.URL + "/vex-repository.json",
-	}
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
 	docChan := make(chan *processor.Document, 10)
 	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@4.17.21"}}, docChan)
 	if err != nil {
@@ -470,5 +509,141 @@ func TestMultiVersionManifest(t *testing.T) {
 	}
 	if len(docs) != 1 {
 		t.Fatalf("expected 1 document, got %d", len(docs))
+	}
+}
+
+// TestSubdirVsTopLevelDirMismatch tests archives where the top-level directory
+// inside the tarball does not match the subdir specified after "//" in the URL.
+func TestSubdirVsTopLevelDirMismatch(t *testing.T) {
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"subdir-test"}`
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	// The tar archive has a top-level dir "github-release-1.0.0/", and inside it "custom-subdir/pkg/npm/lodash/vex.json".
+	archive := buildTestArchiveWithPrefix(t, "github-release-1.0.0/custom-subdir/", indexJSON, map[string]string{
+		"pkg/npm/lodash/vex.json": vexDoc,
+	})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		// URL specifies subdirectory "custom-subdir" after "//"
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz//custom-subdir"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
+	docChan := make(chan *processor.Document, 10)
+	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@4.17.21"}}, docChan)
+	if err != nil {
+		t.Fatalf("CertifyComponent failed: %v", err)
+	}
+	close(docChan)
+	var docs []*processor.Document
+	for doc := range docChan {
+		docs = append(docs, doc)
+	}
+	if len(docs) != 1 {
+		t.Fatalf("expected 1 document with custom subdir, got %d", len(docs))
+	}
+}
+
+// TestFormatFiltering verifies that non-openvex format entries are skipped.
+func TestFormatFiltering(t *testing.T) {
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"format-test"}`
+	// Index with one openvex entry and one csaf entry.
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[
+		{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json","format":"openvex"},
+		{"id":"pkg:npm/express","location":"pkg/npm/express/csaf.json","format":"csaf"}
+	]}`
+	archive := buildTestArchive(t, indexJSON, map[string]string{
+		"pkg/npm/lodash/vex.json":   vexDoc,
+		"pkg/npm/express/csaf.json": `{"document":{}}`,
+	})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
+	docChan := make(chan *processor.Document, 10)
+	nodes := []*root_package.PackageNode{
+		{Purl: "pkg:npm/lodash@1.0"},
+		{Purl: "pkg:npm/express@4.0"},
+	}
+	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	close(docChan)
+	var docs []*processor.Document
+	for doc := range docChan {
+		docs = append(docs, doc)
+	}
+	// Only lodash (openvex) should be emitted; express (csaf) must be skipped.
+	if len(docs) != 1 {
+		t.Fatalf("expected 1 doc (openvex only), got %d", len(docs))
+	}
+}
+
+// TestCachingAndTTL verifies that the certifier reuses cached manifest and vexDocs
+// without re-downloading until the TTL expires.
+func TestCachingAndTTL(t *testing.T) {
+	var downloadCount int32
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"cache-test"}`
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	archive := buildTestArchive(t, indexJSON, map[string]string{
+		"pkg/npm/lodash/vex.json": vexDoc,
+	})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","update_interval":"1h","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			atomic.AddInt32(&downloadCount, 1)
+		}
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := NewVEXHubCertifier(server.URL + "/vex-repository.json")
+	nodes := []*root_package.PackageNode{{Purl: "pkg:npm/lodash@1.0"}}
+
+	// First call downloads the archive.
+	docChan := make(chan *processor.Document, 10)
+	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+		t.Fatalf("first call failed: %v", err)
+	}
+	if atomic.LoadInt32(&downloadCount) != 1 {
+		t.Fatalf("expected 1 download, got %d", atomic.LoadInt32(&downloadCount))
+	}
+
+	// Second call should use cache (no new download).
+	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+		t.Fatalf("second call failed: %v", err)
+	}
+	if atomic.LoadInt32(&downloadCount) != 1 {
+		t.Fatalf("expected 1 download (cached), got %d", atomic.LoadInt32(&downloadCount))
 	}
 }
