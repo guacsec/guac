@@ -415,7 +415,7 @@ func readAllBody(r *http.Request) ([]byte, error) {
 	if r.Body == nil {
 		return nil, nil
 	}
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 	return io.ReadAll(r.Body)
 }
 

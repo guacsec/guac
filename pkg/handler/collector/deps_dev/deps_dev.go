@@ -28,8 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 
-	pb "deps.dev/api/v3"
-
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -44,8 +42,6 @@ const (
 	GetProjectDurationHistogram = "http_deps_dev_project_duration"
 	GetVersionErrorsCounter     = "http_deps_dev_version_errors"
 	prometheusPrefix            = "deps_dev"
-	// RPS = rate per second
-	rateLimit = 150
 )
 
 type IsDepPackage struct {
@@ -59,7 +55,6 @@ type depsCollector struct {
 
 	dc                   *ddc.DepsClient
 	collectDataSource    datasource.CollectSource
-	client               pb.InsightsClient
 	poll                 bool
 	retrieveDependencies bool
 	interval             time.Duration
