@@ -206,6 +206,20 @@ func generatePackageVersionCreate(tx *ent.Tx, pkgVersionID *uuid.UUID, pkgNameID
 		SetHash(versionHashFromInputSpec(*pkgInput.PackageInput))
 }
 
+// sortablePackageNameCreates sorts a batch of PackageName creates by their
+// deterministic ID, keeping ids and creates in lockstep.
+type sortablePackageNameCreates struct {
+	ids     []string
+	creates []*ent.PackageNameCreate
+}
+
+func (s sortablePackageNameCreates) Len() int           { return len(s.creates) }
+func (s sortablePackageNameCreates) Less(i, j int) bool { return s.ids[i] < s.ids[j] }
+func (s sortablePackageNameCreates) Swap(i, j int) {
+	s.ids[i], s.ids[j] = s.ids[j], s.ids[i]
+	s.creates[i], s.creates[j] = s.creates[j], s.creates[i]
+}
+
 func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
 	batches := chunk(pkgInputs, MaxBatchSize)
 	pkgNameIDs := make([]string, 0)
@@ -217,6 +231,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 		pkgVersionCreates := make([]*ent.PackageVersionCreate, len(pkgs))
 		seenPkgNames := make(map[string]bool)
 		var pkgNameCreates []*ent.PackageNameCreate
+		var pkgNameCreateIDs []string
 
 		for i, pkg := range pkgs {
 			pkgInput := pkg
@@ -230,6 +245,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			if !seenPkgNames[nameIDStr] {
 				seenPkgNames[nameIDStr] = true
 				pkgNameCreates = append(pkgNameCreates, generatePackageNameCreate(tx, &pkgNameID, pkgInput))
+				pkgNameCreateIDs = append(pkgNameCreateIDs, nameIDStr)
 			}
 			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
 
@@ -239,12 +255,26 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
 		}
 
+		// Sort PackageName creates by their deterministic ID so that concurrent
+		// transactions upserting overlapping package names always acquire the
+		// underlying row-exclusive locks in the same order. Building the batch in
+		// unsorted (SBOM) order lets two concurrent transactions lock shared rows
+		// in opposite orders, which Postgres reports as a 40P01 deadlock.
+		sort.Sort(sortablePackageNameCreates{ids: pkgNameCreateIDs, creates: pkgNameCreates})
+
 		if err := tx.PackageName.CreateBulk(pkgNameCreates...).
 			OnConflict(
 				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
 			).
-			UpdateNewValues().
-			Exec(ctx); err != nil {
+			// PackageName's ID and fields are all deterministically derived from
+			// the conflict columns (name, namespace, type), so an existing row
+			// never actually changes on conflict. DoNothing avoids taking an
+			// unnecessary row-exclusive lock on the most frequently-written rows.
+			// DoNothing means Postgres returns no row via RETURNING on an actual
+			// conflict, which ent surfaces as stdsql.ErrNoRows; that's expected
+			// here, matching the PackageVersion upsert below.
+			DoNothing().
+			Exec(ctx); err != nil && err != stdsql.ErrNoRows {
 
 			return nil, errors.Wrap(err, "bulk upsert pkgName node")
 		}
@@ -286,8 +316,13 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	if err := pkgNameCreate.
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
-		UpdateNewValues().
-		Exec(ctx); err != nil {
+		// See upsertBulkPackage: PackageName's ID and fields are deterministically
+		// derived from the conflict columns, so DoNothing avoids an unnecessary
+		// row-exclusive lock on conflict. As with the PackageVersion upsert
+		// below, a real conflict makes Postgres return no row via RETURNING,
+		// which ent surfaces as stdsql.ErrNoRows; that's expected, not an error.
+		DoNothing().
+		Exec(ctx); err != nil && err != stdsql.ErrNoRows {
 
 		return nil, errors.Wrap(err, "upsert package name")
 	}
