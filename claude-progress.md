@@ -4,7 +4,7 @@
 
 - **Branch:** fix/post-merge-workflow-errors
 - **Last updated:** 2026-08-17
-- **Summary:** 3 files (2 new, 1 modified)
+- **Summary:** 4 files (3 new, 1 modified)
 
 ## What to do next
 
@@ -18,6 +18,16 @@
   New:
   - .claude
   - .claude-session-head
+  Modified:
+  - claude-progress.md
+
+
+### 2026-08-17T14:02:05Z
+- 4 files (3 new, 1 modified)
+  New:
+  - .claude
+  - .claude-session-head
+  - PR_DESCRIPTION.md
   Modified:
   - claude-progress.md
 
