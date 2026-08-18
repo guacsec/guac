@@ -1,0 +1,29 @@
+{
+  "info": {
+    "name": "requests",
+    "version": "2.31.0",
+    "summary": "Python HTTP for Humans.",
+    "home_page": "https://requests.readthedocs.io",
+    "author": "Kenneth Reitz",
+    "license": "Apache 2.0",
+    "requires_dist": [
+      "charset-normalizer (<4,>=2)",
+      "idna (<4,>=2.5)",
+      "urllib3 (<3,>=1.21.1)",
+      "certifi (>=2017.4.17)"
+    ],
+    "project_urls": {
+      "Source": "https://github.com/psf/requests"
+    }
+  },
+  "urls": [
+    {
+      "filename": "requests-2.31.0-py3-none-any.whl",
+      "packagetype": "bdist_wheel",
+      "url": "https://files.pythonhosted.org/packages/70/8e/requests-2.31.0-py3-none-any.whl",
+      "digests": {
+        "sha256": "58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"
+      }
+    }
+  ]
+}
