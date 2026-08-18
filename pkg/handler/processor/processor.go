@@ -39,7 +39,7 @@ type Document struct {
 	Encoding          EncodingType
 	SourceInformation SourceInformation
 	ChildLogger       *zap.SugaredLogger
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels            map[string]string `json:"labels,omitempty"`
 }
 
 // DocumentTree describes the output of a document tree that resulted from
@@ -70,6 +70,7 @@ const (
 	DocumentScorecard          DocumentType = "SCORECARD"
 	DocumentCycloneDX          DocumentType = "CycloneDX"
 	DocumentDepsDev            DocumentType = "DEPS_DEV"
+	DocumentGoMod              DocumentType = "GO_MOD"
 	DocumentCsaf               DocumentType = "CSAF"
 	DocumentOpenVEX            DocumentType = "OPEN_VEX"
 	DocumentIngestPredicates   DocumentType = "INGEST_PREDICATES"
