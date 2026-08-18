@@ -301,7 +301,7 @@ require (
 	github.com/oapi-codegen/oapi-codegen/v2 v2.7.2
 	github.com/oapi-codegen/runtime v1.6.0
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/openvex/go-vex v0.2.7
+	github.com/openvex/go-vex v0.2.8
 	github.com/ossf/scorecard/v5 v5.4.0
 	github.com/package-url/packageurl-go v0.1.6
 	github.com/pandatix/go-cvss v0.6.2
