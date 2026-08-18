@@ -40,6 +40,13 @@ func init() {
 		"add-license-on-ingest",
 		"add-eol-on-ingest",
 		"enable-otel",
+		"enable-ingest-api",
+		"ingest-api-listen-port",
+		"ingest-api-tls-cert-file",
+		"ingest-api-tls-key-file",
+		"ingest-api-max-document-size",
+		"ingest-api-max-concurrent-ingests",
+		"disable-pubsub-ingest",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
@@ -73,7 +80,17 @@ Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as
 For example: "s3://my-bucket?region=us-west-1"
 
 Specific authentication method vary per cloud provider. Please follow the documentation per implementation to ensure
-you have access to read and write to the respective blob store.`,
+you have access to read and write to the respective blob store.
+
+guacingest can additionally serve a document upload API with --enable-ingest-api, which accepts a document
+streamed directly over gRPC and ingests it synchronously. This avoids the message size limit of the pubsub
+path without requiring a blob store, at the cost of durability: a document that fails to ingest is not
+retained, so the client is responsible for retrying. Pair it with --disable-pubsub-ingest to run the upload
+API on its own, without a blob store or event stream.
+
+The upload API is unauthenticated: --ingest-api-tls-cert-file and --ingest-api-tls-key-file encrypt the
+connection but do not identify the caller, and gRPC reflection is always enabled. Anyone who can reach the
+port can write to the graph, so bind it to a trusted network.`,
 	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		ingest(cmd, args)

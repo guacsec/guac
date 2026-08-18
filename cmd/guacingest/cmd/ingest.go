@@ -34,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor"
+	ingest_server "github.com/guacsec/guac/pkg/ingestor/server"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
@@ -51,6 +52,30 @@ type options struct {
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
 	enableOtel              bool
+	ingestAPI               ingestAPIOptions
+	disablePubsubIngest     bool
+}
+
+// ingestAPIOptions configures the document upload API. It is grouped rather
+// than flattened into options so that the flags travel together.
+type ingestAPIOptions struct {
+	enabled              bool
+	port                 int
+	tlsCertFile          string
+	tlsKeyFile           string
+	maxDocumentSize      int
+	maxConcurrentIngests int
+}
+
+func ingestAPIOptionsFromViper() ingestAPIOptions {
+	return ingestAPIOptions{
+		enabled:              viper.GetBool("enable-ingest-api"),
+		port:                 viper.GetInt("ingest-api-listen-port"),
+		tlsCertFile:          viper.GetString("ingest-api-tls-cert-file"),
+		tlsKeyFile:           viper.GetString("ingest-api-tls-key-file"),
+		maxDocumentSize:      viper.GetInt("ingest-api-max-document-size"),
+		maxConcurrentIngests: viper.GetInt("ingest-api-max-concurrent-ingests"),
+	}
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -67,6 +92,8 @@ func ingest(cmd *cobra.Command, args []string) {
 		viper.GetBool("add-eol-on-ingest"),
 		viper.GetBool("add-depsdev-on-ingest"),
 		viper.GetBool("enable-otel"),
+		ingestAPIOptionsFromViper(),
+		viper.GetBool("disable-pubsub-ingest"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
@@ -90,24 +117,30 @@ func ingest(cmd *cobra.Command, args []string) {
 		}()
 	}
 
-	if strings.HasPrefix(opts.pubsubAddr, "nats://") {
-		// initialize jetstream
-		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
-		if err := jetStream.JetStreamInit(ctx); err != nil {
-			logger.Fatalf("jetStream initialization failed with error: %v", err)
+	// The blob store and event stream are only needed for the pubsub ingestion
+	// path, so they are not initialized when running the upload API on its own.
+	var blobStore *blob.BlobStore
+	var pubsub *emitter.EmitterPubSub
+	if !opts.disablePubsubIngest {
+		if strings.HasPrefix(opts.pubsubAddr, "nats://") {
+			// initialize jetstream
+			// TODO: pass in credentials file for NATS secure login
+			jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
+			if err := jetStream.JetStreamInit(ctx); err != nil {
+				logger.Fatalf("jetStream initialization failed with error: %v", err)
+			}
+			defer jetStream.Close()
 		}
-		defer jetStream.Close()
-	}
 
-	// initialize blob store
-	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
-	if err != nil {
-		logger.Fatalf("unable to connect to blob store: %v", err)
-	}
+		// initialize blob store
+		blobStore, err = blob.NewBlobStore(ctx, opts.blobAddr)
+		if err != nil {
+			logger.Fatalf("unable to connect to blob store: %v", err)
+		}
 
-	// initialize pubsub
-	pubsub := emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
+		// initialize pubsub
+		pubsub = emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
+	}
 
 	// initialize collectsub client
 	csubClient, err := csub_client.NewClient(opts.csubClientOptions)
@@ -142,14 +175,46 @@ func ingest(cmd *cobra.Command, args []string) {
 	// Assuming that publisher and consumer are different processes.
 	sigs := make(chan os.Signal, 1)
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := process.Subscribe(ctx, emit, blobStore, pubsub); err != nil {
-			logger.Errorf("processor ended with error: %v", err)
-			sigs <- syscall.SIGTERM
+
+	if !opts.disablePubsubIngest {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := process.Subscribe(ctx, emit, blobStore, pubsub); err != nil {
+				logger.Errorf("processor ended with error: %v", err)
+				sigs <- syscall.SIGTERM
+			}
+		}()
+	}
+
+	if opts.ingestAPI.enabled {
+		ingestServer, err := ingest_server.NewServer(ingest_server.ServerOptions{
+			Port:                 opts.ingestAPI.port,
+			TLSCertFile:          opts.ingestAPI.tlsCertFile,
+			TLSKeyFile:           opts.ingestAPI.tlsKeyFile,
+			GraphqlEndpoint:      opts.graphqlEndpoint,
+			Transport:            transport,
+			CsubClient:           csubClient,
+			ScanForVulns:         opts.queryVulnOnIngestion,
+			ScanForLicense:       opts.queryLicenseOnIngestion,
+			ScanForEOL:           opts.queryEOLOnIngestion,
+			ScanForDepsDev:       opts.queryDepsDevOnIngestion,
+			MaxDocumentSize:      opts.ingestAPI.maxDocumentSize,
+			MaxConcurrentIngests: opts.ingestAPI.maxConcurrentIngests,
+		})
+		if err != nil {
+			logger.Fatalf("unable to create document upload API server: %v", err)
 		}
-	}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := ingestServer.Serve(ctx); err != nil {
+				logger.Errorf("document upload API ended with error: %v", err)
+				sigs <- syscall.SIGTERM
+			}
+		}()
+	}
 
 	logger.Infof("starting processor and parser")
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -168,9 +233,32 @@ func validateFlags(
 	queryEOLIngestion bool,
 	queryDepsDevIngestion bool,
 	enableOtel bool,
+	ingestAPI ingestAPIOptions,
+	disablePubsubIngest bool,
 	args []string,
 ) (options, error) {
 	var opts options
+
+	if disablePubsubIngest && !ingestAPI.enabled {
+		return opts, fmt.Errorf("nothing to do: pubsub ingestion is disabled and the document upload API is not enabled")
+	}
+	if ingestAPI.enabled {
+		if ingestAPI.port <= 0 || ingestAPI.port > 65535 {
+			return opts, fmt.Errorf("ingest-api-listen-port must be between 1 and 65535, got %d", ingestAPI.port)
+		}
+		if ingestAPI.maxDocumentSize <= 0 {
+			return opts, fmt.Errorf("ingest-api-max-document-size must be positive, got %d", ingestAPI.maxDocumentSize)
+		}
+		if ingestAPI.maxConcurrentIngests <= 0 {
+			return opts, fmt.Errorf("ingest-api-max-concurrent-ingests must be positive, got %d", ingestAPI.maxConcurrentIngests)
+		}
+		if (ingestAPI.tlsCertFile == "") != (ingestAPI.tlsKeyFile == "") {
+			return opts, fmt.Errorf("ingest-api-tls-cert-file and ingest-api-tls-key-file must be set together")
+		}
+	}
+	opts.ingestAPI = ingestAPI
+	opts.disablePubsubIngest = disablePubsubIngest
+
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

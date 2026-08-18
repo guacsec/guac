@@ -78,6 +78,15 @@ func init() {
 
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
+	// document upload API served by guacingest
+	set.Bool("enable-ingest-api", false, "enable the document upload API, which accepts documents streamed directly to the ingestor. The API is unauthenticated and writes to the graph, so serve it only on a trusted network")
+	set.Int("ingest-api-listen-port", 2783, "port to listen on for the document upload API")
+	set.String("ingest-api-tls-cert-file", "", "path to the TLS certificate in PEM format for the document upload API")
+	set.String("ingest-api-tls-key-file", "", "path to the TLS key in PEM format for the document upload API")
+	set.Int("ingest-api-max-document-size", 256<<20, "maximum size in bytes of a single document uploaded via the document upload API")
+	set.Int("ingest-api-max-concurrent-ingests", 5, "maximum number of documents the document upload API will ingest concurrently. Budget roughly two to three times this multiplied by ingest-api-max-document-size for peak memory, since a document is buffered in a growing in-memory buffer")
+	set.Bool("disable-pubsub-ingest", false, "disable subscribing to the pubsub queue, for running guacingest with only the document upload API")
+
 	set.String("rest-api-server-port", "8081", "port to serve the REST API from")
 	set.String("rest-api-tls-cert-file", "", "path to the TLS certificate in PEM format for rest api server")
 	set.String("rest-api-tls-key-file", "", "path to the TLS key in PEM format for rest api server")

@@ -80,7 +80,8 @@ lint: check-golangci-lint-tool-check
 proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		pkg/collectsub/collectsub/collectsub.proto
+		pkg/collectsub/collectsub/collectsub.proto \
+		pkg/ingestor/ingestapi/ingest.proto
 
 # Run atlas to generate ent migration diff for postgres
 .PHONY: atlas-diff
