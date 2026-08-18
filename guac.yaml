@@ -64,6 +64,19 @@ gql-addr: http://localhost:8080/query
 # REST API setup
 rest-api-server-port: 8081
 
+# document upload API served by guacingest. The API is unauthenticated and writes
+# to the graph, so serve it only on a trusted network.
+enable-ingest-api: false
+ingest-api-listen-port: 2783
+ingest-api-max-document-size: 268435456
+ingest-api-max-concurrent-ingests: 5
+disable-pubsub-ingest: false
+
+# send collected documents to a remote document upload API instead of ingesting
+# them locally
+use-ingest-api: false
+ingest-api-addr: localhost:2783
+
 # Collector behavior
 service-poll: true
 use-csub: true

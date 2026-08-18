@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -30,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
+	ingest_client "github.com/guacsec/guac/pkg/ingestor/client"
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/key/inmemory"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
@@ -57,6 +59,26 @@ type fileOptions struct {
 	queryEOLOnIngestion     bool
 	queryDepsDevOnIngestion bool
 	enableOtel              bool
+	ingestAPI               ingestAPIClientOptions
+}
+
+// ingestAPIClientOptions routes collected documents to a remote ingestor's
+// document upload API instead of ingesting them in this process. It is grouped
+// rather than flattened into fileOptions so that the flags travel together.
+type ingestAPIClientOptions struct {
+	enabled       bool
+	addr          string
+	tls           bool
+	tlsSkipVerify bool
+}
+
+func ingestAPIClientOptionsFromViper() ingestAPIClientOptions {
+	return ingestAPIClientOptions{
+		enabled:       viper.GetBool("use-ingest-api"),
+		addr:          viper.GetString("ingest-api-addr"),
+		tls:           viper.GetBool("ingest-api-tls"),
+		tlsSkipVerify: viper.GetBool("ingest-api-tls-skip-verify"),
+	}
 }
 
 var filesCmd = &cobra.Command{
@@ -76,6 +98,7 @@ var filesCmd = &cobra.Command{
 			viper.GetBool("add-eol-on-ingest"),
 			viper.GetBool("add-depsdev-on-ingest"),
 			viper.GetBool("enable-otel"),
+			ingestAPIClientOptionsFromViper(),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -146,9 +169,8 @@ var filesCmd = &cobra.Command{
 
 		gotErr := false
 
-		emit := func(d *processor.Document) error {
-			totalNum += 1
-			if _, err := ingestor.Ingest(
+		ingestDoc := func(d *processor.Document) error {
+			_, err := ingestor.Ingest(
 				ctx,
 				d,
 				opts.graphqlEndpoint,
@@ -158,7 +180,33 @@ var filesCmd = &cobra.Command{
 				opts.queryLicenseOnIngestion,
 				opts.queryEOLOnIngestion,
 				opts.queryDepsDevOnIngestion,
-			); err != nil {
+			)
+			return err
+		}
+
+		if opts.ingestAPI.enabled {
+			ingestClient, err := ingest_client.NewClient(ingest_client.IngestClientOptions{
+				Addr:          opts.ingestAPI.addr,
+				Tls:           opts.ingestAPI.tls,
+				TlsSkipVerify: opts.ingestAPI.tlsSkipVerify,
+			})
+			if err != nil {
+				logger.Fatalf("unable to create document upload API client: %v", err)
+			}
+			defer ingestClient.Close()
+
+			// The remote ingestor runs the processor and the parsers itself, so
+			// only the raw document and its provenance go over the wire. The
+			// scan-on-ingest flags are the remote's to honour, not ours.
+			ingestDoc = func(d *processor.Document) error {
+				_, err := ingestClient.IngestDocument(ctx, d.SourceInformation.Collector, d.SourceInformation.Source, bytes.NewReader(d.Blob))
+				return err
+			}
+		}
+
+		emit := func(d *processor.Document) error {
+			totalNum += 1
+			if err := ingestDoc(d); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
@@ -197,12 +245,18 @@ func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr st
 	queryEOLIngestion bool,
 	queryDepsDevOnIngestion bool,
 	enableOtel bool,
+	ingestAPI ingestAPIClientOptions,
 	args []string,
 ) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.headerFile = headerFile
 	opts.enableOtel = enableOtel
+
+	if ingestAPI.enabled && ingestAPI.addr == "" {
+		return opts, errors.New("ingest-api-addr must be set when use-ingest-api is enabled")
+	}
+	opts.ingestAPI = ingestAPI
 
 	if keyPath != "" {
 		if strings.HasSuffix(keyPath, "pem") {
@@ -237,6 +291,10 @@ func init() {
 		"verifier-key-path",
 		"verifier-key-id",
 		"enable-otel",
+		"use-ingest-api",
+		"ingest-api-addr",
+		"ingest-api-tls",
+		"ingest-api-tls-skip-verify",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
