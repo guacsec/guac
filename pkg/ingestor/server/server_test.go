@@ -344,9 +344,7 @@ func TestIngestDocument_LogsThroughTheStreamLogger(t *testing.T) {
 	}
 
 	// A logger pulled off the wrong context key is a no-op logger, which
-	// silently swallows every line the handler and the processor emit. Assert
-	// on real output rather than on the logger being non-nil, which a no-op
-	// logger also satisfies.
+	// silently swallows every line the handler and the processor emit.
 	tagged := logs.FilterField(zap.String(logging.DocumentHash, resp.GetDocumentRef())).All()
 	if len(tagged) == 0 {
 		t.Errorf("expected a log line tagged with %s=%s, got %d untagged entries",

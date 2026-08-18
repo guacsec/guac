@@ -50,33 +50,12 @@ import (
 )
 
 const (
-	// defaultMaxDocumentSize caps a single uploaded document. It is well above
-	// the pubsub limit this API exists to sidestep, while still bounding what
-	// one stream can allocate.
-	defaultMaxDocumentSize = 256 << 20 // 256 MiB
-
-	// defaultMaxConcurrentIngests bounds documents being ingested at once.
-	// Ingestion is CPU heavy, and because a document is buffered in memory this
-	// also bounds peak memory. Budget for roughly two to three times
-	// limit * maxDocumentSize: the receive buffer grows by reallocate and copy,
-	// so a document near the cap transiently holds both the old and the new
-	// backing array.
+	defaultMaxDocumentSize      = 256 << 20 // 256 MiB
 	defaultMaxConcurrentIngests = 5
-
-	// maxMessageSize caps a single chunk on the wire. It is deliberately far
-	// below the document size cap, which bounds the reassembled document rather
-	// than any one message, so a client must chunk. It matches the collectsub
-	// server so both GUAC gRPC endpoints behave the same way.
-	maxMessageSize = 16 << 20 // 16 MiB
-
-	// healthServiceName must match the proto package and service name so that
-	// grpc_health_probe can target this service specifically.
-	healthServiceName = "guacsec.guac.ingestor.schema.DocumentIngestService"
+	maxMessageSize              = 16 << 20 // 16 MiB
+	healthServiceName           = "guacsec.guac.ingestor.schema.DocumentIngestService"
 )
 
-// ingestFunc ingests a single assembled document. It is a field on the server
-// rather than a direct call to ingestor.Ingest so tests can exercise the
-// streaming logic without a GraphQL backend.
 type ingestFunc func(ctx context.Context, d *processor.Document) error
 
 type server struct {
@@ -108,11 +87,7 @@ type ServerOptions struct {
 	ScanForEOL     bool
 	ScanForDepsDev bool
 
-	// MaxDocumentSize caps a single document in bytes. Zero selects the
-	// default.
-	MaxDocumentSize int
-	// MaxConcurrentIngests caps documents ingested at once. Zero selects the
-	// default.
+	MaxDocumentSize      int
 	MaxConcurrentIngests int
 }
 
@@ -168,11 +143,7 @@ func NewServer(opts ServerOptions) (*server, error) {
 func (s *server) IngestDocument(stream pb.DocumentIngestService_IngestDocumentServer) error {
 	ctx := stream.Context()
 
-	// Acquire the ingest slot before buffering anything. Gating here rather
-	// than around the ingest call means the number of concurrent streams bounds
-	// peak memory too, instead of only bounding concurrent CPU work. The
-	// acquire is non-blocking: shedding load beats holding a client on an open
-	// stream for an unbounded time.
+	// Acquire the ingest slot before buffering anything.
 	select {
 	case s.sem <- struct{}{}:
 		defer func() { <-s.sem }()
@@ -188,11 +159,8 @@ func (s *server) IngestDocument(stream pb.DocumentIngestService_IngestDocumentSe
 	documentRef := events.GetKey(blob)
 	// The logger comes from ctxzap rather than logging.FromContext: a gRPC
 	// stream context carries only the key the grpc_zap interceptor set, so
-	// logging.FromContext would silently fall back to a no-op logger and every
-	// line from here and from the processor would be discarded.
-	//
-	// Tag every line with the same key the blob store path uses, so logs from
-	// either ingestion route can be correlated the same way.
+	// logging.FromContext would fall back to a no-op logger and discard every
+	// line from here and from the processor.
 	childLogger := ctxzap.Extract(ctx).Sugar().With(zap.String(logging.DocumentHash, documentRef))
 
 	doc := &processor.Document{
