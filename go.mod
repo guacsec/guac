@@ -3,7 +3,7 @@ module github.com/guacsec/guac
 go 1.26.0
 
 require (
-	cloud.google.com/go/storage v1.63.1
+	cloud.google.com/go/storage v1.64.0
 	github.com/fsouza/fake-gcs-server v1.55.1
 	github.com/in-toto/in-toto-golang v0.11.0
 	github.com/secure-systems-lab/go-securesystemslib v0.11.0
