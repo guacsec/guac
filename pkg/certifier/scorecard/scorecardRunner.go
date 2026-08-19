@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v5/checker"
 	"github.com/ossf/scorecard/v5/checks"
+	"github.com/ossf/scorecard/v5/clients"
 	"github.com/ossf/scorecard/v5/log"
 	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
 )
@@ -250,17 +251,9 @@ func parseRetryAfter(value string, now time.Time) (time.Duration, bool) {
 	return 0, false
 }
 
-func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
-	logger := logging.FromContext(s.ctx)
-	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
-
-	// Can't use guacs standard logger because scorecard uses a different logger.
-	defaultLogger := log.NewLogger(log.DefaultLevel)
-	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, _, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
-	if err != nil {
-		return nil, fmt.Errorf("error, failed to get clients: %w", err)
-	}
-	checkNames := []string{
+// defaultCheckNames is the set of scorecard checks GUAC computes locally.
+func defaultCheckNames() []string {
+	return []string{
 		checks.CheckBinaryArtifacts,
 		checks.CheckVulnerabilities,
 		checks.CheckPinnedDependencies,
@@ -281,6 +274,47 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 		checks.CheckTokenPermissions,
 		checks.CheckWebHooks,
 	}
+}
+
+// supportedChecks drops the checks scorecard cannot evaluate at a non-HEAD
+// commit. Scorecard treats any commit other than HEAD as a CommitBased request
+// and rejects the whole run if an explicitly requested check does not support
+// that request type, so an unfiltered list fails with "Unsupported RequestType
+// [1] by check: Contributors" rather than scoring the checks that do work.
+func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) []string {
+	if commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA) {
+		return checkNames
+	}
+
+	required := []checker.RequestType{checker.CommitBased}
+	allChecks := checks.GetAllWithExperimental()
+	supported := make([]string, 0, len(checkNames))
+	var skipped []string
+	for _, name := range checkNames {
+		if len(checker.ListUnsupported(required, allChecks[name].SupportedRequestTypes)) == 0 {
+			supported = append(supported, name)
+			continue
+		}
+		skipped = append(skipped, name)
+	}
+
+	if len(skipped) > 0 {
+		logging.FromContext(s.ctx).Infof("Skipping scorecard checks unsupported at commit %s: %s",
+			commitSHA, strings.Join(skipped, ", "))
+	}
+	return supported
+}
+
+func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
+	logger := logging.FromContext(s.ctx)
+	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
+
+	// Can't use guacs standard logger because scorecard uses a different logger.
+	defaultLogger := log.NewLogger(log.DefaultLevel)
+	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, _, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
+	if err != nil {
+		return nil, fmt.Errorf("error, failed to get clients: %w", err)
+	}
 	if tag != "" {
 		if err := repoClient.InitRepo(repo, commitSHA, 0); err != nil {
 			return nil, fmt.Errorf("error, failed to initialize repoClient: %w", err)
@@ -299,6 +333,8 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 			}
 		}
 	}
+
+	checkNames := s.supportedChecks(defaultCheckNames(), commitSHA)
 
 	opts := []sc.Option{
 		sc.WithCommitSHA(commitSHA),
