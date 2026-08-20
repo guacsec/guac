@@ -24,6 +24,18 @@
   - pkg/certifier/scorecard/scorecard_test.go
   - pkg/handler/collector/github/github_test.go
 
+
+### 2026-08-20T17:50:17Z
+- 7 files (7 modified)
+  Modified:
+  - claude-progress.md
+  - internal/client/githubclient/githubclient.go
+  - internal/client/githubclient/githubclient_test.go
+  - pkg/certifier/scorecard/scorecard.go
+  - pkg/certifier/scorecard/scorecardRunner.go
+  - pkg/certifier/scorecard/scorecard_test.go
+  - pkg/handler/collector/github/github_test.go
+
 ## Past Sessions
 
 ### Session 2026-08-17 (1 entries)
