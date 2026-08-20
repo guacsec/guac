@@ -4,7 +4,7 @@
 
 - **Branch:** fix/post-merge-workflow-errors
 - **Last updated:** 2026-08-20
-- **Summary:** 1 files (1 modified)
+- **Summary:** 7 files (7 modified)
 
 ## What to do next
 
@@ -13,10 +13,16 @@
 ## Session Log
 
 
-### 2026-08-20T06:29:55Z
-- 1 files (1 modified)
+### 2026-08-20T17:36:20Z
+- 7 files (7 modified)
   Modified:
   - claude-progress.md
+  - internal/client/githubclient/githubclient.go
+  - internal/client/githubclient/githubclient_test.go
+  - pkg/certifier/scorecard/scorecard.go
+  - pkg/certifier/scorecard/scorecardRunner.go
+  - pkg/certifier/scorecard/scorecard_test.go
+  - pkg/handler/collector/github/github_test.go
 
 ## Past Sessions
 
@@ -34,4 +40,8 @@
 
 ### Session 2026-08-20 (2 entries)
 - 2 files (1 new, 1 modified)
+
+
+### Session 2026-08-20 (1 entries)
+- 1 files (1 modified)
 
