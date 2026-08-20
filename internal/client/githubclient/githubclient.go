@@ -41,6 +41,11 @@ type GithubClient interface {
 	// We need to resolve it to a commit.
 	GetCommitSHA1(ctx context.Context, owner string, repo string, ref string) (string, error)
 
+	// GetTagCommitSHA fetches the commit SHA that a tag points at, dereferencing
+	// annotated tags. Unlike GetCommitSHA1 it only ever matches a tag, so a tag
+	// and branch sharing a name cannot be confused for one another.
+	GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error)
+
 	// GetReleaseByTagSlices fetches metadata regarding releases for a given tag. If the tag is the empty string,
 	// it should just return the latest.
 	GetReleaseByTag(ctx context.Context, owner string, repo string, tag string) (*client.Release, error)
@@ -257,6 +262,27 @@ func (gc *githubClient) GetCommitSHA1(ctx context.Context, owner string, repo st
 	commit, _, err := gc.ghClient.Repositories.GetCommitSHA1(ctx, owner, repo, ref, "")
 
 	return commit, err
+}
+
+// GetTagCommitSHA resolves a tag through the git refs API rather than the commits
+// API, so only a tag can satisfy it. A lightweight tag points straight at the
+// commit; an annotated tag points at a tag object that has to be dereferenced.
+func (gc *githubClient) GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error) {
+	ref, _, err := gc.ghClient.Git.GetRef(ctx, owner, repo, "tags/"+tag)
+	if err != nil {
+		return "", fmt.Errorf("failed to get ref for tag %v: %w", tag, err)
+	}
+
+	obj := ref.GetObject()
+	if obj.GetType() != "tag" {
+		return obj.GetSHA(), nil
+	}
+
+	tagObj, _, err := gc.ghClient.Git.GetTag(ctx, owner, repo, obj.GetSHA())
+	if err != nil {
+		return "", fmt.Errorf("failed to dereference annotated tag %v: %w", tag, err)
+	}
+	return tagObj.GetObject().GetSHA(), nil
 }
 
 func (gc *githubClient) GetReleaseByTag(ctx context.Context, owner string, repo string, tag string) (*client.Release, error) {

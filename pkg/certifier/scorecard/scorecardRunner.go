@@ -24,8 +24,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/guacsec/guac/internal/client/githubclient"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/ossf/scorecard/v5/checker"
 	"github.com/ossf/scorecard/v5/checks"
@@ -251,11 +253,79 @@ func parseRetryAfter(value string, now time.Time) (time.Duration, bool) {
 	return 0, false
 }
 
+// tagCommit resolves owner/repo@tag to the commit SHA the tag points at.
+// Indirected through a variable so tests can resolve tags without network access.
+var tagCommit = githubTagCommit
+
+var (
+	ghClientMu     sync.Mutex
+	ghClientShared githubclient.GithubClient
+)
+
+// sharedGithubClient reuses one GitHub client across tag lookups. NewGithubClient
+// spends an API call verifying the token, so building one per tag would double the
+// request budget every tag costs. Failures are not cached, so a rate limit or
+// outage does not poison later lookups.
+func sharedGithubClient(ctx context.Context) (githubclient.GithubClient, error) {
+	ghClientMu.Lock()
+	defer ghClientMu.Unlock()
+
+	if ghClientShared != nil {
+		return ghClientShared, nil
+	}
+	gh, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_AUTH_TOKEN"))
+	if err != nil {
+		return nil, err
+	}
+	ghClientShared = gh
+	return gh, nil
+}
+
+// githubTagCommit asks GitHub which commit a tag points at, via the git refs API
+// so that only a tag can answer: resolving through the commits API would also
+// accept a branch, which is the mistake this lookup exists to stop making.
+func githubTagCommit(ctx context.Context, owner, repo, tag string) (string, error) {
+	gh, err := sharedGithubClient(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to create github client: %w", err)
+	}
+	return gh.GetTagCommitSHA(ctx, owner, repo, tag)
+}
+
+// splitOwnerRepo splits a normalized github.com/owner/repo name into its parts.
+func splitOwnerRepo(repoName string) (string, string, error) {
+	parts := strings.Split(strings.TrimPrefix(repoName, githubPrefix), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", fmt.Errorf("cannot parse owner and repo from %q", repoName)
+	}
+	return parts[0], parts[1], nil
+}
+
+// commitForTag resolves a tag to the commit it points at.
+//
+// A release's TargetCommitish must not be used for this: it is the branch the
+// release was cut from, so scoring it would score that branch's moving HEAD and
+// attach the result to a fixed tag, pointing the attestation at the wrong
+// revision.
+func (s scorecardRunner) commitForTag(repoName, tag string) (string, error) {
+	owner, repo, err := splitOwnerRepo(repoName)
+	if err != nil {
+		return "", err
+	}
+	commitSHA, err := tagCommit(s.ctx, owner, repo, tag)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve tag %s to a commit: %w", tag, err)
+	}
+	if commitSHA == "" {
+		return "", fmt.Errorf("tag %s resolved to an empty commit SHA", tag)
+	}
+	return commitSHA, nil
+}
+
 // supportedChecks drops the checks scorecard cannot evaluate at a non-HEAD
 // commit. Scorecard treats any commit other than HEAD as a CommitBased request
 // and rejects the whole run if an explicitly requested check does not support
-// that request type, so an unfiltered list fails with "Unsupported RequestType
-// [1] by check: Contributors" rather than scoring the checks that do work.
+// that request type
 func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) []string {
 	if commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA) {
 		return checkNames
@@ -274,8 +344,13 @@ func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) 
 	}
 
 	if len(skipped) > 0 {
-		logging.FromContext(s.ctx).Infof("Skipping scorecard checks unsupported at commit %s: %s",
-			commitSHA, strings.Join(skipped, ", "))
+		// Reduced coverage changes what the score means, so warn rather than inform.
+		// The emitted document reports the checks that ran, so a consumer can tell a
+		// reduced score from a full one without reading these logs.
+		logging.FromContext(s.ctx).Warnf(
+			"Scorecard coverage reduced at commit %s: scoring %d of %d checks, "+
+				"%s cannot be evaluated outside HEAD",
+			commitSHA, len(supported), len(checkNames), strings.Join(skipped, ", "))
 	}
 	return supported
 }
@@ -312,22 +387,17 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 		checks.CheckWebHooks,
 	}
 	if tag != "" {
-		if err := repoClient.InitRepo(repo, commitSHA, 0); err != nil {
-			return nil, fmt.Errorf("error, failed to initialize repoClient: %w", err)
-		}
-		defer func() { _ = repoClient.Close() }()
-
-		releases, err := repoClient.ListReleases()
+		commitSHA, err = s.commitForTag(repoName, tag)
 		if err != nil {
-			return nil, fmt.Errorf("error, failed to run releases: %w", err)
+			return nil, fmt.Errorf("error, %w", err)
 		}
-
-		for _, release := range releases {
-			if release.TagName == tag {
-				commitSHA = release.TargetCommitish
-				break
-			}
-		}
+		logger.Infof("Resolved tag %s to commit %s", tag, commitSHA)
+	}
+	if commitSHA == "" {
+		// sc.WithCommitSHA overwrites scorecard's HEAD default even when handed an
+		// empty string, and an empty commit is then classified CommitBased, so it
+		// has to be normalized before either scorecard or supportedChecks sees it.
+		commitSHA = clients.HeadSHA
 	}
 
 	checkNames = s.supportedChecks(checkNames, commitSHA)

@@ -127,6 +127,12 @@ func (m *MockGithubClient) GetCommitSHA1(ctx context.Context, owner string, repo
 	return mockCommit, nil
 }
 
+// GetTagCommitSHA fetches the commit SHA that a tag points at, dereferencing
+// annotated tags.
+func (m *MockGithubClient) GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error) {
+	return mockCommit, nil
+}
+
 // GetReleaseByTagSlices fetches metadata regarding releases for a given tag. If the tag is the empty string,
 // it should just return the latest.
 func (m *MockGithubClient) GetReleaseByTag(ctx context.Context, owner string, repo string, tag string) (*client.Release, error) {
