@@ -65,6 +65,7 @@ paths:
         the endpoint will return both pkg:foo/bar@a=b and pkg:foo/bar@c=d&a=b.
       operationId: getPackagePurls
       parameters:
+        - $ref: "#/components/parameters/PaginationSpec"
         - name: purl
           in: path
           required: true
@@ -123,6 +124,7 @@ paths:
         depends on C, then requesting dependencies for A will return both B and C.
       operationId: getPackageDeps
       parameters:
+        - $ref: "#/components/parameters/PaginationSpec"
         - name: purl
           in: path
           required: true
@@ -163,6 +165,7 @@ paths:
       summary: Get dependencies for an artifact, identified by a digest
       operationId: getArtifactDeps
       parameters:
+        - $ref: "#/components/parameters/PaginationSpec"
         - name: digest
           in: path
           required: true

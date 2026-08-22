@@ -1,16 +1,18 @@
+//
 // Copyright 2024 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//	http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package server_test
 
 import (
@@ -513,4 +515,118 @@ func Test_ClientErrorsForArtifact(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Tests that GetPackageDeps and GetArtifactDeps honor the PaginationSpec
+// query parameter instead of always returning the full result set.
+func Test_DepsEndpoints_RespectPaginationSpec(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	pageSize := 1
+
+	t.Run("GetPackageDeps", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		Ingest(ctx, t, gqlClient, GuacData{
+			Packages: []string{"pkg:guac/foo", "pkg:guac/bar", "pkg:guac/baz"},
+			HasSboms: []HasSbom{
+				{Subject: "pkg:guac/foo", IncludedSoftware: []string{"pkg:guac/bar", "pkg:guac/baz"}},
+			},
+		})
+		restApi := server.NewDefaultServer(gqlClient)
+
+		res, err := restApi.GetPackageDeps(ctx, gen.GetPackageDepsRequestObject{
+			Purl:   "pkg:guac/foo",
+			Params: gen.GetPackageDepsParams{PaginationSpec: &gen.PaginationSpec{PageSize: &pageSize}},
+		})
+		if err != nil {
+			t.Fatalf("GetPackageDeps returned unexpected error: %v", err)
+		}
+		success, ok := res.(gen.GetPackageDeps200JSONResponse)
+		if !ok {
+			t.Fatalf("Expected 200 response, got %T: %v", res, res)
+		}
+		if len(success.PurlList) != pageSize {
+			t.Errorf("PurlList length = %d, want %d", len(success.PurlList), pageSize)
+		}
+		if success.PaginationInfo.NextCursor == nil {
+			t.Fatalf("expected NextCursor to be set when more results remain")
+		}
+
+		// Follow NextCursor and confirm the second page is disjoint from the
+		// first, i.e. the underlying ordering used for pagination is stable
+		// across requests.
+		res2, err := restApi.GetPackageDeps(ctx, gen.GetPackageDepsRequestObject{
+			Purl: "pkg:guac/foo",
+			Params: gen.GetPackageDepsParams{PaginationSpec: &gen.PaginationSpec{
+				PageSize: &pageSize,
+				Cursor:   success.PaginationInfo.NextCursor,
+			}},
+		})
+		if err != nil {
+			t.Fatalf("GetPackageDeps returned unexpected error: %v", err)
+		}
+		success2, ok := res2.(gen.GetPackageDeps200JSONResponse)
+		if !ok {
+			t.Fatalf("Expected 200 response, got %T: %v", res2, res2)
+		}
+		if len(success2.PurlList) != pageSize {
+			t.Errorf("second page PurlList length = %d, want %d", len(success2.PurlList), pageSize)
+		}
+		if success2.PurlList[0] == success.PurlList[0] {
+			t.Errorf("second page returned the same purl as the first page: %v", success2.PurlList[0])
+		}
+	})
+
+	t.Run("GetArtifactDeps", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		Ingest(ctx, t, gqlClient, GuacData{
+			Packages:  []string{"pkg:guac/bar", "pkg:guac/baz"},
+			Artifacts: []string{"sha-xyz"},
+			HasSboms: []HasSbom{
+				{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar", "pkg:guac/baz"}},
+			},
+		})
+		restApi := server.NewDefaultServer(gqlClient)
+
+		res, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{
+			Digest: "sha-xyz",
+			Params: gen.GetArtifactDepsParams{PaginationSpec: &gen.PaginationSpec{PageSize: &pageSize}},
+		})
+		if err != nil {
+			t.Fatalf("GetArtifactDeps returned unexpected error: %v", err)
+		}
+		success, ok := res.(gen.GetArtifactDeps200JSONResponse)
+		if !ok {
+			t.Fatalf("Expected 200 response, got %T: %v", res, res)
+		}
+		if len(success.PurlList) != pageSize {
+			t.Errorf("PurlList length = %d, want %d", len(success.PurlList), pageSize)
+		}
+		if success.PaginationInfo.NextCursor == nil {
+			t.Fatalf("expected NextCursor to be set when more results remain")
+		}
+
+		// Follow NextCursor and confirm the second page is disjoint from the
+		// first, i.e. the underlying ordering used for pagination is stable
+		// across requests.
+		res2, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{
+			Digest: "sha-xyz",
+			Params: gen.GetArtifactDepsParams{PaginationSpec: &gen.PaginationSpec{
+				PageSize: &pageSize,
+				Cursor:   success.PaginationInfo.NextCursor,
+			}},
+		})
+		if err != nil {
+			t.Fatalf("GetArtifactDeps returned unexpected error: %v", err)
+		}
+		success2, ok := res2.(gen.GetArtifactDeps200JSONResponse)
+		if !ok {
+			t.Fatalf("Expected 200 response, got %T: %v", res2, res2)
+		}
+		if len(success2.PurlList) != pageSize {
+			t.Errorf("second page PurlList length = %d, want %d", len(success2.PurlList), pageSize)
+		}
+		if success2.PurlList[0] == success.PurlList[0] {
+			t.Errorf("second page returned the same purl as the first page: %v", success2.PurlList[0])
+		}
+	})
 }

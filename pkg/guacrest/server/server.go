@@ -20,11 +20,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/dependencies"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
+	"github.com/guacsec/guac/pkg/guacrest/pagination"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
@@ -124,11 +126,19 @@ func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPack
 		}, nil
 	}
 
-	totalCount := len(purls)
+	page, paginationInfo, err := pagination.Paginate(ctx, purls, request.Params.PaginationSpec)
+	if err != nil {
+		return gen.GetPackagePurls400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
 	return gen.GetPackagePurls200JSONResponse{
 		PurlListJSONResponse: gen.PurlListJSONResponse{
-			PaginationInfo: gen.PaginationInfo{TotalCount: &totalCount},
-			PurlList:       purls,
+			PaginationInfo: paginationInfo,
+			PurlList:       page,
 		},
 	}, nil
 }
@@ -186,13 +196,24 @@ func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPacka
 		}
 	}
 
-	result := gen.GetPackageDeps200JSONResponse{}
-
+	depPurls := make([]string, 0, len(purls))
 	for _, depPurl := range purls {
-		result.PurlList = append(result.PurlList, depPurl)
+		depPurls = append(depPurls, depPurl)
 	}
-	totalCount := len(result.PurlList)
-	result.PaginationInfo = gen.PaginationInfo{TotalCount: &totalCount}
+	sort.Strings(depPurls)
+
+	page, paginationInfo, err := pagination.Paginate(ctx, depPurls, request.Params.PaginationSpec)
+	if err != nil {
+		return gen.GetPackageDeps400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	result := gen.GetPackageDeps200JSONResponse{}
+	result.PaginationInfo = paginationInfo
+	result.PurlList = append(result.PurlList, page...)
 
 	return result, nil
 }
@@ -245,13 +266,24 @@ func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArti
 		}
 	}
 
-	result := gen.GetArtifactDeps200JSONResponse{}
-
+	depPurls := make([]string, 0, len(purls))
 	for _, depPurl := range purls {
-		result.PurlList = append(result.PurlList, depPurl)
+		depPurls = append(depPurls, depPurl)
 	}
-	totalCount := len(result.PurlList)
-	result.PaginationInfo = gen.PaginationInfo{TotalCount: &totalCount}
+	sort.Strings(depPurls)
+
+	page, paginationInfo, err := pagination.Paginate(ctx, depPurls, request.Params.PaginationSpec)
+	if err != nil {
+		return gen.GetArtifactDeps400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	result := gen.GetArtifactDeps200JSONResponse{}
+	result.PaginationInfo = paginationInfo
+	result.PurlList = append(result.PurlList, page...)
 
 	return result, nil
 }
