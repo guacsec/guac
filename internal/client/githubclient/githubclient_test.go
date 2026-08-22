@@ -245,9 +245,6 @@ func Test_githubClient_GetCommitSHA1(t *testing.T) {
 	}
 }
 
-// A tag must resolve to the commit it points at. The same commit is expected
-// whether the tag is lightweight or annotated, since an annotated tag is
-// dereferenced to the commit its tag object points at.
 func Test_githubClient_GetTagCommitSHA(t *testing.T) {
 	gc := testGithubClient()
 
@@ -268,8 +265,6 @@ func Test_githubClient_GetTagCommitSHA(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			// A branch name must not satisfy a tag lookup, otherwise a score
-			// computed for a branch head could be attached to a tag.
 			name:    "branch name is not a tag",
 			tag:     "main",
 			wantErr: true,

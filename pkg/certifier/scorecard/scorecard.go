@@ -90,9 +90,6 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 			DocumentRef: events.GetDocRef(scorecardResults.Bytes()),
 		},
 	}
-	// A tagged request is scored at the commit the tag points at, so label it with
-	// the tag. Commit is defaulted to HEAD above when empty, so checking it first
-	// would label every tagged score @HEAD and leave this tag branch unreachable.
 	if sourceNode.Tag != "" {
 		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Tag
 	} else {

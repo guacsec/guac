@@ -253,8 +253,6 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 
 func Test_scorecardRunner_supportedChecks(t *testing.T) {
 	runner := scorecardRunner{ctx: context.Background()}
-	// License reads file content so it runs at any commit, while Contributors
-	// needs repository history and scorecard only offers it at HEAD.
 	input := []string{checks.CheckContributors, checks.CheckLicense}
 
 	tests := []struct {
@@ -265,8 +263,6 @@ func Test_scorecardRunner_supportedChecks(t *testing.T) {
 		{name: "empty commit keeps every check", commitSHA: "", want: input},
 		{name: "HEAD keeps every check", commitSHA: "HEAD", want: input},
 		{name: "pinned commit drops unsupported checks", commitSHA: "98316298749fdd62d3cc99423baec45ae11af662", want: []string{checks.CheckLicense}},
-		// A release's TargetCommitish is a branch name, which scorecard also
-		// treats as a pinned commit.
 		{name: "branch name drops unsupported checks", commitSHA: "main", want: []string{checks.CheckLicense}},
 	}
 
@@ -279,9 +275,6 @@ func Test_scorecardRunner_supportedChecks(t *testing.T) {
 	}
 }
 
-// A tagged request is scored at the commit the tag points at, so the emitted
-// document must be labelled with the tag rather than the HEAD that
-// CertifyComponent substitutes for an empty commit.
 func TestCertifyComponentTaggedSourceLabel(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // nolint:govet
 	defer cancel()
@@ -339,7 +332,6 @@ func TestSplitOwnerRepo(t *testing.T) {
 	}
 }
 
-// stubTagCommit swaps the tag resolver for the duration of a test.
 func stubTagCommit(t *testing.T, fn func(ctx context.Context, owner, repo, tag string) (string, error)) {
 	t.Helper()
 	orig := tagCommit
@@ -347,9 +339,6 @@ func stubTagCommit(t *testing.T, fn func(ctx context.Context, owner, repo, tag s
 	t.Cleanup(func() { tagCommit = orig })
 }
 
-// A tag must resolve to the commit it points at. Resolving it to a release's
-// TargetCommitish yields a branch name, which would score that branch's moving
-// HEAD and attach the result to a fixed tag.
 func Test_scorecardRunner_commitForTag(t *testing.T) {
 	const wantSHA = "98316298749fdd62d3cc99423baec45ae11af662"
 	runner := scorecardRunner{ctx: context.Background()}

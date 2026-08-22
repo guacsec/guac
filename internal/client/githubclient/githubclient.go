@@ -20,12 +20,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/google/go-github/v50/github"
 	"github.com/guacsec/guac/internal/client"
 	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/oauth2"
-	"io"
-	"net/http"
 )
 
 // TODO (mlieberman85): This interface will probably be pulled out into an interface that can support other
@@ -41,9 +42,6 @@ type GithubClient interface {
 	// We need to resolve it to a commit.
 	GetCommitSHA1(ctx context.Context, owner string, repo string, ref string) (string, error)
 
-	// GetTagCommitSHA fetches the commit SHA that a tag points at, dereferencing
-	// annotated tags. Unlike GetCommitSHA1 it only ever matches a tag, so a tag
-	// and branch sharing a name cannot be confused for one another.
 	GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error)
 
 	// GetReleaseByTagSlices fetches metadata regarding releases for a given tag. If the tag is the empty string,
@@ -264,9 +262,6 @@ func (gc *githubClient) GetCommitSHA1(ctx context.Context, owner string, repo st
 	return commit, err
 }
 
-// GetTagCommitSHA resolves a tag through the git refs API rather than the commits
-// API, so only a tag can satisfy it. A lightweight tag points straight at the
-// commit; an annotated tag points at a tag object that has to be dereferenced.
 func (gc *githubClient) GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error) {
 	ref, _, err := gc.ghClient.Git.GetRef(ctx, owner, repo, "tags/"+tag)
 	if err != nil {
