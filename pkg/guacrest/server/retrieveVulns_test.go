@@ -61,7 +61,7 @@ func Test_GetVulnsForArtifact(t *testing.T) {
 				IsOccurrences:   []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-xyz"}},
 				CertifyVulns:    []CertifyVuln{{Package: "pkg:guac/foo", Vulnerability: "osv/CVE-2024-0001", Metadata: vulnScanMeta()}},
 			},
-			digest:   "sha-xyz",
+			digest:   "sha256:sha-xyz",
 			expected: []string{"cve-2024-0001"},
 		},
 		{
@@ -69,7 +69,7 @@ func Test_GetVulnsForArtifact(t *testing.T) {
 			data: GuacData{
 				Artifacts: []string{"sha-xyz"},
 			},
-			digest:   "sha-xyz",
+			digest:   "sha256:sha-xyz",
 			expected: []string{},
 		},
 		{
@@ -79,7 +79,7 @@ func Test_GetVulnsForArtifact(t *testing.T) {
 				Artifacts:     []string{"sha-xyz"},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-xyz"}},
 			},
-			digest:   "sha-xyz",
+			digest:   "sha256:sha-xyz",
 			expected: []string{},
 		},
 	}
@@ -212,7 +212,7 @@ func Test_GetArtifactVulns_HTTP(t *testing.T) {
 		})
 		restApi := server.NewDefaultServer(gqlClient)
 
-		res, err := restApi.GetArtifactVulns(ctx, gen.GetArtifactVulnsRequestObject{Digest: "sha-xyz"})
+		res, err := restApi.GetArtifactVulns(ctx, gen.GetArtifactVulnsRequestObject{Digest: "sha256:sha-xyz"})
 		if err != nil {
 			t.Fatalf("GetArtifactVulns returned unexpected error: %v", err)
 		}
@@ -226,6 +226,19 @@ func Test_GetArtifactVulns_HTTP(t *testing.T) {
 	})
 
 	t.Run("Returns 400 for unknown digest", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		restApi := server.NewDefaultServer(gqlClient)
+
+		res, err := restApi.GetArtifactVulns(ctx, gen.GetArtifactVulnsRequestObject{Digest: "sha256:sha-missing"})
+		if err != nil {
+			t.Fatalf("GetArtifactVulns returned unexpected error: %v", err)
+		}
+		if _, ok := res.(gen.GetArtifactVulns400JSONResponse); !ok {
+			t.Fatalf("expected 400 response, got %T: %v", res, res)
+		}
+	})
+
+	t.Run("Returns 400 for digest missing algorithm prefix", func(t *testing.T) {
 		gqlClient := SetupTest(t)
 		restApi := server.NewDefaultServer(gqlClient)
 
