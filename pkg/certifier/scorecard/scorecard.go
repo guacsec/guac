@@ -90,10 +90,10 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 			DocumentRef: events.GetDocRef(scorecardResults.Bytes()),
 		},
 	}
-	if sourceNode.Commit != "" {
-		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Commit
-	} else {
+	if sourceNode.Tag != "" {
 		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Tag
+	} else {
+		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Commit
 	}
 
 	docChannel <- &res
