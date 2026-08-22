@@ -3,8 +3,8 @@
 ## Current State
 
 - **Branch:** fix/post-merge-workflow-errors
-- **Last updated:** 2026-08-20
-- **Summary:** 7 files (7 modified)
+- **Last updated:** 2026-08-22
+- **Summary:** 7 files (6 modified, 1 deleted)
 
 ## What to do next
 
@@ -13,55 +13,16 @@
 ## Session Log
 
 
-### 2026-08-20T17:48:49Z
-- 7 files (7 modified)
+### 2026-08-22T17:19:24Z
+- 7 files (6 modified, 1 deleted)
   Modified:
-  - claude-progress.md
   - internal/client/githubclient/githubclient.go
   - internal/client/githubclient/githubclient_test.go
   - pkg/certifier/scorecard/scorecard.go
   - pkg/certifier/scorecard/scorecardRunner.go
   - pkg/certifier/scorecard/scorecard_test.go
   - pkg/handler/collector/github/github_test.go
-
-
-### 2026-08-20T17:50:17Z
-- 7 files (7 modified)
-  Modified:
+  Deleted:
   - claude-progress.md
-  - internal/client/githubclient/githubclient.go
-  - internal/client/githubclient/githubclient_test.go
-  - pkg/certifier/scorecard/scorecard.go
-  - pkg/certifier/scorecard/scorecardRunner.go
-  - pkg/certifier/scorecard/scorecard_test.go
-  - pkg/handler/collector/github/github_test.go
 
 ## Past Sessions
-
-### Session 2026-08-17 (1 entries)
-- 4 files (2 new, 2 modified); 1 commits: fix(scorecard): skip checks unsupported at non-HEAD commits
-
-
-### Session 2026-08-17 (2 entries)
-- 3 files (2 new, 1 modified)
-
-
-### Session 2026-08-18 (2 entries)
-- 4 files (3 new, 1 modified)
-
-
-### Session 2026-08-20 (2 entries)
-- 2 files (1 new, 1 modified)
-
-
-### Session 2026-08-20 (1 entries)
-- 1 files (1 modified)
-
-
-### Session 2026-08-20 (1 entries)
-- 7 files (7 modified)
-
-
-### Session 2026-08-20 (2 entries)
-- 7 files (7 modified)
-
