@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
@@ -26,10 +27,14 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/ossf/scorecard/v5/checker"
 	"github.com/ossf/scorecard/v5/checks"
 	scpkg "github.com/ossf/scorecard/v5/pkg/scorecard"
+	"github.com/ossf/scorecard/v5/policy"
 	"go.uber.org/mock/gomock"
 )
+
+const pinnedSHA = "98316298749fdd62d3cc99423baec45ae11af662"
 
 type mockScorecard struct{}
 
@@ -253,7 +258,7 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 
 func Test_scorecardRunner_supportedChecks(t *testing.T) {
 	runner := scorecardRunner{ctx: context.Background()}
-	input := []string{checks.CheckContributors, checks.CheckLicense}
+	input := []string{checks.CheckContributors, checks.CheckLicense, checks.CheckMaintained}
 
 	tests := []struct {
 		name      string
@@ -262,41 +267,73 @@ func Test_scorecardRunner_supportedChecks(t *testing.T) {
 	}{
 		{name: "empty commit keeps every check", commitSHA: "", want: input},
 		{name: "HEAD keeps every check", commitSHA: "HEAD", want: input},
-		{name: "pinned commit drops unsupported checks", commitSHA: "98316298749fdd62d3cc99423baec45ae11af662", want: []string{checks.CheckLicense}},
+		{name: "lowercase head keeps every check", commitSHA: "head", want: input},
+		{name: "pinned SHA drops unsupported checks", commitSHA: pinnedSHA, want: []string{checks.CheckLicense}},
 		{name: "branch name drops unsupported checks", commitSHA: "main", want: []string{checks.CheckLicense}},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if got := runner.supportedChecks(input, test.commitSHA); !reflect.DeepEqual(got, test.want) {
+			if got := runner.supportedChecks(input, test.commitSHA); !slices.Equal(got, test.want) {
 				t.Errorf("supportedChecks() = %v, want %v", got, test.want)
 			}
 		})
 	}
 }
 
-func TestCertifyComponentTaggedSourceLabel(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // nolint:govet
-	defer cancel()
+func Test_scorecardRunner_supportedChecksPassPolicyGate(t *testing.T) {
+	runner := scorecardRunner{ctx: context.Background()}
+	filtered := runner.supportedChecks(defaultCheckNames(), pinnedSHA)
 
-	ctrl := gomock.NewController(t)
-	scMock := mocks.NewMockScorecard(ctrl)
-	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_, _, _ string) (*scpkg.Result, error) {
-			return &scpkg.Result{}, nil
-		}).AnyTimes()
+	if len(filtered) == 0 {
+		t.Fatal("supportedChecks() returned no checks for a pinned commit")
+	}
+	if _, err := policy.GetEnabled(nil, filtered, []checker.RequestType{checker.CommitBased}); err != nil {
+		t.Errorf("policy.GetEnabled() error = %v, want nil", err)
+	}
+}
 
-	sc := scorecard{scorecard: scMock, ghToken: "test"}
-	docChannel := make(chan *processor.Document, 2)
+func Test_defaultCheckNamesPassPolicyGateAtHead(t *testing.T) {
+	if _, err := policy.GetEnabled(nil, defaultCheckNames(), nil); err != nil {
+		t.Errorf("policy.GetEnabled() error = %v, want nil", err)
+	}
+}
 
-	err := sc.CertifyComponent(ctx, &source.SourceNode{Repo: "myrepo", Tag: "v1.0.0"}, docChannel)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+func TestCertifyComponentSourceLabel(t *testing.T) {
+	tests := []struct {
+		name   string
+		commit string
+		tag    string
+		want   string
+	}{
+		{name: "commit only", commit: pinnedSHA, want: "myrepo@" + pinnedSHA},
+		{name: "commit wins over tag", commit: pinnedSHA, tag: "v1.0.0", want: "myrepo@" + pinnedSHA},
+		{name: "tag replaces HEAD", commit: "HEAD", tag: "v1.0.0", want: "myrepo@v1.0.0"},
+		{name: "tag replaces empty commit", tag: "v1.0.0", want: "myrepo@v1.0.0"},
+		{name: "neither falls back to HEAD", want: "myrepo@HEAD"},
 	}
 
-	res := <-docChannel
-	if want := "myrepo@v1.0.0"; res.SourceInformation.Source != want {
-		t.Errorf("SourceInformation.Source = %q, want %q", res.SourceInformation.Source, want)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // nolint:govet
+			defer cancel()
+
+			scMock := mocks.NewMockScorecard(gomock.NewController(t))
+			scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(&scpkg.Result{}, nil).AnyTimes()
+
+			sc := scorecard{scorecard: scMock, ghToken: "test"}
+			docChannel := make(chan *processor.Document, 1)
+
+			node := &source.SourceNode{Repo: "myrepo", Commit: test.commit, Tag: test.tag}
+			if err := sc.CertifyComponent(ctx, node, docChannel); err != nil {
+				t.Fatalf("CertifyComponent() error = %v", err)
+			}
+
+			if got := (<-docChannel).SourceInformation.Source; got != test.want {
+				t.Errorf("SourceInformation.Source = %q, want %q", got, test.want)
+			}
+		})
 	}
 }
 
@@ -313,6 +350,7 @@ func TestSplitOwnerRepo(t *testing.T) {
 		{name: "owner only", repoName: "github.com/ossf", wantErr: true},
 		{name: "extra path segment", repoName: "github.com/ossf/scorecard/v5", wantErr: true},
 		{name: "empty repo", repoName: "github.com/ossf/", wantErr: true},
+		{name: "empty owner", repoName: "github.com//scorecard", wantErr: true},
 		{name: "empty", repoName: "", wantErr: true},
 	}
 
@@ -332,30 +370,20 @@ func TestSplitOwnerRepo(t *testing.T) {
 	}
 }
 
-func stubTagCommit(t *testing.T, fn func(ctx context.Context, owner, repo, tag string) (string, error)) {
-	t.Helper()
-	orig := tagCommit
-	tagCommit = fn
-	t.Cleanup(func() { tagCommit = orig })
-}
-
 func Test_scorecardRunner_commitForTag(t *testing.T) {
-	const wantSHA = "98316298749fdd62d3cc99423baec45ae11af662"
-	runner := scorecardRunner{ctx: context.Background()}
-
 	t.Run("resolves tag to commit", func(t *testing.T) {
 		var gotOwner, gotRepo, gotTag string
-		stubTagCommit(t, func(_ context.Context, owner, repo, tag string) (string, error) {
+		runner := scorecardRunner{ctx: context.Background(), resolveTag: func(_ context.Context, owner, repo, tag string) (string, error) {
 			gotOwner, gotRepo, gotTag = owner, repo, tag
-			return wantSHA, nil
-		})
+			return pinnedSHA, nil
+		}}
 
 		got, err := runner.commitForTag("github.com/ossf/scorecard", "v4.10.4")
 		if err != nil {
 			t.Fatalf("commitForTag() error = %v", err)
 		}
-		if got != wantSHA {
-			t.Errorf("commitForTag() = %q, want %q", got, wantSHA)
+		if got != pinnedSHA {
+			t.Errorf("commitForTag() = %q, want %q", got, pinnedSHA)
 		}
 		if gotOwner != "ossf" || gotRepo != "scorecard" || gotTag != "v4.10.4" {
 			t.Errorf("resolver called with %q, %q, %q; want ossf, scorecard, v4.10.4", gotOwner, gotRepo, gotTag)
@@ -363,28 +391,30 @@ func Test_scorecardRunner_commitForTag(t *testing.T) {
 	})
 
 	t.Run("propagates resolver failure", func(t *testing.T) {
-		stubTagCommit(t, func(_ context.Context, _, _, _ string) (string, error) {
+		runner := scorecardRunner{ctx: context.Background(), resolveTag: func(_ context.Context, _, _, _ string) (string, error) {
 			return "", fmt.Errorf("404 tag not found")
-		})
+		}}
 		if _, err := runner.commitForTag("github.com/ossf/scorecard", "v9.9.9"); err == nil {
 			t.Fatal("commitForTag() error = nil, want a resolution failure")
 		}
 	})
 
+	// An empty SHA would be passed to scorecard as an empty commit, which it
+	// reads as a pinned empty revision rather than HEAD.
 	t.Run("rejects empty commit", func(t *testing.T) {
-		stubTagCommit(t, func(_ context.Context, _, _, _ string) (string, error) {
+		runner := scorecardRunner{ctx: context.Background(), resolveTag: func(_ context.Context, _, _, _ string) (string, error) {
 			return "", nil
-		})
+		}}
 		if _, err := runner.commitForTag("github.com/ossf/scorecard", "v4.10.4"); err == nil {
 			t.Fatal("commitForTag() error = nil, want an empty-SHA failure")
 		}
 	})
 
 	t.Run("rejects unparseable repo", func(t *testing.T) {
-		stubTagCommit(t, func(_ context.Context, _, _, _ string) (string, error) {
+		runner := scorecardRunner{ctx: context.Background(), resolveTag: func(_ context.Context, _, _, _ string) (string, error) {
 			t.Fatal("resolver called for an unparseable repo name")
 			return "", nil
-		})
+		}}
 		if _, err := runner.commitForTag("github.com/ossf", "v4.10.4"); err == nil {
 			t.Fatal("commitForTag() error = nil, want a parse failure")
 		}

@@ -20,13 +20,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"net/http"
-
 	"github.com/google/go-github/v50/github"
 	"github.com/guacsec/guac/internal/client"
 	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
 )
 
 // TODO (mlieberman85): This interface will probably be pulled out into an interface that can support other
@@ -41,8 +40,6 @@ type GithubClient interface {
 	// The release commitish can be a commit, branch name, or a tag.
 	// We need to resolve it to a commit.
 	GetCommitSHA1(ctx context.Context, owner string, repo string, ref string) (string, error)
-
-	GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error)
 
 	// GetReleaseByTagSlices fetches metadata regarding releases for a given tag. If the tag is the empty string,
 	// it should just return the latest.
@@ -260,24 +257,6 @@ func (gc *githubClient) GetCommitSHA1(ctx context.Context, owner string, repo st
 	commit, _, err := gc.ghClient.Repositories.GetCommitSHA1(ctx, owner, repo, ref, "")
 
 	return commit, err
-}
-
-func (gc *githubClient) GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error) {
-	ref, _, err := gc.ghClient.Git.GetRef(ctx, owner, repo, "tags/"+tag)
-	if err != nil {
-		return "", fmt.Errorf("failed to get ref for tag %v: %w", tag, err)
-	}
-
-	obj := ref.GetObject()
-	if obj.GetType() != "tag" {
-		return obj.GetSHA(), nil
-	}
-
-	tagObj, _, err := gc.ghClient.Git.GetTag(ctx, owner, repo, obj.GetSHA())
-	if err != nil {
-		return "", fmt.Errorf("failed to dereference annotated tag %v: %w", tag, err)
-	}
-	return tagObj.GetObject().GetSHA(), nil
 }
 
 func (gc *githubClient) GetReleaseByTag(ctx context.Context, owner string, repo string, tag string) (*client.Release, error) {

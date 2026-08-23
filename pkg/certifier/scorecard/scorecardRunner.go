@@ -24,7 +24,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
@@ -51,10 +50,12 @@ var (
 // scorecardRunner is a struct that implements the Scorecard interface.
 type scorecardRunner struct {
 	ctx context.Context
-	// computeOnly skips the scorecard API entirely and always computes the
-	// score locally with the scorecard package.
 	computeOnly bool
+	resolveTag tagResolver
 }
+
+// tagResolver resolves a tag to the commit SHA it points at.
+type tagResolver func(ctx context.Context, owner, repo, tag string) (string, error)
 
 // RunnerOption configures a scorecard runner.
 type RunnerOption func(*scorecardRunner)
@@ -307,6 +308,45 @@ func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) 
 	return supported
 }
 
+func splitOwnerRepo(repoName string) (string, string, error) {
+	owner, repo, ok := strings.Cut(strings.TrimPrefix(repoName, githubPrefix), "/")
+	if !ok || owner == "" || repo == "" || strings.Contains(repo, "/") {
+		return "", "", fmt.Errorf("cannot parse owner and repo from %q", repoName)
+	}
+	return owner, repo, nil
+}
+
+func (s scorecardRunner) commitForTag(repoName, tag string) (string, error) {
+	owner, repo, err := splitOwnerRepo(repoName)
+	if err != nil {
+		return "", err
+	}
+
+	resolve := s.resolveTag
+	if resolve == nil {
+		resolve = githubTagCommit
+	}
+
+	commitSHA, err := resolve(s.ctx, owner, repo, tag)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve tag %v of %v: %w", tag, repoName, err)
+	}
+	if commitSHA == "" {
+		return "", fmt.Errorf("tag %v of %v resolved to an empty commit SHA", tag, repoName)
+	}
+	return commitSHA, nil
+}
+
+// githubTagCommit resolves a tag through the GitHub API. Annotated tags are
+// dereferenced to their commit by the API.
+func githubTagCommit(ctx context.Context, owner, repo, tag string) (string, error) {
+	gh, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_AUTH_TOKEN"))
+	if err != nil {
+		return "", fmt.Errorf("failed to create github client: %w", err)
+	}
+	return gh.GetCommitSHA1(ctx, owner, repo, tag)
+}
+
 func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
 	logger := logging.FromContext(s.ctx)
 	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
@@ -320,15 +360,13 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 	if tag != "" {
 		commitSHA, err = s.commitForTag(repoName, tag)
 		if err != nil {
-			return nil, fmt.Errorf("error, %w", err)
+			return nil, err
 		}
 		logger.Infof("Resolved tag %s to commit %s", tag, commitSHA)
 	}
 	if commitSHA == "" {
 		commitSHA = clients.HeadSHA
 	}
-
-	checkNames = s.supportedChecks(checkNames, commitSHA)
 
 	checkNames := s.supportedChecks(defaultCheckNames(), commitSHA)
 

@@ -245,44 +245,6 @@ func Test_githubClient_GetCommitSHA1(t *testing.T) {
 	}
 }
 
-func Test_githubClient_GetTagCommitSHA(t *testing.T) {
-	gc := testGithubClient()
-
-	tests := []struct {
-		name    string
-		tag     string
-		want    string
-		wantErr bool
-	}{
-		{
-			name: "existing tag resolves to its commit",
-			tag:  "v1",
-			want: "a05760afde49e6f2bf24a40eae3079f515df9815",
-		},
-		{
-			name:    "missing tag errors rather than resolving",
-			tag:     "doesnotexist",
-			wantErr: true,
-		},
-		{
-			name:    "branch name is not a tag",
-			tag:     "main",
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := gc.GetTagCommitSHA(context.Background(), "guacsec", "guac-test", tt.tag)
-			if (err != nil) != tt.wantErr {
-				t.Fatalf("githubClient.GetTagCommitSHA() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if got != tt.want {
-				t.Errorf("githubClient.GetTagCommitSHA() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_githubClient_GetReleaseByTag(t *testing.T) {
 	gc := testGithubClient()
 

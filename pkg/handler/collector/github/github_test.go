@@ -33,7 +33,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
-type MockGithubClient struct{}
+type MockGithubClient struct {
+}
 
 const (
 	mockTag                       = "mockTag"
@@ -123,10 +124,6 @@ func (m *MockGithubClient) GetLatestRelease(ctx context.Context, owner string, r
 // The release commitish can be a commit, branch name, or a tag.
 // We need to resolve it to a commit.
 func (m *MockGithubClient) GetCommitSHA1(ctx context.Context, owner string, repo string, ref string) (string, error) {
-	return mockCommit, nil
-}
-
-func (m *MockGithubClient) GetTagCommitSHA(ctx context.Context, owner string, repo string, tag string) (string, error) {
 	return mockCommit, nil
 }
 
@@ -289,7 +286,7 @@ func Test_githubCollector_RetrieveArtifacts(t *testing.T) {
 	mockData := mockDataSource()
 
 	// TODO: Currently, len(collectedDocs) == 0. Fix this, and implement a
-	// more robust doc comparison like assert from github.com/stretchr/testify
+	// more robust doc comparison, like assert from github.com/stretchr/testify
 
 	type fields struct {
 		poll              bool
