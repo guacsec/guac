@@ -92,7 +92,7 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		},
 	}
 	ref := sourceNode.Commit
-	if ref == clients.HeadSHA && sourceNode.Tag != "" {
+	if isHead(ref) && sourceNode.Tag != "" {
 		ref = sourceNode.Tag
 	}
 	res.SourceInformation.Source = sourceNode.Repo + "@" + ref

@@ -49,9 +49,9 @@ var (
 
 // scorecardRunner is a struct that implements the Scorecard interface.
 type scorecardRunner struct {
-	ctx context.Context
+	ctx         context.Context
 	computeOnly bool
-	resolveTag tagResolver
+	resolveTag  tagResolver
 }
 
 // tagResolver resolves a tag to the commit SHA it points at.
@@ -74,6 +74,10 @@ func normalizeRepoName(repoName string) string {
 		return repoName
 	}
 	return githubPrefix + repoName
+}
+
+func isHead(commitSHA string) bool {
+	return commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA)
 }
 
 func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Result, error) {
@@ -115,7 +119,7 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, tag string) (*sc.R
 
 	// If tag is provided without a valid commitSHA, skip API and use local computation
 	// The API cannot resolve tags, but computeScore can look up the commit for a tag
-	if (commitSHA == "" || commitSHA == "HEAD") && tag != "" {
+	if isHead(commitSHA) && tag != "" {
 		logger.Debugf("Tag %s provided without commit SHA - skipping API, will use local computation", tag)
 		return nil, fmt.Errorf("tag provided without commit SHA; falling back to local computation for tag %s", tag)
 	}
@@ -126,7 +130,7 @@ func (s scorecardRunner) getScoreFromAPI(repoName, commitSHA, tag string) (*sc.R
 	}
 
 	// If commitSHA is provided, try with it first
-	if commitSHA != "" && commitSHA != "HEAD" {
+	if !isHead(commitSHA) {
 		urlWithCommit := baseURL + "?commit=" + commitSHA
 		result, err := s.fetchFromAPI(urlWithCommit)
 		if err == nil {
@@ -285,7 +289,7 @@ func defaultCheckNames() []string {
 // that request type, so an unfiltered list fails with "Unsupported RequestType
 // [1] by check: Contributors" rather than scoring the checks that do work.
 func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) []string {
-	if commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA) {
+	if isHead(commitSHA) {
 		return checkNames
 	}
 
@@ -294,7 +298,8 @@ func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) 
 	supported := make([]string, 0, len(checkNames))
 	var skipped []string
 	for _, name := range checkNames {
-		if len(checker.ListUnsupported(required, allChecks[name].SupportedRequestTypes)) == 0 {
+		check, known := allChecks[name]
+		if !known || len(checker.ListUnsupported(required, check.SupportedRequestTypes)) == 0 {
 			supported = append(supported, name)
 			continue
 		}
@@ -314,6 +319,22 @@ func splitOwnerRepo(repoName string) (string, string, error) {
 		return "", "", fmt.Errorf("cannot parse owner and repo from %q", repoName)
 	}
 	return owner, repo, nil
+}
+
+func (s scorecardRunner) scoreCommit(repoName, commitSHA, tag string) (string, error) {
+	if !isHead(commitSHA) {
+		return commitSHA, nil
+	}
+	if tag == "" {
+		return clients.HeadSHA, nil
+	}
+
+	resolved, err := s.commitForTag(repoName, tag)
+	if err != nil {
+		return "", err
+	}
+	logging.FromContext(s.ctx).Infof("Resolved tag %s to commit %s", tag, resolved)
+	return resolved, nil
 }
 
 func (s scorecardRunner) commitForTag(repoName, tag string) (string, error) {
@@ -357,15 +378,9 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to get clients: %w", err)
 	}
-	if tag != "" {
-		commitSHA, err = s.commitForTag(repoName, tag)
-		if err != nil {
-			return nil, err
-		}
-		logger.Infof("Resolved tag %s to commit %s", tag, commitSHA)
-	}
-	if commitSHA == "" {
-		commitSHA = clients.HeadSHA
+	commitSHA, err = s.scoreCommit(repoName, commitSHA, tag)
+	if err != nil {
+		return nil, err
 	}
 
 	checkNames := s.supportedChecks(defaultCheckNames(), commitSHA)

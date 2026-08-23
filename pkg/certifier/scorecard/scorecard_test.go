@@ -281,6 +281,19 @@ func Test_scorecardRunner_supportedChecks(t *testing.T) {
 	}
 }
 
+func Test_scorecardRunner_supportedChecksKeepsUnknownNames(t *testing.T) {
+	runner := scorecardRunner{ctx: context.Background()}
+	const unknown = "Not-A-Real-Check"
+
+	got := runner.supportedChecks([]string{unknown, checks.CheckLicense}, pinnedSHA)
+	if !slices.Contains(got, unknown) {
+		t.Fatalf("supportedChecks() = %v, want it to keep %q", got, unknown)
+	}
+	if _, err := policy.GetEnabled(nil, got, []checker.RequestType{checker.CommitBased}); err == nil {
+		t.Error("policy.GetEnabled() error = nil, want rejection of the unknown check")
+	}
+}
+
 func Test_scorecardRunner_supportedChecksPassPolicyGate(t *testing.T) {
 	runner := scorecardRunner{ctx: context.Background()}
 	filtered := runner.supportedChecks(defaultCheckNames(), pinnedSHA)
@@ -309,6 +322,7 @@ func TestCertifyComponentSourceLabel(t *testing.T) {
 		{name: "commit only", commit: pinnedSHA, want: "myrepo@" + pinnedSHA},
 		{name: "commit wins over tag", commit: pinnedSHA, tag: "v1.0.0", want: "myrepo@" + pinnedSHA},
 		{name: "tag replaces HEAD", commit: "HEAD", tag: "v1.0.0", want: "myrepo@v1.0.0"},
+		{name: "tag replaces lowercase head", commit: "head", tag: "v1.0.0", want: "myrepo@v1.0.0"},
 		{name: "tag replaces empty commit", tag: "v1.0.0", want: "myrepo@v1.0.0"},
 		{name: "neither falls back to HEAD", want: "myrepo@HEAD"},
 	}
@@ -365,6 +379,69 @@ func TestSplitOwnerRepo(t *testing.T) {
 			}
 			if owner != test.wantOwner || repo != test.wantRepo {
 				t.Errorf("splitOwnerRepo() = %q, %q, want %q, %q", owner, repo, test.wantOwner, test.wantRepo)
+			}
+		})
+	}
+}
+
+func Test_scorecardRunner_scoreCommit(t *testing.T) {
+	const taggedSHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+	tests := []struct {
+		name         string
+		commit       string
+		tag          string
+		want         string
+		wantResolved bool
+	}{
+		{name: "explicit commit wins over tag", commit: pinnedSHA, tag: "v1.0.0", want: pinnedSHA},
+		{name: "explicit commit without tag", commit: pinnedSHA, want: pinnedSHA},
+		{name: "branch name is treated as explicit", commit: "main", tag: "v1.0.0", want: "main"},
+		{name: "HEAD with tag resolves the tag", commit: "HEAD", tag: "v1.0.0", want: taggedSHA, wantResolved: true},
+		{name: "lowercase head with tag resolves the tag", commit: "head", tag: "v1.0.0", want: taggedSHA, wantResolved: true},
+		{name: "empty commit with tag resolves the tag", tag: "v1.0.0", want: taggedSHA, wantResolved: true},
+		{name: "neither falls back to HEAD", want: "HEAD"},
+		{name: "HEAD without tag stays HEAD", commit: "HEAD", want: "HEAD"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			resolved := false
+			runner := scorecardRunner{ctx: context.Background(), resolveTag: func(_ context.Context, _, _, _ string) (string, error) {
+				resolved = true
+				return taggedSHA, nil
+			}}
+
+			got, err := runner.scoreCommit("github.com/ossf/scorecard", test.commit, test.tag)
+			if err != nil {
+				t.Fatalf("scoreCommit() error = %v", err)
+			}
+			if got != test.want {
+				t.Errorf("scoreCommit() = %q, want %q", got, test.want)
+			}
+			if resolved != test.wantResolved {
+				t.Errorf("tag resolved = %v, want %v", resolved, test.wantResolved)
+			}
+		})
+	}
+}
+
+func TestIsHead(t *testing.T) {
+	tests := []struct {
+		commitSHA string
+		want      bool
+	}{
+		{commitSHA: "", want: true},
+		{commitSHA: "HEAD", want: true},
+		{commitSHA: "head", want: true},
+		{commitSHA: "Head", want: true},
+		{commitSHA: pinnedSHA, want: false},
+		{commitSHA: "main", want: false},
+	}
+	for _, test := range tests {
+		t.Run(test.commitSHA, func(t *testing.T) {
+			if got := isHead(test.commitSHA); got != test.want {
+				t.Errorf("isHead(%q) = %v, want %v", test.commitSHA, got, test.want)
 			}
 		})
 	}
