@@ -33,6 +33,11 @@ const (
 	durableProcessor        string        = "processor"
 	bufferChannelSize       int           = 1000
 	backOffTimer            time.Duration = 1 * time.Second
+	// How long JetStream waits for an ack before redelivering. Ingesting one
+	// document can take minutes for a large SBOM with enrichment, and the default
+	// is 30s, so without this the server redelivers documents that are still being
+	// processed and the consumer spends its time re-fetching work already in flight.
+	consumerAckWait time.Duration = 10 * time.Minute
 )
 
 type jetStream struct {

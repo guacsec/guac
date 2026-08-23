@@ -18,6 +18,7 @@ package emitter
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -78,5 +79,20 @@ func TestEmitter_PublishOnEmit(t *testing.T) {
 		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
 		}
+	}
+}
+
+func TestBuildSubscriptionURLSetsAckWait(t *testing.T) {
+	// The default ack wait is 30s, which is shorter than a large SBOM takes to
+	// ingest, so the server redelivers documents that are still being processed.
+	got := buildSubscriptionURL("nats://127.0.0.1:4222")
+	if !strings.Contains(got, "consumer_ack_wait="+consumerAckWait.String()) {
+		t.Errorf("subscription url is missing the consumer ack wait: %s", got)
+	}
+
+	// Anything that isn't NATS is passed through untouched.
+	const other = "mem://topicA"
+	if got := buildSubscriptionURL(other); got != other {
+		t.Errorf("buildSubscriptionURL(%q) = %q, want it unchanged", other, got)
 	}
 }
