@@ -253,96 +253,9 @@ func parseRetryAfter(value string, now time.Time) (time.Duration, bool) {
 	return 0, false
 }
 
-var tagCommit = githubTagCommit
-
-var (
-	ghClientMu     sync.Mutex
-	ghClientShared githubclient.GithubClient
-)
-
-func sharedGithubClient(ctx context.Context) (githubclient.GithubClient, error) {
-	ghClientMu.Lock()
-	defer ghClientMu.Unlock()
-
-	if ghClientShared != nil {
-		return ghClientShared, nil
-	}
-	gh, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_AUTH_TOKEN"))
-	if err != nil {
-		return nil, err
-	}
-	ghClientShared = gh
-	return gh, nil
-}
-
-func githubTagCommit(ctx context.Context, owner, repo, tag string) (string, error) {
-	gh, err := sharedGithubClient(ctx)
-	if err != nil {
-		return "", fmt.Errorf("failed to create github client: %w", err)
-	}
-	return gh.GetTagCommitSHA(ctx, owner, repo, tag)
-}
-
-func splitOwnerRepo(repoName string) (string, string, error) {
-	parts := strings.Split(strings.TrimPrefix(repoName, githubPrefix), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return "", "", fmt.Errorf("cannot parse owner and repo from %q", repoName)
-	}
-	return parts[0], parts[1], nil
-}
-
-func (s scorecardRunner) commitForTag(repoName, tag string) (string, error) {
-	owner, repo, err := splitOwnerRepo(repoName)
-	if err != nil {
-		return "", err
-	}
-	commitSHA, err := tagCommit(s.ctx, owner, repo, tag)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve tag %s to a commit: %w", tag, err)
-	}
-	if commitSHA == "" {
-		return "", fmt.Errorf("tag %s resolved to an empty commit SHA", tag)
-	}
-	return commitSHA, nil
-}
-
-func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) []string {
-	if commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA) {
-		return checkNames
-	}
-
-	required := []checker.RequestType{checker.CommitBased}
-	allChecks := checks.GetAllWithExperimental()
-	supported := make([]string, 0, len(checkNames))
-	var skipped []string
-	for _, name := range checkNames {
-		if len(checker.ListUnsupported(required, allChecks[name].SupportedRequestTypes)) == 0 {
-			supported = append(supported, name)
-			continue
-		}
-		skipped = append(skipped, name)
-	}
-
-	if len(skipped) > 0 {
-		logging.FromContext(s.ctx).Warnf(
-			"Scorecard coverage reduced at commit %s: scoring %d of %d checks, "+
-				"%s cannot be evaluated outside HEAD",
-			commitSHA, len(supported), len(checkNames), strings.Join(skipped, ", "))
-	}
-	return supported
-}
-
-func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
-	logger := logging.FromContext(s.ctx)
-	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
-
-	// Can't use guacs standard logger because scorecard uses a different logger.
-	defaultLogger := log.NewLogger(log.DefaultLevel)
-	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, _, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
-	if err != nil {
-		return nil, fmt.Errorf("error, failed to get clients: %w", err)
-	}
-	checkNames := []string{
+// defaultCheckNames is the set of scorecard checks GUAC computes locally.
+func defaultCheckNames() []string {
+	return []string{
 		checks.CheckBinaryArtifacts,
 		checks.CheckVulnerabilities,
 		checks.CheckPinnedDependencies,
@@ -363,6 +276,47 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 		checks.CheckTokenPermissions,
 		checks.CheckWebHooks,
 	}
+}
+
+// supportedChecks drops the checks scorecard cannot evaluate at a non-HEAD
+// commit. Scorecard treats any commit other than HEAD as a CommitBased request
+// and rejects the whole run if an explicitly requested check does not support
+// that request type, so an unfiltered list fails with "Unsupported RequestType
+// [1] by check: Contributors" rather than scoring the checks that do work.
+func (s scorecardRunner) supportedChecks(checkNames []string, commitSHA string) []string {
+	if commitSHA == "" || strings.EqualFold(commitSHA, clients.HeadSHA) {
+		return checkNames
+	}
+
+	required := []checker.RequestType{checker.CommitBased}
+	allChecks := checks.GetAllWithExperimental()
+	supported := make([]string, 0, len(checkNames))
+	var skipped []string
+	for _, name := range checkNames {
+		if len(checker.ListUnsupported(required, allChecks[name].SupportedRequestTypes)) == 0 {
+			supported = append(supported, name)
+			continue
+		}
+		skipped = append(skipped, name)
+	}
+
+	if len(skipped) > 0 {
+		logging.FromContext(s.ctx).Infof("Skipping scorecard checks unsupported at commit %s: %s",
+			commitSHA, strings.Join(skipped, ", "))
+	}
+	return supported
+}
+
+func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Result, error) {
+	logger := logging.FromContext(s.ctx)
+	logger.Infof("Starting local scorecard computation for repo: %s, commit: %s, tag: %s", repoName, commitSHA, tag)
+
+	// Can't use guacs standard logger because scorecard uses a different logger.
+	defaultLogger := log.NewLogger(log.DefaultLevel)
+	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, _, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
+	if err != nil {
+		return nil, fmt.Errorf("error, failed to get clients: %w", err)
+	}
 	if tag != "" {
 		commitSHA, err = s.commitForTag(repoName, tag)
 		if err != nil {
@@ -375,6 +329,8 @@ func (s scorecardRunner) computeScore(repoName, commitSHA, tag string) (*sc.Resu
 	}
 
 	checkNames = s.supportedChecks(checkNames, commitSHA)
+
+	checkNames := s.supportedChecks(defaultCheckNames(), commitSHA)
 
 	opts := []sc.Option{
 		sc.WithCommitSHA(commitSHA),
