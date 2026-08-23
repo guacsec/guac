@@ -30,7 +30,7 @@ func Test_FindArtifactWithDigest_ArtifactNotFound(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	gqlClient := test_helpers.SetupTest(t)
 
-	_, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "xyz")
+	_, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "sha256:xyz")
 	assert.ErrorContains(t, err, "no artifacts matched the digest")
 }
 
@@ -47,8 +47,48 @@ func Test_FindArtifactWithDigest_ArtifactFound(t *testing.T) {
 		t.Fatalf("Error ingesting test data")
 	}
 
-	res, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "abc")
+	res, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "sha256:abc")
 	assert.NoError(t, err)
 	assert.Equal(t, res.Algorithm, "sha256")
 	assert.Equal(t, res.Digest, "abc")
+}
+
+func Test_FindArtifactWithDigest_DisambiguatesSameDigestDifferentAlgorithm(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	gqlClient := test_helpers.SetupTest(t)
+
+	for _, algorithm := range []string{"sha256", "sha1"} {
+		idOrArtifactSpec := gql.IDorArtifactInput{ArtifactInput: &gql.ArtifactInputSpec{
+			Algorithm: algorithm,
+			Digest:    "abc",
+		}}
+		_, err := gql.IngestArtifact(ctx, gqlClient, idOrArtifactSpec)
+		if err != nil {
+			t.Fatalf("Error ingesting test data")
+		}
+	}
+
+	res, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "sha1:abc")
+	assert.NoError(t, err)
+	assert.Equal(t, res.Algorithm, "sha1")
+	assert.Equal(t, res.Digest, "abc")
+}
+
+func Test_FindArtifactWithDigest_MissingAlgorithmPrefix(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	gqlClient := test_helpers.SetupTest(t)
+
+	_, err := helpers.FindArtifactWithDigest(ctx, gqlClient, "abc")
+	assert.ErrorContains(t, err, "must be in the form <algorithm>:<digest>")
+}
+
+func Test_FindArtifactWithDigest_EmptyAlgorithmOrDigest(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	gqlClient := test_helpers.SetupTest(t)
+
+	_, err := helpers.FindArtifactWithDigest(ctx, gqlClient, ":abc")
+	assert.ErrorContains(t, err, "must be in the form <algorithm>:<digest>")
+
+	_, err = helpers.FindArtifactWithDigest(ctx, gqlClient, "sha256:")
+	assert.ErrorContains(t, err, "must be in the form <algorithm>:<digest>")
 }

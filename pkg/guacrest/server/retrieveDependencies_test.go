@@ -250,7 +250,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 					{Subject: "sha-xyz", IncludedSoftware: []string{"pkg:guac/bar"}},
 				},
 			},
-			digest:           "sha-xyz",
+			digest:           "sha256:sha-xyz",
 			expectedByDigest: []string{"pkg:guac/bar"},
 		},
 		{
@@ -263,7 +263,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 					{Subject: "sha-123", IncludedSoftware: []string{"pkg:guac/foo"}},
 				},
 			},
-			digest:           "sha-xyz",
+			digest:           "sha256:sha-xyz",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -276,7 +276,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 					{Subject: "pkg:guac/bar", IncludedSoftware: []string{"pkg:guac/foo"}},
 				},
 			},
-			digest:           "sha-xyz",
+			digest:           "sha256:sha-xyz",
 			expectedByDigest: []string{"pkg:guac/bar"},
 		},
 		{
@@ -287,7 +287,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				HasSboms:      []HasSbom{{Subject: "sha-xyz", IncludedSoftware: []string{"sha-123"}}},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
 			},
-			digest:           "sha-xyz",
+			digest:           "sha256:sha-xyz",
 			expectedByDigest: []string{"pkg:guac/bar"},
 		},
 		{
@@ -298,7 +298,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				HasSboms:   []HasSbom{{Subject: "sha-456", IncludedSoftware: []string{"pkg:guac/foo"}}},
 				HashEquals: []HashEqual{{ArtifactA: "sha-123", ArtifactB: "sha-456"}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -315,7 +315,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 					{ArtifactA: "sha-123", ArtifactB: "sha-789"},
 				},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
 		},
 		{
@@ -327,7 +327,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-xyz"}},
 				HasSlsas:      []HasSlsa{{Subject: "sha-123", BuiltBy: "GHA", BuiltFrom: []string{"sha-xyz"}}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -342,7 +342,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				},
 				HasSlsas: []HasSlsa{{Subject: "sha-123", BuiltBy: "GHA", BuiltFrom: []string{"sha-xyz", "sha-abc"}}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
 		},
 		{
@@ -356,7 +356,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 					IncludedIsOccurrences: []IsOccurrence{{Subject: "pkg:guac/bar", Artifact: "sha-123"}},
 				}},
 			},
-			digest:           "sha-xyz",
+			digest:           "sha256:sha-xyz",
 			expectedByDigest: []string{"pkg:guac/bar"},
 		},
 		{
@@ -367,7 +367,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				HashEquals:    []HashEqual{{ArtifactA: "sha-123", ArtifactB: "sha-456"}},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-456"}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{},
 		},
 		{
@@ -382,7 +382,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-789"}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{},
 		},
 		{
@@ -397,7 +397,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-789"}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
@@ -412,7 +412,7 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 				},
 				IsOccurrences: []IsOccurrence{{Subject: "pkg:guac/foo", Artifact: "sha-789"}},
 			},
-			digest:           "sha-123",
+			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 	}
@@ -492,7 +492,7 @@ func Test_ClientErrorsForArtifact(t *testing.T) {
 		digest string
 	}{{
 		name:   "Artifact not found because version was not specified",
-		digest: "sha-abc",
+		digest: "sha256:sha-abc",
 	}, {
 		name: "Neither Purl nor Digest provided",
 	}, {

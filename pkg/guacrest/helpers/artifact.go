@@ -18,18 +18,25 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-// Queries for an artifact by digest and returns its id. The digest must uniquely
-// identify an artifact, otherwise an error is returned.
+// Queries for an artifact by its <algorithm>:<digest> identifier and returns its
+// id. The identifier must uniquely identify an artifact, otherwise an error is
+// returned.
 func FindArtifactWithDigest(ctx context.Context, gqlClient graphql.Client,
-	digest string) (gql.AllArtifactTree, error) {
+	algorithmDigest string) (gql.AllArtifactTree, error) {
 	logger := logging.FromContext(ctx)
-	filter := gql.ArtifactSpec{Digest: &digest}
+
+	algorithm, digest, found := strings.Cut(algorithmDigest, ":")
+	if !found || algorithm == "" || digest == "" {
+		return gql.AllArtifactTree{}, fmt.Errorf("artifact digest must be in the form <algorithm>:<digest>, got %q", algorithmDigest)
+	}
+	filter := gql.ArtifactSpec{Algorithm: &algorithm, Digest: &digest}
 
 	artifacts, err := gql.Artifacts(ctx, gqlClient, filter)
 	if err != nil {
@@ -40,7 +47,7 @@ func FindArtifactWithDigest(ctx context.Context, gqlClient graphql.Client,
 		return gql.AllArtifactTree{}, fmt.Errorf("no artifacts matched the digest")
 	}
 	if len(artifacts.GetArtifacts()) > 1 {
-		logger.Errorf("More than one artifact was found with digest %s", digest)
+		logger.Errorf("More than one artifact was found with digest %s", algorithmDigest)
 		return gql.AllArtifactTree{}, Err500
 	}
 	return artifacts.GetArtifacts()[0].AllArtifactTree, nil
