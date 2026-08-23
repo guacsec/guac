@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/ossf/scorecard/v5/clients"
 	"github.com/ossf/scorecard/v5/docs/checks"
 	"github.com/ossf/scorecard/v5/log"
 	sc "github.com/ossf/scorecard/v5/pkg/scorecard"
@@ -58,7 +59,7 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 	}
 
 	if sourceNode.Commit == "" {
-		sourceNode.Commit = "HEAD"
+		sourceNode.Commit = clients.HeadSHA
 	}
 
 	if sourceNode.Repo == "" {
@@ -90,11 +91,11 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 			DocumentRef: events.GetDocRef(scorecardResults.Bytes()),
 		},
 	}
-	if sourceNode.Commit != "" {
-		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Commit
-	} else {
-		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Tag
+	ref := sourceNode.Commit
+	if isHead(ref) && sourceNode.Tag != "" {
+		ref = sourceNode.Tag
 	}
+	res.SourceInformation.Source = sourceNode.Repo + "@" + ref
 
 	docChannel <- &res
 
