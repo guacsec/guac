@@ -208,4 +208,35 @@ func Test_GetPackagePurls(t *testing.T) {
 			t.Fatalf("Expected 400 response, got %T: %v", res, res)
 		}
 	})
+
+	t.Run("Respects PaginationSpec and sets NextCursor", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		Ingest(ctx, t, gqlClient, GuacData{
+			Packages: []string{"pkg:guac/foo", "pkg:guac/foo@v1", "pkg:guac/foo@v2"},
+		})
+		restApi := server.NewDefaultServer(gqlClient)
+
+		pageSize := 1
+		res, err := restApi.GetPackagePurls(ctx, gen.GetPackagePurlsRequestObject{
+			Purl:   "pkg:guac/foo",
+			Params: gen.GetPackagePurlsParams{PaginationSpec: &gen.PaginationSpec{PageSize: &pageSize}},
+		})
+		if err != nil {
+			t.Fatalf("GetPackagePurls returned unexpected error: %v", err)
+		}
+		success, ok := res.(gen.GetPackagePurls200JSONResponse)
+		if !ok {
+			t.Fatalf("Expected 200 response, got %T: %v", res, res)
+		}
+
+		if len(success.PurlList) != pageSize {
+			t.Errorf("PurlList length = %d, want %d", len(success.PurlList), pageSize)
+		}
+		if success.PaginationInfo.NextCursor == nil {
+			t.Errorf("expected NextCursor to be set when more results remain")
+		}
+		if success.PaginationInfo.TotalCount == nil || *success.PaginationInfo.TotalCount != 3 {
+			t.Errorf("TotalCount = %v, want 3", success.PaginationInfo.TotalCount)
+		}
+	})
 }
