@@ -551,9 +551,7 @@ func Test_DepsEndpoints_RespectPaginationSpec(t *testing.T) {
 			t.Fatalf("expected NextCursor to be set when more results remain")
 		}
 
-		// Follow NextCursor and confirm the second page is disjoint from the
-		// first, i.e. the underlying ordering used for pagination is stable
-		// across requests.
+		// second page must be disjoint from the first (stable ordering)
 		res2, err := restApi.GetPackageDeps(ctx, gen.GetPackageDepsRequestObject{
 			Purl: "pkg:guac/foo",
 			Params: gen.GetPackageDepsParams{PaginationSpec: &gen.PaginationSpec{
@@ -605,9 +603,7 @@ func Test_DepsEndpoints_RespectPaginationSpec(t *testing.T) {
 			t.Fatalf("expected NextCursor to be set when more results remain")
 		}
 
-		// Follow NextCursor and confirm the second page is disjoint from the
-		// first, i.e. the underlying ordering used for pagination is stable
-		// across requests.
+		// second page must be disjoint from the first (stable ordering)
 		res2, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{
 			Digest: "sha-xyz",
 			Params: gen.GetArtifactDepsParams{PaginationSpec: &gen.PaginationSpec{

@@ -176,6 +176,19 @@ func (s *DefaultServer) GetPackageVulns(ctx context.Context, request gen.GetPack
 	}, nil
 }
 
+// paginateDepPurls flattens a purl map into a deterministically sorted slice
+// (map iteration order is randomized, so a stable sort keeps NextCursor
+// meaningful across requests) and paginates it per spec.
+func paginateDepPurls(ctx context.Context, purls map[string]string, spec *gen.PaginationSpec) ([]string, gen.PaginationInfo, error) {
+	depPurls := make([]string, 0, len(purls))
+	for _, depPurl := range purls {
+		depPurls = append(depPurls, depPurl)
+	}
+	sort.Strings(depPurls)
+
+	return pagination.Paginate(ctx, depPurls, spec)
+}
+
 func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPackageDepsRequestObject) (gen.GetPackageDepsResponseObject, error) {
 	unescapedPurl, err := url.PathUnescape(request.Purl)
 	if err != nil {
@@ -196,13 +209,7 @@ func (s *DefaultServer) GetPackageDeps(ctx context.Context, request gen.GetPacka
 		}
 	}
 
-	depPurls := make([]string, 0, len(purls))
-	for _, depPurl := range purls {
-		depPurls = append(depPurls, depPurl)
-	}
-	sort.Strings(depPurls)
-
-	page, paginationInfo, err := pagination.Paginate(ctx, depPurls, request.Params.PaginationSpec)
+	page, paginationInfo, err := paginateDepPurls(ctx, purls, request.Params.PaginationSpec)
 	if err != nil {
 		return gen.GetPackageDeps400JSONResponse{
 			BadRequestJSONResponse: gen.BadRequestJSONResponse{
@@ -266,13 +273,7 @@ func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArti
 		}
 	}
 
-	depPurls := make([]string, 0, len(purls))
-	for _, depPurl := range purls {
-		depPurls = append(depPurls, depPurl)
-	}
-	sort.Strings(depPurls)
-
-	page, paginationInfo, err := pagination.Paginate(ctx, depPurls, request.Params.PaginationSpec)
+	page, paginationInfo, err := paginateDepPurls(ctx, purls, request.Params.PaginationSpec)
 	if err != nil {
 		return gen.GetArtifactDeps400JSONResponse{
 			BadRequestJSONResponse: gen.BadRequestJSONResponse{
