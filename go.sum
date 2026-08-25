@@ -181,8 +181,8 @@ github.com/PuerkitoBio/goquery v1.10.3/go.mod h1:tMUX0zDMHXYlAQk6p35XxQMqMweEKB7
 github.com/RaveNoX/go-jsoncommentstrip v1.0.0/go.mod h1:78ihd09MekBnJnxpICcwzCMzGrKSKYe4AqU6PDYYpjk=
 github.com/STARRY-S/zip v0.2.3 h1:luE4dMvRPDOWQdeDdUxUoZkzUIpTccdKdhHHsQJ1fm4=
 github.com/STARRY-S/zip v0.2.3/go.mod h1:lqJ9JdeRipyOQJrYSOtpNAiaesFO6zVDsE8GIGFaoSk=
-github.com/XSAM/otelsql v0.41.0 h1:uZifjQhZhv5EDYJh+IVk1DiYxQZJBlNSen0MBFnfxB8=
-github.com/XSAM/otelsql v0.41.0/go.mod h1:NMQT0PiKoFILp9QgjQz+D5mvW+9mT0suR7OejqrtMaM=
+github.com/XSAM/otelsql v0.43.0 h1:ZIhXqRoMhILXQwBQoq/Dl6Taap/KEFQXZrWjYV1L8X8=
+github.com/XSAM/otelsql v0.43.0/go.mod h1:DJBGBvbtwf1OCBYRTjpRFxOqi6ONpdfb+htr4ncRWuw=
 github.com/acobaugh/osrelease v0.1.0 h1:Yb59HQDGGNhCj4suHaFQQfBps5wyoKLSSX/J/+UifRE=
 github.com/acobaugh/osrelease v0.1.0/go.mod h1:4bFEs0MtgHNHBrmHCt67gNisnabCRAlzdVasCEGHTWY=
 github.com/adrg/xdg v0.5.3 h1:xRnxJXne7+oWDatRhR1JLnvuccuIeCoBu2rtuLqQB78=
