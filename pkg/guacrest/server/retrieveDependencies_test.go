@@ -586,7 +586,7 @@ func Test_DepsEndpoints_RespectPaginationSpec(t *testing.T) {
 		restApi := server.NewDefaultServer(gqlClient)
 
 		res, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{
-			Digest: "sha-xyz",
+			Digest: "sha256:sha-xyz",
 			Params: gen.GetArtifactDepsParams{PaginationSpec: &gen.PaginationSpec{PageSize: &pageSize}},
 		})
 		if err != nil {
@@ -605,7 +605,7 @@ func Test_DepsEndpoints_RespectPaginationSpec(t *testing.T) {
 
 		// second page must be disjoint from the first (stable ordering)
 		res2, err := restApi.GetArtifactDeps(ctx, gen.GetArtifactDepsRequestObject{
-			Digest: "sha-xyz",
+			Digest: "sha256:sha-xyz",
 			Params: gen.GetArtifactDepsParams{PaginationSpec: &gen.PaginationSpec{
 				PageSize: &pageSize,
 				Cursor:   success.PaginationInfo.NextCursor,
