@@ -5,12 +5,12 @@ package generated
 import (
 	"context"
 	"errors"
-	"fmt"
+	"math"
 	"strconv"
-	"sync"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -135,7 +135,10 @@ type QueryResolver interface {
 func (ec *executionContext) field_Mutation_delete_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +149,10 @@ func (ec *executionContext) field_Mutation_delete_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifact", ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifact",
+		func(ctx context.Context, v any) (*model.IDorArtifactInput, error) {
+			return ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +163,10 @@ func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifacts", ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifacts",
+		func(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +177,10 @@ func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builder", ec.unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builder",
+		func(ctx context.Context, v any) (*model.IDorBuilderInput, error) {
+			return ec.unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +191,10 @@ func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builders", ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builders",
+		func(ctx context.Context, v any) ([]*model.IDorBuilderInput, error) {
+			return ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -190,17 +205,26 @@ func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInputs, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadataList", ec.unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadataList",
+		func(ctx context.Context, v any) ([]*model.HasMetadataInputSpec, error) {
+			return ec.unmarshalNHasMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -211,12 +235,18 @@ func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx contex
 func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities", ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities",
+		func(ctx context.Context, v any) ([]*model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerabilities"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadataList", ec.unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadataList",
+		func(ctx context.Context, v any) ([]*model.VulnerabilityMetadataInputSpec, error) {
+			return ec.unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -227,17 +257,26 @@ func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(
 func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInput, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBad", ec.unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBad",
+		func(ctx context.Context, v any) (model.CertifyBadInputSpec, error) {
+			return ec.unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -248,17 +287,26 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInputs, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBads", ec.unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBads",
+		func(ctx context.Context, v any) ([]*model.CertifyBadInputSpec, error) {
+			return ec.unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -269,17 +317,26 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInput, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGood", ec.unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGood",
+		func(ctx context.Context, v any) (model.CertifyGoodInputSpec, error) {
+			return ec.unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -290,17 +347,26 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInputs, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGoods", ec.unmarshalNCertifyGoodInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGoods",
+		func(ctx context.Context, v any) ([]*model.CertifyGoodInputSpec, error) {
+			return ec.unmarshalNCertifyGoodInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -311,22 +377,34 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageOrSourceInput, error) {
+			return ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "declaredLicenses", ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "declaredLicenses",
+		func(ctx context.Context, v any) ([]*model.IDorLicenseInput, error) {
+			return ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["declaredLicenses"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "discoveredLicenses", ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "discoveredLicenses",
+		func(ctx context.Context, v any) ([]*model.IDorLicenseInput, error) {
+			return ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["discoveredLicenses"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegal", ec.unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpec)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegal",
+		func(ctx context.Context, v any) (model.CertifyLegalInputSpec, error) {
+			return ec.unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -337,22 +415,34 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageOrSourceInputs, error) {
+			return ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "declaredLicensesList", ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "declaredLicensesList",
+		func(ctx context.Context, v any) ([][]*model.IDorLicenseInput, error) {
+			return ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["declaredLicensesList"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "discoveredLicensesList", ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "discoveredLicensesList",
+		func(ctx context.Context, v any) ([][]*model.IDorLicenseInput, error) {
+			return ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["discoveredLicensesList"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegals", ec.unmarshalNCertifyLegalInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpecᚄ)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegals",
+		func(ctx context.Context, v any) ([]*model.CertifyLegalInputSpec, error) {
+			return ec.unmarshalNCertifyLegalInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -363,17 +453,26 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.
 func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkg"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability", ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability",
+		func(ctx context.Context, v any) (model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerability"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVuln", ec.unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVuln",
+		func(ctx context.Context, v any) (model.ScanMetadataInput, error) {
+			return ec.unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -384,17 +483,26 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgs"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities", ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities",
+		func(ctx context.Context, v any) ([]*model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerabilities"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVulns", ec.unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVulns",
+		func(ctx context.Context, v any) ([]*model.ScanMetadataInput, error) {
+			return ec.unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -405,17 +513,26 @@ func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgs"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "depPkgs", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "depPkgs",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["depPkgs"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "dependencies", ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "dependencies",
+		func(ctx context.Context, v any) ([]*model.IsDependencyInputSpec, error) {
+			return ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -426,17 +543,26 @@ func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkg"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "depPkg", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "depPkg",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["depPkg"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "dependency", ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "dependency",
+		func(ctx context.Context, v any) (model.IsDependencyInputSpec, error) {
+			return ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -447,17 +573,26 @@ func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInput, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadata", ec.unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadata",
+		func(ctx context.Context, v any) (model.HasMetadataInputSpec, error) {
+			return ec.unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -468,17 +603,26 @@ func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageOrArtifactInput, error) {
+			return ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOM", ec.unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOM",
+		func(ctx context.Context, v any) (model.HasSBOMInputSpec, error) {
+			return ec.unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hasSBOM"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "includes", ec.unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "includes",
+		func(ctx context.Context, v any) (model.HasSBOMIncludesInputSpec, error) {
+			return ec.unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -489,17 +633,26 @@ func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageOrArtifactInputs, error) {
+			return ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOMs", ec.unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOMs",
+		func(ctx context.Context, v any) ([]*model.HasSBOMInputSpec, error) {
+			return ec.unmarshalNHasSBOMInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hasSBOMs"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "includes", ec.unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "includes",
+		func(ctx context.Context, v any) ([]*model.HasSBOMIncludesInputSpec, error) {
+			return ec.unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -510,22 +663,34 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkg"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "source", ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "source",
+		func(ctx context.Context, v any) (model.IDorSourceInput, error) {
+			return ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["source"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAt", ec.unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAt",
+		func(ctx context.Context, v any) (model.HasSourceAtInputSpec, error) {
+			return ec.unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -536,22 +701,34 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgs"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "sources", ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "sources",
+		func(ctx context.Context, v any) ([]*model.IDorSourceInput, error) {
+			return ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["sources"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAts", ec.unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAts",
+		func(ctx context.Context, v any) ([]*model.HasSourceAtInputSpec, error) {
+			return ec.unmarshalNHasSourceAtInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -562,17 +739,26 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifact", ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifact",
+		func(ctx context.Context, v any) (model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["artifact"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherArtifact", ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherArtifact",
+		func(ctx context.Context, v any) (model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["otherArtifact"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hashEqual", ec.unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hashEqual",
+		func(ctx context.Context, v any) (model.HashEqualInputSpec, error) {
+			return ec.unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -583,17 +769,26 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifacts", ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifacts",
+		func(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["artifacts"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherArtifacts", ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherArtifacts",
+		func(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["otherArtifacts"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hashEquals", ec.unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "hashEquals",
+		func(ctx context.Context, v any) ([]*model.HashEqualInputSpec, error) {
+			return ec.unmarshalNHashEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -604,7 +799,10 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "license", ec.unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "license",
+		func(ctx context.Context, v any) (*model.IDorLicenseInput, error) {
+			return ec.unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -615,7 +813,10 @@ func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "licenses", ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "licenses",
+		func(ctx context.Context, v any) ([]*model.IDorLicenseInput, error) {
+			return ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -626,17 +827,26 @@ func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageOrSourceInput, error) {
+			return ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "artifact", ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "artifact",
+		func(ctx context.Context, v any) (model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["artifact"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "occurrence", ec.unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "occurrence",
+		func(ctx context.Context, v any) (model.IsOccurrenceInputSpec, error) {
+			return ec.unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -647,17 +857,26 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageOrSourceInputs, error) {
+			return ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "artifacts", ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "artifacts",
+		func(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["artifacts"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "occurrences", ec.unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "occurrences",
+		func(ctx context.Context, v any) ([]*model.IsOccurrenceInputSpec, error) {
+			return ec.unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -668,7 +887,10 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -679,7 +901,10 @@ func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -690,17 +915,26 @@ func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkg",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkg"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherPackage", ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherPackage",
+		func(ctx context.Context, v any) (model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["otherPackage"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEqual", ec.unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEqual",
+		func(ctx context.Context, v any) (model.PkgEqualInputSpec, error) {
+			return ec.unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -711,17 +945,26 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgs",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgs"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherPackages", ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherPackages",
+		func(ctx context.Context, v any) ([]*model.IDorPkgInput, error) {
+			return ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["otherPackages"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEquals", ec.unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEquals",
+		func(ctx context.Context, v any) ([]*model.PkgEqualInputSpec, error) {
+			return ec.unmarshalNPkgEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -732,17 +975,26 @@ func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInput, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContact", ec.unmarshalNPointOfContactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContact",
+		func(ctx context.Context, v any) (model.PointOfContactInputSpec, error) {
+			return ec.unmarshalNPointOfContactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -753,17 +1005,26 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context
 func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageSourceOrArtifactInputs, error) {
+			return ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType", ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pkgMatchType",
+		func(ctx context.Context, v any) (model.MatchFlags, error) {
+			return ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgMatchType"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContacts", ec.unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContacts",
+		func(ctx context.Context, v any) ([]*model.PointOfContactInputSpec, error) {
+			return ec.unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -774,22 +1035,34 @@ func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx contex
 func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "builtFrom", ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "builtFrom",
+		func(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["builtFrom"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "builtBy", ec.unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "builtBy",
+		func(ctx context.Context, v any) (model.IDorBuilderInput, error) {
+			return ec.unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["builtBy"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "slsa", ec.unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "slsa",
+		func(ctx context.Context, v any) (model.SLSAInputSpec, error) {
+			return ec.unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -800,22 +1073,34 @@ func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "builtFromList", ec.unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "builtFromList",
+		func(ctx context.Context, v any) ([][]*model.IDorArtifactInput, error) {
+			return ec.unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["builtFromList"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "builtByList", ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "builtByList",
+		func(ctx context.Context, v any) ([]*model.IDorBuilderInput, error) {
+			return ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["builtByList"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "slsaList", ec.unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "slsaList",
+		func(ctx context.Context, v any) ([]*model.SLSAInputSpec, error) {
+			return ec.unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -826,12 +1111,18 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "source", ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "source",
+		func(ctx context.Context, v any) (model.IDorSourceInput, error) {
+			return ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["source"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "scorecard", ec.unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "scorecard",
+		func(ctx context.Context, v any) (model.ScorecardInputSpec, error) {
+			return ec.unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -842,12 +1133,18 @@ func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sources", ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sources",
+		func(ctx context.Context, v any) ([]*model.IDorSourceInput, error) {
+			return ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["sources"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "scorecards", ec.unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "scorecards",
+		func(ctx context.Context, v any) ([]*model.ScorecardInputSpec, error) {
+			return ec.unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -858,7 +1155,10 @@ func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "source", ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "source",
+		func(ctx context.Context, v any) (model.IDorSourceInput, error) {
+			return ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -869,7 +1169,10 @@ func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context
 func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sources", ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sources",
+		func(ctx context.Context, v any) ([]*model.IDorSourceInput, error) {
+			return ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -880,17 +1183,26 @@ func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (model.PackageOrArtifactInput, error) {
+			return ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability", ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability",
+		func(ctx context.Context, v any) (model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerability"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vexStatement", ec.unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vexStatement",
+		func(ctx context.Context, v any) (model.VexStatementInputSpec, error) {
+			return ec.unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -901,17 +1213,26 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects", ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subjects",
+		func(ctx context.Context, v any) (model.PackageOrArtifactInputs, error) {
+			return ec.unmarshalNPackageOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInputs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subjects"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities", ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities",
+		func(ctx context.Context, v any) ([]*model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerabilities"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vexStatements", ec.unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vexStatements",
+		func(ctx context.Context, v any) ([]*model.VexStatementInputSpec, error) {
+			return ec.unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -922,17 +1243,26 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.
 func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability", ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability",
+		func(ctx context.Context, v any) (model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerability"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherVulnerability", ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherVulnerability",
+		func(ctx context.Context, v any) (model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["otherVulnerability"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEqual", ec.unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEqual",
+		func(ctx context.Context, v any) (model.VulnEqualInputSpec, error) {
+			return ec.unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -943,17 +1273,26 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities", ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilities",
+		func(ctx context.Context, v any) ([]*model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerabilities"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherVulnerabilities", ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otherVulnerabilities",
+		func(ctx context.Context, v any) ([]*model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["otherVulnerabilities"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEquals", ec.unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEquals",
+		func(ctx context.Context, v any) ([]*model.VulnEqualInputSpec, error) {
+			return ec.unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -964,7 +1303,10 @@ func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulns", ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulns",
+		func(ctx context.Context, v any) ([]*model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -975,12 +1317,18 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx contex
 func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability", ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerability",
+		func(ctx context.Context, v any) (model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerability"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadata", ec.unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadata",
+		func(ctx context.Context, v any) (model.VulnerabilityMetadataInputSpec, error) {
+			return ec.unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -991,7 +1339,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx 
 func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vuln", ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vuln",
+		func(ctx context.Context, v any) (model.IDorVulnerabilityInput, error) {
+			return ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1002,7 +1353,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs", ec.unmarshalNID2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1013,7 +1367,10 @@ func (ec *executionContext) field_Query_BatchQueryDepPkgDependency_args(ctx cont
 func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs", ec.unmarshalNID2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1024,7 +1381,10 @@ func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyLegal_args(ctx con
 func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs", ec.unmarshalNID2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1035,7 +1395,10 @@ func (ec *executionContext) field_Query_BatchQueryPkgIDCertifyVuln_args(ctx cont
 func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs", ec.unmarshalNID2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1046,17 +1409,26 @@ func (ec *executionContext) field_Query_BatchQuerySubjectPkgDependency_args(ctx 
 func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBadSpec", ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBadSpec",
+		func(ctx context.Context, v any) (model.CertifyBadSpec, error) {
+			return ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["certifyBadSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1067,7 +1439,10 @@ func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context,
 func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBadSpec", ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyBadSpec",
+		func(ctx context.Context, v any) (model.CertifyBadSpec, error) {
+			return ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1078,17 +1453,26 @@ func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGoodSpec", ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGoodSpec",
+		func(ctx context.Context, v any) (model.CertifyGoodSpec, error) {
+			return ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["certifyGoodSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1099,7 +1483,10 @@ func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context
 func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGoodSpec", ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyGoodSpec",
+		func(ctx context.Context, v any) (model.CertifyGoodSpec, error) {
+			return ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1110,17 +1497,26 @@ func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegalSpec", ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegalSpec",
+		func(ctx context.Context, v any) (model.CertifyLegalSpec, error) {
+			return ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["certifyLegalSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1131,7 +1527,10 @@ func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Contex
 func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegalSpec", ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyLegalSpec",
+		func(ctx context.Context, v any) (model.CertifyLegalSpec, error) {
+			return ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1142,17 +1541,26 @@ func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, r
 func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVEXStatementSpec", ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVEXStatementSpec",
+		func(ctx context.Context, v any) (model.CertifyVEXStatementSpec, error) {
+			return ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["certifyVEXStatementSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1163,7 +1571,10 @@ func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context
 func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVEXStatementSpec", ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVEXStatementSpec",
+		func(ctx context.Context, v any) (model.CertifyVEXStatementSpec, error) {
+			return ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1174,17 +1585,26 @@ func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Con
 func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVulnSpec", ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVulnSpec",
+		func(ctx context.Context, v any) (model.CertifyVulnSpec, error) {
+			return ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["certifyVulnSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1195,7 +1615,10 @@ func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context
 func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVulnSpec", ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "certifyVulnSpec",
+		func(ctx context.Context, v any) (model.CertifyVulnSpec, error) {
+			return ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1206,17 +1629,26 @@ func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadataSpec", ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadataSpec",
+		func(ctx context.Context, v any) (model.HasMetadataSpec, error) {
+			return ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hasMetadataSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1227,7 +1659,10 @@ func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context
 func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadataSpec", ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasMetadataSpec",
+		func(ctx context.Context, v any) (model.HasMetadataSpec, error) {
+			return ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1238,17 +1673,26 @@ func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOMSpec", ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOMSpec",
+		func(ctx context.Context, v any) (model.HasSBOMSpec, error) {
+			return ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hasSBOMSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1259,7 +1703,10 @@ func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOMSpec", ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSBOMSpec",
+		func(ctx context.Context, v any) (model.HasSBOMSpec, error) {
+			return ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1270,17 +1717,26 @@ func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSLSASpec", ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSLSASpec",
+		func(ctx context.Context, v any) (model.HasSLSASpec, error) {
+			return ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hasSLSASpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1291,7 +1747,10 @@ func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSLSASpec", ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSLSASpec",
+		func(ctx context.Context, v any) (model.HasSLSASpec, error) {
+			return ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1302,17 +1761,26 @@ func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAtSpec", ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAtSpec",
+		func(ctx context.Context, v any) (model.HasSourceAtSpec, error) {
+			return ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hasSourceAtSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1323,7 +1791,10 @@ func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context
 func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAtSpec", ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hasSourceAtSpec",
+		func(ctx context.Context, v any) (model.HasSourceAtSpec, error) {
+			return ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1334,17 +1805,26 @@ func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hashEqualSpec", ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hashEqualSpec",
+		func(ctx context.Context, v any) (model.HashEqualSpec, error) {
+			return ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["hashEqualSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1355,7 +1835,10 @@ func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, 
 func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hashEqualSpec", ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "hashEqualSpec",
+		func(ctx context.Context, v any) (model.HashEqualSpec, error) {
+			return ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1366,17 +1849,26 @@ func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isDependencySpec", ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isDependencySpec",
+		func(ctx context.Context, v any) (model.IsDependencySpec, error) {
+			return ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["isDependencySpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1387,7 +1879,10 @@ func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Contex
 func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isDependencySpec", ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isDependencySpec",
+		func(ctx context.Context, v any) (model.IsDependencySpec, error) {
+			return ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1398,17 +1893,26 @@ func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, r
 func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isOccurrenceSpec", ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isOccurrenceSpec",
+		func(ctx context.Context, v any) (model.IsOccurrenceSpec, error) {
+			return ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["isOccurrenceSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1419,7 +1923,10 @@ func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Contex
 func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isOccurrenceSpec", ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "isOccurrenceSpec",
+		func(ctx context.Context, v any) (model.IsOccurrenceSpec, error) {
+			return ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1430,17 +1937,26 @@ func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, r
 func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEqualSpec", ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEqualSpec",
+		func(ctx context.Context, v any) (model.PkgEqualSpec, error) {
+			return ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgEqualSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1451,7 +1967,10 @@ func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, r
 func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEqualSpec", ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgEqualSpec",
+		func(ctx context.Context, v any) (model.PkgEqualSpec, error) {
+			return ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1462,17 +1981,26 @@ func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContactSpec", ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContactSpec",
+		func(ctx context.Context, v any) (model.PointOfContactSpec, error) {
+			return ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pointOfContactSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1483,7 +2011,10 @@ func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Cont
 func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContactSpec", ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pointOfContactSpec",
+		func(ctx context.Context, v any) (model.PointOfContactSpec, error) {
+			return ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1494,7 +2025,10 @@ func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context,
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1505,17 +2039,26 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifactSpec", ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifactSpec",
+		func(ctx context.Context, v any) (model.ArtifactSpec, error) {
+			return ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["artifactSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1526,7 +2069,10 @@ func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, 
 func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifactSpec", ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "artifactSpec",
+		func(ctx context.Context, v any) (model.ArtifactSpec, error) {
+			return ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1537,17 +2083,26 @@ func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builderSpec", ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builderSpec",
+		func(ctx context.Context, v any) (model.BuilderSpec, error) {
+			return ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["builderSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1558,7 +2113,10 @@ func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, r
 func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builderSpec", ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "builderSpec",
+		func(ctx context.Context, v any) (model.BuilderSpec, error) {
+			return ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1569,12 +2127,18 @@ func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "queryType", ec.unmarshalNQueryType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐQueryType)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "queryType",
+		func(ctx context.Context, v any) (model.QueryType, error) {
+			return ec.unmarshalNQueryType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐQueryType(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["queryType"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lastScan", ec.unmarshalOInt2ᚖint)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lastScan",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1585,17 +2149,26 @@ func (ec *executionContext) field_Query_findPackagesThatNeedScanning_args(ctx co
 func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "searchText", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "searchText",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["searchText"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1606,7 +2179,10 @@ func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Contex
 func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "searchText", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "searchText",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1617,17 +2193,26 @@ func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, r
 func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "licenseSpec", ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "licenseSpec",
+		func(ctx context.Context, v any) (model.LicenseSpec, error) {
+			return ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["licenseSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1638,7 +2223,10 @@ func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "licenseSpec", ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "licenseSpec",
+		func(ctx context.Context, v any) (model.LicenseSpec, error) {
+			return ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1649,22 +2237,34 @@ func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["node"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "usingOnly", ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "usingOnly",
+		func(ctx context.Context, v any) ([]model.Edge, error) {
+			return ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["usingOnly"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1675,12 +2275,18 @@ func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, 
 func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["node"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "usingOnly", ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "usingOnly",
+		func(ctx context.Context, v any) ([]model.Edge, error) {
+			return ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1691,7 +2297,10 @@ func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "node",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1702,7 +2311,10 @@ func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "nodes", ec.unmarshalNID2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "nodes",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1713,17 +2325,26 @@ func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgSpec", ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgSpec",
+		func(ctx context.Context, v any) (model.PkgSpec, error) {
+			return ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1734,7 +2355,10 @@ func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, r
 func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgSpec", ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgSpec",
+		func(ctx context.Context, v any) (model.PkgSpec, error) {
+			return ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1745,22 +2369,34 @@ func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "subject",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["subject"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "target", ec.unmarshalNID2string)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "target",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["target"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "maxPathLength", ec.unmarshalNInt2int)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "maxPathLength",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNInt2int(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["maxPathLength"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "usingOnly", ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "usingOnly",
+		func(ctx context.Context, v any) ([]model.Edge, error) {
+			return ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1771,17 +2407,26 @@ func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_queryPackagesListForScan_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs", ec.unmarshalNID2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pkgIDs",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["pkgIDs"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1792,17 +2437,26 @@ func (ec *executionContext) field_Query_queryPackagesListForScan_args(ctx contex
 func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "scorecardSpec", ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "scorecardSpec",
+		func(ctx context.Context, v any) (model.CertifyScorecardSpec, error) {
+			return ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["scorecardSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1813,7 +2467,10 @@ func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context,
 func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "scorecardSpec", ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "scorecardSpec",
+		func(ctx context.Context, v any) (model.CertifyScorecardSpec, error) {
+			return ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1824,17 +2481,26 @@ func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sourceSpec", ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sourceSpec",
+		func(ctx context.Context, v any) (model.SourceSpec, error) {
+			return ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["sourceSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1845,7 +2511,10 @@ func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sourceSpec", ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sourceSpec",
+		func(ctx context.Context, v any) (model.SourceSpec, error) {
+			return ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1856,17 +2525,26 @@ func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEqualSpec", ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEqualSpec",
+		func(ctx context.Context, v any) (model.VulnEqualSpec, error) {
+			return ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnEqualSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1877,7 +2555,10 @@ func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, 
 func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEqualSpec", ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnEqualSpec",
+		func(ctx context.Context, v any) (model.VulnEqualSpec, error) {
+			return ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1888,7 +2569,10 @@ func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnSpec", ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnSpec",
+		func(ctx context.Context, v any) (model.VulnerabilitySpec, error) {
+			return ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1899,17 +2583,26 @@ func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context
 func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnSpec", ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnSpec",
+		func(ctx context.Context, v any) (model.VulnerabilitySpec, error) {
+			return ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1920,17 +2613,26 @@ func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Conte
 func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadataSpec", ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadataSpec",
+		func(ctx context.Context, v any) (model.VulnerabilityMetadataSpec, error) {
+			return ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["vulnerabilityMetadataSpec"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1941,7 +2643,10 @@ func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx conte
 func (ec *executionContext) field_Query_vulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadataSpec", ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "vulnerabilityMetadataSpec",
+		func(ctx context.Context, v any) (model.VulnerabilityMetadataSpec, error) {
+			return ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1951,10 +2656,6 @@ func (ec *executionContext) field_Query_vulnerabilityMetadata_args(ctx context.C
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Artifact_id(ctx context.Context, field graphql.CollectedField, obj *model.Artifact) (ret graphql.Marshaler) {
@@ -1962,28 +2663,24 @@ func (ec *executionContext) _Artifact_id(ctx context.Context, field graphql.Coll
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Artifact_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Artifact_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Artifact_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Artifact",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Artifact", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _Artifact_algorithm(ctx context.Context, field graphql.CollectedField, obj *model.Artifact) (ret graphql.Marshaler) {
@@ -1991,28 +2688,24 @@ func (ec *executionContext) _Artifact_algorithm(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Artifact_algorithm,
-		func(ctx context.Context) (any, error) { return obj.Algorithm, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Artifact_algorithm(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Algorithm, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Artifact_algorithm(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Artifact",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Artifact", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Artifact_digest(ctx context.Context, field graphql.CollectedField, obj *model.Artifact) (ret graphql.Marshaler) {
@@ -2020,28 +2713,24 @@ func (ec *executionContext) _Artifact_digest(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Artifact_digest,
-		func(ctx context.Context) (any, error) { return obj.Digest, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Artifact_digest(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Digest, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Artifact_digest(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Artifact",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Artifact", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _ArtifactConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactConnection) (ret graphql.Marshaler) {
@@ -2049,28 +2738,24 @@ func (ec *executionContext) _ArtifactConnection_totalCount(ctx context.Context, 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ArtifactConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ArtifactConnection_totalCount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_ArtifactConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ArtifactConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("ArtifactConnection", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _ArtifactConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactConnection) (ret graphql.Marshaler) {
@@ -2078,17 +2763,22 @@ func (ec *executionContext) _ArtifactConnection_pageInfo(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ArtifactConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ArtifactConnection_pageInfo(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_ArtifactConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ArtifactConnection",
@@ -2096,15 +2786,7 @@ func (ec *executionContext) fieldContext_ArtifactConnection_pageInfo(_ context.C
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "startCursor":
-				return ec.fieldContext_PageInfo_startCursor(ctx, field)
-			case "endCursor":
-				return ec.fieldContext_PageInfo_endCursor(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+			return ec.childFields_PageInfo(ctx, field)
 		},
 	}
 	return fc, nil
@@ -2115,17 +2797,22 @@ func (ec *executionContext) _ArtifactConnection_edges(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ArtifactConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ArtifactConnection_edges(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.ArtifactEdge) graphql.Marshaler {
+			return ec.marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_ArtifactConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ArtifactConnection",
@@ -2133,13 +2820,7 @@ func (ec *executionContext) fieldContext_ArtifactConnection_edges(_ context.Cont
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_ArtifactEdge_cursor(ctx, field)
-			case "node":
-				return ec.fieldContext_ArtifactEdge_node(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ArtifactEdge", field.Name)
+			return ec.childFields_ArtifactEdge(ctx, field)
 		},
 	}
 	return fc, nil
@@ -2150,28 +2831,24 @@ func (ec *executionContext) _ArtifactEdge_cursor(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ArtifactEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ArtifactEdge_cursor(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_ArtifactEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ArtifactEdge",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("ArtifactEdge", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _ArtifactEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactEdge) (ret graphql.Marshaler) {
@@ -2179,17 +2856,22 @@ func (ec *executionContext) _ArtifactEdge_node(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ArtifactEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ArtifactEdge_node(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Artifact) graphql.Marshaler {
+			return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_ArtifactEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ArtifactEdge",
@@ -2197,15 +2879,7 @@ func (ec *executionContext) fieldContext_ArtifactEdge_node(_ context.Context, fi
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Artifact_id(ctx, field)
-			case "algorithm":
-				return ec.fieldContext_Artifact_algorithm(ctx, field)
-			case "digest":
-				return ec.fieldContext_Artifact_digest(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
+			return ec.childFields_Artifact(ctx, field)
 		},
 	}
 	return fc, nil
@@ -2216,20 +2890,23 @@ func (ec *executionContext) _Mutation_ingestArtifact(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestArtifact,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestArtifact(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestArtifact(ctx, fc.Args["artifact"].(*model.IDorArtifactInput))
+			return ec.Resolvers.Mutation().IngestArtifact(ctx, fc.Args["artifact"].(*model.IDorArtifactInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestArtifact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2259,20 +2936,23 @@ func (ec *executionContext) _Mutation_ingestArtifacts(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestArtifacts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestArtifacts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestArtifacts(ctx, fc.Args["artifacts"].([]*model.IDorArtifactInput))
+			return ec.Resolvers.Mutation().IngestArtifacts(ctx, fc.Args["artifacts"].([]*model.IDorArtifactInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestArtifacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2302,20 +2982,23 @@ func (ec *executionContext) _Mutation_ingestBuilder(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestBuilder,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestBuilder(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestBuilder(ctx, fc.Args["builder"].(*model.IDorBuilderInput))
+			return ec.Resolvers.Mutation().IngestBuilder(ctx, fc.Args["builder"].(*model.IDorBuilderInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestBuilder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2345,20 +3028,23 @@ func (ec *executionContext) _Mutation_ingestBuilders(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestBuilders,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestBuilders(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestBuilders(ctx, fc.Args["builders"].([]*model.IDorBuilderInput))
+			return ec.Resolvers.Mutation().IngestBuilders(ctx, fc.Args["builders"].([]*model.IDorBuilderInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestBuilders(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2388,20 +3074,23 @@ func (ec *executionContext) _Mutation_ingestCertifyBad(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyBad,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyBad(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyBad(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBad"].(model.CertifyBadInputSpec))
+			return ec.Resolvers.Mutation().IngestCertifyBad(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBad"].(model.CertifyBadInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyBad(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2431,20 +3120,23 @@ func (ec *executionContext) _Mutation_ingestCertifyBads(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyBads,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyBads(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyBads(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
+			return ec.Resolvers.Mutation().IngestCertifyBads(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyBads(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2474,20 +3166,23 @@ func (ec *executionContext) _Mutation_ingestCertifyGood(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyGood,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyGood(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyGood(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGood"].(model.CertifyGoodInputSpec))
+			return ec.Resolvers.Mutation().IngestCertifyGood(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGood"].(model.CertifyGoodInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyGood(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2517,20 +3212,23 @@ func (ec *executionContext) _Mutation_ingestCertifyGoods(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyGoods,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyGoods(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyGoods(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
+			return ec.Resolvers.Mutation().IngestCertifyGoods(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyGoods(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2560,20 +3258,23 @@ func (ec *executionContext) _Mutation_ingestCertifyLegal(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyLegal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyLegal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyLegal(ctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["declaredLicenses"].([]*model.IDorLicenseInput), fc.Args["discoveredLicenses"].([]*model.IDorLicenseInput), fc.Args["certifyLegal"].(model.CertifyLegalInputSpec))
+			return ec.Resolvers.Mutation().IngestCertifyLegal(ctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["declaredLicenses"].([]*model.IDorLicenseInput), fc.Args["discoveredLicenses"].([]*model.IDorLicenseInput), fc.Args["certifyLegal"].(model.CertifyLegalInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2603,20 +3304,23 @@ func (ec *executionContext) _Mutation_ingestCertifyLegals(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyLegals,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyLegals(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyLegals(ctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["declaredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["discoveredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["certifyLegals"].([]*model.CertifyLegalInputSpec))
+			return ec.Resolvers.Mutation().IngestCertifyLegals(ctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["declaredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["discoveredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["certifyLegals"].([]*model.CertifyLegalInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2646,20 +3350,23 @@ func (ec *executionContext) _Mutation_ingestScorecard(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestScorecard,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestScorecard(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestScorecard(ctx, fc.Args["source"].(model.IDorSourceInput), fc.Args["scorecard"].(model.ScorecardInputSpec))
+			return ec.Resolvers.Mutation().IngestScorecard(ctx, fc.Args["source"].(model.IDorSourceInput), fc.Args["scorecard"].(model.ScorecardInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestScorecard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2689,20 +3396,23 @@ func (ec *executionContext) _Mutation_ingestScorecards(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestScorecards,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestScorecards(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestScorecards(ctx, fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["scorecards"].([]*model.ScorecardInputSpec))
+			return ec.Resolvers.Mutation().IngestScorecards(ctx, fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["scorecards"].([]*model.ScorecardInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestScorecards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2732,20 +3442,23 @@ func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVEXStatement,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVEXStatement(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVEXStatement(ctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
+			return ec.Resolvers.Mutation().IngestVEXStatement(ctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVEXStatement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2775,20 +3488,23 @@ func (ec *executionContext) _Mutation_ingestVEXStatements(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVEXStatements,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVEXStatements(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVEXStatements(ctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vexStatements"].([]*model.VexStatementInputSpec))
+			return ec.Resolvers.Mutation().IngestVEXStatements(ctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vexStatements"].([]*model.VexStatementInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVEXStatements(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2818,20 +3534,23 @@ func (ec *executionContext) _Mutation_ingestCertifyVuln(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyVuln,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyVuln(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyVuln(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["certifyVuln"].(model.ScanMetadataInput))
+			return ec.Resolvers.Mutation().IngestCertifyVuln(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["certifyVuln"].(model.ScanMetadataInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyVuln(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2861,20 +3580,23 @@ func (ec *executionContext) _Mutation_ingestCertifyVulns(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestCertifyVulns,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestCertifyVulns(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestCertifyVulns(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["certifyVulns"].([]*model.ScanMetadataInput))
+			return ec.Resolvers.Mutation().IngestCertifyVulns(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["certifyVulns"].([]*model.ScanMetadataInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyVulns(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2904,20 +3626,23 @@ func (ec *executionContext) _Mutation_ingestPointOfContact(ctx context.Context, 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestPointOfContact,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestPointOfContact(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestPointOfContact(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContact"].(model.PointOfContactInputSpec))
+			return ec.Resolvers.Mutation().IngestPointOfContact(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContact"].(model.PointOfContactInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestPointOfContact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2947,20 +3672,23 @@ func (ec *executionContext) _Mutation_ingestPointOfContacts(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestPointOfContacts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestPointOfContacts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestPointOfContacts(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContacts"].([]*model.PointOfContactInputSpec))
+			return ec.Resolvers.Mutation().IngestPointOfContacts(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContacts"].([]*model.PointOfContactInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestPointOfContacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -2990,20 +3718,23 @@ func (ec *executionContext) _Mutation_delete(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_delete,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_delete(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().Delete(ctx, fc.Args["node"].(string))
+			return ec.Resolvers.Mutation().Delete(ctx, fc.Args["node"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_delete(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3033,20 +3764,23 @@ func (ec *executionContext) _Mutation_ingestHasSBOM(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHasSBOM,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHasSBOM(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHasSbom(ctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec), fc.Args["includes"].(model.HasSBOMIncludesInputSpec))
+			return ec.Resolvers.Mutation().IngestHasSbom(ctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec), fc.Args["includes"].(model.HasSBOMIncludesInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHasSBOM(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3076,20 +3810,23 @@ func (ec *executionContext) _Mutation_ingestHasSBOMs(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHasSBOMs,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHasSBOMs(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHasSBOMs(ctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["hasSBOMs"].([]*model.HasSBOMInputSpec), fc.Args["includes"].([]*model.HasSBOMIncludesInputSpec))
+			return ec.Resolvers.Mutation().IngestHasSBOMs(ctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["hasSBOMs"].([]*model.HasSBOMInputSpec), fc.Args["includes"].([]*model.HasSBOMIncludesInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHasSBOMs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3119,20 +3856,23 @@ func (ec *executionContext) _Mutation_ingestSLSA(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestSLSA,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestSLSA(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestSlsa(ctx, fc.Args["subject"].(model.IDorArtifactInput), fc.Args["builtFrom"].([]*model.IDorArtifactInput), fc.Args["builtBy"].(model.IDorBuilderInput), fc.Args["slsa"].(model.SLSAInputSpec))
+			return ec.Resolvers.Mutation().IngestSlsa(ctx, fc.Args["subject"].(model.IDorArtifactInput), fc.Args["builtFrom"].([]*model.IDorArtifactInput), fc.Args["builtBy"].(model.IDorBuilderInput), fc.Args["slsa"].(model.SLSAInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestSLSA(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3162,20 +3902,23 @@ func (ec *executionContext) _Mutation_ingestSLSAs(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestSLSAs,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestSLSAs(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestSLSAs(ctx, fc.Args["subjects"].([]*model.IDorArtifactInput), fc.Args["builtFromList"].([][]*model.IDorArtifactInput), fc.Args["builtByList"].([]*model.IDorBuilderInput), fc.Args["slsaList"].([]*model.SLSAInputSpec))
+			return ec.Resolvers.Mutation().IngestSLSAs(ctx, fc.Args["subjects"].([]*model.IDorArtifactInput), fc.Args["builtFromList"].([][]*model.IDorArtifactInput), fc.Args["builtByList"].([]*model.IDorBuilderInput), fc.Args["slsaList"].([]*model.SLSAInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestSLSAs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3205,20 +3948,23 @@ func (ec *executionContext) _Mutation_ingestHasSourceAt(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHasSourceAt,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHasSourceAt(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHasSourceAt(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["source"].(model.IDorSourceInput), fc.Args["hasSourceAt"].(model.HasSourceAtInputSpec))
+			return ec.Resolvers.Mutation().IngestHasSourceAt(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["source"].(model.IDorSourceInput), fc.Args["hasSourceAt"].(model.HasSourceAtInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHasSourceAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3248,20 +3994,23 @@ func (ec *executionContext) _Mutation_ingestHasSourceAts(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHasSourceAts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHasSourceAts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHasSourceAts(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["hasSourceAts"].([]*model.HasSourceAtInputSpec))
+			return ec.Resolvers.Mutation().IngestHasSourceAts(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["hasSourceAts"].([]*model.HasSourceAtInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHasSourceAts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3291,20 +4040,23 @@ func (ec *executionContext) _Mutation_ingestHashEqual(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHashEqual,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHashEqual(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHashEqual(ctx, fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["otherArtifact"].(model.IDorArtifactInput), fc.Args["hashEqual"].(model.HashEqualInputSpec))
+			return ec.Resolvers.Mutation().IngestHashEqual(ctx, fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["otherArtifact"].(model.IDorArtifactInput), fc.Args["hashEqual"].(model.HashEqualInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHashEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3334,20 +4086,23 @@ func (ec *executionContext) _Mutation_ingestHashEquals(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHashEquals,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHashEquals(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHashEquals(ctx, fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["otherArtifacts"].([]*model.IDorArtifactInput), fc.Args["hashEquals"].([]*model.HashEqualInputSpec))
+			return ec.Resolvers.Mutation().IngestHashEquals(ctx, fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["otherArtifacts"].([]*model.IDorArtifactInput), fc.Args["hashEquals"].([]*model.HashEqualInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHashEquals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3377,20 +4132,23 @@ func (ec *executionContext) _Mutation_ingestDependency(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestDependency,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestDependency(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestDependency(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["depPkg"].(model.IDorPkgInput), fc.Args["dependency"].(model.IsDependencyInputSpec))
+			return ec.Resolvers.Mutation().IngestDependency(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["depPkg"].(model.IDorPkgInput), fc.Args["dependency"].(model.IsDependencyInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3420,20 +4178,23 @@ func (ec *executionContext) _Mutation_ingestDependencies(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestDependencies,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestDependencies(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestDependencies(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["depPkgs"].([]*model.IDorPkgInput), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
+			return ec.Resolvers.Mutation().IngestDependencies(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["depPkgs"].([]*model.IDorPkgInput), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestDependencies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3463,20 +4224,23 @@ func (ec *executionContext) _Mutation_ingestOccurrence(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestOccurrence,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestOccurrence(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestOccurrence(ctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
+			return ec.Resolvers.Mutation().IngestOccurrence(ctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestOccurrence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3506,20 +4270,23 @@ func (ec *executionContext) _Mutation_ingestOccurrences(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestOccurrences,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestOccurrences(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestOccurrences(ctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
+			return ec.Resolvers.Mutation().IngestOccurrences(ctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestOccurrences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3549,20 +4316,23 @@ func (ec *executionContext) _Mutation_ingestLicense(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestLicense,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestLicense(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestLicense(ctx, fc.Args["license"].(*model.IDorLicenseInput))
+			return ec.Resolvers.Mutation().IngestLicense(ctx, fc.Args["license"].(*model.IDorLicenseInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestLicense(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3592,20 +4362,23 @@ func (ec *executionContext) _Mutation_ingestLicenses(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestLicenses,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestLicenses(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestLicenses(ctx, fc.Args["licenses"].([]*model.IDorLicenseInput))
+			return ec.Resolvers.Mutation().IngestLicenses(ctx, fc.Args["licenses"].([]*model.IDorLicenseInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestLicenses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3635,20 +4408,23 @@ func (ec *executionContext) _Mutation_ingestHasMetadata(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestHasMetadata,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestHasMetadata(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestHasMetadata(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadata"].(model.HasMetadataInputSpec))
+			return ec.Resolvers.Mutation().IngestHasMetadata(ctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadata"].(model.HasMetadataInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestHasMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3678,20 +4454,23 @@ func (ec *executionContext) _Mutation_ingestBulkHasMetadata(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestBulkHasMetadata,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestBulkHasMetadata(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestBulkHasMetadata(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadataList"].([]*model.HasMetadataInputSpec))
+			return ec.Resolvers.Mutation().IngestBulkHasMetadata(ctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadataList"].([]*model.HasMetadataInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestBulkHasMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3721,20 +4500,23 @@ func (ec *executionContext) _Mutation_ingestPackage(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestPackage,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestPackage(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestPackage(ctx, fc.Args["pkg"].(model.IDorPkgInput))
+			return ec.Resolvers.Mutation().IngestPackage(ctx, fc.Args["pkg"].(model.IDorPkgInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPackageIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDs,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PackageIDs) graphql.Marshaler {
+			return ec.marshalNPackageIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDs(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestPackage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3742,17 +4524,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestPackage(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "packageTypeID":
-				return ec.fieldContext_PackageIDs_packageTypeID(ctx, field)
-			case "packageNamespaceID":
-				return ec.fieldContext_PackageIDs_packageNamespaceID(ctx, field)
-			case "packageNameID":
-				return ec.fieldContext_PackageIDs_packageNameID(ctx, field)
-			case "packageVersionID":
-				return ec.fieldContext_PackageIDs_packageVersionID(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PackageIDs", field.Name)
+			return ec.childFields_PackageIDs(ctx, field)
 		},
 	}
 	defer func() {
@@ -3774,20 +4546,23 @@ func (ec *executionContext) _Mutation_ingestPackages(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestPackages,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestPackages(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestPackages(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput))
+			return ec.Resolvers.Mutation().IngestPackages(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPackageIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDsᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.PackageIDs) graphql.Marshaler {
+			return ec.marshalNPackageIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDsᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestPackages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3795,17 +4570,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestPackages(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "packageTypeID":
-				return ec.fieldContext_PackageIDs_packageTypeID(ctx, field)
-			case "packageNamespaceID":
-				return ec.fieldContext_PackageIDs_packageNamespaceID(ctx, field)
-			case "packageNameID":
-				return ec.fieldContext_PackageIDs_packageNameID(ctx, field)
-			case "packageVersionID":
-				return ec.fieldContext_PackageIDs_packageVersionID(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PackageIDs", field.Name)
+			return ec.childFields_PackageIDs(ctx, field)
 		},
 	}
 	defer func() {
@@ -3827,20 +4592,23 @@ func (ec *executionContext) _Mutation_ingestPkgEqual(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestPkgEqual,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestPkgEqual(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestPkgEqual(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["otherPackage"].(model.IDorPkgInput), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
+			return ec.Resolvers.Mutation().IngestPkgEqual(ctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["otherPackage"].(model.IDorPkgInput), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestPkgEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3870,20 +4638,23 @@ func (ec *executionContext) _Mutation_ingestPkgEquals(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestPkgEquals,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestPkgEquals(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestPkgEquals(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["otherPackages"].([]*model.IDorPkgInput), fc.Args["pkgEquals"].([]*model.PkgEqualInputSpec))
+			return ec.Resolvers.Mutation().IngestPkgEquals(ctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["otherPackages"].([]*model.IDorPkgInput), fc.Args["pkgEquals"].([]*model.PkgEqualInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestPkgEquals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3913,20 +4684,23 @@ func (ec *executionContext) _Mutation_ingestSource(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestSource,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestSource(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestSource(ctx, fc.Args["source"].(model.IDorSourceInput))
+			return ec.Resolvers.Mutation().IngestSource(ctx, fc.Args["source"].(model.IDorSourceInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNSourceIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDs,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.SourceIDs) graphql.Marshaler {
+			return ec.marshalNSourceIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDs(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestSource(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3934,15 +4708,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestSource(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "sourceTypeID":
-				return ec.fieldContext_SourceIDs_sourceTypeID(ctx, field)
-			case "sourceNamespaceID":
-				return ec.fieldContext_SourceIDs_sourceNamespaceID(ctx, field)
-			case "sourceNameID":
-				return ec.fieldContext_SourceIDs_sourceNameID(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type SourceIDs", field.Name)
+			return ec.childFields_SourceIDs(ctx, field)
 		},
 	}
 	defer func() {
@@ -3964,20 +4730,23 @@ func (ec *executionContext) _Mutation_ingestSources(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestSources,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestSources(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestSources(ctx, fc.Args["sources"].([]*model.IDorSourceInput))
+			return ec.Resolvers.Mutation().IngestSources(ctx, fc.Args["sources"].([]*model.IDorSourceInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNSourceIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDsᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.SourceIDs) graphql.Marshaler {
+			return ec.marshalNSourceIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDsᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestSources(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -3985,15 +4754,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestSources(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "sourceTypeID":
-				return ec.fieldContext_SourceIDs_sourceTypeID(ctx, field)
-			case "sourceNamespaceID":
-				return ec.fieldContext_SourceIDs_sourceNamespaceID(ctx, field)
-			case "sourceNameID":
-				return ec.fieldContext_SourceIDs_sourceNameID(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type SourceIDs", field.Name)
+			return ec.childFields_SourceIDs(ctx, field)
 		},
 	}
 	defer func() {
@@ -4015,20 +4776,23 @@ func (ec *executionContext) _Mutation_ingestVulnEqual(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVulnEqual,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVulnEqual(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVulnEqual(ctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["otherVulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
+			return ec.Resolvers.Mutation().IngestVulnEqual(ctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["otherVulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVulnEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -4058,20 +4822,23 @@ func (ec *executionContext) _Mutation_ingestVulnEquals(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVulnEquals,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVulnEquals(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVulnEquals(ctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["otherVulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnEquals"].([]*model.VulnEqualInputSpec))
+			return ec.Resolvers.Mutation().IngestVulnEquals(ctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["otherVulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnEquals"].([]*model.VulnEqualInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVulnEquals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -4101,20 +4868,23 @@ func (ec *executionContext) _Mutation_ingestVulnerabilityMetadata(ctx context.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVulnerabilityMetadata,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVulnerabilityMetadata(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVulnerabilityMetadata(ctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
+			return ec.Resolvers.Mutation().IngestVulnerabilityMetadata(ctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVulnerabilityMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -4144,20 +4914,23 @@ func (ec *executionContext) _Mutation_ingestBulkVulnerabilityMetadata(ctx contex
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestBulkVulnerabilityMetadata,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestBulkVulnerabilityMetadata(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestBulkVulnerabilityMetadata(ctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec))
+			return ec.Resolvers.Mutation().IngestBulkVulnerabilityMetadata(ctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestBulkVulnerabilityMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -4187,20 +4960,23 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVulnerability,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVulnerability(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVulnerability(ctx, fc.Args["vuln"].(model.IDorVulnerabilityInput))
+			return ec.Resolvers.Mutation().IngestVulnerability(ctx, fc.Args["vuln"].(model.IDorVulnerabilityInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNVulnerabilityIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityIDs,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.VulnerabilityIDs) graphql.Marshaler {
+			return ec.marshalNVulnerabilityIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityIDs(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -4208,13 +4984,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "vulnerabilityTypeID":
-				return ec.fieldContext_VulnerabilityIDs_vulnerabilityTypeID(ctx, field)
-			case "vulnerabilityNodeID":
-				return ec.fieldContext_VulnerabilityIDs_vulnerabilityNodeID(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityIDs", field.Name)
+			return ec.childFields_VulnerabilityIDs(ctx, field)
 		},
 	}
 	defer func() {
@@ -4236,20 +5006,23 @@ func (ec *executionContext) _Mutation_ingestVulnerabilities(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_ingestVulnerabilities,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_ingestVulnerabilities(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().IngestVulnerabilities(ctx, fc.Args["vulns"].([]*model.IDorVulnerabilityInput))
+			return ec.Resolvers.Mutation().IngestVulnerabilities(ctx, fc.Args["vulns"].([]*model.IDorVulnerabilityInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNVulnerabilityIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityIDsᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.VulnerabilityIDs) graphql.Marshaler {
+			return ec.marshalNVulnerabilityIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityIDsᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_ingestVulnerabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -4257,13 +5030,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerabilities(ctx cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "vulnerabilityTypeID":
-				return ec.fieldContext_VulnerabilityIDs_vulnerabilityTypeID(ctx, field)
-			case "vulnerabilityNodeID":
-				return ec.fieldContext_VulnerabilityIDs_vulnerabilityNodeID(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityIDs", field.Name)
+			return ec.childFields_VulnerabilityIDs(ctx, field)
 		},
 	}
 	defer func() {
@@ -4285,20 +5052,23 @@ func (ec *executionContext) _Query_artifacts(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_artifacts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_artifacts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Artifacts(ctx, fc.Args["artifactSpec"].(model.ArtifactSpec))
+			return ec.Resolvers.Query().Artifacts(ctx, fc.Args["artifactSpec"].(model.ArtifactSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Artifact) graphql.Marshaler {
+			return ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_artifacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4306,15 +5076,7 @@ func (ec *executionContext) fieldContext_Query_artifacts(ctx context.Context, fi
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Artifact_id(ctx, field)
-			case "algorithm":
-				return ec.fieldContext_Artifact_algorithm(ctx, field)
-			case "digest":
-				return ec.fieldContext_Artifact_digest(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
+			return ec.childFields_Artifact(ctx, field)
 		},
 	}
 	defer func() {
@@ -4336,20 +5098,23 @@ func (ec *executionContext) _Query_artifactsList(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_artifactsList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_artifactsList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ArtifactsList(ctx, fc.Args["artifactSpec"].(model.ArtifactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().ArtifactsList(ctx, fc.Args["artifactSpec"].(model.ArtifactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.ArtifactConnection) graphql.Marshaler {
+			return ec.marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_artifactsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4357,15 +5122,7 @@ func (ec *executionContext) fieldContext_Query_artifactsList(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_ArtifactConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_ArtifactConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_ArtifactConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ArtifactConnection", field.Name)
+			return ec.childFields_ArtifactConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -4387,20 +5144,23 @@ func (ec *executionContext) _Query_builders(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_builders,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_builders(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Builders(ctx, fc.Args["builderSpec"].(model.BuilderSpec))
+			return ec.Resolvers.Query().Builders(ctx, fc.Args["builderSpec"].(model.BuilderSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNBuilder2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Builder) graphql.Marshaler {
+			return ec.marshalNBuilder2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_builders(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4408,13 +5168,7 @@ func (ec *executionContext) fieldContext_Query_builders(ctx context.Context, fie
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Builder_id(ctx, field)
-			case "uri":
-				return ec.fieldContext_Builder_uri(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Builder", field.Name)
+			return ec.childFields_Builder(ctx, field)
 		},
 	}
 	defer func() {
@@ -4436,20 +5190,23 @@ func (ec *executionContext) _Query_buildersList(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_buildersList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_buildersList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BuildersList(ctx, fc.Args["builderSpec"].(model.BuilderSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().BuildersList(ctx, fc.Args["builderSpec"].(model.BuilderSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOBuilderConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.BuilderConnection) graphql.Marshaler {
+			return ec.marshalOBuilderConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_buildersList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4457,15 +5214,7 @@ func (ec *executionContext) fieldContext_Query_buildersList(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_BuilderConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_BuilderConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_BuilderConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type BuilderConnection", field.Name)
+			return ec.childFields_BuilderConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -4487,20 +5236,23 @@ func (ec *executionContext) _Query_CertifyBad(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyBad,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyBad(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyBad(ctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec))
+			return ec.Resolvers.Query().CertifyBad(ctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyBad2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyBad) graphql.Marshaler {
+			return ec.marshalNCertifyBad2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4508,23 +5260,7 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyBad_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyBad_subject(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyBad_justification(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyBad_knownSince(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyBad_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyBad_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_CertifyBad_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyBad", field.Name)
+			return ec.childFields_CertifyBad(ctx, field)
 		},
 	}
 	defer func() {
@@ -4546,20 +5282,23 @@ func (ec *executionContext) _Query_CertifyBadList(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyBadList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyBadList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyBadList(ctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().CertifyBadList(ctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCertifyBadConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.CertifyBadConnection) graphql.Marshaler {
+			return ec.marshalOCertifyBadConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyBadList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4567,15 +5306,7 @@ func (ec *executionContext) fieldContext_Query_CertifyBadList(ctx context.Contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CertifyBadConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_CertifyBadConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_CertifyBadConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyBadConnection", field.Name)
+			return ec.childFields_CertifyBadConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -4597,20 +5328,23 @@ func (ec *executionContext) _Query_CertifyGood(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyGood,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyGood(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyGood(ctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec))
+			return ec.Resolvers.Query().CertifyGood(ctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyGood2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyGood) graphql.Marshaler {
+			return ec.marshalNCertifyGood2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4618,23 +5352,7 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyGood_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyGood_subject(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyGood_justification(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyGood_knownSince(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyGood_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyGood_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_CertifyGood_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyGood", field.Name)
+			return ec.childFields_CertifyGood(ctx, field)
 		},
 	}
 	defer func() {
@@ -4656,20 +5374,23 @@ func (ec *executionContext) _Query_CertifyGoodList(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyGoodList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyGoodList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyGoodList(ctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().CertifyGoodList(ctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCertifyGoodConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.CertifyGoodConnection) graphql.Marshaler {
+			return ec.marshalOCertifyGoodConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyGoodList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4677,15 +5398,7 @@ func (ec *executionContext) fieldContext_Query_CertifyGoodList(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CertifyGoodConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_CertifyGoodConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_CertifyGoodConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyGoodConnection", field.Name)
+			return ec.childFields_CertifyGoodConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -4707,20 +5420,23 @@ func (ec *executionContext) _Query_CertifyLegal(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyLegal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyLegal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyLegal(ctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec))
+			return ec.Resolvers.Query().CertifyLegal(ctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyLegal) graphql.Marshaler {
+			return ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4728,33 +5444,7 @@ func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyLegal_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyLegal_subject(ctx, field)
-			case "declaredLicense":
-				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
-			case "declaredLicenses":
-				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
-			case "discoveredLicense":
-				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
-			case "discoveredLicenses":
-				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
-			case "attribution":
-				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyLegal_justification(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyLegal_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyLegal_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+			return ec.childFields_CertifyLegal(ctx, field)
 		},
 	}
 	defer func() {
@@ -4776,20 +5466,23 @@ func (ec *executionContext) _Query_CertifyLegalList(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyLegalList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyLegalList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyLegalList(ctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().CertifyLegalList(ctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCertifyLegalConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.CertifyLegalConnection) graphql.Marshaler {
+			return ec.marshalOCertifyLegalConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyLegalList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4797,15 +5490,7 @@ func (ec *executionContext) fieldContext_Query_CertifyLegalList(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CertifyLegalConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_CertifyLegalConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_CertifyLegalConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyLegalConnection", field.Name)
+			return ec.childFields_CertifyLegalConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -4827,20 +5512,23 @@ func (ec *executionContext) _Query_BatchQueryPkgIDCertifyLegal(ctx context.Conte
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_BatchQueryPkgIDCertifyLegal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_BatchQueryPkgIDCertifyLegal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BatchQueryPkgIDCertifyLegal(ctx, fc.Args["pkgIDs"].([]string))
+			return ec.Resolvers.Query().BatchQueryPkgIDCertifyLegal(ctx, fc.Args["pkgIDs"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyLegal) graphql.Marshaler {
+			return ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_BatchQueryPkgIDCertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4848,33 +5536,7 @@ func (ec *executionContext) fieldContext_Query_BatchQueryPkgIDCertifyLegal(ctx c
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyLegal_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyLegal_subject(ctx, field)
-			case "declaredLicense":
-				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
-			case "declaredLicenses":
-				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
-			case "discoveredLicense":
-				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
-			case "discoveredLicenses":
-				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
-			case "attribution":
-				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyLegal_justification(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyLegal_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyLegal_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+			return ec.childFields_CertifyLegal(ctx, field)
 		},
 	}
 	defer func() {
@@ -4896,20 +5558,23 @@ func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_scorecards,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_scorecards(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Scorecards(ctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec))
+			return ec.Resolvers.Query().Scorecards(ctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyScorecard) graphql.Marshaler {
+			return ec.marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4917,15 +5582,7 @@ func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, f
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyScorecard_id(ctx, field)
-			case "source":
-				return ec.fieldContext_CertifyScorecard_source(ctx, field)
-			case "scorecard":
-				return ec.fieldContext_CertifyScorecard_scorecard(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecard", field.Name)
+			return ec.childFields_CertifyScorecard(ctx, field)
 		},
 	}
 	defer func() {
@@ -4947,20 +5604,23 @@ func (ec *executionContext) _Query_scorecardsList(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_scorecardsList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_scorecardsList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ScorecardsList(ctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().ScorecardsList(ctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCertifyScorecardConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.CertifyScorecardConnection) graphql.Marshaler {
+			return ec.marshalOCertifyScorecardConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_scorecardsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -4968,15 +5628,7 @@ func (ec *executionContext) fieldContext_Query_scorecardsList(ctx context.Contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CertifyScorecardConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_CertifyScorecardConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_CertifyScorecardConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecardConnection", field.Name)
+			return ec.childFields_CertifyScorecardConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -4998,20 +5650,23 @@ func (ec *executionContext) _Query_CertifyVEXStatement(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyVEXStatement,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyVEXStatement(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyVEXStatement(ctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec))
+			return ec.Resolvers.Query().CertifyVEXStatement(ctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyVEXStatement2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyVEXStatement) graphql.Marshaler {
+			return ec.marshalNCertifyVEXStatement2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5019,31 +5674,7 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyVEXStatement_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
-			case "vulnerability":
-				return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
-			case "status":
-				return ec.fieldContext_CertifyVEXStatement_status(ctx, field)
-			case "vexJustification":
-				return ec.fieldContext_CertifyVEXStatement_vexJustification(ctx, field)
-			case "statement":
-				return ec.fieldContext_CertifyVEXStatement_statement(ctx, field)
-			case "statusNotes":
-				return ec.fieldContext_CertifyVEXStatement_statusNotes(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyVEXStatement_knownSince(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyVEXStatement_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyVEXStatement_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_CertifyVEXStatement_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyVEXStatement", field.Name)
+			return ec.childFields_CertifyVEXStatement(ctx, field)
 		},
 	}
 	defer func() {
@@ -5065,20 +5696,23 @@ func (ec *executionContext) _Query_CertifyVEXStatementList(ctx context.Context, 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyVEXStatementList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyVEXStatementList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyVEXStatementList(ctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().CertifyVEXStatementList(ctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVEXConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVEXConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.VEXConnection) graphql.Marshaler {
+			return ec.marshalOVEXConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVEXConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyVEXStatementList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5086,15 +5720,7 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatementList(ctx conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_VEXConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_VEXConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_VEXConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VEXConnection", field.Name)
+			return ec.childFields_VEXConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5116,20 +5742,23 @@ func (ec *executionContext) _Query_CertifyVuln(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyVuln,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyVuln(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyVuln(ctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec))
+			return ec.Resolvers.Query().CertifyVuln(ctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyVuln) graphql.Marshaler {
+			return ec.marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyVuln(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5137,17 +5766,7 @@ func (ec *executionContext) fieldContext_Query_CertifyVuln(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyVuln_id(ctx, field)
-			case "package":
-				return ec.fieldContext_CertifyVuln_package(ctx, field)
-			case "vulnerability":
-				return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
-			case "metadata":
-				return ec.fieldContext_CertifyVuln_metadata(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
+			return ec.childFields_CertifyVuln(ctx, field)
 		},
 	}
 	defer func() {
@@ -5169,20 +5788,23 @@ func (ec *executionContext) _Query_CertifyVulnList(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_CertifyVulnList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_CertifyVulnList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CertifyVulnList(ctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().CertifyVulnList(ctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCertifyVulnConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.CertifyVulnConnection) graphql.Marshaler {
+			return ec.marshalOCertifyVulnConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_CertifyVulnList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5190,15 +5812,7 @@ func (ec *executionContext) fieldContext_Query_CertifyVulnList(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CertifyVulnConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_CertifyVulnConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_CertifyVulnConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyVulnConnection", field.Name)
+			return ec.childFields_CertifyVulnConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5220,20 +5834,23 @@ func (ec *executionContext) _Query_BatchQueryPkgIDCertifyVuln(ctx context.Contex
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_BatchQueryPkgIDCertifyVuln,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_BatchQueryPkgIDCertifyVuln(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BatchQueryPkgIDCertifyVuln(ctx, fc.Args["pkgIDs"].([]string))
+			return ec.Resolvers.Query().BatchQueryPkgIDCertifyVuln(ctx, fc.Args["pkgIDs"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.CertifyVuln) graphql.Marshaler {
+			return ec.marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_BatchQueryPkgIDCertifyVuln(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5241,17 +5858,7 @@ func (ec *executionContext) fieldContext_Query_BatchQueryPkgIDCertifyVuln(ctx co
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyVuln_id(ctx, field)
-			case "package":
-				return ec.fieldContext_CertifyVuln_package(ctx, field)
-			case "vulnerability":
-				return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
-			case "metadata":
-				return ec.fieldContext_CertifyVuln_metadata(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
+			return ec.childFields_CertifyVuln(ctx, field)
 		},
 	}
 	defer func() {
@@ -5273,20 +5880,23 @@ func (ec *executionContext) _Query_PointOfContact(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_PointOfContact,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_PointOfContact(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().PointOfContact(ctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec))
+			return ec.Resolvers.Query().PointOfContact(ctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPointOfContact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.PointOfContact) graphql.Marshaler {
+			return ec.marshalNPointOfContact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_PointOfContact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5294,27 +5904,7 @@ func (ec *executionContext) fieldContext_Query_PointOfContact(ctx context.Contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_PointOfContact_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_PointOfContact_subject(ctx, field)
-			case "email":
-				return ec.fieldContext_PointOfContact_email(ctx, field)
-			case "info":
-				return ec.fieldContext_PointOfContact_info(ctx, field)
-			case "since":
-				return ec.fieldContext_PointOfContact_since(ctx, field)
-			case "justification":
-				return ec.fieldContext_PointOfContact_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_PointOfContact_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_PointOfContact_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_PointOfContact_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PointOfContact", field.Name)
+			return ec.childFields_PointOfContact(ctx, field)
 		},
 	}
 	defer func() {
@@ -5336,20 +5926,23 @@ func (ec *executionContext) _Query_PointOfContactList(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_PointOfContactList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_PointOfContactList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().PointOfContactList(ctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().PointOfContactList(ctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOPointOfContactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PointOfContactConnection) graphql.Marshaler {
+			return ec.marshalOPointOfContactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_PointOfContactList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5357,15 +5950,7 @@ func (ec *executionContext) fieldContext_Query_PointOfContactList(ctx context.Co
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_PointOfContactConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_PointOfContactConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_PointOfContactConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PointOfContactConnection", field.Name)
+			return ec.childFields_PointOfContactConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5387,20 +5972,23 @@ func (ec *executionContext) _Query_HasSBOM(ctx context.Context, field graphql.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasSBOM,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasSBOM(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasSbom(ctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec))
+			return ec.Resolvers.Query().HasSbom(ctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbomᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HasSbom) graphql.Marshaler {
+			return ec.marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbomᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5408,35 +5996,7 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_HasSBOM_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_HasSBOM_subject(ctx, field)
-			case "uri":
-				return ec.fieldContext_HasSBOM_uri(ctx, field)
-			case "algorithm":
-				return ec.fieldContext_HasSBOM_algorithm(ctx, field)
-			case "digest":
-				return ec.fieldContext_HasSBOM_digest(ctx, field)
-			case "downloadLocation":
-				return ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
-			case "origin":
-				return ec.fieldContext_HasSBOM_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_HasSBOM_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_HasSBOM_documentRef(ctx, field)
-			case "includedSoftware":
-				return ec.fieldContext_HasSBOM_includedSoftware(ctx, field)
-			case "includedDependencies":
-				return ec.fieldContext_HasSBOM_includedDependencies(ctx, field)
-			case "includedOccurrences":
-				return ec.fieldContext_HasSBOM_includedOccurrences(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasSBOM", field.Name)
+			return ec.childFields_HasSBOM(ctx, field)
 		},
 	}
 	defer func() {
@@ -5458,20 +6018,23 @@ func (ec *executionContext) _Query_HasSBOMList(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasSBOMList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasSBOMList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasSBOMList(ctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().HasSBOMList(ctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOHasSBOMConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HasSBOMConnection) graphql.Marshaler {
+			return ec.marshalOHasSBOMConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasSBOMList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5479,15 +6042,7 @@ func (ec *executionContext) fieldContext_Query_HasSBOMList(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_HasSBOMConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_HasSBOMConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_HasSBOMConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasSBOMConnection", field.Name)
+			return ec.childFields_HasSBOMConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5509,20 +6064,23 @@ func (ec *executionContext) _Query_HasSLSA(ctx context.Context, field graphql.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasSLSA,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasSLSA(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasSlsa(ctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec))
+			return ec.Resolvers.Query().HasSlsa(ctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNHasSLSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsaᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HasSlsa) graphql.Marshaler {
+			return ec.marshalNHasSLSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsaᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasSLSA(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5530,15 +6088,7 @@ func (ec *executionContext) fieldContext_Query_HasSLSA(ctx context.Context, fiel
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_HasSLSA_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_HasSLSA_subject(ctx, field)
-			case "slsa":
-				return ec.fieldContext_HasSLSA_slsa(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasSLSA", field.Name)
+			return ec.childFields_HasSLSA(ctx, field)
 		},
 	}
 	defer func() {
@@ -5560,20 +6110,23 @@ func (ec *executionContext) _Query_HasSLSAList(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasSLSAList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasSLSAList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasSLSAList(ctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().HasSLSAList(ctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOHasSLSAConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSAConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HasSLSAConnection) graphql.Marshaler {
+			return ec.marshalOHasSLSAConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSAConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasSLSAList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5581,15 +6134,7 @@ func (ec *executionContext) fieldContext_Query_HasSLSAList(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_HasSLSAConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_HasSLSAConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_HasSLSAConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasSLSAConnection", field.Name)
+			return ec.childFields_HasSLSAConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5611,20 +6156,23 @@ func (ec *executionContext) _Query_HasSourceAt(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasSourceAt,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasSourceAt(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasSourceAt(ctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec))
+			return ec.Resolvers.Query().HasSourceAt(ctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNHasSourceAt2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HasSourceAt) graphql.Marshaler {
+			return ec.marshalNHasSourceAt2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5632,25 +6180,7 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_HasSourceAt_id(ctx, field)
-			case "package":
-				return ec.fieldContext_HasSourceAt_package(ctx, field)
-			case "source":
-				return ec.fieldContext_HasSourceAt_source(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_HasSourceAt_knownSince(ctx, field)
-			case "justification":
-				return ec.fieldContext_HasSourceAt_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_HasSourceAt_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_HasSourceAt_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_HasSourceAt_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasSourceAt", field.Name)
+			return ec.childFields_HasSourceAt(ctx, field)
 		},
 	}
 	defer func() {
@@ -5672,20 +6202,23 @@ func (ec *executionContext) _Query_HasSourceAtList(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasSourceAtList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasSourceAtList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasSourceAtList(ctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().HasSourceAtList(ctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOHasSourceAtConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HasSourceAtConnection) graphql.Marshaler {
+			return ec.marshalOHasSourceAtConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasSourceAtList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5693,15 +6226,7 @@ func (ec *executionContext) fieldContext_Query_HasSourceAtList(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_HasSourceAtConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_HasSourceAtConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_HasSourceAtConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasSourceAtConnection", field.Name)
+			return ec.childFields_HasSourceAtConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5723,20 +6248,23 @@ func (ec *executionContext) _Query_HashEqual(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HashEqual,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HashEqual(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HashEqual(ctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec))
+			return ec.Resolvers.Query().HashEqual(ctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNHashEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HashEqual) graphql.Marshaler {
+			return ec.marshalNHashEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HashEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5744,21 +6272,7 @@ func (ec *executionContext) fieldContext_Query_HashEqual(ctx context.Context, fi
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_HashEqual_id(ctx, field)
-			case "artifacts":
-				return ec.fieldContext_HashEqual_artifacts(ctx, field)
-			case "justification":
-				return ec.fieldContext_HashEqual_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_HashEqual_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_HashEqual_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_HashEqual_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HashEqual", field.Name)
+			return ec.childFields_HashEqual(ctx, field)
 		},
 	}
 	defer func() {
@@ -5780,20 +6294,23 @@ func (ec *executionContext) _Query_HashEqualList(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HashEqualList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HashEqualList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HashEqualList(ctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().HashEqualList(ctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOHashEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HashEqualConnection) graphql.Marshaler {
+			return ec.marshalOHashEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HashEqualList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5801,15 +6318,7 @@ func (ec *executionContext) fieldContext_Query_HashEqualList(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_HashEqualConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_HashEqualConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_HashEqualConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HashEqualConnection", field.Name)
+			return ec.childFields_HashEqualConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5831,20 +6340,23 @@ func (ec *executionContext) _Query_IsDependency(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_IsDependency,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_IsDependency(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IsDependency(ctx, fc.Args["isDependencySpec"].(model.IsDependencySpec))
+			return ec.Resolvers.Query().IsDependency(ctx, fc.Args["isDependencySpec"].(model.IsDependencySpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.IsDependency) graphql.Marshaler {
+			return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5852,25 +6364,7 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_IsDependency_id(ctx, field)
-			case "package":
-				return ec.fieldContext_IsDependency_package(ctx, field)
-			case "dependencyPackage":
-				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
-			case "dependencyType":
-				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
-			case "justification":
-				return ec.fieldContext_IsDependency_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_IsDependency_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_IsDependency_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_IsDependency_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+			return ec.childFields_IsDependency(ctx, field)
 		},
 	}
 	defer func() {
@@ -5892,20 +6386,23 @@ func (ec *executionContext) _Query_IsDependencyList(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_IsDependencyList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_IsDependencyList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IsDependencyList(ctx, fc.Args["isDependencySpec"].(model.IsDependencySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().IsDependencyList(ctx, fc.Args["isDependencySpec"].(model.IsDependencySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOIsDependencyConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.IsDependencyConnection) graphql.Marshaler {
+			return ec.marshalOIsDependencyConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_IsDependencyList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5913,15 +6410,7 @@ func (ec *executionContext) fieldContext_Query_IsDependencyList(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_IsDependencyConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_IsDependencyConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_IsDependencyConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsDependencyConnection", field.Name)
+			return ec.childFields_IsDependencyConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -5943,20 +6432,23 @@ func (ec *executionContext) _Query_BatchQuerySubjectPkgDependency(ctx context.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_BatchQuerySubjectPkgDependency,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_BatchQuerySubjectPkgDependency(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BatchQuerySubjectPkgDependency(ctx, fc.Args["pkgIDs"].([]string))
+			return ec.Resolvers.Query().BatchQuerySubjectPkgDependency(ctx, fc.Args["pkgIDs"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.IsDependency) graphql.Marshaler {
+			return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_BatchQuerySubjectPkgDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -5964,25 +6456,7 @@ func (ec *executionContext) fieldContext_Query_BatchQuerySubjectPkgDependency(ct
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_IsDependency_id(ctx, field)
-			case "package":
-				return ec.fieldContext_IsDependency_package(ctx, field)
-			case "dependencyPackage":
-				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
-			case "dependencyType":
-				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
-			case "justification":
-				return ec.fieldContext_IsDependency_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_IsDependency_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_IsDependency_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_IsDependency_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+			return ec.childFields_IsDependency(ctx, field)
 		},
 	}
 	defer func() {
@@ -6004,20 +6478,23 @@ func (ec *executionContext) _Query_BatchQueryDepPkgDependency(ctx context.Contex
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_BatchQueryDepPkgDependency,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_BatchQueryDepPkgDependency(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BatchQueryDepPkgDependency(ctx, fc.Args["pkgIDs"].([]string))
+			return ec.Resolvers.Query().BatchQueryDepPkgDependency(ctx, fc.Args["pkgIDs"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.IsDependency) graphql.Marshaler {
+			return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_BatchQueryDepPkgDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6025,25 +6502,7 @@ func (ec *executionContext) fieldContext_Query_BatchQueryDepPkgDependency(ctx co
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_IsDependency_id(ctx, field)
-			case "package":
-				return ec.fieldContext_IsDependency_package(ctx, field)
-			case "dependencyPackage":
-				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
-			case "dependencyType":
-				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
-			case "justification":
-				return ec.fieldContext_IsDependency_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_IsDependency_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_IsDependency_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_IsDependency_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+			return ec.childFields_IsDependency(ctx, field)
 		},
 	}
 	defer func() {
@@ -6065,20 +6524,23 @@ func (ec *executionContext) _Query_IsOccurrence(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_IsOccurrence,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_IsOccurrence(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IsOccurrence(ctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec))
+			return ec.Resolvers.Query().IsOccurrence(ctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.IsOccurrence) graphql.Marshaler {
+			return ec.marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6086,23 +6548,7 @@ func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_IsOccurrence_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_IsOccurrence_subject(ctx, field)
-			case "artifact":
-				return ec.fieldContext_IsOccurrence_artifact(ctx, field)
-			case "justification":
-				return ec.fieldContext_IsOccurrence_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_IsOccurrence_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_IsOccurrence_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_IsOccurrence_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsOccurrence", field.Name)
+			return ec.childFields_IsOccurrence(ctx, field)
 		},
 	}
 	defer func() {
@@ -6124,20 +6570,23 @@ func (ec *executionContext) _Query_IsOccurrenceList(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_IsOccurrenceList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_IsOccurrenceList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IsOccurrenceList(ctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().IsOccurrenceList(ctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOIsOccurrenceConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.IsOccurrenceConnection) graphql.Marshaler {
+			return ec.marshalOIsOccurrenceConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_IsOccurrenceList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6145,15 +6594,7 @@ func (ec *executionContext) fieldContext_Query_IsOccurrenceList(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_IsOccurrenceConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_IsOccurrenceConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_IsOccurrenceConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsOccurrenceConnection", field.Name)
+			return ec.childFields_IsOccurrenceConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6175,20 +6616,23 @@ func (ec *executionContext) _Query_licenses(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_licenses,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_licenses(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Licenses(ctx, fc.Args["licenseSpec"].(model.LicenseSpec))
+			return ec.Resolvers.Query().Licenses(ctx, fc.Args["licenseSpec"].(model.LicenseSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNLicense2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.License) graphql.Marshaler {
+			return ec.marshalNLicense2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_licenses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6196,17 +6640,7 @@ func (ec *executionContext) fieldContext_Query_licenses(ctx context.Context, fie
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_License_id(ctx, field)
-			case "name":
-				return ec.fieldContext_License_name(ctx, field)
-			case "inline":
-				return ec.fieldContext_License_inline(ctx, field)
-			case "listVersion":
-				return ec.fieldContext_License_listVersion(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+			return ec.childFields_License(ctx, field)
 		},
 	}
 	defer func() {
@@ -6228,20 +6662,23 @@ func (ec *executionContext) _Query_licenseList(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_licenseList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_licenseList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().LicenseList(ctx, fc.Args["licenseSpec"].(model.LicenseSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().LicenseList(ctx, fc.Args["licenseSpec"].(model.LicenseSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOLicenseConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.LicenseConnection) graphql.Marshaler {
+			return ec.marshalOLicenseConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_licenseList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6249,15 +6686,7 @@ func (ec *executionContext) fieldContext_Query_licenseList(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_LicenseConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_LicenseConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_LicenseConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type LicenseConnection", field.Name)
+			return ec.childFields_LicenseConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6279,20 +6708,23 @@ func (ec *executionContext) _Query_HasMetadata(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasMetadata,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasMetadata(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasMetadata(ctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec))
+			return ec.Resolvers.Query().HasMetadata(ctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNHasMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.HasMetadata) graphql.Marshaler {
+			return ec.marshalNHasMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6300,27 +6732,7 @@ func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_HasMetadata_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_HasMetadata_subject(ctx, field)
-			case "key":
-				return ec.fieldContext_HasMetadata_key(ctx, field)
-			case "value":
-				return ec.fieldContext_HasMetadata_value(ctx, field)
-			case "timestamp":
-				return ec.fieldContext_HasMetadata_timestamp(ctx, field)
-			case "justification":
-				return ec.fieldContext_HasMetadata_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_HasMetadata_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_HasMetadata_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_HasMetadata_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasMetadata", field.Name)
+			return ec.childFields_HasMetadata(ctx, field)
 		},
 	}
 	defer func() {
@@ -6342,20 +6754,23 @@ func (ec *executionContext) _Query_HasMetadataList(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_HasMetadataList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_HasMetadataList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().HasMetadataList(ctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().HasMetadataList(ctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOHasMetadataConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.HasMetadataConnection) graphql.Marshaler {
+			return ec.marshalOHasMetadataConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_HasMetadataList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6363,15 +6778,7 @@ func (ec *executionContext) fieldContext_Query_HasMetadataList(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_HasMetadataConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_HasMetadataConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_HasMetadataConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HasMetadataConnection", field.Name)
+			return ec.childFields_HasMetadataConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6393,20 +6800,23 @@ func (ec *executionContext) _Query_packages(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_packages,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_packages(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Packages(ctx, fc.Args["pkgSpec"].(model.PkgSpec))
+			return ec.Resolvers.Query().Packages(ctx, fc.Args["pkgSpec"].(model.PkgSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPackage2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Package) graphql.Marshaler {
+			return ec.marshalNPackage2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_packages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6414,15 +6824,7 @@ func (ec *executionContext) fieldContext_Query_packages(ctx context.Context, fie
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Package_id(ctx, field)
-			case "type":
-				return ec.fieldContext_Package_type(ctx, field)
-			case "namespaces":
-				return ec.fieldContext_Package_namespaces(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Package", field.Name)
+			return ec.childFields_Package(ctx, field)
 		},
 	}
 	defer func() {
@@ -6444,20 +6846,23 @@ func (ec *executionContext) _Query_packagesList(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_packagesList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_packagesList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().PackagesList(ctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().PackagesList(ctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PackageConnection) graphql.Marshaler {
+			return ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_packagesList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6465,15 +6870,7 @@ func (ec *executionContext) fieldContext_Query_packagesList(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_PackageConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_PackageConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_PackageConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PackageConnection", field.Name)
+			return ec.childFields_PackageConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6495,20 +6892,23 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_path,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_path(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Path(ctx, fc.Args["subject"].(string), fc.Args["target"].(string), fc.Args["maxPathLength"].(int), fc.Args["usingOnly"].([]model.Edge))
+			return ec.Resolvers.Query().Path(ctx, fc.Args["subject"].(string), fc.Args["target"].(string), fc.Args["maxPathLength"].(int), fc.Args["usingOnly"].([]model.Edge))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []model.Node) graphql.Marshaler {
+			return ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_path(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6538,20 +6938,23 @@ func (ec *executionContext) _Query_neighbors(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_neighbors,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_neighbors(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Neighbors(ctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge))
+			return ec.Resolvers.Query().Neighbors(ctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []model.Node) graphql.Marshaler {
+			return ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_neighbors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6581,20 +6984,23 @@ func (ec *executionContext) _Query_neighborsList(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_neighborsList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_neighborsList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().NeighborsList(ctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().NeighborsList(ctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalONeighborConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNeighborConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.NeighborConnection) graphql.Marshaler {
+			return ec.marshalONeighborConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNeighborConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_neighborsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6602,15 +7008,7 @@ func (ec *executionContext) fieldContext_Query_neighborsList(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_NeighborConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_NeighborConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_NeighborConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type NeighborConnection", field.Name)
+			return ec.childFields_NeighborConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6632,20 +7030,23 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_node,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_node(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Node(ctx, fc.Args["node"].(string))
+			return ec.Resolvers.Query().Node(ctx, fc.Args["node"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNNode2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNode,
+		func(ctx context.Context, selections ast.SelectionSet, v model.Node) graphql.Marshaler {
+			return ec.marshalNNode2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNode(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6675,20 +7076,23 @@ func (ec *executionContext) _Query_nodes(ctx context.Context, field graphql.Coll
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_nodes,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_nodes(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Nodes(ctx, fc.Args["nodes"].([]string))
+			return ec.Resolvers.Query().Nodes(ctx, fc.Args["nodes"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []model.Node) graphql.Marshaler {
+			return ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6718,20 +7122,23 @@ func (ec *executionContext) _Query_PkgEqual(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_PkgEqual,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_PkgEqual(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().PkgEqual(ctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec))
+			return ec.Resolvers.Query().PkgEqual(ctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPkgEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.PkgEqual) graphql.Marshaler {
+			return ec.marshalNPkgEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_PkgEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6739,21 +7146,7 @@ func (ec *executionContext) fieldContext_Query_PkgEqual(ctx context.Context, fie
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_PkgEqual_id(ctx, field)
-			case "packages":
-				return ec.fieldContext_PkgEqual_packages(ctx, field)
-			case "justification":
-				return ec.fieldContext_PkgEqual_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_PkgEqual_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_PkgEqual_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_PkgEqual_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PkgEqual", field.Name)
+			return ec.childFields_PkgEqual(ctx, field)
 		},
 	}
 	defer func() {
@@ -6775,20 +7168,23 @@ func (ec *executionContext) _Query_PkgEqualList(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_PkgEqualList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_PkgEqualList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().PkgEqualList(ctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().PkgEqualList(ctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOPkgEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PkgEqualConnection) graphql.Marshaler {
+			return ec.marshalOPkgEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_PkgEqualList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6796,15 +7192,7 @@ func (ec *executionContext) fieldContext_Query_PkgEqualList(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_PkgEqualConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_PkgEqualConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_PkgEqualConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PkgEqualConnection", field.Name)
+			return ec.childFields_PkgEqualConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6826,20 +7214,23 @@ func (ec *executionContext) _Query_findSoftware(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_findSoftware,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_findSoftware(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FindSoftware(ctx, fc.Args["searchText"].(string))
+			return ec.Resolvers.Query().FindSoftware(ctx, fc.Args["searchText"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPackageSourceOrArtifact2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []model.PackageSourceOrArtifact) graphql.Marshaler {
+			return ec.marshalNPackageSourceOrArtifact2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_findSoftware(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6869,20 +7260,23 @@ func (ec *executionContext) _Query_findSoftwareList(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_findSoftwareList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_findSoftwareList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FindSoftwareList(ctx, fc.Args["searchText"].(string), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().FindSoftwareList(ctx, fc.Args["searchText"].(string), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOFindSoftwareConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFindSoftwareConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.FindSoftwareConnection) graphql.Marshaler {
+			return ec.marshalOFindSoftwareConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFindSoftwareConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_findSoftwareList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6890,15 +7284,7 @@ func (ec *executionContext) fieldContext_Query_findSoftwareList(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_FindSoftwareConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_FindSoftwareConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_FindSoftwareConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type FindSoftwareConnection", field.Name)
+			return ec.childFields_FindSoftwareConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6920,20 +7306,23 @@ func (ec *executionContext) _Query_queryPackagesListForScan(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_queryPackagesListForScan,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_queryPackagesListForScan(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().QueryPackagesListForScan(ctx, fc.Args["pkgIDs"].([]string), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().QueryPackagesListForScan(ctx, fc.Args["pkgIDs"].([]string), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.PackageConnection) graphql.Marshaler {
+			return ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_queryPackagesListForScan(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -6941,15 +7330,7 @@ func (ec *executionContext) fieldContext_Query_queryPackagesListForScan(ctx cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_PackageConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_PackageConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_PackageConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PackageConnection", field.Name)
+			return ec.childFields_PackageConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -6971,20 +7352,23 @@ func (ec *executionContext) _Query_findPackagesThatNeedScanning(ctx context.Cont
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_findPackagesThatNeedScanning,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_findPackagesThatNeedScanning(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FindPackagesThatNeedScanning(ctx, fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int))
+			return ec.Resolvers.Query().FindPackagesThatNeedScanning(ctx, fc.Args["queryType"].(model.QueryType), fc.Args["lastScan"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNID2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_findPackagesThatNeedScanning(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7014,20 +7398,23 @@ func (ec *executionContext) _Query_sources(ctx context.Context, field graphql.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_sources,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_sources(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Sources(ctx, fc.Args["sourceSpec"].(model.SourceSpec))
+			return ec.Resolvers.Query().Sources(ctx, fc.Args["sourceSpec"].(model.SourceSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNSource2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Source) graphql.Marshaler {
+			return ec.marshalNSource2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_sources(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7035,15 +7422,7 @@ func (ec *executionContext) fieldContext_Query_sources(ctx context.Context, fiel
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Source_id(ctx, field)
-			case "type":
-				return ec.fieldContext_Source_type(ctx, field)
-			case "namespaces":
-				return ec.fieldContext_Source_namespaces(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Source", field.Name)
+			return ec.childFields_Source(ctx, field)
 		},
 	}
 	defer func() {
@@ -7065,20 +7444,23 @@ func (ec *executionContext) _Query_sourcesList(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_sourcesList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_sourcesList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SourcesList(ctx, fc.Args["sourceSpec"].(model.SourceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().SourcesList(ctx, fc.Args["sourceSpec"].(model.SourceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOSourceConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.SourceConnection) graphql.Marshaler {
+			return ec.marshalOSourceConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_sourcesList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7086,15 +7468,7 @@ func (ec *executionContext) fieldContext_Query_sourcesList(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_SourceConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_SourceConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_SourceConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type SourceConnection", field.Name)
+			return ec.childFields_SourceConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -7116,20 +7490,23 @@ func (ec *executionContext) _Query_vulnEqual(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vulnEqual,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vulnEqual(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VulnEqual(ctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec))
+			return ec.Resolvers.Query().VulnEqual(ctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNVulnEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.VulnEqual) graphql.Marshaler {
+			return ec.marshalNVulnEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_vulnEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7137,21 +7514,7 @@ func (ec *executionContext) fieldContext_Query_vulnEqual(ctx context.Context, fi
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_VulnEqual_id(ctx, field)
-			case "vulnerabilities":
-				return ec.fieldContext_VulnEqual_vulnerabilities(ctx, field)
-			case "justification":
-				return ec.fieldContext_VulnEqual_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_VulnEqual_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_VulnEqual_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_VulnEqual_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnEqual", field.Name)
+			return ec.childFields_VulnEqual(ctx, field)
 		},
 	}
 	defer func() {
@@ -7173,20 +7536,23 @@ func (ec *executionContext) _Query_vulnEqualList(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vulnEqualList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vulnEqualList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VulnEqualList(ctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().VulnEqualList(ctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVulnEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.VulnEqualConnection) graphql.Marshaler {
+			return ec.marshalOVulnEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_vulnEqualList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7194,15 +7560,7 @@ func (ec *executionContext) fieldContext_Query_vulnEqualList(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_VulnEqualConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_VulnEqualConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_VulnEqualConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnEqualConnection", field.Name)
+			return ec.childFields_VulnEqualConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -7224,20 +7582,23 @@ func (ec *executionContext) _Query_vulnerabilityMetadata(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vulnerabilityMetadata,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vulnerabilityMetadata(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VulnerabilityMetadata(ctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec))
+			return ec.Resolvers.Query().VulnerabilityMetadata(ctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNVulnerabilityMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.VulnerabilityMetadata) graphql.Marshaler {
+			return ec.marshalNVulnerabilityMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_vulnerabilityMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7245,25 +7606,7 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityMetadata(ctx context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_VulnerabilityMetadata_id(ctx, field)
-			case "vulnerability":
-				return ec.fieldContext_VulnerabilityMetadata_vulnerability(ctx, field)
-			case "scoreType":
-				return ec.fieldContext_VulnerabilityMetadata_scoreType(ctx, field)
-			case "scoreValue":
-				return ec.fieldContext_VulnerabilityMetadata_scoreValue(ctx, field)
-			case "timestamp":
-				return ec.fieldContext_VulnerabilityMetadata_timestamp(ctx, field)
-			case "origin":
-				return ec.fieldContext_VulnerabilityMetadata_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_VulnerabilityMetadata_collector(ctx, field)
-			case "documentRef":
-				return ec.fieldContext_VulnerabilityMetadata_documentRef(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadata", field.Name)
+			return ec.childFields_VulnerabilityMetadata(ctx, field)
 		},
 	}
 	defer func() {
@@ -7285,20 +7628,23 @@ func (ec *executionContext) _Query_vulnerabilityMetadataList(ctx context.Context
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vulnerabilityMetadataList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vulnerabilityMetadataList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VulnerabilityMetadataList(ctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().VulnerabilityMetadataList(ctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVulnerabilityMetadataConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.VulnerabilityMetadataConnection) graphql.Marshaler {
+			return ec.marshalOVulnerabilityMetadataConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_vulnerabilityMetadataList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7306,15 +7652,7 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityMetadataList(ctx con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_VulnerabilityMetadataConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_VulnerabilityMetadataConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_VulnerabilityMetadataConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadataConnection", field.Name)
+			return ec.childFields_VulnerabilityMetadataConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -7336,20 +7674,23 @@ func (ec *executionContext) _Query_vulnerabilities(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vulnerabilities,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vulnerabilities(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Vulnerabilities(ctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec))
+			return ec.Resolvers.Query().Vulnerabilities(ctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNVulnerability2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Vulnerability) graphql.Marshaler {
+			return ec.marshalNVulnerability2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_vulnerabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7357,15 +7698,7 @@ func (ec *executionContext) fieldContext_Query_vulnerabilities(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Vulnerability_id(ctx, field)
-			case "type":
-				return ec.fieldContext_Vulnerability_type(ctx, field)
-			case "vulnerabilityIDs":
-				return ec.fieldContext_Vulnerability_vulnerabilityIDs(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Vulnerability", field.Name)
+			return ec.childFields_Vulnerability(ctx, field)
 		},
 	}
 	defer func() {
@@ -7387,20 +7720,23 @@ func (ec *executionContext) _Query_vulnerabilityList(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vulnerabilityList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vulnerabilityList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VulnerabilityList(ctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+			return ec.Resolvers.Query().VulnerabilityList(ctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVulnerabilityConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityConnection,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.VulnerabilityConnection) graphql.Marshaler {
+			return ec.marshalOVulnerabilityConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityConnection(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_vulnerabilityList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7408,15 +7744,7 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityList(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_VulnerabilityConnection_totalCount(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_VulnerabilityConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_VulnerabilityConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityConnection", field.Name)
+			return ec.childFields_VulnerabilityConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -7438,20 +7766,23 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query___type,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query___type(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.introspectType(fc.Args["name"].(string))
+			return ec.IntrospectType(fc.Args["name"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
+		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
+			return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7459,31 +7790,7 @@ func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return ec.fieldContext___Type_kind(ctx, field)
-			case "name":
-				return ec.fieldContext___Type_name(ctx, field)
-			case "description":
-				return ec.fieldContext___Type_description(ctx, field)
-			case "specifiedByURL":
-				return ec.fieldContext___Type_specifiedByURL(ctx, field)
-			case "fields":
-				return ec.fieldContext___Type_fields(ctx, field)
-			case "interfaces":
-				return ec.fieldContext___Type_interfaces(ctx, field)
-			case "possibleTypes":
-				return ec.fieldContext___Type_possibleTypes(ctx, field)
-			case "enumValues":
-				return ec.fieldContext___Type_enumValues(ctx, field)
-			case "inputFields":
-				return ec.fieldContext___Type_inputFields(ctx, field)
-			case "ofType":
-				return ec.fieldContext___Type_ofType(ctx, field)
-			case "isOneOf":
-				return ec.fieldContext___Type_isOneOf(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return ec.childFields___Type(ctx, field)
 		},
 	}
 	defer func() {
@@ -7505,19 +7812,22 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query___schema,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query___schema(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
-			return ec.introspectSchema()
+			return ec.IntrospectSchema()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema,
+		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
+			return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, selections, v)
+		},
 		true,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -7525,21 +7835,7 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "description":
-				return ec.fieldContext___Schema_description(ctx, field)
-			case "types":
-				return ec.fieldContext___Schema_types(ctx, field)
-			case "queryType":
-				return ec.fieldContext___Schema_queryType(ctx, field)
-			case "mutationType":
-				return ec.fieldContext___Schema_mutationType(ctx, field)
-			case "subscriptionType":
-				return ec.fieldContext___Schema_subscriptionType(ctx, field)
-			case "directives":
-				return ec.fieldContext___Schema_directives(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+			return ec.childFields___Schema(ctx, field)
 		},
 	}
 	return fc, nil
@@ -7551,6 +7847,10 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 
 func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context, obj any) (model.ArtifactInputSpec, error) {
 	var it model.ArtifactInputSpec
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -7579,12 +7879,15 @@ func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context,
 			it.Digest = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj any) (model.ArtifactSpec, error) {
 	var it model.ArtifactSpec
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -7620,12 +7923,15 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 			it.Digest = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputIDorArtifactInput(ctx context.Context, obj any) (model.IDorArtifactInput, error) {
 	var it model.IDorArtifactInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -7654,7 +7960,6 @@ func (ec *executionContext) unmarshalInputIDorArtifactInput(ctx context.Context,
 			it.ArtifactInput = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -7672,7 +7977,8 @@ func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet,
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -7701,16 +8007,14 @@ func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
 
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
 
 	return out
 }
@@ -7721,7 +8025,8 @@ func (ec *executionContext) _ArtifactConnection(ctx context.Context, sel ast.Sel
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactConnectionImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -7750,16 +8055,14 @@ func (ec *executionContext) _ArtifactConnection(ctx context.Context, sel ast.Sel
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
 
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
 
 	return out
 }
@@ -7770,7 +8073,8 @@ func (ec *executionContext) _ArtifactEdge(ctx context.Context, sel ast.Selection
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactEdgeImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -7794,16 +8098,14 @@ func (ec *executionContext) _ArtifactEdge(ctx context.Context, sel ast.Selection
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
 
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
 
 	return out
 }
@@ -7817,7 +8119,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	})
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -8165,16 +8468,14 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
 
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
 
 	return out
 }
@@ -8188,7 +8489,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	})
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -8223,13 +8525,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "artifactsList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_artifactsList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8264,13 +8569,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "buildersList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_buildersList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8305,13 +8613,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "CertifyBadList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_CertifyBadList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8346,13 +8657,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "CertifyGoodList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_CertifyGoodList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8387,13 +8701,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "CertifyLegalList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_CertifyLegalList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8450,13 +8767,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "scorecardsList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_scorecardsList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8491,13 +8811,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "CertifyVEXStatementList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_CertifyVEXStatementList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8532,13 +8855,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "CertifyVulnList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_CertifyVulnList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8595,13 +8921,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "PointOfContactList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_PointOfContactList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8636,13 +8965,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "HasSBOMList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_HasSBOMList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8677,13 +9009,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "HasSLSAList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_HasSLSAList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8718,13 +9053,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "HasSourceAtList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_HasSourceAtList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8759,13 +9097,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "HashEqualList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_HashEqualList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8800,13 +9141,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "IsDependencyList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_IsDependencyList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8885,13 +9229,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "IsOccurrenceList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_IsOccurrenceList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8926,13 +9273,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "licenseList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_licenseList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8967,13 +9317,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "HasMetadataList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_HasMetadataList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9008,13 +9361,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "packagesList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_packagesList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9071,13 +9427,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "neighborsList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_neighborsList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9156,13 +9515,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "PkgEqualList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_PkgEqualList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9197,13 +9559,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "findSoftwareList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_findSoftwareList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9216,13 +9581,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "queryPackagesListForScan":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_queryPackagesListForScan(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9279,13 +9647,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "sourcesList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_sourcesList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9320,13 +9691,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "vulnEqualList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_vulnEqualList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9361,13 +9735,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "vulnerabilityMetadataList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_vulnerabilityMetadataList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9402,13 +9779,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "vulnerabilityList":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_vulnerabilityList(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -9422,10 +9802,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
 			})
+			if out.Values[i] == graphql.RequiredNull {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "__schema":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+			if out.Values[i] == graphql.RequiredNull {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9435,16 +9821,14 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
 
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
 
 	return out
 }
@@ -9454,39 +9838,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 // region    ***************************** type.gotpl *****************************
 
 func (ec *executionContext) marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Artifact) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -9500,7 +9856,7 @@ func (ec *executionContext) marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguac
 func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx context.Context, sel ast.SelectionSet, v *model.Artifact) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -9508,39 +9864,11 @@ func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋ
 }
 
 func (ec *executionContext) marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ArtifactEdge) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -9554,7 +9882,7 @@ func (ec *executionContext) marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋ
 func (ec *executionContext) marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -9577,8 +9905,7 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2githubᚗcomᚋguacsec�
 }
 
 func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([][]*model.IDorArtifactInput, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([][]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {
@@ -9592,8 +9919,7 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋ
 }
 
 func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v any) ([]*model.IDorArtifactInput, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {
@@ -9630,8 +9956,7 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsec�
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]*model.ArtifactSpec, len(vSlice))
 	for i := range vSlice {
@@ -9648,8 +9973,7 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsec�
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]*model.ArtifactSpec, len(vSlice))
 	for i := range vSlice {
@@ -9674,8 +9998,7 @@ func (ec *executionContext) unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋgua
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {

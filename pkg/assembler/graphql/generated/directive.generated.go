@@ -4,7 +4,6 @@ package generated
 
 import (
 	"context"
-	"errors"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -20,17 +19,26 @@ import (
 func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "keyName", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "keyName",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["keyName"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "operation", ec.unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "operation",
+		func(ctx context.Context, v any) (*model.FilterOperation, error) {
+			return ec.unmarshalOFilterOperation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFilterOperation(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["operation"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "value", ec.unmarshalOString2ᚖstring)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "value",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -39,33 +47,6 @@ func (ec *executionContext) dir_filter_args(ctx context.Context, rawArgs map[str
 }
 
 // endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
-	fc := graphql.GetFieldContext(ctx)
-	for _, d := range fc.Field.Directives {
-		switch d.Name {
-		case "filter":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_filter_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return nil
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.directives.Filter == nil {
-					return nil, errors.New("directive filter is not implemented")
-				}
-				return ec.directives.Filter(ctx, obj, n, args["keyName"].(*string), args["operation"].(*model.FilterOperation), args["value"].(*string))
-			}
-		}
-	}
-	return next
-}
-
-// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 
