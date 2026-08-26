@@ -13,4 +13,13 @@ always = false
 require_automerge_label = false
 
 [approve]
-auto_approve_usernames = ["dependabot"]
+auto_approve_usernames = [
+  "dependabot",
+  "mlieberman85",
+  "mihaimaruseac",
+  "lumjjb",
+  "pxp928",
+  "SantiagoTorres",
+  "jeffmendoza",
+  "gaganhr94",
+]
