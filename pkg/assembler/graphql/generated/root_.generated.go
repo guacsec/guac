@@ -6,10 +6,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -17,20 +17,10 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
-type Config struct {
-	Schema     *ast.Schema
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
+type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
@@ -757,1322 +747,1179 @@ type ComplexityRoot struct {
 	}
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
 
 func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
-	ec := executionContext{nil, e, 0, 0, nil}
+	ec := newExecutionContext(nil, e, nil)
 	_ = ec
 	switch typeName + "." + field {
 
 	case "Artifact.algorithm":
-		if e.complexity.Artifact.Algorithm == nil {
+		if e.ComplexityRoot.Artifact.Algorithm == nil {
 			break
 		}
 
-		return e.complexity.Artifact.Algorithm(childComplexity), true
-
+		return e.ComplexityRoot.Artifact.Algorithm(childComplexity), true
 	case "Artifact.digest":
-		if e.complexity.Artifact.Digest == nil {
+		if e.ComplexityRoot.Artifact.Digest == nil {
 			break
 		}
 
-		return e.complexity.Artifact.Digest(childComplexity), true
-
+		return e.ComplexityRoot.Artifact.Digest(childComplexity), true
 	case "Artifact.id":
-		if e.complexity.Artifact.ID == nil {
+		if e.ComplexityRoot.Artifact.ID == nil {
 			break
 		}
 
-		return e.complexity.Artifact.ID(childComplexity), true
+		return e.ComplexityRoot.Artifact.ID(childComplexity), true
 
 	case "ArtifactConnection.edges":
-		if e.complexity.ArtifactConnection.Edges == nil {
+		if e.ComplexityRoot.ArtifactConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.ArtifactConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.ArtifactConnection.Edges(childComplexity), true
 	case "ArtifactConnection.pageInfo":
-		if e.complexity.ArtifactConnection.PageInfo == nil {
+		if e.ComplexityRoot.ArtifactConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.ArtifactConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.ArtifactConnection.PageInfo(childComplexity), true
 	case "ArtifactConnection.totalCount":
-		if e.complexity.ArtifactConnection.TotalCount == nil {
+		if e.ComplexityRoot.ArtifactConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.ArtifactConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.ArtifactConnection.TotalCount(childComplexity), true
 
 	case "ArtifactEdge.cursor":
-		if e.complexity.ArtifactEdge.Cursor == nil {
+		if e.ComplexityRoot.ArtifactEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ArtifactEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.ArtifactEdge.Cursor(childComplexity), true
 	case "ArtifactEdge.node":
-		if e.complexity.ArtifactEdge.Node == nil {
+		if e.ComplexityRoot.ArtifactEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ArtifactEdge.Node(childComplexity), true
+		return e.ComplexityRoot.ArtifactEdge.Node(childComplexity), true
 
 	case "Builder.id":
-		if e.complexity.Builder.ID == nil {
+		if e.ComplexityRoot.Builder.ID == nil {
 			break
 		}
 
-		return e.complexity.Builder.ID(childComplexity), true
-
+		return e.ComplexityRoot.Builder.ID(childComplexity), true
 	case "Builder.uri":
-		if e.complexity.Builder.URI == nil {
+		if e.ComplexityRoot.Builder.URI == nil {
 			break
 		}
 
-		return e.complexity.Builder.URI(childComplexity), true
+		return e.ComplexityRoot.Builder.URI(childComplexity), true
 
 	case "BuilderConnection.edges":
-		if e.complexity.BuilderConnection.Edges == nil {
+		if e.ComplexityRoot.BuilderConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.BuilderConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.BuilderConnection.Edges(childComplexity), true
 	case "BuilderConnection.pageInfo":
-		if e.complexity.BuilderConnection.PageInfo == nil {
+		if e.ComplexityRoot.BuilderConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.BuilderConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.BuilderConnection.PageInfo(childComplexity), true
 	case "BuilderConnection.totalCount":
-		if e.complexity.BuilderConnection.TotalCount == nil {
+		if e.ComplexityRoot.BuilderConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.BuilderConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.BuilderConnection.TotalCount(childComplexity), true
 
 	case "BuilderEdge.cursor":
-		if e.complexity.BuilderEdge.Cursor == nil {
+		if e.ComplexityRoot.BuilderEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.BuilderEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.BuilderEdge.Cursor(childComplexity), true
 	case "BuilderEdge.node":
-		if e.complexity.BuilderEdge.Node == nil {
+		if e.ComplexityRoot.BuilderEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.BuilderEdge.Node(childComplexity), true
+		return e.ComplexityRoot.BuilderEdge.Node(childComplexity), true
 
 	case "CertifyBad.collector":
-		if e.complexity.CertifyBad.Collector == nil {
+		if e.ComplexityRoot.CertifyBad.Collector == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.Collector(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBad.Collector(childComplexity), true
 	case "CertifyBad.documentRef":
-		if e.complexity.CertifyBad.DocumentRef == nil {
+		if e.ComplexityRoot.CertifyBad.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBad.DocumentRef(childComplexity), true
 	case "CertifyBad.id":
-		if e.complexity.CertifyBad.ID == nil {
+		if e.ComplexityRoot.CertifyBad.ID == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.ID(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBad.ID(childComplexity), true
 	case "CertifyBad.justification":
-		if e.complexity.CertifyBad.Justification == nil {
+		if e.ComplexityRoot.CertifyBad.Justification == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.Justification(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBad.Justification(childComplexity), true
 	case "CertifyBad.knownSince":
-		if e.complexity.CertifyBad.KnownSince == nil {
+		if e.ComplexityRoot.CertifyBad.KnownSince == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.KnownSince(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBad.KnownSince(childComplexity), true
 	case "CertifyBad.origin":
-		if e.complexity.CertifyBad.Origin == nil {
+		if e.ComplexityRoot.CertifyBad.Origin == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.Origin(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBad.Origin(childComplexity), true
 	case "CertifyBad.subject":
-		if e.complexity.CertifyBad.Subject == nil {
+		if e.ComplexityRoot.CertifyBad.Subject == nil {
 			break
 		}
 
-		return e.complexity.CertifyBad.Subject(childComplexity), true
+		return e.ComplexityRoot.CertifyBad.Subject(childComplexity), true
 
 	case "CertifyBadConnection.edges":
-		if e.complexity.CertifyBadConnection.Edges == nil {
+		if e.ComplexityRoot.CertifyBadConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.CertifyBadConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBadConnection.Edges(childComplexity), true
 	case "CertifyBadConnection.pageInfo":
-		if e.complexity.CertifyBadConnection.PageInfo == nil {
+		if e.ComplexityRoot.CertifyBadConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.CertifyBadConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBadConnection.PageInfo(childComplexity), true
 	case "CertifyBadConnection.totalCount":
-		if e.complexity.CertifyBadConnection.TotalCount == nil {
+		if e.ComplexityRoot.CertifyBadConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.CertifyBadConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.CertifyBadConnection.TotalCount(childComplexity), true
 
 	case "CertifyBadEdge.cursor":
-		if e.complexity.CertifyBadEdge.Cursor == nil {
+		if e.ComplexityRoot.CertifyBadEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.CertifyBadEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.CertifyBadEdge.Cursor(childComplexity), true
 	case "CertifyBadEdge.node":
-		if e.complexity.CertifyBadEdge.Node == nil {
+		if e.ComplexityRoot.CertifyBadEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.CertifyBadEdge.Node(childComplexity), true
+		return e.ComplexityRoot.CertifyBadEdge.Node(childComplexity), true
 
 	case "CertifyGood.collector":
-		if e.complexity.CertifyGood.Collector == nil {
+		if e.ComplexityRoot.CertifyGood.Collector == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.Collector(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGood.Collector(childComplexity), true
 	case "CertifyGood.documentRef":
-		if e.complexity.CertifyGood.DocumentRef == nil {
+		if e.ComplexityRoot.CertifyGood.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGood.DocumentRef(childComplexity), true
 	case "CertifyGood.id":
-		if e.complexity.CertifyGood.ID == nil {
+		if e.ComplexityRoot.CertifyGood.ID == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.ID(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGood.ID(childComplexity), true
 	case "CertifyGood.justification":
-		if e.complexity.CertifyGood.Justification == nil {
+		if e.ComplexityRoot.CertifyGood.Justification == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.Justification(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGood.Justification(childComplexity), true
 	case "CertifyGood.knownSince":
-		if e.complexity.CertifyGood.KnownSince == nil {
+		if e.ComplexityRoot.CertifyGood.KnownSince == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.KnownSince(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGood.KnownSince(childComplexity), true
 	case "CertifyGood.origin":
-		if e.complexity.CertifyGood.Origin == nil {
+		if e.ComplexityRoot.CertifyGood.Origin == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.Origin(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGood.Origin(childComplexity), true
 	case "CertifyGood.subject":
-		if e.complexity.CertifyGood.Subject == nil {
+		if e.ComplexityRoot.CertifyGood.Subject == nil {
 			break
 		}
 
-		return e.complexity.CertifyGood.Subject(childComplexity), true
+		return e.ComplexityRoot.CertifyGood.Subject(childComplexity), true
 
 	case "CertifyGoodConnection.edges":
-		if e.complexity.CertifyGoodConnection.Edges == nil {
+		if e.ComplexityRoot.CertifyGoodConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.CertifyGoodConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGoodConnection.Edges(childComplexity), true
 	case "CertifyGoodConnection.pageInfo":
-		if e.complexity.CertifyGoodConnection.PageInfo == nil {
+		if e.ComplexityRoot.CertifyGoodConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.CertifyGoodConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGoodConnection.PageInfo(childComplexity), true
 	case "CertifyGoodConnection.totalCount":
-		if e.complexity.CertifyGoodConnection.TotalCount == nil {
+		if e.ComplexityRoot.CertifyGoodConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.CertifyGoodConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.CertifyGoodConnection.TotalCount(childComplexity), true
 
 	case "CertifyGoodEdge.cursor":
-		if e.complexity.CertifyGoodEdge.Cursor == nil {
+		if e.ComplexityRoot.CertifyGoodEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.CertifyGoodEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.CertifyGoodEdge.Cursor(childComplexity), true
 	case "CertifyGoodEdge.node":
-		if e.complexity.CertifyGoodEdge.Node == nil {
+		if e.ComplexityRoot.CertifyGoodEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.CertifyGoodEdge.Node(childComplexity), true
+		return e.ComplexityRoot.CertifyGoodEdge.Node(childComplexity), true
 
 	case "CertifyLegal.attribution":
-		if e.complexity.CertifyLegal.Attribution == nil {
+		if e.ComplexityRoot.CertifyLegal.Attribution == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.Attribution(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.Attribution(childComplexity), true
 	case "CertifyLegal.collector":
-		if e.complexity.CertifyLegal.Collector == nil {
+		if e.ComplexityRoot.CertifyLegal.Collector == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.Collector(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.Collector(childComplexity), true
 	case "CertifyLegal.declaredLicense":
-		if e.complexity.CertifyLegal.DeclaredLicense == nil {
+		if e.ComplexityRoot.CertifyLegal.DeclaredLicense == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.DeclaredLicense(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.DeclaredLicense(childComplexity), true
 	case "CertifyLegal.declaredLicenses":
-		if e.complexity.CertifyLegal.DeclaredLicenses == nil {
+		if e.ComplexityRoot.CertifyLegal.DeclaredLicenses == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.DeclaredLicenses(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.DeclaredLicenses(childComplexity), true
 	case "CertifyLegal.discoveredLicense":
-		if e.complexity.CertifyLegal.DiscoveredLicense == nil {
+		if e.ComplexityRoot.CertifyLegal.DiscoveredLicense == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.DiscoveredLicense(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.DiscoveredLicense(childComplexity), true
 	case "CertifyLegal.discoveredLicenses":
-		if e.complexity.CertifyLegal.DiscoveredLicenses == nil {
+		if e.ComplexityRoot.CertifyLegal.DiscoveredLicenses == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.DiscoveredLicenses(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.DiscoveredLicenses(childComplexity), true
 	case "CertifyLegal.documentRef":
-		if e.complexity.CertifyLegal.DocumentRef == nil {
+		if e.ComplexityRoot.CertifyLegal.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.DocumentRef(childComplexity), true
 	case "CertifyLegal.id":
-		if e.complexity.CertifyLegal.ID == nil {
+		if e.ComplexityRoot.CertifyLegal.ID == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.ID(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.ID(childComplexity), true
 	case "CertifyLegal.justification":
-		if e.complexity.CertifyLegal.Justification == nil {
+		if e.ComplexityRoot.CertifyLegal.Justification == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.Justification(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.Justification(childComplexity), true
 	case "CertifyLegal.origin":
-		if e.complexity.CertifyLegal.Origin == nil {
+		if e.ComplexityRoot.CertifyLegal.Origin == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.Origin(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.Origin(childComplexity), true
 	case "CertifyLegal.subject":
-		if e.complexity.CertifyLegal.Subject == nil {
+		if e.ComplexityRoot.CertifyLegal.Subject == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.Subject(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegal.Subject(childComplexity), true
 	case "CertifyLegal.timeScanned":
-		if e.complexity.CertifyLegal.TimeScanned == nil {
+		if e.ComplexityRoot.CertifyLegal.TimeScanned == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegal.TimeScanned(childComplexity), true
+		return e.ComplexityRoot.CertifyLegal.TimeScanned(childComplexity), true
 
 	case "CertifyLegalConnection.edges":
-		if e.complexity.CertifyLegalConnection.Edges == nil {
+		if e.ComplexityRoot.CertifyLegalConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegalConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegalConnection.Edges(childComplexity), true
 	case "CertifyLegalConnection.pageInfo":
-		if e.complexity.CertifyLegalConnection.PageInfo == nil {
+		if e.ComplexityRoot.CertifyLegalConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegalConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegalConnection.PageInfo(childComplexity), true
 	case "CertifyLegalConnection.totalCount":
-		if e.complexity.CertifyLegalConnection.TotalCount == nil {
+		if e.ComplexityRoot.CertifyLegalConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegalConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.CertifyLegalConnection.TotalCount(childComplexity), true
 
 	case "CertifyLegalEdge.cursor":
-		if e.complexity.CertifyLegalEdge.Cursor == nil {
+		if e.ComplexityRoot.CertifyLegalEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegalEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.CertifyLegalEdge.Cursor(childComplexity), true
 	case "CertifyLegalEdge.node":
-		if e.complexity.CertifyLegalEdge.Node == nil {
+		if e.ComplexityRoot.CertifyLegalEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.CertifyLegalEdge.Node(childComplexity), true
+		return e.ComplexityRoot.CertifyLegalEdge.Node(childComplexity), true
 
 	case "CertifyScorecard.id":
-		if e.complexity.CertifyScorecard.ID == nil {
+		if e.ComplexityRoot.CertifyScorecard.ID == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecard.ID(childComplexity), true
-
+		return e.ComplexityRoot.CertifyScorecard.ID(childComplexity), true
 	case "CertifyScorecard.scorecard":
-		if e.complexity.CertifyScorecard.Scorecard == nil {
+		if e.ComplexityRoot.CertifyScorecard.Scorecard == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecard.Scorecard(childComplexity), true
-
+		return e.ComplexityRoot.CertifyScorecard.Scorecard(childComplexity), true
 	case "CertifyScorecard.source":
-		if e.complexity.CertifyScorecard.Source == nil {
+		if e.ComplexityRoot.CertifyScorecard.Source == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecard.Source(childComplexity), true
+		return e.ComplexityRoot.CertifyScorecard.Source(childComplexity), true
 
 	case "CertifyScorecardConnection.edges":
-		if e.complexity.CertifyScorecardConnection.Edges == nil {
+		if e.ComplexityRoot.CertifyScorecardConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecardConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.CertifyScorecardConnection.Edges(childComplexity), true
 	case "CertifyScorecardConnection.pageInfo":
-		if e.complexity.CertifyScorecardConnection.PageInfo == nil {
+		if e.ComplexityRoot.CertifyScorecardConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecardConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.CertifyScorecardConnection.PageInfo(childComplexity), true
 	case "CertifyScorecardConnection.totalCount":
-		if e.complexity.CertifyScorecardConnection.TotalCount == nil {
+		if e.ComplexityRoot.CertifyScorecardConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecardConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.CertifyScorecardConnection.TotalCount(childComplexity), true
 
 	case "CertifyScorecardEdge.cursor":
-		if e.complexity.CertifyScorecardEdge.Cursor == nil {
+		if e.ComplexityRoot.CertifyScorecardEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecardEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.CertifyScorecardEdge.Cursor(childComplexity), true
 	case "CertifyScorecardEdge.node":
-		if e.complexity.CertifyScorecardEdge.Node == nil {
+		if e.ComplexityRoot.CertifyScorecardEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecardEdge.Node(childComplexity), true
+		return e.ComplexityRoot.CertifyScorecardEdge.Node(childComplexity), true
 
 	case "CertifyVEXStatement.collector":
-		if e.complexity.CertifyVEXStatement.Collector == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.Collector == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.Collector(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.Collector(childComplexity), true
 	case "CertifyVEXStatement.documentRef":
-		if e.complexity.CertifyVEXStatement.DocumentRef == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.DocumentRef(childComplexity), true
 	case "CertifyVEXStatement.id":
-		if e.complexity.CertifyVEXStatement.ID == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.ID == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.ID(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.ID(childComplexity), true
 	case "CertifyVEXStatement.knownSince":
-		if e.complexity.CertifyVEXStatement.KnownSince == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.KnownSince == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.KnownSince(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.KnownSince(childComplexity), true
 	case "CertifyVEXStatement.origin":
-		if e.complexity.CertifyVEXStatement.Origin == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.Origin == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.Origin(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.Origin(childComplexity), true
 	case "CertifyVEXStatement.statement":
-		if e.complexity.CertifyVEXStatement.Statement == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.Statement == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.Statement(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.Statement(childComplexity), true
 	case "CertifyVEXStatement.status":
-		if e.complexity.CertifyVEXStatement.Status == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.Status == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.Status(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.Status(childComplexity), true
 	case "CertifyVEXStatement.statusNotes":
-		if e.complexity.CertifyVEXStatement.StatusNotes == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.StatusNotes == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.StatusNotes(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.StatusNotes(childComplexity), true
 	case "CertifyVEXStatement.subject":
-		if e.complexity.CertifyVEXStatement.Subject == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.Subject == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.Subject(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.Subject(childComplexity), true
 	case "CertifyVEXStatement.vexJustification":
-		if e.complexity.CertifyVEXStatement.VexJustification == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.VexJustification == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.VexJustification(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVEXStatement.VexJustification(childComplexity), true
 	case "CertifyVEXStatement.vulnerability":
-		if e.complexity.CertifyVEXStatement.Vulnerability == nil {
+		if e.ComplexityRoot.CertifyVEXStatement.Vulnerability == nil {
 			break
 		}
 
-		return e.complexity.CertifyVEXStatement.Vulnerability(childComplexity), true
+		return e.ComplexityRoot.CertifyVEXStatement.Vulnerability(childComplexity), true
 
 	case "CertifyVuln.id":
-		if e.complexity.CertifyVuln.ID == nil {
+		if e.ComplexityRoot.CertifyVuln.ID == nil {
 			break
 		}
 
-		return e.complexity.CertifyVuln.ID(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVuln.ID(childComplexity), true
 	case "CertifyVuln.metadata":
-		if e.complexity.CertifyVuln.Metadata == nil {
+		if e.ComplexityRoot.CertifyVuln.Metadata == nil {
 			break
 		}
 
-		return e.complexity.CertifyVuln.Metadata(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVuln.Metadata(childComplexity), true
 	case "CertifyVuln.package":
-		if e.complexity.CertifyVuln.Package == nil {
+		if e.ComplexityRoot.CertifyVuln.Package == nil {
 			break
 		}
 
-		return e.complexity.CertifyVuln.Package(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVuln.Package(childComplexity), true
 	case "CertifyVuln.vulnerability":
-		if e.complexity.CertifyVuln.Vulnerability == nil {
+		if e.ComplexityRoot.CertifyVuln.Vulnerability == nil {
 			break
 		}
 
-		return e.complexity.CertifyVuln.Vulnerability(childComplexity), true
+		return e.ComplexityRoot.CertifyVuln.Vulnerability(childComplexity), true
 
 	case "CertifyVulnConnection.edges":
-		if e.complexity.CertifyVulnConnection.Edges == nil {
+		if e.ComplexityRoot.CertifyVulnConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.CertifyVulnConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVulnConnection.Edges(childComplexity), true
 	case "CertifyVulnConnection.pageInfo":
-		if e.complexity.CertifyVulnConnection.PageInfo == nil {
+		if e.ComplexityRoot.CertifyVulnConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.CertifyVulnConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVulnConnection.PageInfo(childComplexity), true
 	case "CertifyVulnConnection.totalCount":
-		if e.complexity.CertifyVulnConnection.TotalCount == nil {
+		if e.ComplexityRoot.CertifyVulnConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.CertifyVulnConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.CertifyVulnConnection.TotalCount(childComplexity), true
 
 	case "CertifyVulnEdge.cursor":
-		if e.complexity.CertifyVulnEdge.Cursor == nil {
+		if e.ComplexityRoot.CertifyVulnEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.CertifyVulnEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.CertifyVulnEdge.Cursor(childComplexity), true
 	case "CertifyVulnEdge.node":
-		if e.complexity.CertifyVulnEdge.Node == nil {
+		if e.ComplexityRoot.CertifyVulnEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.CertifyVulnEdge.Node(childComplexity), true
+		return e.ComplexityRoot.CertifyVulnEdge.Node(childComplexity), true
 
 	case "FindSoftwareConnection.edges":
-		if e.complexity.FindSoftwareConnection.Edges == nil {
+		if e.ComplexityRoot.FindSoftwareConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.FindSoftwareConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.FindSoftwareConnection.Edges(childComplexity), true
 	case "FindSoftwareConnection.pageInfo":
-		if e.complexity.FindSoftwareConnection.PageInfo == nil {
+		if e.ComplexityRoot.FindSoftwareConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.FindSoftwareConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.FindSoftwareConnection.PageInfo(childComplexity), true
 	case "FindSoftwareConnection.totalCount":
-		if e.complexity.FindSoftwareConnection.TotalCount == nil {
+		if e.ComplexityRoot.FindSoftwareConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.FindSoftwareConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.FindSoftwareConnection.TotalCount(childComplexity), true
 
 	case "HasMetadata.collector":
-		if e.complexity.HasMetadata.Collector == nil {
+		if e.ComplexityRoot.HasMetadata.Collector == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Collector(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.Collector(childComplexity), true
 	case "HasMetadata.documentRef":
-		if e.complexity.HasMetadata.DocumentRef == nil {
+		if e.ComplexityRoot.HasMetadata.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.DocumentRef(childComplexity), true
 	case "HasMetadata.id":
-		if e.complexity.HasMetadata.ID == nil {
+		if e.ComplexityRoot.HasMetadata.ID == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.ID(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.ID(childComplexity), true
 	case "HasMetadata.justification":
-		if e.complexity.HasMetadata.Justification == nil {
+		if e.ComplexityRoot.HasMetadata.Justification == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Justification(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.Justification(childComplexity), true
 	case "HasMetadata.key":
-		if e.complexity.HasMetadata.Key == nil {
+		if e.ComplexityRoot.HasMetadata.Key == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Key(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.Key(childComplexity), true
 	case "HasMetadata.origin":
-		if e.complexity.HasMetadata.Origin == nil {
+		if e.ComplexityRoot.HasMetadata.Origin == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Origin(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.Origin(childComplexity), true
 	case "HasMetadata.subject":
-		if e.complexity.HasMetadata.Subject == nil {
+		if e.ComplexityRoot.HasMetadata.Subject == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Subject(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.Subject(childComplexity), true
 	case "HasMetadata.timestamp":
-		if e.complexity.HasMetadata.Timestamp == nil {
+		if e.ComplexityRoot.HasMetadata.Timestamp == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Timestamp(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadata.Timestamp(childComplexity), true
 	case "HasMetadata.value":
-		if e.complexity.HasMetadata.Value == nil {
+		if e.ComplexityRoot.HasMetadata.Value == nil {
 			break
 		}
 
-		return e.complexity.HasMetadata.Value(childComplexity), true
+		return e.ComplexityRoot.HasMetadata.Value(childComplexity), true
 
 	case "HasMetadataConnection.edges":
-		if e.complexity.HasMetadataConnection.Edges == nil {
+		if e.ComplexityRoot.HasMetadataConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.HasMetadataConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadataConnection.Edges(childComplexity), true
 	case "HasMetadataConnection.pageInfo":
-		if e.complexity.HasMetadataConnection.PageInfo == nil {
+		if e.ComplexityRoot.HasMetadataConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.HasMetadataConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadataConnection.PageInfo(childComplexity), true
 	case "HasMetadataConnection.totalCount":
-		if e.complexity.HasMetadataConnection.TotalCount == nil {
+		if e.ComplexityRoot.HasMetadataConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.HasMetadataConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.HasMetadataConnection.TotalCount(childComplexity), true
 
 	case "HasMetadataEdge.cursor":
-		if e.complexity.HasMetadataEdge.Cursor == nil {
+		if e.ComplexityRoot.HasMetadataEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.HasMetadataEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.HasMetadataEdge.Cursor(childComplexity), true
 	case "HasMetadataEdge.node":
-		if e.complexity.HasMetadataEdge.Node == nil {
+		if e.ComplexityRoot.HasMetadataEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.HasMetadataEdge.Node(childComplexity), true
+		return e.ComplexityRoot.HasMetadataEdge.Node(childComplexity), true
 
 	case "HasSBOM.algorithm":
-		if e.complexity.HasSBOM.Algorithm == nil {
+		if e.ComplexityRoot.HasSBOM.Algorithm == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Algorithm(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.Algorithm(childComplexity), true
 	case "HasSBOM.collector":
-		if e.complexity.HasSBOM.Collector == nil {
+		if e.ComplexityRoot.HasSBOM.Collector == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Collector(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.Collector(childComplexity), true
 	case "HasSBOM.digest":
-		if e.complexity.HasSBOM.Digest == nil {
+		if e.ComplexityRoot.HasSBOM.Digest == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Digest(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.Digest(childComplexity), true
 	case "HasSBOM.documentRef":
-		if e.complexity.HasSBOM.DocumentRef == nil {
+		if e.ComplexityRoot.HasSBOM.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.DocumentRef(childComplexity), true
 	case "HasSBOM.downloadLocation":
-		if e.complexity.HasSBOM.DownloadLocation == nil {
+		if e.ComplexityRoot.HasSBOM.DownloadLocation == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.DownloadLocation(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.DownloadLocation(childComplexity), true
 	case "HasSBOM.id":
-		if e.complexity.HasSBOM.ID == nil {
+		if e.ComplexityRoot.HasSBOM.ID == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.ID(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.ID(childComplexity), true
 	case "HasSBOM.includedDependencies":
-		if e.complexity.HasSBOM.IncludedDependencies == nil {
+		if e.ComplexityRoot.HasSBOM.IncludedDependencies == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.IncludedDependencies(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.IncludedDependencies(childComplexity), true
 	case "HasSBOM.includedOccurrences":
-		if e.complexity.HasSBOM.IncludedOccurrences == nil {
+		if e.ComplexityRoot.HasSBOM.IncludedOccurrences == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.IncludedOccurrences(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.IncludedOccurrences(childComplexity), true
 	case "HasSBOM.includedSoftware":
-		if e.complexity.HasSBOM.IncludedSoftware == nil {
+		if e.ComplexityRoot.HasSBOM.IncludedSoftware == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.IncludedSoftware(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.IncludedSoftware(childComplexity), true
 	case "HasSBOM.knownSince":
-		if e.complexity.HasSBOM.KnownSince == nil {
+		if e.ComplexityRoot.HasSBOM.KnownSince == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.KnownSince(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.KnownSince(childComplexity), true
 	case "HasSBOM.origin":
-		if e.complexity.HasSBOM.Origin == nil {
+		if e.ComplexityRoot.HasSBOM.Origin == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Origin(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.Origin(childComplexity), true
 	case "HasSBOM.subject":
-		if e.complexity.HasSBOM.Subject == nil {
+		if e.ComplexityRoot.HasSBOM.Subject == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Subject(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOM.Subject(childComplexity), true
 	case "HasSBOM.uri":
-		if e.complexity.HasSBOM.URI == nil {
+		if e.ComplexityRoot.HasSBOM.URI == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.URI(childComplexity), true
+		return e.ComplexityRoot.HasSBOM.URI(childComplexity), true
 
 	case "HasSBOMConnection.edges":
-		if e.complexity.HasSBOMConnection.Edges == nil {
+		if e.ComplexityRoot.HasSBOMConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.HasSBOMConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOMConnection.Edges(childComplexity), true
 	case "HasSBOMConnection.pageInfo":
-		if e.complexity.HasSBOMConnection.PageInfo == nil {
+		if e.ComplexityRoot.HasSBOMConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.HasSBOMConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOMConnection.PageInfo(childComplexity), true
 	case "HasSBOMConnection.totalCount":
-		if e.complexity.HasSBOMConnection.TotalCount == nil {
+		if e.ComplexityRoot.HasSBOMConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.HasSBOMConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.HasSBOMConnection.TotalCount(childComplexity), true
 
 	case "HasSBOMEdge.cursor":
-		if e.complexity.HasSBOMEdge.Cursor == nil {
+		if e.ComplexityRoot.HasSBOMEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.HasSBOMEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.HasSBOMEdge.Cursor(childComplexity), true
 	case "HasSBOMEdge.node":
-		if e.complexity.HasSBOMEdge.Node == nil {
+		if e.ComplexityRoot.HasSBOMEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.HasSBOMEdge.Node(childComplexity), true
+		return e.ComplexityRoot.HasSBOMEdge.Node(childComplexity), true
 
 	case "HasSLSA.id":
-		if e.complexity.HasSLSA.ID == nil {
+		if e.ComplexityRoot.HasSLSA.ID == nil {
 			break
 		}
 
-		return e.complexity.HasSLSA.ID(childComplexity), true
-
+		return e.ComplexityRoot.HasSLSA.ID(childComplexity), true
 	case "HasSLSA.slsa":
-		if e.complexity.HasSLSA.Slsa == nil {
+		if e.ComplexityRoot.HasSLSA.Slsa == nil {
 			break
 		}
 
-		return e.complexity.HasSLSA.Slsa(childComplexity), true
-
+		return e.ComplexityRoot.HasSLSA.Slsa(childComplexity), true
 	case "HasSLSA.subject":
-		if e.complexity.HasSLSA.Subject == nil {
+		if e.ComplexityRoot.HasSLSA.Subject == nil {
 			break
 		}
 
-		return e.complexity.HasSLSA.Subject(childComplexity), true
+		return e.ComplexityRoot.HasSLSA.Subject(childComplexity), true
 
 	case "HasSLSAConnection.edges":
-		if e.complexity.HasSLSAConnection.Edges == nil {
+		if e.ComplexityRoot.HasSLSAConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.HasSLSAConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.HasSLSAConnection.Edges(childComplexity), true
 	case "HasSLSAConnection.pageInfo":
-		if e.complexity.HasSLSAConnection.PageInfo == nil {
+		if e.ComplexityRoot.HasSLSAConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.HasSLSAConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.HasSLSAConnection.PageInfo(childComplexity), true
 	case "HasSLSAConnection.totalCount":
-		if e.complexity.HasSLSAConnection.TotalCount == nil {
+		if e.ComplexityRoot.HasSLSAConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.HasSLSAConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.HasSLSAConnection.TotalCount(childComplexity), true
 
 	case "HasSLSAEdge.cursor":
-		if e.complexity.HasSLSAEdge.Cursor == nil {
+		if e.ComplexityRoot.HasSLSAEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.HasSLSAEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.HasSLSAEdge.Cursor(childComplexity), true
 	case "HasSLSAEdge.node":
-		if e.complexity.HasSLSAEdge.Node == nil {
+		if e.ComplexityRoot.HasSLSAEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.HasSLSAEdge.Node(childComplexity), true
+		return e.ComplexityRoot.HasSLSAEdge.Node(childComplexity), true
 
 	case "HasSourceAt.collector":
-		if e.complexity.HasSourceAt.Collector == nil {
+		if e.ComplexityRoot.HasSourceAt.Collector == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.Collector(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.Collector(childComplexity), true
 	case "HasSourceAt.documentRef":
-		if e.complexity.HasSourceAt.DocumentRef == nil {
+		if e.ComplexityRoot.HasSourceAt.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.DocumentRef(childComplexity), true
 	case "HasSourceAt.id":
-		if e.complexity.HasSourceAt.ID == nil {
+		if e.ComplexityRoot.HasSourceAt.ID == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.ID(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.ID(childComplexity), true
 	case "HasSourceAt.justification":
-		if e.complexity.HasSourceAt.Justification == nil {
+		if e.ComplexityRoot.HasSourceAt.Justification == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.Justification(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.Justification(childComplexity), true
 	case "HasSourceAt.knownSince":
-		if e.complexity.HasSourceAt.KnownSince == nil {
+		if e.ComplexityRoot.HasSourceAt.KnownSince == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.KnownSince(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.KnownSince(childComplexity), true
 	case "HasSourceAt.origin":
-		if e.complexity.HasSourceAt.Origin == nil {
+		if e.ComplexityRoot.HasSourceAt.Origin == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.Origin(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.Origin(childComplexity), true
 	case "HasSourceAt.package":
-		if e.complexity.HasSourceAt.Package == nil {
+		if e.ComplexityRoot.HasSourceAt.Package == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.Package(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAt.Package(childComplexity), true
 	case "HasSourceAt.source":
-		if e.complexity.HasSourceAt.Source == nil {
+		if e.ComplexityRoot.HasSourceAt.Source == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAt.Source(childComplexity), true
+		return e.ComplexityRoot.HasSourceAt.Source(childComplexity), true
 
 	case "HasSourceAtConnection.edges":
-		if e.complexity.HasSourceAtConnection.Edges == nil {
+		if e.ComplexityRoot.HasSourceAtConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAtConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAtConnection.Edges(childComplexity), true
 	case "HasSourceAtConnection.pageInfo":
-		if e.complexity.HasSourceAtConnection.PageInfo == nil {
+		if e.ComplexityRoot.HasSourceAtConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAtConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAtConnection.PageInfo(childComplexity), true
 	case "HasSourceAtConnection.totalCount":
-		if e.complexity.HasSourceAtConnection.TotalCount == nil {
+		if e.ComplexityRoot.HasSourceAtConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAtConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.HasSourceAtConnection.TotalCount(childComplexity), true
 
 	case "HasSourceAtEdge.cursor":
-		if e.complexity.HasSourceAtEdge.Cursor == nil {
+		if e.ComplexityRoot.HasSourceAtEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAtEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.HasSourceAtEdge.Cursor(childComplexity), true
 	case "HasSourceAtEdge.node":
-		if e.complexity.HasSourceAtEdge.Node == nil {
+		if e.ComplexityRoot.HasSourceAtEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.HasSourceAtEdge.Node(childComplexity), true
+		return e.ComplexityRoot.HasSourceAtEdge.Node(childComplexity), true
 
 	case "HashEqual.artifacts":
-		if e.complexity.HashEqual.Artifacts == nil {
+		if e.ComplexityRoot.HashEqual.Artifacts == nil {
 			break
 		}
 
-		return e.complexity.HashEqual.Artifacts(childComplexity), true
-
+		return e.ComplexityRoot.HashEqual.Artifacts(childComplexity), true
 	case "HashEqual.collector":
-		if e.complexity.HashEqual.Collector == nil {
+		if e.ComplexityRoot.HashEqual.Collector == nil {
 			break
 		}
 
-		return e.complexity.HashEqual.Collector(childComplexity), true
-
+		return e.ComplexityRoot.HashEqual.Collector(childComplexity), true
 	case "HashEqual.documentRef":
-		if e.complexity.HashEqual.DocumentRef == nil {
+		if e.ComplexityRoot.HashEqual.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.HashEqual.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.HashEqual.DocumentRef(childComplexity), true
 	case "HashEqual.id":
-		if e.complexity.HashEqual.ID == nil {
+		if e.ComplexityRoot.HashEqual.ID == nil {
 			break
 		}
 
-		return e.complexity.HashEqual.ID(childComplexity), true
-
+		return e.ComplexityRoot.HashEqual.ID(childComplexity), true
 	case "HashEqual.justification":
-		if e.complexity.HashEqual.Justification == nil {
+		if e.ComplexityRoot.HashEqual.Justification == nil {
 			break
 		}
 
-		return e.complexity.HashEqual.Justification(childComplexity), true
-
+		return e.ComplexityRoot.HashEqual.Justification(childComplexity), true
 	case "HashEqual.origin":
-		if e.complexity.HashEqual.Origin == nil {
+		if e.ComplexityRoot.HashEqual.Origin == nil {
 			break
 		}
 
-		return e.complexity.HashEqual.Origin(childComplexity), true
+		return e.ComplexityRoot.HashEqual.Origin(childComplexity), true
 
 	case "HashEqualConnection.edges":
-		if e.complexity.HashEqualConnection.Edges == nil {
+		if e.ComplexityRoot.HashEqualConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.HashEqualConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.HashEqualConnection.Edges(childComplexity), true
 	case "HashEqualConnection.pageInfo":
-		if e.complexity.HashEqualConnection.PageInfo == nil {
+		if e.ComplexityRoot.HashEqualConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.HashEqualConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.HashEqualConnection.PageInfo(childComplexity), true
 	case "HashEqualConnection.totalCount":
-		if e.complexity.HashEqualConnection.TotalCount == nil {
+		if e.ComplexityRoot.HashEqualConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.HashEqualConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.HashEqualConnection.TotalCount(childComplexity), true
 
 	case "HashEqualEdge.cursor":
-		if e.complexity.HashEqualEdge.Cursor == nil {
+		if e.ComplexityRoot.HashEqualEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.HashEqualEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.HashEqualEdge.Cursor(childComplexity), true
 	case "HashEqualEdge.node":
-		if e.complexity.HashEqualEdge.Node == nil {
+		if e.ComplexityRoot.HashEqualEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.HashEqualEdge.Node(childComplexity), true
+		return e.ComplexityRoot.HashEqualEdge.Node(childComplexity), true
 
 	case "IsDependency.collector":
-		if e.complexity.IsDependency.Collector == nil {
+		if e.ComplexityRoot.IsDependency.Collector == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.Collector(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.Collector(childComplexity), true
 	case "IsDependency.dependencyPackage":
-		if e.complexity.IsDependency.DependencyPackage == nil {
+		if e.ComplexityRoot.IsDependency.DependencyPackage == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.DependencyPackage(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.DependencyPackage(childComplexity), true
 	case "IsDependency.dependencyType":
-		if e.complexity.IsDependency.DependencyType == nil {
+		if e.ComplexityRoot.IsDependency.DependencyType == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.DependencyType(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.DependencyType(childComplexity), true
 	case "IsDependency.documentRef":
-		if e.complexity.IsDependency.DocumentRef == nil {
+		if e.ComplexityRoot.IsDependency.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.DocumentRef(childComplexity), true
 	case "IsDependency.id":
-		if e.complexity.IsDependency.ID == nil {
+		if e.ComplexityRoot.IsDependency.ID == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.ID(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.ID(childComplexity), true
 	case "IsDependency.justification":
-		if e.complexity.IsDependency.Justification == nil {
+		if e.ComplexityRoot.IsDependency.Justification == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.Justification(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.Justification(childComplexity), true
 	case "IsDependency.origin":
-		if e.complexity.IsDependency.Origin == nil {
+		if e.ComplexityRoot.IsDependency.Origin == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.Origin(childComplexity), true
-
+		return e.ComplexityRoot.IsDependency.Origin(childComplexity), true
 	case "IsDependency.package":
-		if e.complexity.IsDependency.Package == nil {
+		if e.ComplexityRoot.IsDependency.Package == nil {
 			break
 		}
 
-		return e.complexity.IsDependency.Package(childComplexity), true
+		return e.ComplexityRoot.IsDependency.Package(childComplexity), true
 
 	case "IsDependencyConnection.edges":
-		if e.complexity.IsDependencyConnection.Edges == nil {
+		if e.ComplexityRoot.IsDependencyConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.IsDependencyConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.IsDependencyConnection.Edges(childComplexity), true
 	case "IsDependencyConnection.pageInfo":
-		if e.complexity.IsDependencyConnection.PageInfo == nil {
+		if e.ComplexityRoot.IsDependencyConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.IsDependencyConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.IsDependencyConnection.PageInfo(childComplexity), true
 	case "IsDependencyConnection.totalCount":
-		if e.complexity.IsDependencyConnection.TotalCount == nil {
+		if e.ComplexityRoot.IsDependencyConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.IsDependencyConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.IsDependencyConnection.TotalCount(childComplexity), true
 
 	case "IsDependencyEdge.cursor":
-		if e.complexity.IsDependencyEdge.Cursor == nil {
+		if e.ComplexityRoot.IsDependencyEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.IsDependencyEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.IsDependencyEdge.Cursor(childComplexity), true
 	case "IsDependencyEdge.node":
-		if e.complexity.IsDependencyEdge.Node == nil {
+		if e.ComplexityRoot.IsDependencyEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.IsDependencyEdge.Node(childComplexity), true
+		return e.ComplexityRoot.IsDependencyEdge.Node(childComplexity), true
 
 	case "IsOccurrence.artifact":
-		if e.complexity.IsOccurrence.Artifact == nil {
+		if e.ComplexityRoot.IsOccurrence.Artifact == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.Artifact(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrence.Artifact(childComplexity), true
 	case "IsOccurrence.collector":
-		if e.complexity.IsOccurrence.Collector == nil {
+		if e.ComplexityRoot.IsOccurrence.Collector == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.Collector(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrence.Collector(childComplexity), true
 	case "IsOccurrence.documentRef":
-		if e.complexity.IsOccurrence.DocumentRef == nil {
+		if e.ComplexityRoot.IsOccurrence.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrence.DocumentRef(childComplexity), true
 	case "IsOccurrence.id":
-		if e.complexity.IsOccurrence.ID == nil {
+		if e.ComplexityRoot.IsOccurrence.ID == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.ID(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrence.ID(childComplexity), true
 	case "IsOccurrence.justification":
-		if e.complexity.IsOccurrence.Justification == nil {
+		if e.ComplexityRoot.IsOccurrence.Justification == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.Justification(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrence.Justification(childComplexity), true
 	case "IsOccurrence.origin":
-		if e.complexity.IsOccurrence.Origin == nil {
+		if e.ComplexityRoot.IsOccurrence.Origin == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.Origin(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrence.Origin(childComplexity), true
 	case "IsOccurrence.subject":
-		if e.complexity.IsOccurrence.Subject == nil {
+		if e.ComplexityRoot.IsOccurrence.Subject == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.Subject(childComplexity), true
+		return e.ComplexityRoot.IsOccurrence.Subject(childComplexity), true
 
 	case "IsOccurrenceConnection.edges":
-		if e.complexity.IsOccurrenceConnection.Edges == nil {
+		if e.ComplexityRoot.IsOccurrenceConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrenceConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrenceConnection.Edges(childComplexity), true
 	case "IsOccurrenceConnection.pageInfo":
-		if e.complexity.IsOccurrenceConnection.PageInfo == nil {
+		if e.ComplexityRoot.IsOccurrenceConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrenceConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrenceConnection.PageInfo(childComplexity), true
 	case "IsOccurrenceConnection.totalCount":
-		if e.complexity.IsOccurrenceConnection.TotalCount == nil {
+		if e.ComplexityRoot.IsOccurrenceConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrenceConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.IsOccurrenceConnection.TotalCount(childComplexity), true
 
 	case "IsOccurrenceEdge.cursor":
-		if e.complexity.IsOccurrenceEdge.Cursor == nil {
+		if e.ComplexityRoot.IsOccurrenceEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrenceEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.IsOccurrenceEdge.Cursor(childComplexity), true
 	case "IsOccurrenceEdge.node":
-		if e.complexity.IsOccurrenceEdge.Node == nil {
+		if e.ComplexityRoot.IsOccurrenceEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrenceEdge.Node(childComplexity), true
+		return e.ComplexityRoot.IsOccurrenceEdge.Node(childComplexity), true
 
 	case "License.id":
-		if e.complexity.License.ID == nil {
+		if e.ComplexityRoot.License.ID == nil {
 			break
 		}
 
-		return e.complexity.License.ID(childComplexity), true
-
+		return e.ComplexityRoot.License.ID(childComplexity), true
 	case "License.inline":
-		if e.complexity.License.Inline == nil {
+		if e.ComplexityRoot.License.Inline == nil {
 			break
 		}
 
-		return e.complexity.License.Inline(childComplexity), true
-
+		return e.ComplexityRoot.License.Inline(childComplexity), true
 	case "License.listVersion":
-		if e.complexity.License.ListVersion == nil {
+		if e.ComplexityRoot.License.ListVersion == nil {
 			break
 		}
 
-		return e.complexity.License.ListVersion(childComplexity), true
-
+		return e.ComplexityRoot.License.ListVersion(childComplexity), true
 	case "License.name":
-		if e.complexity.License.Name == nil {
+		if e.ComplexityRoot.License.Name == nil {
 			break
 		}
 
-		return e.complexity.License.Name(childComplexity), true
+		return e.ComplexityRoot.License.Name(childComplexity), true
 
 	case "LicenseConnection.edges":
-		if e.complexity.LicenseConnection.Edges == nil {
+		if e.ComplexityRoot.LicenseConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.LicenseConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.LicenseConnection.Edges(childComplexity), true
 	case "LicenseConnection.pageInfo":
-		if e.complexity.LicenseConnection.PageInfo == nil {
+		if e.ComplexityRoot.LicenseConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.LicenseConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.LicenseConnection.PageInfo(childComplexity), true
 	case "LicenseConnection.totalCount":
-		if e.complexity.LicenseConnection.TotalCount == nil {
+		if e.ComplexityRoot.LicenseConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.LicenseConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.LicenseConnection.TotalCount(childComplexity), true
 
 	case "LicenseEdge.cursor":
-		if e.complexity.LicenseEdge.Cursor == nil {
+		if e.ComplexityRoot.LicenseEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.LicenseEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.LicenseEdge.Cursor(childComplexity), true
 	case "LicenseEdge.node":
-		if e.complexity.LicenseEdge.Node == nil {
+		if e.ComplexityRoot.LicenseEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.LicenseEdge.Node(childComplexity), true
+		return e.ComplexityRoot.LicenseEdge.Node(childComplexity), true
 
 	case "Mutation.delete":
-		if e.complexity.Mutation.Delete == nil {
+		if e.ComplexityRoot.Mutation.Delete == nil {
 			break
 		}
 
@@ -2081,10 +1928,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Delete(childComplexity, args["node"].(string)), true
-
+		return e.ComplexityRoot.Mutation.Delete(childComplexity, args["node"].(string)), true
 	case "Mutation.ingestArtifact":
-		if e.complexity.Mutation.IngestArtifact == nil {
+		if e.ComplexityRoot.Mutation.IngestArtifact == nil {
 			break
 		}
 
@@ -2093,10 +1939,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestArtifact(childComplexity, args["artifact"].(*model.IDorArtifactInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestArtifact(childComplexity, args["artifact"].(*model.IDorArtifactInput)), true
 	case "Mutation.ingestArtifacts":
-		if e.complexity.Mutation.IngestArtifacts == nil {
+		if e.ComplexityRoot.Mutation.IngestArtifacts == nil {
 			break
 		}
 
@@ -2105,10 +1950,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestArtifacts(childComplexity, args["artifacts"].([]*model.IDorArtifactInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestArtifacts(childComplexity, args["artifacts"].([]*model.IDorArtifactInput)), true
 	case "Mutation.ingestBuilder":
-		if e.complexity.Mutation.IngestBuilder == nil {
+		if e.ComplexityRoot.Mutation.IngestBuilder == nil {
 			break
 		}
 
@@ -2117,10 +1961,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.IDorBuilderInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.IDorBuilderInput)), true
 	case "Mutation.ingestBuilders":
-		if e.complexity.Mutation.IngestBuilders == nil {
+		if e.ComplexityRoot.Mutation.IngestBuilders == nil {
 			break
 		}
 
@@ -2129,10 +1972,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.IDorBuilderInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.IDorBuilderInput)), true
 	case "Mutation.ingestBulkHasMetadata":
-		if e.complexity.Mutation.IngestBulkHasMetadata == nil {
+		if e.ComplexityRoot.Mutation.IngestBulkHasMetadata == nil {
 			break
 		}
 
@@ -2141,10 +1983,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestBulkHasMetadata(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["hasMetadataList"].([]*model.HasMetadataInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestBulkHasMetadata(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["hasMetadataList"].([]*model.HasMetadataInputSpec)), true
 	case "Mutation.ingestBulkVulnerabilityMetadata":
-		if e.complexity.Mutation.IngestBulkVulnerabilityMetadata == nil {
+		if e.ComplexityRoot.Mutation.IngestBulkVulnerabilityMetadata == nil {
 			break
 		}
 
@@ -2153,10 +1994,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestBulkVulnerabilityMetadata(childComplexity, args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestBulkVulnerabilityMetadata(childComplexity, args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec)), true
 	case "Mutation.ingestCertifyBad":
-		if e.complexity.Mutation.IngestCertifyBad == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyBad == nil {
 			break
 		}
 
@@ -2165,10 +2005,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
 	case "Mutation.ingestCertifyBads":
-		if e.complexity.Mutation.IngestCertifyBads == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyBads == nil {
 			break
 		}
 
@@ -2177,10 +2016,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
 	case "Mutation.ingestCertifyGood":
-		if e.complexity.Mutation.IngestCertifyGood == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyGood == nil {
 			break
 		}
 
@@ -2189,10 +2027,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
 	case "Mutation.ingestCertifyGoods":
-		if e.complexity.Mutation.IngestCertifyGoods == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyGoods == nil {
 			break
 		}
 
@@ -2201,10 +2038,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
 	case "Mutation.ingestCertifyLegal":
-		if e.complexity.Mutation.IngestCertifyLegal == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyLegal == nil {
 			break
 		}
 
@@ -2213,10 +2049,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyLegal(childComplexity, args["subject"].(model.PackageOrSourceInput), args["declaredLicenses"].([]*model.IDorLicenseInput), args["discoveredLicenses"].([]*model.IDorLicenseInput), args["certifyLegal"].(model.CertifyLegalInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyLegal(childComplexity, args["subject"].(model.PackageOrSourceInput), args["declaredLicenses"].([]*model.IDorLicenseInput), args["discoveredLicenses"].([]*model.IDorLicenseInput), args["certifyLegal"].(model.CertifyLegalInputSpec)), true
 	case "Mutation.ingestCertifyLegals":
-		if e.complexity.Mutation.IngestCertifyLegals == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyLegals == nil {
 			break
 		}
 
@@ -2225,10 +2060,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyLegals(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["declaredLicensesList"].([][]*model.IDorLicenseInput), args["discoveredLicensesList"].([][]*model.IDorLicenseInput), args["certifyLegals"].([]*model.CertifyLegalInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyLegals(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["declaredLicensesList"].([][]*model.IDorLicenseInput), args["discoveredLicensesList"].([][]*model.IDorLicenseInput), args["certifyLegals"].([]*model.CertifyLegalInputSpec)), true
 	case "Mutation.ingestCertifyVuln":
-		if e.complexity.Mutation.IngestCertifyVuln == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyVuln == nil {
 			break
 		}
 
@@ -2237,10 +2071,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.IDorPkgInput), args["vulnerability"].(model.IDorVulnerabilityInput), args["certifyVuln"].(model.ScanMetadataInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.IDorPkgInput), args["vulnerability"].(model.IDorVulnerabilityInput), args["certifyVuln"].(model.ScanMetadataInput)), true
 	case "Mutation.ingestCertifyVulns":
-		if e.complexity.Mutation.IngestCertifyVulns == nil {
+		if e.ComplexityRoot.Mutation.IngestCertifyVulns == nil {
 			break
 		}
 
@@ -2249,10 +2082,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyVulns(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["certifyVulns"].([]*model.ScanMetadataInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestCertifyVulns(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["certifyVulns"].([]*model.ScanMetadataInput)), true
 	case "Mutation.ingestDependencies":
-		if e.complexity.Mutation.IngestDependencies == nil {
+		if e.ComplexityRoot.Mutation.IngestDependencies == nil {
 			break
 		}
 
@@ -2261,10 +2093,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["depPkgs"].([]*model.IDorPkgInput), args["dependencies"].([]*model.IsDependencyInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["depPkgs"].([]*model.IDorPkgInput), args["dependencies"].([]*model.IsDependencyInputSpec)), true
 	case "Mutation.ingestDependency":
-		if e.complexity.Mutation.IngestDependency == nil {
+		if e.ComplexityRoot.Mutation.IngestDependency == nil {
 			break
 		}
 
@@ -2273,10 +2104,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["dependency"].(model.IsDependencyInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestDependency(childComplexity, args["pkg"].(model.IDorPkgInput), args["depPkg"].(model.IDorPkgInput), args["dependency"].(model.IsDependencyInputSpec)), true
 	case "Mutation.ingestHasMetadata":
-		if e.complexity.Mutation.IngestHasMetadata == nil {
+		if e.ComplexityRoot.Mutation.IngestHasMetadata == nil {
 			break
 		}
 
@@ -2285,10 +2115,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
 	case "Mutation.ingestHasSBOMs":
-		if e.complexity.Mutation.IngestHasSBOMs == nil {
+		if e.ComplexityRoot.Mutation.IngestHasSBOMs == nil {
 			break
 		}
 
@@ -2297,10 +2126,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSBOMs(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["hasSBOMs"].([]*model.HasSBOMInputSpec), args["includes"].([]*model.HasSBOMIncludesInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHasSBOMs(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["hasSBOMs"].([]*model.HasSBOMInputSpec), args["includes"].([]*model.HasSBOMIncludesInputSpec)), true
 	case "Mutation.ingestHasSBOM":
-		if e.complexity.Mutation.IngestHasSbom == nil {
+		if e.ComplexityRoot.Mutation.IngestHasSbom == nil {
 			break
 		}
 
@@ -2309,10 +2137,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["hasSBOM"].(model.HasSBOMInputSpec), args["includes"].(model.HasSBOMIncludesInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["hasSBOM"].(model.HasSBOMInputSpec), args["includes"].(model.HasSBOMIncludesInputSpec)), true
 	case "Mutation.ingestHasSourceAt":
-		if e.complexity.Mutation.IngestHasSourceAt == nil {
+		if e.ComplexityRoot.Mutation.IngestHasSourceAt == nil {
 			break
 		}
 
@@ -2321,10 +2148,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSourceAt(childComplexity, args["pkg"].(model.IDorPkgInput), args["pkgMatchType"].(model.MatchFlags), args["source"].(model.IDorSourceInput), args["hasSourceAt"].(model.HasSourceAtInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHasSourceAt(childComplexity, args["pkg"].(model.IDorPkgInput), args["pkgMatchType"].(model.MatchFlags), args["source"].(model.IDorSourceInput), args["hasSourceAt"].(model.HasSourceAtInputSpec)), true
 	case "Mutation.ingestHasSourceAts":
-		if e.complexity.Mutation.IngestHasSourceAts == nil {
+		if e.ComplexityRoot.Mutation.IngestHasSourceAts == nil {
 			break
 		}
 
@@ -2333,10 +2159,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSourceAts(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["pkgMatchType"].(model.MatchFlags), args["sources"].([]*model.IDorSourceInput), args["hasSourceAts"].([]*model.HasSourceAtInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHasSourceAts(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["pkgMatchType"].(model.MatchFlags), args["sources"].([]*model.IDorSourceInput), args["hasSourceAts"].([]*model.HasSourceAtInputSpec)), true
 	case "Mutation.ingestHashEqual":
-		if e.complexity.Mutation.IngestHashEqual == nil {
+		if e.ComplexityRoot.Mutation.IngestHashEqual == nil {
 			break
 		}
 
@@ -2345,10 +2170,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.IDorArtifactInput), args["otherArtifact"].(model.IDorArtifactInput), args["hashEqual"].(model.HashEqualInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.IDorArtifactInput), args["otherArtifact"].(model.IDorArtifactInput), args["hashEqual"].(model.HashEqualInputSpec)), true
 	case "Mutation.ingestHashEquals":
-		if e.complexity.Mutation.IngestHashEquals == nil {
+		if e.ComplexityRoot.Mutation.IngestHashEquals == nil {
 			break
 		}
 
@@ -2357,10 +2181,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.IDorArtifactInput), args["otherArtifacts"].([]*model.IDorArtifactInput), args["hashEquals"].([]*model.HashEqualInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.IDorArtifactInput), args["otherArtifacts"].([]*model.IDorArtifactInput), args["hashEquals"].([]*model.HashEqualInputSpec)), true
 	case "Mutation.ingestLicense":
-		if e.complexity.Mutation.IngestLicense == nil {
+		if e.ComplexityRoot.Mutation.IngestLicense == nil {
 			break
 		}
 
@@ -2369,10 +2192,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestLicense(childComplexity, args["license"].(*model.IDorLicenseInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestLicense(childComplexity, args["license"].(*model.IDorLicenseInput)), true
 	case "Mutation.ingestLicenses":
-		if e.complexity.Mutation.IngestLicenses == nil {
+		if e.ComplexityRoot.Mutation.IngestLicenses == nil {
 			break
 		}
 
@@ -2381,10 +2203,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestLicenses(childComplexity, args["licenses"].([]*model.IDorLicenseInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestLicenses(childComplexity, args["licenses"].([]*model.IDorLicenseInput)), true
 	case "Mutation.ingestOccurrence":
-		if e.complexity.Mutation.IngestOccurrence == nil {
+		if e.ComplexityRoot.Mutation.IngestOccurrence == nil {
 			break
 		}
 
@@ -2393,10 +2214,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["subject"].(model.PackageOrSourceInput), args["artifact"].(model.IDorArtifactInput), args["occurrence"].(model.IsOccurrenceInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestOccurrence(childComplexity, args["subject"].(model.PackageOrSourceInput), args["artifact"].(model.IDorArtifactInput), args["occurrence"].(model.IsOccurrenceInputSpec)), true
 	case "Mutation.ingestOccurrences":
-		if e.complexity.Mutation.IngestOccurrences == nil {
+		if e.ComplexityRoot.Mutation.IngestOccurrences == nil {
 			break
 		}
 
@@ -2405,10 +2225,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.IDorArtifactInput), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestOccurrences(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.IDorArtifactInput), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
 	case "Mutation.ingestPackage":
-		if e.complexity.Mutation.IngestPackage == nil {
+		if e.ComplexityRoot.Mutation.IngestPackage == nil {
 			break
 		}
 
@@ -2417,10 +2236,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(model.IDorPkgInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestPackage(childComplexity, args["pkg"].(model.IDorPkgInput)), true
 	case "Mutation.ingestPackages":
-		if e.complexity.Mutation.IngestPackages == nil {
+		if e.ComplexityRoot.Mutation.IngestPackages == nil {
 			break
 		}
 
@@ -2429,10 +2247,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPackages(childComplexity, args["pkgs"].([]*model.IDorPkgInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestPackages(childComplexity, args["pkgs"].([]*model.IDorPkgInput)), true
 	case "Mutation.ingestPkgEqual":
-		if e.complexity.Mutation.IngestPkgEqual == nil {
+		if e.ComplexityRoot.Mutation.IngestPkgEqual == nil {
 			break
 		}
 
@@ -2441,10 +2258,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.IDorPkgInput), args["otherPackage"].(model.IDorPkgInput), args["pkgEqual"].(model.PkgEqualInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.IDorPkgInput), args["otherPackage"].(model.IDorPkgInput), args["pkgEqual"].(model.PkgEqualInputSpec)), true
 	case "Mutation.ingestPkgEquals":
-		if e.complexity.Mutation.IngestPkgEquals == nil {
+		if e.ComplexityRoot.Mutation.IngestPkgEquals == nil {
 			break
 		}
 
@@ -2453,10 +2269,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPkgEquals(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["otherPackages"].([]*model.IDorPkgInput), args["pkgEquals"].([]*model.PkgEqualInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestPkgEquals(childComplexity, args["pkgs"].([]*model.IDorPkgInput), args["otherPackages"].([]*model.IDorPkgInput), args["pkgEquals"].([]*model.PkgEqualInputSpec)), true
 	case "Mutation.ingestPointOfContact":
-		if e.complexity.Mutation.IngestPointOfContact == nil {
+		if e.ComplexityRoot.Mutation.IngestPointOfContact == nil {
 			break
 		}
 
@@ -2465,10 +2280,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
 	case "Mutation.ingestPointOfContacts":
-		if e.complexity.Mutation.IngestPointOfContacts == nil {
+		if e.ComplexityRoot.Mutation.IngestPointOfContacts == nil {
 			break
 		}
 
@@ -2477,10 +2291,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPointOfContacts(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["pointOfContacts"].([]*model.PointOfContactInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestPointOfContacts(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["pointOfContacts"].([]*model.PointOfContactInputSpec)), true
 	case "Mutation.ingestSLSAs":
-		if e.complexity.Mutation.IngestSLSAs == nil {
+		if e.ComplexityRoot.Mutation.IngestSLSAs == nil {
 			break
 		}
 
@@ -2489,10 +2302,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSLSAs(childComplexity, args["subjects"].([]*model.IDorArtifactInput), args["builtFromList"].([][]*model.IDorArtifactInput), args["builtByList"].([]*model.IDorBuilderInput), args["slsaList"].([]*model.SLSAInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestSLSAs(childComplexity, args["subjects"].([]*model.IDorArtifactInput), args["builtFromList"].([][]*model.IDorArtifactInput), args["builtByList"].([]*model.IDorBuilderInput), args["slsaList"].([]*model.SLSAInputSpec)), true
 	case "Mutation.ingestScorecard":
-		if e.complexity.Mutation.IngestScorecard == nil {
+		if e.ComplexityRoot.Mutation.IngestScorecard == nil {
 			break
 		}
 
@@ -2501,10 +2313,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestScorecard(childComplexity, args["source"].(model.IDorSourceInput), args["scorecard"].(model.ScorecardInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestScorecard(childComplexity, args["source"].(model.IDorSourceInput), args["scorecard"].(model.ScorecardInputSpec)), true
 	case "Mutation.ingestScorecards":
-		if e.complexity.Mutation.IngestScorecards == nil {
+		if e.ComplexityRoot.Mutation.IngestScorecards == nil {
 			break
 		}
 
@@ -2513,10 +2324,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestScorecards(childComplexity, args["sources"].([]*model.IDorSourceInput), args["scorecards"].([]*model.ScorecardInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestScorecards(childComplexity, args["sources"].([]*model.IDorSourceInput), args["scorecards"].([]*model.ScorecardInputSpec)), true
 	case "Mutation.ingestSLSA":
-		if e.complexity.Mutation.IngestSlsa == nil {
+		if e.ComplexityRoot.Mutation.IngestSlsa == nil {
 			break
 		}
 
@@ -2525,10 +2335,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSlsa(childComplexity, args["subject"].(model.IDorArtifactInput), args["builtFrom"].([]*model.IDorArtifactInput), args["builtBy"].(model.IDorBuilderInput), args["slsa"].(model.SLSAInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestSlsa(childComplexity, args["subject"].(model.IDorArtifactInput), args["builtFrom"].([]*model.IDorArtifactInput), args["builtBy"].(model.IDorBuilderInput), args["slsa"].(model.SLSAInputSpec)), true
 	case "Mutation.ingestSource":
-		if e.complexity.Mutation.IngestSource == nil {
+		if e.ComplexityRoot.Mutation.IngestSource == nil {
 			break
 		}
 
@@ -2537,10 +2346,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(model.IDorSourceInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestSource(childComplexity, args["source"].(model.IDorSourceInput)), true
 	case "Mutation.ingestSources":
-		if e.complexity.Mutation.IngestSources == nil {
+		if e.ComplexityRoot.Mutation.IngestSources == nil {
 			break
 		}
 
@@ -2549,10 +2357,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSources(childComplexity, args["sources"].([]*model.IDorSourceInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestSources(childComplexity, args["sources"].([]*model.IDorSourceInput)), true
 	case "Mutation.ingestVEXStatement":
-		if e.complexity.Mutation.IngestVEXStatement == nil {
+		if e.ComplexityRoot.Mutation.IngestVEXStatement == nil {
 			break
 		}
 
@@ -2561,10 +2368,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.IDorVulnerabilityInput), args["vexStatement"].(model.VexStatementInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.IDorVulnerabilityInput), args["vexStatement"].(model.VexStatementInputSpec)), true
 	case "Mutation.ingestVEXStatements":
-		if e.complexity.Mutation.IngestVEXStatements == nil {
+		if e.ComplexityRoot.Mutation.IngestVEXStatements == nil {
 			break
 		}
 
@@ -2573,10 +2379,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVEXStatements(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["vexStatements"].([]*model.VexStatementInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestVEXStatements(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["vexStatements"].([]*model.VexStatementInputSpec)), true
 	case "Mutation.ingestVulnEqual":
-		if e.complexity.Mutation.IngestVulnEqual == nil {
+		if e.ComplexityRoot.Mutation.IngestVulnEqual == nil {
 			break
 		}
 
@@ -2585,10 +2390,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnEqual(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["otherVulnerability"].(model.IDorVulnerabilityInput), args["vulnEqual"].(model.VulnEqualInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestVulnEqual(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["otherVulnerability"].(model.IDorVulnerabilityInput), args["vulnEqual"].(model.VulnEqualInputSpec)), true
 	case "Mutation.ingestVulnEquals":
-		if e.complexity.Mutation.IngestVulnEquals == nil {
+		if e.ComplexityRoot.Mutation.IngestVulnEquals == nil {
 			break
 		}
 
@@ -2597,10 +2401,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnEquals(childComplexity, args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["otherVulnerabilities"].([]*model.IDorVulnerabilityInput), args["vulnEquals"].([]*model.VulnEqualInputSpec)), true
-
+		return e.ComplexityRoot.Mutation.IngestVulnEquals(childComplexity, args["vulnerabilities"].([]*model.IDorVulnerabilityInput), args["otherVulnerabilities"].([]*model.IDorVulnerabilityInput), args["vulnEquals"].([]*model.VulnEqualInputSpec)), true
 	case "Mutation.ingestVulnerabilities":
-		if e.complexity.Mutation.IngestVulnerabilities == nil {
+		if e.ComplexityRoot.Mutation.IngestVulnerabilities == nil {
 			break
 		}
 
@@ -2609,10 +2412,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerabilities(childComplexity, args["vulns"].([]*model.IDorVulnerabilityInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestVulnerabilities(childComplexity, args["vulns"].([]*model.IDorVulnerabilityInput)), true
 	case "Mutation.ingestVulnerability":
-		if e.complexity.Mutation.IngestVulnerability == nil {
+		if e.ComplexityRoot.Mutation.IngestVulnerability == nil {
 			break
 		}
 
@@ -2621,10 +2423,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["vuln"].(model.IDorVulnerabilityInput)), true
-
+		return e.ComplexityRoot.Mutation.IngestVulnerability(childComplexity, args["vuln"].(model.IDorVulnerabilityInput)), true
 	case "Mutation.ingestVulnerabilityMetadata":
-		if e.complexity.Mutation.IngestVulnerabilityMetadata == nil {
+		if e.ComplexityRoot.Mutation.IngestVulnerabilityMetadata == nil {
 			break
 		}
 
@@ -2633,416 +2434,375 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
+		return e.ComplexityRoot.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
 
 	case "NeighborConnection.edges":
-		if e.complexity.NeighborConnection.Edges == nil {
+		if e.ComplexityRoot.NeighborConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.NeighborConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.NeighborConnection.Edges(childComplexity), true
 	case "NeighborConnection.pageInfo":
-		if e.complexity.NeighborConnection.PageInfo == nil {
+		if e.ComplexityRoot.NeighborConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.NeighborConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.NeighborConnection.PageInfo(childComplexity), true
 	case "NeighborConnection.totalCount":
-		if e.complexity.NeighborConnection.TotalCount == nil {
+		if e.ComplexityRoot.NeighborConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.NeighborConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.NeighborConnection.TotalCount(childComplexity), true
 
 	case "NeighborEdge.cursor":
-		if e.complexity.NeighborEdge.Cursor == nil {
+		if e.ComplexityRoot.NeighborEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.NeighborEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.NeighborEdge.Cursor(childComplexity), true
 	case "NeighborEdge.node":
-		if e.complexity.NeighborEdge.Node == nil {
+		if e.ComplexityRoot.NeighborEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.NeighborEdge.Node(childComplexity), true
+		return e.ComplexityRoot.NeighborEdge.Node(childComplexity), true
 
 	case "Package.id":
-		if e.complexity.Package.ID == nil {
+		if e.ComplexityRoot.Package.ID == nil {
 			break
 		}
 
-		return e.complexity.Package.ID(childComplexity), true
-
+		return e.ComplexityRoot.Package.ID(childComplexity), true
 	case "Package.namespaces":
-		if e.complexity.Package.Namespaces == nil {
+		if e.ComplexityRoot.Package.Namespaces == nil {
 			break
 		}
 
-		return e.complexity.Package.Namespaces(childComplexity), true
-
+		return e.ComplexityRoot.Package.Namespaces(childComplexity), true
 	case "Package.type":
-		if e.complexity.Package.Type == nil {
+		if e.ComplexityRoot.Package.Type == nil {
 			break
 		}
 
-		return e.complexity.Package.Type(childComplexity), true
+		return e.ComplexityRoot.Package.Type(childComplexity), true
 
 	case "PackageConnection.edges":
-		if e.complexity.PackageConnection.Edges == nil {
+		if e.ComplexityRoot.PackageConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.PackageConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.PackageConnection.Edges(childComplexity), true
 	case "PackageConnection.pageInfo":
-		if e.complexity.PackageConnection.PageInfo == nil {
+		if e.ComplexityRoot.PackageConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.PackageConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.PackageConnection.PageInfo(childComplexity), true
 	case "PackageConnection.totalCount":
-		if e.complexity.PackageConnection.TotalCount == nil {
+		if e.ComplexityRoot.PackageConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.PackageConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.PackageConnection.TotalCount(childComplexity), true
 
 	case "PackageEdge.cursor":
-		if e.complexity.PackageEdge.Cursor == nil {
+		if e.ComplexityRoot.PackageEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.PackageEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.PackageEdge.Cursor(childComplexity), true
 	case "PackageEdge.node":
-		if e.complexity.PackageEdge.Node == nil {
+		if e.ComplexityRoot.PackageEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.PackageEdge.Node(childComplexity), true
+		return e.ComplexityRoot.PackageEdge.Node(childComplexity), true
 
 	case "PackageIDs.packageNameID":
-		if e.complexity.PackageIDs.PackageNameID == nil {
+		if e.ComplexityRoot.PackageIDs.PackageNameID == nil {
 			break
 		}
 
-		return e.complexity.PackageIDs.PackageNameID(childComplexity), true
-
+		return e.ComplexityRoot.PackageIDs.PackageNameID(childComplexity), true
 	case "PackageIDs.packageNamespaceID":
-		if e.complexity.PackageIDs.PackageNamespaceID == nil {
+		if e.ComplexityRoot.PackageIDs.PackageNamespaceID == nil {
 			break
 		}
 
-		return e.complexity.PackageIDs.PackageNamespaceID(childComplexity), true
-
+		return e.ComplexityRoot.PackageIDs.PackageNamespaceID(childComplexity), true
 	case "PackageIDs.packageTypeID":
-		if e.complexity.PackageIDs.PackageTypeID == nil {
+		if e.ComplexityRoot.PackageIDs.PackageTypeID == nil {
 			break
 		}
 
-		return e.complexity.PackageIDs.PackageTypeID(childComplexity), true
-
+		return e.ComplexityRoot.PackageIDs.PackageTypeID(childComplexity), true
 	case "PackageIDs.packageVersionID":
-		if e.complexity.PackageIDs.PackageVersionID == nil {
+		if e.ComplexityRoot.PackageIDs.PackageVersionID == nil {
 			break
 		}
 
-		return e.complexity.PackageIDs.PackageVersionID(childComplexity), true
+		return e.ComplexityRoot.PackageIDs.PackageVersionID(childComplexity), true
 
 	case "PackageName.id":
-		if e.complexity.PackageName.ID == nil {
+		if e.ComplexityRoot.PackageName.ID == nil {
 			break
 		}
 
-		return e.complexity.PackageName.ID(childComplexity), true
-
+		return e.ComplexityRoot.PackageName.ID(childComplexity), true
 	case "PackageName.name":
-		if e.complexity.PackageName.Name == nil {
+		if e.ComplexityRoot.PackageName.Name == nil {
 			break
 		}
 
-		return e.complexity.PackageName.Name(childComplexity), true
-
+		return e.ComplexityRoot.PackageName.Name(childComplexity), true
 	case "PackageName.versions":
-		if e.complexity.PackageName.Versions == nil {
+		if e.ComplexityRoot.PackageName.Versions == nil {
 			break
 		}
 
-		return e.complexity.PackageName.Versions(childComplexity), true
+		return e.ComplexityRoot.PackageName.Versions(childComplexity), true
 
 	case "PackageNamespace.id":
-		if e.complexity.PackageNamespace.ID == nil {
+		if e.ComplexityRoot.PackageNamespace.ID == nil {
 			break
 		}
 
-		return e.complexity.PackageNamespace.ID(childComplexity), true
-
+		return e.ComplexityRoot.PackageNamespace.ID(childComplexity), true
 	case "PackageNamespace.names":
-		if e.complexity.PackageNamespace.Names == nil {
+		if e.ComplexityRoot.PackageNamespace.Names == nil {
 			break
 		}
 
-		return e.complexity.PackageNamespace.Names(childComplexity), true
-
+		return e.ComplexityRoot.PackageNamespace.Names(childComplexity), true
 	case "PackageNamespace.namespace":
-		if e.complexity.PackageNamespace.Namespace == nil {
+		if e.ComplexityRoot.PackageNamespace.Namespace == nil {
 			break
 		}
 
-		return e.complexity.PackageNamespace.Namespace(childComplexity), true
+		return e.ComplexityRoot.PackageNamespace.Namespace(childComplexity), true
 
 	case "PackageQualifier.key":
-		if e.complexity.PackageQualifier.Key == nil {
+		if e.ComplexityRoot.PackageQualifier.Key == nil {
 			break
 		}
 
-		return e.complexity.PackageQualifier.Key(childComplexity), true
-
+		return e.ComplexityRoot.PackageQualifier.Key(childComplexity), true
 	case "PackageQualifier.value":
-		if e.complexity.PackageQualifier.Value == nil {
+		if e.ComplexityRoot.PackageQualifier.Value == nil {
 			break
 		}
 
-		return e.complexity.PackageQualifier.Value(childComplexity), true
+		return e.ComplexityRoot.PackageQualifier.Value(childComplexity), true
 
 	case "PackageVersion.id":
-		if e.complexity.PackageVersion.ID == nil {
+		if e.ComplexityRoot.PackageVersion.ID == nil {
 			break
 		}
 
-		return e.complexity.PackageVersion.ID(childComplexity), true
-
+		return e.ComplexityRoot.PackageVersion.ID(childComplexity), true
 	case "PackageVersion.purl":
-		if e.complexity.PackageVersion.Purl == nil {
+		if e.ComplexityRoot.PackageVersion.Purl == nil {
 			break
 		}
 
-		return e.complexity.PackageVersion.Purl(childComplexity), true
-
+		return e.ComplexityRoot.PackageVersion.Purl(childComplexity), true
 	case "PackageVersion.qualifiers":
-		if e.complexity.PackageVersion.Qualifiers == nil {
+		if e.ComplexityRoot.PackageVersion.Qualifiers == nil {
 			break
 		}
 
-		return e.complexity.PackageVersion.Qualifiers(childComplexity), true
-
+		return e.ComplexityRoot.PackageVersion.Qualifiers(childComplexity), true
 	case "PackageVersion.subpath":
-		if e.complexity.PackageVersion.Subpath == nil {
+		if e.ComplexityRoot.PackageVersion.Subpath == nil {
 			break
 		}
 
-		return e.complexity.PackageVersion.Subpath(childComplexity), true
-
+		return e.ComplexityRoot.PackageVersion.Subpath(childComplexity), true
 	case "PackageVersion.version":
-		if e.complexity.PackageVersion.Version == nil {
+		if e.ComplexityRoot.PackageVersion.Version == nil {
 			break
 		}
 
-		return e.complexity.PackageVersion.Version(childComplexity), true
+		return e.ComplexityRoot.PackageVersion.Version(childComplexity), true
 
 	case "PageInfo.endCursor":
-		if e.complexity.PageInfo.EndCursor == nil {
+		if e.ComplexityRoot.PageInfo.EndCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.EndCursor(childComplexity), true
-
+		return e.ComplexityRoot.PageInfo.EndCursor(childComplexity), true
 	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
+		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
-
+		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
 	case "PageInfo.startCursor":
-		if e.complexity.PageInfo.StartCursor == nil {
+		if e.ComplexityRoot.PageInfo.StartCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.StartCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.StartCursor(childComplexity), true
 
 	case "PkgEqual.collector":
-		if e.complexity.PkgEqual.Collector == nil {
+		if e.ComplexityRoot.PkgEqual.Collector == nil {
 			break
 		}
 
-		return e.complexity.PkgEqual.Collector(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqual.Collector(childComplexity), true
 	case "PkgEqual.documentRef":
-		if e.complexity.PkgEqual.DocumentRef == nil {
+		if e.ComplexityRoot.PkgEqual.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.PkgEqual.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqual.DocumentRef(childComplexity), true
 	case "PkgEqual.id":
-		if e.complexity.PkgEqual.ID == nil {
+		if e.ComplexityRoot.PkgEqual.ID == nil {
 			break
 		}
 
-		return e.complexity.PkgEqual.ID(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqual.ID(childComplexity), true
 	case "PkgEqual.justification":
-		if e.complexity.PkgEqual.Justification == nil {
+		if e.ComplexityRoot.PkgEqual.Justification == nil {
 			break
 		}
 
-		return e.complexity.PkgEqual.Justification(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqual.Justification(childComplexity), true
 	case "PkgEqual.origin":
-		if e.complexity.PkgEqual.Origin == nil {
+		if e.ComplexityRoot.PkgEqual.Origin == nil {
 			break
 		}
 
-		return e.complexity.PkgEqual.Origin(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqual.Origin(childComplexity), true
 	case "PkgEqual.packages":
-		if e.complexity.PkgEqual.Packages == nil {
+		if e.ComplexityRoot.PkgEqual.Packages == nil {
 			break
 		}
 
-		return e.complexity.PkgEqual.Packages(childComplexity), true
+		return e.ComplexityRoot.PkgEqual.Packages(childComplexity), true
 
 	case "PkgEqualConnection.edges":
-		if e.complexity.PkgEqualConnection.Edges == nil {
+		if e.ComplexityRoot.PkgEqualConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.PkgEqualConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqualConnection.Edges(childComplexity), true
 	case "PkgEqualConnection.pageInfo":
-		if e.complexity.PkgEqualConnection.PageInfo == nil {
+		if e.ComplexityRoot.PkgEqualConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.PkgEqualConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqualConnection.PageInfo(childComplexity), true
 	case "PkgEqualConnection.totalCount":
-		if e.complexity.PkgEqualConnection.TotalCount == nil {
+		if e.ComplexityRoot.PkgEqualConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.PkgEqualConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.PkgEqualConnection.TotalCount(childComplexity), true
 
 	case "PkgEqualEdge.cursor":
-		if e.complexity.PkgEqualEdge.Cursor == nil {
+		if e.ComplexityRoot.PkgEqualEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.PkgEqualEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.PkgEqualEdge.Cursor(childComplexity), true
 	case "PkgEqualEdge.node":
-		if e.complexity.PkgEqualEdge.Node == nil {
+		if e.ComplexityRoot.PkgEqualEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.PkgEqualEdge.Node(childComplexity), true
+		return e.ComplexityRoot.PkgEqualEdge.Node(childComplexity), true
 
 	case "PointOfContact.collector":
-		if e.complexity.PointOfContact.Collector == nil {
+		if e.ComplexityRoot.PointOfContact.Collector == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Collector(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.Collector(childComplexity), true
 	case "PointOfContact.documentRef":
-		if e.complexity.PointOfContact.DocumentRef == nil {
+		if e.ComplexityRoot.PointOfContact.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.DocumentRef(childComplexity), true
 	case "PointOfContact.email":
-		if e.complexity.PointOfContact.Email == nil {
+		if e.ComplexityRoot.PointOfContact.Email == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Email(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.Email(childComplexity), true
 	case "PointOfContact.id":
-		if e.complexity.PointOfContact.ID == nil {
+		if e.ComplexityRoot.PointOfContact.ID == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.ID(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.ID(childComplexity), true
 	case "PointOfContact.info":
-		if e.complexity.PointOfContact.Info == nil {
+		if e.ComplexityRoot.PointOfContact.Info == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Info(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.Info(childComplexity), true
 	case "PointOfContact.justification":
-		if e.complexity.PointOfContact.Justification == nil {
+		if e.ComplexityRoot.PointOfContact.Justification == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Justification(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.Justification(childComplexity), true
 	case "PointOfContact.origin":
-		if e.complexity.PointOfContact.Origin == nil {
+		if e.ComplexityRoot.PointOfContact.Origin == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Origin(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.Origin(childComplexity), true
 	case "PointOfContact.since":
-		if e.complexity.PointOfContact.Since == nil {
+		if e.ComplexityRoot.PointOfContact.Since == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Since(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContact.Since(childComplexity), true
 	case "PointOfContact.subject":
-		if e.complexity.PointOfContact.Subject == nil {
+		if e.ComplexityRoot.PointOfContact.Subject == nil {
 			break
 		}
 
-		return e.complexity.PointOfContact.Subject(childComplexity), true
+		return e.ComplexityRoot.PointOfContact.Subject(childComplexity), true
 
 	case "PointOfContactConnection.edges":
-		if e.complexity.PointOfContactConnection.Edges == nil {
+		if e.ComplexityRoot.PointOfContactConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.PointOfContactConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContactConnection.Edges(childComplexity), true
 	case "PointOfContactConnection.pageInfo":
-		if e.complexity.PointOfContactConnection.PageInfo == nil {
+		if e.ComplexityRoot.PointOfContactConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.PointOfContactConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContactConnection.PageInfo(childComplexity), true
 	case "PointOfContactConnection.totalCount":
-		if e.complexity.PointOfContactConnection.TotalCount == nil {
+		if e.ComplexityRoot.PointOfContactConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.PointOfContactConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.PointOfContactConnection.TotalCount(childComplexity), true
 
 	case "PointOfContactEdge.cursor":
-		if e.complexity.PointOfContactEdge.Cursor == nil {
+		if e.ComplexityRoot.PointOfContactEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.PointOfContactEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.PointOfContactEdge.Cursor(childComplexity), true
 	case "PointOfContactEdge.node":
-		if e.complexity.PointOfContactEdge.Node == nil {
+		if e.ComplexityRoot.PointOfContactEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.PointOfContactEdge.Node(childComplexity), true
+		return e.ComplexityRoot.PointOfContactEdge.Node(childComplexity), true
 
 	case "Query.artifacts":
-		if e.complexity.Query.Artifacts == nil {
+		if e.ComplexityRoot.Query.Artifacts == nil {
 			break
 		}
 
@@ -3051,10 +2811,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Artifacts(childComplexity, args["artifactSpec"].(model.ArtifactSpec)), true
-
+		return e.ComplexityRoot.Query.Artifacts(childComplexity, args["artifactSpec"].(model.ArtifactSpec)), true
 	case "Query.artifactsList":
-		if e.complexity.Query.ArtifactsList == nil {
+		if e.ComplexityRoot.Query.ArtifactsList == nil {
 			break
 		}
 
@@ -3063,10 +2822,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.BatchQueryDepPkgDependency":
-		if e.complexity.Query.BatchQueryDepPkgDependency == nil {
+		if e.ComplexityRoot.Query.BatchQueryDepPkgDependency == nil {
 			break
 		}
 
@@ -3075,10 +2833,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BatchQueryDepPkgDependency(childComplexity, args["pkgIDs"].([]string)), true
-
+		return e.ComplexityRoot.Query.BatchQueryDepPkgDependency(childComplexity, args["pkgIDs"].([]string)), true
 	case "Query.BatchQueryPkgIDCertifyLegal":
-		if e.complexity.Query.BatchQueryPkgIDCertifyLegal == nil {
+		if e.ComplexityRoot.Query.BatchQueryPkgIDCertifyLegal == nil {
 			break
 		}
 
@@ -3087,10 +2844,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BatchQueryPkgIDCertifyLegal(childComplexity, args["pkgIDs"].([]string)), true
-
+		return e.ComplexityRoot.Query.BatchQueryPkgIDCertifyLegal(childComplexity, args["pkgIDs"].([]string)), true
 	case "Query.BatchQueryPkgIDCertifyVuln":
-		if e.complexity.Query.BatchQueryPkgIDCertifyVuln == nil {
+		if e.ComplexityRoot.Query.BatchQueryPkgIDCertifyVuln == nil {
 			break
 		}
 
@@ -3099,10 +2855,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BatchQueryPkgIDCertifyVuln(childComplexity, args["pkgIDs"].([]string)), true
-
+		return e.ComplexityRoot.Query.BatchQueryPkgIDCertifyVuln(childComplexity, args["pkgIDs"].([]string)), true
 	case "Query.BatchQuerySubjectPkgDependency":
-		if e.complexity.Query.BatchQuerySubjectPkgDependency == nil {
+		if e.ComplexityRoot.Query.BatchQuerySubjectPkgDependency == nil {
 			break
 		}
 
@@ -3111,10 +2866,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BatchQuerySubjectPkgDependency(childComplexity, args["pkgIDs"].([]string)), true
-
+		return e.ComplexityRoot.Query.BatchQuerySubjectPkgDependency(childComplexity, args["pkgIDs"].([]string)), true
 	case "Query.builders":
-		if e.complexity.Query.Builders == nil {
+		if e.ComplexityRoot.Query.Builders == nil {
 			break
 		}
 
@@ -3123,10 +2877,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Builders(childComplexity, args["builderSpec"].(model.BuilderSpec)), true
-
+		return e.ComplexityRoot.Query.Builders(childComplexity, args["builderSpec"].(model.BuilderSpec)), true
 	case "Query.buildersList":
-		if e.complexity.Query.BuildersList == nil {
+		if e.ComplexityRoot.Query.BuildersList == nil {
 			break
 		}
 
@@ -3135,10 +2888,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BuildersList(childComplexity, args["builderSpec"].(model.BuilderSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.BuildersList(childComplexity, args["builderSpec"].(model.BuilderSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.CertifyBad":
-		if e.complexity.Query.CertifyBad == nil {
+		if e.ComplexityRoot.Query.CertifyBad == nil {
 			break
 		}
 
@@ -3147,10 +2899,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec)), true
-
+		return e.ComplexityRoot.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec)), true
 	case "Query.CertifyBadList":
-		if e.complexity.Query.CertifyBadList == nil {
+		if e.ComplexityRoot.Query.CertifyBadList == nil {
 			break
 		}
 
@@ -3159,10 +2910,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyBadList(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.CertifyBadList(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.CertifyGood":
-		if e.complexity.Query.CertifyGood == nil {
+		if e.ComplexityRoot.Query.CertifyGood == nil {
 			break
 		}
 
@@ -3171,10 +2921,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec)), true
-
+		return e.ComplexityRoot.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec)), true
 	case "Query.CertifyGoodList":
-		if e.complexity.Query.CertifyGoodList == nil {
+		if e.ComplexityRoot.Query.CertifyGoodList == nil {
 			break
 		}
 
@@ -3183,10 +2932,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyGoodList(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.CertifyGoodList(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.CertifyLegal":
-		if e.complexity.Query.CertifyLegal == nil {
+		if e.ComplexityRoot.Query.CertifyLegal == nil {
 			break
 		}
 
@@ -3195,10 +2943,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyLegal(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec)), true
-
+		return e.ComplexityRoot.Query.CertifyLegal(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec)), true
 	case "Query.CertifyLegalList":
-		if e.complexity.Query.CertifyLegalList == nil {
+		if e.ComplexityRoot.Query.CertifyLegalList == nil {
 			break
 		}
 
@@ -3207,10 +2954,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyLegalList(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.CertifyLegalList(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.CertifyVEXStatement":
-		if e.complexity.Query.CertifyVEXStatement == nil {
+		if e.ComplexityRoot.Query.CertifyVEXStatement == nil {
 			break
 		}
 
@@ -3219,10 +2965,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyVEXStatement(childComplexity, args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec)), true
-
+		return e.ComplexityRoot.Query.CertifyVEXStatement(childComplexity, args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec)), true
 	case "Query.CertifyVEXStatementList":
-		if e.complexity.Query.CertifyVEXStatementList == nil {
+		if e.ComplexityRoot.Query.CertifyVEXStatementList == nil {
 			break
 		}
 
@@ -3231,10 +2976,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyVEXStatementList(childComplexity, args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.CertifyVEXStatementList(childComplexity, args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.CertifyVuln":
-		if e.complexity.Query.CertifyVuln == nil {
+		if e.ComplexityRoot.Query.CertifyVuln == nil {
 			break
 		}
 
@@ -3243,10 +2987,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec)), true
-
+		return e.ComplexityRoot.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec)), true
 	case "Query.CertifyVulnList":
-		if e.complexity.Query.CertifyVulnList == nil {
+		if e.ComplexityRoot.Query.CertifyVulnList == nil {
 			break
 		}
 
@@ -3255,10 +2998,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyVulnList(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.CertifyVulnList(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.findPackagesThatNeedScanning":
-		if e.complexity.Query.FindPackagesThatNeedScanning == nil {
+		if e.ComplexityRoot.Query.FindPackagesThatNeedScanning == nil {
 			break
 		}
 
@@ -3267,10 +3009,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FindPackagesThatNeedScanning(childComplexity, args["queryType"].(model.QueryType), args["lastScan"].(*int)), true
-
+		return e.ComplexityRoot.Query.FindPackagesThatNeedScanning(childComplexity, args["queryType"].(model.QueryType), args["lastScan"].(*int)), true
 	case "Query.findSoftware":
-		if e.complexity.Query.FindSoftware == nil {
+		if e.ComplexityRoot.Query.FindSoftware == nil {
 			break
 		}
 
@@ -3279,10 +3020,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FindSoftware(childComplexity, args["searchText"].(string)), true
-
+		return e.ComplexityRoot.Query.FindSoftware(childComplexity, args["searchText"].(string)), true
 	case "Query.findSoftwareList":
-		if e.complexity.Query.FindSoftwareList == nil {
+		if e.ComplexityRoot.Query.FindSoftwareList == nil {
 			break
 		}
 
@@ -3291,10 +3031,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FindSoftwareList(childComplexity, args["searchText"].(string), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.FindSoftwareList(childComplexity, args["searchText"].(string), args["after"].(*string), args["first"].(*int)), true
 	case "Query.HasMetadata":
-		if e.complexity.Query.HasMetadata == nil {
+		if e.ComplexityRoot.Query.HasMetadata == nil {
 			break
 		}
 
@@ -3303,10 +3042,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec)), true
-
+		return e.ComplexityRoot.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec)), true
 	case "Query.HasMetadataList":
-		if e.complexity.Query.HasMetadataList == nil {
+		if e.ComplexityRoot.Query.HasMetadataList == nil {
 			break
 		}
 
@@ -3315,10 +3053,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasMetadataList(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.HasMetadataList(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.HasSBOMList":
-		if e.complexity.Query.HasSBOMList == nil {
+		if e.ComplexityRoot.Query.HasSBOMList == nil {
 			break
 		}
 
@@ -3327,10 +3064,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSBOMList(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.HasSBOMList(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.HasSLSAList":
-		if e.complexity.Query.HasSLSAList == nil {
+		if e.ComplexityRoot.Query.HasSLSAList == nil {
 			break
 		}
 
@@ -3339,10 +3075,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSLSAList(childComplexity, args["hasSLSASpec"].(model.HasSLSASpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.HasSLSAList(childComplexity, args["hasSLSASpec"].(model.HasSLSASpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.HasSBOM":
-		if e.complexity.Query.HasSbom == nil {
+		if e.ComplexityRoot.Query.HasSbom == nil {
 			break
 		}
 
@@ -3351,10 +3086,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSbom(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec)), true
-
+		return e.ComplexityRoot.Query.HasSbom(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec)), true
 	case "Query.HasSLSA":
-		if e.complexity.Query.HasSlsa == nil {
+		if e.ComplexityRoot.Query.HasSlsa == nil {
 			break
 		}
 
@@ -3363,10 +3097,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSlsa(childComplexity, args["hasSLSASpec"].(model.HasSLSASpec)), true
-
+		return e.ComplexityRoot.Query.HasSlsa(childComplexity, args["hasSLSASpec"].(model.HasSLSASpec)), true
 	case "Query.HasSourceAt":
-		if e.complexity.Query.HasSourceAt == nil {
+		if e.ComplexityRoot.Query.HasSourceAt == nil {
 			break
 		}
 
@@ -3375,10 +3108,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec)), true
-
+		return e.ComplexityRoot.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec)), true
 	case "Query.HasSourceAtList":
-		if e.complexity.Query.HasSourceAtList == nil {
+		if e.ComplexityRoot.Query.HasSourceAtList == nil {
 			break
 		}
 
@@ -3387,10 +3119,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSourceAtList(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.HasSourceAtList(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.HashEqual":
-		if e.complexity.Query.HashEqual == nil {
+		if e.ComplexityRoot.Query.HashEqual == nil {
 			break
 		}
 
@@ -3399,10 +3130,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HashEqual(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec)), true
-
+		return e.ComplexityRoot.Query.HashEqual(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec)), true
 	case "Query.HashEqualList":
-		if e.complexity.Query.HashEqualList == nil {
+		if e.ComplexityRoot.Query.HashEqualList == nil {
 			break
 		}
 
@@ -3411,10 +3141,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.HashEqualList(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec), args["after"].(*string), args["first"].(*int)), true
+		return e.ComplexityRoot.Query.HashEqualList(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.IsDependency":
-		if e.complexity.Query.IsDependency == nil {
+		if e.ComplexityRoot.Query.IsDependency == nil {
 			break
 		}
 
@@ -3423,10 +3153,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(model.IsDependencySpec)), true
-
+		return e.ComplexityRoot.Query.IsDependency(childComplexity, args["isDependencySpec"].(model.IsDependencySpec)), true
 	case "Query.IsDependencyList":
-		if e.complexity.Query.IsDependencyList == nil {
+		if e.ComplexityRoot.Query.IsDependencyList == nil {
 			break
 		}
 
@@ -3435,10 +3164,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IsDependencyList(childComplexity, args["isDependencySpec"].(model.IsDependencySpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.IsDependencyList(childComplexity, args["isDependencySpec"].(model.IsDependencySpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.IsOccurrence":
-		if e.complexity.Query.IsOccurrence == nil {
+		if e.ComplexityRoot.Query.IsOccurrence == nil {
 			break
 		}
 
@@ -3447,10 +3175,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec)), true
-
+		return e.ComplexityRoot.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec)), true
 	case "Query.IsOccurrenceList":
-		if e.complexity.Query.IsOccurrenceList == nil {
+		if e.ComplexityRoot.Query.IsOccurrenceList == nil {
 			break
 		}
 
@@ -3459,10 +3186,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IsOccurrenceList(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.IsOccurrenceList(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.licenseList":
-		if e.complexity.Query.LicenseList == nil {
+		if e.ComplexityRoot.Query.LicenseList == nil {
 			break
 		}
 
@@ -3471,10 +3197,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.LicenseList(childComplexity, args["licenseSpec"].(model.LicenseSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.LicenseList(childComplexity, args["licenseSpec"].(model.LicenseSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.licenses":
-		if e.complexity.Query.Licenses == nil {
+		if e.ComplexityRoot.Query.Licenses == nil {
 			break
 		}
 
@@ -3483,10 +3208,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Licenses(childComplexity, args["licenseSpec"].(model.LicenseSpec)), true
-
+		return e.ComplexityRoot.Query.Licenses(childComplexity, args["licenseSpec"].(model.LicenseSpec)), true
 	case "Query.neighbors":
-		if e.complexity.Query.Neighbors == nil {
+		if e.ComplexityRoot.Query.Neighbors == nil {
 			break
 		}
 
@@ -3495,10 +3219,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge)), true
-
+		return e.ComplexityRoot.Query.Neighbors(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge)), true
 	case "Query.neighborsList":
-		if e.complexity.Query.NeighborsList == nil {
+		if e.ComplexityRoot.Query.NeighborsList == nil {
 			break
 		}
 
@@ -3507,10 +3230,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.NeighborsList(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.NeighborsList(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge), args["after"].(*string), args["first"].(*int)), true
 	case "Query.node":
-		if e.complexity.Query.Node == nil {
+		if e.ComplexityRoot.Query.Node == nil {
 			break
 		}
 
@@ -3519,10 +3241,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Node(childComplexity, args["node"].(string)), true
-
+		return e.ComplexityRoot.Query.Node(childComplexity, args["node"].(string)), true
 	case "Query.nodes":
-		if e.complexity.Query.Nodes == nil {
+		if e.ComplexityRoot.Query.Nodes == nil {
 			break
 		}
 
@@ -3531,10 +3252,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Nodes(childComplexity, args["nodes"].([]string)), true
-
+		return e.ComplexityRoot.Query.Nodes(childComplexity, args["nodes"].([]string)), true
 	case "Query.packages":
-		if e.complexity.Query.Packages == nil {
+		if e.ComplexityRoot.Query.Packages == nil {
 			break
 		}
 
@@ -3543,10 +3263,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(model.PkgSpec)), true
-
+		return e.ComplexityRoot.Query.Packages(childComplexity, args["pkgSpec"].(model.PkgSpec)), true
 	case "Query.packagesList":
-		if e.complexity.Query.PackagesList == nil {
+		if e.ComplexityRoot.Query.PackagesList == nil {
 			break
 		}
 
@@ -3555,10 +3274,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.PackagesList(childComplexity, args["pkgSpec"].(model.PkgSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.PackagesList(childComplexity, args["pkgSpec"].(model.PkgSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.path":
-		if e.complexity.Query.Path == nil {
+		if e.ComplexityRoot.Query.Path == nil {
 			break
 		}
 
@@ -3567,10 +3285,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int), args["usingOnly"].([]model.Edge)), true
-
+		return e.ComplexityRoot.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int), args["usingOnly"].([]model.Edge)), true
 	case "Query.PkgEqual":
-		if e.complexity.Query.PkgEqual == nil {
+		if e.ComplexityRoot.Query.PkgEqual == nil {
 			break
 		}
 
@@ -3579,10 +3296,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec)), true
-
+		return e.ComplexityRoot.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec)), true
 	case "Query.PkgEqualList":
-		if e.complexity.Query.PkgEqualList == nil {
+		if e.ComplexityRoot.Query.PkgEqualList == nil {
 			break
 		}
 
@@ -3591,10 +3307,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.PkgEqualList(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.PkgEqualList(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.PointOfContact":
-		if e.complexity.Query.PointOfContact == nil {
+		if e.ComplexityRoot.Query.PointOfContact == nil {
 			break
 		}
 
@@ -3603,10 +3318,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec)), true
-
+		return e.ComplexityRoot.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec)), true
 	case "Query.PointOfContactList":
-		if e.complexity.Query.PointOfContactList == nil {
+		if e.ComplexityRoot.Query.PointOfContactList == nil {
 			break
 		}
 
@@ -3615,10 +3329,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.PointOfContactList(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.PointOfContactList(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.queryPackagesListForScan":
-		if e.complexity.Query.QueryPackagesListForScan == nil {
+		if e.ComplexityRoot.Query.QueryPackagesListForScan == nil {
 			break
 		}
 
@@ -3627,10 +3340,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.QueryPackagesListForScan(childComplexity, args["pkgIDs"].([]string), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.QueryPackagesListForScan(childComplexity, args["pkgIDs"].([]string), args["after"].(*string), args["first"].(*int)), true
 	case "Query.scorecards":
-		if e.complexity.Query.Scorecards == nil {
+		if e.ComplexityRoot.Query.Scorecards == nil {
 			break
 		}
 
@@ -3639,10 +3351,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Scorecards(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec)), true
-
+		return e.ComplexityRoot.Query.Scorecards(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec)), true
 	case "Query.scorecardsList":
-		if e.complexity.Query.ScorecardsList == nil {
+		if e.ComplexityRoot.Query.ScorecardsList == nil {
 			break
 		}
 
@@ -3651,10 +3362,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ScorecardsList(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.ScorecardsList(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.sources":
-		if e.complexity.Query.Sources == nil {
+		if e.ComplexityRoot.Query.Sources == nil {
 			break
 		}
 
@@ -3663,10 +3373,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(model.SourceSpec)), true
-
+		return e.ComplexityRoot.Query.Sources(childComplexity, args["sourceSpec"].(model.SourceSpec)), true
 	case "Query.sourcesList":
-		if e.complexity.Query.SourcesList == nil {
+		if e.ComplexityRoot.Query.SourcesList == nil {
 			break
 		}
 
@@ -3675,10 +3384,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SourcesList(childComplexity, args["sourceSpec"].(model.SourceSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.SourcesList(childComplexity, args["sourceSpec"].(model.SourceSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.vulnEqual":
-		if e.complexity.Query.VulnEqual == nil {
+		if e.ComplexityRoot.Query.VulnEqual == nil {
 			break
 		}
 
@@ -3687,10 +3395,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VulnEqual(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec)), true
-
+		return e.ComplexityRoot.Query.VulnEqual(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec)), true
 	case "Query.vulnEqualList":
-		if e.complexity.Query.VulnEqualList == nil {
+		if e.ComplexityRoot.Query.VulnEqualList == nil {
 			break
 		}
 
@@ -3699,10 +3406,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VulnEqualList(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.VulnEqualList(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.vulnerabilities":
-		if e.complexity.Query.Vulnerabilities == nil {
+		if e.ComplexityRoot.Query.Vulnerabilities == nil {
 			break
 		}
 
@@ -3711,10 +3417,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Vulnerabilities(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec)), true
-
+		return e.ComplexityRoot.Query.Vulnerabilities(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec)), true
 	case "Query.vulnerabilityList":
-		if e.complexity.Query.VulnerabilityList == nil {
+		if e.ComplexityRoot.Query.VulnerabilityList == nil {
 			break
 		}
 
@@ -3723,10 +3428,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VulnerabilityList(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec), args["after"].(*string), args["first"].(*int)), true
-
+		return e.ComplexityRoot.Query.VulnerabilityList(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.vulnerabilityMetadata":
-		if e.complexity.Query.VulnerabilityMetadata == nil {
+		if e.ComplexityRoot.Query.VulnerabilityMetadata == nil {
 			break
 		}
 
@@ -3735,10 +3439,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VulnerabilityMetadata(childComplexity, args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec)), true
-
+		return e.ComplexityRoot.Query.VulnerabilityMetadata(childComplexity, args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec)), true
 	case "Query.vulnerabilityMetadataList":
-		if e.complexity.Query.VulnerabilityMetadataList == nil {
+		if e.ComplexityRoot.Query.VulnerabilityMetadataList == nil {
 			break
 		}
 
@@ -3747,644 +3450,578 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VulnerabilityMetadataList(childComplexity, args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), args["after"].(*string), args["first"].(*int)), true
+		return e.ComplexityRoot.Query.VulnerabilityMetadataList(childComplexity, args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "SLSA.buildType":
-		if e.complexity.SLSA.BuildType == nil {
+		if e.ComplexityRoot.SLSA.BuildType == nil {
 			break
 		}
 
-		return e.complexity.SLSA.BuildType(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.BuildType(childComplexity), true
 	case "SLSA.builtBy":
-		if e.complexity.SLSA.BuiltBy == nil {
+		if e.ComplexityRoot.SLSA.BuiltBy == nil {
 			break
 		}
 
-		return e.complexity.SLSA.BuiltBy(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.BuiltBy(childComplexity), true
 	case "SLSA.builtFrom":
-		if e.complexity.SLSA.BuiltFrom == nil {
+		if e.ComplexityRoot.SLSA.BuiltFrom == nil {
 			break
 		}
 
-		return e.complexity.SLSA.BuiltFrom(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.BuiltFrom(childComplexity), true
 	case "SLSA.collector":
-		if e.complexity.SLSA.Collector == nil {
+		if e.ComplexityRoot.SLSA.Collector == nil {
 			break
 		}
 
-		return e.complexity.SLSA.Collector(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.Collector(childComplexity), true
 	case "SLSA.documentRef":
-		if e.complexity.SLSA.DocumentRef == nil {
+		if e.ComplexityRoot.SLSA.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.SLSA.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.DocumentRef(childComplexity), true
 	case "SLSA.finishedOn":
-		if e.complexity.SLSA.FinishedOn == nil {
+		if e.ComplexityRoot.SLSA.FinishedOn == nil {
 			break
 		}
 
-		return e.complexity.SLSA.FinishedOn(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.FinishedOn(childComplexity), true
 	case "SLSA.origin":
-		if e.complexity.SLSA.Origin == nil {
+		if e.ComplexityRoot.SLSA.Origin == nil {
 			break
 		}
 
-		return e.complexity.SLSA.Origin(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.Origin(childComplexity), true
 	case "SLSA.slsaPredicate":
-		if e.complexity.SLSA.SlsaPredicate == nil {
+		if e.ComplexityRoot.SLSA.SlsaPredicate == nil {
 			break
 		}
 
-		return e.complexity.SLSA.SlsaPredicate(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.SlsaPredicate(childComplexity), true
 	case "SLSA.slsaVersion":
-		if e.complexity.SLSA.SlsaVersion == nil {
+		if e.ComplexityRoot.SLSA.SlsaVersion == nil {
 			break
 		}
 
-		return e.complexity.SLSA.SlsaVersion(childComplexity), true
-
+		return e.ComplexityRoot.SLSA.SlsaVersion(childComplexity), true
 	case "SLSA.startedOn":
-		if e.complexity.SLSA.StartedOn == nil {
+		if e.ComplexityRoot.SLSA.StartedOn == nil {
 			break
 		}
 
-		return e.complexity.SLSA.StartedOn(childComplexity), true
+		return e.ComplexityRoot.SLSA.StartedOn(childComplexity), true
 
 	case "SLSAPredicate.key":
-		if e.complexity.SLSAPredicate.Key == nil {
+		if e.ComplexityRoot.SLSAPredicate.Key == nil {
 			break
 		}
 
-		return e.complexity.SLSAPredicate.Key(childComplexity), true
-
+		return e.ComplexityRoot.SLSAPredicate.Key(childComplexity), true
 	case "SLSAPredicate.value":
-		if e.complexity.SLSAPredicate.Value == nil {
+		if e.ComplexityRoot.SLSAPredicate.Value == nil {
 			break
 		}
 
-		return e.complexity.SLSAPredicate.Value(childComplexity), true
+		return e.ComplexityRoot.SLSAPredicate.Value(childComplexity), true
 
 	case "ScanMetadata.collector":
-		if e.complexity.ScanMetadata.Collector == nil {
+		if e.ComplexityRoot.ScanMetadata.Collector == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.Collector(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.Collector(childComplexity), true
 	case "ScanMetadata.dbUri":
-		if e.complexity.ScanMetadata.DbURI == nil {
+		if e.ComplexityRoot.ScanMetadata.DbURI == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.DbURI(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.DbURI(childComplexity), true
 	case "ScanMetadata.dbVersion":
-		if e.complexity.ScanMetadata.DbVersion == nil {
+		if e.ComplexityRoot.ScanMetadata.DbVersion == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.DbVersion(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.DbVersion(childComplexity), true
 	case "ScanMetadata.documentRef":
-		if e.complexity.ScanMetadata.DocumentRef == nil {
+		if e.ComplexityRoot.ScanMetadata.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.DocumentRef(childComplexity), true
 	case "ScanMetadata.origin":
-		if e.complexity.ScanMetadata.Origin == nil {
+		if e.ComplexityRoot.ScanMetadata.Origin == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.Origin(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.Origin(childComplexity), true
 	case "ScanMetadata.scannerUri":
-		if e.complexity.ScanMetadata.ScannerURI == nil {
+		if e.ComplexityRoot.ScanMetadata.ScannerURI == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.ScannerURI(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.ScannerURI(childComplexity), true
 	case "ScanMetadata.scannerVersion":
-		if e.complexity.ScanMetadata.ScannerVersion == nil {
+		if e.ComplexityRoot.ScanMetadata.ScannerVersion == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.ScannerVersion(childComplexity), true
-
+		return e.ComplexityRoot.ScanMetadata.ScannerVersion(childComplexity), true
 	case "ScanMetadata.timeScanned":
-		if e.complexity.ScanMetadata.TimeScanned == nil {
+		if e.ComplexityRoot.ScanMetadata.TimeScanned == nil {
 			break
 		}
 
-		return e.complexity.ScanMetadata.TimeScanned(childComplexity), true
+		return e.ComplexityRoot.ScanMetadata.TimeScanned(childComplexity), true
 
 	case "Scorecard.aggregateScore":
-		if e.complexity.Scorecard.AggregateScore == nil {
+		if e.ComplexityRoot.Scorecard.AggregateScore == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.AggregateScore(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.AggregateScore(childComplexity), true
 	case "Scorecard.checks":
-		if e.complexity.Scorecard.Checks == nil {
+		if e.ComplexityRoot.Scorecard.Checks == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.Checks(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.Checks(childComplexity), true
 	case "Scorecard.collector":
-		if e.complexity.Scorecard.Collector == nil {
+		if e.ComplexityRoot.Scorecard.Collector == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.Collector(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.Collector(childComplexity), true
 	case "Scorecard.documentRef":
-		if e.complexity.Scorecard.DocumentRef == nil {
+		if e.ComplexityRoot.Scorecard.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.DocumentRef(childComplexity), true
 	case "Scorecard.origin":
-		if e.complexity.Scorecard.Origin == nil {
+		if e.ComplexityRoot.Scorecard.Origin == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.Origin(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.Origin(childComplexity), true
 	case "Scorecard.scorecardCommit":
-		if e.complexity.Scorecard.ScorecardCommit == nil {
+		if e.ComplexityRoot.Scorecard.ScorecardCommit == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.ScorecardCommit(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.ScorecardCommit(childComplexity), true
 	case "Scorecard.scorecardVersion":
-		if e.complexity.Scorecard.ScorecardVersion == nil {
+		if e.ComplexityRoot.Scorecard.ScorecardVersion == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.ScorecardVersion(childComplexity), true
-
+		return e.ComplexityRoot.Scorecard.ScorecardVersion(childComplexity), true
 	case "Scorecard.timeScanned":
-		if e.complexity.Scorecard.TimeScanned == nil {
+		if e.ComplexityRoot.Scorecard.TimeScanned == nil {
 			break
 		}
 
-		return e.complexity.Scorecard.TimeScanned(childComplexity), true
+		return e.ComplexityRoot.Scorecard.TimeScanned(childComplexity), true
 
 	case "ScorecardCheck.check":
-		if e.complexity.ScorecardCheck.Check == nil {
+		if e.ComplexityRoot.ScorecardCheck.Check == nil {
 			break
 		}
 
-		return e.complexity.ScorecardCheck.Check(childComplexity), true
-
+		return e.ComplexityRoot.ScorecardCheck.Check(childComplexity), true
 	case "ScorecardCheck.score":
-		if e.complexity.ScorecardCheck.Score == nil {
+		if e.ComplexityRoot.ScorecardCheck.Score == nil {
 			break
 		}
 
-		return e.complexity.ScorecardCheck.Score(childComplexity), true
+		return e.ComplexityRoot.ScorecardCheck.Score(childComplexity), true
 
 	case "SoftwareEdge.cursor":
-		if e.complexity.SoftwareEdge.Cursor == nil {
+		if e.ComplexityRoot.SoftwareEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.SoftwareEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.SoftwareEdge.Cursor(childComplexity), true
 	case "SoftwareEdge.node":
-		if e.complexity.SoftwareEdge.Node == nil {
+		if e.ComplexityRoot.SoftwareEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.SoftwareEdge.Node(childComplexity), true
+		return e.ComplexityRoot.SoftwareEdge.Node(childComplexity), true
 
 	case "Source.id":
-		if e.complexity.Source.ID == nil {
+		if e.ComplexityRoot.Source.ID == nil {
 			break
 		}
 
-		return e.complexity.Source.ID(childComplexity), true
-
+		return e.ComplexityRoot.Source.ID(childComplexity), true
 	case "Source.namespaces":
-		if e.complexity.Source.Namespaces == nil {
+		if e.ComplexityRoot.Source.Namespaces == nil {
 			break
 		}
 
-		return e.complexity.Source.Namespaces(childComplexity), true
-
+		return e.ComplexityRoot.Source.Namespaces(childComplexity), true
 	case "Source.type":
-		if e.complexity.Source.Type == nil {
+		if e.ComplexityRoot.Source.Type == nil {
 			break
 		}
 
-		return e.complexity.Source.Type(childComplexity), true
+		return e.ComplexityRoot.Source.Type(childComplexity), true
 
 	case "SourceConnection.edges":
-		if e.complexity.SourceConnection.Edges == nil {
+		if e.ComplexityRoot.SourceConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.SourceConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.SourceConnection.Edges(childComplexity), true
 	case "SourceConnection.pageInfo":
-		if e.complexity.SourceConnection.PageInfo == nil {
+		if e.ComplexityRoot.SourceConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.SourceConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.SourceConnection.PageInfo(childComplexity), true
 	case "SourceConnection.totalCount":
-		if e.complexity.SourceConnection.TotalCount == nil {
+		if e.ComplexityRoot.SourceConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.SourceConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.SourceConnection.TotalCount(childComplexity), true
 
 	case "SourceEdge.cursor":
-		if e.complexity.SourceEdge.Cursor == nil {
+		if e.ComplexityRoot.SourceEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.SourceEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.SourceEdge.Cursor(childComplexity), true
 	case "SourceEdge.node":
-		if e.complexity.SourceEdge.Node == nil {
+		if e.ComplexityRoot.SourceEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.SourceEdge.Node(childComplexity), true
+		return e.ComplexityRoot.SourceEdge.Node(childComplexity), true
 
 	case "SourceIDs.sourceNameID":
-		if e.complexity.SourceIDs.SourceNameID == nil {
+		if e.ComplexityRoot.SourceIDs.SourceNameID == nil {
 			break
 		}
 
-		return e.complexity.SourceIDs.SourceNameID(childComplexity), true
-
+		return e.ComplexityRoot.SourceIDs.SourceNameID(childComplexity), true
 	case "SourceIDs.sourceNamespaceID":
-		if e.complexity.SourceIDs.SourceNamespaceID == nil {
+		if e.ComplexityRoot.SourceIDs.SourceNamespaceID == nil {
 			break
 		}
 
-		return e.complexity.SourceIDs.SourceNamespaceID(childComplexity), true
-
+		return e.ComplexityRoot.SourceIDs.SourceNamespaceID(childComplexity), true
 	case "SourceIDs.sourceTypeID":
-		if e.complexity.SourceIDs.SourceTypeID == nil {
+		if e.ComplexityRoot.SourceIDs.SourceTypeID == nil {
 			break
 		}
 
-		return e.complexity.SourceIDs.SourceTypeID(childComplexity), true
+		return e.ComplexityRoot.SourceIDs.SourceTypeID(childComplexity), true
 
 	case "SourceName.commit":
-		if e.complexity.SourceName.Commit == nil {
+		if e.ComplexityRoot.SourceName.Commit == nil {
 			break
 		}
 
-		return e.complexity.SourceName.Commit(childComplexity), true
-
+		return e.ComplexityRoot.SourceName.Commit(childComplexity), true
 	case "SourceName.id":
-		if e.complexity.SourceName.ID == nil {
+		if e.ComplexityRoot.SourceName.ID == nil {
 			break
 		}
 
-		return e.complexity.SourceName.ID(childComplexity), true
-
+		return e.ComplexityRoot.SourceName.ID(childComplexity), true
 	case "SourceName.name":
-		if e.complexity.SourceName.Name == nil {
+		if e.ComplexityRoot.SourceName.Name == nil {
 			break
 		}
 
-		return e.complexity.SourceName.Name(childComplexity), true
-
+		return e.ComplexityRoot.SourceName.Name(childComplexity), true
 	case "SourceName.tag":
-		if e.complexity.SourceName.Tag == nil {
+		if e.ComplexityRoot.SourceName.Tag == nil {
 			break
 		}
 
-		return e.complexity.SourceName.Tag(childComplexity), true
+		return e.ComplexityRoot.SourceName.Tag(childComplexity), true
 
 	case "SourceNamespace.id":
-		if e.complexity.SourceNamespace.ID == nil {
+		if e.ComplexityRoot.SourceNamespace.ID == nil {
 			break
 		}
 
-		return e.complexity.SourceNamespace.ID(childComplexity), true
-
+		return e.ComplexityRoot.SourceNamespace.ID(childComplexity), true
 	case "SourceNamespace.names":
-		if e.complexity.SourceNamespace.Names == nil {
+		if e.ComplexityRoot.SourceNamespace.Names == nil {
 			break
 		}
 
-		return e.complexity.SourceNamespace.Names(childComplexity), true
-
+		return e.ComplexityRoot.SourceNamespace.Names(childComplexity), true
 	case "SourceNamespace.namespace":
-		if e.complexity.SourceNamespace.Namespace == nil {
+		if e.ComplexityRoot.SourceNamespace.Namespace == nil {
 			break
 		}
 
-		return e.complexity.SourceNamespace.Namespace(childComplexity), true
+		return e.ComplexityRoot.SourceNamespace.Namespace(childComplexity), true
 
 	case "VEXConnection.edges":
-		if e.complexity.VEXConnection.Edges == nil {
+		if e.ComplexityRoot.VEXConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.VEXConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.VEXConnection.Edges(childComplexity), true
 	case "VEXConnection.pageInfo":
-		if e.complexity.VEXConnection.PageInfo == nil {
+		if e.ComplexityRoot.VEXConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.VEXConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.VEXConnection.PageInfo(childComplexity), true
 	case "VEXConnection.totalCount":
-		if e.complexity.VEXConnection.TotalCount == nil {
+		if e.ComplexityRoot.VEXConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.VEXConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.VEXConnection.TotalCount(childComplexity), true
 
 	case "VEXEdge.cursor":
-		if e.complexity.VEXEdge.Cursor == nil {
+		if e.ComplexityRoot.VEXEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.VEXEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.VEXEdge.Cursor(childComplexity), true
 	case "VEXEdge.node":
-		if e.complexity.VEXEdge.Node == nil {
+		if e.ComplexityRoot.VEXEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.VEXEdge.Node(childComplexity), true
+		return e.ComplexityRoot.VEXEdge.Node(childComplexity), true
 
 	case "VulnEqual.collector":
-		if e.complexity.VulnEqual.Collector == nil {
+		if e.ComplexityRoot.VulnEqual.Collector == nil {
 			break
 		}
 
-		return e.complexity.VulnEqual.Collector(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqual.Collector(childComplexity), true
 	case "VulnEqual.documentRef":
-		if e.complexity.VulnEqual.DocumentRef == nil {
+		if e.ComplexityRoot.VulnEqual.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.VulnEqual.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqual.DocumentRef(childComplexity), true
 	case "VulnEqual.id":
-		if e.complexity.VulnEqual.ID == nil {
+		if e.ComplexityRoot.VulnEqual.ID == nil {
 			break
 		}
 
-		return e.complexity.VulnEqual.ID(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqual.ID(childComplexity), true
 	case "VulnEqual.justification":
-		if e.complexity.VulnEqual.Justification == nil {
+		if e.ComplexityRoot.VulnEqual.Justification == nil {
 			break
 		}
 
-		return e.complexity.VulnEqual.Justification(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqual.Justification(childComplexity), true
 	case "VulnEqual.origin":
-		if e.complexity.VulnEqual.Origin == nil {
+		if e.ComplexityRoot.VulnEqual.Origin == nil {
 			break
 		}
 
-		return e.complexity.VulnEqual.Origin(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqual.Origin(childComplexity), true
 	case "VulnEqual.vulnerabilities":
-		if e.complexity.VulnEqual.Vulnerabilities == nil {
+		if e.ComplexityRoot.VulnEqual.Vulnerabilities == nil {
 			break
 		}
 
-		return e.complexity.VulnEqual.Vulnerabilities(childComplexity), true
+		return e.ComplexityRoot.VulnEqual.Vulnerabilities(childComplexity), true
 
 	case "VulnEqualConnection.edges":
-		if e.complexity.VulnEqualConnection.Edges == nil {
+		if e.ComplexityRoot.VulnEqualConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.VulnEqualConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqualConnection.Edges(childComplexity), true
 	case "VulnEqualConnection.pageInfo":
-		if e.complexity.VulnEqualConnection.PageInfo == nil {
+		if e.ComplexityRoot.VulnEqualConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.VulnEqualConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqualConnection.PageInfo(childComplexity), true
 	case "VulnEqualConnection.totalCount":
-		if e.complexity.VulnEqualConnection.TotalCount == nil {
+		if e.ComplexityRoot.VulnEqualConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.VulnEqualConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.VulnEqualConnection.TotalCount(childComplexity), true
 
 	case "VulnEqualEdge.cursor":
-		if e.complexity.VulnEqualEdge.Cursor == nil {
+		if e.ComplexityRoot.VulnEqualEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.VulnEqualEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.VulnEqualEdge.Cursor(childComplexity), true
 	case "VulnEqualEdge.node":
-		if e.complexity.VulnEqualEdge.Node == nil {
+		if e.ComplexityRoot.VulnEqualEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.VulnEqualEdge.Node(childComplexity), true
+		return e.ComplexityRoot.VulnEqualEdge.Node(childComplexity), true
 
 	case "Vulnerability.id":
-		if e.complexity.Vulnerability.ID == nil {
+		if e.ComplexityRoot.Vulnerability.ID == nil {
 			break
 		}
 
-		return e.complexity.Vulnerability.ID(childComplexity), true
-
+		return e.ComplexityRoot.Vulnerability.ID(childComplexity), true
 	case "Vulnerability.type":
-		if e.complexity.Vulnerability.Type == nil {
+		if e.ComplexityRoot.Vulnerability.Type == nil {
 			break
 		}
 
-		return e.complexity.Vulnerability.Type(childComplexity), true
-
+		return e.ComplexityRoot.Vulnerability.Type(childComplexity), true
 	case "Vulnerability.vulnerabilityIDs":
-		if e.complexity.Vulnerability.VulnerabilityIDs == nil {
+		if e.ComplexityRoot.Vulnerability.VulnerabilityIDs == nil {
 			break
 		}
 
-		return e.complexity.Vulnerability.VulnerabilityIDs(childComplexity), true
+		return e.ComplexityRoot.Vulnerability.VulnerabilityIDs(childComplexity), true
 
 	case "VulnerabilityConnection.edges":
-		if e.complexity.VulnerabilityConnection.Edges == nil {
+		if e.ComplexityRoot.VulnerabilityConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityConnection.Edges(childComplexity), true
 	case "VulnerabilityConnection.pageInfo":
-		if e.complexity.VulnerabilityConnection.PageInfo == nil {
+		if e.ComplexityRoot.VulnerabilityConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityConnection.PageInfo(childComplexity), true
 	case "VulnerabilityConnection.totalCount":
-		if e.complexity.VulnerabilityConnection.TotalCount == nil {
+		if e.ComplexityRoot.VulnerabilityConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityConnection.TotalCount(childComplexity), true
 
 	case "VulnerabilityEdge.cursor":
-		if e.complexity.VulnerabilityEdge.Cursor == nil {
+		if e.ComplexityRoot.VulnerabilityEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityEdge.Cursor(childComplexity), true
 	case "VulnerabilityEdge.node":
-		if e.complexity.VulnerabilityEdge.Node == nil {
+		if e.ComplexityRoot.VulnerabilityEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityEdge.Node(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityEdge.Node(childComplexity), true
 
 	case "VulnerabilityID.id":
-		if e.complexity.VulnerabilityID.ID == nil {
+		if e.ComplexityRoot.VulnerabilityID.ID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityID.ID(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityID.ID(childComplexity), true
 	case "VulnerabilityID.vulnerabilityID":
-		if e.complexity.VulnerabilityID.VulnerabilityID == nil {
+		if e.ComplexityRoot.VulnerabilityID.VulnerabilityID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityID.VulnerabilityID(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityID.VulnerabilityID(childComplexity), true
 
 	case "VulnerabilityIDs.vulnerabilityNodeID":
-		if e.complexity.VulnerabilityIDs.VulnerabilityNodeID == nil {
+		if e.ComplexityRoot.VulnerabilityIDs.VulnerabilityNodeID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityIDs.VulnerabilityNodeID(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityIDs.VulnerabilityNodeID(childComplexity), true
 	case "VulnerabilityIDs.vulnerabilityTypeID":
-		if e.complexity.VulnerabilityIDs.VulnerabilityTypeID == nil {
+		if e.ComplexityRoot.VulnerabilityIDs.VulnerabilityTypeID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityIDs.VulnerabilityTypeID(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityIDs.VulnerabilityTypeID(childComplexity), true
 
 	case "VulnerabilityMetadata.collector":
-		if e.complexity.VulnerabilityMetadata.Collector == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.Collector == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.Collector(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.Collector(childComplexity), true
 	case "VulnerabilityMetadata.documentRef":
-		if e.complexity.VulnerabilityMetadata.DocumentRef == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.DocumentRef == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.DocumentRef(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.DocumentRef(childComplexity), true
 	case "VulnerabilityMetadata.id":
-		if e.complexity.VulnerabilityMetadata.ID == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.ID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.ID(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.ID(childComplexity), true
 	case "VulnerabilityMetadata.origin":
-		if e.complexity.VulnerabilityMetadata.Origin == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.Origin == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.Origin(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.Origin(childComplexity), true
 	case "VulnerabilityMetadata.scoreType":
-		if e.complexity.VulnerabilityMetadata.ScoreType == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.ScoreType == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.ScoreType(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.ScoreType(childComplexity), true
 	case "VulnerabilityMetadata.scoreValue":
-		if e.complexity.VulnerabilityMetadata.ScoreValue == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.ScoreValue == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.ScoreValue(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.ScoreValue(childComplexity), true
 	case "VulnerabilityMetadata.timestamp":
-		if e.complexity.VulnerabilityMetadata.Timestamp == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.Timestamp == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.Timestamp(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadata.Timestamp(childComplexity), true
 	case "VulnerabilityMetadata.vulnerability":
-		if e.complexity.VulnerabilityMetadata.Vulnerability == nil {
+		if e.ComplexityRoot.VulnerabilityMetadata.Vulnerability == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.Vulnerability(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityMetadata.Vulnerability(childComplexity), true
 
 	case "VulnerabilityMetadataConnection.edges":
-		if e.complexity.VulnerabilityMetadataConnection.Edges == nil {
+		if e.ComplexityRoot.VulnerabilityMetadataConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadataConnection.Edges(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadataConnection.Edges(childComplexity), true
 	case "VulnerabilityMetadataConnection.pageInfo":
-		if e.complexity.VulnerabilityMetadataConnection.PageInfo == nil {
+		if e.ComplexityRoot.VulnerabilityMetadataConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadataConnection.PageInfo(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadataConnection.PageInfo(childComplexity), true
 	case "VulnerabilityMetadataConnection.totalCount":
-		if e.complexity.VulnerabilityMetadataConnection.TotalCount == nil {
+		if e.ComplexityRoot.VulnerabilityMetadataConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadataConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityMetadataConnection.TotalCount(childComplexity), true
 
 	case "VulnerabilityMetadataEdge.cursor":
-		if e.complexity.VulnerabilityMetadataEdge.Cursor == nil {
+		if e.ComplexityRoot.VulnerabilityMetadataEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadataEdge.Cursor(childComplexity), true
-
+		return e.ComplexityRoot.VulnerabilityMetadataEdge.Cursor(childComplexity), true
 	case "VulnerabilityMetadataEdge.node":
-		if e.complexity.VulnerabilityMetadataEdge.Node == nil {
+		if e.ComplexityRoot.VulnerabilityMetadataEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadataEdge.Node(childComplexity), true
+		return e.ComplexityRoot.VulnerabilityMetadataEdge.Node(childComplexity), true
 
 	}
 	return 0, false
@@ -4392,7 +4029,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
-	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
@@ -4476,9 +4113,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
-				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
-					result := <-ec.deferredResults
-					atomic.AddInt32(&ec.pendingDeferred, -1)
+				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
+					result := <-ec.DeferredResults
+					atomic.AddInt32(&ec.PendingDeferred, -1)
 					data = result.Result
 					response.Path = result.Path
 					response.Label = result.Label
@@ -4490,8 +4127,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
-			if atomic.LoadInt32(&ec.deferred) > 0 {
-				hasNext := atomic.LoadInt32(&ec.pendingDeferred) > 0
+			if atomic.LoadInt32(&ec.Deferred) > 0 {
+				hasNext := atomic.LoadInt32(&ec.PendingDeferred) > 0
 				response.HasNext = &hasNext
 			}
 
@@ -4519,44 +4156,22 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 }
 
 type executionContext struct {
-	*graphql.OperationContext
-	*executableSchema
-	deferred        int32
-	pendingDeferred int32
-	deferredResults chan graphql.DeferredResult
+	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 }
 
-func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
-	atomic.AddInt32(&ec.pendingDeferred, 1)
-	go func() {
-		ctx := graphql.WithFreshResponseContext(dg.Context)
-		dg.FieldSet.Dispatch(ctx)
-		ds := graphql.DeferredResult{
-			Path:   dg.Path,
-			Label:  dg.Label,
-			Result: dg.FieldSet,
-			Errors: graphql.GetErrors(ctx),
-		}
-		// null fields should bubble up
-		if dg.FieldSet.Invalids > 0 {
-			ds.Result = graphql.Null
-		}
-		ec.deferredResults <- ds
-	}()
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
+func newExecutionContext(
+	opCtx *graphql.OperationContext,
+	execSchema *executableSchema,
+	deferredResults chan graphql.DeferredResult,
+) *executionContext {
+	return &executionContext{
+		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
+			opCtx,
+			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),
+			parsedSchema,
+			deferredResults,
+		),
 	}
-	return introspection.WrapSchema(ec.Schema()), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 var sources = []*ast.Source{
@@ -8306,3 +7921,1344 @@ extend type Mutation {
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
+
+// childFields_* functions provide shared child field context lookups.
+// Each function is generated once per unique object type, deduplicating the
+// switch statements that were previously inlined in every fieldContext_* function.
+
+func (ec *executionContext) childFields_Artifact(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Artifact_id(ctx, field)
+	case "algorithm":
+		return ec.fieldContext_Artifact_algorithm(ctx, field)
+	case "digest":
+		return ec.fieldContext_Artifact_digest(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
+}
+
+func (ec *executionContext) childFields_ArtifactConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_ArtifactConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_ArtifactConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_ArtifactConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ArtifactConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_ArtifactEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_ArtifactEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_ArtifactEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ArtifactEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_Builder(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Builder_id(ctx, field)
+	case "uri":
+		return ec.fieldContext_Builder_uri(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Builder", field.Name)
+}
+
+func (ec *executionContext) childFields_BuilderConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_BuilderConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_BuilderConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_BuilderConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type BuilderConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_BuilderEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_BuilderEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_BuilderEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type BuilderEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyBad(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CertifyBad_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_CertifyBad_subject(ctx, field)
+	case "justification":
+		return ec.fieldContext_CertifyBad_justification(ctx, field)
+	case "knownSince":
+		return ec.fieldContext_CertifyBad_knownSince(ctx, field)
+	case "origin":
+		return ec.fieldContext_CertifyBad_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_CertifyBad_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_CertifyBad_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyBad", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyBadConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_CertifyBadConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_CertifyBadConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_CertifyBadConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyBadConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyBadEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_CertifyBadEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_CertifyBadEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyBadEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyGood(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CertifyGood_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_CertifyGood_subject(ctx, field)
+	case "justification":
+		return ec.fieldContext_CertifyGood_justification(ctx, field)
+	case "knownSince":
+		return ec.fieldContext_CertifyGood_knownSince(ctx, field)
+	case "origin":
+		return ec.fieldContext_CertifyGood_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_CertifyGood_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_CertifyGood_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyGood", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyGoodConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_CertifyGoodConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_CertifyGoodConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_CertifyGoodConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyGoodConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyGoodEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_CertifyGoodEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_CertifyGoodEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyGoodEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyLegal(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CertifyLegal_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_CertifyLegal_subject(ctx, field)
+	case "declaredLicense":
+		return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
+	case "declaredLicenses":
+		return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
+	case "discoveredLicense":
+		return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
+	case "discoveredLicenses":
+		return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
+	case "attribution":
+		return ec.fieldContext_CertifyLegal_attribution(ctx, field)
+	case "justification":
+		return ec.fieldContext_CertifyLegal_justification(ctx, field)
+	case "timeScanned":
+		return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
+	case "origin":
+		return ec.fieldContext_CertifyLegal_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_CertifyLegal_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyLegalConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_CertifyLegalConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_CertifyLegalConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_CertifyLegalConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyLegalConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyLegalEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_CertifyLegalEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_CertifyLegalEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyLegalEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyScorecard(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CertifyScorecard_id(ctx, field)
+	case "source":
+		return ec.fieldContext_CertifyScorecard_source(ctx, field)
+	case "scorecard":
+		return ec.fieldContext_CertifyScorecard_scorecard(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyScorecard", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyScorecardConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_CertifyScorecardConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_CertifyScorecardConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_CertifyScorecardConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyScorecardConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyScorecardEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_CertifyScorecardEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_CertifyScorecardEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyScorecardEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyVEXStatement(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CertifyVEXStatement_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
+	case "vulnerability":
+		return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
+	case "status":
+		return ec.fieldContext_CertifyVEXStatement_status(ctx, field)
+	case "vexJustification":
+		return ec.fieldContext_CertifyVEXStatement_vexJustification(ctx, field)
+	case "statement":
+		return ec.fieldContext_CertifyVEXStatement_statement(ctx, field)
+	case "statusNotes":
+		return ec.fieldContext_CertifyVEXStatement_statusNotes(ctx, field)
+	case "knownSince":
+		return ec.fieldContext_CertifyVEXStatement_knownSince(ctx, field)
+	case "origin":
+		return ec.fieldContext_CertifyVEXStatement_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_CertifyVEXStatement_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_CertifyVEXStatement_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyVEXStatement", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyVuln(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CertifyVuln_id(ctx, field)
+	case "package":
+		return ec.fieldContext_CertifyVuln_package(ctx, field)
+	case "vulnerability":
+		return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
+	case "metadata":
+		return ec.fieldContext_CertifyVuln_metadata(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyVulnConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_CertifyVulnConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_CertifyVulnConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_CertifyVulnConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyVulnConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_CertifyVulnEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_CertifyVulnEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_CertifyVulnEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CertifyVulnEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_FindSoftwareConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_FindSoftwareConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_FindSoftwareConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_FindSoftwareConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type FindSoftwareConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_HasMetadata(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HasMetadata_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_HasMetadata_subject(ctx, field)
+	case "key":
+		return ec.fieldContext_HasMetadata_key(ctx, field)
+	case "value":
+		return ec.fieldContext_HasMetadata_value(ctx, field)
+	case "timestamp":
+		return ec.fieldContext_HasMetadata_timestamp(ctx, field)
+	case "justification":
+		return ec.fieldContext_HasMetadata_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_HasMetadata_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_HasMetadata_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_HasMetadata_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasMetadata", field.Name)
+}
+
+func (ec *executionContext) childFields_HasMetadataConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_HasMetadataConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_HasMetadataConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_HasMetadataConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasMetadataConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_HasMetadataEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_HasMetadataEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_HasMetadataEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasMetadataEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSBOM(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HasSBOM_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_HasSBOM_subject(ctx, field)
+	case "uri":
+		return ec.fieldContext_HasSBOM_uri(ctx, field)
+	case "algorithm":
+		return ec.fieldContext_HasSBOM_algorithm(ctx, field)
+	case "digest":
+		return ec.fieldContext_HasSBOM_digest(ctx, field)
+	case "downloadLocation":
+		return ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
+	case "knownSince":
+		return ec.fieldContext_HasSBOM_knownSince(ctx, field)
+	case "origin":
+		return ec.fieldContext_HasSBOM_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_HasSBOM_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_HasSBOM_documentRef(ctx, field)
+	case "includedSoftware":
+		return ec.fieldContext_HasSBOM_includedSoftware(ctx, field)
+	case "includedDependencies":
+		return ec.fieldContext_HasSBOM_includedDependencies(ctx, field)
+	case "includedOccurrences":
+		return ec.fieldContext_HasSBOM_includedOccurrences(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSBOM", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSBOMConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_HasSBOMConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_HasSBOMConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_HasSBOMConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSBOMConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSBOMEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_HasSBOMEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_HasSBOMEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSBOMEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSLSA(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HasSLSA_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_HasSLSA_subject(ctx, field)
+	case "slsa":
+		return ec.fieldContext_HasSLSA_slsa(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSLSA", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSLSAConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_HasSLSAConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_HasSLSAConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_HasSLSAConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSLSAConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSLSAEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_HasSLSAEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_HasSLSAEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSLSAEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSourceAt(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HasSourceAt_id(ctx, field)
+	case "package":
+		return ec.fieldContext_HasSourceAt_package(ctx, field)
+	case "source":
+		return ec.fieldContext_HasSourceAt_source(ctx, field)
+	case "knownSince":
+		return ec.fieldContext_HasSourceAt_knownSince(ctx, field)
+	case "justification":
+		return ec.fieldContext_HasSourceAt_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_HasSourceAt_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_HasSourceAt_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_HasSourceAt_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSourceAt", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSourceAtConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_HasSourceAtConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_HasSourceAtConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_HasSourceAtConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSourceAtConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_HasSourceAtEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_HasSourceAtEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_HasSourceAtEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HasSourceAtEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_HashEqual(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_HashEqual_id(ctx, field)
+	case "artifacts":
+		return ec.fieldContext_HashEqual_artifacts(ctx, field)
+	case "justification":
+		return ec.fieldContext_HashEqual_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_HashEqual_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_HashEqual_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_HashEqual_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HashEqual", field.Name)
+}
+
+func (ec *executionContext) childFields_HashEqualConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_HashEqualConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_HashEqualConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_HashEqualConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HashEqualConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_HashEqualEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_HashEqualEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_HashEqualEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HashEqualEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_IsDependency(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_IsDependency_id(ctx, field)
+	case "package":
+		return ec.fieldContext_IsDependency_package(ctx, field)
+	case "dependencyPackage":
+		return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
+	case "dependencyType":
+		return ec.fieldContext_IsDependency_dependencyType(ctx, field)
+	case "justification":
+		return ec.fieldContext_IsDependency_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_IsDependency_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_IsDependency_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_IsDependency_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+}
+
+func (ec *executionContext) childFields_IsDependencyConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_IsDependencyConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_IsDependencyConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_IsDependencyConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type IsDependencyConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_IsDependencyEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_IsDependencyEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_IsDependencyEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type IsDependencyEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_IsOccurrence(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_IsOccurrence_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_IsOccurrence_subject(ctx, field)
+	case "artifact":
+		return ec.fieldContext_IsOccurrence_artifact(ctx, field)
+	case "justification":
+		return ec.fieldContext_IsOccurrence_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_IsOccurrence_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_IsOccurrence_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_IsOccurrence_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type IsOccurrence", field.Name)
+}
+
+func (ec *executionContext) childFields_IsOccurrenceConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_IsOccurrenceConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_IsOccurrenceConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_IsOccurrenceConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type IsOccurrenceConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_IsOccurrenceEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_IsOccurrenceEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_IsOccurrenceEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type IsOccurrenceEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_License(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_License_id(ctx, field)
+	case "name":
+		return ec.fieldContext_License_name(ctx, field)
+	case "inline":
+		return ec.fieldContext_License_inline(ctx, field)
+	case "listVersion":
+		return ec.fieldContext_License_listVersion(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+}
+
+func (ec *executionContext) childFields_LicenseConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_LicenseConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_LicenseConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_LicenseConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type LicenseConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_LicenseEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_LicenseEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_LicenseEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type LicenseEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_NeighborConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_NeighborConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_NeighborConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_NeighborConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type NeighborConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_NeighborEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_NeighborEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_NeighborEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type NeighborEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_Package(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Package_id(ctx, field)
+	case "type":
+		return ec.fieldContext_Package_type(ctx, field)
+	case "namespaces":
+		return ec.fieldContext_Package_namespaces(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Package", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_PackageConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_PackageConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_PackageConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_PackageEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_PackageEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageIDs(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "packageTypeID":
+		return ec.fieldContext_PackageIDs_packageTypeID(ctx, field)
+	case "packageNamespaceID":
+		return ec.fieldContext_PackageIDs_packageNamespaceID(ctx, field)
+	case "packageNameID":
+		return ec.fieldContext_PackageIDs_packageNameID(ctx, field)
+	case "packageVersionID":
+		return ec.fieldContext_PackageIDs_packageVersionID(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageIDs", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageName(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_PackageName_id(ctx, field)
+	case "name":
+		return ec.fieldContext_PackageName_name(ctx, field)
+	case "versions":
+		return ec.fieldContext_PackageName_versions(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageName", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageNamespace(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_PackageNamespace_id(ctx, field)
+	case "namespace":
+		return ec.fieldContext_PackageNamespace_namespace(ctx, field)
+	case "names":
+		return ec.fieldContext_PackageNamespace_names(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageNamespace", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageQualifier(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "key":
+		return ec.fieldContext_PackageQualifier_key(ctx, field)
+	case "value":
+		return ec.fieldContext_PackageQualifier_value(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageQualifier", field.Name)
+}
+
+func (ec *executionContext) childFields_PackageVersion(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_PackageVersion_id(ctx, field)
+	case "purl":
+		return ec.fieldContext_PackageVersion_purl(ctx, field)
+	case "version":
+		return ec.fieldContext_PackageVersion_version(ctx, field)
+	case "qualifiers":
+		return ec.fieldContext_PackageVersion_qualifiers(ctx, field)
+	case "subpath":
+		return ec.fieldContext_PackageVersion_subpath(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PackageVersion", field.Name)
+}
+
+func (ec *executionContext) childFields_PageInfo(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "hasNextPage":
+		return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+	case "startCursor":
+		return ec.fieldContext_PageInfo_startCursor(ctx, field)
+	case "endCursor":
+		return ec.fieldContext_PageInfo_endCursor(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+}
+
+func (ec *executionContext) childFields_PkgEqual(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_PkgEqual_id(ctx, field)
+	case "packages":
+		return ec.fieldContext_PkgEqual_packages(ctx, field)
+	case "justification":
+		return ec.fieldContext_PkgEqual_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_PkgEqual_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_PkgEqual_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_PkgEqual_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PkgEqual", field.Name)
+}
+
+func (ec *executionContext) childFields_PkgEqualConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_PkgEqualConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_PkgEqualConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_PkgEqualConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PkgEqualConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_PkgEqualEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_PkgEqualEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_PkgEqualEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PkgEqualEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_PointOfContact(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_PointOfContact_id(ctx, field)
+	case "subject":
+		return ec.fieldContext_PointOfContact_subject(ctx, field)
+	case "email":
+		return ec.fieldContext_PointOfContact_email(ctx, field)
+	case "info":
+		return ec.fieldContext_PointOfContact_info(ctx, field)
+	case "since":
+		return ec.fieldContext_PointOfContact_since(ctx, field)
+	case "justification":
+		return ec.fieldContext_PointOfContact_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_PointOfContact_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_PointOfContact_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_PointOfContact_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PointOfContact", field.Name)
+}
+
+func (ec *executionContext) childFields_PointOfContactConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_PointOfContactConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_PointOfContactConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_PointOfContactConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PointOfContactConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_PointOfContactEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_PointOfContactEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_PointOfContactEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PointOfContactEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_SLSA(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "builtFrom":
+		return ec.fieldContext_SLSA_builtFrom(ctx, field)
+	case "builtBy":
+		return ec.fieldContext_SLSA_builtBy(ctx, field)
+	case "buildType":
+		return ec.fieldContext_SLSA_buildType(ctx, field)
+	case "slsaPredicate":
+		return ec.fieldContext_SLSA_slsaPredicate(ctx, field)
+	case "slsaVersion":
+		return ec.fieldContext_SLSA_slsaVersion(ctx, field)
+	case "startedOn":
+		return ec.fieldContext_SLSA_startedOn(ctx, field)
+	case "finishedOn":
+		return ec.fieldContext_SLSA_finishedOn(ctx, field)
+	case "origin":
+		return ec.fieldContext_SLSA_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_SLSA_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_SLSA_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SLSA", field.Name)
+}
+
+func (ec *executionContext) childFields_SLSAPredicate(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "key":
+		return ec.fieldContext_SLSAPredicate_key(ctx, field)
+	case "value":
+		return ec.fieldContext_SLSAPredicate_value(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SLSAPredicate", field.Name)
+}
+
+func (ec *executionContext) childFields_ScanMetadata(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "timeScanned":
+		return ec.fieldContext_ScanMetadata_timeScanned(ctx, field)
+	case "dbUri":
+		return ec.fieldContext_ScanMetadata_dbUri(ctx, field)
+	case "dbVersion":
+		return ec.fieldContext_ScanMetadata_dbVersion(ctx, field)
+	case "scannerUri":
+		return ec.fieldContext_ScanMetadata_scannerUri(ctx, field)
+	case "scannerVersion":
+		return ec.fieldContext_ScanMetadata_scannerVersion(ctx, field)
+	case "origin":
+		return ec.fieldContext_ScanMetadata_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_ScanMetadata_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_ScanMetadata_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ScanMetadata", field.Name)
+}
+
+func (ec *executionContext) childFields_Scorecard(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "checks":
+		return ec.fieldContext_Scorecard_checks(ctx, field)
+	case "aggregateScore":
+		return ec.fieldContext_Scorecard_aggregateScore(ctx, field)
+	case "timeScanned":
+		return ec.fieldContext_Scorecard_timeScanned(ctx, field)
+	case "scorecardVersion":
+		return ec.fieldContext_Scorecard_scorecardVersion(ctx, field)
+	case "scorecardCommit":
+		return ec.fieldContext_Scorecard_scorecardCommit(ctx, field)
+	case "origin":
+		return ec.fieldContext_Scorecard_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_Scorecard_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_Scorecard_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Scorecard", field.Name)
+}
+
+func (ec *executionContext) childFields_ScorecardCheck(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "check":
+		return ec.fieldContext_ScorecardCheck_check(ctx, field)
+	case "score":
+		return ec.fieldContext_ScorecardCheck_score(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ScorecardCheck", field.Name)
+}
+
+func (ec *executionContext) childFields_SoftwareEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_SoftwareEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_SoftwareEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SoftwareEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_Source(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Source_id(ctx, field)
+	case "type":
+		return ec.fieldContext_Source_type(ctx, field)
+	case "namespaces":
+		return ec.fieldContext_Source_namespaces(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Source", field.Name)
+}
+
+func (ec *executionContext) childFields_SourceConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_SourceConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_SourceConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_SourceConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SourceConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_SourceEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_SourceEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_SourceEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SourceEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_SourceIDs(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "sourceTypeID":
+		return ec.fieldContext_SourceIDs_sourceTypeID(ctx, field)
+	case "sourceNamespaceID":
+		return ec.fieldContext_SourceIDs_sourceNamespaceID(ctx, field)
+	case "sourceNameID":
+		return ec.fieldContext_SourceIDs_sourceNameID(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SourceIDs", field.Name)
+}
+
+func (ec *executionContext) childFields_SourceName(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_SourceName_id(ctx, field)
+	case "name":
+		return ec.fieldContext_SourceName_name(ctx, field)
+	case "tag":
+		return ec.fieldContext_SourceName_tag(ctx, field)
+	case "commit":
+		return ec.fieldContext_SourceName_commit(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SourceName", field.Name)
+}
+
+func (ec *executionContext) childFields_SourceNamespace(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_SourceNamespace_id(ctx, field)
+	case "namespace":
+		return ec.fieldContext_SourceNamespace_namespace(ctx, field)
+	case "names":
+		return ec.fieldContext_SourceNamespace_names(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SourceNamespace", field.Name)
+}
+
+func (ec *executionContext) childFields_VEXConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_VEXConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_VEXConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_VEXConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VEXConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_VEXEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_VEXEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_VEXEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VEXEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnEqual(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_VulnEqual_id(ctx, field)
+	case "vulnerabilities":
+		return ec.fieldContext_VulnEqual_vulnerabilities(ctx, field)
+	case "justification":
+		return ec.fieldContext_VulnEqual_justification(ctx, field)
+	case "origin":
+		return ec.fieldContext_VulnEqual_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_VulnEqual_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_VulnEqual_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnEqual", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnEqualConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_VulnEqualConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_VulnEqualConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_VulnEqualConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnEqualConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnEqualEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_VulnEqualEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_VulnEqualEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnEqualEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_Vulnerability(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Vulnerability_id(ctx, field)
+	case "type":
+		return ec.fieldContext_Vulnerability_type(ctx, field)
+	case "vulnerabilityIDs":
+		return ec.fieldContext_Vulnerability_vulnerabilityIDs(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Vulnerability", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_VulnerabilityConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_VulnerabilityConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_VulnerabilityConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_VulnerabilityEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_VulnerabilityEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityID(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_VulnerabilityID_id(ctx, field)
+	case "vulnerabilityID":
+		return ec.fieldContext_VulnerabilityID_vulnerabilityID(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityID", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityIDs(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "vulnerabilityTypeID":
+		return ec.fieldContext_VulnerabilityIDs_vulnerabilityTypeID(ctx, field)
+	case "vulnerabilityNodeID":
+		return ec.fieldContext_VulnerabilityIDs_vulnerabilityNodeID(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityIDs", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityMetadata(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_VulnerabilityMetadata_id(ctx, field)
+	case "vulnerability":
+		return ec.fieldContext_VulnerabilityMetadata_vulnerability(ctx, field)
+	case "scoreType":
+		return ec.fieldContext_VulnerabilityMetadata_scoreType(ctx, field)
+	case "scoreValue":
+		return ec.fieldContext_VulnerabilityMetadata_scoreValue(ctx, field)
+	case "timestamp":
+		return ec.fieldContext_VulnerabilityMetadata_timestamp(ctx, field)
+	case "origin":
+		return ec.fieldContext_VulnerabilityMetadata_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_VulnerabilityMetadata_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_VulnerabilityMetadata_documentRef(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadata", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityMetadataConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_VulnerabilityMetadataConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_VulnerabilityMetadataConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_VulnerabilityMetadataConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadataConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_VulnerabilityMetadataEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_VulnerabilityMetadataEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_VulnerabilityMetadataEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadataEdge", field.Name)
+}
+
+func (ec *executionContext) childFields___Directive(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext___Directive_name(ctx, field)
+	case "description":
+		return ec.fieldContext___Directive_description(ctx, field)
+	case "isRepeatable":
+		return ec.fieldContext___Directive_isRepeatable(ctx, field)
+	case "locations":
+		return ec.fieldContext___Directive_locations(ctx, field)
+	case "args":
+		return ec.fieldContext___Directive_args(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
+}
+
+func (ec *executionContext) childFields___EnumValue(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext___EnumValue_name(ctx, field)
+	case "description":
+		return ec.fieldContext___EnumValue_description(ctx, field)
+	case "isDeprecated":
+		return ec.fieldContext___EnumValue_isDeprecated(ctx, field)
+	case "deprecationReason":
+		return ec.fieldContext___EnumValue_deprecationReason(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __EnumValue", field.Name)
+}
+
+func (ec *executionContext) childFields___Field(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext___Field_name(ctx, field)
+	case "description":
+		return ec.fieldContext___Field_description(ctx, field)
+	case "args":
+		return ec.fieldContext___Field_args(ctx, field)
+	case "type":
+		return ec.fieldContext___Field_type(ctx, field)
+	case "isDeprecated":
+		return ec.fieldContext___Field_isDeprecated(ctx, field)
+	case "deprecationReason":
+		return ec.fieldContext___Field_deprecationReason(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Field", field.Name)
+}
+
+func (ec *executionContext) childFields___InputValue(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext___InputValue_name(ctx, field)
+	case "description":
+		return ec.fieldContext___InputValue_description(ctx, field)
+	case "type":
+		return ec.fieldContext___InputValue_type(ctx, field)
+	case "defaultValue":
+		return ec.fieldContext___InputValue_defaultValue(ctx, field)
+	case "isDeprecated":
+		return ec.fieldContext___InputValue_isDeprecated(ctx, field)
+	case "deprecationReason":
+		return ec.fieldContext___InputValue_deprecationReason(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
+}
+
+func (ec *executionContext) childFields___Schema(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "description":
+		return ec.fieldContext___Schema_description(ctx, field)
+	case "types":
+		return ec.fieldContext___Schema_types(ctx, field)
+	case "queryType":
+		return ec.fieldContext___Schema_queryType(ctx, field)
+	case "mutationType":
+		return ec.fieldContext___Schema_mutationType(ctx, field)
+	case "subscriptionType":
+		return ec.fieldContext___Schema_subscriptionType(ctx, field)
+	case "directives":
+		return ec.fieldContext___Schema_directives(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+}
+
+func (ec *executionContext) childFields___Type(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "kind":
+		return ec.fieldContext___Type_kind(ctx, field)
+	case "name":
+		return ec.fieldContext___Type_name(ctx, field)
+	case "description":
+		return ec.fieldContext___Type_description(ctx, field)
+	case "specifiedByURL":
+		return ec.fieldContext___Type_specifiedByURL(ctx, field)
+	case "fields":
+		return ec.fieldContext___Type_fields(ctx, field)
+	case "interfaces":
+		return ec.fieldContext___Type_interfaces(ctx, field)
+	case "possibleTypes":
+		return ec.fieldContext___Type_possibleTypes(ctx, field)
+	case "enumValues":
+		return ec.fieldContext___Type_enumValues(ctx, field)
+	case "inputFields":
+		return ec.fieldContext___Type_inputFields(ctx, field)
+	case "ofType":
+		return ec.fieldContext___Type_ofType(ctx, field)
+	case "isOneOf":
+		return ec.fieldContext___Type_isOneOf(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+}
+
+func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
+	fc := graphql.GetFieldContext(ctx)
+	for _, d := range fc.Field.Directives {
+		switch d.Name {
+		case "filter":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_filter_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return nil
+			}
+			n := next
+			next = func(ctx context.Context) (any, error) {
+				if ec.Directives.Filter == nil {
+					return nil, errors.New("directive filter is not implemented")
+				}
+				return ec.Directives.Filter(ctx, obj, n, args["keyName"].(*string), args["operation"].(*model.FilterOperation), args["value"].(*string))
+			}
+		}
+	}
+	return next
+}
