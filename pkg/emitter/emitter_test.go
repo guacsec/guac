@@ -18,6 +18,7 @@ package emitter
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -79,6 +80,13 @@ func TestEmitter_PublishOnEmit(t *testing.T) {
 		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
 		}
+	}
+}
+
+func TestBuildSubscriptionURLSetsMaxWaiting(t *testing.T) {
+	got := buildSubscriptionURL("nats://127.0.0.1:4222")
+	if !strings.Contains(got, "consumer_max_waiting="+strconv.Itoa(consumerMaxWaiting)) {
+		t.Errorf("subscription url is missing the consumer max waiting: %s", got)
 	}
 }
 
