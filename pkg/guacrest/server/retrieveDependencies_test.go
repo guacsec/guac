@@ -208,6 +208,38 @@ func Test_RetrieveDependencies_ByPurl(t *testing.T) {
 			purl:           "pkg:guac/foo",
 			expectedByName: []string{"pkg:github/package-url/purl-spec"},
 		},
+		{
+			name: "package -> occurrence -> artifact -> SLSA -> material -> occurrence -> package",
+			data: GuacData{
+				Packages:  []string{"pkg:guac/app", "pkg:guac/base"},
+				Artifacts: []string{"sha-app", "sha-base"},
+				Builders:  []string{"GHA"},
+				IsOccurrences: []IsOccurrence{
+					{Subject: "pkg:guac/app", Artifact: "sha-app"},
+					{Subject: "pkg:guac/base", Artifact: "sha-base"},
+				},
+				HasSlsas: []HasSlsa{{Subject: "sha-app", BuiltBy: "GHA", BuiltFrom: []string{"sha-base"}}},
+			},
+			purl:           "pkg:guac/app",
+			expectedByName: []string{"pkg:guac/base"},
+		},
+		{
+			// byName passes EdgeArtifactHasSlsa into the same shared traversal,
+			// so the subject filter applies to purl-rooted walks too.
+			name: "package does not depend on a sibling SLSA material",
+			data: GuacData{
+				Packages:  []string{"pkg:guac/base", "pkg:guac/sibling"},
+				Artifacts: []string{"sha-app", "sha-base", "sha-sibling"},
+				Builders:  []string{"GHA"},
+				IsOccurrences: []IsOccurrence{
+					{Subject: "pkg:guac/base", Artifact: "sha-base"},
+					{Subject: "pkg:guac/sibling", Artifact: "sha-sibling"},
+				},
+				HasSlsas: []HasSlsa{{Subject: "sha-app", BuiltBy: "GHA", BuiltFrom: []string{"sha-base", "sha-sibling"}}},
+			},
+			purl:           "pkg:guac/base",
+			expectedByName: []string{},
+		},
 	}
 
 	for _, tt := range tests {
@@ -235,6 +267,19 @@ func Test_RetrieveDependencies_ByPurl(t *testing.T) {
 // Tests the dependencies retrieval by artifact digest.
 func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
+
+	// sha-123 was built from sha-xyz and sha-abc. Two cases below walk this
+	// same graph from opposite ends, so they have to stay in lockstep.
+	slsaTwoMaterials := GuacData{
+		Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
+		Artifacts: []string{"sha-123", "sha-xyz", "sha-abc"},
+		Builders:  []string{"GHA"},
+		IsOccurrences: []IsOccurrence{
+			{Subject: "pkg:guac/foo", Artifact: "sha-xyz"},
+			{Subject: "pkg:guac/bar", Artifact: "sha-abc"},
+		},
+		HasSlsas: []HasSlsa{{Subject: "sha-123", BuiltBy: "GHA", BuiltFrom: []string{"sha-xyz", "sha-abc"}}},
+	}
 	tests := []struct {
 		name             string
 		data             GuacData
@@ -331,17 +376,16 @@ func Test_RetrieveDependencies_ByDigest(t *testing.T) {
 			expectedByDigest: []string{"pkg:guac/foo"},
 		},
 		{
-			name: "artifact -> SLSA -> artifact, artifact",
-			data: GuacData{
-				Packages:  []string{"pkg:guac/foo", "pkg:guac/bar"},
-				Artifacts: []string{"sha-123", "sha-xyz", "sha-abc"},
-				Builders:  []string{"GHA"},
-				IsOccurrences: []IsOccurrence{
-					{Subject: "pkg:guac/foo", Artifact: "sha-xyz"},
-					{Subject: "pkg:guac/bar", Artifact: "sha-abc"},
-				},
-				HasSlsas: []HasSlsa{{Subject: "sha-123", BuiltBy: "GHA", BuiltFrom: []string{"sha-xyz", "sha-abc"}}},
-			},
+			// sha-xyz is an input to sha-123, not a consumer of sha-abc: an
+			// unfiltered HasSlsa walk would leak that sibling material.
+			name:             "artifact does not depend on a sibling SLSA material",
+			data:             slsaTwoMaterials,
+			digest:           "sha256:sha-xyz",
+			expectedByDigest: []string{},
+		},
+		{
+			name:             "artifact -> SLSA -> artifact, artifact",
+			data:             slsaTwoMaterials,
 			digest:           "sha256:sha-123",
 			expectedByDigest: []string{"pkg:guac/foo", "pkg:guac/bar"},
 		},

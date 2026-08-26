@@ -18,13 +18,16 @@ package server
 import (
 	"context"
 	"fmt"
+	"iter"
+	"maps"
+	"slices"
+
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	assembler_helpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/guacrest/helpers"
 	"github.com/guacsec/guac/pkg/logging"
 
 	"github.com/Khan/genqlient/graphql"
-	"golang.org/x/exp/maps"
 )
 
 // node is implemented by all GraphQL client types
@@ -88,11 +91,12 @@ func newByName(gqlClient graphql.Client) byName {
 
 //********* The graph traversal *********/
 
-func getTransitiveDependencies(
+// getReachableNodes walks the graph from start, returning every node reached
+// keyed by ID, plus a dequeue-order lower bound on the set equivalent to start.
+func getReachableNodes(
 	ctx context.Context,
-	gqlClient graphql.Client,
 	start node,
-	edges edgeGen) ([]node, error) {
+	edges edgeGen) (map[string]node, map[node]any, error) {
 
 	// As the queue in this function is essentially a list of IO actions, this
 	// function could be optimized by running through the queue and executing
@@ -116,13 +120,13 @@ func getTransitiveDependencies(
 		// Get direct dependencies
 		adjacent, err := edges.getDirectDependencies(ctx, currentNode)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		queue = append(queue, adjacent...)
 
 		adjacent, err = edges.getEquivalentNodes(ctx, currentNode)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		queue = append(queue, adjacent...)
 
@@ -132,12 +136,24 @@ func getTransitiveDependencies(
 			}
 		}
 	}
+	return visited, nodesEquivalentToStart, nil
+}
+
+func getTransitiveDependencies(
+	ctx context.Context,
+	start node,
+	edges edgeGen) ([]node, error) {
+
+	visited, nodesEquivalentToStart, err := getReachableNodes(ctx, start, edges)
+	if err != nil {
+		return nil, err
+	}
 
 	// Nodes equivalent to the start node are not dependencies
 	for node := range nodesEquivalentToStart {
 		delete(visited, node.GetId())
 	}
-	return maps.Values(visited), nil
+	return slices.Collect(maps.Values(visited)), nil
 }
 
 /********* Implementations of the interface *********/
@@ -207,6 +223,12 @@ func neighborsTwoHops(ctx context.Context, gqlClient graphql.Client, v node,
 
 	res := []node{}
 	for _, predicate := range predicates {
+		// EdgeArtifactHasSlsa resolves both ways, so only expand an attestation v
+		// is the subject of; "" guards a backend breaking the non-null schema.
+		if slsa, ok := predicate.(*gql.AllSLSATree); ok &&
+			slsa.Subject.Id != "" && slsa.Subject.Id != v.GetId() {
+			continue
+		}
 		nodes, err := neighbors(ctx, gqlClient, predicate, edgesFromPredicates)
 		if err != nil {
 			return nil, err
@@ -228,7 +250,13 @@ func neighbors(ctx context.Context, gqlClient graphql.Client, v node, edges []gq
 		logger.Errorf("Neighbors query returned nil")
 		return nil, helpers.Err500
 	}
-	return transformWithError(ctx, neighborsResponse.GetNeighbors(), neighborToNode)
+	nodes, err := transformWithError(ctx, neighborsResponse.GetNeighbors(), neighborToNode)
+	if err != nil {
+		return nil, err
+	}
+	// neighborToNode yields nil for a package name node; drop those so callers
+	// never dequeue a nil node and panic on GetId.
+	return slices.DeleteFunc(nodes, func(n node) bool { return n == nil }), nil
 }
 
 // Maps a list of As to a list of Bs
@@ -308,16 +336,7 @@ func mapPkgNodesToPurls(ctx context.Context, gqlClient graphql.Client,
 	logger := logging.FromContext(ctx)
 
 	// get the IDs of the package nodes
-	pkgIds := []string{}
-	for _, node := range nodes {
-		if v, ok := node.(*gql.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion); ok {
-			if v == nil {
-				logger.Warnf("An gql version node is unexpectedly nil")
-				continue
-			}
-			pkgIds = append(pkgIds, node.GetId())
-		}
-	}
+	pkgIds := pkgVersionIDs(ctx, slices.Values(nodes))
 
 	// Call Nodes to get the entire package trie for each node
 	gqlNodes, err := gql.Nodes(ctx, gqlClient, pkgIds)
@@ -360,7 +379,7 @@ func GetDepsForPackage(
 
 	edgeGenerator := newByName(gqlClient)
 	// Perform traversal
-	deps, err := getTransitiveDependencies(ctx, gqlClient, &pkg, edgeGenerator)
+	deps, err := getTransitiveDependencies(ctx, &pkg, edgeGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dependencies: %w", err)
 	}
@@ -389,7 +408,7 @@ func GetDepsForArtifact(
 	edgeGenerator := newByDigest(gqlClient)
 
 	// Perform traversal
-	deps, err := getTransitiveDependencies(ctx, gqlClient, &art, edgeGenerator)
+	deps, err := getTransitiveDependencies(ctx, &art, edgeGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dependencies: %w", err)
 	}
@@ -401,4 +420,21 @@ func GetDepsForArtifact(
 	}
 
 	return purls, nil
+}
+
+// pkgVersionIDs picks the package version nodes out of a traversal result and
+// returns their IDs.
+func pkgVersionIDs(ctx context.Context, nodes iter.Seq[node]) []string {
+	logger := logging.FromContext(ctx)
+	ids := []string{}
+	for n := range nodes {
+		if v, ok := n.(*gql.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion); ok {
+			if v == nil {
+				logger.Warnf("An gql version node is unexpectedly nil")
+				continue
+			}
+			ids = append(ids, v.Id)
+		}
+	}
+	return ids
 }
