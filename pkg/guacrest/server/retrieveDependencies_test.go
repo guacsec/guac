@@ -209,7 +209,7 @@ func Test_RetrieveDependencies_ByPurl(t *testing.T) {
 			expectedByName: []string{"pkg:github/package-url/purl-spec"},
 		},
 		{
-			name: "package -> occurrence -> artifact -> SLSA -> material -> occurrence -> package",
+			name: "Package depends on the packages its artifact was built from",
 			data: GuacData{
 				Packages:  []string{"pkg:guac/app", "pkg:guac/base"},
 				Artifacts: []string{"sha-app", "sha-base"},

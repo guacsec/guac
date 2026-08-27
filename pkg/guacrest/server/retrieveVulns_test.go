@@ -18,9 +18,12 @@ package server_test
 import (
 	stdcmp "cmp"
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -403,4 +406,66 @@ func Test_GetPackageVulns_HTTP(t *testing.T) {
 			t.Fatalf("expected 400 response, got %T: %v", res, res)
 		}
 	})
+}
+
+// stubClient answers each GraphQL operation with canned JSON, so the traversal
+// can be driven over responses the keyvalue backend will not produce.
+type stubClient map[string]string
+
+func (c stubClient) MakeRequest(ctx context.Context, req *graphql.Request, resp *graphql.Response) error {
+	raw, ok := c[req.OpName]
+	if !ok {
+		return fmt.Errorf("stub client has no response for operation %q", req.OpName)
+	}
+	if raw == "" {
+		return fmt.Errorf("graphql server is down")
+	}
+	return json.Unmarshal([]byte(raw), resp.Data)
+}
+
+func Test_GetArtifactVulns_BackendFailures(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	oneArtifact := `{"artifacts":[{"id":"art-1","algorithm":"sha256","digest":"abc"}]}`
+
+	tests := []struct {
+		name   string
+		client stubClient
+		want   any
+	}{{
+		// GetVulnsForArtifact wraps the error before handleErr sees it, so an
+		// identity comparison would report a backend outage as 400 Bad Request.
+		name:   "a failing Artifacts query is a 502, not a 400",
+		client: stubClient{"Artifacts": ""},
+		want:   gen.GetArtifactVulns502JSONResponse{},
+	}, {
+		name:   "an ambiguous digest is a 500, not a 400",
+		client: stubClient{"Artifacts": `{"artifacts":[{"id":"art-1"},{"id":"art-2"}]}`},
+		want:   gen.GetArtifactVulns500JSONResponse{},
+	}, {
+		name:   "a failing Neighbors query is a 502",
+		client: stubClient{"Artifacts": oneArtifact, "Neighbors": ""},
+		want:   gen.GetArtifactVulns502JSONResponse{},
+	}, {
+		// A package name node carries no versions, so it maps to a nil node.
+		// Before those were dropped, the traversal dequeued one and panicked.
+		name: "a package name neighbor is dropped instead of panicking",
+		client: stubClient{"Artifacts": oneArtifact, "Neighbors": `{"neighbors":[` +
+			`{"__typename":"Package","id":"pkg-name-1","type":"guac","namespaces":[` +
+			`{"id":"ns-1","namespace":"","names":[{"id":"name-1","name":"foo","versions":[]}]}]}]}`},
+		want: gen.GetArtifactVulns200JSONResponse{},
+	}}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			restApi := server.NewDefaultServer(tt.client)
+
+			res, err := restApi.GetArtifactVulns(ctx, gen.GetArtifactVulnsRequestObject{Digest: "sha256:abc"})
+			if err != nil {
+				t.Fatalf("GetArtifactVulns returned unexpected error: %v", err)
+			}
+			if fmt.Sprintf("%T", res) != fmt.Sprintf("%T", tt.want) {
+				t.Errorf("GetArtifactVulns returned %T, want %T", res, tt.want)
+			}
+		})
+	}
 }
