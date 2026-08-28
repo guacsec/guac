@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -53,6 +54,31 @@ func (n *isDependencyLink) Key() string {
 		n.Collector,
 		n.DocumentRef,
 	}, ":"))
+}
+
+// deleteIsDependency removes an isDependency node and its back edges. Already
+// gone is not an error. Caller must hold the write lock.
+func (c *demoClient) deleteIsDependency(ctx context.Context, id string) error {
+	link, err := byIDkv[*isDependencyLink](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return nil
+		}
+		return fmt.Errorf("failed to retrieve isDependency %q: %w", id, err)
+	}
+
+	// Both are the same node for a self dependency.
+	for _, pkgID := range helper.SortAndRemoveDups([]string{link.PackageID, link.DepPackageID}) {
+		foundPkg, err := byIDkv[*pkgVersion](ctx, pkgID, c)
+		if err != nil {
+			return fmt.Errorf("failed to retrieve package version %q: %w", pkgID, err)
+		}
+		if err := removeLink(ctx, link.ThisID, &foundPkg.IsDependencyLinks, pkgVerCol, foundPkg, c); err != nil {
+			return fmt.Errorf("failed to remove package back edge: %w", err)
+		}
+	}
+
+	return delkv(ctx, isDepCol, link, c)
 }
 
 func (n *isDependencyLink) Neighbors(allowedEdges edgeMap) []string {

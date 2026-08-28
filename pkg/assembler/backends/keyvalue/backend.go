@@ -22,6 +22,7 @@ import (
 	"hash/fnv"
 	"math"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -305,6 +306,21 @@ func byKeykv[E node](ctx context.Context, coll string, k string, c *demoClient) 
 func setkv(ctx context.Context, coll string, n node, c *demoClient) error {
 	// validate type?
 	return c.kv.Set(ctx, coll, n.Key(), n)
+}
+
+// delkv removes a node from its collection and drops its ID from the index.
+func delkv(ctx context.Context, coll string, n node, c *demoClient) error {
+	if err := c.kv.Remove(ctx, coll, n.Key()); err != nil {
+		return err
+	}
+	return c.kv.Remove(ctx, indexCol, n.ID())
+}
+
+// removeLink drops linkID from a node's back edge slice and stores the node
+// again. Pass a pointer to the slice field.
+func removeLink(ctx context.Context, linkID string, links *[]string, coll string, n node, c *demoClient) error {
+	*links = slices.DeleteFunc(*links, func(id string) bool { return id == linkID })
+	return setkv(ctx, coll, n, c)
 }
 
 func (c *demoClient) addToIndex(ctx context.Context, coll string, n node) error {

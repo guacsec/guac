@@ -97,11 +97,11 @@ var skipMatrix = map[string]map[string]bool{
 	// redis order issues, tikv: not a valid VexStatus
 	"TestVEXBulkIngest": {arango: true, redis: true, tikv: true},
 	// redis order issues
-	"TestFindSoftware":  {redis: true, arango: true},
+	"TestFindSoftware": {redis: true, arango: true},
 	// remove these once its implemented for the other backends
-	"TestDeleteCertifyVuln":              {arango: true, memmap: true, redis: true, tikv: true},
-	"TestDeleteHasSBOM":                  {arango: true, memmap: true, redis: true, tikv: true},
-	"TestDeleteHasSLSAs":                 {arango: true, memmap: true, redis: true, tikv: true},
+	"TestDeleteCertifyVuln":              {arango: true},
+	"TestDeleteHasSBOM":                  {arango: true},
+	"TestDeleteHasSLSAs":                 {arango: true},
 	"TestQueryPackagesListForScan":       {arango: true, redis: true, tikv: true},
 	"TestBatchQueryPkgIDCertifyVuln":     {arango: true, redis: true, tikv: true},
 	"TestBatchQueryPkgIDCertifyLegal":    {arango: true, redis: true, tikv: true},
