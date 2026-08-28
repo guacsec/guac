@@ -59,6 +59,39 @@ func (n *certifyVulnerabilityLink) Key() string {
 	}, ":"))
 }
 
+// deleteCertifyVuln removes a certifyVuln node and the back edges pointing at
+// it. The caller must hold the write lock.
+func (c *demoClient) deleteCertifyVuln(ctx context.Context, id string) (bool, error) {
+	link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil
+		}
+		return false, gqlerror.Errorf("failed to retrieve certifyVuln %q: %v", id, err)
+	}
+
+	foundPkg, err := byIDkv[*pkgVersion](ctx, link.PackageID, c)
+	if err != nil {
+		return false, gqlerror.Errorf("failed to retrieve package version %q: %v", link.PackageID, err)
+	}
+	if err := removeLink(ctx, link.ThisID, &foundPkg.CertifyVulnLinks, pkgVerCol, foundPkg, c); err != nil {
+		return false, gqlerror.Errorf("failed to remove package back edge: %v", err)
+	}
+
+	foundVuln, err := byIDkv[*vulnIDNode](ctx, link.VulnerabilityID, c)
+	if err != nil {
+		return false, gqlerror.Errorf("failed to retrieve vulnerability %q: %v", link.VulnerabilityID, err)
+	}
+	if err := removeLink(ctx, link.ThisID, &foundVuln.CertifyVulnLinks, vulnIDCol, foundVuln, c); err != nil {
+		return false, gqlerror.Errorf("failed to remove vulnerability back edge: %v", err)
+	}
+
+	if err := delkv(ctx, cVulnCol, link, c); err != nil {
+		return false, gqlerror.Errorf("failed to remove certifyVuln %q: %v", id, err)
+	}
+	return true, nil
+}
+
 func (n *certifyVulnerabilityLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2)
 	if allowedEdges[model.EdgeCertifyVulnPackage] {

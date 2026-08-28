@@ -70,6 +70,20 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	return s.c.Put(ctx, []byte(ck), bts)
 }
 
+func (s *store) Remove(ctx context.Context, c, k string) error {
+	ck := strings.Join([]string{c, k}, ":")
+	// Same as Get: rawkv does not report missing keys as an error, so check for
+	// an empty value instead.
+	bts, err := s.c.Get(ctx, []byte(ck))
+	if len(bts) == 0 {
+		return kv.NotFoundError
+	}
+	if err != nil {
+		return err
+	}
+	return s.c.Delete(ctx, []byte(ck))
+}
+
 func (s *store) Keys(c string) kv.Scanner {
 	return &scanner{
 		c:      s.c,

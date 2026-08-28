@@ -18,12 +18,13 @@ package keyvalue
 import (
 	"context"
 	"errors"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
@@ -43,6 +44,48 @@ type isOccurrenceStruct struct {
 }
 
 func (n *isOccurrenceStruct) ID() string { return n.ThisID }
+
+// deleteIsOccurrence removes an isOccurrence node and the back edges pointing at
+// it. A node that is already gone is not an error. The caller must hold the
+// write lock.
+func (c *demoClient) deleteIsOccurrence(ctx context.Context, id string) error {
+	link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return nil
+		}
+		return fmt.Errorf("failed to retrieve isOccurrence %q: %w", id, err)
+	}
+
+	foundArt, err := byIDkv[*artStruct](ctx, link.Artifact, c)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve artifact %q: %w", link.Artifact, err)
+	}
+	if err := removeLink(ctx, link.ThisID, &foundArt.Occurrences, artCol, foundArt, c); err != nil {
+		return fmt.Errorf("failed to remove artifact back edge: %w", err)
+	}
+
+	if link.Pkg != "" {
+		foundPkg, err := byIDkv[*pkgVersion](ctx, link.Pkg, c)
+		if err != nil {
+			return fmt.Errorf("failed to retrieve package version %q: %w", link.Pkg, err)
+		}
+		if err := removeLink(ctx, link.ThisID, &foundPkg.Occurrences, pkgVerCol, foundPkg, c); err != nil {
+			return fmt.Errorf("failed to remove package back edge: %w", err)
+		}
+	}
+	if link.Source != "" {
+		foundSrc, err := byIDkv[*srcNameNode](ctx, link.Source, c)
+		if err != nil {
+			return fmt.Errorf("failed to retrieve source %q: %w", link.Source, err)
+		}
+		if err := removeLink(ctx, link.ThisID, &foundSrc.Occurrences, srcNameCol, foundSrc, c); err != nil {
+			return fmt.Errorf("failed to remove source back edge: %w", err)
+		}
+	}
+
+	return delkv(ctx, occCol, link, c)
+}
 
 func (n *isOccurrenceStruct) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 3)

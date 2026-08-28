@@ -17,12 +17,15 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 type edgeMap map[model.Edge]bool
@@ -193,5 +196,44 @@ func (c *demoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, err
 // Delete node and all associated relationships. This functionality is only implemented for
 // certifyVuln, HasSBOM and HasSLSA.
 func (c *demoClient) Delete(ctx context.Context, node string) (bool, error) {
-	panic(fmt.Errorf("not implemented: Delete"))
+	c.m.Lock()
+	defer c.m.Unlock()
+
+	var k string
+	if err := c.kv.Get(ctx, indexCol, node, &k); err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil
+		}
+		return false, fmt.Errorf("%w : id not found in index %q", err, node)
+	}
+
+	sub := strings.SplitN(k, ":", 2)
+	if len(sub) != 2 {
+		return false, fmt.Errorf("bad value was stored in index map: %v", k)
+	}
+
+	switch sub[0] {
+	case cVulnCol:
+		deleted, err := c.deleteCertifyVuln(ctx, node)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete CertifyVuln via ID: %s, with error: %w", node, err)
+		}
+		return deleted, nil
+	case hasSBOMCol:
+		deleted, err := c.deleteHasSBOM(ctx, node)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete HasSBOM via ID: %s, with error: %w", node, err)
+		}
+		return deleted, nil
+	case slsaCol:
+		deleted, err := c.deleteHasSLSA(ctx, node)
+		if err != nil {
+			return false, fmt.Errorf("failed to delete HasSLSA via ID: %s, with error: %w", node, err)
+		}
+		return deleted, nil
+	default:
+		// Match the ent backend: unknown node types are a no-op, not an error.
+		log.Printf("Unknown node type: %s", sub[0])
+		return false, nil
+	}
 }

@@ -68,6 +68,60 @@ func (n *hasSBOMStruct) Key() string {
 	}, ":"))
 }
 
+// deleteHasSBOM removes a hasSBOM node, the isDependency and isOccurrence nodes
+// it includes, and the back edges pointing at any of them. The caller must hold
+// the write lock.
+//
+// NOTE: included nodes are deduped in this backend, so an isDependency shared
+// with another hasSBOM goes away with the first delete and simply drops out of
+// that hasSBOM's includes (see convHasSBOM). Refcount them if a shared included
+// node ever needs to survive.
+func (c *demoClient) deleteHasSBOM(ctx context.Context, id string) (bool, error) {
+	link, err := byIDkv[*hasSBOMStruct](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil
+		}
+		return false, gqlerror.Errorf("failed to retrieve hasSBOM %q: %v", id, err)
+	}
+
+	if link.Pkg != "" {
+		foundPkg, err := byIDkv[*pkgVersion](ctx, link.Pkg, c)
+		if err != nil {
+			return false, gqlerror.Errorf("failed to retrieve package version %q: %v", link.Pkg, err)
+		}
+		if err := removeLink(ctx, link.ThisID, &foundPkg.HasSBOMs, pkgVerCol, foundPkg, c); err != nil {
+			return false, gqlerror.Errorf("failed to remove package back edge: %v", err)
+		}
+	}
+	if link.Artifact != "" {
+		foundArt, err := byIDkv[*artStruct](ctx, link.Artifact, c)
+		if err != nil {
+			return false, gqlerror.Errorf("failed to retrieve artifact %q: %v", link.Artifact, err)
+		}
+		if err := removeLink(ctx, link.ThisID, &foundArt.HasSBOMs, artCol, foundArt, c); err != nil {
+			return false, gqlerror.Errorf("failed to remove artifact back edge: %v", err)
+		}
+	}
+
+	if err := delkv(ctx, hasSBOMCol, link, c); err != nil {
+		return false, gqlerror.Errorf("failed to remove hasSBOM %q: %v", id, err)
+	}
+
+	for _, depID := range link.IncludedDependencies {
+		if err := c.deleteIsDependency(ctx, depID); err != nil {
+			return false, gqlerror.Errorf("failed to remove included dependency %q: %v", depID, err)
+		}
+	}
+	for _, occID := range link.IncludedOccurrences {
+		if err := c.deleteIsOccurrence(ctx, occID); err != nil {
+			return false, gqlerror.Errorf("failed to remove included occurrence %q: %v", occID, err)
+		}
+	}
+
+	return true, nil
+}
+
 func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
 	var out []string
 	if n.Pkg != "" && allowedEdges[model.EdgeHasSbomPackage] {
@@ -296,6 +350,11 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		for _, id := range in.IncludedDependencies {
 			link, err := byIDkv[*isDependencyLink](ctx, id, c)
 			if err != nil {
+				// The node may have been deleted along with another hasSBOM
+				// that included it. Drop it rather than failing the query.
+				if errors.Is(err, kv.NotFoundError) {
+					continue
+				}
 				return nil, fmt.Errorf("expected IsDependency: %w", err)
 			}
 			isDep, err := c.buildIsDependency(ctx, link, nil, true)
@@ -310,7 +369,10 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		for _, id := range in.IncludedOccurrences {
 			link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
 			if err != nil {
-				return nil, fmt.Errorf("expected IsDependency: %w", err)
+				if errors.Is(err, kv.NotFoundError) {
+					continue
+				}
+				return nil, fmt.Errorf("expected IsOccurrence: %w", err)
 			}
 			isOcc, err := c.convOccurrence(ctx, link)
 			if err != nil {
