@@ -31,6 +31,9 @@ type Store interface {
 	// Sets a value, creates collection if necessary
 	Set(ctx context.Context, collection, key string, value any) error
 
+	// Remove a value from the store. If not found, returns NotFoundError.
+	Remove(ctx context.Context, collection, key string) error
+
 	// Create a scanner that will be used to get all the keys in a collection.
 	Keys(collection string) Scanner
 }

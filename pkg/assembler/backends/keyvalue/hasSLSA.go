@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -70,6 +71,42 @@ func (n *hasSLSAStruct) Key() string {
 		n.Collector,
 		n.DocumentRef,
 	}, ":"))
+}
+
+// deleteHasSLSA removes a hasSLSA node and its back edges. Caller must hold the
+// write lock.
+func (c *demoClient) deleteHasSLSA(ctx context.Context, id string) (bool, error) {
+	link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) {
+			return false, nil
+		}
+		return false, gqlerror.Errorf("failed to retrieve hasSLSA %q: %v", id, err)
+	}
+
+	// The subject can also be a builtFrom material, so dedup first.
+	for _, artID := range helper.SortAndRemoveDups(append([]string{link.Subject}, link.BuiltFrom...)) {
+		foundArt, err := byIDkv[*artStruct](ctx, artID, c)
+		if err != nil {
+			return false, gqlerror.Errorf("failed to retrieve artifact %q: %v", artID, err)
+		}
+		if err := removeLink(ctx, link.ThisID, &foundArt.HasSLSAs, artCol, foundArt, c); err != nil {
+			return false, gqlerror.Errorf("failed to remove artifact back edge: %v", err)
+		}
+	}
+
+	foundBuilder, err := byIDkv[*builderStruct](ctx, link.BuiltBy, c)
+	if err != nil {
+		return false, gqlerror.Errorf("failed to retrieve builder %q: %v", link.BuiltBy, err)
+	}
+	if err := removeLink(ctx, link.ThisID, &foundBuilder.HasSLSAs, builderCol, foundBuilder, c); err != nil {
+		return false, gqlerror.Errorf("failed to remove builder back edge: %v", err)
+	}
+
+	if err := delkv(ctx, slsaCol, link, c); err != nil {
+		return false, gqlerror.Errorf("failed to remove hasSLSA %q: %v", id, err)
+	}
+	return true, nil
 }
 
 func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []string {
