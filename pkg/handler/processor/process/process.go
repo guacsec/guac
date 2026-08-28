@@ -115,7 +115,12 @@ func deliveryCountSource(fromBroker bool) string {
 // in tests). NATS JetStream tracks NumDelivered server-side, so we prefer
 // that path when available.
 type notFoundTracker struct {
-	mu       sync.Mutex
+	mu sync.Mutex
+	// attempts is keyed by blob store key, not by pubsub message. Two distinct
+	// messages referencing the same missing blob therefore share one counter,
+	// so the second can reach maxBlobNotFoundRetries in fewer deliveries of its
+	// own. That is acceptable: both messages point at the same absent blob, and
+	// a successful read clears the entry.
 	attempts map[string]int
 }
 
@@ -152,19 +157,17 @@ func deliveryAttempt(msg *pubsub.Message) (int, bool) {
 	return int(md.NumDelivered), true
 }
 
-// registerProcessorMetrics registers (or recovers an existing) counter for
-// dropped-message accounting. Returns nil for the counter if registration
-// fails so the caller can degrade gracefully without aborting ingest.
-func registerProcessorMetrics(ctx context.Context, logger *zap.SugaredLogger) metrics.Counter {
-	collector := metrics.FromContext(ctx, metricsCollectorName)
-	counter, err := collector.RegisterCounter(ctx, blobNotFoundDroppedCounter, "processor_id")
-	if err != nil {
-		// Most commonly this fires in tests where the counter was registered
-		// by a prior Subscribe; the metric is still usable via AddCounter.
+// registerProcessorMetrics declares the dropped-message counter on collector so
+// that AddCounter can find it later. The Counter returned by RegisterCounter is
+// deliberately discarded: it is bound to the label *names* rather than to this
+// processor's UUID, so incrementing it would record a different series than the
+// AddCounter call at the drop site. Registration failure is not fatal — most
+// commonly it means a prior Subscribe already registered the counter on this
+// collector — so it is logged and ingest continues.
+func registerProcessorMetrics(ctx context.Context, collector metrics.MetricCollector, logger *zap.SugaredLogger) {
+	if _, err := collector.RegisterCounter(ctx, blobNotFoundDroppedCounter, "processor_id"); err != nil {
 		logger.Debugf("blob-notfound counter registration: %v", err)
-		return nil
 	}
-	return counter
 }
 
 // Subscribe receives the CD event and decodes the event to obtain the blob store key.
@@ -187,8 +190,11 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 
 	// In-process fallback for backends without a native delivery count.
 	tracker := newNotFoundTracker()
-	droppedCounter := registerProcessorMetrics(ctx, logger)
+	// One collector instance for both registration and increment: FromContext
+	// constructs a fresh collector when the context carries none, so calling it
+	// twice would register the counter on a collector the drop site never uses.
 	metricsCollector := metrics.FromContext(ctx, metricsCollectorName)
+	registerProcessorMetrics(ctx, metricsCollector, logger)
 
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d *pubsub.Message) error {
@@ -229,9 +235,7 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 						"blob_key", blobStoreKey,
 						"delivery_count_source", deliveryCountSource(fromBroker),
 					)
-					if droppedCounter != nil {
-						droppedCounter.Inc()
-					} else if err := metricsCollector.AddCounter(ctx, blobNotFoundDroppedCounter, 1, uuidString); err != nil {
+					if err := metricsCollector.AddCounter(ctx, blobNotFoundDroppedCounter, 1, uuidString); err != nil {
 						childLogger.Debugf("[processor: %s] AddCounter blob-notfound: %v", uuidString, err)
 					}
 					tracker.clear(blobStoreKey)
