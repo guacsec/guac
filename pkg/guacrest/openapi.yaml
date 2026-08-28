@@ -229,6 +229,12 @@ components:
           $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
+        ScorecardScore:
+          description: >
+            The OpenSSF Scorecard aggregate score of the source the package is
+            linked to. Absent when no scored source is linked.
+          type: number
+          format: double
     Vulnerability:
       type: object
       required:

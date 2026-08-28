@@ -51,6 +51,17 @@ const (
 	defaultIsDependencyOrigin         = "test-origin"
 	defaultIsDependencyCollector      = "test-collector"
 
+	// HasSourceAt
+	defaultHasSourceAtJustification = "test-justification"
+	defaultHasSourceAtOrigin        = "test-origin"
+	defaultHasSourceAtCollector     = "test-collector"
+
+	// CertifyScorecard
+	defaultScorecardVersion   = "test-scorecard-version"
+	defaultScorecardCommit    = "test-scorecard-commit"
+	defaultScorecardOrigin    = "test-origin"
+	defaultScorecardCollector = "test-collector"
+
 	// HashEquals
 	defaultHashEqualJustification = "test-justification"
 	defaultHashEqualOrigin        = "test-origin"
@@ -91,6 +102,9 @@ type GuacData struct {
 	HasSlsas       []HasSlsa
 	CertifyVulns   []CertifyVuln
 
+	HasSourceAts      []HasSourceAt
+	CertifyScorecards []CertifyScorecard
+
 	// Other graphql verbs still need to be added here
 }
 
@@ -125,6 +139,17 @@ type HasSlsa struct {
 	BuiltFrom []string           // a list of previously ingested digests
 	BuiltBy   string             // a previously ingested builder
 	Spec      *gql.SLSAInputSpec // if nil, a default will be used
+}
+
+type HasSourceAt struct {
+	Package string                    // a previously ingested purl
+	Source  string                    // a previously ingested source
+	Spec    *gql.HasSourceAtInputSpec // if nil, a default will be used
+}
+
+type CertifyScorecard struct {
+	Source string                  // a previously ingested source
+	Spec   *gql.ScorecardInputSpec // if nil, a default will be used
 }
 
 type CertifyVuln struct {
@@ -198,6 +223,14 @@ func Ingest(ctx context.Context, t *testing.T, gqlClient graphql.Client, data Gu
 
 	for _, certifyVuln := range data.CertifyVulns {
 		i.ingestCertifyVuln(ctx, t, gqlClient, certifyVuln)
+	}
+
+	for _, hasSourceAt := range data.HasSourceAts {
+		i.ingestHasSourceAt(ctx, t, gqlClient, hasSourceAt)
+	}
+
+	for _, certifyScorecard := range data.CertifyScorecards {
+		i.ingestCertifyScorecard(ctx, t, gqlClient, certifyScorecard)
 	}
 
 	return i
@@ -437,6 +470,7 @@ func ingestSource(ctx context.Context, t *testing.T, gqlClient graphql.Client, n
 	spec := gql.SourceInputSpec{
 		Type:      defaultSourceType,
 		Namespace: defaultSourceNamespace,
+		Name:      name,
 	}
 	idorInputSpec := gql.IDorSourceInput{SourceInput: &spec}
 	res, err := gql.IngestSource(ctx, gqlClient, idorInputSpec)
@@ -498,5 +532,66 @@ func (i nounIds) ingestCertifyVuln(ctx context.Context, t *testing.T, gqlClient 
 	_, err := gql.IngestCertifyVulnPkg(ctx, gqlClient, pkgSpec, vulnSpec, *spec)
 	if err != nil {
 		t.Fatalf("Error ingesting CertifyVuln when setting up test: %s", err)
+	}
+}
+
+func (i nounIds) ingestHasSourceAt(ctx context.Context, t *testing.T, gqlClient graphql.Client, hasSourceAt HasSourceAt) {
+	spec := hasSourceAt.Spec
+	if spec == nil {
+		spec = &gql.HasSourceAtInputSpec{
+			KnownSince:    time.Now(),
+			Justification: defaultHasSourceAtJustification,
+			Origin:        defaultHasSourceAtOrigin,
+			Collector:     defaultHasSourceAtCollector,
+		}
+	}
+
+	if _, ok := i.PackageIds[hasSourceAt.Package]; !ok {
+		t.Fatalf("The purl %s has not been ingested", hasSourceAt.Package)
+	}
+	sourceId, ok := i.SourceIds[hasSourceAt.Source]
+	if !ok {
+		t.Fatalf("The source %s has not been ingested", hasSourceAt.Source)
+	}
+
+	// the keyvalue backend needs both package IDs to resolve by ID, so match on the input spec
+	pkgInput, err := helpers.PurlToPkg(hasSourceAt.Package)
+	if err != nil {
+		t.Fatalf("Could not create a package input spec from a purl: %s", err)
+	}
+
+	pkgSpec := gql.IDorPkgInput{PackageInput: pkgInput}
+	sourceSpec := gql.IDorSourceInput{SourceNameID: &sourceId}
+	matchFlags := gql.MatchFlags{Pkg: gql.PkgMatchTypeSpecificVersion}
+
+	if _, err := gql.IngestHasSourceAt(ctx, gqlClient, pkgSpec, matchFlags, sourceSpec, *spec); err != nil {
+		t.Fatalf("Error ingesting HasSourceAt when setting up test: %s", err)
+	}
+}
+
+func (i nounIds) ingestCertifyScorecard(ctx context.Context, t *testing.T, gqlClient graphql.Client, certifyScorecard CertifyScorecard) {
+	spec := gql.ScorecardInputSpec{
+		TimeScanned:      time.Now(),
+		ScorecardVersion: defaultScorecardVersion,
+		ScorecardCommit:  defaultScorecardCommit,
+		Origin:           defaultScorecardOrigin,
+		Collector:        defaultScorecardCollector,
+	}
+	if certifyScorecard.Spec != nil {
+		spec = *certifyScorecard.Spec
+	}
+	// the graphql schema requires a checks list, so an unset one has to be empty rather than null
+	if spec.Checks == nil {
+		spec.Checks = []gql.ScorecardCheckInputSpec{}
+	}
+
+	sourceId, ok := i.SourceIds[certifyScorecard.Source]
+	if !ok {
+		t.Fatalf("The source %s has not been ingested", certifyScorecard.Source)
+	}
+	sourceSpec := gql.IDorSourceInput{SourceNameID: &sourceId}
+
+	if _, err := gql.IngestCertifyScorecard(ctx, gqlClient, sourceSpec, spec); err != nil {
+		t.Fatalf("Error ingesting CertifyScorecard when setting up test: %s", err)
 	}
 }

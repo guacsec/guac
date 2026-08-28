@@ -34,6 +34,9 @@ type Error struct {
 type PackageName struct {
 	DependentCount int  `json:"DependentCount"`
 	Name           Purl `json:"Name"`
+
+	// ScorecardScore The OpenSSF Scorecard aggregate score of the source the package is linked to. Absent when no scored source is linked.
+	ScorecardScore *float64 `json:"ScorecardScore,omitempty"`
 }
 
 // PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
