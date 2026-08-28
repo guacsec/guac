@@ -316,9 +316,8 @@ func delkv(ctx context.Context, coll string, n node, c *demoClient) error {
 	return c.kv.Remove(ctx, indexCol, n.ID())
 }
 
-// removeLink drops linkID from one of a node's back edge slices and stores the
-// node again. Pass a pointer to the slice field, e.g.
-// removeLink(ctx, id, &pkg.HasSBOMs, pkgVerCol, pkg, c).
+// removeLink drops linkID from a node's back edge slice and stores the node
+// again. Pass a pointer to the slice field.
 func removeLink(ctx context.Context, linkID string, links *[]string, coll string, n node, c *demoClient) error {
 	*links = slices.DeleteFunc(*links, func(id string) bool { return id == linkID })
 	return setkv(ctx, coll, n, c)

@@ -73,8 +73,8 @@ func (n *hasSLSAStruct) Key() string {
 	}, ":"))
 }
 
-// deleteHasSLSA removes a hasSLSA node and the back edges pointing at it. The
-// caller must hold the write lock.
+// deleteHasSLSA removes a hasSLSA node and its back edges. Caller must hold the
+// write lock.
 func (c *demoClient) deleteHasSLSA(ctx context.Context, id string) (bool, error) {
 	link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
 	if err != nil {
@@ -84,8 +84,7 @@ func (c *demoClient) deleteHasSLSA(ctx context.Context, id string) (bool, error)
 		return false, gqlerror.Errorf("failed to retrieve hasSLSA %q: %v", id, err)
 	}
 
-	// The subject and every builtFrom material are artifacts, and an artifact
-	// can be both, so dedup before touching the store.
+	// The subject can also be a builtFrom material, so dedup first.
 	for _, artID := range helper.SortAndRemoveDups(append([]string{link.Subject}, link.BuiltFrom...)) {
 		foundArt, err := byIDkv[*artStruct](ctx, artID, c)
 		if err != nil {

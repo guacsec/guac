@@ -69,13 +69,10 @@ func (n *hasSBOMStruct) Key() string {
 }
 
 // deleteHasSBOM removes a hasSBOM node, the isDependency and isOccurrence nodes
-// it includes, and the back edges pointing at any of them. The caller must hold
-// the write lock.
+// it includes, and all their back edges. Caller must hold the write lock.
 //
-// NOTE: included nodes are deduped in this backend, so an isDependency shared
-// with another hasSBOM goes away with the first delete and simply drops out of
-// that hasSBOM's includes (see convHasSBOM). Refcount them if a shared included
-// node ever needs to survive.
+// Includes are deduped, so another hasSBOM may list the same one. Those are kept:
+// a dangling ID would break that record's Neighbors, Node and Path lookups.
 func (c *demoClient) deleteHasSBOM(ctx context.Context, id string) (bool, error) {
 	link, err := byIDkv[*hasSBOMStruct](ctx, id, c)
 	if err != nil {
@@ -108,18 +105,72 @@ func (c *demoClient) deleteHasSBOM(ctx context.Context, id string) (bool, error)
 		return false, gqlerror.Errorf("failed to remove hasSBOM %q: %v", id, err)
 	}
 
+	// This node is already gone, so it does not count itself.
+	kept, err := c.referencedIncludes(ctx, link)
+	if err != nil {
+		return false, gqlerror.Errorf("failed to check for shared includes: %v", err)
+	}
+
 	for _, depID := range link.IncludedDependencies {
+		if kept[depID] {
+			continue
+		}
 		if err := c.deleteIsDependency(ctx, depID); err != nil {
 			return false, gqlerror.Errorf("failed to remove included dependency %q: %v", depID, err)
 		}
 	}
 	for _, occID := range link.IncludedOccurrences {
+		if kept[occID] {
+			continue
+		}
 		if err := c.deleteIsOccurrence(ctx, occID); err != nil {
 			return false, gqlerror.Errorf("failed to remove included occurrence %q: %v", occID, err)
 		}
 	}
 
 	return true, nil
+}
+
+// referencedIncludes returns which of gone's includes another hasSBOM still
+// lists. Deletes are rare, so a scan is cheaper than storing a refcount.
+func (c *demoClient) referencedIncludes(ctx context.Context, gone *hasSBOMStruct) (map[string]bool, error) {
+	want := make(map[string]bool, len(gone.IncludedDependencies)+len(gone.IncludedOccurrences))
+	for _, id := range gone.IncludedDependencies {
+		want[id] = true
+	}
+	for _, id := range gone.IncludedOccurrences {
+		want[id] = true
+	}
+	kept := make(map[string]bool)
+	if len(want) == 0 {
+		return kept, nil
+	}
+
+	scn := c.kv.Keys(hasSBOMCol)
+	for done := false; !done; {
+		keys, last, err := scn.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+		done = last
+		for _, key := range keys {
+			other, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, key, c)
+			if err != nil {
+				return nil, err
+			}
+			for _, id := range other.IncludedDependencies {
+				if want[id] {
+					kept[id] = true
+				}
+			}
+			for _, id := range other.IncludedOccurrences {
+				if want[id] {
+					kept[id] = true
+				}
+			}
+		}
+	}
+	return kept, nil
 }
 
 func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
@@ -350,8 +401,8 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		for _, id := range in.IncludedDependencies {
 			link, err := byIDkv[*isDependencyLink](ctx, id, c)
 			if err != nil {
-				// The node may have been deleted along with another hasSBOM
-				// that included it. Drop it rather than failing the query.
+				// Should not happen: deleteHasSBOM keeps shared includes.
+				// Drop it rather than fail every HasSBOM query.
 				if errors.Is(err, kv.NotFoundError) {
 					continue
 				}

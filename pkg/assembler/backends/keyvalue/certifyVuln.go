@@ -59,8 +59,8 @@ func (n *certifyVulnerabilityLink) Key() string {
 	}, ":"))
 }
 
-// deleteCertifyVuln removes a certifyVuln node and the back edges pointing at
-// it. The caller must hold the write lock.
+// deleteCertifyVuln removes a certifyVuln node and its back edges. Caller must
+// hold the write lock.
 func (c *demoClient) deleteCertifyVuln(ctx context.Context, id string) (bool, error) {
 	link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
 	if err != nil {

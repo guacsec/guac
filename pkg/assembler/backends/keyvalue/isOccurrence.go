@@ -45,9 +45,8 @@ type isOccurrenceStruct struct {
 
 func (n *isOccurrenceStruct) ID() string { return n.ThisID }
 
-// deleteIsOccurrence removes an isOccurrence node and the back edges pointing at
-// it. A node that is already gone is not an error. The caller must hold the
-// write lock.
+// deleteIsOccurrence removes an isOccurrence node and its back edges. Already
+// gone is not an error. Caller must hold the write lock.
 func (c *demoClient) deleteIsOccurrence(ctx context.Context, id string) error {
 	link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
 	if err != nil {

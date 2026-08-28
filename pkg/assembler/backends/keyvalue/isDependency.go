@@ -56,9 +56,8 @@ func (n *isDependencyLink) Key() string {
 	}, ":"))
 }
 
-// deleteIsDependency removes an isDependency node and the back edges pointing at
-// it. A node that is already gone is not an error. The caller must hold the
-// write lock.
+// deleteIsDependency removes an isDependency node and its back edges. Already
+// gone is not an error. Caller must hold the write lock.
 func (c *demoClient) deleteIsDependency(ctx context.Context, id string) error {
 	link, err := byIDkv[*isDependencyLink](ctx, id, c)
 	if err != nil {
@@ -68,7 +67,7 @@ func (c *demoClient) deleteIsDependency(ctx context.Context, id string) error {
 		return fmt.Errorf("failed to retrieve isDependency %q: %w", id, err)
 	}
 
-	// PackageID and DepPackageID are the same node for a self dependency.
+	// Both are the same node for a self dependency.
 	for _, pkgID := range helper.SortAndRemoveDups([]string{link.PackageID, link.DepPackageID}) {
 		foundPkg, err := byIDkv[*pkgVersion](ctx, pkgID, c)
 		if err != nil {

@@ -23,9 +23,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// Included isDependency and isOccurrence nodes are deduped, so two hasSBOMs can
-// point at the same one. Deleting the first must not leave the second
-// unqueryable.
+// Includes are deduped, so two hasSBOMs can point at the same one. Deleting the
+// first must not leave the second unqueryable.
 func TestDeleteHasSBOMWithSharedIncludes(t *testing.T) {
 	ctx := context.Background()
 	be, err := getBackend(ctx, nil)
@@ -66,17 +65,17 @@ func TestDeleteHasSBOMWithSharedIncludes(t *testing.T) {
 		Dependencies: []string{depID},
 		Occurrences:  []string{occID},
 	}
-	// Two SBOMs on the same package, differing only by URI, over the same
-	// included nodes.
+	// Same package and includes, different URI.
 	first, err := be.IngestHasSbom(ctx,
 		model.PackageOrArtifactInput{Package: &model.IDorPkgInput{PackageInput: pkgIn}},
 		model.HasSBOMInputSpec{URI: "first uri"}, includes)
 	if err != nil {
 		t.Fatalf("could not ingest first hasSBOM: %v", err)
 	}
-	if _, err := be.IngestHasSbom(ctx,
+	second, err := be.IngestHasSbom(ctx,
 		model.PackageOrArtifactInput{Package: &model.IDorPkgInput{PackageInput: pkgIn}},
-		model.HasSBOMInputSpec{URI: "second uri"}, includes); err != nil {
+		model.HasSBOMInputSpec{URI: "second uri"}, includes)
+	if err != nil {
 		t.Fatalf("could not ingest second hasSBOM: %v", err)
 	}
 
@@ -97,5 +96,27 @@ func TestDeleteHasSBOMWithSharedIncludes(t *testing.T) {
 	}
 	if uri := got.Edges[0].Node.URI; uri != "second uri" {
 		t.Errorf("expected the second hasSBOM to survive, got URI %q", uri)
+	}
+	if n := len(got.Edges[0].Node.IncludedDependencies); n != 1 {
+		t.Errorf("expected the surviving hasSBOM to keep its included dependency, got %d", n)
+	}
+	if n := len(got.Edges[0].Node.IncludedOccurrences); n != 1 {
+		t.Errorf("expected the surviving hasSBOM to keep its included occurrence, got %d", n)
+	}
+
+	// These resolve include IDs through the index, so a deleted include breaks
+	// them even when the SBOM query itself tolerates it.
+	if _, err := be.Neighbors(ctx, second, nil); err != nil {
+		t.Errorf("neighbors of the surviving hasSBOM: %v", err)
+	}
+	if _, err := be.Node(ctx, second); err != nil {
+		t.Errorf("node lookup of the surviving hasSBOM: %v", err)
+	}
+	deps, err := be.IsDependencyList(ctx, model.IsDependencySpec{}, nil, nil)
+	if err != nil {
+		t.Fatalf("could not list dependencies after delete: %v", err)
+	}
+	if deps == nil || len(deps.Edges) != 1 {
+		t.Errorf("expected the shared dependency to outlive the deleted hasSBOM, got: %v", deps)
 	}
 }
