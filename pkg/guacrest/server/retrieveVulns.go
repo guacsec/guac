@@ -18,6 +18,8 @@ package server
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/Khan/genqlient/graphql"
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -27,14 +29,14 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-// GetVulnsForArtifact returns the vulnerabilities certified against any
-// package that the artifact (identified by digest) is an occurrence of.
+// GetVulnsForArtifact returns the vulnerabilities certified against every
+// package reachable from the artifact identified by digest.
 func GetVulnsForArtifact(ctx context.Context, gqlClient graphql.Client, digest string) ([]gen.Vulnerability, error) {
 	art, err := helpers.FindArtifactWithDigest(ctx, gqlClient, digest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find artifact: %w", err)
 	}
-	pkgIDs, err := packageIDsForArtifact(ctx, gqlClient, art.Id)
+	pkgIDs, err := packageIDsForArtifact(ctx, gqlClient, &art)
 	if err != nil {
 		return nil, err
 	}
@@ -62,46 +64,25 @@ func GetVulnsForPackage(ctx context.Context, gqlClient graphql.Client, purl stri
 			}
 			pkgIDs = append(pkgIDs, depID)
 		}
+		// deps is a map, so sort the dependency IDs to keep the response order
+		// stable across identical requests; the purl's own vulns stay first.
+		slices.Sort(pkgIDs[1:])
 	}
 	return vulnsForPackageIDs(ctx, gqlClient, pkgIDs)
 }
 
-// packageIDsForArtifact walks artifact -> IsOccurrence -> package and
-// returns the de-duplicated set of package version IDs.
-func packageIDsForArtifact(ctx context.Context, gqlClient graphql.Client, artID string) ([]string, error) {
-	logger := logging.FromContext(ctx)
-
-	occNeighbors, err := gql.Neighbors(ctx, gqlClient, artID, []gql.Edge{gql.EdgeArtifactIsOccurrence})
+// packageIDsForArtifact returns the sorted IDs of every package version the
+// byDigest walk reaches, equivalents included - unlike GetDepsForArtifact.
+func packageIDsForArtifact(ctx context.Context, gqlClient graphql.Client, art *gql.AllArtifactTree) ([]string, error) {
+	reachable, _, err := getReachableNodes(ctx, art, newByDigest(gqlClient))
 	if err != nil {
-		logger.Errorf("Neighbors query returned err: %v", err)
-		return nil, helpers.Err502
+		return nil, err
 	}
-	seen := map[string]struct{}{}
-	var pkgIDs []string
-	for _, n := range occNeighbors.GetNeighbors() {
-		occ, ok := n.(*gql.NeighborsNeighborsIsOccurrence)
-		if !ok || occ == nil {
-			continue
-		}
-		pkgNeighbors, err := gql.Neighbors(ctx, gqlClient, occ.Id, []gql.Edge{gql.EdgeIsOccurrencePackage})
-		if err != nil {
-			logger.Errorf("Neighbors query returned err: %v", err)
-			return nil, helpers.Err502
-		}
-		for _, pn := range pkgNeighbors.GetNeighbors() {
-			pkg, ok := pn.(*gql.NeighborsNeighborsPackage)
-			if !ok || pkg == nil {
-				continue
-			}
-			for _, v := range helpers.GetVersionsOfAllPackageTree(pkg.AllPkgTree) {
-				if _, dup := seen[v.Id]; dup {
-					continue
-				}
-				seen[v.Id] = struct{}{}
-				pkgIDs = append(pkgIDs, v.Id)
-			}
-		}
-	}
+	// reachable is keyed by node ID, so the result is already de-duplicated.
+	pkgIDs := pkgVersionIDs(ctx, maps.Values(reachable))
+	// Map iteration order is randomized, so sort to keep the vulnerability
+	// order stable across identical requests.
+	slices.Sort(pkgIDs)
 	return pkgIDs, nil
 }
 
@@ -110,11 +91,16 @@ func packageIDsForArtifact(ctx context.Context, gqlClient graphql.Client, artID 
 // certification ID.
 func vulnsForPackageIDs(ctx context.Context, gqlClient graphql.Client, pkgIDs []string) ([]gen.Vulnerability, error) {
 	logger := logging.FromContext(ctx)
+	// A novuln record certifies that a scan found nothing, so it is not a
+	// vulnerability - unfiltered, every clean package reports one.
+	noVuln := false
 	seen := map[string]struct{}{}
 	result := []gen.Vulnerability{}
 	for _, id := range pkgIDs {
-		pkgID := id
-		resp, err := gql.CertifyVuln(ctx, gqlClient, gql.CertifyVulnSpec{Package: &gql.PkgSpec{Id: &pkgID}})
+		resp, err := gql.CertifyVuln(ctx, gqlClient, gql.CertifyVulnSpec{
+			Package:       &gql.PkgSpec{Id: &id},
+			Vulnerability: &gql.VulnerabilitySpec{NoVuln: &noVuln},
+		})
 		if err != nil {
 			logger.Errorf("CertifyVuln query returned err: %v", err)
 			return nil, helpers.Err502

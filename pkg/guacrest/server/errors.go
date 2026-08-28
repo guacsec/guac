@@ -17,6 +17,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
@@ -52,10 +53,12 @@ func handleErr(
 	if err == nil {
 		return createBadRequestResponse(endpointType, "Unknown error")
 	}
-	switch err {
-	case helpers.Err502:
+	// Callers wrap these with %w, so compare with errors.Is rather than by
+	// identity - otherwise a backend outage is reported as 400 Bad Request.
+	switch {
+	case errors.Is(err, helpers.Err502):
 		return createBadGatewayResponse(endpointType, err.Error())
-	case helpers.Err500:
+	case errors.Is(err, helpers.Err500):
 		return createInternalServerErrorResponse(endpointType, err.Error())
 	default:
 		return createBadRequestResponse(endpointType, err.Error())

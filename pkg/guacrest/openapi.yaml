@@ -87,7 +87,8 @@ paths:
       description: >
         This endpoint will find all vulnerabilities for the purl passed in. 
         If the `includeDependencies` flag is set to true, it will also include 
-        vulnerabilities of the dependencies of the purl passed in.
+        vulnerabilities of the dependencies of the purl passed in. Records
+        certifying that a scan found nothing (novuln) are not returned.
       operationId: getPackageVulns
       parameters:
         - name: purl
@@ -143,6 +144,12 @@ paths:
   "/v0/artifact/{digest}/vulns":
     get:
       summary: Get vulnerabilities for an artifact, identified by a digest
+      description: >
+        This endpoint will find all vulnerabilities certified against the artifact's
+        own packages, its HashEqual and IsOccurrence equivalents, and every package
+        reachable through HasSBOM includes and the materials of HasSLSA attestations
+        the artifact is the subject of, followed transitively. Records certifying
+        that a scan found nothing (novuln) are not returned.
       operationId: getArtifactVulns
       parameters:
         - name: digest
