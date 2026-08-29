@@ -51,7 +51,7 @@ const gcsCredentialsPathFlag = "gcp-credentials-path"
 var gcsCmd = &cobra.Command{
 	Use:     "gcs [flags] bucket_name",
 	Short:   "takes SBOMs and attestations from a Google Cloud Storage bucket and injects them to GUAC graph. This command talks directly to the graphQL endpoint",
-	Example: "guacone collect gcs my-bucket --gcs-credentials-path /secret/sa.json",
+	Example: "guacone collect gcs my-bucket --gcp-credentials-path /secret/sa.json",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		opts, err := validateGCSFlags(
