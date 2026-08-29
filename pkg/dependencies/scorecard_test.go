@@ -78,6 +78,24 @@ func Test_GetDependenciesBySortedScorecard(t *testing.T) {
 			},
 		},
 		{
+			// the git certifier links a source to a package name, not to one version
+			name: "a name level link scores the package",
+			data: clients.GuacData{
+				Packages: []string{"pkg:guac/app@1", "pkg:guac/lib@1"},
+				Sources:  []string{"lib-repo"},
+				HasSboms: []clients.HasSbom{sbomOf("pkg:guac/app@1", "pkg:guac/lib@1")},
+				HasSourceAts: []clients.HasSourceAt{
+					{Package: "pkg:guac/lib@1", Source: "lib-repo", AllVersions: true},
+				},
+				CertifyScorecards: []clients.CertifyScorecard{
+					{Source: "lib-repo", Spec: scorecardAt(3.5, 0)},
+				},
+			},
+			want: []PackageName{
+				{Name: "pkg:guac/lib", DependentCount: 1, ScorecardScore: ptrfrom.Float64(3.5)},
+			},
+		},
+		{
 			// 0 is a real Scorecard value, so a package scored 0 must sort ahead
 			// of one that simply has no score.
 			name: "a zero score is not the same as no score",

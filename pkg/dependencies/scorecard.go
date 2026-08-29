@@ -133,8 +133,9 @@ func newerScan(scorecard model.AllCertifyScorecardScorecard, keptScore float64, 
 	return scorecard.TimeScanned.After(keptTime)
 }
 
-// sourceKeys identifies a repository by type, namespace and name alone, so scans of
-// every tag and commit merge: HasSourceAt carries no ref to match the certifier's on.
+// sourceKeys identifies a repository by type, namespace and name alone. The tag and
+// commit both queries carry are dropped on purpose, so a scan of any ref scores every
+// package linked to that repository: a package linked to v2.0 can take a v0.1 score.
 func sourceKeys(source model.AllSourceTree) []string {
 	var keys []string
 	for _, namespace := range source.Namespaces {

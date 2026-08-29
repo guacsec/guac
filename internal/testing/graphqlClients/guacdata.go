@@ -142,9 +142,10 @@ type HasSlsa struct {
 }
 
 type HasSourceAt struct {
-	Package string                    // a previously ingested purl
-	Source  string                    // a previously ingested source
-	Spec    *gql.HasSourceAtInputSpec // if nil, a default will be used
+	Package     string                    // a previously ingested purl
+	Source      string                    // a previously ingested source
+	AllVersions bool                      // link the package name rather than the version
+	Spec        *gql.HasSourceAtInputSpec // if nil, a default will be used
 }
 
 type CertifyScorecard struct {
@@ -563,6 +564,9 @@ func (i nounIds) ingestHasSourceAt(ctx context.Context, t *testing.T, gqlClient 
 	pkgSpec := gql.IDorPkgInput{PackageInput: pkgInput}
 	sourceSpec := gql.IDorSourceInput{SourceNameID: &sourceId}
 	matchFlags := gql.MatchFlags{Pkg: gql.PkgMatchTypeSpecificVersion}
+	if hasSourceAt.AllVersions {
+		matchFlags.Pkg = gql.PkgMatchTypeAllVersions
+	}
 
 	if _, err := gql.IngestHasSourceAt(ctx, gqlClient, pkgSpec, matchFlags, sourceSpec, *spec); err != nil {
 		t.Fatalf("Error ingesting HasSourceAt when setting up test: %s", err)
