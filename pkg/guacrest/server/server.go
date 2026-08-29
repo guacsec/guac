@@ -70,37 +70,41 @@ func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheck
 }
 
 func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.AnalyzeDependenciesRequestObject) (gen.AnalyzeDependenciesResponseObject, error) {
+	var packages []dependencies.PackageName
+	var err error
+
 	switch request.Params.Sort {
 	case gen.Frequency:
-		packages, err := dependencies.GetDependenciesBySortedDependentCnt(ctx, s.gqlClient)
-		if err != nil {
-			return gen.AnalyzeDependencies500JSONResponse{
-				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
-					Message: err.Error(),
-				},
-			}, nil
-		}
-
-		var packageNames []gen.PackageName
-
-		for _, p := range packages {
-			pac := p // have to do this because we don't want packageNames to keep on appending a pointer of the same variable p.
-			packageNames = append(packageNames, gen.PackageName{
-				Name:           pac.Name,
-				DependentCount: pac.DependentCount,
-			})
-		}
-
-		val := gen.AnalyzeDependencies200JSONResponse{
-			PackageNameListJSONResponse: packageNames,
-		}
-
-		return val, nil
+		packages, err = dependencies.GetDependenciesBySortedDependentCnt(ctx, s.gqlClient)
 	case gen.Scorecard:
-		return nil, fmt.Errorf("scorecard sort is unimplemented")
+		packages, err = dependencies.GetDependenciesBySortedScorecard(ctx, s.gqlClient)
 	default:
-		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
+		return gen.AnalyzeDependencies400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("%v sort is unsupported", request.Params.Sort),
+			},
+		}, nil
 	}
+	if err != nil {
+		return gen.AnalyzeDependencies500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	var packageNames []gen.PackageName
+	for _, p := range packages {
+		packageNames = append(packageNames, gen.PackageName{
+			Name:           p.Name,
+			DependentCount: p.DependentCount,
+			ScorecardScore: p.ScorecardScore,
+		})
+	}
+
+	return gen.AnalyzeDependencies200JSONResponse{
+		PackageNameListJSONResponse: packageNames,
+	}, nil
 }
 
 func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPackagePurlsRequestObject) (gen.GetPackagePurlsResponseObject, error) {
