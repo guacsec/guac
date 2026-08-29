@@ -24,7 +24,12 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+	"sync"
 
+	"gocloud.dev/gcerrors"
+	"gocloud.dev/pubsub"
+
+	"github.com/nats-io/nats.go/jetstream"
 	"go.uber.org/zap"
 
 	uuid "github.com/gofrs/uuid"
@@ -44,15 +49,30 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/klauspost/compress/zstd"
-	"gocloud.dev/pubsub"
 )
 
 var (
 	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
 	json               = jsoniter.ConfigCompatibleWithStandardLibrary
 )
+
+// maxBlobNotFoundRetries caps how many times a single pubsub message will be
+// retried when the blob store reports the object is missing. After this many
+// consecutive NotFound responses for the same message, it is acked (dropped)
+// so it stops being redelivered indefinitely. Guards against orphaned events
+// whose underlying blob has been deleted or never landed.
+const maxBlobNotFoundRetries = 3
+
+// metricsCollectorName is the namespace used for processor metrics.
+const metricsCollectorName = "guac_processor"
+
+// blobNotFoundDroppedCounter is the metric name (sans namespace) for the
+// counter tracking pubsub messages dropped because their referenced blob is
+// persistently missing.
+const blobNotFoundDroppedCounter = "blob_notfound_dropped_total"
 
 func init() {
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Generic)
@@ -81,6 +101,75 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	return nil
 }
 
+// deliveryCountSource returns a stable label describing where the delivery
+// count was sourced from, for log/metric clarity.
+func deliveryCountSource(fromBroker bool) string {
+	if fromBroker {
+		return "broker"
+	}
+	return "in_process"
+}
+
+// notFoundTracker counts consecutive NotFound responses per blob key for
+// pubsub backends that don't expose a native delivery count (e.g. mempubsub
+// in tests). NATS JetStream tracks NumDelivered server-side, so we prefer
+// that path when available.
+type notFoundTracker struct {
+	mu sync.Mutex
+	// attempts is keyed by blob store key, not by pubsub message. Two distinct
+	// messages referencing the same missing blob therefore share one counter,
+	// so the second can reach maxBlobNotFoundRetries in fewer deliveries of its
+	// own. That is acceptable: both messages point at the same absent blob, and
+	// a successful read clears the entry.
+	attempts map[string]int
+}
+
+func newNotFoundTracker() *notFoundTracker {
+	return &notFoundTracker{attempts: make(map[string]int)}
+}
+
+func (t *notFoundTracker) increment(key string) int {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.attempts[key]++
+	return t.attempts[key]
+}
+
+func (t *notFoundTracker) clear(key string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	delete(t.attempts, key)
+}
+
+// deliveryAttempt returns the broker-reported delivery count for msg if the
+// underlying transport exposes one (currently NATS JetStream). The boolean
+// indicates whether a server-side count was available; callers fall back to
+// in-process tracking when it is not.
+func deliveryAttempt(msg *pubsub.Message) (int, bool) {
+	var jsMsg jetstream.Msg
+	if !msg.As(&jsMsg) {
+		return 0, false
+	}
+	md, err := jsMsg.Metadata()
+	if err != nil || md == nil {
+		return 0, false
+	}
+	return int(md.NumDelivered), true
+}
+
+// registerProcessorMetrics declares the dropped-message counter on collector so
+// that AddCounter can find it later. The Counter returned by RegisterCounter is
+// deliberately discarded: it is bound to the label *names* rather than to this
+// processor's UUID, so incrementing it would record a different series than the
+// AddCounter call at the drop site. Registration failure is not fatal — most
+// commonly it means a prior Subscribe already registered the counter on this
+// collector — so it is logged and ingest continues.
+func registerProcessorMetrics(ctx context.Context, collector metrics.MetricCollector, logger *zap.SugaredLogger) {
+	if _, err := collector.RegisterCounter(ctx, blobNotFoundDroppedCounter, "processor_id"); err != nil {
+		logger.Debugf("blob-notfound counter registration: %v", err)
+	}
+}
+
 // Subscribe receives the CD event and decodes the event to obtain the blob store key.
 // The key is used to retrieve the "document" from the blob store to be processed and ingested.
 func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobStore, emPubSub *emitter.EmitterPubSub) error {
@@ -98,6 +187,14 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 	}
 
 	retries := 0
+
+	// In-process fallback for backends without a native delivery count.
+	tracker := newNotFoundTracker()
+	// One collector instance for both registration and increment: FromContext
+	// constructs a fresh collector when the context carries none, so calling it
+	// twice would register the counter on a collector the drop site never uses.
+	metricsCollector := metrics.FromContext(ctx, metricsCollectorName)
+	registerProcessorMetrics(ctx, metricsCollector, logger)
 
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d *pubsub.Message) error {
@@ -117,9 +214,41 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 
 		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
 		if err != nil {
+			if gcerrors.Code(err) == gcerrors.NotFound {
+				attempts, fromBroker := deliveryAttempt(d)
+				if !fromBroker {
+					attempts = tracker.increment(blobStoreKey)
+				}
+
+				childLogger.Errorw("failed read document to blob store",
+					"processor_id", uuidString,
+					"attempt", attempts,
+					"max_attempts", maxBlobNotFoundRetries,
+					"delivery_count_source", deliveryCountSource(fromBroker),
+					"error", err.Error(),
+				)
+
+				if attempts >= maxBlobNotFoundRetries {
+					childLogger.Warnw("blob persistently missing — dropping pubsub message to stop redelivery",
+						"processor_id", uuidString,
+						"attempts", attempts,
+						"blob_key", blobStoreKey,
+						"delivery_count_source", deliveryCountSource(fromBroker),
+					)
+					if err := metricsCollector.AddCounter(ctx, blobNotFoundDroppedCounter, 1, uuidString); err != nil {
+						childLogger.Debugf("[processor: %s] AddCounter blob-notfound: %v", uuidString, err)
+					}
+					tracker.clear(blobStoreKey)
+					d.Ack()
+				}
+				return nil
+			}
 			childLogger.Errorf("[processor: %s] failed read document to blob store: %v", uuidString, err)
 			return nil
 		}
+
+		// successful read — clear any prior NotFound bookkeeping for this key
+		tracker.clear(blobStoreKey)
 
 		doc := processor.Document{}
 		if err = json.Unmarshal(documentBytes, &doc); err != nil {
