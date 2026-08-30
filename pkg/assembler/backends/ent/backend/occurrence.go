@@ -19,6 +19,7 @@ import (
 	"context"
 	stdsql "database/sql"
 	"fmt"
+	"sort"
 
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
@@ -167,6 +168,20 @@ func occurrenceConflictColumns() []string {
 	}
 }
 
+// sortableOccurrenceCreates sorts a batch of Occurrence creates by their
+// deterministic ID, keeping ids and creates in lockstep.
+type sortableOccurrenceCreates struct {
+	ids     []string
+	creates []*ent.OccurrenceCreate
+}
+
+func (s sortableOccurrenceCreates) Len() int           { return len(s.creates) }
+func (s sortableOccurrenceCreates) Less(i, j int) bool { return s.ids[i] < s.ids[j] }
+func (s sortableOccurrenceCreates) Swap(i, j int) {
+	s.ids[i], s.ids[j] = s.ids[j], s.ids[i]
+	s.creates[i], s.creates[j] = s.creates[j], s.creates[i]
+}
+
 func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
@@ -196,6 +211,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 	index := 0
 	for _, occurs := range batches {
 		creates := make([]*ent.OccurrenceCreate, len(occurs))
+		createIDs := make([]string, len(occurs))
 		for i, occur := range occurs {
 			occur := occur
 			switch {
@@ -206,6 +222,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
+				createIDs[i] = isOccurrenceID.String()
 				ids = append(ids, isOccurrenceID.String())
 
 			case len(subjects.Sources) > 0:
@@ -215,12 +232,21 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
+				createIDs[i] = isOccurrenceID.String()
 				ids = append(ids, isOccurrenceID.String())
 			default:
 				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
 			}
 			index++
 		}
+
+		// Sort the batch by its deterministic occurrence ID so that concurrent
+		// transactions upserting overlapping occurrences always acquire the
+		// underlying row-exclusive locks in the same order. Building the batch
+		// in unsorted (SBOM) order lets two concurrent transactions lock shared
+		// rows in opposite orders, which Postgres reports as a 40P01 deadlock.
+		// See the equivalent PackageName fix in upsertBulkPackage.
+		sort.Sort(sortableOccurrenceCreates{ids: createIDs, creates: creates})
 
 		err := tx.Occurrence.CreateBulk(creates...).
 			OnConflict(
