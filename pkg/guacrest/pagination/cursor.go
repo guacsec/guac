@@ -33,11 +33,11 @@ var (
 
 func indexFromCursor(cursor string) (uint64, error) {
 	if len(cursor) != 11 {
-		return 0, fmt.Errorf("Encoded cursor %q is not 11 bytes", cursor)
+		return 0, fmt.Errorf("encoded cursor %q is not 11 bytes", cursor)
 	}
 	decodedBytes, err := byteEncoding.DecodeString(cursor)
 	if err != nil {
-		return 0, fmt.Errorf("Cursor could not be decoded as base64: %v", err)
+		return 0, fmt.Errorf("cursor could not be decoded as base64: %v", err)
 	}
 	// decodedBytes must be at least length 8, but this is covered by the
 	// string length check above

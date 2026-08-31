@@ -55,36 +55,36 @@ func Paginate[T any](ctx context.Context, lst []T, spec *models.PaginationSpec) 
 	models.PaginationInfo, error) {
 	logger := logging.FromContext(ctx)
 
-	var pagesize int = DefaultPageSize
+	var pagesize = DefaultPageSize
 	if spec != nil && spec.PageSize != nil {
 		pagesize = *spec.PageSize
 	}
 	if pagesize < 0 {
 		return nil, models.PaginationInfo{},
-			fmt.Errorf("Pagination error: PageSize is negative.")
+			fmt.Errorf("pagination error: PageSize is negative")
 	}
 
-	var inputLength uint64 = uint64(len(lst))
+	var inputLength = uint64(len(lst))
 	var start uint64 = 0
 
 	if spec != nil && spec.Cursor != nil {
 		if *spec.Cursor == "" {
 			return nil, models.PaginationInfo{},
-				fmt.Errorf("Pagination error: The cursor is the empty string")
+				fmt.Errorf("pagination error: the cursor is the empty string")
 		}
 
 		decoded, err := indexFromCursor(*spec.Cursor)
 		if err != nil {
 			logger.Warnf("Pagination error: %s", err)
 			return nil, models.PaginationInfo{},
-				fmt.Errorf("Pagination error: The cursor is invalid.")
+				fmt.Errorf("pagination error: the cursor is invalid")
 		}
 		if decoded >= inputLength {
 			logger.Warnf("Pagination error: The cursor is out of bounds. This is" +
 				" either due to client manipulation of the cursor or a different slice" +
 				" argument passed to Paginate than when this cursor was generated.")
 			return nil, models.PaginationInfo{},
-				fmt.Errorf("Pagination error: The cursor is invalid")
+				fmt.Errorf("pagination error: the cursor is invalid")
 		}
 		start = decoded
 	}
