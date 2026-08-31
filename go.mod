@@ -186,7 +186,6 @@ require (
 	github.com/pjbgf/sha1cd v0.6.0 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.70.1 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
@@ -254,7 +253,7 @@ require (
 	entgo.io/contrib v0.7.0
 	entgo.io/ent v0.14.6
 	github.com/99designs/gqlgen v0.17.94
-	github.com/CycloneDX/cyclonedx-go v0.11.0
+	github.com/CycloneDX/cyclonedx-go v0.12.0
 	github.com/Khan/genqlient v0.8.1
 	github.com/Masterminds/semver v1.5.0
 	github.com/ProtonMail/gluon v0.17.0
@@ -306,7 +305,7 @@ require (
 	github.com/sigstore/sigstore v1.10.9
 	github.com/spdx/tools-golang v0.5.7
 	github.com/spf13/viper v1.21.0
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.1
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
 	github.com/vektah/gqlparser/v2 v2.5.36
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.45.0
@@ -502,7 +501,7 @@ require (
 	go.etcd.io/bbolt v1.4.3 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/telemetry v0.0.0-20260811182544-a038080d80e5 // indirect
