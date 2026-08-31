@@ -39,14 +39,20 @@ func TestWarnIfPrometheusUnsupported(t *testing.T) {
 			wantWarning:      false,
 		},
 		{
-			name:             "other subcommand with flag set warns",
+			name:             "osv with flag set does not warn",
 			cmdName:          "osv",
+			enablePrometheus: true,
+			wantWarning:      false,
+		},
+		{
+			name:             "other subcommand with flag set warns",
+			cmdName:          "github",
 			enablePrometheus: true,
 			wantWarning:      true,
 		},
 		{
 			name:             "other subcommand without flag set does not warn",
-			cmdName:          "osv",
+			cmdName:          "github",
 			enablePrometheus: false,
 			wantWarning:      false,
 		},
