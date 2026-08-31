@@ -72,7 +72,7 @@ func (c *demoClient) neighborsFromId(ctx context.Context, id string, allowedEdge
 
 	sub := strings.SplitN(k, ":", 2)
 	if len(sub) != 2 {
-		return nil, fmt.Errorf("Bad value was stored in index map: %v", k)
+		return nil, fmt.Errorf("bad value was stored in index map: %v", k)
 	}
 
 	node := typeColMap(sub[0])
@@ -165,7 +165,7 @@ func (c *demoClient) Node(ctx context.Context, id string) (model.Node, error) {
 
 	sub := strings.SplitN(k, ":", 2)
 	if len(sub) != 2 {
-		return nil, fmt.Errorf("Bad value was stored in index map: %v", k)
+		return nil, fmt.Errorf("bad value was stored in index map: %v", k)
 	}
 
 	node := typeColMap(sub[0])

@@ -924,7 +924,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 		})
 		currentID = versionNode.Parent
 	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
-		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	pnl := []*model.PackageName{}
@@ -939,7 +939,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 		})
 		currentID = nameNode.Parent
 	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
-		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	pnsl := []*model.PackageNamespace{}
@@ -954,7 +954,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 		})
 		currentID = namespaceNode.Parent
 	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
-		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	typeNode, err := byIDkv[*pkgType](ctx, currentID, c)
@@ -962,7 +962,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 		if errors.Is(err, kv.NotFoundError) || errors.Is(err, errTypeNotMatch) {
 			return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
 		} else {
-			return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+			return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 		}
 	}
 	if filter != nil && noMatch(filter.Type, typeNode.Type) {
@@ -1076,7 +1076,7 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 			return true
 		}
 	}
-	if filter.Qualifiers != nil && len(filter.Qualifiers) > 0 {
+	if len(filter.Qualifiers) > 0 {
 		filterQualifiers := getQualifiersFromFilter(filter.Qualifiers)
 		return !reflect.DeepEqual(v, filterQualifiers)
 	}

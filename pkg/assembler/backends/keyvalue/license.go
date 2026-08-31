@@ -191,12 +191,8 @@ func (c *demoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseS
 
 	var done bool
 	scn := c.kv.Keys(licenseCol)
-	currentPage := false
-
 	// If no cursor present start from the top
-	if after == nil {
-		currentPage = true
-	}
+	currentPage := after == nil
 
 	for !done {
 		var lKeys []string

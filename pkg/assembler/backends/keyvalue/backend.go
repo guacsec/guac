@@ -127,7 +127,7 @@ type node interface {
 }
 
 var errNotFound = errors.New("not found")
-var errTypeNotMatch = errors.New("Stored type does not match")
+var errTypeNotMatch = errors.New("stored type does not match")
 
 // Scorecard scores are in range of 1-10, so a single step at 100 should be
 // plenty big
@@ -289,7 +289,7 @@ func byIDkv[E node](ctx context.Context, id string, c *demoClient) (E, error) {
 	}
 	sub := strings.SplitN(k, ":", 2)
 	if len(sub) != 2 {
-		return nl, fmt.Errorf("Bad value was stored in index map: %v", k)
+		return nl, fmt.Errorf("bad value was stored in index map: %v", k)
 	}
 	return byKeykv[E](ctx, sub[0], sub[1], c)
 }
