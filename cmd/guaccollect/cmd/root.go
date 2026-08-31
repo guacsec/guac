@@ -27,11 +27,10 @@ import (
 )
 
 // warnIfPrometheusUnsupported warns when --enable-prometheus is set on a
-// subcommand other than deps_dev, the only subcommand that currently starts
-// a Prometheus metrics server, even though the flag is registered as a
-// persistent flag accepted by every subcommand.
+// subcommand that does not start a Prometheus metrics server, even though
+// the flag is registered as a persistent flag accepted by every subcommand.
 func warnIfPrometheusUnsupported(cmd *cobra.Command, _ []string) {
-	if cmd.Name() != depsDevCmd.Name() && viper.GetBool("enable-prometheus") {
+	if cmd.Name() != depsDevCmd.Name() && cmd.Name() != osvCmd.Name() && viper.GetBool("enable-prometheus") {
 		fmt.Fprintf(os.Stderr, "Warning: --enable-prometheus (or GUAC_ENABLE_PROMETHEUS) is not supported by the %q subcommand and will be ignored\n", cmd.Name())
 	}
 }

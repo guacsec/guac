@@ -71,6 +71,10 @@ type osvOptions struct {
 	addVulnMetadata bool
 	// enable otel
 	enableOtel bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 var osvCmd = &cobra.Command{
@@ -105,6 +109,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetInt("last-scan"),
 			viper.GetBool("add-vuln-metadata"),
 			viper.GetBool("enable-otel"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -127,10 +133,29 @@ you have access to read and write to the respective blob store.`,
 			}()
 		}
 
+		var metricsCollector metrics.MetricCollector
+		if opts.enablePrometheus {
+			ctx = metrics.WithMetrics(ctx, "osv")
+			metricsCollector = metrics.FromContext(ctx, "osv")
+			if err := osv.RegisterMetrics(ctx, metricsCollector); err != nil {
+				logger.Fatalf("unable to register metrics: %v", err)
+			}
+			go func() {
+				http.Handle("/metrics", metricsCollector.MetricsHandler())
+				logger.Infof("Prometheus server is listening on: %d", opts.prometheusPort)
+				if err := http.ListenAndServe(fmt.Sprintf(":%d", opts.prometheusPort), nil); err != nil {
+					logger.Fatalf("Error starting HTTP server: %v", err)
+				}
+			}()
+		}
+
 		if err := certify.RegisterCertifier(func() certifier.Certifier {
 			certifierOpts := []osv.CertifierOpts{}
 			if opts.addVulnMetadata {
 				certifierOpts = append(certifierOpts, osv.WithVulnerabilityMetadata())
+			}
+			if metricsCollector != nil {
+				certifierOpts = append(certifierOpts, osv.WithMetrics(metricsCollector))
 			}
 			return osv.NewOSVCertificationParser(certifierOpts...)
 		}, certifier.CertifierOSV); err != nil {
@@ -163,6 +188,8 @@ func validateOSVFlags(
 	batchSize int, lastScan int,
 	addVulnMetadata bool,
 	enableOtel bool,
+	enablePrometheus bool,
+	prometheusPort int,
 ) (osvOptions, error) {
 	var opts osvOptions
 
@@ -174,6 +201,8 @@ func validateOSVFlags(
 	opts.publishToQueue = pubToQueue
 	opts.addVulnMetadata = addVulnMetadata
 	opts.enableOtel = enableOtel
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -292,6 +321,7 @@ func init() {
 		"header-file", "certifier-latency",
 		"certifier-batch-size", "last-scan",
 		"add-vuln-metadata",
+		"prometheus-port",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
