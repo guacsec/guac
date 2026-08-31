@@ -667,7 +667,7 @@ func (c *demoClient) buildSourceResponse(ctx context.Context, id string, filter 
 		snl = append(snl, model)
 		currentID = nameNode.Parent
 	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
-		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	snsl := []*model.SourceNamespace{}
@@ -682,7 +682,7 @@ func (c *demoClient) buildSourceResponse(ctx context.Context, id string, filter 
 		})
 		currentID = namespaceNode.Parent
 	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
-		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	typeNode, err := byIDkv[*srcType](ctx, currentID, c)
@@ -690,7 +690,7 @@ func (c *demoClient) buildSourceResponse(ctx context.Context, id string, filter 
 		if errors.Is(err, kv.NotFoundError) || errors.Is(err, errTypeNotMatch) {
 			return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
 		} else {
-			return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+			return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 		}
 	}
 	if filter != nil && noMatch(filter.Type, typeNode.Type) {

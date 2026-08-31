@@ -139,12 +139,8 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 	}
 	edges := make([]*model.BuilderEdge, 0)
 	count := 0
-	currentPage := false
-
 	// If no cursor present start from the top
-	if after == nil {
-		currentPage = true
-	}
+	currentPage := after == nil
 	hasNextPage := false
 	totalCount := 0
 
