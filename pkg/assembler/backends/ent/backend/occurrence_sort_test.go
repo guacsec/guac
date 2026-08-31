@@ -22,11 +22,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 )
 
-// TestSortableOccurrenceCreates_DeterministicOrder verifies that sorting
-// keeps each Occurrence create paired with its ID, and always produces the
-// same ordering regardless of the input order. This is what prevents two
-// concurrent transactions from locking shared occurrences rows in opposite
-// orders (the lock-order-inversion deadlock described in the issue).
 func TestSortableOccurrenceCreates_DeterministicOrder(t *testing.T) {
 	idA, idB, idC := "aaaaaaaa", "bbbbbbbb", "cccccccc"
 	createA, createB, createC := &ent.OccurrenceCreate{}, &ent.OccurrenceCreate{}, &ent.OccurrenceCreate{}
@@ -55,8 +50,6 @@ func TestSortableOccurrenceCreates_DeterministicOrder(t *testing.T) {
 			t.Fatalf("ids not sorted: %v", ids)
 		}
 
-		// Verify ids and creates stayed paired: mapping id -> create must be
-		// consistent with the input mapping (A->createA, B->createB, C->createC).
 		want := map[string]*ent.OccurrenceCreate{idA: createA, idB: createB, idC: createC}
 		for i, id := range ids {
 			if creates[i] != want[id] {

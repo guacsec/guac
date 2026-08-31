@@ -168,8 +168,7 @@ func occurrenceConflictColumns() []string {
 	}
 }
 
-// sortableOccurrenceCreates sorts a batch of Occurrence creates by their
-// deterministic ID, keeping ids and creates in lockstep.
+// sortableOccurrenceCreates sorts a batch of Occurrence creates by deterministic ID, keeping ids and creates paired.
 type sortableOccurrenceCreates struct {
 	ids     []string
 	creates []*ent.OccurrenceCreate
@@ -240,12 +239,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 			index++
 		}
 
-		// Sort the batch by its deterministic occurrence ID so that concurrent
-		// transactions upserting overlapping occurrences always acquire the
-		// underlying row-exclusive locks in the same order. Building the batch
-		// in unsorted (SBOM) order lets two concurrent transactions lock shared
-		// rows in opposite orders, which Postgres reports as a 40P01 deadlock.
-		// See the equivalent PackageName fix in upsertBulkPackage.
+		// Sort by deterministic ID so concurrent transactions lock shared rows in the same order, avoiding 40P01 deadlocks.
 		sort.Sort(sortableOccurrenceCreates{ids: createIDs, creates: creates})
 
 		err := tx.Occurrence.CreateBulk(creates...).
