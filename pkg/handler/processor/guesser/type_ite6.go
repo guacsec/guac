@@ -29,7 +29,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type ite6TypeGuesser struct{}
 
-func (_ *ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	var statement in_toto.Statement
 	if json.Unmarshal(blob, &statement) == nil && format == processor.FormatJSON {
 		if strings.HasPrefix(statement.Type, "https://in-toto.io/Statement") {

@@ -24,7 +24,7 @@ import (
 
 type IngestPredicatesGuesser struct{}
 
-func (_ *IngestPredicatesGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*IngestPredicatesGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	switch format {
 	case processor.FormatJSON:
 		var preds assembler.IngestPredicates

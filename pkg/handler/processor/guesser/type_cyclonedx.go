@@ -29,7 +29,7 @@ const (
 	cycloneDXFormat = "CycloneDX"
 )
 
-func (_ *cycloneDXTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*cycloneDXTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	reader := bytes.NewReader(blob)
 	switch format {
 	case processor.FormatJSON:

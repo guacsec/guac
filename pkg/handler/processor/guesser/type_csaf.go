@@ -22,7 +22,7 @@ import (
 
 type csafTypeGuesser struct{}
 
-func (_ *csafTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*csafTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	switch format {
 	case processor.FormatJSON:
 		// Decode the BOM

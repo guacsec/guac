@@ -312,12 +312,12 @@ func (s *slsaParser) getSLSA() error {
 	var genericMap map[string]any
 	err = json.Unmarshal(data, &genericMap)
 	if err != nil {
-		return fmt.Errorf("Could not unmarshal SLSA Predicate to map: %w", err)
+		return fmt.Errorf("could not unmarshal SLSA Predicate to map: %w", err)
 	}
 
 	flatMap, err := flatten.Flatten(genericMap, "slsa.", flatten.SeparatorStyle{Middle: "."})
 	if err != nil {
-		return fmt.Errorf("Could not flatten SLSA Predicate map: %w", err)
+		return fmt.Errorf("could not flatten SLSA Predicate map: %w", err)
 	}
 
 	for k, v := range flatMap {
@@ -351,32 +351,32 @@ func (s *slsaParser) getBuilder() error {
 func (s *slsaParser) parseSlsaPredicate(p []byte) error {
 	s.smt = &attestationv1.Statement{}
 	if err := protojson.Unmarshal(p, s.smt); err != nil {
-		return fmt.Errorf("Could not unmarshal SLSA statement: %w", err)
+		return fmt.Errorf("could not unmarshal SLSA statement: %w", err)
 	}
 
 	predBytes, err := json.Marshal(s.smt.Predicate)
 	if err != nil {
-		return fmt.Errorf("Could not marshal SLSA predicate: %w", err)
+		return fmt.Errorf("could not marshal SLSA predicate: %w", err)
 	}
 
 	switch s.smt.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
 		s.pred01 = &slsa01.ProvenancePredicate{}
 		if err := json.Unmarshal(predBytes, s.pred01); err != nil {
-			return fmt.Errorf("Could not unmarshal v0.1 SLSA provenance statement : %w", err)
+			return fmt.Errorf("could not unmarshal v0.1 SLSA provenance statement : %w", err)
 		}
 	case slsa02.PredicateSLSAProvenance:
 		s.pred02 = &slsa02.ProvenancePredicate{}
 		if err := json.Unmarshal(predBytes, s.pred02); err != nil {
-			return fmt.Errorf("Could not unmarshal v0.2 SLSA provenance statement : %w", err)
+			return fmt.Errorf("could not unmarshal v0.2 SLSA provenance statement : %w", err)
 		}
 	case PredicateSLSAProvenancev1:
 		s.pred1 = &slsa1.Provenance{}
 		if err := protojson.Unmarshal(predBytes, s.pred1); err != nil {
-			return fmt.Errorf("Could not unmarshal v1.0 SLSA provenance statement : %w", err)
+			return fmt.Errorf("could not unmarshal v1.0 SLSA provenance statement : %w", err)
 		}
 	default:
-		return fmt.Errorf("Unknown SLSA PredicateType: %q", s.smt.PredicateType)
+		return fmt.Errorf("unknown SLSA PredicateType: %q", s.smt.PredicateType)
 	}
 	return nil
 }
