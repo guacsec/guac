@@ -1641,7 +1641,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				// if not present in expected packages or in expected artifacts
-				if !(inExpectedPkgs || inExpectedArtifacts || inExpectedSrcs) {
+				if !inExpectedPkgs && !inExpectedArtifacts && !inExpectedSrcs {
 					t.Errorf("this ID appears in the returned map but is not expected: %s \n", gotID)
 					return
 				}
@@ -1661,7 +1661,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	case <-done:
 	case <-time.After(5 * time.Second):
 		cf()
-		server.Close()
+		_ = server.Close()
 	}
 	cf()
 }

@@ -90,7 +90,7 @@ func (c *openVEXParser) Parse(ctx context.Context, doc *processor.Document) erro
 
 			if s.Status == vex.StatusAffected || s.Status == vex.StatusUnderInvestigation {
 				vulnData := generated.ScanMetadataInput{
-					TimeScanned: *openVex.Metadata.Timestamp,
+					TimeScanned: *openVex.Timestamp,
 				}
 				cv := assembler.CertifyVulnIngest{
 					Pkg:           ingest.Pkg,
@@ -121,8 +121,8 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 
 	for _, p := range vexStatement.Products {
 		vd := generated.VexStatementInputSpec{}
-		vd.KnownSince = *openVex.Metadata.Timestamp
-		vd.Origin = openVex.Metadata.ID
+		vd.KnownSince = *openVex.Timestamp
+		vd.Origin = openVex.ID
 
 		ingest := assembler.VexIngest{}
 
@@ -132,9 +132,10 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 			return nil, fmt.Errorf("invalid status for openVEX: %s", status)
 		}
 
-		if vd.Status == generated.VexStatusNotAffected {
+		switch vd.Status {
+		case generated.VexStatusNotAffected:
 			vd.Statement = vexStatement.ImpactStatement
-		} else if vd.Status == generated.VexStatusAffected {
+		case generated.VexStatusAffected:
 			vd.Statement = vexStatement.ActionStatement
 		}
 
