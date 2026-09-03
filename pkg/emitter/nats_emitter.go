@@ -27,14 +27,21 @@ import (
 
 // NATS stream
 const (
-	streamName              string        = "DOCUMENTS"
-	streamSubjects          string        = "DOCUMENTS.*"
-	subjectNameDocCollected string        = "DOCUMENTS.collected"
-	durableProcessor        string        = "processor"
-	bufferChannelSize       int           = 1000
-	backOffTimer            time.Duration = 1 * time.Second
-	consumerAckWait time.Duration = 10 * time.Minute
-	consumerMaxWaiting int = 100
+	streamName              string = "DOCUMENTS"
+	streamSubjects          string = "DOCUMENTS.*"
+	subjectNameDocCollected string = "DOCUMENTS.collected"
+	// streamRecreateAttempts is the number of times the stream is created
+	// when recreating it. The NATS server can still be finalizing the
+	// deletion of the previous stream when the replacement is created, which
+	// transiently fails with "error creating store for stream".
+	streamRecreateAttempts = 5
+	// streamRecreateRetryDelay is the delay between stream creation attempts.
+	streamRecreateRetryDelay time.Duration = 100 * time.Millisecond
+	durableProcessor         string        = "processor"
+	bufferChannelSize        int           = 1000
+	backOffTimer             time.Duration = 1 * time.Second
+	consumerAckWait          time.Duration = 10 * time.Minute
+	consumerMaxWaiting       int           = 100
 )
 
 type jetStream struct {
@@ -145,10 +152,20 @@ func (j *jetStream) RecreateStream(ctx context.Context) error {
 			return fmt.Errorf("failed to delete stream: %w", err)
 		}
 	}
-	err := createStreamOrExists(ctx, j.js)
-	if err != nil {
-		j.Close()
-		return fmt.Errorf("failed to create stream: %w", err)
+	var createErr error
+	for attempt := 1; attempt <= streamRecreateAttempts; attempt++ {
+		if attempt > 1 {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(streamRecreateRetryDelay):
+			}
+		}
+		createErr = createStreamOrExists(ctx, j.js)
+		if createErr == nil {
+			return nil
+		}
 	}
-	return nil
+	j.Close()
+	return fmt.Errorf("failed to create stream: %w", createErr)
 }
