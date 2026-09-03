@@ -8,18 +8,18 @@
 #/pkg/ingestor
 
 # GraphQL topic area
-/pkg/assembler/graphql @jeffmendoza
+#/pkg/assembler/graphql
 
 # Backends topic area
-/pkg/assembler/backends @jeffmendoza
+#/pkg/assembler/backends
 
 # Frontend topic area
 # ?
 
 # Clients topic area
-/pkg/assembler/clients  @jeffmendoza
-/pkg/cli  @jeffmendoza
-/cmd  @jeffmendoza
+#/pkg/assembler/clients
+#/pkg/cli
+#/cmd
 
 # Maintainers may be codeowners of broader directories.
 
