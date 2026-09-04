@@ -57,6 +57,10 @@ const (
 	// supportedSpecVersion is the only spec version we know how to parse.
 	// Forward-incompatible versions are logged and skipped.
 	supportedSpecVersion = "0.1"
+
+	// defaultCacheTTL applies when the manifest omits update_interval or the
+	// value it carries cannot be parsed.
+	defaultCacheTTL = time.Hour
 )
 
 var ErrComponentTypeMismatch = errors.New("rootComponent type is not []*root_package.PackageNode")
@@ -92,28 +96,40 @@ type IndexPackage struct {
 	Format   string `json:"format,omitempty"`
 }
 
+// vexHubCertifier holds the state that has to outlive a single CertifyComponent
+// call: the indexed archive and the documents already emitted.
+//
+// certify.generateDocuments invokes the registered factory once per component
+// batch, so a factory that constructs a fresh certifier each time would reset
+// this state on every batch and re-download the archive just as often. Callers
+// must build one instance and have the factory hand back that same pointer; the
+// mutexes below guard the concurrent CertifyComponent calls that sharing implies.
 type vexHubCertifier struct {
 	httpClient  *http.Client
 	manifestURL string
 
-	// cache stores parsed manifest + vexDocs keyed by manifest URL, with TTL
-	// derived from the manifest's update_interval field.
-	cache   map[string]*manifestCacheEntry
+	// cacheMu guards cache, which holds the indexed archive until its TTL
+	// (the manifest's update_interval) expires.
 	cacheMu sync.RWMutex
+	cache   *archiveCache
 
-	// seen tracks which canonical PURLs have already been emitted so that
-	// duplicate documents are not sent across subsequent CertifyComponent batches.
-	seen   map[string]struct{}
+	// seenMu guards seen, which holds the DocumentRef of every VEX document
+	// already pushed downstream.
 	seenMu sync.Mutex
+	seen   map[string]struct{}
 }
 
-type manifestCacheEntry struct {
-	manifest *Manifest
-	vexDocs  map[string][]byte
-	expiry   time.Time
+// archiveCache is one indexed VEX archive: canonical PURL -> document bytes.
+type archiveCache struct {
+	vexDocs map[string][]byte
+	expiry  time.Time
 }
 
 // NewVEXHubCertifier creates a new VEX Hub certifier.
+//
+// The returned certifier caches the indexed archive and tracks emitted documents
+// on itself, so construct it once and reuse it for the lifetime of the process
+// rather than building one inside the certify.RegisterCertifier factory.
 func NewVEXHubCertifier(manifestURL string) certifier.Certifier {
 	if manifestURL == "" {
 		manifestURL = DefaultManifestURL
@@ -121,15 +137,12 @@ func NewVEXHubCertifier(manifestURL string) certifier.Certifier {
 	return &vexHubCertifier{
 		httpClient:  &http.Client{Timeout: httpTimeout},
 		manifestURL: manifestURL,
-		cache:       make(map[string]*manifestCacheEntry),
 		seen:        make(map[string]struct{}),
 	}
 }
 
 // CertifyComponent fetches VEX documents from the VEX Hub for the given packages.
 func (v *vexHubCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
-	logger := logging.FromContext(ctx)
-
 	packageNodes, ok := rootComponent.([]*root_package.PackageNode)
 	if !ok {
 		return ErrComponentTypeMismatch
@@ -144,58 +157,67 @@ func (v *vexHubCertifier) CertifyComponent(ctx context.Context, rootComponent in
 		return nil
 	}
 
-	// Return cached vexDocs if they are still fresh.
-	var vexDocs map[string][]byte
-	v.cacheMu.RLock()
-	entry, cached := v.cache[v.manifestURL]
-	v.cacheMu.RUnlock()
-	if cached && time.Now().Before(entry.expiry) {
-		vexDocs = entry.vexDocs
-	} else {
-		// Fetch the manifest to discover archive locations.
-		manifest, err := fetchManifest(ctx, v.httpClient, v.manifestURL)
-		if err != nil {
-			return fmt.Errorf("failed to fetch VEX Hub manifest: %w", err)
-		}
-
-		archiveURL, subdir := getArchiveURL(ctx, v.httpClient, manifest)
-		if archiveURL == "" {
-			logger.Infof("no compatible archive location found in VEX Hub manifest")
-			return nil
-		}
-
-		vexDocs, err = downloadAndIndex(ctx, v.httpClient, archiveURL, subdir)
-		if err != nil {
-			return err
-		}
-
-		// Use update_interval from the matching manifest version as the TTL.
-		ttl := time.Hour // safe default when update_interval is absent or unparseable
-		for _, ver := range manifest.Versions {
-			if ver.SpecVersion == supportedSpecVersion && ver.UpdateInterval != "" {
-				if d, perr := time.ParseDuration(ver.UpdateInterval); perr == nil {
-					ttl = d
-				}
-				break
-			}
-		}
-
-		v.cacheMu.Lock()
-		v.cache[v.manifestURL] = &manifestCacheEntry{
-			manifest: manifest,
-			vexDocs:  vexDocs,
-			expiry:   time.Now().Add(ttl),
-		}
-		v.cacheMu.Unlock()
+	vexDocs, err := v.indexedDocs(ctx)
+	if err != nil {
+		return err
 	}
-
-	logger.Infof("VEX Hub: indexed %d packages from archive", len(vexDocs))
 
 	if _, err := v.emitVEXDocuments(ctx, purls, vexDocs, docChannel); err != nil {
 		return fmt.Errorf("failed to emit VEX documents: %w", err)
 	}
 
 	return nil
+}
+
+// indexedDocs returns the indexed archive, refreshing it from the hub when the
+// cached copy is absent or past its TTL.
+func (v *vexHubCertifier) indexedDocs(ctx context.Context) (map[string][]byte, error) {
+	v.cacheMu.RLock()
+	cache := v.cache
+	v.cacheMu.RUnlock()
+	if cache != nil && time.Now().Before(cache.expiry) {
+		return cache.vexDocs, nil
+	}
+
+	manifest, err := fetchManifest(ctx, v.httpClient, v.manifestURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch VEX Hub manifest: %w", err)
+	}
+
+	archiveURL, subdir, err := getArchiveURL(ctx, v.httpClient, manifest)
+	if err != nil {
+		return nil, fmt.Errorf("no usable archive location in VEX Hub manifest %s: %w", v.manifestURL, err)
+	}
+
+	vexDocs, err := downloadAndIndex(ctx, v.httpClient, archiveURL, subdir)
+	if err != nil {
+		return nil, err
+	}
+
+	v.cacheMu.Lock()
+	v.cache = &archiveCache{vexDocs: vexDocs, expiry: time.Now().Add(cacheTTL(manifest))}
+	v.cacheMu.Unlock()
+
+	// Logged on refresh rather than per batch: with the certifier shared across
+	// batches this fires once per update_interval.
+	logging.FromContext(ctx).Infof("VEX Hub: indexed %d packages from %s", len(vexDocs), archiveURL)
+
+	return vexDocs, nil
+}
+
+// cacheTTL reads update_interval off the supported manifest version, falling
+// back to defaultCacheTTL when it is absent or unparseable.
+func cacheTTL(manifest *Manifest) time.Duration {
+	for _, ver := range manifest.Versions {
+		if ver.SpecVersion != supportedSpecVersion {
+			continue
+		}
+		if d, err := time.ParseDuration(ver.UpdateInterval); err == nil && d > 0 {
+			return d
+		}
+		break
+	}
+	return defaultCacheTTL
 }
 
 // fetchManifest downloads and parses the vex-repository.json manifest.
@@ -227,65 +249,84 @@ func fetchManifest(ctx context.Context, client *http.Client, url string) (*Manif
 }
 
 // getArchiveURL iterates over every version and every location in the manifest,
-// selecting the first URL whose spec_version matches supportedSpecVersion and
-// that responds to a HEAD request with HTTP 200.
+// returning the first URL whose spec_version matches supportedSpecVersion and
+// that a HEAD probe does not positively rule out.
 //
 // The subdirectory is specified after "//" in the URL (per VEX Repo Spec).
 // Example: "https://example.com/archive.tar.gz//vexhub-main" -> archiveURL + subdir "vexhub-main"
 //
-// Versions with unsupported spec_version values are logged and skipped.
-func getArchiveURL(ctx context.Context, client *http.Client, manifest *Manifest) (archiveURL, subdir string) {
-	if len(manifest.Versions) == 0 {
-		return "", ""
-	}
+// Versions with unsupported spec_version values are logged and skipped. When no
+// location survives, an error is returned rather than an empty URL, so that an
+// unreachable or misconfigured hub is distinguishable from a hub that simply has
+// nothing to report.
+func getArchiveURL(ctx context.Context, client *http.Client, manifest *Manifest) (archiveURL, subdir string, err error) {
 	logger := logging.FromContext(ctx)
+
+	probed := 0
 	for _, v := range manifest.Versions {
 		if v.SpecVersion != supportedSpecVersion {
 			logger.Infof("VEX Hub: skipping unsupported spec_version %q (supported: %q)", v.SpecVersion, supportedSpecVersion)
 			continue
 		}
-		if len(v.Locations) == 0 {
-			continue
-		}
 		for _, loc := range v.Locations {
-			rawURL := loc.URL
-			if rawURL == "" {
+			if loc.URL == "" {
 				continue
 			}
-
-			// Parse out optional subdir after "//".
-			var targetURL, sub string
-			schemeEnd := strings.Index(rawURL, "://")
-			searchStart := 0
-			if schemeEnd >= 0 {
-				searchStart = schemeEnd + 3
+			targetURL, sub := splitSubdir(loc.URL)
+			probed++
+			if reachable(ctx, client, targetURL) {
+				return targetURL, sub, nil
 			}
-			rest := rawURL[searchStart:]
-			if idx := strings.Index(rest, "//"); idx >= 0 {
-				targetURL = rawURL[:searchStart+idx]
-				sub = rest[idx+2:]
-			} else {
-				targetURL = rawURL
-			}
-
-			// Probe reachability with a HEAD request against the actual archive URL.
-			req, err := http.NewRequestWithContext(ctx, http.MethodHead, targetURL, nil)
-			if err != nil {
-				continue
-			}
-			resp, err := client.Do(req)
-			if err != nil || resp.StatusCode != http.StatusOK {
-				if resp != nil {
-					_ = resp.Body.Close()
-				}
-				continue
-			}
-			_ = resp.Body.Close()
-
-			return targetURL, sub
 		}
 	}
-	return "", ""
+
+	if probed == 0 {
+		return "", "", fmt.Errorf("manifest declares no locations for spec_version %s", supportedSpecVersion)
+	}
+	return "", "", fmt.Errorf("all %d declared location(s) failed the reachability probe", probed)
+}
+
+// splitSubdir separates the archive URL from the optional "//"-delimited
+// subdirectory the VEX Repo Spec allows after the host.
+func splitSubdir(rawURL string) (targetURL, subdir string) {
+	searchStart := 0
+	if schemeEnd := strings.Index(rawURL, "://"); schemeEnd >= 0 {
+		searchStart = schemeEnd + 3
+	}
+	rest := rawURL[searchStart:]
+	idx := strings.Index(rest, "//")
+	if idx < 0 {
+		return rawURL, ""
+	}
+	return rawURL[:searchStart+idx], rest[idx+2:]
+}
+
+// reachable probes a candidate archive location with HEAD.
+//
+// The check is deliberately lenient: plenty of object stores and CDNs answer
+// 403/405/501 to HEAD while serving the very same URL over GET, so demanding a
+// 200 here would discard locations that work fine. Only a transport error or a
+// definitive 404/410 rules a location out.
+func reachable(ctx context.Context, client *http.Client, url string) bool {
+	logger := logging.FromContext(ctx)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	if err != nil {
+		logger.Warnf("VEX Hub: skipping malformed location %s: %v", url, err)
+		return false
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Warnf("VEX Hub: location %s is unreachable: %v", url, err)
+		return false
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone {
+		logger.Warnf("VEX Hub: location %s returned %d, skipping", url, resp.StatusCode)
+		return false
+	}
+	return true
 }
 
 // canonicalizePURL parses a PURL with packageurl-go and re-stringifies it so
@@ -298,6 +339,57 @@ func canonicalizePURL(purl string) string {
 		return purl
 	}
 	return p.ToString()
+}
+
+// archivePrefix reports the archive-internal prefix that turns tar entry names
+// into paths relative to the VEX repository root, given the entry expected to
+// hold index.json.
+//
+// Hubs publish archives both with a single top-level wrapper directory (what a
+// GitHub tarball produces) and without one, so the prefix is discovered rather
+// than assumed. Only a single leading component is accepted, so an unrelated
+// index.json nested deeper in the tree cannot hijack the match.
+func archivePrefix(entryName, indexPath string) (string, bool) {
+	if entryName == indexPath {
+		return "", true
+	}
+	wrapper, found := strings.CutSuffix(entryName, "/"+indexPath)
+	if !found || wrapper == "" || strings.Contains(wrapper, "/") {
+		return "", false
+	}
+	return wrapper + "/", true
+}
+
+// repoRelativeName strips the discovered wrapper prefix and the manifest subdir
+// from a tar entry name, yielding the path as index.json spells it. Entries
+// outside the repository root are reported with ok == false.
+func repoRelativeName(entryName, prefix, subdir string) (string, bool) {
+	name, ok := strings.CutPrefix(entryName, prefix)
+	if !ok {
+		return "", false
+	}
+	if sub := strings.Trim(subdir, "/"); sub != "" {
+		if name, ok = strings.CutPrefix(name, sub+"/"); !ok {
+			return "", false
+		}
+	}
+	return name, true
+}
+
+// readEntry reads a single tar entry, refusing anything over maxEntryBytes.
+//
+// Reading one byte past the limit is what separates "this file is too big" from
+// a file that lands exactly on it; a plain io.LimitReader would hand back a
+// truncated document that only fails later as a baffling JSON parse error.
+func readEntry(r io.Reader, name string) ([]byte, error) {
+	data, err := io.ReadAll(io.LimitReader(r, maxEntryBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("reading %s: %w", name, err)
+	}
+	if int64(len(data)) > maxEntryBytes {
+		return nil, fmt.Errorf("%s exceeds maximum entry size of %d bytes", name, maxEntryBytes)
+	}
+	return data, nil
 }
 
 // downloadAndIndex downloads a tar.gz archive using a two-pass approach to
@@ -345,22 +437,14 @@ func downloadAndIndex(ctx context.Context, client *http.Client, archiveURL, subd
 		return nil, fmt.Errorf("archive exceeds maximum allowed size of %d bytes", maxArchiveBytes)
 	}
 
-	// normalizeName strips the leading top-level directory component (e.g. "vexhub-main/")
-	// from a tar entry name first, then optionally strips the subdir prefix.
-	normalizeName := func(name string) string {
-		// Always strip the leading top-level directory component.
-		if idx := strings.Index(name, "/"); idx >= 0 {
-			name = name[idx+1:]
-		}
-		// Then strip the subdir prefix if one was specified in the manifest URL.
-		if subdir != "" {
-			if after, found := strings.CutPrefix(name, subdir+"/"); found {
-				name = after
-			} else if after, found := strings.CutPrefix(name, subdir); found {
-				name = after
-			}
-		}
-		return name
+	// Locations inside index.json are relative to the repository root, which sits
+	// under the manifest's subdir (when it declares one) and under whatever
+	// top-level wrapper directory the archive happens to use. Rather than assume
+	// a wrapper exists, pass 1 discovers the prefix from wherever index.json
+	// actually turns up and pass 2 reuses it verbatim.
+	indexPath := "index.json"
+	if sub := strings.Trim(subdir, "/"); sub != "" {
+		indexPath = sub + "/index.json"
 	}
 
 	// openTar returns a fresh *tar.Reader positioned at the beginning of the archive.
@@ -380,7 +464,11 @@ func downloadAndIndex(ctx context.Context, client *http.Client, archiveURL, subd
 	if err != nil {
 		return nil, err
 	}
-	var indexData []byte
+	var (
+		indexData []byte
+		prefix    string
+		found     bool
+	)
 	for {
 		header, err := tr1.Next()
 		if err == io.EOF {
@@ -392,16 +480,18 @@ func downloadAndIndex(ctx context.Context, client *http.Client, archiveURL, subd
 		if header.Typeflag != tar.TypeReg {
 			continue
 		}
-		if normalizeName(header.Name) == "index.json" {
-			indexData, err = io.ReadAll(io.LimitReader(tr1, maxEntryBytes))
-			if err != nil {
-				return nil, fmt.Errorf("reading index.json: %w", err)
-			}
-			break
+		p, ok := archivePrefix(header.Name, indexPath)
+		if !ok {
+			continue
 		}
+		if indexData, err = readEntry(tr1, header.Name); err != nil {
+			return nil, err
+		}
+		prefix, found = p, true
+		break
 	}
-	if indexData == nil {
-		return nil, fmt.Errorf("index.json not found in archive")
+	if !found {
+		return nil, fmt.Errorf("%s not found in archive", indexPath)
 	}
 
 	var index Index
@@ -433,13 +523,13 @@ func downloadAndIndex(ctx context.Context, client *http.Client, archiveURL, subd
 		if header.Typeflag != tar.TypeReg {
 			continue
 		}
-		name := normalizeName(header.Name)
-		if !needed[name] {
+		name, ok := repoRelativeName(header.Name, prefix, subdir)
+		if !ok || !needed[name] {
 			continue
 		}
-		data, err := io.ReadAll(io.LimitReader(tr2, maxEntryBytes))
+		data, err := readEntry(tr2, header.Name)
 		if err != nil {
-			return nil, fmt.Errorf("reading file %s: %w", header.Name, err)
+			return nil, err
 		}
 		cumulativeBytes += int64(len(data))
 		if cumulativeBytes > maxArchiveBytes {
@@ -465,45 +555,33 @@ func downloadAndIndex(ctx context.Context, client *http.Client, archiveURL, subd
 	return vexDocs, nil
 }
 
-// emitVEXDocuments looks up each PURL in the VEX index and emits matching documents.
-// Both the query PURLs and the index keys are canonicalized via packageurl-go
-// before comparison so that PURL spelling variants do not cause misses.
-// Documents already emitted in a previous batch are deduplicated via v.seen.
-// The channel send is wrapped in a select so that context cancellation
+// emitVEXDocuments looks up each PURL in the VEX index and emits matching
+// documents. Both the query PURLs and the index keys are canonicalized via
+// packageurl-go before comparison so that PURL spelling variants do not cause
+// misses. The channel send is wrapped in a select so that context cancellation
 // (e.g. graceful shutdown) is respected and the call never hangs.
 func (v *vexHubCertifier) emitVEXDocuments(ctx context.Context, purls []string, vexDocs map[string][]byte, docChannel chan<- *processor.Document) ([]*processor.Document, error) {
 	var emitted []*processor.Document
-	v.seenMu.Lock()
-	defer v.seenMu.Unlock()
 
 	for _, purl := range purls {
 		if strings.Contains(purl, "pkg:guac") {
 			continue
 		}
 
-		lookupKey := canonicalizePURL(purl)
-
-		docData, ok := vexDocs[lookupKey]
-		if !ok {
-			// Try again with version, qualifiers, and subpath stripped.
-			p, err := packageurl.FromString(purl)
-			if err == nil {
-				p.Version = ""
-				p.Qualifiers = packageurl.Qualifiers{}
-				p.Subpath = ""
-				lookupKey = p.ToString()
-				docData, ok = vexDocs[lookupKey]
-			}
-		}
-
+		docData, ok := lookupVEXDoc(vexDocs, purl)
 		if !ok {
 			continue
 		}
 
-		if _, seen := v.seen[lookupKey]; seen {
+		// Dedup on the document digest rather than the PURL. Keying on the PURL
+		// would permanently suppress a package once seen, so a statement revised
+		// upstream would never reach the pipeline again after a cache refresh --
+		// defeating the point of polling on update_interval. The digest lets
+		// changed content through while still swallowing unchanged repeats.
+		docRef := events.GetDocRef(docData)
+		if v.markEmitted(docRef) {
 			continue
 		}
-		v.seen[lookupKey] = struct{}{}
 
 		doc := &processor.Document{
 			Blob:   docData,
@@ -512,7 +590,7 @@ func (v *vexHubCertifier) emitVEXDocuments(ctx context.Context, purls []string, 
 			SourceInformation: processor.SourceInformation{
 				Collector:   VEXHubCollector,
 				Source:      VEXHubCollector,
-				DocumentRef: events.GetDocRef(docData),
+				DocumentRef: docRef,
 			},
 		}
 
@@ -527,4 +605,34 @@ func (v *vexHubCertifier) emitVEXDocuments(ctx context.Context, purls []string, 
 	}
 
 	return emitted, nil
+}
+
+// lookupVEXDoc resolves a PURL against the index, retrying with version,
+// qualifiers and subpath stripped since hubs commonly key on the bare package.
+func lookupVEXDoc(vexDocs map[string][]byte, purl string) ([]byte, bool) {
+	if docData, ok := vexDocs[canonicalizePURL(purl)]; ok {
+		return docData, true
+	}
+	p, err := packageurl.FromString(purl)
+	if err != nil {
+		return nil, false
+	}
+	p.Version = ""
+	p.Qualifiers = packageurl.Qualifiers{}
+	p.Subpath = ""
+	docData, ok := vexDocs[p.ToString()]
+	return docData, ok
+}
+
+// markEmitted records docRef and reports whether it had already been emitted.
+// The lock is scoped to the map access alone so that it is never held across the
+// blocking channel send in emitVEXDocuments.
+func (v *vexHubCertifier) markEmitted(docRef string) bool {
+	v.seenMu.Lock()
+	defer v.seenMu.Unlock()
+	if _, seen := v.seen[docRef]; seen {
+		return true
+	}
+	v.seen[docRef] = struct{}{}
+	return false
 }

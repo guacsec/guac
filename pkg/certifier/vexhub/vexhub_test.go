@@ -21,12 +21,15 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 
+	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -37,7 +40,6 @@ func newTestCertifier(client *http.Client, manifestURL string) *vexHubCertifier 
 	return &vexHubCertifier{
 		httpClient:  client,
 		manifestURL: manifestURL,
-		cache:       make(map[string]*manifestCacheEntry),
 		seen:        make(map[string]struct{}),
 	}
 }
@@ -123,6 +125,7 @@ func TestGetArchiveURL(t *testing.T) {
 		manifest   Manifest
 		wantURL    string
 		wantSubdir string
+		wantErr    bool
 	}{
 		{
 			name: "supported spec version simple URL",
@@ -140,6 +143,7 @@ func TestGetArchiveURL(t *testing.T) {
 			manifest:   Manifest{},
 			wantURL:    "",
 			wantSubdir: "",
+			wantErr:    true,
 		},
 		{
 			name: "URL with subdirectory",
@@ -162,6 +166,7 @@ func TestGetArchiveURL(t *testing.T) {
 			},
 			wantURL:    "",
 			wantSubdir: "",
+			wantErr:    true,
 		},
 		{
 			name: "multi-version manifest picks first compatible",
@@ -186,7 +191,10 @@ func TestGetArchiveURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotURL, gotSubdir := getArchiveURL(ctx, srv.Client(), &tt.manifest)
+			gotURL, gotSubdir, err := getArchiveURL(ctx, srv.Client(), &tt.manifest)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("error = %v, wantErr %v", err, tt.wantErr)
+			}
 			if gotURL != tt.wantURL {
 				t.Errorf("URL = %q, want %q", gotURL, tt.wantURL)
 			}
@@ -645,5 +653,277 @@ func TestCachingAndTTL(t *testing.T) {
 	}
 	if atomic.LoadInt32(&downloadCount) != 1 {
 		t.Fatalf("expected 1 download (cached), got %d", atomic.LoadInt32(&downloadCount))
+	}
+}
+
+// TestRevisedDocumentReEmitsAfterRefresh is the regression test for dedup being
+// keyed on the document digest rather than the PURL. A hub that publishes an
+// updated VEX statement for a package we have already reported must get that
+// statement through on the next refresh; keying on the PURL would suppress it
+// for the lifetime of the process and make polling on update_interval pointless.
+func TestRevisedDocumentReEmitsAfterRefresh(t *testing.T) {
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	revisions := []string{
+		`{"@context":"https://openvex.dev/ns/v0.2.0","@id":"rev-1"}`,
+		`{"@context":"https://openvex.dev/ns/v0.2.0","@id":"rev-2"}`,
+	}
+	var gets int32
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		// A zero-length TTL forces a refresh on every call, standing in for a
+		// hub whose update_interval has elapsed.
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","update_interval":"1ns","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		n := int(atomic.AddInt32(&gets, 1)) - 1
+		if n >= len(revisions) {
+			n = len(revisions) - 1
+		}
+		_, _ = w.Write(buildTestArchive(t, indexJSON, map[string]string{"pkg/npm/lodash/vex.json": revisions[n]}))
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
+	nodes := []*root_package.PackageNode{{Purl: "pkg:npm/lodash@4.17.21"}}
+	docChan := make(chan *processor.Document, 10)
+
+	// First pass: the original statement is emitted.
+	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+		t.Fatalf("first call failed: %v", err)
+	}
+	// Second pass: the hub now serves a revised statement, which must get through.
+	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+		t.Fatalf("second call failed: %v", err)
+	}
+	// Third pass: content is unchanged from the second, so nothing new is emitted.
+	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+		t.Fatalf("third call failed: %v", err)
+	}
+
+	close(docChan)
+	var docs []*processor.Document
+	for doc := range docChan {
+		docs = append(docs, doc)
+	}
+	if len(docs) != 2 {
+		t.Fatalf("expected 2 docs (original + revision, unchanged repeat suppressed), got %d", len(docs))
+	}
+	if string(docs[0].Blob) == string(docs[1].Blob) {
+		t.Fatal("expected the second document to be the revised statement")
+	}
+}
+
+// TestSharedCertifierKeepsStateAcrossBatches guards the contract that
+// certify.generateDocuments calls the registered factory once per component
+// batch: the factory must return one shared instance, otherwise the cache and
+// the dedup set are reallocated per batch.
+func TestSharedCertifierKeepsStateAcrossBatches(t *testing.T) {
+	var downloads int32
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"shared"}`
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	archive := buildTestArchive(t, indexJSON, map[string]string{"pkg/npm/lodash/vex.json": vexDoc})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","update_interval":"1h","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		atomic.AddInt32(&downloads, 1)
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	// Mirrors how the cobra commands register the certifier.
+	shared := NewVEXHubCertifier(server.URL + "/vex-repository.json")
+	factory := func() certifier.Certifier { return shared }
+
+	docChan := make(chan *processor.Document, 10)
+	for batch := 0; batch < 3; batch++ {
+		nodes := []*root_package.PackageNode{{Purl: fmt.Sprintf("pkg:npm/lodash@4.17.%d", batch)}}
+		if err := factory().CertifyComponent(context.Background(), nodes, docChan); err != nil {
+			t.Fatalf("batch %d failed: %v", batch, err)
+		}
+	}
+
+	if got := atomic.LoadInt32(&downloads); got != 1 {
+		t.Fatalf("expected 1 archive download across 3 batches, got %d", got)
+	}
+	close(docChan)
+	var docs []*processor.Document
+	for doc := range docChan {
+		docs = append(docs, doc)
+	}
+	if len(docs) != 1 {
+		t.Fatalf("expected 1 doc across 3 batches (dedup holds), got %d", len(docs))
+	}
+}
+
+// TestNoUsableLocationReturnsError verifies that a hub whose locations are all
+// unreachable surfaces as an error rather than a silent success, so that a
+// broken hub is distinguishable from a hub with nothing to report.
+func TestNoUsableLocationReturnsError(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/missing.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/missing.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
+	err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@1.0"}}, nil)
+	if err == nil {
+		t.Fatal("expected an error when no archive location is usable, got nil")
+	}
+	if !strings.Contains(err.Error(), "no usable archive location") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+// TestHeadMethodNotAllowedStillUsable covers object stores and CDNs that answer
+// 403/405 to HEAD while serving the same URL over GET perfectly well. Demanding
+// a 200 from the probe would discard a location that works.
+func TestHeadMethodNotAllowedStillUsable(t *testing.T) {
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"head-405"}`
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	archive := buildTestArchive(t, indexJSON, map[string]string{"pkg/npm/lodash/vex.json": vexDoc})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
+	docChan := make(chan *processor.Document, 10)
+	if err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@4.17.21"}}, docChan); err != nil {
+		t.Fatalf("CertifyComponent failed for a location answering 405 to HEAD: %v", err)
+	}
+	close(docChan)
+	if len(docChan) != 1 {
+		t.Fatalf("expected 1 document, got %d", len(docChan))
+	}
+}
+
+// TestArchiveWithoutTopLevelDirectory covers archives that place index.json at
+// the root instead of under a wrapper directory. Unconditionally stripping the
+// leading path component would eat a real directory here.
+func TestArchiveWithoutTopLevelDirectory(t *testing.T) {
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"no-wrapper"}`
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	archive := buildTestArchiveWithPrefix(t, "", indexJSON, map[string]string{"pkg/npm/lodash/vex.json": vexDoc})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := newTestCertifier(server.Client(), server.URL+"/vex-repository.json")
+	docChan := make(chan *processor.Document, 10)
+	if err := c.CertifyComponent(context.Background(), []*root_package.PackageNode{{Purl: "pkg:npm/lodash@4.17.21"}}, docChan); err != nil {
+		t.Fatalf("CertifyComponent failed: %v", err)
+	}
+	close(docChan)
+	if len(docChan) != 1 {
+		t.Fatalf("expected 1 document from a wrapper-less archive, got %d", len(docChan))
+	}
+}
+
+// TestReadEntryRejectsOversizedFile verifies that an entry over maxEntryBytes
+// errors out instead of being silently truncated into unparseable JSON.
+func TestReadEntryRejectsOversizedFile(t *testing.T) {
+	oversized := io.LimitReader(zeroReader{}, maxEntryBytes+1)
+	if _, err := readEntry(oversized, "huge.json"); err == nil {
+		t.Fatal("expected an error for an entry over maxEntryBytes, got nil")
+	} else if !strings.Contains(err.Error(), "exceeds maximum entry size") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	atLimit := io.LimitReader(zeroReader{}, maxEntryBytes)
+	data, err := readEntry(atLimit, "exact.json")
+	if err != nil {
+		t.Fatalf("entry exactly at the limit should be accepted, got: %v", err)
+	}
+	if int64(len(data)) != maxEntryBytes {
+		t.Fatalf("expected %d bytes, got %d", int64(maxEntryBytes), len(data))
+	}
+}
+
+// zeroReader is an endless stream of zero bytes, bounded by the caller.
+type zeroReader struct{}
+
+func (zeroReader) Read(p []byte) (int, error) { return len(p), nil }
+
+// TestConcurrentBatchesShareStateSafely drives one shared certifier from several
+// goroutines, the way certify.generateDocuments does now that the factory hands
+// back a singleton. This is what makes the cache and dedup mutexes load-bearing.
+func TestConcurrentBatchesShareStateSafely(t *testing.T) {
+	vexDoc := `{"@context":"https://openvex.dev/ns/v0.2.0","@id":"concurrent"}`
+	indexJSON := `{"updated_at":"2024-01-01T00:00:00Z","packages":[{"id":"pkg:npm/lodash","location":"pkg/npm/lodash/vex.json"}]}`
+	archive := buildTestArchive(t, indexJSON, map[string]string{"pkg/npm/lodash/vex.json": vexDoc})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/vex-repository.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, `{"name":"test","versions":[{"spec_version":"0.1","update_interval":"1h","locations":[{"url":"%s/archive.tar.gz"}]}]}`, "http://"+r.Host)
+	})
+	mux.HandleFunc("/archive.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		_, _ = w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c := NewVEXHubCertifier(server.URL + "/vex-repository.json")
+	docChan := make(chan *processor.Document, 100)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 8; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			nodes := []*root_package.PackageNode{{Purl: fmt.Sprintf("pkg:npm/lodash@4.17.%d", i)}}
+			if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
+				t.Errorf("batch %d: %v", i, err)
+			}
+		}(i)
+	}
+	wg.Wait()
+
+	close(docChan)
+	if n := len(docChan); n != 1 {
+		t.Fatalf("expected exactly 1 doc across concurrent batches, got %d", n)
 	}
 }

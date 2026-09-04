@@ -108,8 +108,14 @@ var vexHubCmd = &cobra.Command{
 			}()
 		}
 
+		// certify.generateDocuments calls this factory once per component batch.
+		// The certifier caches the indexed archive and tracks which documents it
+		// has already emitted on itself, so hand back a single shared instance --
+		// returning a new one per batch would drop that state and re-download the
+		// archive on every batch.
+		vexHubCertifier := vexhub.NewVEXHubCertifier(opts.manifestURL)
 		vexHubCertifierFunc := func() certifier.Certifier {
-			return vexhub.NewVEXHubCertifier(opts.manifestURL)
+			return vexHubCertifier
 		}
 		if err := certify.RegisterCertifier(vexHubCertifierFunc, certifier.CertifierVEXHub); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
