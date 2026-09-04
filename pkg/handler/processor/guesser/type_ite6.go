@@ -20,9 +20,8 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	"github.com/guacsec/guac/internal/intoto"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	attestationv1 "github.com/in-toto/attestation/go/v1"
-	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -30,35 +29,32 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 type ite6TypeGuesser struct{}
 
 func (*ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	var statement in_toto.Statement
+	var statement intoto.StatementHeader
 	if json.Unmarshal(blob, &statement) == nil && format == processor.FormatJSON {
-		if strings.HasPrefix(statement.Type, "https://in-toto.io/Statement") {
-			if strings.HasPrefix(statement.PredicateType, "https://slsa.dev/provenance") {
-				return processor.DocumentITE6SLSA
-			} else if strings.HasPrefix(statement.PredicateType, "https://crev.dev/in-toto-scheme") {
-				return processor.DocumentITE6Generic
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/certify/v0.1") {
-				return processor.DocumentITE6Generic
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.1") ||
-				strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.2") {
-				return processor.DocumentITE6Vul
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
-				return processor.DocumentITE6ClearlyDefined
-			} else if strings.HasPrefix(statement.PredicateType, "https://in-toto.io/attestation/malware/v0.1") {
-				return processor.DocumentITE6Malware
-			}
-			return processor.DocumentITE6Generic
+		// A document that mixes the v0.1 and v1 spellings of either header
+		// field is malformed: refuse to guess rather than route it on a
+		// silently preferred format.
+		stmtType, err := statement.Type()
+		if err != nil {
+			return processor.DocumentUnknown
 		}
-	}
-	var attV1Statement attestationv1.Statement
-	if json.Unmarshal(blob, &attV1Statement) == nil && format == processor.FormatJSON {
-		if strings.HasPrefix(attV1Statement.Type, "https://in-toto.io/Statement") {
-			if strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.1") ||
-				strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/vulns/v0.2") {
+		predicateType, err := statement.PredicateType()
+		if err != nil {
+			return processor.DocumentUnknown
+		}
+		if strings.HasPrefix(stmtType, "https://in-toto.io/Statement") {
+			if strings.HasPrefix(predicateType, "https://slsa.dev/provenance") {
+				return processor.DocumentITE6SLSA
+			} else if strings.HasPrefix(predicateType, "https://crev.dev/in-toto-scheme") {
+				return processor.DocumentITE6Generic
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/certify/v0.1") {
+				return processor.DocumentITE6Generic
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/vulns/v0.1") ||
+				strings.HasPrefix(predicateType, "https://in-toto.io/attestation/vulns/v0.2") {
 				return processor.DocumentITE6Vul
-			} else if strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/clearlydefined/v0.1") {
 				return processor.DocumentITE6ClearlyDefined
-			} else if strings.HasPrefix(attV1Statement.PredicateType, "https://in-toto.io/attestation/malware/v0.1") {
+			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/malware/v0.1") {
 				return processor.DocumentITE6Malware
 			}
 			return processor.DocumentITE6Generic
