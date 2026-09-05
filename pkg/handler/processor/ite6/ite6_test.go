@@ -58,6 +58,25 @@ var (
 				]
 			}
 	}`
+	// noStatementType, ambiguousStatementType and ambiguousPredicateType are the
+	// header shapes that no downstream parser can route, and that the type
+	// guesser already refuses to classify.
+	noStatementType = `{
+		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
+		"predicateType": "https://slsa.dev/provenance/v0.2"
+	}`
+	ambiguousStatementType = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"type": "https://in-toto.io/Statement/v1",
+		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
+		"predicateType": "https://slsa.dev/provenance/v0.2"
+	}`
+	ambiguousPredicateType = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
+		"predicateType": "https://slsa.dev/provenance/v0.2",
+		"predicate_type": "https://slsa.dev/provenance/v1"
+	}`
 )
 
 func TestITE6Processor_ValidateSchema(t *testing.T) {
@@ -137,6 +156,42 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name: "ITE6 Doc with no statement type",
+		args: &processor.Document{
+			Blob:   []byte(noStatementType),
+			Type:   processor.DocumentITE6SLSA,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: true,
+	}, {
+		name: "ITE6 Doc with ambiguous statement type",
+		args: &processor.Document{
+			Blob:   []byte(ambiguousStatementType),
+			Type:   processor.DocumentITE6SLSA,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: true,
+	}, {
+		name: "ITE6 Doc with ambiguous predicate type",
+		args: &processor.Document{
+			Blob:   []byte(ambiguousPredicateType),
+			Type:   processor.DocumentITE6SLSA,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
