@@ -71,6 +71,7 @@ const (
 	DocumentScorecard          DocumentType = "SCORECARD"
 	DocumentCycloneDX          DocumentType = "CycloneDX"
 	DocumentDepsDev            DocumentType = "DEPS_DEV"
+	DocumentPyPI               DocumentType = "PYPI"
 	DocumentCsaf               DocumentType = "CSAF"
 	DocumentOpenVEX            DocumentType = "OPEN_VEX"
 	DocumentIngestPredicates   DocumentType = "INGEST_PREDICATES"
