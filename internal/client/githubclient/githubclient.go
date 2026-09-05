@@ -212,7 +212,7 @@ func DownloadAndExtractZip(url string, runID int64) ([]*client.WorkflowArtifactC
 	if err != nil {
 		return nil, fmt.Errorf("error getting zip file: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("bad status: %s", resp.Status)
@@ -239,7 +239,7 @@ func DownloadAndExtractZip(url string, runID int64) ([]*client.WorkflowArtifactC
 		if err != nil {
 			return nil, fmt.Errorf("error opening file in zip: %w", err)
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		fileData := make([]byte, zipFile.UncompressedSize64)
 		_, err = io.ReadFull(f, fileData)
@@ -293,7 +293,7 @@ func (gc *githubClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.Rele
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("unable to fetch asset %v, status: %v", asset.URL, resp.Status)

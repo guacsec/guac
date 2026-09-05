@@ -64,7 +64,7 @@ func (d *fileDataSources) GetDataSources(_ context.Context) (*datasource.DataSou
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	b, err := io.ReadAll(f)
 	if err != nil {
@@ -90,12 +90,12 @@ func (d *fileDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 	}
 	err = watcher.Add(d.filePath)
 	if err != nil {
-		watcher.Close()
+		_ = watcher.Close()
 		return nil, err
 	}
 
 	go func() {
-		defer watcher.Close()
+		defer func() { _ = watcher.Close() }()
 
 		for {
 			select {
