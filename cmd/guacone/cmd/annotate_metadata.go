@@ -79,7 +79,8 @@ var annotateMetadata = &cobra.Command{
 		var srcInput *model.SourceInputSpec
 		var artifact *model.ArtifactInputSpec
 
-		if opts.subjectType == "package" {
+		switch opts.subjectType {
+		case "package":
 			pkgInput, err = helpers.PurlToPkg(opts.subject)
 			if err != nil {
 				logger.Fatalf("failed to parse PURL: %v", err)
@@ -93,12 +94,12 @@ var annotateMetadata = &cobra.Command{
 					Pkg: model.PkgMatchTypeSpecificVersion,
 				}
 			}
-		} else if opts.subjectType == "source" {
+		case "source":
 			srcInput, err = helpers.VcsToSrc(opts.subject)
 			if err != nil {
 				logger.Fatalf("failed to parse source: %v", err)
 			}
-		} else {
+		default:
 			split := strings.Split(opts.subject, ":")
 			if len(split) != 2 {
 				logger.Fatalf("failed to parse artifact. Needs to be in algorithm:digest form")

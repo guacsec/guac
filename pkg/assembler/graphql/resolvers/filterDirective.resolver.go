@@ -15,7 +15,7 @@ const numWorkers = 5
 const channelBufferSize = 1000
 
 func collectResults(resultChan <-chan reflect.Value, modelType reflect.Type) reflect.Value {
-	matchingItemsInterface := reflect.MakeSlice(reflect.SliceOf(reflect.PtrTo(modelType)), 0, 0)
+	matchingItemsInterface := reflect.MakeSlice(reflect.SliceOf(reflect.PointerTo(modelType)), 0, 0)
 
 	for item := range resultChan {
 		matchingItemsInterface = reflect.Append(matchingItemsInterface, item.Addr())
@@ -70,7 +70,7 @@ func handleSliceField(field reflect.Value, keys []string, value string, operatio
 
 	for j := 0; j < field.Len(); j++ {
 		sliceItem := field.Index(j)
-		if sliceItem.Kind() == reflect.Ptr {
+		if sliceItem.Kind() == reflect.Pointer {
 			sliceItem = sliceItem.Elem()
 		}
 		newItem := reflect.New(sliceItem.Type()).Elem()
@@ -116,7 +116,7 @@ func handleMatchingField(field reflect.Value, keys []string, value string, opera
 }
 
 func isStructOrPointerToStruct(v reflect.Value) (reflect.Value, bool) {
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 
@@ -124,7 +124,7 @@ func isStructOrPointerToStruct(v reflect.Value) (reflect.Value, bool) {
 }
 
 func isStructPtrField(field reflect.Value) bool {
-	return field.Kind() == reflect.Ptr && !field.IsNil() && field.Elem().Kind() == reflect.Struct
+	return field.Kind() == reflect.Pointer && !field.IsNil() && field.Elem().Kind() == reflect.Struct
 }
 
 func isSliceField(field reflect.Value) bool {

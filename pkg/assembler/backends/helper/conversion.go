@@ -22,15 +22,12 @@ import (
 // TODO: maybe use generics for PkgInputSpec and PkgSpec?
 func ConvertPkgInputSpecToPkgSpec(pkgInput *model.PkgInputSpec) *model.PkgSpec {
 	qualifiers := convertQualifierInputToQualifierSpec(pkgInput.Qualifiers)
-	matchEmpty := false
-	if len(qualifiers) == 0 {
-		matchEmpty = true
-	}
-	var version string = ""
+	matchEmpty := len(qualifiers) == 0
+	version := ""
 	if pkgInput.Version != nil {
 		version = *pkgInput.Version
 	}
-	var subpath string = ""
+	subpath := ""
 	if pkgInput.Subpath != nil {
 		subpath = *pkgInput.Subpath
 	}
@@ -60,11 +57,11 @@ func convertQualifierInputToQualifierSpec(qualifiers []*model.PackageQualifierIn
 
 // TODO: maybe use generics for SourceInputSpec and SourceSpec?
 func ConvertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.SourceSpec {
-	var tag string = ""
+	tag := ""
 	if srcInput.Tag != nil {
 		tag = *srcInput.Tag
 	}
-	var commit string = ""
+	commit := ""
 	if srcInput.Commit != nil {
 		commit = *srcInput.Commit
 	}

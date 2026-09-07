@@ -70,7 +70,7 @@ func SearchDependentsFromStartPackage(ctx context.Context, gqlClient graphql.Cli
 	}
 
 	// TODO: add functionality to start with other nodes?
-	if len(nodePkg.AllPkgTree.Namespaces) == 0 {
+	if len(nodePkg.Namespaces) == 0 {
 		return nil, nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
@@ -80,7 +80,7 @@ func SearchDependentsFromStartPackage(ctx context.Context, gqlClient graphql.Cli
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) == 0 {
 		// TODO: handle case where there are circular dependents that introduce more versions to the version list on a node that requires revisiting
-		err := q.addNodesToQueueFromPackageName(ctx, gqlClient, nodePkg.AllPkgTree.Type, nodePkg.AllPkgTree.Namespaces[0].Namespace, nodePkg.AllPkgTree.Namespaces[0].Names[0].Name, startID)
+		err := q.addNodesToQueueFromPackageName(ctx, gqlClient, nodePkg.Type, nodePkg.Namespaces[0].Namespace, nodePkg.Namespaces[0].Names[0].Name, startID)
 
 		if err != nil {
 			return nil, nil, err
