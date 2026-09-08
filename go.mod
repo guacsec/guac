@@ -200,7 +200,7 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
-	github.com/sirupsen/logrus v1.9.4 // indirect
+	github.com/sirupsen/logrus v1.10.2 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
@@ -214,7 +214,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tikv/pd/client v0.0.0-20231115064546-181fdc95be65 // indirect
 	github.com/twmb/murmur3 v1.1.3 // indirect
-	github.com/ulikunitz/xz v0.5.15 // indirect
+	github.com/ulikunitz/xz v0.5.16 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
@@ -280,7 +280,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/json-iterator/go v1.1.12
-	github.com/klauspost/compress v1.19.1
+	github.com/klauspost/compress v1.19.2
 	github.com/kubescape/storage v0.2.0
 	github.com/lib/pq v1.12.3
 	github.com/manifoldco/promptui v0.9.0
@@ -299,7 +299,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.24.1
 	github.com/redis/go-redis/v9 v9.21.0
-	github.com/regclient/regclient v0.11.5
+	github.com/regclient/regclient v0.11.6
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.10.9
