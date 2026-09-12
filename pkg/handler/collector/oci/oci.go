@@ -32,6 +32,7 @@ import (
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/types/descriptor"
+	"github.com/regclient/regclient/types/errs"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/platform"
 	"github.com/regclient/regclient/types/ref"
@@ -368,7 +369,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
 					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
 					if e != nil {
-						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
+						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", e)
 						cancel()
 						return
 					}
@@ -397,6 +398,46 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 	return nil
 }
 
+const (
+	// manifestGetAttempts is the number of times a manifest is fetched
+	// before an error is returned to the caller.
+	manifestGetAttempts = 3
+	// manifestGetBackoff is the base delay between manifest fetch attempts.
+	// The delay doubles after each failed attempt.
+	manifestGetBackoff = 250 * time.Millisecond
+)
+
+// getManifestWithRetry fetches a manifest from the registry, retrying
+// transient failures (timeouts, connection resets, rate limits) with a short
+// backoff before giving up. A missing manifest
+// (errors.Is(err, errs.ErrNotFound)) is not retried and is returned as-is.
+func getManifestWithRetry(ctx context.Context, rc *regclient.RegClient, r ref.Ref, artifact string) (manifest.Manifest, error) {
+	logger := logging.FromContext(ctx)
+	var lastErr error
+	backoff := manifestGetBackoff
+	for attempt := 1; attempt <= manifestGetAttempts; attempt++ {
+		m, err := rc.ManifestGet(ctx, r)
+		if err == nil {
+			return m, nil
+		}
+		if errors.Is(err, errs.ErrNotFound) {
+			return m, err
+		}
+		lastErr = err
+		logger.Infof("failed to get manifest for %v (attempt %d of %d): %v", artifact, attempt, manifestGetAttempts, err)
+		if attempt == manifestGetAttempts {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(backoff):
+		}
+		backoff *= 2
+	}
+	return nil, fmt.Errorf("failed to get manifest for %v after %d attempts: %w", artifact, manifestGetAttempts, lastErr)
+}
+
 // fetchOCIArtifactBlobs fetches the blobs of an OCI artifact and sends them to the provided docChannel.
 // It takes a context.Context, a *regclient.RegClient, an artifact string, an artifactType string, and a docChannel chan<- *processor.Document as input.
 // Note that we are not concurrently fetching the layers since we will usually have 1 layer per artifact.
@@ -414,12 +455,15 @@ func fetchOCIArtifactBlobs(
 		return fmt.Errorf("unable to parse OCI reference: %v", artifact)
 	}
 
-	m, err := rc.ManifestGet(ctx, r)
+	m, err := getManifestWithRetry(ctx, rc, r, artifact)
 	if err != nil {
-		// this is a normal behavior, not an error when the digest does not have an attestation
-		// explicitly logging it as info to avoid call-stack when logging
-		logger.Infof("unable to get manifest for %v: %v", artifact, err)
-		return nil
+		if errors.Is(err, errs.ErrNotFound) {
+			// this is a normal behavior, not an error when the digest does not have an attestation
+			// explicitly logging it as info to avoid call-stack when logging
+			logger.Infof("no manifest found for %v, not an error when the digest does not have an attestation", artifact)
+			return nil
+		}
+		return fmt.Errorf("unable to get manifest for %v: %w", artifact, err)
 	}
 
 	// go through layers in reverse
