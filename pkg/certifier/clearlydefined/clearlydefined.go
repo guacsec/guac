@@ -213,18 +213,19 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 	var sourceInputs []string
 	for _, definition := range definitionMap {
 		if definition.Described.SourceLocation != nil {
-			srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
-				definition.Described.SourceLocation.Name, &definition.Described.SourceLocation.Revision)
+			sourceLocation := definition.Described.SourceLocation
+			srcType, namespace, name := normalizedSourceLocation(sourceLocation)
+			srcInput := helpers.SourceToSourceInput(srcType, namespace, name, &sourceLocation.Revision)
 
 			nameID := helpers.SrcClientKey(srcInput).NameId
 
 			if _, ok := sourceMap[nameID]; !ok {
 				coordinate := &coordinates.Coordinate{
-					CoordinateType: definition.Described.SourceLocation.Type,
-					Provider:       definition.Described.SourceLocation.Provider,
-					Namespace:      definition.Described.SourceLocation.Namespace,
-					Name:           definition.Described.SourceLocation.Name,
-					Revision:       definition.Described.SourceLocation.Revision,
+					CoordinateType: sourceLocation.Type,
+					Provider:       sourceLocation.Provider,
+					Namespace:      sourceLocation.Namespace,
+					Name:           sourceLocation.Name,
+					Revision:       sourceLocation.Revision,
 				}
 				sourceMap[nameID] = true
 				sourceInputs = append(sourceInputs, nameID)
@@ -241,6 +242,43 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 		return generateDocument(definitionMap, docChannel)
 	}
 	return nil, nil
+}
+
+// normalizedSourceLocation returns the canonical GUAC source identity for a
+// ClearlyDefined source location. ClearlyDefined namespaces omit the VCS host
+// (for example "facebook"), while other GUAC data sources use VcsToSrc and
+// produce namespaces such as "github.com/facebook".
+//
+// Prefer the source URL for git sources so all ingestion paths reuse GUAC's
+// existing VCS normalization. ClearlyDefined source URLs may point at a
+// revision-specific browser path, so strip known revision suffixes first.
+// If the URL cannot be normalized, preserve the existing ClearlyDefined fields.
+func normalizedSourceLocation(sourceLocation *attestation_license.SourceLocation) (string, string, string) {
+	srcType := sourceLocation.Type
+	namespace := sourceLocation.Namespace
+	name := sourceLocation.Name
+
+	if sourceLocation.Type != "git" || sourceLocation.URL == "" {
+		return srcType, namespace, name
+	}
+
+	repositoryURL := strings.TrimSuffix(sourceLocation.URL, "/")
+	if sourceLocation.Revision != "" {
+		for _, suffix := range []string{
+			"/-/tree/" + sourceLocation.Revision,
+			"/tree/" + sourceLocation.Revision,
+			"/src/" + sourceLocation.Revision,
+		} {
+			repositoryURL = strings.TrimSuffix(repositoryURL, suffix)
+		}
+	}
+
+	normalized, err := helpers.VcsToSrc(repositoryURL)
+	if err != nil {
+		return srcType, namespace, name
+	}
+
+	return normalized.Type, normalized.Namespace, normalized.Name
 }
 
 // generateDocument generates the processor document for ingestion
