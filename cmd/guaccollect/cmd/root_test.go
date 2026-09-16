@@ -45,6 +45,12 @@ func TestWarnIfPrometheusUnsupported(t *testing.T) {
 			wantWarning:      false,
 		},
 		{
+			name:             "datadog-malware with flag set does not warn",
+			cmdName:          "datadog-malware",
+			enablePrometheus: true,
+			wantWarning:      false,
+		},
+		{
 			name:             "other subcommand with flag set warns",
 			cmdName:          "github",
 			enablePrometheus: true,
