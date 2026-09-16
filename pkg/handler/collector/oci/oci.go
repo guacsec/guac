@@ -407,11 +407,16 @@ const (
 	manifestGetBackoff = 250 * time.Millisecond
 )
 
-// getManifestWithRetry fetches a manifest from the registry, retrying
-// transient failures (timeouts, connection resets, rate limits) with a short
-// backoff before giving up. A missing manifest
-// (errors.Is(err, errs.ErrNotFound)) is not retried and is returned as-is.
-func getManifestWithRetry(ctx context.Context, rc *regclient.RegClient, r ref.Ref, artifact string) (manifest.Manifest, error) {
+type manifestGetter interface {
+	ManifestGet(context.Context, ref.Ref, ...regclient.ManifestOpts) (manifest.Manifest, error)
+}
+
+// getManifestWithRetry fetches a manifest from the registry, retrying failures
+// with a short backoff before giving up. Referrer descriptors point at concrete
+// manifests, but registry replicas can briefly return not found while they
+// converge, so not-found responses are retried as well. The caller still
+// treats a persistent not-found response as an absent attestation.
+func getManifestWithRetry(ctx context.Context, rc manifestGetter, r ref.Ref, artifact string) (manifest.Manifest, error) {
 	logger := logging.FromContext(ctx)
 	var lastErr error
 	backoff := manifestGetBackoff
@@ -419,9 +424,6 @@ func getManifestWithRetry(ctx context.Context, rc *regclient.RegClient, r ref.Re
 		m, err := rc.ManifestGet(ctx, r)
 		if err == nil {
 			return m, nil
-		}
-		if errors.Is(err, errs.ErrNotFound) {
-			return m, err
 		}
 		lastErr = err
 		logger.Infof("failed to get manifest for %v (attempt %d of %d): %v", artifact, attempt, manifestGetAttempts, err)
