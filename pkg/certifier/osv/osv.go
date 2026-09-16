@@ -55,8 +55,7 @@ const (
 	PRODUCER_ID  string = "guacsec/guac"
 	OSVCollector string = "osv_certifier"
 
-	// OSVQueryErrorsCounter is the name of the counter metric that tracks
-	// failed batch queries to OSV.
+	// OSVQueryErrorsCounter tracks failed batch queries to OSV.
 	OSVQueryErrorsCounter = "osv_query_errors"
 )
 
@@ -67,8 +66,7 @@ var registerMetricsOnce sync.Once
 type osvCertifier struct {
 	osvHTTPClient             *http.Client
 	withVulnerabilityMetadata bool
-	// Metrics is optional; when nil, no metrics are recorded.
-	Metrics metrics.MetricCollector
+	Metrics                   metrics.MetricCollector
 }
 
 type CertifierOpts func(*osvCertifier)
@@ -79,20 +77,14 @@ func WithVulnerabilityMetadata() CertifierOpts {
 	}
 }
 
-// WithMetrics configures the certifier to record metrics using the given
-// MetricCollector. The caller is responsible for calling RegisterMetrics
-// once before any certifier built with this option is used, since
-// NewOSVCertificationParser is called once per component certified and
-// re-registering the same Prometheus metric would fail.
+// WithMetrics wires m into the certifier. Call RegisterMetrics once first.
 func WithMetrics(m metrics.MetricCollector) CertifierOpts {
 	return func(oc *osvCertifier) {
 		oc.Metrics = m
 	}
 }
 
-// RegisterMetrics registers the Prometheus metrics recorded by the osv
-// certifier. It is safe to call multiple times; registration only happens
-// once per process.
+// RegisterMetrics is safe to call multiple times; it only registers once.
 func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
 	var err error
 	registerMetricsOnce.Do(func() {
