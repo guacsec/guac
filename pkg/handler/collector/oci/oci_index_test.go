@@ -641,17 +641,16 @@ func trackingRegistry(t *testing.T, registryURL string) (host string, closeFn fu
 	}
 	var mu sync.Mutex
 	var gets []string
-	proxy := httputil.NewSingleHostReverseProxy(backend)
-	origDirector := proxy.Director
-	proxy.Director = func(req *http.Request) {
-		if origDirector != nil {
-			origDirector(req)
-		}
-		if req.Method == http.MethodGet && strings.Contains(req.URL.Path, "/blobs/") {
-			mu.Lock()
-			gets = append(gets, req.URL.Path)
-			mu.Unlock()
-		}
+	proxy := &httputil.ReverseProxy{
+		Rewrite: func(req *httputil.ProxyRequest) {
+			req.SetURL(backend)
+			req.Out.Host = req.In.Host
+			if req.Out.Method == http.MethodGet && strings.Contains(req.Out.URL.Path, "/blobs/") {
+				mu.Lock()
+				gets = append(gets, req.Out.URL.Path)
+				mu.Unlock()
+			}
+		},
 	}
 	srv := httptest.NewServer(proxy)
 	parsedURL, err := url.Parse(srv.URL)

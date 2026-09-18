@@ -473,10 +473,13 @@ func maybeGunzip(b []byte) ([]byte, error) {
 		// Not a valid gzip payload; keep the original bytes.
 		return b, nil
 	}
-	defer zr.Close()
 	out, err := io.ReadAll(zr)
+	closeErr := zr.Close()
 	if err != nil {
 		return nil, err
+	}
+	if closeErr != nil {
+		return nil, closeErr
 	}
 	return out, nil
 }
