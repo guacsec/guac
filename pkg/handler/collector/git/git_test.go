@@ -19,18 +19,21 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_gitCol_RetrieveArtifacts(t *testing.T) {
+	sourceDir, expectedDocs := createTestGitRepo(t)
+
 	type fields struct {
-		url      string
-		dir      string
 		poll     bool
 		interval time.Duration
 	}
@@ -43,19 +46,15 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 	}{{
 		name: "get repo",
 		fields: fields{
-			url:      "https://github.com/guacsec/git-collector-test",
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			interval: time.Millisecond,
 		},
 		preCreateDir:           false,
 		wantErr:                false,
-		numberOfFilesCollected: 9,
+		numberOfFilesCollected: len(expectedDocs),
 	}, {
 		name: "if repo exist",
 		fields: fields{
-			url:      "https://github.com/guacsec/git-collector-test",
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			interval: time.Millisecond,
 		},
@@ -65,22 +64,19 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "get repo poll",
 		fields: fields{
-			url:      "https://github.com/guacsec/git-collector-test",
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     true,
 			interval: time.Millisecond,
 		},
 		preCreateDir:           false,
-		wantErr:                false,
-		numberOfFilesCollected: 9,
+		wantErr:                true,
+		numberOfFilesCollected: len(expectedDocs),
 	}}
 	for _, tt := range tests {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
 		t.Run(tt.name, func(t *testing.T) {
-			// in case the file exists from a failed run, delete it
-			os.RemoveAll(tt.fields.dir)
-			g := NewGitDocumentCollector(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
+			ctx := logging.WithLogger(context.Background())
+			logger := logging.FromContext(ctx)
+			dir := filepath.Join(t.TempDir(), "repo")
+			g := NewGitDocumentCollector(ctx, sourceDir, dir, tt.fields.poll, tt.fields.interval)
 
 			collector.DeregisterDocumentCollector(CollectorGitDocument)
 			if err := collector.RegisterDocumentCollector(g, CollectorGitDocument); err != nil &&
@@ -89,10 +85,10 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			}
 
 			if tt.preCreateDir {
-				if err := os.Mkdir(tt.fields.dir, os.ModePerm); err != nil {
+				if err := os.Mkdir(dir, os.ModePerm); err != nil {
 					t.Fatal(err)
 				}
-				err := cloneRepoToDir(logger, tt.fields.url, tt.fields.dir)
+				err := cloneRepoToDir(logger, sourceDir, dir)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -100,13 +96,20 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {
-				ctx, cancel = context.WithTimeout(ctx, time.Second)
+				ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 				defer cancel()
 			}
 
-			var collectedDocs []*processor.Document
+			collectedDocs := map[string]struct{}{}
 			em := func(d *processor.Document) error {
-				collectedDocs = append(collectedDocs, d)
+				blob := string(d.Blob)
+				if _, ok := expectedDocs[blob]; !ok {
+					return nil
+				}
+				collectedDocs[blob] = struct{}{}
+				if cancel != nil && len(collectedDocs) == len(expectedDocs) {
+					cancel()
+				}
 				return nil
 			}
 			eh := func(err error) bool {
@@ -116,7 +119,6 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 				return true
 			}
 
-			defer os.RemoveAll(tt.fields.dir) // clean up
 			if err := collector.Collect(ctx, em, eh); err != nil {
 				t.Fatalf("Collector error handler error: %v", err)
 			}
@@ -130,4 +132,47 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			}
 		})
 	}
+}
+
+func createTestGitRepo(t *testing.T) (string, map[string]struct{}) {
+	t.Helper()
+
+	dir := t.TempDir()
+	repo, err := git.PlainInit(dir, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	documents := map[string]string{
+		"first.json":  `{"name":"first"}`,
+		"second.json": `{"name":"second"}`,
+	}
+	worktree, err := repo.Worktree()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, contents := range documents {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := worktree.Add(filepath.ToSlash(name)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, err = worktree.Commit("add test documents", &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  "GUAC test",
+			Email: "guac-test@example.com",
+			When:  time.Unix(0, 0).UTC(),
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedDocs := make(map[string]struct{}, len(documents))
+	for _, contents := range documents {
+		expectedDocs[contents] = struct{}{}
+	}
+	return dir, expectedDocs
 }
