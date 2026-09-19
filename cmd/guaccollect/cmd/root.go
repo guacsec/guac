@@ -26,6 +26,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// warnIfPrometheusUnsupported warns when --enable-prometheus is set on a subcommand that doesn't start a metrics server.
+func warnIfPrometheusUnsupported(cmd *cobra.Command, _ []string) {
+	supported := cmd.Name() == depsDevCmd.Name() || cmd.Name() == osvCmd.Name() || cmd.Name() == datadogMalwareCmd.Name() || cmd.Name() == blobCmd.Name()
+	if !supported && viper.GetBool("enable-prometheus") {
+		fmt.Fprintf(os.Stderr, "Warning: --enable-prometheus (or GUAC_ENABLE_PROMETHEUS) is not supported by the %q subcommand and will be ignored\n", cmd.Name())
+	}
+}
+
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
@@ -59,9 +67,10 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:     "guaccollect",
-	Short:   "guaccollect is an collector cmdline for GUAC",
-	Version: version.Version,
+	Use:              "guaccollect",
+	Short:            "guaccollect is an collector cmdline for GUAC",
+	Version:          version.Version,
+	PersistentPreRun: warnIfPrometheusUnsupported,
 }
 
 func Execute() {
