@@ -57,6 +57,12 @@ func TestWarnIfPrometheusUnsupported(t *testing.T) {
 			wantWarning:      false,
 		},
 		{
+			name:             "eol with flag set does not warn",
+			cmdName:          "eol",
+			enablePrometheus: true,
+			wantWarning:      false,
+		},
+		{
 			name:             "other subcommand with flag set warns",
 			cmdName:          "github",
 			enablePrometheus: true,
