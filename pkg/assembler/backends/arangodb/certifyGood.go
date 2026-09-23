@@ -187,7 +187,7 @@ func getSrcCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyGoodFromCursor(ctx, cursor, false)
 }
@@ -212,7 +212,7 @@ func getArtCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyGoodFromCursor(ctx, cursor, false)
 }
@@ -265,7 +265,7 @@ func getPkgCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyGoodFromCursor(ctx, cursor, false)
 }
@@ -360,7 +360,7 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package certifyGood: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		} else {
 			query := `
 			LET firstPkg = FIRST(
@@ -392,7 +392,7 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package certifyGood: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 
 	} else if subject.Artifact != nil {
@@ -418,7 +418,7 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact certifyGood: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
@@ -450,7 +450,7 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source certifyGood: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return "", fmt.Errorf("package, artifact, or source is specified for IngestCertifyGood")
 	}
@@ -536,7 +536,7 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package certifyGoods: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		} else {
 			query := `
 			LET firstPkg = FIRST(
@@ -570,7 +570,7 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package certifyGoods: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 	} else if len(subjects.Artifacts) > 0 {
 
@@ -630,7 +630,7 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact certifyGoods %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if len(subjects.Sources) > 0 {
 
 		if len(subjects.Sources) != len(certifyGoods) {
@@ -697,7 +697,7 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source certifyGoods: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestCertifyGoods")
 	}
@@ -814,7 +814,7 @@ func (c *arangoClient) queryCertifyGoodNodeByID(ctx context.Context, filter *mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbCertifyGood struct {
 		CertifyGoodID string  `json:"_id"`

@@ -194,7 +194,7 @@ func getSrcHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasMetadata: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getHasMetadataFromCursor(ctx, cursor, false)
 }
@@ -221,7 +221,7 @@ func getArtHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasMetadata: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getHasMetadataFromCursor(ctx, cursor, false)
 }
@@ -277,7 +277,7 @@ func getPkgHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasMetadata: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getHasMetadataFromCursor(ctx, cursor, false)
 }
@@ -381,7 +381,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 
 		} else {
 			query := `
@@ -414,7 +414,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 	} else if subject.Artifact != nil {
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
@@ -439,7 +439,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact hasMetadata: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
@@ -471,7 +471,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source hasMetadata: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return "", fmt.Errorf("package, artifact, or source is specified for IngestHasMetadata")
 	}
@@ -553,7 +553,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 
 		} else {
 			query := `
@@ -588,7 +588,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 	} else if len(subjects.Artifacts) > 0 {
 		var listOfValues []map[string]any
@@ -643,7 +643,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact hasMetadata: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -705,7 +705,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source hasMetadata: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestBulkHasMetadata")
 	}
@@ -829,7 +829,7 @@ func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for hasMetadata: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbHasMetadata struct {
 		HasMetadataID string    `json:"_id"`

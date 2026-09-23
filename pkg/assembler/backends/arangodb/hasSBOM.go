@@ -139,7 +139,7 @@ func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSBOM: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return c.getHasSBOMFromCursor(ctx, cursor, filter, false)
 }
@@ -170,7 +170,7 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSBOM: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return c.getHasSBOMFromCursor(ctx, cursor, filter, false)
 }
@@ -368,7 +368,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSBOMs: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if len(subjects.Artifacts) > 0 {
 
 		var listOfValues []map[string]any
@@ -439,7 +439,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact hasSBOM: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return nil, fmt.Errorf("packages or artifacts not specified for IngestHasSBOMs")
 	}
@@ -499,7 +499,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest hasSBOM: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 		hasSBOMList, err := c.getHasSBOMFromCursor(ctx, cursor, nil, true)
 		if err != nil {
 			return "", fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
@@ -557,7 +557,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		if err != nil {
 			return "", fmt.Errorf("failed to create ingest hasSBOM: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		hasSBOMList, err := c.getHasSBOMFromCursor(ctx, cursor, nil, true)
 		if err != nil {
@@ -848,7 +848,7 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for hasSBOM: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbHasSbom struct {
 		HasSbomID            string   `json:"_id"`
@@ -992,7 +992,7 @@ func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allo
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSbomNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbIncludedSoftware struct {
 			IncludedSoftware []string `json:"includedSoftware"`
@@ -1033,7 +1033,7 @@ func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allo
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSbomNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbIncludedDependencies struct {
 			IncludedDependencies []string `json:"includedDependencies"`
@@ -1074,7 +1074,7 @@ func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allo
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSbomNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbIncludesOccurrences struct {
 			IncludesOccurrences []string `json:"includesOccurrences"`

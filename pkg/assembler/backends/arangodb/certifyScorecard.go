@@ -92,7 +92,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Scorecards: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyScorecardFromCursor(ctx, cursor, false)
 }
@@ -251,7 +251,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.ID
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest scorecard: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get scorecard from arango cursor: %w", err)
@@ -297,7 +297,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.IDorSou
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest source occurrence: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -431,7 +431,7 @@ func (c *arangoClient) queryCertifyScorecardNodeByID(ctx context.Context, filter
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for scorecard: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbScorecard struct {
 		ScorecardID      string    `json:"_id"`
