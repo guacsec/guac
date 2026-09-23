@@ -44,7 +44,7 @@ func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseS
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for license: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getLicenses(ctx, cursor)
 }
@@ -129,7 +129,7 @@ RETURN { "id": NEW._id }`
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest license: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	createdLicenses, err := getLicenses(ctx, cursor)
 	if err != nil {
@@ -154,7 +154,7 @@ RETURN { "id": NEW._id }`
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest license: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	createdLicenses, err := getLicenses(ctx, cursor)
 	if err != nil {
@@ -242,7 +242,7 @@ func (c *arangoClient) getLicenses(ctx context.Context, licenses []*model.IDorLi
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Licenses: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getLicenses(ctx, cursor)
 }
@@ -294,7 +294,7 @@ func (c *arangoClient) getLicensesByID(ctx context.Context, licIDs []string) ([]
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Licenses: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getLicenses(ctx, cursor)
 }
