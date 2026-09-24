@@ -187,7 +187,7 @@ func getSrcCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyBadFromCursor(ctx, cursor, false)
 }
@@ -212,7 +212,7 @@ func getArtCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyBadFromCursor(ctx, cursor, false)
 }
@@ -264,7 +264,7 @@ func getPkgCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getCertifyBadFromCursor(ctx, cursor, false)
 }
@@ -359,7 +359,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package certifyBad: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		} else {
 			query := `
 			LET firstPkg = FIRST(
@@ -391,7 +391,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package certifyBad: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 	} else if subject.Artifact != nil {
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
@@ -416,7 +416,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
@@ -448,7 +448,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source certifyBad: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return "", fmt.Errorf("package, artifact, or source is specified for IngestCertifyBad")
 	}
@@ -529,7 +529,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package certifyBads: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 
 		} else {
 			query := `
@@ -564,7 +564,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package certifyBads: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 
 	} else if len(subjects.Artifacts) > 0 {
@@ -620,7 +620,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -682,7 +682,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source certifyBad: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestCertifyBads")
 	}
@@ -801,7 +801,7 @@ func (c *arangoClient) queryCertifyBadNodeByID(ctx context.Context, filter *mode
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyBad: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbCertifyBad struct {
 		CertifyBadID  string  `json:"_id"`

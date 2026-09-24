@@ -127,7 +127,7 @@ func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities
 func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 
-	if vulnEqualSpec.Vulnerabilities != nil && len(vulnEqualSpec.Vulnerabilities) > 2 {
+	if len(vulnEqualSpec.Vulnerabilities) > 2 {
 		return nil, gqlerror.Errorf("VulnEqual :: cannot specify more than 2 vulnerabilities in VulnEqual")
 	}
 
@@ -171,7 +171,7 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 func (r *queryResolver) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 
-	if vulnEqualSpec.Vulnerabilities != nil && len(vulnEqualSpec.Vulnerabilities) > 2 {
+	if len(vulnEqualSpec.Vulnerabilities) > 2 {
 		return nil, gqlerror.Errorf("VulnEqual :: cannot specify more than 2 vulnerabilities in VulnEqual")
 	}
 
