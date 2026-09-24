@@ -46,7 +46,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 	defer server.Stop()
 	client := server.Client()
 
-	var doc *processor.Document = &processor.Document{
+	doc := &processor.Document{
 		Blob:   blob,
 		Type:   processor.DocumentUnknown,
 		Format: processor.FormatUnknown,

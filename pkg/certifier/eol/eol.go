@@ -315,7 +315,7 @@ func fetchAllProducts(ctx context.Context, client *http.Client) ([]string, error
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var products []string
 	if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
@@ -330,7 +330,7 @@ func fetchProductEOL(ctx context.Context, client *http.Client, product string) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch EOL data for %s: %w", product, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Check for non-200 status codes
 	if resp.StatusCode != http.StatusOK {
