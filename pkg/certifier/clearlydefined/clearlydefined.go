@@ -103,7 +103,7 @@ func getDefinitions(ctx context.Context, client *http.Client, purls []string, co
 	if err != nil {
 		return nil, fmt.Errorf("clearly defined POST request failed with error: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -289,7 +289,7 @@ func createAttestation(purl string, definition *attestation_license.Definition, 
 	}
 
 	subject := &attestationv1.ResourceDescriptor{Uri: purl}
-	attestation.Statement.Subject = append(attestation.Statement.Subject, subject)
+	attestation.Subject = append(attestation.Subject, subject)
 
 	return attestation
 }

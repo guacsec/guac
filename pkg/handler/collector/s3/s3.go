@@ -169,7 +169,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 				logger.Errorf("error getting message provider for queue %v: %v", queue, err)
 				return
 			}
-			defer mp.Close(cncCtx)
+			defer func() { _ = mp.Close(cncCtx) }()
 
 			for {
 				select {

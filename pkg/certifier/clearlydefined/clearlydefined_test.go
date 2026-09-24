@@ -249,7 +249,7 @@ func TestCDCertifierRateLimiter(t *testing.T) {
 
 		resp, err := cert.(*cdCertifier).cdHTTPClient.Do(req)
 		assert.NoError(t, err)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	// Check if the log contains any rate limiting messages

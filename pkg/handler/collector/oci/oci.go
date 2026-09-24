@@ -171,7 +171,7 @@ func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRe
 			}
 
 			rc := regclient.New(o.rcOpts...)
-			defer rc.Close(ctx, r)
+			defer func() { _ = rc.Close(ctx, r) }()
 
 			if err := o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel); err != nil {
 				return err
@@ -184,7 +184,7 @@ func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRe
 		}
 
 		rc := regclient.New(o.rcOpts...)
-		defer rc.Close(ctx, r)
+		defer func() { _ = rc.Close(ctx, r) }()
 
 		tags, err := rc.TagList(ctx, r)
 		if err != nil {

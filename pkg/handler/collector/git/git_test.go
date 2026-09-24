@@ -79,7 +79,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 		logger := logging.FromContext(ctx)
 		t.Run(tt.name, func(t *testing.T) {
 			// in case the file exists from a failed run, delete it
-			os.RemoveAll(tt.fields.dir)
+			_ = os.RemoveAll(tt.fields.dir)
 			g := NewGitDocumentCollector(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
 
 			collector.DeregisterDocumentCollector(CollectorGitDocument)
@@ -116,7 +116,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 				return true
 			}
 
-			defer os.RemoveAll(tt.fields.dir) // clean up
+			defer func() { _ = os.RemoveAll(tt.fields.dir) }() // clean up
 			if err := collector.Collect(ctx, em, eh); err != nil {
 				t.Fatalf("Collector error handler error: %v", err)
 			}
