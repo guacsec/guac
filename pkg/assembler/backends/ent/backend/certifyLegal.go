@@ -175,7 +175,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		}
 
 		seen := make(map[string]bool)
-		certifyLegalCreate, err := generateCertifyLegalCreate(ctx, tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses, seen)
+		certifyLegalCreate, _, err := generateCertifyLegalCreate(ctx, tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses, seen)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 		}
@@ -201,7 +201,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 }
 
 func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput,
-	declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, seen map[string]bool) (*ent.CertifyLegalCreate, error) {
+	declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, seen map[string]bool) (*ent.CertifyLegalCreate, *uuid.UUID, error) {
 
 	certifyLegalCreate := tx.CertifyLegal.Create().
 		SetDeclaredLicense(cl.DeclaredLicense).
@@ -225,7 +225,7 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 			} else {
 				licenseID, err := getLicenseID(ctx, tx.Client(), *decLic.LicenseInput)
 				if err != nil {
-					return nil, errors.Wrap(err, "failed to get license ID")
+					return nil, nil, errors.Wrap(err, "failed to get license ID")
 				}
 				declaredLicenseIDs = append(declaredLicenseIDs, licenseID.String())
 			}
@@ -235,7 +235,7 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		for _, declaredLicID := range sortedDeclaredLicenseIDs {
 			declaredLicUUID, err := uuid.Parse(declaredLicID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from licenseID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from licenseID failed with error: %w", err)
 			}
 			certifyLegalCreate.AddDeclaredLicenseIDs(declaredLicUUID)
 		}
@@ -255,7 +255,7 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 			} else {
 				licenseID, err := getLicenseID(ctx, tx.Client(), *disLic.LicenseInput)
 				if err != nil {
-					return nil, errors.Wrap(err, "failed to get license ID")
+					return nil, nil, errors.Wrap(err, "failed to get license ID")
 				}
 				discoveredLicenseIDs = append(discoveredLicenseIDs, licenseID.String())
 			}
@@ -265,7 +265,7 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		for _, discoveredLicID := range sortedDiscoveredLicenseIDs {
 			discoveredLicUUID, err := uuid.Parse(discoveredLicID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from licenseID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from licenseID failed with error: %w", err)
 			}
 			certifyLegalCreate.AddDiscoveredLicenseIDs(discoveredLicUUID)
 		}
@@ -276,6 +276,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		certifyLegalCreate.SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
 	}
 
+	var certifyLegalID *uuid.UUID
+	var err error
 	if pkg != nil {
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
@@ -283,26 +285,26 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
 			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
 		} else {
 			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
 			if err != nil {
-				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+				return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
 			}
 			pkgVersionID = pv.ID
 		}
 		certifyLegalCreate.SetPackageID(pkgVersionID)
-		certifyLegalID, err := guacCertifyLegalKey(ptrfrom.String(pkgVersionID.String()), nil, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
+		certifyLegalID, err = guacCertifyLegalKey(ptrfrom.String(pkgVersionID.String()), nil, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+			return nil, nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
 		}
 
 		if _, exists := seen[certifyLegalID.String()]; !exists {
 			seen[certifyLegalID.String()] = true
 		} else {
 			// if duplicate entry is found, we will ignore it as it is exactly the same
-			return nil, nil
+			return nil, nil, nil
 		}
 
 		certifyLegalCreate.SetID(*certifyLegalID)
@@ -313,34 +315,34 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
 			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
 		} else {
 			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			sourceID = srcID
 		}
 		certifyLegalCreate.SetSourceID(sourceID)
-		certifyLegalID, err := guacCertifyLegalKey(nil, ptrfrom.String(sourceID.String()), sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
+		certifyLegalID, err = guacCertifyLegalKey(nil, ptrfrom.String(sourceID.String()), sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+			return nil, nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
 		}
 
 		if _, exists := seen[certifyLegalID.String()]; !exists {
 			seen[certifyLegalID.String()] = true
 		} else {
 			// if duplicate entry is found, we will ignore it as it is exactly the same
-			return nil, nil
+			return nil, nil, nil
 		}
 
 		certifyLegalCreate.SetID(*certifyLegalID)
 	} else {
-		return nil, fmt.Errorf("pkg or source not specified for certifyLegal")
+		return nil, nil, fmt.Errorf("pkg or source not specified for certifyLegal")
 	}
 
-	return certifyLegalCreate, nil
+	return certifyLegalCreate, certifyLegalID, nil
 }
 
 func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) (*[]string, error) {
@@ -371,31 +373,36 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 	index := 0
 	for _, cls := range batches {
 		var creates []*ent.CertifyLegalCreate
+		var createIDs []string
 		seen := make(map[string]bool)
 		for _, cl := range cls {
 			cl := cl
 			if len(subjects.Packages) > 0 {
-				pkgCL, err := generateCertifyLegalCreate(ctx, tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index], seen)
+				pkgCL, pkgCLID, err := generateCertifyLegalCreate(ctx, tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index], seen)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 				}
 				if pkgCL != nil {
 					creates = append(creates, pkgCL)
+					createIDs = append(createIDs, pkgCLID.String())
 				}
 
 			} else if len(subjects.Sources) > 0 {
-				srcCL, err := generateCertifyLegalCreate(ctx, tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index], seen)
+				srcCL, srcCLID, err := generateCertifyLegalCreate(ctx, tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index], seen)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 				}
 				if srcCL != nil {
 					creates = append(creates, srcCL)
+					createIDs = append(createIDs, srcCLID.String())
 				}
 			} else {
 				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkCertifyLegal", "subject must be either a package or source")
 			}
 			index++
 		}
+
+		sortBatchByID(createIDs, creates)
 
 		err := tx.CertifyLegal.CreateBulk(creates...).
 			OnConflict(
