@@ -510,6 +510,7 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 
 	for _, srcs := range batches {
 		srcNameCreates := make([]*ent.SourceNameCreate, len(srcs))
+		srcNameCreateIDs := make([]string, len(srcs))
 
 		for i, src := range srcs {
 			s := src
@@ -517,10 +518,13 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 			srcNameID := generateUUIDKey([]byte(srcIDs.NameId))
 
 			srcNameCreates[i] = generateSourceNameCreate(tx, &srcNameID, s)
+			srcNameCreateIDs[i] = srcNameID.String()
 			srcNameIDs = append(srcNameIDs, srcNameID.String())
 			srcTypes[srcNameID.String()] = s.SourceInput.Type
 			srcNamespaces[srcNameID.String()] = strings.Join([]string{s.SourceInput.Type, s.SourceInput.Namespace}, guacIDSplit)
 		}
+
+		sortBatchByID(srcNameCreateIDs, srcNameCreates)
 
 		if err := tx.SourceName.CreateBulk(srcNameCreates...).
 			OnConflict(

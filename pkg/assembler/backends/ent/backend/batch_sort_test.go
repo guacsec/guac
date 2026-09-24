@@ -70,4 +70,13 @@ func TestSortBatchByID_DeterministicOrder(t *testing.T) {
 	t.Run("CertifyLegal", func(t *testing.T) {
 		assertSortBatchByIDDeterministic(t, func() *ent.CertifyLegalCreate { return &ent.CertifyLegalCreate{} })
 	})
+	t.Run("PackageVersion", func(t *testing.T) {
+		assertSortBatchByIDDeterministic(t, func() *ent.PackageVersionCreate { return &ent.PackageVersionCreate{} })
+	})
+	t.Run("SourceName", func(t *testing.T) {
+		assertSortBatchByIDDeterministic(t, func() *ent.SourceNameCreate { return &ent.SourceNameCreate{} })
+	})
+	t.Run("CertifyVuln", func(t *testing.T) {
+		assertSortBatchByIDDeterministic(t, func() *ent.CertifyVulnCreate { return &ent.CertifyVulnCreate{} })
+	})
 }
