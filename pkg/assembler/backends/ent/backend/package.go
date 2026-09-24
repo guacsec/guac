@@ -206,20 +206,6 @@ func generatePackageVersionCreate(tx *ent.Tx, pkgVersionID *uuid.UUID, pkgNameID
 		SetHash(versionHashFromInputSpec(*pkgInput.PackageInput))
 }
 
-// sortablePackageNameCreates sorts a batch of PackageName creates by their
-// deterministic ID, keeping ids and creates in lockstep.
-type sortablePackageNameCreates struct {
-	ids     []string
-	creates []*ent.PackageNameCreate
-}
-
-func (s sortablePackageNameCreates) Len() int           { return len(s.creates) }
-func (s sortablePackageNameCreates) Less(i, j int) bool { return s.ids[i] < s.ids[j] }
-func (s sortablePackageNameCreates) Swap(i, j int) {
-	s.ids[i], s.ids[j] = s.ids[j], s.ids[i]
-	s.creates[i], s.creates[j] = s.creates[j], s.creates[i]
-}
-
 func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
 	batches := chunk(pkgInputs, MaxBatchSize)
 	pkgNameIDs := make([]string, 0)
@@ -260,7 +246,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 		// underlying row-exclusive locks in the same order. Building the batch in
 		// unsorted (SBOM) order lets two concurrent transactions lock shared rows
 		// in opposite orders, which Postgres reports as a 40P01 deadlock.
-		sort.Sort(sortablePackageNameCreates{ids: pkgNameCreateIDs, creates: pkgNameCreates})
+		sortBatchByID(pkgNameCreateIDs, pkgNameCreates)
 
 		if err := tx.PackageName.CreateBulk(pkgNameCreates...).
 			OnConflict(
