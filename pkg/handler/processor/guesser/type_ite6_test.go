@@ -36,13 +36,39 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1"}`),
 		expected: processor.DocumentITE6Generic,
 	}, {
+		name:     "valid ITE6 v1 Document",
+		blob:     []byte(`{"type": "https://in-toto.io/Statement/v1"}`),
+		expected: processor.DocumentITE6Generic,
+	}, {
 		name:     "valid SLSA ITE6 Document",
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1", "predicateType": "https://slsa.dev/provenance/v0.2"}`),
+		expected: processor.DocumentITE6SLSA,
+	}, {
+		name:     "valid SLSA ITE6 v1 Document",
+		blob:     []byte(`{"type": "https://in-toto.io/Statement/v1", "predicate_type": "https://slsa.dev/provenance/v0.2"}`),
 		expected: processor.DocumentITE6SLSA,
 	}, {
 		name:     "valid SLSA ITE6 Document with different versions",
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v1.1", "predicateType": "https://slsa.dev/provenance/v1.0"}`),
 		expected: processor.DocumentITE6SLSA,
+	}, {
+		// A document that populates both v0.1 and v1 type fields is malformed and
+		// must be rejected (returns DocumentUnknown) rather than silently
+		// preferring one format over the other.
+		name:     "ambiguous ITE6 Document with both _type and type fields",
+		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1", "type": "https://in-toto.io/Statement/v1", "predicateType": "https://slsa.dev/provenance/v0.2", "predicate_type": "https://slsa.dev/provenance/v0.2"}`),
+		expected: processor.DocumentUnknown,
+	}, {
+		// Only the predicate type is ambiguous here: the statement type still
+		// matches, so without an explicit check the document would fall through
+		// to the generic parser instead of being rejected.
+		name:     "ambiguous SLSA ITE6 Document with both predicateType and predicate_type fields",
+		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1", "predicateType": "https://slsa.dev/provenance/v0.2", "predicate_type": "https://slsa.dev/provenance/v1"}`),
+		expected: processor.DocumentUnknown,
+	}, {
+		name:     "ambiguous Vuln ITE6 Document with both predicateType and predicate_type fields",
+		blob:     []byte(`{"type": "https://in-toto.io/Statement/v1", "predicateType": "https://in-toto.io/attestation/vulns/v0.1", "predicate_type": "https://in-toto.io/attestation/vulns/v0.2"}`),
+		expected: processor.DocumentUnknown,
 	}, {
 		name:     "valid CREV ITE6 Document",
 		blob:     testdata.ITE6CREVExample,

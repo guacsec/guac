@@ -20,8 +20,8 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	"github.com/guacsec/guac/internal/intoto"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -54,9 +54,23 @@ func (e *ITE6Processor) Unpack(i *processor.Document) ([]*processor.Document, er
 	return nil, nil
 }
 
-func parseStatement(p []byte) (*in_toto.Statement, error) {
-	ps := in_toto.Statement{}
+// parseStatement unmarshals the in-toto statement header and rejects documents
+// that no parser downstream could route: a statement type that is absent, or a
+// header field that mixes the v0.1 and v1 spellings. This mirrors the checks the
+// type guesser applies, so the two stages agree on which documents are ITE6.
+func parseStatement(p []byte) (*intoto.StatementHeader, error) {
+	ps := intoto.StatementHeader{}
 	if err := json.Unmarshal(p, &ps); err != nil {
+		return nil, err
+	}
+	stmtType, err := ps.Type()
+	if err != nil {
+		return nil, err
+	}
+	if stmtType == "" {
+		return nil, fmt.Errorf("in-toto statement has neither v0.1 (_type) nor v1 (type) statement type field")
+	}
+	if _, err := ps.PredicateType(); err != nil {
 		return nil, err
 	}
 	return &ps, nil
