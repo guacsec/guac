@@ -218,6 +218,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 		seenPkgNames := make(map[string]bool)
 		var pkgNameCreates []*ent.PackageNameCreate
 		var pkgNameCreateIDs []string
+		pkgVersionCreateIDs := make([]string, len(pkgs))
 
 		for i, pkg := range pkgs {
 			pkgInput := pkg
@@ -234,6 +235,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 				pkgNameCreateIDs = append(pkgNameCreateIDs, nameIDStr)
 			}
 			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
+			pkgVersionCreateIDs[i] = pkgVersionID.String()
 
 			pkgNameIDs = append(pkgNameIDs, nameIDStr)
 			pkgTypes[nameIDStr] = pkgInput.PackageInput.Type
@@ -264,6 +266,8 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 
 			return nil, errors.Wrap(err, "bulk upsert pkgName node")
 		}
+
+		sortBatchByID(pkgVersionCreateIDs, pkgVersionCreates)
 
 		if err := retryOnFKViolation(ctx, func() error {
 			return tx.PackageVersion.CreateBulk(pkgVersionCreates...).
