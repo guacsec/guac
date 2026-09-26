@@ -33,8 +33,8 @@ func (c *neo4jClient) CertifyBadList(ctx context.Context, certifyBadSpec model.C
 }
 
 func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	// TODO: Fix validation
 	queryAll := true
@@ -47,7 +47,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil) {
 		var sb strings.Builder
-		var firstMatch bool = true
+		firstMatch := true
 		queryValues := map[string]any{}
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
@@ -83,17 +83,17 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 			setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
-		result, err := session.ReadTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := session.ExecuteRead(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-				result, err := tx.Run(sb.String(), queryValues)
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				collectedCertifyBad := []*model.CertifyBad{}
 
-				for result.Next() {
+				for result.Next(ctx) {
 					pkgQualifiers := result.Record().Values[5]
 					subPath := result.Record().Values[4]
 					version := result.Record().Values[3]
@@ -129,7 +129,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil) {
 		var sb strings.Builder
-		var firstMatch bool = true
+		firstMatch := true
 		queryValues := map[string]any{}
 
 		query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
@@ -141,17 +141,17 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		}
 		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, certifyBad")
-		result, err := session.ReadTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := session.ExecuteRead(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-				result, err := tx.Run(sb.String(), queryValues)
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				collectedCertifyBad := []*model.CertifyBad{}
 
-				for result.Next() {
+				for result.Next(ctx) {
 					tag := result.Record().Values[3]
 					commit := result.Record().Values[4]
 					nameStr := result.Record().Values[2].(string)
@@ -185,7 +185,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil) {
 		var sb strings.Builder
-		var firstMatch bool = true
+		firstMatch := true
 		queryValues := map[string]any{}
 
 		query := "MATCH (a:Artifact)-[:subject]-(certifyBad:CertifyBad)"
@@ -196,17 +196,17 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		}
 		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN a.algorithm, a.digest, certifyBad")
-		result, err := session.ReadTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := session.ExecuteRead(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-				result, err := tx.Run(sb.String(), queryValues)
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				collectedCertifyBad := []*model.CertifyBad{}
 
-				for result.Next() {
+				for result.Next(ctx) {
 					algorithm := result.Record().Values[0].(string)
 					digest := result.Record().Values[1].(string)
 					artifact := generateModelArtifact(algorithm, digest)

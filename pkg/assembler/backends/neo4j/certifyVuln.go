@@ -38,7 +38,7 @@ func (c *neo4jClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model
 // TODO (pxp928): fix for new vulnerability
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
-	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	// session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	// defer session.Close()
 
 	// // TODO: Fix validation
@@ -53,7 +53,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	// if queryAll || (certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Cve != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query CVE
@@ -74,17 +74,17 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	// 	setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVuln := []*model.CertifyVuln{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
 	// 				version := result.Record().Values[3]
@@ -126,7 +126,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	// if queryAll || (certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Ghsa != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query ghsa
@@ -147,17 +147,17 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	// 	setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVuln := []*model.CertifyVuln{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
 	// 				version := result.Record().Values[3]
@@ -198,7 +198,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	// if queryAll || (certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Osv != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query ghsa
@@ -220,17 +220,17 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	// 	setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVuln := []*model.CertifyVuln{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
 	// 				version := result.Record().Values[3]
@@ -339,11 +339,11 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgIn
 	// 	return nil, err
 	// }
 
-	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	// session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	// defer session.Close()
 
 	// var sb strings.Builder
-	// var firstMatch bool = true
+	// firstMatch := true
 	// queryValues := map[string]any{}
 
 	// queryValues[timeScanned] = certifyVuln.TimeScanned.UTC()
@@ -380,15 +380,15 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgIn
 	// 	sb.WriteString(merge)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.WriteTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 	result, err := session.ExecuteWrite(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			// query returns a single record
-	// 			record, err := result.Single()
+	// 			record, err := result.Single(ctx)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
@@ -446,15 +446,15 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgIn
 	// 	sb.WriteString(merge)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.WriteTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 	result, err := session.ExecuteWrite(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			// query returns a single record
-	// 			record, err := result.Single()
+	// 			record, err := result.Single(ctx)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
@@ -513,15 +513,15 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgIn
 	// 	sb.WriteString(merge)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.WriteTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 	result, err := session.ExecuteWrite(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			// query returns a single record
-	// 			record, err := result.Single()
+	// 			record, err := result.Single(ctx)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}

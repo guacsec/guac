@@ -36,11 +36,11 @@ func (c *neo4jClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model
 }
 
 func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 
 	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 		"version.qualifier_list, hasSourceAt, objSrcType.type, objSrcNamespace.namespace, objSrcName.name, objSrcName.tag, objSrcName.commit"
@@ -77,17 +77,17 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 		sb.WriteString(returnValue)
 	}
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-			result, err := tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			collectedHasSourceAt := []*model.HasSourceAt{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 				pkgQualifiers := result.Record().Values[5]
 				subPath := result.Record().Values[4]
 				version := result.Record().Values[3]

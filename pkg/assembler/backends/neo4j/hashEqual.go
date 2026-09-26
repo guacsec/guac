@@ -32,15 +32,15 @@ func (c *neo4jClient) HashEqualList(ctx context.Context, hashEqualSpec model.Has
 
 func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 
 	var selectedArt *model.ArtifactSpec = nil
 	var dependentArt *model.ArtifactSpec = nil
-	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) != 0 {
+	if len(hashEqualSpec.Artifacts) != 0 {
 		if len(hashEqualSpec.Artifacts) == 1 {
 			selectedArt = hashEqualSpec.Artifacts[0]
 		} else {
@@ -77,16 +77,16 @@ func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEq
 		sb.WriteString(returnValue)
 	}
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			collectedHashEqual := []*model.HashEqual{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 
 				algorithm := result.Record().Values[0].(string)
 				digest := result.Record().Values[1].(string)
