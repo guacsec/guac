@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -30,6 +31,8 @@ import (
 	"github.com/guacsec/guac/pkg/clients"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
 
 	osv_models "github.com/google/osv-scanner/pkg/models"
@@ -51,13 +54,19 @@ const (
 	INVOC_URI    string = "guac"
 	PRODUCER_ID  string = "guacsec/guac"
 	OSVCollector string = "osv_certifier"
+
+	// OSVQueryErrorsCounter tracks failed batch queries to OSV.
+	OSVQueryErrorsCounter = "osv_query_errors"
 )
 
 var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
+var registerMetricsOnce sync.Once
+
 type osvCertifier struct {
 	osvHTTPClient             *http.Client
 	withVulnerabilityMetadata bool
+	Metrics                   metrics.MetricCollector
 }
 
 type CertifierOpts func(*osvCertifier)
@@ -66,6 +75,24 @@ func WithVulnerabilityMetadata() CertifierOpts {
 	return func(oc *osvCertifier) {
 		oc.withVulnerabilityMetadata = true
 	}
+}
+
+// WithMetrics wires m into the certifier. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) CertifierOpts {
+	return func(oc *osvCertifier) {
+		oc.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, OSVQueryErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for osv query errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 // NewOSVCertificationParser initializes the OSVCertifier
@@ -97,6 +124,11 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 	}
 
 	if _, err := EvaluateOSVResponse(ctx, o.osvHTTPClient, purls, docChannel, o.withVulnerabilityMetadata); err != nil {
+		if o.Metrics != nil {
+			if metricsErr := o.Metrics.AddCounter(ctx, OSVQueryErrorsCounter, 1); metricsErr != nil {
+				logging.FromContext(ctx).Debugf("failed to record osv query error metric: %v", metricsErr)
+			}
+		}
 		return fmt.Errorf("could not generate document from OSV results: %w", err)
 	}
 	return nil

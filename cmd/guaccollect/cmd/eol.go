@@ -61,6 +61,10 @@ type eolOptions struct {
 	lastScan *int
 	// enable otel
 	enableOtel bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 var eolCmd = &cobra.Command{
@@ -94,6 +98,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
 			viper.GetBool("enable-otel"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -116,7 +122,29 @@ you have access to read and write to the respective blob store.`,
 			}()
 		}
 
-		if err := certify.RegisterCertifier(eol.NewEOLCertifier, certifier.CertifierEOL); err != nil {
+		var metricsCollector metrics.MetricCollector
+		if opts.enablePrometheus {
+			ctx = metrics.WithMetrics(ctx, "eol")
+			metricsCollector = metrics.FromContext(ctx, "eol")
+			if err := eol.RegisterMetrics(ctx, metricsCollector); err != nil {
+				logger.Fatalf("unable to register metrics: %v", err)
+			}
+			go func() {
+				http.Handle("/metrics", metricsCollector.MetricsHandler())
+				logger.Infof("Prometheus server is listening on: %d", opts.prometheusPort)
+				if err := http.ListenAndServe(fmt.Sprintf(":%d", opts.prometheusPort), nil); err != nil {
+					logger.Fatalf("Error starting HTTP server: %v", err)
+				}
+			}()
+		}
+
+		if err := certify.RegisterCertifier(func() certifier.Certifier {
+			certifierOpts := []eol.CertifierOpts{}
+			if metricsCollector != nil {
+				certifierOpts = append(certifierOpts, eol.WithMetrics(metricsCollector))
+			}
+			return eol.NewEOLCertifier(certifierOpts...)
+		}, certifier.CertifierEOL); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -145,6 +173,8 @@ func validateEOLFlags(
 	certifierLatencyStr string,
 	batchSize int, lastScan int,
 	enableOtel bool,
+	enablePrometheus bool,
+	prometheusPort int,
 ) (eolOptions, error) {
 	var opts eolOptions
 
@@ -155,6 +185,8 @@ func validateEOLFlags(
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
 	opts.enableOtel = enableOtel
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -191,6 +223,7 @@ func init() {
 		"interval",
 		"header-file", "certifier-latency",
 		"certifier-batch-size", "last-scan",
+		"prometheus-port",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

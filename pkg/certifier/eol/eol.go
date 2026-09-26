@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -32,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	"golang.org/x/time/rate"
@@ -46,10 +48,43 @@ const (
 	EOLCollector   = "endoflife.date"
 	rateLimit      = 10
 	rateLimitBurst = 1
+
+	// EOLQueryErrorsCounter is the name of the counter metric that tracks
+	// failed queries to endoflife.date.
+	EOLQueryErrorsCounter = "eol_query_errors"
 )
+
+var registerMetricsOnce sync.Once
 
 type eolCertifier struct {
 	client *http.Client
+	// Metrics is optional; when nil, no metrics are recorded.
+	Metrics metrics.MetricCollector
+}
+
+// CertifierOpts configures an eolCertifier.
+type CertifierOpts func(*eolCertifier)
+
+// WithMetrics configures the certifier to record metrics using the given
+// MetricCollector. Call RegisterMetrics once before any certifier built with
+// this option is used.
+func WithMetrics(m metrics.MetricCollector) CertifierOpts {
+	return func(e *eolCertifier) {
+		e.Metrics = m
+	}
+}
+
+// RegisterMetrics registers the Prometheus metrics recorded by the eol
+// certifier. It is safe to call multiple times; registration only happens
+// once per process.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, EOLQueryErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for eol query errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 // EOLStringOrBool represents a value that can be either a string, boolean, or null
@@ -176,12 +211,16 @@ type CycleData struct {
 // EOLData is a list of CycleData, the response from the endoflife.date API
 type EOLData = []CycleData
 
-func NewEOLCertifier() certifier.Certifier {
+func NewEOLCertifier(opts ...CertifierOpts) certifier.Certifier {
 	limiter := rate.NewLimiter(rate.Every(time.Second/time.Duration(rateLimit)), rateLimitBurst)
 	client := &http.Client{
 		Transport: clients.NewRateLimitedTransport(version.UATransport, limiter),
 	}
-	return &eolCertifier{client: client}
+	e := &eolCertifier{client: client}
+	for _, opt := range opts {
+		opt(e)
+	}
+	return e
 }
 
 func (e *eolCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
@@ -196,6 +235,11 @@ func (e *eolCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 	}
 
 	if _, err := EvaluateEOLResponse(ctx, e.client, purls, docChannel); err != nil {
+		if e.Metrics != nil {
+			if metricsErr := e.Metrics.AddCounter(ctx, EOLQueryErrorsCounter, 1); metricsErr != nil {
+				logging.FromContext(ctx).Debugf("failed to record eol query error metric: %v", metricsErr)
+			}
+		}
 		return fmt.Errorf("could not generate document from EOL results: %w", err)
 	}
 	return nil
