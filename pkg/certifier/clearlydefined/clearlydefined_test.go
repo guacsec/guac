@@ -33,10 +33,102 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	mockclearlydefined "github.com/guacsec/guac/internal/testing/mockClearlyDefined"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	attestation_license "github.com/guacsec/guac/pkg/certifier/attestation/license"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
+
+func TestNormalizedSourceLocation(t *testing.T) {
+	revision := "9e3b772b8cabbd8cadc7522ebe3dde3279e79d9e"
+
+	tests := []struct {
+		name          string
+		source        *attestation_license.SourceLocation
+		wantType      string
+		wantNamespace string
+		wantName      string
+	}{
+		{
+			name: "github source URL",
+			source: &attestation_license.SourceLocation{
+				Type:      "git",
+				Provider:  "github",
+				Namespace: "facebook",
+				Name:      "react",
+				Revision:  revision,
+				URL:       "https://github.com/facebook/react/tree/" + revision,
+			},
+			wantType:      "git",
+			wantNamespace: "github.com/facebook",
+			wantName:      "react",
+		},
+		{
+			name: "gitlab source URL",
+			source: &attestation_license.SourceLocation{
+				Type:      "git",
+				Provider:  "gitlab",
+				Namespace: "group",
+				Name:      "project",
+				Revision:  revision,
+				URL:       "https://gitlab.com/group/project/-/tree/" + revision,
+			},
+			wantType:      "git",
+			wantNamespace: "gitlab.com/group",
+			wantName:      "project",
+		},
+		{
+			name: "missing URL preserves existing identity",
+			source: &attestation_license.SourceLocation{
+				Type:      "git",
+				Provider:  "github",
+				Namespace: "facebook",
+				Name:      "react",
+				Revision:  revision,
+			},
+			wantType:      "git",
+			wantNamespace: "facebook",
+			wantName:      "react",
+		},
+		{
+			name: "unsupported URL preserves existing identity",
+			source: &attestation_license.SourceLocation{
+				Type:      "git",
+				Provider:  "unknown",
+				Namespace: "facebook",
+				Name:      "react",
+				Revision:  revision,
+				URL:       "https://example.com/facebook/react/tree/" + revision,
+			},
+			wantType:      "git",
+			wantNamespace: "facebook",
+			wantName:      "react",
+		},
+		{
+			name: "non-git source preserves existing identity",
+			source: &attestation_license.SourceLocation{
+				Type:      "sourcearchive",
+				Provider:  "mavencentral",
+				Namespace: "org.apache.commons",
+				Name:      "commons-text",
+				Revision:  "1.9",
+				URL:       "https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9-sources.jar",
+			},
+			wantType:      "sourcearchive",
+			wantNamespace: "org.apache.commons",
+			wantName:      "commons-text",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotType, gotNamespace, gotName := normalizedSourceLocation(tt.source)
+			assert.Equal(t, tt.wantType, gotType)
+			assert.Equal(t, tt.wantNamespace, gotNamespace)
+			assert.Equal(t, tt.wantName, gotName)
+		})
+	}
+}
 
 func TestClearlyDefined(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
