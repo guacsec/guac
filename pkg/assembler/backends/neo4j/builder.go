@@ -28,8 +28,8 @@ func (c *neo4jClient) BuildersList(ctx context.Context, builderSpec model.Builde
 }
 
 func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var query string
 	values := map[string]any{}
@@ -40,15 +40,15 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 		query = "MATCH (b:Builder) RETURN b.uri"
 	}
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(query, values)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, query, values)
 			if err != nil {
 				return nil, err
 			}
 
 			builders := []*model.Builder{}
-			for result.Next() {
+			for result.Next(ctx) {
 				uri := result.Record().Values[0].(string)
 				builder := generateModelBuilder(uri)
 				builders = append(builders, builder)
@@ -71,22 +71,22 @@ func (c *neo4jClient) IngestBuilders(ctx context.Context, builders []*model.IDor
 }
 
 func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.IDorBuilderInput) (string, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	values := map[string]any{}
 	values["uri"] = builder.BuilderInput.URI
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 			query := "MERGE (b:Builder{uri:$uri}) RETURN b.uri"
-			result, err := tx.Run(query, values)
+			result, err := tx.Run(ctx, query, values)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}

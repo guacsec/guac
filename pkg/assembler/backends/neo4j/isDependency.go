@@ -39,11 +39,11 @@ func (c *neo4jClient) IsDependencyList(ctx context.Context, isDependencySpec mod
 
 // note this has not been optimized to remove pkgVersion -> pkgName
 func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 
 	selectedPkg := isDependencySpec.Package
 	var dependentPkg *model.PkgSpec = nil
@@ -77,17 +77,17 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 	sb.WriteString(returnValue)
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-			result, err := tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			collectedIsDependency := []*model.IsDependency{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 				pkgQualifiers := result.Record().Values[5]
 				subPath := result.Record().Values[4]
 				version := result.Record().Values[3]
@@ -164,12 +164,12 @@ func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.IDor
 // Ingest IsDependency
 // note this has not been optimized to remove pkgVersion -> pkgName
 func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, dependency model.IsDependencyInputSpec) (string, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 	// TODO: handle depPkgMatchType
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	// TODO: use generics here between PkgInputSpec and PkgSpec?
@@ -209,15 +209,15 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInp
 	sb.WriteString(merge)
 	sb.WriteString(returnValue)
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}

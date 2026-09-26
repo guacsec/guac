@@ -36,14 +36,14 @@ func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEq
 	// // 	return nil, err
 	// // }
 
-	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	// session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	// defer session.Close()
 
 	// aggregateIsVulnerability := []*model.IsVulnerability{}
 
 	// if queryAll || isVulnerabilitySpec.Vulnerability != nil && isVulnerabilitySpec.Vulnerability.Cve != nil {
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query CVE
@@ -61,17 +61,17 @@ func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEq
 	// 	setIsVulnerabilityValues(&sb, isVulnerabilitySpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedIsVulnerability := []*model.IsVulnerability{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				id := result.Record().Values[0].(string)
 	// 				osv := generateModelOsv(id)
 
@@ -105,7 +105,7 @@ func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEq
 
 	// if queryAll || isVulnerabilitySpec.Vulnerability != nil && isVulnerabilitySpec.Vulnerability.Ghsa != nil {
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query GHSA
@@ -123,17 +123,17 @@ func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEq
 	// 	setIsVulnerabilityValues(&sb, isVulnerabilitySpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedIsVulnerability := []*model.IsVulnerability{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				id := result.Record().Values[0].(string)
 	// 				osv := generateModelOsv(id)
 

@@ -44,11 +44,11 @@ func (c *neo4jClient) ScorecardsList(ctx context.Context, scorecardSpec model.Ce
 }
 
 func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
@@ -59,16 +59,16 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 	setCertifyScorecardValues(&sb, certifyScorecardSpec, &firstMatch, queryValues)
 	sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, certifyScorecard")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			collectedCertifyScorecard := []*model.CertifyScorecard{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 				tag := result.Record().Values[4]
 				commit := result.Record().Values[3]
 				nameStr := result.Record().Values[2].(string)
@@ -201,8 +201,8 @@ func (c *neo4jClient) IngestScorecards(ctx context.Context, sources []*model.IDo
 // Ingest Scorecard
 
 func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	values := map[string]any{}
 	values["sourceType"] = source.SourceInput.Type
@@ -253,20 +253,20 @@ func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.IDorSour
 	values["origin"] = scorecard.Origin
 	values["collector"] = scorecard.Collector
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 			query := `
 MATCH (root:Src) -[:SrcHasType]-> (type:SrcType) -[:SrcHasNamespace]-> (ns:SrcNamespace) -[:SrcHasName] -> (name:SrcName)
 WHERE type.type = $sourceType AND ns.namespace = $namespace AND name.name = $name AND name.commit = $commit AND name.tag = $tag
 MERGE (name) <-[:subject]- (certifyScorecard:CertifyScorecard{timeScanned:$timeScanned,aggregateScore:$aggregateScore,scorecardVersion:$scorecardVersion,scorecardCommit:$scorecardCommit,checkKeys:$checkKeys,checkValues:$checkValues,origin:$origin,collector:$collector})
 RETURN type.type, ns.namespace, name.name, name.commit, name.tag, certifyScorecard`
-			result, err := tx.Run(query, values)
+			result, err := tx.Run(ctx, query, values)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}
