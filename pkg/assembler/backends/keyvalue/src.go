@@ -206,13 +206,13 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInp
 	outType, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
 	c.m.RUnlock()
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return nil, err
 		}
 		c.m.Lock()
 		outType, err = byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -238,13 +238,13 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInp
 	outNamespace, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNamespace.Key(), c)
 	c.m.RUnlock()
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return nil, err
 		}
 		c.m.Lock()
 		outNamespace, err = byKeykv[*srcNamespace](ctx, srcNSCol, inNamespace.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -276,13 +276,13 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInp
 	outName, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
 	c.m.RUnlock()
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return nil, err
 		}
 		c.m.Lock()
 		outName, err = byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -666,7 +666,7 @@ func (c *demoClient) buildSourceResponse(ctx context.Context, id string, filter 
 		}
 		snl = append(snl, model)
 		currentID = nameNode.Parent
-	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+	} else if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
@@ -681,13 +681,13 @@ func (c *demoClient) buildSourceResponse(ctx context.Context, id string, filter 
 			Names:     snl,
 		})
 		currentID = namespaceNode.Parent
-	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+	} else if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	typeNode, err := byIDkv[*srcType](ctx, currentID, c)
 	if err != nil {
-		if errors.Is(err, kv.NotFoundError) || errors.Is(err, errTypeNotMatch) {
+		if errors.Is(err, kv.ErrNotFound) || errors.Is(err, errTypeNotMatch) {
 			return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
 		} else {
 			return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
@@ -744,7 +744,7 @@ func (c *demoClient) exactSource(ctx context.Context, filter *model.SourceSpec) 
 		if srcN, err := byIDkv[*srcNameNode](ctx, *filter.ID, c); err == nil {
 			return srcN, nil
 		} else {
-			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 				return nil, err
 			}
 			return nil, nil
@@ -756,7 +756,7 @@ func (c *demoClient) exactSource(ctx context.Context, filter *model.SourceSpec) 
 		}
 		srcT, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 				return nil, err
 			}
 			return nil, nil
@@ -768,7 +768,7 @@ func (c *demoClient) exactSource(ctx context.Context, filter *model.SourceSpec) 
 		}
 		srcNS, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNS.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 				return nil, err
 			}
 			return nil, nil
@@ -782,7 +782,7 @@ func (c *demoClient) exactSource(ctx context.Context, filter *model.SourceSpec) 
 		}
 		srcN, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 				return nil, err
 			}
 			return nil, nil

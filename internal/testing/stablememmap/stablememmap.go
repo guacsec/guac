@@ -60,7 +60,7 @@ func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
 		return nil, false, err
 	}
 	if !done {
-		return nil, false, errors.New("Expect memmap to always return all keys at once")
+		return nil, false, errors.New("expect memmap to always return all keys at once")
 	}
 	slices.Sort(keys)
 	return keys, true, nil

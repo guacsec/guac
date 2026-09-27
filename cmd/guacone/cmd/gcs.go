@@ -83,7 +83,7 @@ var gcsCmd = &cobra.Command{
 		// Credential flag is not mandatory since they can also be loaded from
 		// the environment variable GOOGLE_APPLICATION_CREDENTIALS by the client, by default
 		if credsPath := viper.GetString(gcsCredentialsPathFlag); credsPath != "" {
-			gcsOpts = append(gcsOpts, option.WithCredentialsFile(credsPath))
+			gcsOpts = append(gcsOpts, option.WithAuthCredentialsFile(option.ServiceAccount, credsPath))
 		}
 
 		client, err := storage.NewClient(ctx, gcsOpts...)

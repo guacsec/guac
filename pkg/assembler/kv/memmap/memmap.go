@@ -38,11 +38,11 @@ func GetStore() kv.Store {
 func (s *store) Get(_ context.Context, c, k string, v any) error {
 	col, ok := s.m[c]
 	if !ok {
-		return fmt.Errorf("%w : Collection %q", kv.NotFoundError, c)
+		return fmt.Errorf("%w : Collection %q", kv.ErrNotFound, c)
 	}
 	val, ok := col[k]
 	if !ok {
-		return fmt.Errorf("%w : Key %q", kv.NotFoundError, k)
+		return fmt.Errorf("%w : Key %q", kv.ErrNotFound, k)
 	}
 
 	return copyAny(val, v)
@@ -59,10 +59,10 @@ func (s *store) Set(_ context.Context, c, k string, v any) error {
 func (s *store) Remove(_ context.Context, c, k string) error {
 	col, ok := s.m[c]
 	if !ok {
-		return fmt.Errorf("%w : Collection %q", kv.NotFoundError, c)
+		return fmt.Errorf("%w : Collection %q", kv.ErrNotFound, c)
 	}
 	if _, ok := col[k]; !ok {
-		return fmt.Errorf("%w : Key %q", kv.NotFoundError, k)
+		return fmt.Errorf("%w : Key %q", kv.ErrNotFound, k)
 	}
 	delete(col, k)
 	return nil
@@ -79,17 +79,17 @@ func (s *store) Keys(c string) kv.Scanner {
 func copyAny(src any, dst any) error {
 	dP := reflect.ValueOf(dst)
 	if dP.Kind() != reflect.Pointer {
-		return fmt.Errorf("%w : Not a pointer", kv.BadPtrError)
+		return fmt.Errorf("%w : Not a pointer", kv.ErrBadPtr)
 	}
 	d := dP.Elem()
 	if !d.CanSet() {
-		return fmt.Errorf("%w : Pointer not settable", kv.BadPtrError)
+		return fmt.Errorf("%w : Pointer not settable", kv.ErrBadPtr)
 	}
 	s := reflect.ValueOf(src)
 	// Sometimes dst is an interface containing the same type as src.
 	// if s.Type() != d.Type() {
 	// 	return fmt.Errorf("%w : Source and Destination not same type: %v, %v",
-	// 		kv.BadPtrError, s.Type(), d.Type())
+	// 		kv.ErrBadPtr, s.Type(), d.Type())
 	// }
 	d.Set(s)
 	return nil

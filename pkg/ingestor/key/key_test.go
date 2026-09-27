@@ -296,11 +296,12 @@ func TestDelete(t *testing.T) {
 					t.Errorf("Retrieve() error = %s, wantErrMessage %s", err, tt.wantErrMessage)
 				}
 			}
-			if tt.args.providerType == "mock1" {
+			switch tt.args.providerType {
+			case "mock1":
 				if _, found := provider.collector[tt.args.id]; found {
 					t.Errorf("Delete() failed as key still found")
 				}
-			} else if tt.args.providerType == "mock2" {
+			case "mock2":
 				if _, found := provider2.collector[tt.args.id]; found {
 					t.Errorf("Delete() failed as key still found")
 				}

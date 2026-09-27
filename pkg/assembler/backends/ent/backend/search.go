@@ -130,7 +130,8 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		LastScanTimeDB time.Time `json:"max"`
 	}
 
-	if queryType == model.QueryTypeVulnerability {
+	switch queryType {
+	case model.QueryTypeVulnerability:
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -145,7 +146,7 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		if err != nil {
 			return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 		}
-	} else if queryType == model.QueryTypeLicense {
+	case model.QueryTypeLicense:
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -160,7 +161,7 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		if err != nil {
 			return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
 		}
-	} else { // queryType == model.QueryTypeEol via hasMetadata
+	default: // queryType == model.QueryTypeEol via hasMetadata
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -266,10 +267,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 		return nil, nil
 	}
 
-	hasNextPage := true
-	if (startIndex + *first) > len(pkgIDs) {
-		hasNextPage = false
-	}
+	hasNextPage := (startIndex + *first) <= len(pkgIDs)
 
 	return constructPkgConn(pkgConn, len(pkgIDs), hasNextPage), nil
 }

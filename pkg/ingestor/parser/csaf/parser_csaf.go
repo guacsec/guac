@@ -303,7 +303,8 @@ func (c *csafParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 					continue
 				}
 
-				if status == "known_affected" || status == "under_investigation" {
+				switch status {
+				case "known_affected", "under_investigation":
 					vulnData := generated.ScanMetadataInput{
 						TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
 					}
@@ -313,7 +314,7 @@ func (c *csafParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 						VulnData:      &vulnData,
 					}
 					cvs = append(cvs, cv)
-				} else if status == "known_not_affected" || status == "fixed" {
+				case "known_not_affected", "fixed":
 					vulnData := generated.ScanMetadataInput{
 						TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
 					}

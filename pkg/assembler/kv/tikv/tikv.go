@@ -53,7 +53,7 @@ func (s *store) Get(ctx context.Context, c, k string, v any) error {
 	// TODO(jeffmendoza), should figure out error type and check it, instead just see if
 	// slice is empty for now.
 	if len(bts) == 0 {
-		return kv.NotFoundError
+		return kv.ErrNotFound
 	}
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func (s *store) Remove(ctx context.Context, c, k string) error {
 	// Like Get: rawkv returns no error for a missing key, so check for empty.
 	bts, err := s.c.Get(ctx, []byte(ck))
 	if len(bts) == 0 {
-		return kv.NotFoundError
+		return kv.ErrNotFound
 	}
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
 		}
 		parts := strings.SplitN(string(k), ":", 2)
 		if len(parts) != 2 {
-			return nil, false, fmt.Errorf("Invalid key found in TiKV: %q", string(k))
+			return nil, false, fmt.Errorf("invalid key found in TiKV: %q", string(k))
 		}
 		rv[i] = string(parts[1])
 	}

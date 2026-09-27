@@ -118,7 +118,7 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.IDorSour
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

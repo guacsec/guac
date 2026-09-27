@@ -51,7 +51,7 @@ func (s *store) Get(ctx context.Context, c, k string, v any) error {
 	// TODO(jeffmendoza), should figure out error type and check it, instead just see if
 	// string is empty for now.
 	if j == "" {
-		return kv.NotFoundError
+		return kv.ErrNotFound
 	}
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (s *store) Remove(ctx context.Context, c, k string) error {
 		return err
 	}
 	if n == 0 {
-		return kv.NotFoundError
+		return kv.ErrNotFound
 	}
 	return nil
 }

@@ -185,7 +185,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 
 		// Not technically part of the spec but some PURLs still include the namespace
 		// as part of the PURL
-		var ns string = p.Namespace
+		ns := p.Namespace
 		for k, v := range qs {
 			if k == "repository_url" {
 				ns = v
