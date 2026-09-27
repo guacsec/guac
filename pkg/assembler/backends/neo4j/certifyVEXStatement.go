@@ -48,7 +48,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	queryAll = true
 	// }
 
-	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	// session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	// defer session.Close()
 
 	// aggregateCertifyVEXStatement := []*model.CertifyVEXStatement{}
@@ -59,7 +59,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 		certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query CVE
@@ -82,17 +82,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
@@ -143,7 +143,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 		certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query ghsa
@@ -166,17 +166,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
 	// 				version := result.Record().Values[3]
@@ -225,7 +225,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 		certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query ghsa
@@ -248,17 +248,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
 	// 				version := result.Record().Values[3]
@@ -307,7 +307,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 		certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query CVE
@@ -328,17 +328,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				algorithm := result.Record().Values[0].(string)
 	// 				digest := result.Record().Values[1].(string)
 	// 				artifact := generateModelArtifact(algorithm, digest)
@@ -383,7 +383,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 		certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query ghsa
@@ -404,17 +404,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				algorithm := result.Record().Values[0].(string)
 	// 				digest := result.Record().Values[1].(string)
 	// 				artifact := generateModelArtifact(algorithm, digest)
@@ -457,7 +457,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 		certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil) {
 
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	// query ghsa
@@ -478,17 +478,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 	// 	setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				algorithm := result.Record().Values[0].(string)
 	// 				digest := result.Record().Values[1].(string)
 	// 				artifact := generateModelArtifact(algorithm, digest)

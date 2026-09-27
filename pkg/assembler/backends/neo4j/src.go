@@ -52,8 +52,8 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 		return c.sourcesNamespace(ctx, sourceSpec)
 	}
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
 		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
@@ -62,7 +62,7 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 	}
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
@@ -71,16 +71,16 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 	sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-			result, err := tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			srcTypes := map[string]map[string][]*model.SourceName{}
-			for result.Next() {
+			for result.Next(ctx) {
 
 				commitString := result.Record().Values[4].(string)
 				tagString := result.Record().Values[3].(string)
@@ -133,11 +133,11 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 }
 
 func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)")
 
@@ -149,16 +149,16 @@ func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceS
 
 	sb.WriteString(" RETURN type.type")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-			result, err := tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			sources := []*model.Source{}
-			for result.Next() {
+			for result.Next(ctx) {
 
 				source := &model.Source{
 					Type:       result.Record().Values[0].(string),
@@ -181,11 +181,11 @@ func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceS
 }
 
 func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
 
@@ -202,16 +202,16 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	}
 	sb.WriteString(" RETURN type.type, namespace.namespace")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-			result, err := tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			srcTypes := map[string][]*model.SourceNamespace{}
-			for result.Next() {
+			for result.Next(ctx) {
 
 				namespaceString := result.Record().Values[1].(string)
 				typeString := result.Record().Values[0].(string)
@@ -250,8 +250,8 @@ func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.IDorSo
 }
 
 func (c *neo4jClient) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	values := map[string]any{}
 	values["sourceType"] = source.SourceInput.Type
@@ -276,20 +276,20 @@ func (c *neo4jClient) IngestSource(ctx context.Context, source model.IDorSourceI
 		values["tag"] = ""
 	}
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 			query := `MERGE (root:Src)
 MERGE (root) -[:SrcHasType]-> (type:SrcType{type:$sourceType})
 MERGE (type) -[:SrcHasNamespace]-> (ns:SrcNamespace{namespace:$namespace})
 MERGE (ns) -[:SrcHasName]-> (name:SrcName{name:$name,commit:$commit,tag:$tag})
 RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
-			result, err := tx.Run(query, values)
+			result, err := tx.Run(ctx, query, values)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}

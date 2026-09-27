@@ -36,7 +36,7 @@ func (c *neo4jClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSA
 
 func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	// TODO update to not use PackageSourceOrArtifact
-	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	// session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	// defer session.Close()
 
 	// queryAll := false
@@ -56,7 +56,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 	// if queryAll || (hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Package != nil) {
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
@@ -122,17 +122,17 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	// 		sb.WriteString(returnValue)
 	// 	}
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
 
 	// 			resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
 	// 			resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				pkgQualifiers := result.Record().Values[5]
 	// 				subPath := result.Record().Values[4]
 	// 				version := result.Record().Values[3]
@@ -225,7 +225,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 	// if queryAll || (hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Source != nil) {
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	returnValue := " RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, " +
@@ -259,10 +259,10 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	// 	setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
@@ -270,7 +270,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	// 			resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
 	// 			resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				tag := result.Record().Values[3]
 	// 				commit := result.Record().Values[4]
 	// 				nameStr := result.Record().Values[2].(string)
@@ -359,7 +359,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 	// if queryAll || (hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Artifact != nil) {
 	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
+	// 	firstMatch := true
 	// 	queryValues := map[string]any{}
 
 	// 	returnValue := " RETURN a.algorithm, a.digest, " +
@@ -391,10 +391,10 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	// 	setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 	// 	sb.WriteString(returnValue)
 
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
+	// 	result, err := session.ExecuteRead(ctx,
+	// 		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-	// 			result, err := tx.Run(sb.String(), queryValues)
+	// 			result, err := tx.Run(ctx, sb.String(), queryValues)
 	// 			if err != nil {
 	// 				return nil, err
 	// 			}
@@ -402,7 +402,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	// 			resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
 	// 			resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 
-	// 			for result.Next() {
+	// 			for result.Next(ctx) {
 	// 				algorithm := result.Record().Values[0].(string)
 	// 				digest := result.Record().Values[1].(string)
 	// 				artifact := generateModelArtifact(algorithm, digest)
