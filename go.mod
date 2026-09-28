@@ -7,7 +7,7 @@ require (
 	deps.dev/api/v3 v3.0.0-20250917073939-6ff3dd7d2eea
 	entgo.io/contrib v0.7.0
 	entgo.io/ent v0.14.6
-	github.com/99designs/gqlgen v0.17.94
+	github.com/99designs/gqlgen v0.17.95
 	github.com/CycloneDX/cyclonedx-go v0.12.0
 	github.com/Khan/genqlient v0.8.1
 	github.com/Masterminds/semver v1.5.0
@@ -68,7 +68,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
-	github.com/vektah/gqlparser/v2 v2.5.36
+	github.com/vektah/gqlparser/v2 v2.5.37
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.70.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0
 	go.opentelemetry.io/otel v1.46.0
@@ -336,8 +336,8 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40 // indirect
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20240620024024-ca14e6327bbd // indirect
-	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.21 // indirect
+	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
@@ -440,7 +440,7 @@ require (
 	github.com/tonistiigi/go-csvvalue v0.0.0-20240814133006-030d3b2625d0 // indirect
 	github.com/twmb/murmur3 v1.1.3 // indirect
 	github.com/ulikunitz/xz v0.5.16 // indirect
-	github.com/urfave/cli/v3 v3.10.1 // indirect
+	github.com/urfave/cli/v3 v3.11.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
