@@ -1526,10 +1526,6 @@ func (ec *executionContext) marshalNPackageEdge2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._PackageEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPackageIDs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDs(ctx context.Context, sel ast.SelectionSet, v model.PackageIDs) graphql.Marshaler {
-	return ec._PackageIDs(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPackageIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDsᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PackageIDs) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)

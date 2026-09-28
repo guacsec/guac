@@ -1080,10 +1080,6 @@ func (ec *executionContext) marshalNSourceEdge2ᚖgithubᚗcomᚋguacsecᚋguac�
 	return ec._SourceEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSourceIDs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDs(ctx context.Context, sel ast.SelectionSet, v model.SourceIDs) graphql.Marshaler {
-	return ec._SourceIDs(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNSourceIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDsᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SourceIDs) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
