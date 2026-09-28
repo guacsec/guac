@@ -12,7 +12,7 @@ require (
 	github.com/Khan/genqlient v0.8.1
 	github.com/Masterminds/semver v1.5.0
 	github.com/ProtonMail/gluon v0.17.0
-	github.com/XSAM/otelsql v0.43.0
+	github.com/XSAM/otelsql v0.44.0
 	github.com/anchore/syft v1.42.4
 	github.com/arangodb/go-driver v1.6.9
 	github.com/aws/aws-sdk-go-v2 v1.47.0
