@@ -87,7 +87,7 @@ func startServer() {
 	case <-time.After(5 * time.Second):
 		logger.Error("forcibly shutting down REST API Server")
 		cf()
-		server.Close()
+		_ = server.Close()
 	}
 	cf()
 }
