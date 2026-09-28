@@ -174,7 +174,7 @@ func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.IDorArt
 	outA, err := byKeykv[*artStruct](ctx, artCol, inA.Key(), c)
 
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return "", err
 		}
 		// Got KeyError: not found, so do insert

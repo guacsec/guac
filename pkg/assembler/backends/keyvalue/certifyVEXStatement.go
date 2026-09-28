@@ -157,7 +157,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

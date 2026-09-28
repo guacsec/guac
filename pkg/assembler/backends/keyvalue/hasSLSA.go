@@ -78,7 +78,7 @@ func (n *hasSLSAStruct) Key() string {
 func (c *demoClient) deleteHasSLSA(ctx context.Context, id string) (bool, error) {
 	link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
 	if err != nil {
-		if errors.Is(err, kv.NotFoundError) {
+		if errors.Is(err, kv.ErrNotFound) {
 			return false, nil
 		}
 		return false, gqlerror.Errorf("failed to retrieve hasSLSA %q: %v", id, err)
@@ -493,7 +493,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

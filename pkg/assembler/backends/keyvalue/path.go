@@ -201,7 +201,7 @@ func (c *demoClient) Delete(ctx context.Context, node string) (bool, error) {
 
 	var k string
 	if err := c.kv.Get(ctx, indexCol, node, &k); err != nil {
-		if errors.Is(err, kv.NotFoundError) {
+		if errors.Is(err, kv.ErrNotFound) {
 			return false, nil
 		}
 		return false, fmt.Errorf("%w : id not found in index %q", err, node)

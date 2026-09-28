@@ -64,7 +64,7 @@ func (n *certifyVulnerabilityLink) Key() string {
 func (c *demoClient) deleteCertifyVuln(ctx context.Context, id string) (bool, error) {
 	link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
 	if err != nil {
-		if errors.Is(err, kv.NotFoundError) {
+		if errors.Is(err, kv.ErrNotFound) {
 			return false, nil
 		}
 		return false, gqlerror.Errorf("failed to retrieve certifyVuln %q: %v", id, err)
@@ -161,7 +161,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 		}
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

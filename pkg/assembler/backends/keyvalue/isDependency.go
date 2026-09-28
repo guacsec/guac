@@ -61,7 +61,7 @@ func (n *isDependencyLink) Key() string {
 func (c *demoClient) deleteIsDependency(ctx context.Context, id string) error {
 	link, err := byIDkv[*isDependencyLink](ctx, id, c)
 	if err != nil {
-		if errors.Is(err, kv.NotFoundError) {
+		if errors.Is(err, kv.ErrNotFound) {
 			return nil
 		}
 		return fmt.Errorf("failed to retrieve isDependency %q: %w", id, err)
@@ -146,7 +146,7 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 	if err == nil {
 		return outLink.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

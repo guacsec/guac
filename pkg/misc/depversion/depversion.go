@@ -178,7 +178,7 @@ func almostSemVer(s string) bool {
 func fixAlmostSemVer(s string) (string, error) {
 	matches := almostExactSvR.FindStringSubmatch(s)
 	if len(matches) == 0 {
-		return "", fmt.Errorf("Did not match AlmostSemVer: %q", s)
+		return "", fmt.Errorf("did not match AlmostSemVer: %q", s)
 	}
 	return fmt.Sprintf("%s-%s", matches[almostExactSvR.SubexpIndex("beforerel")], matches[almostExactSvR.SubexpIndex("afterrel")]), nil
 }

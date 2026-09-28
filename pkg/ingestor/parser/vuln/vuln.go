@@ -106,7 +106,7 @@ func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStateme
 
 func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgInputSpec, error) {
 	var ps []*generated.PkgInputSpec
-	for _, sub := range s.Statement.Subject {
+	for _, sub := range s.Subject {
 		p, err := helpers.PurlToPkg(sub.Uri)
 		if err != nil {
 			return nil, fmt.Errorf("bad purl in statement header: %w", err)

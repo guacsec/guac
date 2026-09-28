@@ -373,13 +373,13 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 	outType, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
 	c.m.RUnlock()
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return nil, err
 		}
 		c.m.Lock()
 		outType, err = byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -408,7 +408,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 		c.m.Lock()
 		outNamespace, err = byKeykv[*pkgNamespace](ctx, pkgNSCol, inNamespace.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -441,7 +441,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 		c.m.Lock()
 		outName, err = byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -476,7 +476,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 		c.m.Lock()
 		outVersion, err = byKeykv[*pkgVersion](ctx, pkgVerCol, inVersion.Key(), c)
 		if err != nil {
-			if !errors.Is(err, kv.NotFoundError) {
+			if !errors.Is(err, kv.ErrNotFound) {
 				c.m.Unlock()
 				return nil, err
 			}
@@ -923,7 +923,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 			Qualifiers: getCollectedPackageQualifiers(versionNode.Qualifiers),
 		})
 		currentID = versionNode.Parent
-	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+	} else if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
@@ -938,7 +938,7 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 			Versions: pvl,
 		})
 		currentID = nameNode.Parent
-	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+	} else if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
@@ -953,13 +953,13 @@ func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter
 			Names:     pnl,
 		})
 		currentID = namespaceNode.Parent
-	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+	} else if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 		return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	typeNode, err := byIDkv[*pkgType](ctx, currentID, c)
 	if err != nil {
-		if errors.Is(err, kv.NotFoundError) || errors.Is(err, errTypeNotMatch) {
+		if errors.Is(err, kv.ErrNotFound) || errors.Is(err, errTypeNotMatch) {
 			return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
 		} else {
 			return nil, fmt.Errorf("error retrieving node for id: %v : %w", currentID, err)
@@ -1130,7 +1130,7 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 		if pkgN, err := byIDkv[*pkgName](ctx, *filter.ID, c); err == nil {
 			return pkgN, nil
 		} else {
-			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 				return nil, err
 			}
 			return nil, nil
@@ -1144,7 +1144,7 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 	}
 	pkgT, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 			return nil, err
 		}
 		return nil, nil
@@ -1156,7 +1156,7 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 	}
 	pkgNS, err := byKeykv[*pkgNamespace](ctx, pkgNSCol, inNS.Key(), c)
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 			return nil, err
 		}
 		return nil, nil
@@ -1168,7 +1168,7 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 	}
 	pkgN, err := byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 			return nil, err
 		}
 		return nil, nil

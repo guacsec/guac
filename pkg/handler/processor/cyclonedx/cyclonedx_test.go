@@ -16,7 +16,6 @@
 package cyclonedx
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -53,7 +52,6 @@ func TestCycloneDXProcessor_Unpack(t *testing.T) {
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println(testdata.SpdxExampleSmall)
 			d := CycloneDXProcessor{}
 			actual, err := d.Unpack(&tt.doc)
 			if (err != nil) != tt.expectErr {

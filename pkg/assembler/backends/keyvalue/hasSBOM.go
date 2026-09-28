@@ -76,7 +76,7 @@ func (n *hasSBOMStruct) Key() string {
 func (c *demoClient) deleteHasSBOM(ctx context.Context, id string) (bool, error) {
 	link, err := byIDkv[*hasSBOMStruct](ctx, id, c)
 	if err != nil {
-		if errors.Is(err, kv.NotFoundError) {
+		if errors.Is(err, kv.ErrNotFound) {
 			return false, nil
 		}
 		return false, gqlerror.Errorf("failed to retrieve hasSBOM %q: %v", id, err)
@@ -322,7 +322,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 
@@ -403,7 +403,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 			if err != nil {
 				// Should not happen: deleteHasSBOM keeps shared includes.
 				// Drop it rather than fail every HasSBOM query.
-				if errors.Is(err, kv.NotFoundError) {
+				if errors.Is(err, kv.ErrNotFound) {
 					continue
 				}
 				return nil, fmt.Errorf("expected IsDependency: %w", err)
@@ -420,7 +420,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		for _, id := range in.IncludedOccurrences {
 			link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
 			if err != nil {
-				if errors.Is(err, kv.NotFoundError) {
+				if errors.Is(err, kv.ErrNotFound) {
 					continue
 				}
 				return nil, fmt.Errorf("expected IsOccurrence: %w", err)
