@@ -16,11 +16,15 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +36,24 @@ func warnIfPrometheusUnsupported(cmd *cobra.Command, _ []string) {
 	if !supported && viper.GetBool("enable-prometheus") {
 		fmt.Fprintf(os.Stderr, "Warning: --enable-prometheus (or GUAC_ENABLE_PROMETHEUS) is not supported by the %q subcommand and will be ignored\n", cmd.Name())
 	}
+}
+
+// startMetricsServer registers the collector's metrics via register and serves them on /metrics at the given port.
+func startMetricsServer(ctx context.Context, name string, port int, register func(context.Context, metrics.MetricCollector) error) metrics.MetricCollector {
+	logger := logging.FromContext(ctx)
+	ctx = metrics.WithMetrics(ctx, name)
+	m := metrics.FromContext(ctx, name)
+	if err := register(ctx, m); err != nil {
+		logger.Fatalf("unable to register metrics: %v", err)
+	}
+	go func() {
+		http.Handle("/metrics", m.MetricsHandler())
+		logger.Infof("Prometheus server is listening on: %d", port)
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+			logger.Fatalf("Error starting HTTP server: %v", err)
+		}
+	}()
+	return m
 }
 
 func init() {
