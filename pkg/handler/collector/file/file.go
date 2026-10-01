@@ -21,29 +21,62 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 const (
 	FileCollector = "FileCollector"
+
+	// FileReadErrorsCounter tracks files that could not be read.
+	FileReadErrorsCounter = "file_read_errors"
 )
+
+var registerMetricsOnce sync.Once
 
 type fileCollector struct {
 	path        string
 	lastChecked time.Time
 	poll        bool
 	interval    time.Duration
+	Metrics     metrics.MetricCollector
 }
 
-func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration) *fileCollector {
-	return &fileCollector{
+type Opt func(*fileCollector)
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(f *fileCollector) {
+		f.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, FileReadErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for file read errors: %w", regErr)
+		}
+	})
+	return err
+}
+
+func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration, opts ...Opt) *fileCollector {
+	f := &fileCollector{
 		path:     path,
 		poll:     poll,
 		interval: interval,
 	}
+	for _, opt := range opts {
+		opt(f)
+	}
+	return f
 }
 
 // RetrieveArtifacts collects the documents from the collector. It emits each collected
@@ -85,6 +118,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 		blob, err := os.ReadFile(path)
 		if err != nil {
+			f.recordRetrievalError(ctx)
 			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
@@ -126,4 +160,13 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 // Type returns the collector type
 func (f *fileCollector) Type() string {
 	return FileCollector
+}
+
+func (f *fileCollector) recordRetrievalError(ctx context.Context) {
+	if f.Metrics == nil {
+		return
+	}
+	if err := f.Metrics.AddCounter(ctx, FileReadErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record file read error metric: %v", err)
+	}
 }

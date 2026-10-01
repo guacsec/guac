@@ -28,6 +28,7 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/eol"
@@ -96,7 +97,7 @@ var eolCmd = &cobra.Command{
 			}()
 		}
 
-		if err := certify.RegisterCertifier(eol.NewEOLCertifier, eol.EOLCollector); err != nil {
+		if err := certify.RegisterCertifier(func() certifier.Certifier { return eol.NewEOLCertifier() }, eol.EOLCollector); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
