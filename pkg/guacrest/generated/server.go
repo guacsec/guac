@@ -38,6 +38,9 @@ type ServerInterface interface {
 	// Get vulnerabilities for a Package URL (purl)
 	// (GET /v0/package/{purl}/vulns)
 	GetPackageVulns(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnsParams)
+	// List SBOMs in the graph, optionally filtered by package
+	// (GET /v0/sbom)
+	ListSboms(w http.ResponseWriter, r *http.Request, params ListSbomsParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -83,6 +86,12 @@ func (_ Unimplemented) GetPackageDeps(w http.ResponseWriter, r *http.Request, pu
 // Get vulnerabilities for a Package URL (purl)
 // (GET /v0/package/{purl}/vulns)
 func (_ Unimplemented) GetPackageVulns(w http.ResponseWriter, r *http.Request, purl string, params GetPackageVulnsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// List SBOMs in the graph, optionally filtered by package
+// (GET /v0/sbom)
+func (_ Unimplemented) ListSboms(w http.ResponseWriter, r *http.Request, params ListSbomsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -349,6 +358,52 @@ func (siw *ServerInterfaceWrapper) GetPackageVulns(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// ListSboms operation middleware
+func (siw *ServerInterfaceWrapper) ListSboms(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListSbomsParams
+
+	// ------------- Optional query parameter "paginationSpec" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "paginationSpec", r.URL.Query(), &params.PaginationSpec, runtime.BindQueryParameterOptions{Type: "object", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "paginationSpec"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paginationSpec", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "package" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "package", r.URL.Query(), &params.Package, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "package"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "package", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListSboms(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -483,6 +538,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v0/package/{purl}/vulns", wrapper.GetPackageVulns)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v0/sbom", wrapper.ListSboms)
+	})
 
 	return r
 }
@@ -499,6 +557,12 @@ type PurlListJSONResponse struct {
 	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
 	PaginationInfo PaginationInfo `json:"PaginationInfo"`
 	PurlList       []Purl         `json:"PurlList"`
+}
+
+type SbomListJSONResponse struct {
+	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
+	PaginationInfo PaginationInfo `json:"PaginationInfo"`
+	SbomList       []Sbom         `json:"SbomList"`
 }
 
 type VulnerabilityListJSONResponse []Vulnerability
@@ -924,6 +988,72 @@ func (response GetPackageVulns502JSONResponse) VisitGetPackageVulnsResponse(w ht
 	return err
 }
 
+type ListSbomsRequestObject struct {
+	Params ListSbomsParams
+}
+
+type ListSbomsResponseObject interface {
+	VisitListSbomsResponse(w http.ResponseWriter) error
+}
+
+type ListSboms200JSONResponse struct{ SbomListJSONResponse }
+
+func (response ListSboms200JSONResponse) VisitListSbomsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListSboms400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response ListSboms400JSONResponse) VisitListSbomsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListSboms500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListSboms500JSONResponse) VisitListSbomsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListSboms502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response ListSboms502JSONResponse) VisitListSbomsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Identify the most important dependencies
@@ -947,6 +1077,9 @@ type StrictServerInterface interface {
 	// Get vulnerabilities for a Package URL (purl)
 	// (GET /v0/package/{purl}/vulns)
 	GetPackageVulns(ctx context.Context, request GetPackageVulnsRequestObject) (GetPackageVulnsResponseObject, error)
+	// List SBOMs in the graph, optionally filtered by package
+	// (GET /v0/sbom)
+	ListSboms(ctx context.Context, request ListSbomsRequestObject) (ListSbomsResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1155,6 +1288,32 @@ func (sh *strictHandler) GetPackageVulns(w http.ResponseWriter, r *http.Request,
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetPackageVulnsResponseObject); ok {
 		if err := validResponse.VisitGetPackageVulnsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListSboms operation middleware
+func (sh *strictHandler) ListSboms(w http.ResponseWriter, r *http.Request, params ListSbomsParams) {
+	var request ListSbomsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListSboms(ctx, request.(ListSbomsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListSboms")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListSbomsResponseObject); ok {
+		if err := validResponse.VisitListSbomsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

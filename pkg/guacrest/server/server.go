@@ -292,3 +292,38 @@ func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArti
 
 	return result, nil
 }
+
+func (s *DefaultServer) ListSboms(ctx context.Context, request gen.ListSbomsRequestObject) (gen.ListSbomsResponseObject, error) {
+	sboms, err := RetrieveSboms(ctx, s.gqlClient, request.Params.Package)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, ListSboms).(gen.ListSbomsResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	page, paginationInfo, err := pagination.Paginate(ctx, sboms, request.Params.PaginationSpec)
+	if err != nil {
+		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	if page == nil {
+		page = []gen.Sbom{}
+	}
+
+	return gen.ListSboms200JSONResponse{
+		SbomListJSONResponse: gen.SbomListJSONResponse{
+			PaginationInfo: paginationInfo,
+			SbomList:       page,
+		},
+	}, nil
+}

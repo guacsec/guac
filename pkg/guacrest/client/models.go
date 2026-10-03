@@ -7,6 +7,24 @@ import (
 	"time"
 )
 
+// Defines values for SbomSubjectType.
+const (
+	Artifact SbomSubjectType = "artifact"
+	Package  SbomSubjectType = "package"
+)
+
+// Valid indicates whether the value is a known member of the SbomSubjectType enum.
+func (e SbomSubjectType) Valid() bool {
+	switch e {
+	case Artifact:
+		return true
+	case Package:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for AnalyzeDependenciesParamsSort.
 const (
 	Frequency AnalyzeDependenciesParamsSort = "frequency"
@@ -47,6 +65,31 @@ type PaginationInfo struct {
 
 // Purl defines model for Purl.
 type Purl = string
+
+// Sbom defines model for Sbom.
+type Sbom struct {
+	Algorithm        string      `json:"algorithm"`
+	Collector        *string     `json:"collector,omitempty"`
+	Digest           string      `json:"digest"`
+	DocumentRef      *string     `json:"documentRef,omitempty"`
+	DownloadLocation *string     `json:"downloadLocation,omitempty"`
+	Id               string      `json:"id"`
+	KnownSince       time.Time   `json:"knownSince"`
+	Origin           *string     `json:"origin,omitempty"`
+	Subject          SbomSubject `json:"subject"`
+	Uri              string      `json:"uri"`
+}
+
+// SbomSubject defines model for SbomSubject.
+type SbomSubject struct {
+	// Artifact Set when type is "artifact", in the format <algorithm:digest>.
+	Artifact *string         `json:"artifact,omitempty"`
+	Purl     *Purl           `json:"purl,omitempty"`
+	Type     SbomSubjectType `json:"type"`
+}
+
+// SbomSubjectType defines model for SbomSubject.Type.
+type SbomSubjectType string
 
 // ScanMetadata defines model for ScanMetadata.
 type ScanMetadata struct {
@@ -99,6 +142,13 @@ type PurlList struct {
 	PurlList       []Purl         `json:"PurlList"`
 }
 
+// SbomList defines model for SbomList.
+type SbomList struct {
+	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
+	PaginationInfo PaginationInfo `json:"PaginationInfo"`
+	SbomList       []Sbom         `json:"SbomList"`
+}
+
 // VulnerabilityList defines model for VulnerabilityList.
 type VulnerabilityList = []Vulnerability
 
@@ -146,4 +196,15 @@ type GetPackageDepsParams struct {
 type GetPackageVulnsParams struct {
 	// IncludeDependencies A flag to include vulnerabilities of the dependencies. If true, the  response will include vulnerabilities for the purl and its dependencies  instead of the vulnerabilities of just the purl.
 	IncludeDependencies *bool `form:"includeDependencies,omitempty" json:"includeDependencies,omitempty"`
+}
+
+// ListSbomsParams defines parameters for ListSboms.
+type ListSbomsParams struct {
+	// PaginationSpec The pagination configuration for the query.
+	//   * 'PageSize' specifies the number of results returned
+	//   * 'Cursor' is returned by previous calls and specifies what page to return
+	PaginationSpec *PaginationSpec `form:"paginationSpec,omitempty" json:"paginationSpec,omitempty"`
+
+	// Package URL-encoded Package URL (purl)
+	Package *string `form:"package,omitempty" json:"package,omitempty"`
 }

@@ -188,6 +188,31 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
+  "/v0/sbom":
+    get:
+      summary: List SBOMs in the graph, optionally filtered by package
+      description: >
+        Returns every HasSBOM node, sorted by knownSince descending.
+        If a package purl is provided, only SBOMs that contain that package
+        (as subject or in includedSoftware) are returned.
+      operationId: listSboms
+      parameters:
+        - $ref: "#/components/parameters/PaginationSpec"
+        - name: package
+          in: query
+          required: false
+          description: URL-encoded Package URL (purl)
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/SbomList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
 
 components:
   parameters:
@@ -289,6 +314,51 @@ components:
           type: string
         collector:
           type: string
+    SbomSubject:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [package, artifact]
+        purl:
+          description: Set when type is "package".
+          $ref: "#/components/schemas/Purl"
+        artifact:
+          description: Set when type is "artifact", in the format <algorithm:digest>.
+          type: string
+    Sbom:
+      type: object
+      required:
+        - id
+        - subject
+        - uri
+        - algorithm
+        - digest
+        - knownSince
+      properties:
+        id:
+          type: string
+        subject:
+          $ref: "#/components/schemas/SbomSubject"
+        uri:
+          type: string
+        algorithm:
+          type: string
+        digest:
+          type: string
+        downloadLocation:
+          type: string
+        knownSince:
+          type: string
+          format: date-time
+        origin:
+          type: string
+        collector:
+          type: string
+        documentRef:
+          type: string
   responses:
     # for code 200
     PurlList:
@@ -307,6 +377,22 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/Purl"
+    SbomList:
+      description: A list of SBOMs
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - PaginationInfo
+              - SbomList
+            properties:
+              PaginationInfo:
+                $ref: "#/components/schemas/PaginationInfo"
+              SbomList:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sbom"
     PackageNameList:
       description: A list of package names with their dependent counts
       content:
