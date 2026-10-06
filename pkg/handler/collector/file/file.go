@@ -17,6 +17,7 @@ package file
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 const (
@@ -60,6 +62,8 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		return fmt.Errorf("unknown error on os.Stat for FileCollector path: %w", err)
 	}
 
+	logger := logging.FromContext(ctx)
+
 	readFunc := func(path string, dirEntry fs.DirEntry, err error) error {
 		// If the context has been canceled it contains an err which we can throw.
 		// When it gets thrown a second time will cancel the walk.
@@ -70,6 +74,15 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		// NOTE: Explicitly rethrowing new errors if a particular directory has an error.
 		// If we rethrow the error it kills the whole walk. Still useful to make it explicit that we ran into an error.
 		if err != nil {
+			// Inaccessible paths (EACCES/EPERM) are skipped so one unreadable entry
+			// does not abort a large ingestion.
+			if errors.Is(err, fs.ErrPermission) {
+				logger.Warnw("skipping inaccessible path", "path", path, "error", err)
+				if dirEntry != nil && dirEntry.IsDir() {
+					return fs.SkipDir
+				}
+				return nil
+			}
 			return fmt.Errorf("path: %s is invalid", path)
 		}
 		if dirEntry.IsDir() {
@@ -77,6 +90,10 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		}
 		info, err := dirEntry.Info()
 		if err != nil {
+			if errors.Is(err, fs.ErrPermission) {
+				logger.Warnw("skipping inaccessible file", "path", path, "error", err)
+				return nil
+			}
 			return fmt.Errorf("unknown error on dirEntry.Info while walking path: %w", err)
 		}
 		if !info.ModTime().After(f.lastChecked) {
@@ -85,6 +102,10 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 		blob, err := os.ReadFile(path)
 		if err != nil {
+			if errors.Is(err, fs.ErrPermission) {
+				logger.Warnw("skipping unreadable file", "path", path, "error", err)
+				return nil
+			}
 			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
