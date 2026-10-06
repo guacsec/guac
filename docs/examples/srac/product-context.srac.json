@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "0.2-draft",
+  "documentId": "synthetic-product-context-demo",
+  "generatedAt": "2026-10-06T12:00:00Z",
+  "source": {
+    "uri": "https://example.test/safety/needs.json",
+    "authority": "Synthetic Safety Team"
+  },
+  "assertions": [
+    {
+      "id": "product-a-component-l",
+      "product": {
+        "purl": "pkg:generic/product-a@1.0"
+      },
+      "component": {
+        "purl": "pkg:cargo/component-l@2.0.0"
+      },
+      "safetyRelevance": "safety-related",
+      "classification": "ASIL-B",
+      "rationale": "Synthetic example: the component participates in Product A's safety function.",
+      "status": "reviewed",
+      "reviewer": "Synthetic Safety Authority",
+      "evidence": [
+        {
+          "id": "product-a-test-evidence",
+          "uri": "https://example.test/evidence/product-a-test"
+        }
+      ]
+    },
+    {
+      "id": "product-b-component-l",
+      "product": {
+        "purl": "pkg:generic/product-b@1.0"
+      },
+      "component": {
+        "purl": "pkg:cargo/component-l@2.0.0"
+      },
+      "safetyRelevance": "not-safety-related",
+      "rationale": "Synthetic example: the component is used only by Product B's non-safety diagnostics.",
+      "status": "reviewed",
+      "reviewer": "Synthetic Safety Authority"
+    }
+  ]
+}
