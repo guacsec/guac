@@ -1,9 +1,8 @@
 # Experimental SRAC ingestion
 
-This prototype ingests externally authored Safety Relevance Assertion
-Capability (SRAC) documents as read-only, product-scoped GUAC metadata. It is
-intended to validate the use case in #3256 without committing GUAC to a new
-ontology type.
+This prototype ingests externally authored Safety Relevance Assertion Capability
+(SRAC) documents as read-only, product-scoped GUAC metadata. It is intended to
+validate the use case in #3256 without committing GUAC to a new ontology type.
 
 The safety lifecycle remains authoritative. GUAC validates, preserves, and
 correlates supplied context; it does not infer safety relevance or approve a
@@ -31,11 +30,19 @@ The existing `HasMetadata` query can retrieve all ingested SRAC assertions:
 
 ```graphql
 query SafetyRelevantProducts {
-  HasMetadata(hasMetadataSpec: {key: "srac.safety-relevance"}) {
+  HasMetadata(hasMetadataSpec: { key: "srac.safety-relevance" }) {
     subject {
       ... on Package {
         type
-        namespaces { namespace names { name versions { purl } } }
+        namespaces {
+          namespace
+          names {
+            name
+            versions {
+              purl
+            }
+          }
+        }
       }
     }
     value
@@ -47,5 +54,5 @@ query SafetyRelevantProducts {
 
 Consumers parse `value` and select assertions whose `safetyRelevance` is
 `safety-related` and whose component matches the vulnerability under
-investigation. The example fixture shows the same component in two products
-with different externally authored safety contexts.
+investigation. The example fixture shows the same component in two products with
+different externally authored safety contexts.
