@@ -16,8 +16,12 @@
 package oci
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 	"sync"
@@ -65,6 +69,15 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 
 // wellKnownSuffixes are the well known suffixes for fallback artifacts
 var wellKnownSuffixes = []string{"att", "sbom"}
+
+const (
+	// dockerReferenceTypeAnnotation is set on Image Index descriptors created by
+	// docker buildx when an attestation is stored alongside platform manifests.
+	dockerReferenceTypeAnnotation = "vnd.docker.reference.type"
+	// dockerAttestationManifest is the annotation value used by buildx for
+	// SLSA provenance and other in-toto attestations embedded in an index.
+	dockerAttestationManifest = "attestation-manifest"
+)
 
 type ociCollector struct {
 	collectDataSource datasource.CollectSource
@@ -210,10 +223,27 @@ func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRe
 // Note: fetchOCIArtifacts currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
 // A workaround for this would be to run the collector again with a specific tag without polling and ingest like normal
 func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *regclient.RegClient, image ref.Ref, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+
 	// attempt to request only the headers, avoids Docker Hub rate limits
 	m, err := rc.ManifestHead(ctx, image)
 	if err != nil {
 		return fmt.Errorf("failed retrieving manifest head: %w", err)
+	}
+
+	// Harbor and similar registries have been observed advertising a single
+	// image manifest Content-Type on HEAD while GET still returns the OCI
+	// Image Index that contains docker buildx attestation manifests. Only
+	// follow up with GET for tagged refs so platform-digest walks do not add
+	// extra registry traffic (Docker Hub rate limits).
+	if !m.IsList() && image.Digest == "" {
+		if full, getErr := rc.ManifestGet(ctx, image); getErr == nil {
+			full = maybeIndexFromRaw(full)
+			if full.IsList() {
+				logger.Infof("registry HEAD advertised %s for %s; GET returned an image index", m.GetDescriptor().MediaType, image.CommonName())
+			}
+			m = full
+		}
 	}
 
 	// check if the manifest is a manifest list
@@ -246,6 +276,16 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	if err != nil {
 		return fmt.Errorf("failed retrieving manifest: %w", err)
 	}
+	m = maybeIndexFromRaw(m)
+
+	// Collect attestations embedded in the index (for example docker buildx
+	// --provenance) before walking platform images. Otherwise unknown/unknown
+	// attestation descriptors are treated as platforms, marked collected, and skipped.
+	// Do this before GetPlatformList so provenance is still collected if platform
+	// parsing fails.
+	if err := o.fetchIndexEmbeddedArtifacts(ctx, repo, rc, m, docChannel); err != nil {
+		return err
+	}
 
 	pl, err := manifest.GetPlatformList(m)
 	if err != nil {
@@ -264,6 +304,9 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	defer cancel()
 
 	for _, p := range pl {
+		if isUnknownPlatform(p) {
+			continue
+		}
 		// Increment the WaitGroup counter
 		wg.Add(1)
 		go func(p *platform.Platform) {
@@ -308,6 +351,139 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	return nil
 }
 
+// fetchIndexEmbeddedArtifacts collects SBOM and attestation manifests that are
+// linked from an OCI Image Index rather than the referrers API or fallback tags.
+// docker buildx --provenance stores SLSA provenance this way.
+func (o *ociCollector) fetchIndexEmbeddedArtifacts(ctx context.Context, repo string, rc *regclient.RegClient, m manifest.Manifest, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+
+	indexer, ok := m.(manifest.Indexer)
+	if !ok {
+		return nil
+	}
+
+	descs, err := indexer.GetManifestList()
+	if err != nil {
+		return fmt.Errorf("failed retrieving index manifests: %w", err)
+	}
+
+	for _, desc := range descs {
+		if !isIndexEmbeddedArtifact(desc) {
+			continue
+		}
+
+		descDigest := desc.Digest.String()
+		if o.isDigestCollected(repo, descDigest) {
+			continue
+		}
+
+		logger.Infof("Fetching index-embedded artifact %s with artifact type %s", descDigest, desc.ArtifactType)
+		artifact := fmt.Sprintf("%v@%v", repo, descDigest)
+		// docker buildx --provenance does not set ArtifactType on the index
+		// descriptor. fetchOCIArtifactBlobs falls back to layer media types
+		// (application/vnd.in-toto+json) in that case. Skip unknown layers so
+		// unknown/unknown platform entries that are not attestations are not ingested.
+		if err := fetchOCIArtifactBlobs(ctx, rc, artifact, desc.ArtifactType, docChannel, true); err != nil {
+			return fmt.Errorf("failed retrieving index-embedded artifact blobs: %w", err)
+		}
+		o.markDigestAsCollected(repo, descDigest)
+	}
+
+	return nil
+}
+
+func isIndexEmbeddedArtifact(desc descriptor.Descriptor) bool {
+	// docker buildx --provenance writes attestation-manifest on the index
+	// descriptor and omits ArtifactType. Referrers still require a well-known
+	// ArtifactType from wellKnownOCIArtifactTypes.
+	if desc.Annotations != nil && desc.Annotations[dockerReferenceTypeAnnotation] == dockerAttestationManifest {
+		return true
+	}
+	if _, ok := wellKnownOCIArtifactTypes[canonicalArtifactMediaType(desc.ArtifactType)]; ok {
+		return true
+	}
+	// Some registries strip the buildx annotation but leave the attestation
+	// manifest in the index as platform unknown/unknown. Inspect those
+	// manifests and skip non-attestation layers in fetchOCIArtifactBlobs.
+	return isUnknownPlatform(desc.Platform)
+}
+
+func isUnknownPlatform(p *platform.Platform) bool {
+	return p != nil && p.OS == "unknown" && p.Architecture == "unknown"
+}
+
+// maybeIndexFromRaw re-parses a manifest from its raw body when a registry
+// Content-Type claims a single image while the body is an OCI Image Index.
+// Harbor has been observed rewriting both HEAD and GET Content-Type this way.
+func maybeIndexFromRaw(m manifest.Manifest) manifest.Manifest {
+	if m == nil || m.IsList() {
+		return m
+	}
+	raw, err := m.RawBody()
+	if err != nil || !looksLikeIndex(raw) {
+		return m
+	}
+	remade, err := manifest.New(manifest.WithRaw(raw))
+	if err != nil || !remade.IsList() {
+		return m
+	}
+	return remade
+}
+
+func looksLikeIndex(raw []byte) bool {
+	var probe struct {
+		Manifests []json.RawMessage `json:"manifests"`
+	}
+	if err := json.Unmarshal(raw, &probe); err != nil {
+		return false
+	}
+	return len(probe.Manifests) > 0
+}
+
+func documentTypeAndFormat(mediaType string) (processor.DocumentType, processor.FormatType) {
+	mediaType = canonicalArtifactMediaType(mediaType)
+	if mediaType == "" {
+		return processor.DocumentUnknown, processor.FormatUnknown
+	}
+	if wellKnown, ok := wellKnownOCIArtifactTypes[mediaType]; ok {
+		return wellKnown.documentType, wellKnown.formatType
+	}
+	return processor.DocumentUnknown, processor.FormatUnknown
+}
+
+// canonicalArtifactMediaType strips OCI compression suffixes and parameters so
+// docker buildx layers advertised as application/vnd.in-toto+json+gzip still
+// map to the well-known in-toto document type.
+func canonicalArtifactMediaType(mediaType string) string {
+	if mediaType == "" {
+		return ""
+	}
+	if i := strings.IndexByte(mediaType, ';'); i >= 0 {
+		mediaType = strings.TrimSpace(mediaType[:i])
+	}
+	return strings.TrimSuffix(mediaType, "+gzip")
+}
+
+func maybeGunzip(b []byte) ([]byte, error) {
+	if len(b) < 2 || b[0] != 0x1f || b[1] != 0x8b {
+		return b, nil
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(b))
+	if err != nil {
+		// Not a valid gzip payload; keep the original bytes.
+		return b, nil
+	}
+	out, err := io.ReadAll(zr)
+	closeErr := zr.Close()
+	if err != nil {
+		return nil, err
+	}
+	if closeErr != nil {
+		return nil, closeErr
+	}
+	return out, nil
+}
+
 // fetchFallbackArtifacts fetches fallback artifacts for the given image manifest and sends them to the docChannel.
 // It checks for fallback artifacts by appending well-known suffixes to the image digest and checking if the resulting
 // digest+suffix combination has already been collected. If not, it fetches the artifact blobs from the registry and
@@ -323,7 +499,7 @@ func (o *ociCollector) fetchFallbackArtifacts(ctx context.Context, repo string, 
 		// check to see if the digest + suffix has already been collected
 		if !o.isDigestCollected(repo, digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
-			err := fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel)
+			err := fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel, false)
 			if err != nil {
 				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
@@ -366,7 +542,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 				if !o.isDigestCollected(repo, referrerDescDigest) {
 					logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
 					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
-					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
+					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel, false)
 					if e != nil {
 						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
 						cancel()
@@ -407,6 +583,7 @@ func fetchOCIArtifactBlobs(
 	artifact,
 	artifactType string,
 	docChannel chan<- *processor.Document,
+	skipUnknownLayers bool,
 ) error {
 	logger := logging.FromContext(ctx)
 	r, err := ref.New(artifact)
@@ -435,6 +612,20 @@ func fetchOCIArtifactBlobs(
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
+
+		docType, docFormat := documentTypeAndFormat(artifactType)
+		// Fallback .att/.sbom tags pass artifactType "unknown" and must keep
+		// DocumentUnknown so existing guesser-based ingest is unchanged.
+		// docker buildx index descriptors omit ArtifactType or set a non
+		// well-known type; classify those blobs from the layer media type.
+		if artifactType != "unknown" && docType == processor.DocumentUnknown {
+			docType, docFormat = documentTypeAndFormat(layers[i].MediaType)
+		}
+		// Skip unknown/unknown platform image layers before downloading them.
+		if skipUnknownLayers && docType == processor.DocumentUnknown {
+			continue
+		}
+
 		blob, err := rc.BlobGet(ctx, r, layers[i])
 		if err != nil {
 			return fmt.Errorf("failed pulling layer %d: %w", i, err)
@@ -447,16 +638,9 @@ func fetchOCIArtifactBlobs(
 		if closeErr != nil {
 			return fmt.Errorf("failed closing layer %d: %w", i, err)
 		}
-
-		var docType = processor.DocumentUnknown
-		var docFormat = processor.FormatUnknown
-
-		// check if artifactType is in wellKnownOCIArtifactTypes
-		if artifactType != "" {
-			if wellKnownArtifactType, ok := wellKnownOCIArtifactTypes[artifactType]; ok {
-				docType = wellKnownArtifactType.documentType
-				docFormat = wellKnownArtifactType.formatType
-			}
+		btr1, err = maybeGunzip(btr1)
+		if err != nil {
+			return fmt.Errorf("failed decompressing layer %d: %w", i, err)
 		}
 
 		doc := &processor.Document{
