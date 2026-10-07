@@ -33,6 +33,7 @@ const (
 	GetPackageDeps
 	GetArtifactVulns
 	GetArtifactDeps
+	ListSboms
 )
 
 // IsErrorResponse checks if the response status code indicates an error.
@@ -97,6 +98,12 @@ func createBadRequestResponse(endpointType EndpointType, message string) interfa
 				Message: message,
 			},
 		}
+	case ListSboms:
+		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -134,6 +141,12 @@ func createInternalServerErrorResponse(endpointType EndpointType, message string
 				Message: message,
 			},
 		}
+	case ListSboms:
+		return gen.ListSboms500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -167,6 +180,12 @@ func createBadGatewayResponse(endpointType EndpointType, message string) interfa
 		}
 	case GetArtifactVulns:
 		return gen.GetArtifactVulns502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	case ListSboms:
+		return gen.ListSboms502JSONResponse{
 			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
 				Message: message,
 			},
