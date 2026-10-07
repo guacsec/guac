@@ -1816,6 +1816,84 @@ func Test_spdxParser(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "SPDX with SECURITY external references only ingests CPEs as cpe metadata",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{}, "HasSBOM"),
+				cmpopts.IgnoreFields(generated.HasMetadataInputSpec{}, "Timestamp"),
+			},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+		"spdxVersion": "SPDX-2.3",
+		"SPDXID":"SPDXRef-DOCUMENT",
+		"name":"example",
+		"creationInfo": { "created": "2023-01-01T01:01:01.00Z" },
+		"packages":[
+			{
+				"SPDXID":"SPDXRef-Package-example",
+				"name":"example",
+				"versionInfo":"1.0.0",
+				"externalRefs":[
+					{
+						"referenceCategory":"PACKAGE-MANAGER",
+						"referenceLocator":"pkg:npm/example@1.0.0",
+						"referenceType":"purl"
+					},
+					{
+						"referenceCategory":"SECURITY",
+						"referenceLocator":"cpe:2.3:a:example:example:1.0.0:*:*:*:*:*:*:*",
+						"referenceType":"cpe23Type"
+					},
+					{
+						"referenceCategory":"SECURITY",
+						"referenceLocator":"https://nvd.nist.gov/vuln/detail/CVE-2020-28498",
+						"referenceType":"advisory"
+					},
+					{
+						"referenceCategory":"SECURITY",
+						"referenceLocator":"https://github.com/example/example/commit/abc123",
+						"referenceType":"fix"
+					}
+				]
+			}
+		],
+		"relationships":[
+			{
+				"spdxElementId":"SPDXRef-DOCUMENT",
+				"relationshipType":"DESCRIBES",
+				"relatedSpdxElement":"SPDXRef-Package-example"
+			}
+		]
+		}
+		`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:npm/example@1.0.0")},
+				},
+				HasMetadata: []assembler.HasMetadataIngest{
+					{
+						Pkg:          pUrlToPkgDiscardError("pkg:npm/example@1.0.0"),
+						PkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata: &generated.HasMetadataInputSpec{
+							Key:           "cpe",
+							Value:         "cpe:2.3:a:example:example:1.0.0:*:*:*:*:*:*:*",
+							Justification: "spdx cpe external reference",
+							Origin:        "GUAC SPDX",
+							Collector:     "GUAC",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
