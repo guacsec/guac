@@ -226,3 +226,31 @@ func TestRetrieveArtifacts_SkipsUnreadableEntries(t *testing.T) {
 		t.Errorf("collected blobs = %v, want %v", got, want)
 	}
 }
+
+func TestRetrieveArtifacts_UnreadableRootReturnsError(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("file permissions are not enforced the same way on windows")
+	}
+
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "a.json"), []byte("a"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(root, 0); err != nil {
+		t.Fatal(err)
+	}
+	// Restore so t.TempDir cleanup can remove everything.
+	t.Cleanup(func() { _ = os.Chmod(root, 0o755) })
+
+	// Permissions are not enforced for root or some filesystems; skip then.
+	if _, err := os.ReadDir(root); err == nil {
+		t.Skip("permissions cannot be enforced in this environment")
+	}
+
+	fc := NewFileCollector(context.Background(), root, false, 0)
+	docChan := make(chan *processor.Document, 10)
+
+	if err := fc.RetrieveArtifacts(context.Background(), docChan); err == nil {
+		t.Fatal("RetrieveArtifacts() = nil, want error for unreadable root")
+	}
+}

@@ -74,9 +74,9 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		// NOTE: Explicitly rethrowing new errors if a particular directory has an error.
 		// If we rethrow the error it kills the whole walk. Still useful to make it explicit that we ran into an error.
 		if err != nil {
-			// Inaccessible paths (EACCES/EPERM) are skipped so one unreadable entry
+			// Inaccessible paths below the root (EACCES/EPERM) are skipped so one unreadable entry
 			// does not abort a large ingestion.
-			if errors.Is(err, fs.ErrPermission) {
+			if errors.Is(err, fs.ErrPermission) && path != f.path {
 				logger.Warnw("skipping inaccessible path", "path", path, "error", err)
 				if dirEntry != nil && dirEntry.IsDir() {
 					return fs.SkipDir
@@ -90,7 +90,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		}
 		info, err := dirEntry.Info()
 		if err != nil {
-			if errors.Is(err, fs.ErrPermission) {
+			if errors.Is(err, fs.ErrPermission) && path != f.path {
 				logger.Warnw("skipping inaccessible file", "path", path, "error", err)
 				return nil
 			}
@@ -102,7 +102,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 		blob, err := os.ReadFile(path)
 		if err != nil {
-			if errors.Is(err, fs.ErrPermission) {
+			if errors.Is(err, fs.ErrPermission) && path != f.path {
 				logger.Warnw("skipping unreadable file", "path", path, "error", err)
 				return nil
 			}
