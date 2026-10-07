@@ -22,11 +22,15 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -36,6 +40,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 func TestClearlyDefined(t *testing.T) {
@@ -256,4 +261,40 @@ func TestCDCertifierRateLimiter(t *testing.T) {
 	logOutput := logBuffer.String()
 
 	assert.Contains(t, logOutput, "Rate limit exceeded")
+}
+
+type failingTransport struct{}
+
+func (failingTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, errors.New("boom")
+}
+
+func TestCDCertifier_RecordsErrorMetric(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	ctx = metrics.WithMetrics(ctx, "cd_test")
+	collector := metrics.FromContext(ctx, "cd_test")
+
+	counter, err := collector.RegisterCounter(ctx, CDQueryErrorsCounter)
+	require.NoError(t, err)
+
+	cert := &cdCertifier{
+		cdHTTPClient: &http.Client{Transport: failingTransport{}},
+		Metrics:      collector,
+	}
+
+	rootComponent := []*root_package.PackageNode{
+		{Purl: "pkg:npm/lodash@4.17.21"},
+	}
+	docChan := make(chan *processor.Document, 1)
+
+	err = cert.CertifyComponent(ctx, rootComponent, docChan)
+	require.Error(t, err)
+
+	counterVec, ok := counter.(prometheus.Collector)
+	require.True(t, ok, "counter should implement prometheus.Collector")
+	assert.NoError(t, testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_cd_test_clearlydefined_query_errors Counter for cd_test_clearlydefined_query_errors
+		# TYPE guac_cd_test_clearlydefined_query_errors counter
+		guac_cd_test_clearlydefined_query_errors 1
+	`)))
 }

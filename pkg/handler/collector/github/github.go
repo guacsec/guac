@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/internal/client"
@@ -29,12 +30,18 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 const (
 	GithubCollector = "GithubCollector"
 	Latest          = ""
+
+	// FetchErrorsCounter tracks failed GitHub release, asset, and workflow artifact fetches.
+	FetchErrorsCounter = "github_fetch_errors"
 )
+
+var registerMetricsOnce sync.Once
 
 func defaultAssetSuffixes() []string {
 	return []string{".jsonl", ".json"}
@@ -56,6 +63,7 @@ type githubCollector struct {
 	owner             string
 	repo              string
 	lastIngestedRun   int64
+	Metrics           metrics.MetricCollector
 }
 
 type Config struct {
@@ -94,6 +102,24 @@ func NewGithubCollector(opts ...Opt) (*githubCollector, error) {
 		return nil, fmt.Errorf("no repos and releases to collect nor any data source for future subscriptions")
 	}
 	return g, nil
+}
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(g *githubCollector) {
+		g.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, FetchErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for github fetch errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 func WithPolling(interval time.Duration) Opt {
@@ -260,6 +286,7 @@ func (g *githubCollector) fetchAssets(ctx context.Context, owner string, repo st
 		}
 		if err != nil {
 			logger.Warnf("unable to fetch release: %v", err)
+			g.recordFetchError(ctx)
 			continue
 		}
 		releases = append(releases, *release)
@@ -280,6 +307,7 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 			content, err := g.client.GetReleaseAsset(asset)
 			if err != nil {
 				logger.Warnf("unable to download asset: %v", err)
+				g.recordFetchError(ctx)
 				continue
 			}
 			doc := &processor.Document{
@@ -306,6 +334,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 	workflows, err := g.client.GetWorkflow(ctx, g.owner, g.repo, g.workflowFileName)
 	if err != nil {
 		logger.Warnf("unable to fetch workflows: %v", err)
+		g.recordFetchError(ctx)
 		return
 	}
 
@@ -314,6 +343,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 		run, err := g.client.GetLatestWorkflowRun(ctx, g.owner, g.repo, workflow.Id)
 		if err != nil {
 			logger.Errorf("unable to fetch workflow runs for workflow %v: %v", workflow.Id, err)
+			g.recordFetchError(ctx)
 			continue
 		}
 		if run == nil {
@@ -329,6 +359,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, g.owner, g.repo, g.sbomName, run.RunId)
 		if err != nil {
 			logger.Errorf("unable to fetch workflow run artifacts for run %v: %v", run.RunId, err)
+			g.recordFetchError(ctx)
 			continue
 		}
 
@@ -444,4 +475,13 @@ func ParseGitDataSource(source datasource.Source) (*client.Repo, TagOrLatest, er
 		Repo:  m.GetName(),
 	}
 	return r, tol, nil
+}
+
+func (g *githubCollector) recordFetchError(ctx context.Context) {
+	if g.Metrics == nil {
+		return
+	}
+	if err := g.Metrics.AddCounter(ctx, FetchErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record github fetch error metric: %v", err)
+	}
 }

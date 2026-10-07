@@ -109,7 +109,7 @@ var cdCmd = &cobra.Command{
 			}()
 		}
 
-		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
+		if err := certify.RegisterCertifier(func() certifier.Certifier { return clearlydefined.NewClearlyDefinedCertifier() }, certifier.CertifierClearlyDefined); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 

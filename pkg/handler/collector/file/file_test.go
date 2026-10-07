@@ -23,12 +23,16 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
@@ -252,5 +256,47 @@ func TestRetrieveArtifacts_UnreadableRootReturnsError(t *testing.T) {
 
 	if err := fc.RetrieveArtifacts(context.Background(), docChan); err == nil {
 		t.Fatal("RetrieveArtifacts() = nil, want error for unreadable root")
+	}
+}
+
+func TestFileCollector_RecordsReadErrorMetric(t *testing.T) {
+	if runtime.GOOS == "windows" || os.Geteuid() == 0 {
+		t.Skip("relies on POSIX file permissions being enforced for a non-root user")
+	}
+
+	dir := t.TempDir()
+	unreadable := filepath.Join(dir, "unreadable.json")
+	if err := os.WriteFile(unreadable, []byte("test document content"), 0o644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
+	if err := os.Chmod(unreadable, 0o000); err != nil {
+		t.Fatalf("failed to chmod test file: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(unreadable, 0o644) })
+
+	ctx := metrics.WithMetrics(context.Background(), "file_test")
+	m := metrics.FromContext(ctx, "file_test")
+	counter, err := m.RegisterCounter(ctx, FileReadErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	fc := NewFileCollector(ctx, dir, false, time.Second, WithMetrics(m))
+	docChan := make(chan *processor.Document, 1)
+	// Unreadable files below the root are skipped, not fatal, but still counted.
+	if err := fc.RetrieveArtifacts(ctx, docChan); err != nil {
+		t.Fatalf("RetrieveArtifacts() aborted on unreadable file: %v", err)
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_file_test_file_read_errors Counter for file_test_file_read_errors
+		# TYPE guac_file_test_file_read_errors counter
+		guac_file_test_file_read_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
 	}
 }
