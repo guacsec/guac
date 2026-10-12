@@ -23,3 +23,6 @@ var Err502 error = errors.New("error querying the graphql server. The error mess
 // Err500 is used to surface generic internal errors, such as an unexpected response
 // from Graphql server.
 var Err500 error = errors.New("internal error. The error message should have been logged")
+
+// Err404 is used when a resource addressed by an identifier does not exist.
+var Err404 error = errors.New("the requested resource does not exist")

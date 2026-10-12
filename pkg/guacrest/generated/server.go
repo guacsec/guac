@@ -41,6 +41,9 @@ type ServerInterface interface {
 	// List SBOMs in the graph, optionally filtered by package
 	// (GET /v0/sbom)
 	ListSboms(w http.ResponseWriter, r *http.Request, params ListSbomsParams)
+	// Get a single SBOM by its ID
+	// (GET /v0/sbom/{id})
+	GetSbom(w http.ResponseWriter, r *http.Request, id string)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -92,6 +95,12 @@ func (_ Unimplemented) GetPackageVulns(w http.ResponseWriter, r *http.Request, p
 // List SBOMs in the graph, optionally filtered by package
 // (GET /v0/sbom)
 func (_ Unimplemented) ListSboms(w http.ResponseWriter, r *http.Request, params ListSbomsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get a single SBOM by its ID
+// (GET /v0/sbom/{id})
+func (_ Unimplemented) GetSbom(w http.ResponseWriter, r *http.Request, id string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -404,6 +413,32 @@ func (siw *ServerInterfaceWrapper) ListSboms(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
+// GetSbom operation middleware
+func (siw *ServerInterfaceWrapper) GetSbom(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSbom(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -541,6 +576,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v0/sbom", wrapper.ListSboms)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v0/sbom/{id}", wrapper.GetSbom)
+	})
 
 	return r
 }
@@ -551,6 +589,8 @@ type BadRequestJSONResponse Error
 
 type InternalServerErrorJSONResponse Error
 
+type NotFoundJSONResponse Error
+
 type PackageNameListJSONResponse []PackageName
 
 type PurlListJSONResponse struct {
@@ -558,6 +598,8 @@ type PurlListJSONResponse struct {
 	PaginationInfo PaginationInfo `json:"PaginationInfo"`
 	PurlList       []Purl         `json:"PurlList"`
 }
+
+type SbomJSONResponse Sbom
 
 type SbomListJSONResponse struct {
 	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
@@ -1054,6 +1096,86 @@ func (response ListSboms502JSONResponse) VisitListSbomsResponse(w http.ResponseW
 	return err
 }
 
+type GetSbomRequestObject struct {
+	Id string `json:"id"`
+}
+
+type GetSbomResponseObject interface {
+	VisitGetSbomResponse(w http.ResponseWriter) error
+}
+
+type GetSbom200JSONResponse struct{ SbomJSONResponse }
+
+func (response GetSbom200JSONResponse) VisitGetSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbom400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response GetSbom400JSONResponse) VisitGetSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbom404JSONResponse struct{ NotFoundJSONResponse }
+
+func (response GetSbom404JSONResponse) VisitGetSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbom500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetSbom500JSONResponse) VisitGetSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbom502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response GetSbom502JSONResponse) VisitGetSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Identify the most important dependencies
@@ -1080,6 +1202,9 @@ type StrictServerInterface interface {
 	// List SBOMs in the graph, optionally filtered by package
 	// (GET /v0/sbom)
 	ListSboms(ctx context.Context, request ListSbomsRequestObject) (ListSbomsResponseObject, error)
+	// Get a single SBOM by its ID
+	// (GET /v0/sbom/{id})
+	GetSbom(ctx context.Context, request GetSbomRequestObject) (GetSbomResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1314,6 +1439,32 @@ func (sh *strictHandler) ListSboms(w http.ResponseWriter, r *http.Request, param
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ListSbomsResponseObject); ok {
 		if err := validResponse.VisitListSbomsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSbom operation middleware
+func (sh *strictHandler) GetSbom(w http.ResponseWriter, r *http.Request, id string) {
+	var request GetSbomRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSbom(ctx, request.(GetSbomRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSbom")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSbomResponseObject); ok {
+		if err := validResponse.VisitGetSbomResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
