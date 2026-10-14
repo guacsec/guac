@@ -53,7 +53,7 @@ require (
 	github.com/ossf/scorecard/v5 v5.4.0
 	github.com/package-url/packageurl-go v0.1.7
 	github.com/pandatix/go-cvss v0.6.2
-	github.com/pitabwire/natspubsub v0.8.4
+	github.com/pitabwire/natspubsub v0.8.5
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.24.1
 	github.com/redis/go-redis/v9 v9.22.0
