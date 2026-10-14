@@ -84,7 +84,7 @@ require (
 	gocloud.dev/pubsub/rabbitpubsub v0.46.0
 	golang.org/x/exp v0.0.0-20260603202125-055de637280b
 	golang.org/x/mod v0.42.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.37.0
 	golang.org/x/time v0.16.0
 	google.golang.org/api v0.293.0
 	google.golang.org/grpc v1.83.2
