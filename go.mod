@@ -38,12 +38,12 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/json-iterator/go v1.1.12
-	github.com/klauspost/compress v1.20.0
+	github.com/klauspost/compress v1.20.1
 	github.com/kubescape/storage v0.2.0
 	github.com/lib/pq v1.12.3
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats-server/v2 v2.14.3
+	github.com/nats-io/nats-server/v2 v2.15.1
 	github.com/nats-io/nats.go v1.54.0
 	github.com/neo4j/neo4j-go-driver/v5 v5.28.5
 	github.com/oapi-codegen/oapi-codegen/v2 v2.7.2
@@ -85,7 +85,7 @@ require (
 	golang.org/x/exp v0.0.0-20260603202125-055de637280b
 	golang.org/x/mod v0.41.0
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/time v0.15.0
+	golang.org/x/time v0.16.0
 	google.golang.org/api v0.293.0
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
@@ -152,7 +152,7 @@ require (
 	github.com/anchore/packageurl-go v0.1.1-0.20250220190351-d62adb6e1115 // indirect
 	github.com/anchore/stereoscope v0.1.22 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
-	github.com/antithesishq/antithesis-sdk-go v0.7.0-default-no-op // indirect
+	github.com/antithesishq/antithesis-sdk-go v0.8.0-default-no-op // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/arangodb/go-velocypack v0.0.0-20200318135517-5af53c29c67e // indirect
