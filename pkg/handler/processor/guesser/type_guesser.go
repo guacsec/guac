@@ -28,6 +28,7 @@ func init() {
 	_ = RegisterDocumentTypeGuesser(&scorecardTypeGuesser{}, "scorecard")
 	_ = RegisterDocumentTypeGuesser(&cycloneDXTypeGuesser{}, "cyclonedx")
 	_ = RegisterDocumentTypeGuesser(&openVexTypeGuesser{}, "openvex")
+	_ = RegisterDocumentTypeGuesser(&sracTypeGuesser{}, "srac")
 	_ = RegisterDocumentTypeGuesser(&depsDevTypeGuesser{}, "deps.dev")
 	_ = RegisterDocumentTypeGuesser(&csafTypeGuesser{}, "csaf")
 }
