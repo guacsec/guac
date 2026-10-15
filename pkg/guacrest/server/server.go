@@ -327,3 +327,22 @@ func (s *DefaultServer) ListSboms(ctx context.Context, request gen.ListSbomsRequ
 		},
 	}, nil
 }
+
+func (s *DefaultServer) GetSbom(ctx context.Context, request gen.GetSbomRequestObject) (gen.GetSbomResponseObject, error) {
+	sbom, err := RetrieveSbom(ctx, s.gqlClient, request.Id)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetSbom).(gen.GetSbomResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.GetSbom400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return gen.GetSbom200JSONResponse{
+		SbomJSONResponse: gen.SbomJSONResponse(*sbom),
+	}, nil
+}
