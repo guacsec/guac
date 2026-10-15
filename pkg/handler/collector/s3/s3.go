@@ -26,14 +26,41 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 const (
 	S3CollectorType = "S3CollectorType"
+
+	// ItemRetrievalErrorsCounter tracks failed list/download/encoding calls against the bucket.
+	ItemRetrievalErrorsCounter = "s3_item_retrieval_errors"
 )
 
+var registerMetricsOnce sync.Once
+
 type S3Collector struct {
-	config S3CollectorConfig
+	config  S3CollectorConfig
+	Metrics metrics.MetricCollector
+}
+
+type Opt func(*S3Collector)
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(s *S3Collector) {
+		s.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, ItemRetrievalErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for s3 item retrieval errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 type S3CollectorConfig struct {
@@ -50,9 +77,12 @@ type S3CollectorConfig struct {
 	Poll                    bool
 }
 
-func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
+func NewS3Collector(cfg S3CollectorConfig, opts ...Opt) *S3Collector {
 	s3collector := &S3Collector{
 		config: cfg,
+	}
+	for _, opt := range opts {
+		opt(s3collector)
 	}
 	return s3collector
 }
@@ -76,12 +106,14 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 		blob, err := downloader.DownloadFile(ctx, s.config.S3Bucket, item)
 		if err != nil {
 			logger.Errorf("could not download item %v: %v", item, err)
+			s.recordRetrievalError(ctx)
 			return err
 		}
 
 		enc, err := downloader.GetEncoding(ctx, s.config.S3Bucket, item)
 		if err != nil {
 			logger.Errorf("could not get encoding for item %v: %v", item, err)
+			s.recordRetrievalError(ctx)
 			return err
 		}
 
@@ -104,6 +136,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 			files, t, err := downloader.ListFiles(ctx, s.config.S3Bucket, s.config.S3Path, token, MaxKeys)
 			if err != nil {
 				logger.Errorf("could not list files %v: %v", item, err)
+				s.recordRetrievalError(ctx)
 				return err
 			}
 			token = t
@@ -112,12 +145,14 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 				blob, err := downloader.DownloadFile(ctx, s.config.S3Bucket, item)
 				if err != nil {
 					logger.Errorf("could not download item %v, skipping: %v", item, err)
+					s.recordRetrievalError(ctx)
 					continue
 				}
 
 				enc, err := downloader.GetEncoding(ctx, s.config.S3Bucket, item)
 				if err != nil {
 					logger.Errorf("could not get encoding for item %v, skipping: %v", item, err)
+					s.recordRetrievalError(ctx)
 					continue
 				}
 
@@ -203,12 +238,14 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 					blob, err := downloader.DownloadFile(cncCtx, bucketName, item)
 					if err != nil {
 						logger.Errorf("could not download item %v, skipping: %v", item, err)
+						s.recordRetrievalError(cncCtx)
 						continue
 					}
 
 					enc, err := downloader.GetEncoding(cncCtx, bucketName, item)
 					if err != nil {
 						logger.Errorf("could not get encoding for item %v, skipping: %v", item, err)
+						s.recordRetrievalError(cncCtx)
 						continue
 					}
 
@@ -271,4 +308,13 @@ func getDownloader(s S3Collector) bucket.Bucket {
 
 func (s *S3Collector) Type() string {
 	return S3CollectorType
+}
+
+func (s *S3Collector) recordRetrievalError(ctx context.Context) {
+	if s.Metrics == nil {
+		return
+	}
+	if err := s.Metrics.AddCounter(ctx, ItemRetrievalErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record s3 item retrieval error metric: %v", err)
+	}
 }

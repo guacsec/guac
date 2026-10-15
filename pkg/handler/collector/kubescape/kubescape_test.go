@@ -17,13 +17,20 @@ package kubescape
 
 import (
 	"context"
+	"errors"
 	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/anchore/syft/syft/sbom"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
 	scv1beta1 "github.com/kubescape/storage/pkg/apis/softwarecomposition/v1beta1"
 	kssc "github.com/kubescape/storage/pkg/generated/clientset/versioned"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
@@ -85,5 +92,50 @@ func TestListSBOMs(t *testing.T) {
 	}
 	if getCalledName != "sbom1" {
 		t.Errorf("Expected get to be called with sbom name 'sbom1', Got: %q", getCalledName)
+	}
+}
+
+func TestWatch_RecordsSBOMErrorMetric(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"type":"ADDED","object":{"apiVersion":"spdx.softwarecomposition.kubescape.io/v1beta1","kind":"SBOMSPDXv2p3","metadata":{"name":"sbom1"}}}` + "\n"))
+	}))
+	defer server.Close()
+
+	sc, err := kssc.NewForConfig(&rest.Config{Host: server.URL})
+	if err != nil {
+		t.Fatalf("failed to create clientset: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	get = func(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3, error) {
+		cancel()
+		return nil, errors.New("get failed")
+	}
+
+	ctx = metrics.WithMetrics(ctx, "kubescape_test")
+	mc := metrics.FromContext(ctx, "kubescape_test")
+	counter, err := mc.RegisterCounter(ctx, SBOMErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	c := New(Config{Watch: true, Namespace: "ns"}, WithMetrics(mc))
+	dc := make(chan *processor.Document, 1)
+	if err := c.watch(ctx, dc, sc); err != nil {
+		t.Fatalf("watch() error = %v", err)
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_kubescape_test_kubescape_sbom_errors Counter for kubescape_test_kubescape_sbom_errors
+		# TYPE guac_kubescape_test_kubescape_sbom_errors counter
+		guac_kubescape_test_kubescape_sbom_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
 	}
 }

@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -28,6 +29,9 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 // Test message
@@ -226,5 +230,51 @@ func assertSource(t *testing.T, wantSource string, doc *processor.Document) {
 	const wantCollector string = "S3CollectorType"
 	if doc.SourceInformation.Collector != wantCollector {
 		t.Errorf("want Collector = %s, got = %s", wantCollector, doc.SourceInformation.Collector)
+	}
+}
+
+type failingBucket struct {
+	TestBucket
+}
+
+func (failingBucket) DownloadFile(context.Context, string, string) ([]byte, error) {
+	return nil, errors.New("download failed")
+}
+
+type failingBucketBuilder struct{}
+
+func (failingBucketBuilder) GetDownloader(string, string) bucket.Bucket {
+	return &failingBucket{}
+}
+
+func TestS3Collector_RecordsItemErrorMetric(t *testing.T) {
+	ctx := metrics.WithMetrics(context.Background(), "s3_test")
+	m := metrics.FromContext(ctx, "s3_test")
+	counter, err := m.RegisterCounter(ctx, ItemRetrievalErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	s3Collector := NewS3Collector(S3CollectorConfig{
+		BucketBuilder: failingBucketBuilder{},
+		S3Bucket:      "bucket",
+		S3Item:        "item",
+	}, WithMetrics(m))
+
+	docChan := make(chan *processor.Document, 1)
+	if err := s3Collector.RetrieveArtifacts(ctx, docChan); err == nil {
+		t.Fatal("expected RetrieveArtifacts to fail when the download fails")
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_s3_test_s3_item_retrieval_errors Counter for s3_test_s3_item_retrieval_errors
+		# TYPE guac_s3_test_s3_item_retrieval_errors counter
+		guac_s3_test_s3_item_retrieval_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
 	}
 }

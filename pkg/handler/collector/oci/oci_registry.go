@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/types/errs"
@@ -41,6 +42,14 @@ type ociRegistryCollector struct {
 	interval          time.Duration
 	// rcOpts are the regclient options
 	rcOpts []regclient.Opt
+	// Metrics is optional; when nil, no metrics are recorded.
+	Metrics metrics.MetricCollector
+}
+
+// WithMetrics wires m into the collector and returns it. Call RegisterMetrics once first.
+func (o *ociRegistryCollector) WithMetrics(m metrics.MetricCollector) *ociRegistryCollector {
+	o.Metrics = m
+	return o
 }
 
 // NewOCIRegistryCollector initializes the oci registry collector that will collect from all
@@ -97,6 +106,7 @@ func (o *ociRegistryCollector) retrieveRegistryArtifacts(ctx context.Context, do
 		repos, err := o.listRepositories(ctx, rc, registry)
 		if err != nil {
 			logger.Errorf("failed to list repositories for registry %s: %v", registry, err)
+			recordArtifactError(ctx, o.Metrics)
 			continue
 		}
 
@@ -119,6 +129,7 @@ func (o *ociRegistryCollector) retrieveRegistryArtifacts(ctx context.Context, do
 		ociCollector := NewOCICollector(ctx, repoDataSource, false, o.interval, o.rcOpts...)
 		if err := ociCollector.RetrieveArtifacts(ctx, docChannel); err != nil {
 			logger.Errorf("failed to retrieve artifacts from repository %s: %v", registry, err)
+			recordArtifactError(ctx, o.Metrics)
 			continue
 		}
 

@@ -18,7 +18,9 @@ package gcs
 import (
 	"context"
 	"errors"
+	"io"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,6 +29,9 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 func TestGCS_RetrieveArtifacts(t *testing.T) {
@@ -245,5 +250,56 @@ func TestNewGCSCollector(t *testing.T) {
 				t.Errorf("NewGCSCollector() = %v, want %v", g, tt.want)
 			}
 		})
+	}
+}
+
+// failingReader lists real objects but fails every object read.
+type failingReader struct {
+	gcsReader
+}
+
+func (failingReader) getReader(context.Context, string) (io.ReadCloser, error) {
+	return nil, errors.New("read failed")
+}
+
+func TestGCS_RecordsObjectErrorMetric(t *testing.T) {
+	const bucketName = "some-bucket"
+	server := fakestorage.NewServer([]fakestorage.Object{{
+		ObjectAttrs: fakestorage.ObjectAttrs{BucketName: bucketName, Name: "file.txt"},
+		Content:     []byte("content"),
+	}})
+	defer server.Stop()
+
+	ctx := metrics.WithMetrics(context.Background(), "gcs_test")
+	m := metrics.FromContext(ctx, "gcs_test")
+	counter, err := m.RegisterCounter(ctx, ObjectRetrievalErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	g, err := NewGCSCollector(WithBucket(bucketName), WithClient(server.Client()), WithMetrics(m))
+	if err != nil {
+		t.Fatalf("failed to create collector: %v", err)
+	}
+	g.reader = failingReader{&reader{client: server.Client(), bucket: bucketName}}
+
+	docChan := make(chan *processor.Document, 1)
+	if err := g.RetrieveArtifacts(ctx, docChan); err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+	if len(docChan) != 0 {
+		t.Error("expected no documents from a failing object read")
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_gcs_test_gcs_object_retrieval_errors Counter for gcs_test_gcs_object_retrieval_errors
+		# TYPE guac_gcs_test_gcs_object_retrieval_errors counter
+		guac_gcs_test_gcs_object_retrieval_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
 	}
 }

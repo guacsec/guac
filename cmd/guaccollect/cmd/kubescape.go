@@ -36,7 +36,9 @@ type kubescapeOptions struct {
 	csubClientOptions csub_client.CsubClientOptions
 	collConfig        kubescape.Config
 	// enable/disable message publish to queue
-	publishToQueue bool
+	publishToQueue   bool
+	enablePrometheus bool
+	prometheusPort   int
 }
 
 var kubescapeCmd = &cobra.Command{
@@ -65,7 +67,13 @@ $ guaccollect kubescape --service-poll=false --kubescape-filtered --kubescape-na
 			os.Exit(1)
 		}
 
-		c := kubescape.New(opts.collConfig)
+		var collectorOpts []kubescape.Opt
+		if opts.enablePrometheus {
+			metricsCollector := startMetricsServer(ctx, "kubescape", opts.prometheusPort, kubescape.RegisterMetrics)
+			collectorOpts = append(collectorOpts, kubescape.WithMetrics(metricsCollector))
+		}
+
+		c := kubescape.New(opts.collConfig, collectorOpts...)
 
 		if err := collector.RegisterDocumentCollector(c, kubescape.Type); err != nil {
 			logger.Fatalf("unable to register kubescape collector: %v\n", err)
@@ -102,6 +110,8 @@ func validateKubescapeOpts() (*kubescapeOptions, error) {
 		pubSubAddr:        viper.GetString("pubsub-addr"),
 		blobAddr:          viper.GetString("blob-addr"),
 		publishToQueue:    viper.GetBool("publish-to-queue"),
+		enablePrometheus:  viper.GetBool("enable-prometheus"),
+		prometheusPort:    viper.GetInt("prometheus-port"),
 		csubClientOptions: csubOpts,
 		collConfig: kubescape.Config{
 			Watch:     viper.GetBool("service-poll"),
@@ -112,7 +122,7 @@ func validateKubescapeOpts() (*kubescapeOptions, error) {
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"kubescape-namespace", "kubescape-filtered"})
+	set, err := cli.BuildFlags([]string{"kubescape-namespace", "kubescape-filtered", "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

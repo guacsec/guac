@@ -31,6 +31,9 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 type MockGithubClient struct {
@@ -792,5 +795,52 @@ func Test_parseGitDataSource(t *testing.T) {
 				t.Errorf("ParseGitDataSource() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
+	}
+}
+
+type failingAssetClient struct {
+	MockGithubClient
+}
+
+func (f *failingAssetClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.ReleaseAssetContent, error) {
+	return nil, errors.New("download failed")
+}
+
+func TestGithubCollector_RecordsFetchErrorMetric(t *testing.T) {
+	ctx := metrics.WithMetrics(context.Background(), "github_test")
+	mc := metrics.FromContext(ctx, "github_test")
+	counter, err := mc.RegisterCounter(ctx, FetchErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	g, err := NewGithubCollector(
+		WithClient(&failingAssetClient{}),
+		WithRepoToReleaseTags(mockRepoToReleaseTagsLatest()),
+		WithMetrics(mc),
+	)
+	if err != nil {
+		t.Fatalf("failed to create collector: %v", err)
+	}
+
+	docChan := make(chan *processor.Document, 10)
+	if err := g.RetrieveArtifacts(ctx, docChan); err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+	close(docChan)
+	for range docChan {
+		t.Error("expected no documents when asset download fails")
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_github_test_github_fetch_errors Counter for github_test_github_fetch_errors
+		# TYPE guac_github_test_github_fetch_errors counter
+		guac_github_test_github_fetch_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
 	}
 }

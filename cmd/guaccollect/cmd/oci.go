@@ -52,6 +52,10 @@ type ociOptions struct {
 	publishToQueue bool
 	// skip TLS verification for registry connections
 	insecureSkipTLSVerify bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 type ociRegistryOptions struct {
@@ -67,6 +71,10 @@ type ociRegistryOptions struct {
 	publishToQueue bool
 	// skip TLS verification for registry connections
 	insecureSkipTLSVerify bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 var ociCmd = &cobra.Command{
@@ -101,6 +109,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
 			viper.GetBool(ociInsecureSkipTLSVerify),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -120,6 +130,9 @@ you have access to read and write to the respective blob store.`,
 		})
 
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second, rcOpts...)
+		if opts.enablePrometheus {
+			ociCollector.WithMetrics(startMetricsServer(ctx, "image", opts.prometheusPort, oci.RegisterMetrics))
+		}
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
@@ -151,6 +164,8 @@ var ociRegistryCmd = &cobra.Command{
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
 			viper.GetBool(ociInsecureSkipTLSVerify),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -169,6 +184,9 @@ var ociRegistryCmd = &cobra.Command{
 		})
 
 		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.dataSource, opts.poll, 30*time.Minute, rcOpts...)
+		if opts.enablePrometheus {
+			ociRegistryCollector.WithMetrics(startMetricsServer(ctx, "registry", opts.prometheusPort, oci.RegisterMetrics))
+		}
 		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -192,6 +210,8 @@ func validateOCIFlags(
 	poll bool,
 	pubToQueue bool,
 	insecureSkipTLSVerify bool,
+	enablePrometheus bool,
+	prometheusPort int,
 	args []string,
 ) (ociOptions, error) {
 	var opts ociOptions
@@ -200,6 +220,8 @@ func validateOCIFlags(
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
 	opts.insecureSkipTLSVerify = insecureSkipTLSVerify
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -250,6 +272,8 @@ func validateOCIRegistryFlags(
 	poll,
 	pubToQueue bool,
 	insecureSkipTLSVerify bool,
+	enablePrometheus bool,
+	prometheusPort int,
 	args []string,
 ) (ociRegistryOptions, error) {
 	var opts ociRegistryOptions
@@ -258,6 +282,8 @@ func validateOCIRegistryFlags(
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
 	opts.insecureSkipTLSVerify = insecureSkipTLSVerify
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -323,7 +349,7 @@ func validateOCIRegistryFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{ociInsecureSkipTLSVerify})
+	set, err := cli.BuildFlags([]string{ociInsecureSkipTLSVerify, "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

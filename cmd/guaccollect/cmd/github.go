@@ -65,6 +65,10 @@ type githubOptions struct {
 	publishToQueue bool
 	// enable otel
 	enableOtel bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 var githubCmd = &cobra.Command{
@@ -106,6 +110,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
 			viper.GetBool("enable-otel"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -142,6 +148,10 @@ you have access to read and write to the respective blob store.`,
 			github.WithMode(opts.githubMode),
 			github.WithSbomName(opts.sbomName),
 			github.WithWorkflowName(opts.workflowFileName),
+		}
+		if opts.enablePrometheus {
+			metricsCollector := startMetricsServer(ctx, "github", opts.prometheusPort, github.RegisterMetrics)
+			collectorOpts = append(collectorOpts, github.WithMetrics(metricsCollector))
 		}
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
@@ -190,6 +200,8 @@ func validateGithubFlags(
 	poll bool,
 	pubToQueue bool,
 	enableOtel bool,
+	enablePrometheus bool,
+	prometheusPort int,
 	args []string,
 ) (githubOptions, error) {
 	var opts githubOptions
@@ -201,6 +213,8 @@ func validateGithubFlags(
 	opts.workflowFileName = workflowFileName
 	opts.publishToQueue = pubToQueue
 	opts.enableOtel = enableOtel
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -256,7 +270,7 @@ func validateGithubFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{githubMode, githubSbom, githubWorkflowFile})
+	set, err := cli.BuildFlags([]string{githubMode, githubSbom, githubWorkflowFile, "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

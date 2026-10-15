@@ -61,6 +61,10 @@ type cdOptions struct {
 	lastScan *int
 	// enable otel
 	enableOtel bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 var cdCmd = &cobra.Command{
@@ -94,6 +98,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetInt("certifier-batch-size"),
 			viper.GetInt("last-scan"),
 			viper.GetBool("enable-otel"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -116,7 +122,18 @@ you have access to read and write to the respective blob store.`,
 			}()
 		}
 
-		if err := certify.RegisterCertifier(clearlydefined.NewClearlyDefinedCertifier, certifier.CertifierClearlyDefined); err != nil {
+		var metricsCollector metrics.MetricCollector
+		if opts.enablePrometheus {
+			metricsCollector = startMetricsServer(ctx, "clearlydefined", opts.prometheusPort, clearlydefined.RegisterMetrics)
+		}
+
+		if err := certify.RegisterCertifier(func() certifier.Certifier {
+			certifierOpts := []clearlydefined.CertifierOpts{}
+			if metricsCollector != nil {
+				certifierOpts = append(certifierOpts, clearlydefined.WithMetrics(metricsCollector))
+			}
+			return clearlydefined.NewClearlyDefinedCertifier(certifierOpts...)
+		}, certifier.CertifierClearlyDefined); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
@@ -153,6 +170,8 @@ func validateCDFlags(
 	batchSize int,
 	lastScan int,
 	enableOtel bool,
+	enablePrometheus bool,
+	prometheusPort int,
 ) (cdOptions, error) {
 
 	var opts cdOptions
@@ -164,6 +183,8 @@ func validateCDFlags(
 	opts.poll = poll
 	opts.publishToQueue = pubToQueue
 	opts.enableOtel = enableOtel
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -191,7 +212,7 @@ func validateCDFlags(
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
 		"header-file", "certifier-latency",
-		"certifier-batch-size", "last-scan"})
+		"certifier-batch-size", "last-scan", "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -28,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 type gcs struct {
@@ -37,9 +39,15 @@ type gcs struct {
 	lastDownload time.Time
 	poll         bool
 	interval     time.Duration
+	Metrics      metrics.MetricCollector
 }
 
 const CollectorGCS = "GCS"
+
+// ObjectRetrievalErrorsCounter tracks failed per-object reads from the bucket.
+const ObjectRetrievalErrorsCounter = "gcs_object_retrieval_errors"
+
+var registerMetricsOnce sync.Once
 
 // NewGCSCollector initializes the gcs and sets it for polling or one time run
 func NewGCSCollector(opts ...Opt) (*gcs, error) {
@@ -64,6 +72,24 @@ func NewGCSCollector(opts ...Opt) (*gcs, error) {
 }
 
 type Opt func(*gcs)
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(g *gcs) {
+		g.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, ObjectRetrievalErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for gcs object retrieval errors: %w", regErr)
+		}
+	})
+	return err
+}
 
 func WithPolling(interval time.Duration) Opt {
 	return func(g *gcs) {
@@ -172,6 +198,7 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 			payload, err := g.getObject(ctx, attrs.Name)
 			if err != nil {
 				logger.Warnf("failed to retrieve object: %s from bucket: %s, error: %w", attrs.Name, g.bucket, err)
+				g.recordRetrievalError(ctx)
 				continue
 			}
 			if len(payload) == 0 {
@@ -216,4 +243,13 @@ func (g *gcs) getObject(ctx context.Context, object string) ([]byte, error) {
 	}
 	return payload, nil
 
+}
+
+func (g *gcs) recordRetrievalError(ctx context.Context) {
+	if g.Metrics == nil {
+		return
+	}
+	if err := g.Metrics.AddCounter(ctx, ObjectRetrievalErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record gcs object retrieval error metric: %v", err)
+	}
 }

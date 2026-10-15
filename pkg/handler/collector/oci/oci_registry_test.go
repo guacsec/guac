@@ -29,8 +29,11 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/types/descriptor"
@@ -126,9 +129,9 @@ func TestOCIRegistryCollectionPipeline(t *testing.T) {
 						},
 					},
 					sbomDigest.String(): {
-						Content:   sbomBytes,
-						MediaType: "application/vnd.oci.image.manifest.v1+json",
-						Digest:    sbomDigest,
+						Content:      sbomBytes,
+						MediaType:    "application/vnd.oci.image.manifest.v1+json",
+						Digest:       sbomDigest,
 						ArtifactType: SpdxJson,
 					},
 				},
@@ -238,4 +241,48 @@ func toRegistryDataSource(t *testing.T, ociRegistryValues []string) datasource.C
 		panic(err)
 	}
 	return ds
+}
+
+func TestOCIRegistryCollector_RecordsArtifactErrorMetric(t *testing.T) {
+	registry := mockregistry.NewMockRegistry(&mockregistry.RegistryContent{
+		Repositories: map[string]*mockregistry.RepositoryContent{},
+	})
+	defer registry.Close()
+
+	parsedURL, err := url.Parse(registry.URL())
+	if err != nil {
+		t.Fatalf("Failed to parse mock registry URL: %v", err)
+	}
+	registryHost := parsedURL.Host
+
+	ctx := metrics.WithMetrics(context.Background(), "oci_test")
+	mc := metrics.FromContext(ctx, "oci_test")
+	counter, err := mc.RegisterCounter(ctx, ArtifactErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	rcOpts := append(getRegClientOptions(), regclient.WithConfigHost(config.Host{
+		Name:     registryHost,
+		Hostname: registryHost,
+		TLS:      config.TLSDisabled,
+	}))
+	c := NewOCIRegistryCollector(ctx, toRegistryDataSource(t, []string{registryHost}), false, 0, rcOpts...).WithMetrics(mc)
+
+	docChan := make(chan *processor.Document, 10)
+	if err := c.RetrieveArtifacts(ctx, docChan); err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_oci_test_oci_artifact_errors Counter for oci_test_oci_artifact_errors
+		# TYPE guac_oci_test_oci_artifact_errors counter
+		guac_oci_test_oci_artifact_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
+	}
 }

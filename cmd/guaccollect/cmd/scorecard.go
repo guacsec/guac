@@ -52,6 +52,10 @@ type scorecardOptions struct {
 	batchSize int
 	// only compute the scorecard locally, skipping the scorecard API
 	computeOnly bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	prometheusPort int
 }
 
 var scorecardCmd = &cobra.Command{
@@ -84,6 +88,8 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
 			viper.GetBool("compute"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -102,7 +108,13 @@ you have access to read and write to the respective blob store.`,
 			os.Exit(1)
 		}
 
-		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner)
+		var certifierOpts []scorecard.CertifierOpts
+		if opts.enablePrometheus {
+			m := startMetricsServer(ctx, "scorecard", opts.prometheusPort, scorecard.RegisterMetrics)
+			certifierOpts = append(certifierOpts, scorecard.WithMetrics(m))
+		}
+
+		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner, certifierOpts...)
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -140,7 +152,9 @@ func validateScorecardFlags(
 	pubToQueue bool,
 	certifierLatencyStr string,
 	batchSize int,
-	computeOnly bool) (scorecardOptions, error) {
+	computeOnly bool,
+	enablePrometheus bool,
+	prometheusPort int) (scorecardOptions, error) {
 
 	var opts scorecardOptions
 
@@ -169,6 +183,8 @@ func validateScorecardFlags(
 
 	opts.batchSize = batchSize
 	opts.computeOnly = computeOnly
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	return opts, nil
 }
@@ -176,7 +192,7 @@ func validateScorecardFlags(
 func init() {
 	set, err := cli.BuildFlags([]string{"interval",
 		"header-file", "certifier-latency",
-		"certifier-batch-size", "compute"})
+		"certifier-batch-size", "compute", "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
