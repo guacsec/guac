@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package srac defines the experimental, read-only Safety Relevance
-// Assertion Capability (SRAC) interchange model used by the GUAC prototype.
+// Package srac defines and validates the read-only Safety Relevance Assertion
+// Capability (SRAC) interchange document. Graph storage and resolution are
+// intentionally handled by the dedicated ontology proposed in #3272.
 package srac
 
 import (
@@ -73,6 +74,10 @@ func Parse(blob []byte) (*Document, error) {
 	}
 	if err := doc.Validate(); err != nil {
 		return nil, err
+	}
+	for i := range doc.Assertions {
+		doc.Assertions[i].Product.PURL = canonicalPURL(doc.Assertions[i].Product.PURL)
+		doc.Assertions[i].Component.PURL = canonicalPURL(doc.Assertions[i].Component.PURL)
 	}
 	return &doc, nil
 }
@@ -145,6 +150,16 @@ func validateSubject(name string, subject Subject) error {
 	return nil
 }
 
+func canonicalPURL(value string) string {
+	purl, err := packageurl.FromString(value)
+	if err != nil {
+		// Validate calls validateSubject before this helper, so this branch is
+		// unreachable for documents returned by Parse.
+		return value
+	}
+	return purl.ToString()
+}
+
 func validSHA256(value string) bool {
 	decoded, err := hex.DecodeString(value)
 	return err == nil && len(decoded) == 32
@@ -157,78 +172,4 @@ func oneOf(value string, allowed ...string) bool {
 		}
 	}
 	return false
-}
-
-type CorrelationStatus string
-
-const (
-	CorrelationMatched   CorrelationStatus = "matched"
-	CorrelationUnmatched CorrelationStatus = "unmatched"
-	CorrelationAmbiguous CorrelationStatus = "ambiguous"
-	CorrelationInvalid   CorrelationStatus = "invalid"
-)
-
-type Candidate struct {
-	ProductPURL   string
-	ComponentPURL string
-	BOMRef        string
-	Digests       map[string]string
-}
-
-type CorrelationResult struct {
-	Status  CorrelationStatus
-	Matches []Candidate
-	Reason  string
-}
-
-// Correlate applies deterministic, product-context matching. It never falls
-// back to a package name. A supplied digest is a constraint, not a hint.
-func Correlate(assertion Assertion, candidates []Candidate) CorrelationResult {
-	var identifierMatches []Candidate
-	for _, candidate := range candidates {
-		if candidate.ProductPURL != assertion.Product.PURL || candidate.ComponentPURL != assertion.Component.PURL {
-			continue
-		}
-		if assertion.Component.BOMRef != "" && candidate.BOMRef != assertion.Component.BOMRef {
-			continue
-		}
-		identifierMatches = append(identifierMatches, candidate)
-	}
-
-	var matches []Candidate
-	digestMismatch := false
-	for _, candidate := range identifierMatches {
-		if digestsMatch(assertion.Component.Digests, candidate.Digests) {
-			matches = append(matches, candidate)
-		} else if len(assertion.Component.Digests) > 0 {
-			digestMismatch = true
-		}
-	}
-
-	if len(matches) == 1 {
-		return CorrelationResult{Status: CorrelationMatched, Matches: matches}
-	}
-	if len(matches) > 1 {
-		return CorrelationResult{Status: CorrelationAmbiguous, Matches: matches, Reason: "multiple exact candidates"}
-	}
-	if digestMismatch {
-		return CorrelationResult{Status: CorrelationInvalid, Reason: "component digest mismatch"}
-	}
-	return CorrelationResult{Status: CorrelationUnmatched, Reason: "no exact product/component match"}
-}
-
-func digestsMatch(required, actual map[string]string) bool {
-	for algorithm, digest := range required {
-		found := false
-		for actualAlgorithm, actualDigest := range actual {
-			if strings.EqualFold(algorithm, actualAlgorithm) && strings.EqualFold(digest, actualDigest) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-	return true
 }
