@@ -1,58 +1,53 @@
-# Experimental SRAC ingestion
+# SRAC document validation foundation
 
-This prototype ingests externally authored Safety Relevance Assertion Capability
-(SRAC) documents as read-only, product-scoped GUAC metadata. It is intended to
-validate the use case in #3256 without committing GUAC to a new ontology type.
+This change defines and validates the externally authored Safety Relevance
+Assertion Capability (SRAC) interchange document used by the product-context
+example in #3256.
 
-The safety lifecycle remains authoritative. GUAC validates, preserves, and
-correlates supplied context; it does not infer safety relevance or approve a
-safety decision.
+The current slice deliberately stops before graph ingestion. In particular, it
+does not project safety assertions into `HasMetadata`. The maintainer review of
+#3271 confirmed that the permanent implementation requires a dedicated,
+queryable safety-assertion ontology connecting the product, component,
+evidence, provenance, and review state.
 
-## Correlation contract
+The proposed ontology and out-of-order resolution lifecycle are tracked in
+#3272. After maintainers approve that contract, the GUAC document guesser,
+processor, parser, backend, GraphQL API, and certifier can be wired to the same
+first-class predicate.
 
-The adapter requires exact product and component package URLs. An optional
-component BOM reference and digest further constrain a match. Package names
-alone are never accepted. Correlation results are explicit: `matched`,
-`unmatched`, `ambiguous`, or `invalid` (including digest mismatch).
+## Validation performed here
 
-Parsed assertions become `HasMetadata` predicates on the product package with
-the key `srac.safety-relevance`. The JSON value preserves the component target,
-classification, rationale, evidence, review state, source authority, and the
-SHA-256 digest of the received SRAC document.
+The `pkg/srac` package:
 
-This representation is deliberately experimental. Maintainer feedback will
-determine whether a future implementation should use an existing GUAC evidence
-model or a dedicated ontology predicate.
+- accepts the `0.2-draft` JSON document shape;
+- requires a document identity, generation time, source URI, and at least one
+  assertion;
+- requires exact product and component pURLs and canonicalizes them with the
+  package-url library;
+- rejects name-only component matching;
+- validates safety-relevance and decision-status values;
+- requires a reviewer for reviewed, approved, or rejected assertions;
+- validates supplied SHA-256 evidence and component digests; and
+- rejects duplicate assertion identifiers within a document.
 
-## Example query
+The synthetic fixture in `docs/examples/srac/product-context.srac.json` shows
+the same component used in two products with different externally authored
+safety contexts.
 
-The existing `HasMetadata` query can retrieve all ingested SRAC assertions:
+## Follow-up implementation boundary
 
-```graphql
-query SafetyRelevantProducts {
-  HasMetadata(hasMetadataSpec: { key: "srac.safety-relevance" }) {
-    subject {
-      ... on Package {
-        type
-        namespaces {
-          namespace
-          names {
-            name
-            versions {
-              purl
-            }
-          }
-        }
-      }
-    }
-    value
-    origin
-    documentRef
-  }
-}
+The accepted ontology must provide queryable fields rather than an opaque JSON
+value. The planned resolution flow is:
+
+```text
+SRAC document -> declared assertion target -> certifier resolution -> typed
+product/assertion/component graph binding
 ```
 
-Consumers parse `value` and select assertions whose `safetyRelevance` is
-`safety-related` and whose component matches the vulnerability under
-investigation. The example fixture shows the same component in two products with
-different externally authored safety contexts.
+The certifier will own correlation after the ontology exists. It will normalize
+pURLs before comparison, preserve missing endpoints as pending or unmatched,
+distinguish missing digest data from a conflicting digest, and avoid creating
+placeholder package nodes solely because an assertion arrived first.
+
+GUAC will preserve and expose externally authored assertions. It will not infer
+safety relevance or approve safety decisions.
