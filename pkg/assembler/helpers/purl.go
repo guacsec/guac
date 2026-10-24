@@ -129,14 +129,15 @@ func PkgInputSpecToPurl(currentPkg *model.PkgInputSpec) string {
 
 func PkgToPurl(purlType, namespace, name, version, subpath string, qualifiersList []string) string {
 	collectedQualifiers := purl.Qualifiers{}
-	for i := range qualifiersList {
-		if i%2 == 0 {
-			qualifier := purl.Qualifier{
-				Key:   qualifiersList[i],
-				Value: qualifiersList[i+1],
-			}
-			collectedQualifiers = append(collectedQualifiers, qualifier)
+	for i := 0; i < len(qualifiersList); i += 2 {
+		if i+1 >= len(qualifiersList) {
+			break
 		}
+		qualifier := purl.Qualifier{
+			Key:   qualifiersList[i],
+			Value: qualifiersList[i+1],
+		}
+		collectedQualifiers = append(collectedQualifiers, qualifier)
 	}
 
 	if purlType == purl.TypeOCI || purlType == purl.TypeDocker {
