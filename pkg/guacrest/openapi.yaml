@@ -213,6 +213,33 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
+  "/v0/sbom/{id}":
+    get:
+      summary: Get a single SBOM by its ID
+      description: >
+        Returns the HasSBOM node with the given ID, the same object that
+        appears in a SbomList. Package contents (includedSoftware,
+        includedDependencies, includedOccurrences) are not included because
+        their size is not bounded.
+      operationId: getSbom
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The opaque HasSBOM node ID, as returned by GET /v0/sbom
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/Sbom"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
 
 components:
   parameters:
@@ -393,6 +420,12 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/Sbom"
+    Sbom:
+      description: A single SBOM
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Sbom"
     PackageNameList:
       description: A list of package names with their dependent counts
       content:
@@ -420,6 +453,13 @@ components:
     # intended for code 400, client side error
     BadRequest:
       description: Bad request, such as from invalid or missing parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    # intended for code 404, resource not found
+    NotFound:
+      description: The requested resource does not exist
       content:
         application/json:
           schema:

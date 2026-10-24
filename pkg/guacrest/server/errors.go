@@ -34,6 +34,7 @@ const (
 	GetArtifactVulns
 	GetArtifactDeps
 	ListSboms
+	GetSbom
 )
 
 // IsErrorResponse checks if the response status code indicates an error.
@@ -61,6 +62,8 @@ func handleErr(
 		return createBadGatewayResponse(endpointType, err.Error())
 	case errors.Is(err, helpers.Err500):
 		return createInternalServerErrorResponse(endpointType, err.Error())
+	case errors.Is(err, helpers.Err404):
+		return createNotFoundResponse(endpointType, err.Error())
 	default:
 		return createBadRequestResponse(endpointType, err.Error())
 	}
@@ -100,6 +103,12 @@ func createBadRequestResponse(endpointType EndpointType, message string) interfa
 		}
 	case ListSboms:
 		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbom:
+		return gen.GetSbom400JSONResponse{
 			BadRequestJSONResponse: gen.BadRequestJSONResponse{
 				Message: message,
 			},
@@ -147,6 +156,12 @@ func createInternalServerErrorResponse(endpointType EndpointType, message string
 				Message: message,
 			},
 		}
+	case GetSbom:
+		return gen.GetSbom500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -187,6 +202,25 @@ func createBadGatewayResponse(endpointType EndpointType, message string) interfa
 	case ListSboms:
 		return gen.ListSboms502JSONResponse{
 			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbom:
+		return gen.GetSbom502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	default:
+		return nil
+	}
+}
+
+func createNotFoundResponse(endpointType EndpointType, message string) interface{} {
+	switch endpointType {
+	case GetSbom:
+		return gen.GetSbom404JSONResponse{
+			NotFoundJSONResponse: gen.NotFoundJSONResponse{
 				Message: message,
 			},
 		}

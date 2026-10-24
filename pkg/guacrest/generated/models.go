@@ -132,6 +132,9 @@ type BadRequest = Error
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = Error
 
+// NotFound defines model for NotFound.
+type NotFound = Error
+
 // PackageNameList defines model for PackageNameList.
 type PackageNameList = []PackageName
 

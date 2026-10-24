@@ -66,29 +66,13 @@ func RetrieveSboms(ctx context.Context, gqlClient graphql.Client, packageFilter 
 			}
 		}
 
-		subject, ok := sbomSubjectToREST(rawSbom.GetSubject())
+		sbom, ok := sbomToREST(rawSbom)
 		if !ok {
 			logger.Warnf("Skipping HasSBOM %s with unhandled subject type: %T", rawSbom.GetId(), rawSbom.GetSubject())
 			continue
 		}
 
-		dl := rawSbom.GetDownloadLocation()
-		origin := rawSbom.GetOrigin()
-		collector := rawSbom.GetCollector()
-		docRef := rawSbom.GetDocumentRef()
-
-		sboms = append(sboms, gen.Sbom{
-			Id:               rawSbom.GetId(),
-			Subject:          subject,
-			Uri:              rawSbom.GetUri(),
-			Algorithm:        rawSbom.GetAlgorithm(),
-			Digest:           rawSbom.GetDigest(),
-			DownloadLocation: &dl,
-			KnownSince:       rawSbom.GetKnownSince(),
-			Origin:           &origin,
-			Collector:        &collector,
-			DocumentRef:      &docRef,
-		})
+		sboms = append(sboms, sbom)
 	}
 
 	sort.SliceStable(sboms, func(i, j int) bool {
@@ -99,6 +83,32 @@ func RetrieveSboms(ctx context.Context, gqlClient graphql.Client, packageFilter 
 	})
 
 	return sboms, nil
+}
+
+// sbomToREST maps a HasSBOM record to the Sbom shape the REST API returns.
+func sbomToREST(rawSbom gql.HasSBOMsHasSBOM) (gen.Sbom, bool) {
+	subject, ok := sbomSubjectToREST(rawSbom.GetSubject())
+	if !ok {
+		return gen.Sbom{}, false
+	}
+
+	dl := rawSbom.GetDownloadLocation()
+	origin := rawSbom.GetOrigin()
+	collector := rawSbom.GetCollector()
+	docRef := rawSbom.GetDocumentRef()
+
+	return gen.Sbom{
+		Id:               rawSbom.GetId(),
+		Subject:          subject,
+		Uri:              rawSbom.GetUri(),
+		Algorithm:        rawSbom.GetAlgorithm(),
+		Digest:           rawSbom.GetDigest(),
+		DownloadLocation: &dl,
+		KnownSince:       rawSbom.GetKnownSince(),
+		Origin:           &origin,
+		Collector:        &collector,
+		DocumentRef:      &docRef,
+	}, true
 }
 
 func sbomMatches(sbom gql.HasSBOMsHasSBOM, matchingSet map[string]struct{}) bool {
