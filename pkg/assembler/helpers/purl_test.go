@@ -944,6 +944,34 @@ func TestPkgToPurl(t *testing.T) {
 			version:         "2.12.4",
 			subpath:         "",
 			qualifiers:      []string{},
+		}, {
+			// odd-length qualifiers list: the unpaired trailing key must be
+			// dropped silently instead of panicking with index-out-of-range.
+			expectedPurlUri: "pkg:npm/lodash@4.17.21?env=prod",
+			pkgType:         "npm",
+			namespace:       "",
+			name:            "lodash",
+			version:         "4.17.21",
+			subpath:         "",
+			qualifiers:      []string{"env", "prod", "orphan-key"},
+		}, {
+			// single unpaired key: qualifiers list of length 1 must not panic.
+			expectedPurlUri: "pkg:pypi/requests@2.28.0",
+			pkgType:         "pypi",
+			namespace:       "",
+			name:            "requests",
+			version:         "2.28.0",
+			subpath:         "",
+			qualifiers:      []string{"orphan-key"},
+		}, {
+			// empty qualifiers list: must produce a PURL with no qualifier string.
+			expectedPurlUri: "pkg:gem/ruby-advisory-db-check@0.12.4",
+			pkgType:         "gem",
+			namespace:       "",
+			name:            "ruby-advisory-db-check",
+			version:         "0.12.4",
+			subpath:         "",
+			qualifiers:      []string{},
 		},
 	}
 	for _, tt := range testCases {
