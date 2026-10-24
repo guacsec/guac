@@ -631,6 +631,26 @@ func TestAllPkgTreeToPurl(t *testing.T) {
 		}, {
 			expectedPurlUri: "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
 			input:           allPkgTree("swift", "github.com/RxSwiftCommunity", "RxFlow", "2.12.4", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "",
+			input:           nil,
+		}, {
+			expectedPurlUri: "",
+			input: &model.AllPkgTree{
+				Type:       "pypi",
+				Namespaces: []model.AllPkgTreeNamespacesPackageNamespace{},
+			},
+		}, {
+			expectedPurlUri: "",
+			input: &model.AllPkgTree{
+				Type: "pypi",
+				Namespaces: []model.AllPkgTreeNamespacesPackageNamespace{
+					{
+						Namespace: "",
+						Names:     []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName{},
+					},
+				},
+			},
 		},
 	}
 	for _, tt := range testCases {
