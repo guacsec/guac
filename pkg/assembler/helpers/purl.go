@@ -75,9 +75,15 @@ func PurlToPkgFilter(purl string) (model.PkgSpec, error) {
 // AllPkgTreeToPurl takes one package trie evaluation and converts it into a PURL
 // it will only do this for one PURL, and will ignore other pkg tries in the fragment
 func AllPkgTreeToPurl(v *model.AllPkgTree) string {
+	if v == nil || len(v.Namespaces) == 0 {
+		return ""
+	}
 	ns := v.Namespaces[0]
 	nsStr := ns.Namespace
 
+	if len(ns.Names) == 0 {
+		return ""
+	}
 	name := ns.Names[0]
 	nameStr := name.Name
 
@@ -85,7 +91,7 @@ func AllPkgTreeToPurl(v *model.AllPkgTree) string {
 	subpathStr := ""
 	qualifierStrs := []string{}
 	if len(name.Versions) > 0 {
-		version := v.Namespaces[0].Names[0].Versions[0]
+		version := name.Versions[0]
 		versionStr = version.Version
 		subpathStr = version.Subpath
 		for _, v := range version.Qualifiers {
