@@ -240,6 +240,54 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
+  "/v0/sbom/{id}/download":
+    get:
+      summary: Download the original SBOM document
+      description: >
+        Returns the original SBOM document that was ingested into the blob store.
+      operationId: downloadSbom
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The opaque HasSBOM node ID, as returned by GET /v0/sbom
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The original SBOM document
+          headers:
+            Content-Disposition:
+              description: Attachment header with filename
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+            application/x-ndjson:
+              schema:
+                type: string
+                format: binary
+            application/xml:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
 components:
   parameters:
@@ -474,6 +522,13 @@ components:
     # for code 502
     BadGateway:
       description: The server encountered an error connecting to the data backend
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    # for code 503
+    ServiceUnavailable:
+      description: The server is temporarily unavailable
       content:
         application/json:
           schema:

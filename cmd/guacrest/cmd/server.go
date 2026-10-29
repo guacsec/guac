@@ -29,6 +29,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/cli"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/server"
@@ -96,14 +97,24 @@ func startServer() {
 // if an ent address is provided, get the handler backed by ent
 func getRestApiHandlerOrExit(ctx context.Context, gqlClient graphql.Client) gen.StrictServerInterface {
 	logger := logging.FromContext(ctx)
+
+	var blobStore *blob.BlobStore
+	if flags.blobAddr != "" {
+		var err error
+		blobStore, err = blob.NewBlobStore(ctx, flags.blobAddr)
+		if err != nil {
+			logger.Warnf("unable to connect to blob store: %v", err)
+		}
+	}
+
 	if flags.dbDirectConnection {
 		logger.Infof("directly connecting to the Ent backend for optimized endpoint" +
 			"implementation. This is an experimental feature")
 		ent := getEntClientOrExit(ctx)
-		handler := server.NewEntConnectedServer(ent, gqlClient)
+		handler := server.NewEntConnectedServer(ent, gqlClient, blobStore)
 		return handler
 	}
-	return server.NewDefaultServer(gqlClient)
+	return server.NewDefaultServer(gqlClient, blobStore)
 }
 
 func getEntClientOrExit(ctx context.Context) *ent.Client {

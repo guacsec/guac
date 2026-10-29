@@ -41,6 +41,8 @@ var flags = struct {
 	dbDirectConnection bool
 	dbDriver           string
 	dbAddress          string
+
+	blobAddr string
 }{}
 
 var rootCmd = &cobra.Command{
@@ -62,6 +64,8 @@ var rootCmd = &cobra.Command{
 		flags.dbDriver = viper.GetString("db-driver")
 		flags.dbAddress = viper.GetString("db-address")
 		flags.dbDirectConnection = viper.GetBool("db-direct-connection")
+
+		flags.blobAddr = viper.GetString("blob-addr")
 
 		startServer()
 	},
@@ -85,6 +89,7 @@ func init() {
 
 		// configuration of direct database connection
 		"db-direct-connection",
+		"blob-addr",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flags: %v", err)

@@ -9,10 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // ServerInterface represents all server handlers.
@@ -44,6 +46,9 @@ type ServerInterface interface {
 	// Get a single SBOM by its ID
 	// (GET /v0/sbom/{id})
 	GetSbom(w http.ResponseWriter, r *http.Request, id string)
+	// Download the original SBOM document
+	// (GET /v0/sbom/{id}/download)
+	DownloadSbom(w http.ResponseWriter, r *http.Request, id string)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -101,6 +106,12 @@ func (_ Unimplemented) ListSboms(w http.ResponseWriter, r *http.Request, params 
 // Get a single SBOM by its ID
 // (GET /v0/sbom/{id})
 func (_ Unimplemented) GetSbom(w http.ResponseWriter, r *http.Request, id string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Download the original SBOM document
+// (GET /v0/sbom/{id}/download)
+func (_ Unimplemented) DownloadSbom(w http.ResponseWriter, r *http.Request, id string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -439,6 +450,32 @@ func (siw *ServerInterfaceWrapper) GetSbom(w http.ResponseWriter, r *http.Reques
 	handler.ServeHTTP(w, r)
 }
 
+// DownloadSbom operation middleware
+func (siw *ServerInterfaceWrapper) DownloadSbom(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DownloadSbom(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -579,6 +616,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v0/sbom/{id}", wrapper.GetSbom)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v0/sbom/{id}/download", wrapper.DownloadSbom)
+	})
 
 	return r
 }
@@ -606,6 +646,8 @@ type SbomListJSONResponse struct {
 	PaginationInfo PaginationInfo `json:"PaginationInfo"`
 	SbomList       []Sbom         `json:"SbomList"`
 }
+
+type ServiceUnavailableJSONResponse Error
 
 type VulnerabilityListJSONResponse []Vulnerability
 
@@ -1176,6 +1218,205 @@ func (response GetSbom502JSONResponse) VisitGetSbomResponse(w http.ResponseWrite
 	return err
 }
 
+type DownloadSbomRequestObject struct {
+	Id string `json:"id"`
+}
+
+type DownloadSbomResponseObject interface {
+	VisitDownloadSbomResponse(w http.ResponseWriter) error
+}
+
+type DownloadSbom200ResponseHeaders struct {
+	ContentDisposition *string
+}
+
+type DownloadSbom200JSONResponse struct {
+	Body    openapi_types.File
+	Headers DownloadSbom200ResponseHeaders
+}
+
+func (response DownloadSbom200JSONResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.ContentDisposition != nil {
+		w.Header().Set("Content-Disposition", fmt.Sprint(*response.Headers.ContentDisposition))
+	}
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadSbom200ApplicationoctetStreamResponse struct {
+	Body          io.Reader
+	Headers       DownloadSbom200ResponseHeaders
+	ContentLength int64
+}
+
+func (response DownloadSbom200ApplicationoctetStreamResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "application/octet-stream")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	if response.Headers.ContentDisposition != nil {
+		w.Header().Set("Content-Disposition", fmt.Sprint(*response.Headers.ContentDisposition))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type DownloadSbom200ApplicationxNdjsonResponse struct {
+	Body          io.Reader
+	Headers       DownloadSbom200ResponseHeaders
+	ContentLength int64
+}
+
+func (response DownloadSbom200ApplicationxNdjsonResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "application/x-ndjson")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	if response.Headers.ContentDisposition != nil {
+		w.Header().Set("Content-Disposition", fmt.Sprint(*response.Headers.ContentDisposition))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		// If w doesn't support flushing, fall back to io.Copy.
+		_, err := io.Copy(w, response.Body)
+		return err
+	}
+	// text/event-stream messages are typically small; use a
+	// modest buffer and flush after each chunk so clients see
+	// events immediately instead of waiting on OS buffering.
+	buf := make([]byte, 4096)
+	for {
+		n, err := response.Body.Read(buf)
+		if n > 0 {
+			if _, writeErr := w.Write(buf[:n]); writeErr != nil {
+				return writeErr
+			}
+			flusher.Flush()
+		}
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			return err
+		}
+	}
+}
+
+type DownloadSbom200ApplicationxmlResponse struct {
+	Body          io.Reader
+	Headers       DownloadSbom200ResponseHeaders
+	ContentLength int64
+}
+
+func (response DownloadSbom200ApplicationxmlResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "application/xml")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	if response.Headers.ContentDisposition != nil {
+		w.Header().Set("Content-Disposition", fmt.Sprint(*response.Headers.ContentDisposition))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type DownloadSbom400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response DownloadSbom400JSONResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadSbom404JSONResponse struct{ NotFoundJSONResponse }
+
+func (response DownloadSbom404JSONResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadSbom500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DownloadSbom500JSONResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadSbom502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response DownloadSbom502JSONResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadSbom503JSONResponse struct{ ServiceUnavailableJSONResponse }
+
+func (response DownloadSbom503JSONResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Identify the most important dependencies
@@ -1205,6 +1446,9 @@ type StrictServerInterface interface {
 	// Get a single SBOM by its ID
 	// (GET /v0/sbom/{id})
 	GetSbom(ctx context.Context, request GetSbomRequestObject) (GetSbomResponseObject, error)
+	// Download the original SBOM document
+	// (GET /v0/sbom/{id}/download)
+	DownloadSbom(ctx context.Context, request DownloadSbomRequestObject) (DownloadSbomResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1465,6 +1709,32 @@ func (sh *strictHandler) GetSbom(w http.ResponseWriter, r *http.Request, id stri
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetSbomResponseObject); ok {
 		if err := validResponse.VisitGetSbomResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DownloadSbom operation middleware
+func (sh *strictHandler) DownloadSbom(w http.ResponseWriter, r *http.Request, id string) {
+	var request DownloadSbomRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DownloadSbom(ctx, request.(DownloadSbomRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DownloadSbom")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DownloadSbomResponseObject); ok {
+		if err := validResponse.VisitDownloadSbomResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
