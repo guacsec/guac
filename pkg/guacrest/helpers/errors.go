@@ -26,3 +26,6 @@ var Err500 error = errors.New("internal error. The error message should have bee
 
 // Err404 is used when a resource addressed by an identifier does not exist.
 var Err404 error = errors.New("the requested resource does not exist")
+
+// Err503 is used when a required backend service is not available.
+var Err503 error = errors.New("the service is temporarily unavailable")

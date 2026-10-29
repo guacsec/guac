@@ -17,15 +17,22 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"gocloud.dev/gcerrors"
 
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/blob"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/helpers"
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
@@ -82,4 +89,100 @@ func isMalformedIDError(err error) bool {
 		}
 	}
 	return false
+}
+
+// SbomDocument contains the raw decompressed document content and HTTP header metadata.
+type SbomDocument struct {
+	Blob               []byte
+	ContentType        string
+	ContentDisposition string
+}
+
+// RetrieveSbomDocument retrieves the original SBOM document from the blob store
+// associated with the given HasSBOM ID, decompressed according to its encoding.
+func RetrieveSbomDocument(ctx context.Context, gqlClient graphql.Client, blobStore *blob.BlobStore, id string) (*SbomDocument, error) {
+	logger := logging.FromContext(ctx)
+
+	if blobStore == nil {
+		return nil, helpers.Err503
+	}
+
+	response, err := gql.HasSBOMs(ctx, gqlClient, gql.HasSBOMSpec{Id: &id})
+	if err != nil {
+		if isMalformedIDError(err) {
+			return nil, helpers.Err404
+		}
+		logger.Errorf("HasSBOMs query returned error: %v", err)
+		return nil, helpers.Err502
+	}
+	if response == nil {
+		logger.Errorf("HasSBOMs query returned nil response")
+		return nil, helpers.Err500
+	}
+
+	sboms := response.GetHasSBOM()
+	switch len(sboms) {
+	case 0:
+		return nil, helpers.Err404
+	case 1:
+	default:
+		logger.Errorf("More than one HasSBOM was found with id %s", id)
+		return nil, helpers.Err500
+	}
+
+	documentRef := sboms[0].GetDocumentRef()
+	if documentRef == "" {
+		return nil, helpers.Err404
+	}
+
+	blobBytes, err := blobStore.Read(ctx, documentRef)
+	if err != nil {
+		if gcerrors.Code(err) == gcerrors.NotFound {
+			return nil, helpers.Err404
+		}
+		logger.Errorf("failed to read document from blob store: %v", err)
+		return nil, helpers.Err500
+	}
+
+	var doc processor.Document
+	if err := json.Unmarshal(blobBytes, &doc); err != nil {
+		logger.Errorf("failed to unmarshal document from blob store: %v", err)
+		return nil, helpers.Err500
+	}
+
+	if err := process.DecodeDocument(ctx, &doc); err != nil {
+		logger.Errorf("failed to decode document: %v", err)
+		return nil, helpers.Err500
+	}
+
+	format := doc.Format
+	if format == "" || format == processor.FormatUnknown {
+		if _, guessedFormat, err := guesser.GuessDocument(ctx, &doc); err == nil && guessedFormat != processor.FormatUnknown {
+			format = guessedFormat
+		}
+	}
+
+	var contentType, ext string
+	switch format {
+	case processor.FormatJSON:
+		contentType = "application/json"
+		ext = "json"
+	case processor.FormatJSONLines:
+		contentType = "application/x-ndjson"
+		ext = "jsonl"
+	case processor.FormatXML:
+		contentType = "application/xml"
+		ext = "xml"
+	default:
+		contentType = "application/octet-stream"
+		ext = "bin"
+	}
+
+	contentDisposition := fmt.Sprintf("attachment; filename=\"%s.%s\"", documentRef, ext)
+
+	return &SbomDocument{
+		Blob:               doc.Blob,
+		ContentType:        contentType,
+		ContentDisposition: contentDisposition,
+	}, nil
 }
