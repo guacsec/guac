@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/dependencies"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/pagination"
@@ -33,10 +34,15 @@ import (
 // DefaultServer implements the API, backed by the GraphQL Server
 type DefaultServer struct {
 	gqlClient graphql.Client
+	blobStore *blob.BlobStore
 }
 
-func NewDefaultServer(gqlClient graphql.Client) *DefaultServer {
-	return &DefaultServer{gqlClient: gqlClient}
+func NewDefaultServer(gqlClient graphql.Client, blobStore ...*blob.BlobStore) *DefaultServer {
+	s := &DefaultServer{gqlClient: gqlClient}
+	if len(blobStore) > 0 {
+		s.blobStore = blobStore[0]
+	}
+	return s
 }
 
 // Adds the logger to the http request context
@@ -344,5 +350,43 @@ func (s *DefaultServer) GetSbom(ctx context.Context, request gen.GetSbomRequestO
 
 	return gen.GetSbom200JSONResponse{
 		SbomJSONResponse: gen.SbomJSONResponse(*sbom),
+	}, nil
+}
+
+type downloadSbomResponse struct {
+	contentType        string
+	contentDisposition string
+	body               []byte
+}
+
+func (r downloadSbomResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", r.contentType)
+	if r.contentDisposition != "" {
+		w.Header().Set("Content-Disposition", r.contentDisposition)
+	}
+	w.Header().Set("Content-Length", fmt.Sprint(len(r.body)))
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write(r.body)
+	return err
+}
+
+func (s *DefaultServer) DownloadSbom(ctx context.Context, request gen.DownloadSbomRequestObject) (gen.DownloadSbomResponseObject, error) {
+	doc, err := RetrieveSbomDocument(ctx, s.gqlClient, s.blobStore, request.Id)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, DownloadSbom).(gen.DownloadSbomResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.DownloadSbom400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return downloadSbomResponse{
+		contentType:        doc.ContentType,
+		contentDisposition: doc.ContentDisposition,
+		body:               doc.Blob,
 	}, nil
 }

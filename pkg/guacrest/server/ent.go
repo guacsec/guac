@@ -18,22 +18,23 @@ package server
 import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/blob"
 )
 
 // EntConnectedServer implements the REST API interface, using by default the
 // GrapQL API Server as a backend, but also allows overriding the default
 // handlers to ones that directly use the ENT backend.
-// 
+//
 // This is an experimental feature.
 type EntConnectedServer struct {
 	ent *ent.Client
 	*DefaultServer
 }
 
-func NewEntConnectedServer(ent *ent.Client, gqlClient graphql.Client) *EntConnectedServer {
+func NewEntConnectedServer(ent *ent.Client, gqlClient graphql.Client, blobStore ...*blob.BlobStore) *EntConnectedServer {
 	return &EntConnectedServer{
 		ent:           ent,
-		DefaultServer: NewDefaultServer(gqlClient),
+		DefaultServer: NewDefaultServer(gqlClient, blobStore...),
 	}
 }
 
