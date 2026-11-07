@@ -148,7 +148,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(FileCollector),
-				Source:      fmt.Sprintf("file:///%s", path),
+				Source:      fmt.Sprintf("file:///%s", filepath.ToSlash(path)),
 				DocumentRef: events.GetDocRef(blob),
 			},
 		}
