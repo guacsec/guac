@@ -26,6 +26,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	mockclearlydefined "github.com/guacsec/guac/internal/testing/mockClearlyDefined"
+	mockosv "github.com/guacsec/guac/internal/testing/mockosv"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -400,9 +401,13 @@ func TestPurlsToScan(t *testing.T) {
 		})
 		return out
 	})
+	mockOSV := mockosv.NewMockOSV()
+	defer mockOSV.Close()
+	mockClient := &http.Client{Transport: mockOSV.GetTransport()}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotVEs, gotCVs, err := PurlsVulnScan(ctx, tt.purls)
+			gotVEs, gotCVs, err := purlsVulnScanWithClient(ctx, mockClient, tt.purls)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PurlsToScan() error = %v, wantErr %v", err, tt.wantErr)
 				return

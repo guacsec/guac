@@ -41,6 +41,7 @@ import (
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/mockosv"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -155,9 +156,13 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		},
 		wantErr: false,
 	}}
+	mockOSV := mockosv.NewMockOSV()
+	defer mockOSV.Close()
+	mockClient := &http.Client{Transport: mockOSV.GetTransport()}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewOSVCertificationParser()
+			o := NewOSVCertificationParser(WithHTTPClient(mockClient))
 			collectedDocs := []*processor.Document{}
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
