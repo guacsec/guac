@@ -37,14 +37,17 @@ import (
 // PurlsVulnScan takes a slice of purls and bulk queries OSV (skipping purls that start with "pkg:guac").
 // Once the query returns, an attestation is generated and passed to the vulnerability parser for ingestion
 func PurlsVulnScan(ctx context.Context, purls []string) ([]assembler.VulnEqualIngest, []assembler.CertifyVulnIngest, error) {
+	return purlsVulnScanWithClient(ctx, &http.Client{Transport: version.UATransport}, purls)
+}
+
+// purlsVulnScanWithClient is a helper function that allows for the injection of a client for testing purposes
+func purlsVulnScanWithClient(ctx context.Context, client *http.Client, purls []string) ([]assembler.VulnEqualIngest, []assembler.CertifyVulnIngest, error) {
 	// use the existing vulnerability parser to parse and obtain vuln Equal and certifyVuln values
 	vulnParser := vuln.NewVulnCertificationParser()
 	var vulnEquals []assembler.VulnEqualIngest
 	var certifyVulns []assembler.CertifyVulnIngest
 
-	if osvProcessorDocs, err := osv_certifier.EvaluateOSVResponse(ctx, &http.Client{
-		Transport: version.UATransport,
-	}, purls, nil, false); err != nil {
+	if osvProcessorDocs, err := osv_certifier.EvaluateOSVResponse(ctx, client, purls, nil, false); err != nil {
 		return nil, nil, fmt.Errorf("failed get response from OSV with error: %w", err)
 	} else {
 		for _, doc := range osvProcessorDocs {

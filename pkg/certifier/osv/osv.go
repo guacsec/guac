@@ -84,6 +84,13 @@ func WithMetrics(m metrics.MetricCollector) CertifierOpts {
 	}
 }
 
+// WithHTTPClient allows passing a custom http.Client (e.g., for testing with a mock server or transport)
+func WithHTTPClient(client *http.Client) CertifierOpts {
+	return func(oc *osvCertifier) {
+		oc.osvHTTPClient = client
+	}
+}
+
 // RegisterMetrics is safe to call multiple times; it only registers once.
 func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
 	var err error

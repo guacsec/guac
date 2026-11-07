@@ -18,11 +18,13 @@ package certify
 import (
 	"context"
 	"errors"
+	"net/http"
 	"sort"
 	"testing"
 	"time"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/mockosv"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -58,8 +60,12 @@ func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- in
 }
 
 func TestCertify(t *testing.T) {
+	mockOSV := mockosv.NewMockOSV()
+	defer mockOSV.Close()
+	mockClient := &http.Client{Transport: mockOSV.GetTransport()}
+
 	err := RegisterCertifier(func() certifier.Certifier {
-		return osv.NewOSVCertificationParser()
+		return osv.NewOSVCertificationParser(osv.WithHTTPClient(mockClient))
 	}, certifier.CertifierOSV)
 	if err != nil && !errors.Is(err, errCertifierOverwrite) {
 		t.Errorf("unexpected error: %v", err)
