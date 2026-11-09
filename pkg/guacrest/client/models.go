@@ -152,6 +152,9 @@ type SbomList struct {
 	SbomList       []Sbom         `json:"SbomList"`
 }
 
+// ServiceUnavailable defines model for ServiceUnavailable.
+type ServiceUnavailable = Error
+
 // VulnerabilityList defines model for VulnerabilityList.
 type VulnerabilityList = []Vulnerability
 

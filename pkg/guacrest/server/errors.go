@@ -35,6 +35,7 @@ const (
 	GetArtifactDeps
 	ListSboms
 	GetSbom
+	DownloadSbom
 )
 
 // IsErrorResponse checks if the response status code indicates an error.
@@ -58,6 +59,8 @@ func handleErr(
 	// Callers wrap these with %w, so compare with errors.Is rather than by
 	// identity - otherwise a backend outage is reported as 400 Bad Request.
 	switch {
+	case errors.Is(err, helpers.Err503):
+		return createServiceUnavailableResponse(endpointType, err.Error())
 	case errors.Is(err, helpers.Err502):
 		return createBadGatewayResponse(endpointType, err.Error())
 	case errors.Is(err, helpers.Err500):
@@ -113,6 +116,12 @@ func createBadRequestResponse(endpointType EndpointType, message string) interfa
 				Message: message,
 			},
 		}
+	case DownloadSbom:
+		return gen.DownloadSbom400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -158,6 +167,12 @@ func createInternalServerErrorResponse(endpointType EndpointType, message string
 		}
 	case GetSbom:
 		return gen.GetSbom500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
+	case DownloadSbom:
+		return gen.DownloadSbom500JSONResponse{
 			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
 				Message: message,
 			},
@@ -211,6 +226,12 @@ func createBadGatewayResponse(endpointType EndpointType, message string) interfa
 				Message: message,
 			},
 		}
+	case DownloadSbom:
+		return gen.DownloadSbom502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -221,6 +242,25 @@ func createNotFoundResponse(endpointType EndpointType, message string) interface
 	case GetSbom:
 		return gen.GetSbom404JSONResponse{
 			NotFoundJSONResponse: gen.NotFoundJSONResponse{
+				Message: message,
+			},
+		}
+	case DownloadSbom:
+		return gen.DownloadSbom404JSONResponse{
+			NotFoundJSONResponse: gen.NotFoundJSONResponse{
+				Message: message,
+			},
+		}
+	default:
+		return nil
+	}
+}
+
+func createServiceUnavailableResponse(endpointType EndpointType, message string) interface{} {
+	switch endpointType {
+	case DownloadSbom:
+		return gen.DownloadSbom503JSONResponse{
+			ServiceUnavailableJSONResponse: gen.ServiceUnavailableJSONResponse{
 				Message: message,
 			},
 		}
