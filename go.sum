@@ -1298,8 +1298,8 @@ github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a h1:KikTa6HtAK8cS1
 github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a/go.mod h1:AuYgA5Kyo4c7HfUmvRGs/6rGlMMV/6B1bVnB9JxJEEg=
 github.com/sigstore/protobuf-specs v0.5.2 h1:RSWWUY8QrVTxbYH00jY/jg2e7YnjzrpwP+PeHTMll0E=
 github.com/sigstore/protobuf-specs v0.5.2/go.mod h1:DRBzpFuE+LnvQMN10/dU6nBeKwVLGEQ6o2FovN2Rats=
-github.com/sigstore/sigstore v1.11.0 h1:66TQEtd0aMw79qT9EiGnuOxgK6r8Kkpzszi3KUPGt7c=
-github.com/sigstore/sigstore v1.11.0/go.mod h1:Q8tpy2X80KVswawYR0eTjWl3gM3AU+ak+h/NtPzRfWs=
+github.com/sigstore/sigstore v1.11.3 h1:gPjEXTOfVNDFQgkEjyLUo+DDh6EA+iklLp1t5slnuGs=
+github.com/sigstore/sigstore v1.11.3/go.mod h1:72vQpQeeHgCFJzQnLX1w2sD1HjSJTEeW300ialacOkI=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/sirupsen/logrus v1.7.0/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
@@ -1396,8 +1396,8 @@ github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb h1:o/zH4y02t4W
 github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb/go.mod h1:fEAE7GS/lta+OasPOacdgy6RlJIRaq9/Cyr2WbSYcBE=
 github.com/tikv/pd/client v0.0.0-20231115064546-181fdc95be65 h1:V8eaUyF7vpvX3/Xxu35LNqDW8XsfhhpVO9mb7zQdv6Q=
 github.com/tikv/pd/client v0.0.0-20231115064546-181fdc95be65/go.mod h1:cd6zBqRM9aogxf26K8NnFRPVtq9BnRE59tKEpX8IaWQ=
-github.com/tink-crypto/tink-go/v2 v2.8.0 h1:1zODq1bZDqOQdNPjhvwGYLDw9On7mDWPnQf+4xXlpAc=
-github.com/tink-crypto/tink-go/v2 v2.8.0/go.mod h1:aNXZeyxjQU9iqAeARRNmbESXUW6Mao1HRCCTY8B1TFM=
+github.com/tink-crypto/tink-go/v2 v2.9.0 h1:uvjgS1IYDB4zhDK0Zow8ZFB73IjzMAoSqW0JkFnvkrc=
+github.com/tink-crypto/tink-go/v2 v2.9.0/go.mod h1:aNXZeyxjQU9iqAeARRNmbESXUW6Mao1HRCCTY8B1TFM=
 github.com/tinylib/msgp v1.6.1 h1:ESRv8eL3u+DNHUoSAAQRE50Hm162zqAnBoGv9PzScPY=
 github.com/tinylib/msgp v1.6.1/go.mod h1:RSp0LW9oSxFut3KzESt5Voq4GVWyS+PSulT77roAqEA=
 github.com/tklauser/go-sysconf v0.3.15 h1:VE89k0criAymJ/Os65CSn1IXaol+1wrsFHEB8Ol49K4=
