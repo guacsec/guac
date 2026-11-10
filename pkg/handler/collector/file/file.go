@@ -17,33 +17,67 @@ package file
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 const (
 	FileCollector = "FileCollector"
+
+	// FileReadErrorsCounter tracks files that could not be read.
+	FileReadErrorsCounter = "file_read_errors"
 )
+
+var registerMetricsOnce sync.Once
 
 type fileCollector struct {
 	path        string
 	lastChecked time.Time
 	poll        bool
 	interval    time.Duration
+	Metrics     metrics.MetricCollector
 }
 
-func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration) *fileCollector {
-	return &fileCollector{
+type Opt func(*fileCollector)
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(f *fileCollector) {
+		f.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, FileReadErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for file read errors: %w", regErr)
+		}
+	})
+	return err
+}
+
+func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration, opts ...Opt) *fileCollector {
+	f := &fileCollector{
 		path:     path,
 		poll:     poll,
 		interval: interval,
 	}
+	for _, opt := range opts {
+		opt(f)
+	}
+	return f
 }
 
 // RetrieveArtifacts collects the documents from the collector. It emits each collected
@@ -60,6 +94,8 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		return fmt.Errorf("unknown error on os.Stat for FileCollector path: %w", err)
 	}
 
+	logger := logging.FromContext(ctx)
+
 	readFunc := func(path string, dirEntry fs.DirEntry, err error) error {
 		// If the context has been canceled it contains an err which we can throw.
 		// When it gets thrown a second time will cancel the walk.
@@ -70,6 +106,15 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		// NOTE: Explicitly rethrowing new errors if a particular directory has an error.
 		// If we rethrow the error it kills the whole walk. Still useful to make it explicit that we ran into an error.
 		if err != nil {
+			// Inaccessible paths below the root (EACCES/EPERM) are skipped so one unreadable entry
+			// does not abort a large ingestion.
+			if errors.Is(err, fs.ErrPermission) && path != f.path {
+				logger.Warnw("skipping inaccessible path", "path", path, "error", err)
+				if dirEntry != nil && dirEntry.IsDir() {
+					return fs.SkipDir
+				}
+				return nil
+			}
 			return fmt.Errorf("path: %s is invalid", path)
 		}
 		if dirEntry.IsDir() {
@@ -77,6 +122,10 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		}
 		info, err := dirEntry.Info()
 		if err != nil {
+			if errors.Is(err, fs.ErrPermission) && path != f.path {
+				logger.Warnw("skipping inaccessible file", "path", path, "error", err)
+				return nil
+			}
 			return fmt.Errorf("unknown error on dirEntry.Info while walking path: %w", err)
 		}
 		if !info.ModTime().After(f.lastChecked) {
@@ -85,6 +134,11 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 		blob, err := os.ReadFile(path)
 		if err != nil {
+			f.recordRetrievalError(ctx)
+			if errors.Is(err, fs.ErrPermission) && path != f.path {
+				logger.Warnw("skipping unreadable file", "path", path, "error", err)
+				return nil
+			}
 			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
@@ -94,7 +148,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(FileCollector),
-				Source:      fmt.Sprintf("file:///%s", path),
+				Source:      fmt.Sprintf("file:///%s", filepath.ToSlash(path)),
 				DocumentRef: events.GetDocRef(blob),
 			},
 		}
@@ -126,4 +180,13 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 // Type returns the collector type
 func (f *fileCollector) Type() string {
 	return FileCollector
+}
+
+func (f *fileCollector) recordRetrievalError(ctx context.Context) {
+	if f.Metrics == nil {
+		return
+	}
+	if err := f.Metrics.AddCounter(ctx, FileReadErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record file read error metric: %v", err)
+	}
 }

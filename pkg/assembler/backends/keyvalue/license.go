@@ -101,7 +101,7 @@ func (c *demoClient) ingestLicense(ctx context.Context, license *model.IDorLicen
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 	if readOnly {
@@ -134,7 +134,7 @@ func (c *demoClient) licenseExact(ctx context.Context, licenseSpec *model.Licens
 			// If found by id, ignore rest of fields in spec and return as a match
 			return a, nil
 		}
-		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 			return nil, err
 		}
 		// Not found
@@ -150,7 +150,7 @@ func (c *demoClient) licenseExact(ctx context.Context, licenseSpec *model.Licens
 		if err == nil {
 			return out, nil
 		}
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return nil, err
 		}
 	}
@@ -191,12 +191,8 @@ func (c *demoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseS
 
 	var done bool
 	scn := c.kv.Keys(licenseCol)
-	currentPage := false
-
 	// If no cursor present start from the top
-	if after == nil {
-		currentPage = true
-	}
+	currentPage := after == nil
 
 	for !done {
 		var lKeys []string

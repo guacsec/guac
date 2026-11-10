@@ -109,7 +109,7 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.ID
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

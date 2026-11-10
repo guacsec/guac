@@ -76,7 +76,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 		conflictColumns := certifyVulnConflictColumns()
 		seen := make(map[string]bool)
 
-		insert, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln, seen)
+		insert, _, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln, seen)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 		}
@@ -116,13 +116,13 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 	return bulkCertifyVulnGlobalID(*ids), nil
 }
 
-func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput, seen map[string]bool) (*ent.CertifyVulnCreate, error) {
+func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput, seen map[string]bool) (*ent.CertifyVulnCreate, *uuid.UUID, error) {
 
 	certifyVulnCreate := tx.CertifyVuln.Create()
 
 	// manage vulnerability
 	if vuln == nil {
-		return nil, fmt.Errorf("vulnerability must be specified for vex ingestion")
+		return nil, nil, fmt.Errorf("vulnerability must be specified for vex ingestion")
 	}
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
@@ -130,7 +130,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
 		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
 	} else {
 		foundVulnID, err := tx.VulnerabilityID.Query().
@@ -140,7 +140,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 			).
 			OnlyID(ctx)
 		if err != nil {
-			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+			return nil, nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
 		vulnID = foundVulnID
 	}
@@ -148,7 +148,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 
 	// manage package or artifact
 	if pkg == nil {
-		return nil, Errorf("%v :: %s", "generateCertifyVulnCreate", "subject must be package")
+		return nil, nil, Errorf("%v :: %s", "generateCertifyVulnCreate", "subject must be package")
 	}
 	var pkgVersionID uuid.UUID
 	if pkg.PackageVersionID != nil {
@@ -156,12 +156,12 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
 		pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
 	} else {
 		pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
 		if err != nil {
-			return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
 		}
 		pkgVersionID = pv.ID
 	}
@@ -173,7 +173,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		seen[certifyVulnKey.String()] = true
 	} else {
 		// if duplicate entry is found, we will ignore it as it is exactly the same
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	certifyVulnCreate.
@@ -186,7 +186,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		SetTimeScanned(certifyVuln.TimeScanned.UTC()).
 		SetDocumentRef(certifyVuln.DocumentRef)
 
-	return certifyVulnCreate, nil
+	return certifyVulnCreate, &certifyVulnKey, nil
 }
 
 func canonicalCertifyVulnString(cv *model.ScanMetadataInput) string {
@@ -211,18 +211,22 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 	index := 0
 	for _, vulns := range batches {
 		var creates []*ent.CertifyVulnCreate
+		var createKeys []string
 		seen := make(map[string]bool)
 		for _, vuln := range vulns {
 			vuln := vuln
-			cv, err := generateCertifyVulnCreate(ctx, tx, pkgs[index], vulnerabilities[index], vuln, seen)
+			cv, cvKey, err := generateCertifyVulnCreate(ctx, tx, pkgs[index], vulnerabilities[index], vuln, seen)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 			}
 			if cv != nil {
 				creates = append(creates, cv)
+				createKeys = append(createKeys, cvKey.String())
 			}
 			index++
 		}
+
+		sortBatchByID(createKeys, creates)
 
 		err := tx.CertifyVuln.CreateBulk(creates...).
 			OnConflict(

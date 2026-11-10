@@ -94,7 +94,7 @@ func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.IDorBuild
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 	if readOnly {
@@ -139,12 +139,8 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 	}
 	edges := make([]*model.BuilderEdge, 0)
 	count := 0
-	currentPage := false
-
 	// If no cursor present start from the top
-	if after == nil {
-		currentPage = true
-	}
+	currentPage := after == nil
 	hasNextPage := false
 	totalCount := 0
 
@@ -259,7 +255,7 @@ func (c *demoClient) exactBuilder(ctx context.Context, filter *model.BuilderSpec
 		if err == nil {
 			return b, nil
 		}
-		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		if !errors.Is(err, kv.ErrNotFound) && !errors.Is(err, errTypeNotMatch) {
 			return nil, err
 		}
 		// id not found
@@ -273,7 +269,7 @@ func (c *demoClient) exactBuilder(ctx context.Context, filter *model.BuilderSpec
 		if err == nil {
 			return out, nil
 		}
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return nil, err
 		}
 	}

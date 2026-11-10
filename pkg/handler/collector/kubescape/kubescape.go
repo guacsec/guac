@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/anchore/syft/syft/format"
 	"github.com/anchore/syft/syft/format/cyclonedxjson"
@@ -36,14 +37,43 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 const (
 	Type = "KubescapeCollectorType"
+
+	// SBOMErrorsCounter tracks SBOMs that failed processing while watching.
+	SBOMErrorsCounter = "kubescape_sbom_errors"
 )
+
+var registerMetricsOnce sync.Once
 
 type collector struct {
 	config Config
+	// Metrics is optional; when nil, no metrics are recorded.
+	Metrics metrics.MetricCollector
+}
+
+// Opt configures a collector.
+type Opt func(*collector)
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(c *collector) {
+		c.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, SBOMErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for kubescape sbom errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 // Config is passed to New() to create a collector object
@@ -75,10 +105,14 @@ func init() {
 
 // New returns a new collector with saved config conforming to
 // guac/pkg/handler/collector.Collector interface.
-func New(cfg Config) *collector {
-	return &collector{
+func New(cfg Config, opts ...Opt) *collector {
+	c := &collector{
 		config: cfg,
 	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
 }
 
 // Conforming to guac/pkg/handler/collector.Collector interface, retrieve sboms
@@ -170,6 +204,7 @@ func (coll *collector) watch(ctx context.Context, dc chan<- *processor.Document,
 					err := coll.get(ctx, dc, sc, name)
 					if err != nil {
 						logger.Errorf("error processing sbom %q, continuing watch: %s", name, err)
+						coll.recordSBOMError(ctx)
 					}
 				}
 				if e.Type == watch.Error {
@@ -273,4 +308,13 @@ func getReal(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1bet
 
 func getFilteredReal(ctx context.Context, sc *kssc.Clientset, ns, name string) (*scv1beta1.SBOMSPDXv2p3Filtered, error) {
 	return sc.SpdxV1beta1().SBOMSPDXv2p3Filtereds(ns).Get(ctx, name, metav1.GetOptions{})
+}
+
+func (coll *collector) recordSBOMError(ctx context.Context) {
+	if coll.Metrics == nil {
+		return
+	}
+	if err := coll.Metrics.AddCounter(ctx, SBOMErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record kubescape sbom error metric: %v", err)
+	}
 }

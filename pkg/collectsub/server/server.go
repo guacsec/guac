@@ -25,7 +25,6 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
-	"github.com/guacsec/guac/pkg/collectsub/collectsub"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
 	db "github.com/guacsec/guac/pkg/collectsub/server/db/types"
@@ -79,7 +78,7 @@ func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntries
 	}, nil
 }
 
-func (s *server) GetCollectEntries(in *pb.GetCollectEntriesRequest, out collectsub.CollectSubscriberService_GetCollectEntriesServer) error {
+func (s *server) GetCollectEntries(in *pb.GetCollectEntriesRequest, out pb.CollectSubscriberService_GetCollectEntriesServer) error {
 	ctx := out.Context()
 
 	logger := ctxzap.Extract(ctx).Sugar()

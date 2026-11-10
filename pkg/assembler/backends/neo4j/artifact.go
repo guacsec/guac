@@ -25,11 +25,11 @@ import (
 )
 
 func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (a:Artifact)")
@@ -38,15 +38,15 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 
 	sb.WriteString(" RETURN a.algorithm, a.digest")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			artifacts := []*model.Artifact{}
-			for result.Next() {
+			for result.Next(ctx) {
 				algorithm := result.Record().Values[0].(string)
 				digest := result.Record().Values[1].(string)
 				artifact := generateModelArtifact(algorithm, digest)
@@ -70,25 +70,25 @@ func (c *neo4jClient) IngestArtifacts(ctx context.Context, artifacts []*model.ID
 }
 
 func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	values := map[string]any{}
 	values["algorithm"] = strings.ToLower(artifact.ArtifactInput.Algorithm)
 	values["digest"] = strings.ToLower(artifact.ArtifactInput.Digest)
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 			query := `
 MERGE (a:Artifact{algorithm:$algorithm,digest:$digest})
 RETURN a.algorithm, a.digest`
-			result, err := tx.Run(query, values)
+			result, err := tx.Run(ctx, query, values)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}

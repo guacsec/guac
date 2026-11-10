@@ -23,7 +23,7 @@ import (
 
 type jsonFormatGuesser struct{}
 
-func (_ *jsonFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
+func (*jsonFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
 	if jsonValidator.Valid(blob) {
 		return processor.FormatJSON
 	}

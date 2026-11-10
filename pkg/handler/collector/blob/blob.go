@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 	"time"
 
 	"gocloud.dev/blob"
@@ -32,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 const CollectorBlob = "BlobCollector"
@@ -40,9 +42,14 @@ const CollectorBlob = "BlobCollector"
 // limit is configured, defaults to 100 MiB.
 const DefaultMaxObjectSize int64 = 100 * 1024 * 1024
 
+// ObjectRetrievalErrorsCounter tracks failed per-object reads from the blob store.
+const ObjectRetrievalErrorsCounter = "blob_object_retrieval_errors"
+
 // ErrObjectTooLarge is returned by getObject when the object's size
 // exceeds maxObjectSize. Callers log and skip; this is not a fatal error.
 var ErrObjectTooLarge = errors.New("object exceeds max object size")
+
+var registerMetricsOnce sync.Once
 
 type blobCollector struct {
 	url           string
@@ -52,6 +59,7 @@ type blobCollector struct {
 	interval      time.Duration
 	prefix        string
 	maxObjectSize int64
+	Metrics       metrics.MetricCollector
 }
 
 type Opt func(*blobCollector)
@@ -87,6 +95,24 @@ func WithMaxObjectSize(n int64) Opt {
 	return func(b *blobCollector) {
 		b.maxObjectSize = n
 	}
+}
+
+// WithMetrics wires m into the collector. Call RegisterMetrics once first.
+func WithMetrics(m metrics.MetricCollector) Opt {
+	return func(b *blobCollector) {
+		b.Metrics = m
+	}
+}
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, ObjectRetrievalErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for blob object retrieval errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 // NewBlobCollector creates a cloud-agnostic collector that can collect
@@ -186,6 +212,7 @@ func (b *blobCollector) getArtifacts(ctx context.Context, docChannel chan<- *pro
 				logger.Warnf("skipping %q: %v (max %d bytes)", obj.Key, err, b.maxObjectSize)
 			} else {
 				logger.Warnf("failed to retrieve object %q: %v", obj.Key, err)
+				b.recordObjectError(ctx)
 			}
 			continue
 		}
@@ -207,6 +234,15 @@ func (b *blobCollector) getArtifacts(ctx context.Context, docChannel chan<- *pro
 	}
 
 	return nil
+}
+
+func (b *blobCollector) recordObjectError(ctx context.Context) {
+	if b.Metrics == nil {
+		return
+	}
+	if err := b.Metrics.AddCounter(ctx, ObjectRetrievalErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record blob object retrieval error metric: %v", err)
+	}
 }
 
 func (b *blobCollector) getObject(ctx context.Context, key string) ([]byte, error) {

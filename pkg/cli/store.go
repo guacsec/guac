@@ -28,7 +28,7 @@ const (
 	ConfigLogLevelVar = "log-level"
 )
 
-var NotFound = errors.New("Flag not found")
+var ErrNotFound = errors.New("flag not found")
 
 func init() {
 	set := &pflag.FlagSet{}
@@ -161,7 +161,7 @@ func BuildFlags(names []string) (*pflag.FlagSet, error) {
 	for _, n := range names {
 		f, ok := flagStore[n]
 		if !ok {
-			return nil, fmt.Errorf("%w : %s", NotFound, n)
+			return nil, fmt.Errorf("%w : %s", ErrNotFound, n)
 		}
 		rv.AddFlag(f)
 	}

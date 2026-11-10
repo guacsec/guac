@@ -42,7 +42,7 @@ func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderS
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for builder: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getBuilders(ctx, cursor)
 }
@@ -108,7 +108,7 @@ RETURN { "id": NEW._id }`
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest builder: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	createdBuilders, err := getBuilders(ctx, cursor)
 	if err != nil {
@@ -133,7 +133,7 @@ RETURN { "id": NEW._id }`
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest builder: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	createdBuilders, err := getBuilders(ctx, cursor)
 	if err != nil {

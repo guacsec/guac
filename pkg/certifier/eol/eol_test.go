@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -30,6 +31,10 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -173,6 +178,42 @@ func TestCertifyComponent(t *testing.T) {
 
 	require.Len(t, docs, 1, "Expected exactly one document")
 	verifyDoc(docs[0])
+}
+
+func TestEOLCertifier_RecordsErrorMetric(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "gone", http.StatusNotFound)
+	}))
+	defer server.Close()
+	eolAPIBase = server.URL + "/api"
+
+	ctx := logging.WithLogger(context.Background())
+	ctx = metrics.WithMetrics(ctx, "eol_test")
+	collector := metrics.FromContext(ctx, "eol_test")
+
+	counter, err := collector.RegisterCounter(ctx, EOLQueryErrorsCounter)
+	require.NoError(t, err)
+
+	cert := &eolCertifier{
+		client:  server.Client(),
+		Metrics: collector,
+	}
+
+	rootComponent := []*root_package.PackageNode{
+		{Purl: "pkg:maven/com.sap.sapmachine/sapmachine@21.0.5"},
+	}
+	docChan := make(chan *processor.Document, 1)
+
+	err = cert.CertifyComponent(ctx, rootComponent, docChan)
+	require.Error(t, err)
+
+	counterVec, ok := counter.(prometheus.Collector)
+	require.True(t, ok, "counter should implement prometheus.Collector")
+	assert.NoError(t, testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_eol_test_eol_query_errors Counter for eol_test_eol_query_errors
+		# TYPE guac_eol_test_eol_query_errors counter
+		guac_eol_test_eol_query_errors 1
+	`)))
 }
 
 func TestFetchAllProducts(t *testing.T) {

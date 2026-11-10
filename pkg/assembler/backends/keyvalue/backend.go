@@ -22,6 +22,7 @@ import (
 	"hash/fnv"
 	"math"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -126,7 +127,7 @@ type node interface {
 }
 
 var errNotFound = errors.New("not found")
-var errTypeNotMatch = errors.New("Stored type does not match")
+var errTypeNotMatch = errors.New("stored type does not match")
 
 // Scorecard scores are in range of 1-10, so a single step at 100 should be
 // plenty big
@@ -288,7 +289,7 @@ func byIDkv[E node](ctx context.Context, id string, c *demoClient) (E, error) {
 	}
 	sub := strings.SplitN(k, ":", 2)
 	if len(sub) != 2 {
-		return nl, fmt.Errorf("Bad value was stored in index map: %v", k)
+		return nl, fmt.Errorf("bad value was stored in index map: %v", k)
 	}
 	return byKeykv[E](ctx, sub[0], sub[1], c)
 }
@@ -305,6 +306,21 @@ func byKeykv[E node](ctx context.Context, coll string, k string, c *demoClient) 
 func setkv(ctx context.Context, coll string, n node, c *demoClient) error {
 	// validate type?
 	return c.kv.Set(ctx, coll, n.Key(), n)
+}
+
+// delkv removes a node from its collection and drops its ID from the index.
+func delkv(ctx context.Context, coll string, n node, c *demoClient) error {
+	if err := c.kv.Remove(ctx, coll, n.Key()); err != nil {
+		return err
+	}
+	return c.kv.Remove(ctx, indexCol, n.ID())
+}
+
+// removeLink drops linkID from a node's back edge slice and stores the node
+// again. Pass a pointer to the slice field.
+func removeLink(ctx context.Context, linkID string, links *[]string, coll string, n node, c *demoClient) error {
+	*links = slices.DeleteFunc(*links, func(id string) bool { return id == linkID })
+	return setkv(ctx, coll, n, c)
 }
 
 func (c *demoClient) addToIndex(ctx context.Context, coll string, n node) error {

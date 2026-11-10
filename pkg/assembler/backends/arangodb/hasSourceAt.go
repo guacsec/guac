@@ -177,7 +177,7 @@ func getPkgHasSourceAtForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSourceAt: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getHasSourceAtFromCursor(ctx, cursor, false)
 }
@@ -310,7 +310,7 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgI
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		query := `
 			LET firstPkg = FIRST(
@@ -350,7 +350,7 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgI
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	}
 	hasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -437,7 +437,7 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDo
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		query := `
 		LET firstPkg = FIRST(
@@ -479,7 +479,7 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDo
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	}
 	ingestHasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -585,7 +585,7 @@ func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for hasSourceAt: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbHasSourceAt struct {
 		HasSourceAtID string    `json:"_id"`

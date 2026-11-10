@@ -35,13 +35,13 @@ func (c *neo4jClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEq
 
 func (c *neo4jClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
 	var selectedPkg *model.PkgSpec = nil
 	var dependentPkg *model.PkgSpec = nil
-	if pkgEqualSpec.Packages != nil && len(pkgEqualSpec.Packages) != 0 {
+	if len(pkgEqualSpec.Packages) != 0 {
 		if len(pkgEqualSpec.Packages) == 1 {
 			selectedPkg = pkgEqualSpec.Packages[0]
 		} else {
@@ -60,16 +60,16 @@ func (c *neo4jClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqual
 		queryPkgEqual(&sb, dependentPkg, selectedPkg, pkgEqualSpec, true, queryValues)
 	}
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			collectedPkgEqual := []*model.PkgEqual{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 
 				pkgQualifiers := result.Record().Values[5]
 				subPath := result.Record().Values[4]
@@ -170,8 +170,8 @@ func setPkgEqualValues(sb *strings.Builder, pkgEqualSpec *model.PkgEqualSpec, fi
 // Ingest PkgEqual
 
 func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
 	queryValues := map[string]any{}
@@ -209,15 +209,15 @@ func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput
 
 	sb.WriteString(returnValue)
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}

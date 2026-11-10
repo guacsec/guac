@@ -24,7 +24,7 @@ import (
 
 type spdxTypeGuesser struct{}
 
-func (_ *spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	switch format {
 	case processor.FormatJSON:
 		spdxDoc, err := jsonReader.Read(bytes.NewReader(blob))

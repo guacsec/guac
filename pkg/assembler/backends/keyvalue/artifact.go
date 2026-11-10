@@ -174,7 +174,7 @@ func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.IDorArt
 	outA, err := byKeykv[*artStruct](ctx, artCol, inA.Key(), c)
 
 	if err != nil {
-		if !errors.Is(err, kv.NotFoundError) {
+		if !errors.Is(err, kv.ErrNotFound) {
 			return "", err
 		}
 		// Got KeyError: not found, so do insert
@@ -250,12 +250,8 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 
 	edges := make([]*model.ArtifactEdge, 0)
 	count := 0
-	currentPage := false
-
 	// If no cursor present start from the top
-	if after == nil {
-		currentPage = true
-	}
+	currentPage := after == nil
 	hasNextPage := false
 	totalCount := 0
 
@@ -332,15 +328,9 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 }
 
 func createArtifactEdges(algorithm string, a *artStruct, digest string, convArt *model.Artifact) *model.ArtifactEdge {
-	matchAlgorithm := false
-	if algorithm == "" || algorithm == a.Algorithm {
-		matchAlgorithm = true
-	}
+	matchAlgorithm := algorithm == "" || algorithm == a.Algorithm
 
-	matchDigest := false
-	if digest == "" || digest == a.Digest {
-		matchDigest = true
-	}
+	matchDigest := digest == "" || digest == a.Digest
 
 	if matchDigest && matchAlgorithm {
 		return &model.ArtifactEdge{

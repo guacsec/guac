@@ -35,6 +35,8 @@ type dependencyNode struct {
 type PackageName struct {
 	Name           string
 	DependentCount int
+	// nil when no scored source is linked to the package
+	ScorecardScore *float64
 }
 
 // GetDependenciesBySortedDependentCnt retrieves all dependents for each package and returns a sorted list of
@@ -48,7 +50,6 @@ type PackageName struct {
 // - An error
 func GetDependenciesBySortedDependentCnt(ctx context.Context, gqlClient graphql.Client) ([]PackageName, error) {
 	packages, err := findDependentsOfDependencies(ctx, gqlClient)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dependents: %v", err)
 	}

@@ -22,7 +22,7 @@ import (
 
 type scorecardTypeGuesser struct{}
 
-func (_ *scorecardTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*scorecardTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	var scorecard sc.JSONScorecardResultV2
 	if json.Unmarshal(blob, &scorecard) == nil && format == processor.FormatJSON {
 		if scorecard.Scorecard.Version != "" || scorecard.Scorecard.Commit != "" {

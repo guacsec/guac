@@ -35,15 +35,15 @@ func (c *neo4jClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mod
 
 func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	queryAll := true
 	aggregateIsOccurrence := []*model.IsOccurrence{}
 
 	if queryAll || (isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil) {
 		var sb strings.Builder
-		var firstMatch bool = true
+		firstMatch := true
 		queryValues := map[string]any{}
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
@@ -62,17 +62,17 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		result, err := session.ReadTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := session.ExecuteRead(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-				result, err := tx.Run(sb.String(), queryValues)
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				collectedIsOccurrence := []*model.IsOccurrence{}
 
-				for result.Next() {
+				for result.Next(ctx) {
 					pkgQualifiers := result.Record().Values[5]
 					subPath := result.Record().Values[4]
 					version := result.Record().Values[3]
@@ -112,7 +112,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 
 	if queryAll || (isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Source != nil) {
 		var sb strings.Builder
-		var firstMatch bool = true
+		firstMatch := true
 		queryValues := map[string]any{}
 
 		query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
@@ -126,17 +126,17 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest")
 
-		result, err := session.ReadTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := session.ExecuteRead(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
 
-				result, err := tx.Run(sb.String(), queryValues)
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				collectedIsOccurrence := []*model.IsOccurrence{}
 
-				for result.Next() {
+				for result.Next(ctx) {
 					tag := result.Record().Values[3]
 					commit := result.Record().Values[4]
 					nameStr := result.Record().Values[2].(string)
@@ -213,11 +213,11 @@ func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.Pack
 
 func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	occurrenceArt := helper.ConvertArtInputSpecToArtSpec(artifact.ArtifactInput)
@@ -244,15 +244,15 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 			"version.qualifier_list, isOccurrence, objArt.algorithm, objArt.digest"
 		sb.WriteString(returnValue)
 
-		result, err := session.WriteTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
-				result, err := tx.Run(sb.String(), queryValues)
+		result, err := session.ExecuteWrite(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				// query returns a single record
-				record, err := result.Single()
+				record, err := result.Single(ctx)
 				if err != nil {
 					return nil, err
 				}
@@ -305,15 +305,15 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		result, err := session.WriteTransaction(
-			func(tx neo4j.Transaction) (interface{}, error) {
-				result, err := tx.Run(sb.String(), queryValues)
+		result, err := session.ExecuteWrite(ctx,
+			func(tx neo4j.ManagedTransaction) (interface{}, error) {
+				result, err := tx.Run(ctx, sb.String(), queryValues)
 				if err != nil {
 					return nil, err
 				}
 
 				// query returns a single record
-				record, err := result.Single()
+				record, err := result.Single(ctx)
 				if err != nil {
 					return nil, err
 				}

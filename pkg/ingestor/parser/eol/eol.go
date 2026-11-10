@@ -101,11 +101,11 @@ func parseEOLCertifyPredicate(p []byte) (*attestation.EOLStatement, error) {
 }
 
 func (e *parser) parseSubject(s *attestation.EOLStatement) error {
-	if len(s.Statement.Subject) == 0 {
+	if len(s.Subject) == 0 {
 		return fmt.Errorf("no subject found in EOL statement")
 	}
 
-	for _, sub := range s.Statement.Subject {
+	for _, sub := range s.Subject {
 		p, err := helpers.PurlToPkg(sub.Uri)
 		if err != nil {
 			return fmt.Errorf("failed to parse uri: %s to a package with error: %w", sub.Uri, err)

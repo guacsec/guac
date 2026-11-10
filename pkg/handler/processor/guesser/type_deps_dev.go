@@ -22,7 +22,7 @@ import (
 
 type depsDevTypeGuesser struct{}
 
-func (_ *depsDevTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*depsDevTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	packageComponent := ddc.PackageComponent{}
 	if json.Unmarshal(blob, &packageComponent) == nil && format == processor.FormatJSON && packageComponent.CurrentPackage != nil {
 		return processor.DocumentDepsDev

@@ -59,11 +59,11 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 		return c.packagesName(ctx, pkgSpec)
 	}
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
@@ -72,16 +72,16 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 	sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 				pkgQualifiers := []*model.PackageQualifier{}
 				if result.Record().Values[5] != nil {
 					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
@@ -156,11 +156,11 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 }
 
 func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)")
@@ -173,15 +173,15 @@ func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) 
 
 	sb.WriteString(" RETURN type.type")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			packages := []*model.Package{}
-			for result.Next() {
+			for result.Next(ctx) {
 				collectedPackage := &model.Package{
 					Type:       result.Record().Values[0].(string),
 					Namespaces: []*model.PackageNamespace{},
@@ -202,11 +202,11 @@ func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) 
 }
 
 func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)")
@@ -225,16 +225,16 @@ func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgS
 
 	sb.WriteString(" RETURN type.type, namespace.namespace")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			pkgTypes := map[string][]*model.PackageNamespace{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 
 				namespaceString := result.Record().Values[1].(string)
 				typeString := result.Record().Values[0].(string)
@@ -268,11 +268,11 @@ func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgS
 }
 
 func (c *neo4jClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer closeSession(ctx, session)
 
 	var sb strings.Builder
-	var firstMatch bool = true
+	firstMatch := true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)")
@@ -296,16 +296,16 @@ func (c *neo4jClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) 
 
 	sb.WriteString(" RETURN type.type, namespace.namespace, name.name")
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
+	result, err := session.ExecuteRead(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
+			result, err := tx.Run(ctx, sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			pkgTypes := map[string]map[string][]*model.PackageName{}
 
-			for result.Next() {
+			for result.Next(ctx) {
 
 				nameString := result.Record().Values[2].(string)
 				namespaceString := result.Record().Values[1].(string)
@@ -365,8 +365,8 @@ func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgI
 }
 
 func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(ctx, session)
 
 	values := map[string]any{}
 	values["pkgType"] = pkg.PackageInput.Type
@@ -401,21 +401,21 @@ func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.IDorPkgInput)
 	}
 	values["qualifier"] = qualifiers
 
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	result, err := session.ExecuteWrite(ctx,
+		func(tx neo4j.ManagedTransaction) (interface{}, error) {
 			query := `MERGE (root:Pkg)
 MERGE (root) -[:PkgHasType]-> (type:PkgType{type:$pkgType})
 MERGE (type) -[:PkgHasNamespace]-> (ns:PkgNamespace{namespace:$namespace})
 MERGE (ns) -[:PkgHasName]-> (name:PkgName{name:$name})
 MERGE (name) -[:PkgHasVersion]-> (version:PkgVersion{version:$version,subpath:$subpath,qualifier_list:$qualifier})
 RETURN type.type, ns.namespace, name.name, version.version, version.subpath, version.qualifier_list`
-			result, err := tx.Run(query, values)
+			result, err := tx.Run(ctx, query, values)
 			if err != nil {
 				return nil, err
 			}
 
 			// query returns a single record
-			record, err := result.Single()
+			record, err := result.Single(ctx)
 			if err != nil {
 				return nil, err
 			}

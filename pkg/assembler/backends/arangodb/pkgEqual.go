@@ -234,7 +234,7 @@ func getPkgEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilde
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for pkgEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getPkgEqualFromCursor(ctx, cursor, false)
 }
@@ -417,7 +417,7 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPk
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest pkgEquals: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	pkgEqualList, err := getPkgEqualFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -471,7 +471,7 @@ func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInpu
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest pkgEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	pkgEqualList, err := getPkgEqualFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -575,7 +575,7 @@ func (c *arangoClient) queryPkgEqualNodeByID(ctx context.Context, filter *model.
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for pkgEqual: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbPkgEqual struct {
 		PkgEqualID     string `json:"_id"`
@@ -638,7 +638,7 @@ func (c *arangoClient) pkgEqualNeighbors(ctx context.Context, nodeID string, all
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "pkgEqualNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbPkgEqualNeighbor struct {
 			PackageID      string `json:"packageID"`

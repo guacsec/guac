@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/dependencies"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/pagination"
@@ -33,10 +34,15 @@ import (
 // DefaultServer implements the API, backed by the GraphQL Server
 type DefaultServer struct {
 	gqlClient graphql.Client
+	blobStore *blob.BlobStore
 }
 
-func NewDefaultServer(gqlClient graphql.Client) *DefaultServer {
-	return &DefaultServer{gqlClient: gqlClient}
+func NewDefaultServer(gqlClient graphql.Client, blobStore ...*blob.BlobStore) *DefaultServer {
+	s := &DefaultServer{gqlClient: gqlClient}
+	if len(blobStore) > 0 {
+		s.blobStore = blobStore[0]
+	}
+	return s
 }
 
 // Adds the logger to the http request context
@@ -70,37 +76,41 @@ func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheck
 }
 
 func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.AnalyzeDependenciesRequestObject) (gen.AnalyzeDependenciesResponseObject, error) {
+	var packages []dependencies.PackageName
+	var err error
+
 	switch request.Params.Sort {
 	case gen.Frequency:
-		packages, err := dependencies.GetDependenciesBySortedDependentCnt(ctx, s.gqlClient)
-		if err != nil {
-			return gen.AnalyzeDependencies500JSONResponse{
-				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
-					Message: err.Error(),
-				},
-			}, nil
-		}
-
-		var packageNames []gen.PackageName
-
-		for _, p := range packages {
-			pac := p // have to do this because we don't want packageNames to keep on appending a pointer of the same variable p.
-			packageNames = append(packageNames, gen.PackageName{
-				Name:           pac.Name,
-				DependentCount: pac.DependentCount,
-			})
-		}
-
-		val := gen.AnalyzeDependencies200JSONResponse{
-			PackageNameListJSONResponse: packageNames,
-		}
-
-		return val, nil
+		packages, err = dependencies.GetDependenciesBySortedDependentCnt(ctx, s.gqlClient)
 	case gen.Scorecard:
-		return nil, fmt.Errorf("scorecard sort is unimplemented")
+		packages, err = dependencies.GetDependenciesBySortedScorecard(ctx, s.gqlClient)
 	default:
-		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
+		return gen.AnalyzeDependencies400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: fmt.Sprintf("%v sort is unsupported", request.Params.Sort),
+			},
+		}, nil
 	}
+	if err != nil {
+		return gen.AnalyzeDependencies500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	var packageNames []gen.PackageName
+	for _, p := range packages {
+		packageNames = append(packageNames, gen.PackageName{
+			Name:           p.Name,
+			DependentCount: p.DependentCount,
+			ScorecardScore: p.ScorecardScore,
+		})
+	}
+
+	return gen.AnalyzeDependencies200JSONResponse{
+		PackageNameListJSONResponse: packageNames,
+	}, nil
 }
 
 func (s *DefaultServer) GetPackagePurls(ctx context.Context, request gen.GetPackagePurlsRequestObject) (gen.GetPackagePurlsResponseObject, error) {
@@ -287,4 +297,96 @@ func (s *DefaultServer) GetArtifactDeps(ctx context.Context, request gen.GetArti
 	result.PurlList = append(result.PurlList, page...)
 
 	return result, nil
+}
+
+func (s *DefaultServer) ListSboms(ctx context.Context, request gen.ListSbomsRequestObject) (gen.ListSbomsResponseObject, error) {
+	sboms, err := RetrieveSboms(ctx, s.gqlClient, request.Params.Package)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, ListSboms).(gen.ListSbomsResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	page, paginationInfo, err := pagination.Paginate(ctx, sboms, request.Params.PaginationSpec)
+	if err != nil {
+		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	if page == nil {
+		page = []gen.Sbom{}
+	}
+
+	return gen.ListSboms200JSONResponse{
+		SbomListJSONResponse: gen.SbomListJSONResponse{
+			PaginationInfo: paginationInfo,
+			SbomList:       page,
+		},
+	}, nil
+}
+
+func (s *DefaultServer) GetSbom(ctx context.Context, request gen.GetSbomRequestObject) (gen.GetSbomResponseObject, error) {
+	sbom, err := RetrieveSbom(ctx, s.gqlClient, request.Id)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetSbom).(gen.GetSbomResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.GetSbom400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return gen.GetSbom200JSONResponse{
+		SbomJSONResponse: gen.SbomJSONResponse(*sbom),
+	}, nil
+}
+
+type downloadSbomResponse struct {
+	contentType        string
+	contentDisposition string
+	body               []byte
+}
+
+func (r downloadSbomResponse) VisitDownloadSbomResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", r.contentType)
+	if r.contentDisposition != "" {
+		w.Header().Set("Content-Disposition", r.contentDisposition)
+	}
+	w.Header().Set("Content-Length", fmt.Sprint(len(r.body)))
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write(r.body)
+	return err
+}
+
+func (s *DefaultServer) DownloadSbom(ctx context.Context, request gen.DownloadSbomRequestObject) (gen.DownloadSbomResponseObject, error) {
+	doc, err := RetrieveSbomDocument(ctx, s.gqlClient, s.blobStore, request.Id)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, DownloadSbom).(gen.DownloadSbomResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.DownloadSbom400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return downloadSbomResponse{
+		contentType:        doc.ContentType,
+		contentDisposition: doc.ContentDisposition,
+		body:               doc.Blob,
+	}, nil
 }

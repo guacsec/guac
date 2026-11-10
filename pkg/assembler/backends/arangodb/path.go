@@ -90,7 +90,7 @@ IN 1..@maxLength ANY K_PATHS
 	if err != nil {
 		return nil, fmt.Errorf("failed to query path for startNodeID: %s and targetNodeID: %s with error: %w", startNodeID, targetNodeID, err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type Nodes struct {
 		IDs []string `json:"nodes"`

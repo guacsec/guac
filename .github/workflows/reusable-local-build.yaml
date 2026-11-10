@@ -41,7 +41,7 @@ jobs:
         with:
           go-version: 'stable'
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           install-only: true
       - run: |
@@ -57,7 +57,7 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-local-organic-guac-amd64 local-organic-guac
           docker save -o ./bin/local-organic-guac.tar local-organic-guac
         shell: bash
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: guac-artifacts
           path: ./bin

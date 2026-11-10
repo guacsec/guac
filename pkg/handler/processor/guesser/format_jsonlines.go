@@ -24,7 +24,7 @@ import (
 
 type jsonLinesFormatGuesser struct{}
 
-func (_ *jsonLinesFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
+func (*jsonLinesFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
 	lines := strings.Split(strings.TrimSpace(string(blob)), "\n")
 	for _, line := range lines {
 		if !jsonValidator.Valid([]byte(strings.TrimSpace(line))) {

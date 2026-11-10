@@ -2376,8 +2376,8 @@ func TestNeighbors(t *testing.T) {
 			testdata.P2out,
 			includedTestExpectedArtifact1,
 			includedTestExpectedArtifact2,
-			includedTestExpectedPackage1,
 			includedTestExpectedPackage2,
+			includedTestExpectedPackage1,
 			includedTestExpectedPackage3,
 			&model.IsDependency{
 				Package:           includedTestExpectedPackage1,

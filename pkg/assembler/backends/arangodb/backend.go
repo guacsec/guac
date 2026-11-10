@@ -347,7 +347,7 @@ func createView(ctx context.Context, db driver.Database, viewName string, opts *
 }
 
 func createAnalyzer(ctx context.Context, db driver.Database, analyzer driver.ArangoSearchAnalyzerDefinition) error {
-	_, _, err := db.EnsureAnalyzer(ctx, analyzer)
+	_, _, err := db.EnsureCreatedAnalyzer(ctx, &analyzer)
 	return err
 }
 
@@ -373,7 +373,7 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 func newForQuery(repositoryName string, counterName string) *arangoQueryBuilder {
 	aqb := &arangoQueryBuilder{}
 
-	aqb.query.WriteString(fmt.Sprintf("FOR %s IN %s", counterName, repositoryName))
+	fmt.Fprintf(&aqb.query, "FOR %s IN %s", counterName, repositoryName)
 
 	return aqb
 }
@@ -381,7 +381,7 @@ func newForQuery(repositoryName string, counterName string) *arangoQueryBuilder 
 func (aqb *arangoQueryBuilder) forOutBound(edgeCollectionName string, counterVertexName string, outBoundStartVertexName string) *arangoQueryBuilder {
 	aqb.query.WriteString("\n")
 
-	aqb.query.WriteString(fmt.Sprintf("FOR %s IN OUTBOUND %s %s", counterVertexName, outBoundStartVertexName, edgeCollectionName))
+	fmt.Fprintf(&aqb.query, "FOR %s IN OUTBOUND %s %s", counterVertexName, outBoundStartVertexName, edgeCollectionName)
 
 	return aqb
 }
@@ -389,7 +389,7 @@ func (aqb *arangoQueryBuilder) forOutBound(edgeCollectionName string, counterVer
 func (aqb *arangoQueryBuilder) forInBound(edgeCollectionName string, counterVertexName string, inBoundStartVertexName string) *arangoQueryBuilder {
 	aqb.query.WriteString("\n")
 
-	aqb.query.WriteString(fmt.Sprintf("FOR %s IN INBOUND %s %s", counterVertexName, inBoundStartVertexName, edgeCollectionName))
+	fmt.Fprintf(&aqb.query, "FOR %s IN INBOUND %s %s", counterVertexName, inBoundStartVertexName, edgeCollectionName)
 
 	return aqb
 }
@@ -397,7 +397,7 @@ func (aqb *arangoQueryBuilder) forInBound(edgeCollectionName string, counterVert
 func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
-	aqb.query.WriteString(fmt.Sprintf("FILTER %s.%s %s %s", counterName, fieldName, condition, value))
+	fmt.Fprintf(&aqb.query, "FILTER %s.%s %s %s", counterName, fieldName, condition, value)
 
 	return newArangoQueryFilter(aqb)
 }
@@ -405,7 +405,7 @@ func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, cond
 func (aqb *arangoQueryBuilder) filterLength(counterName string, fieldName string, condition string, value int) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
-	aqb.query.WriteString(fmt.Sprintf("FILTER LENGTH(%s.%s) %s %d", counterName, fieldName, condition, value))
+	fmt.Fprintf(&aqb.query, "FILTER LENGTH(%s.%s) %s %d", counterName, fieldName, condition, value)
 
 	return newArangoQueryFilter(aqb)
 }

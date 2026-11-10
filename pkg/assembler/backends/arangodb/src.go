@@ -325,7 +325,7 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for sources: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getSources(ctx, cursor)
 }
@@ -349,7 +349,7 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for source type: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	var sources []*model.Source
 	for {
@@ -399,7 +399,7 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for source namespace: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	srcTypes := map[string][]*model.SourceNamespace{}
 	for {
@@ -614,7 +614,7 @@ func (c *arangoClient) querySrcNameNodeByID(ctx context.Context, id string, filt
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to query for source name: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedSrcName struct {
 		NameID string `json:"name_id"`
@@ -678,7 +678,7 @@ func (c *arangoClient) querySrcNamespaceNodeByID(ctx context.Context, id string,
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to query for source namespace: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedSrcNamespace struct {
 		NamespaceID string `json:"namespace_id"`
@@ -732,7 +732,7 @@ func (c *arangoClient) querySrcTypeNodeByID(ctx context.Context, id string, filt
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for source type: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type parsedSrcType struct {
 		TypeID  string `json:"type_id"`

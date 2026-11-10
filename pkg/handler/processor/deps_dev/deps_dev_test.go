@@ -16,7 +16,6 @@
 package deps_dev
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -87,7 +86,6 @@ func TestDepsDev_Unpack(t *testing.T) {
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println(testdata.SpdxExampleSmall)
 			d := DepsDev{}
 			actual, err := d.Unpack(&tt.doc)
 			if (err != nil) != tt.expectErr {

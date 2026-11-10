@@ -23,13 +23,13 @@ import (
 
 type openVexTypeGuesser struct{}
 
-func (_ *openVexTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (*openVexTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	switch format {
 	case processor.FormatJSON:
 		// Decode the BOM
 		var decoded vex.VEX
 		err := json.Unmarshal(blob, &decoded)
-		if err == nil && decoded.Metadata.ID != "" {
+		if err == nil && decoded.ID != "" {
 			return processor.DocumentOpenVEX
 		}
 	}

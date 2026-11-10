@@ -154,7 +154,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

@@ -24,6 +24,10 @@ type gcsOptions struct {
 	bucket            string
 	// enable/disable message publish to queue
 	publishToQueue bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus port
+	prometheusPort int
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -31,7 +35,7 @@ const gcsCredentialsPathFlag = "gcp-credentials-path"
 var gcsCmd = &cobra.Command{
 	Use:     "gcs [flags] bucket_name",
 	Short:   "takes SBOMs and attestations from a Google Cloud Storage bucket and injects them to GUAC graph. This command talks directly to the graphQL endpoint",
-	Example: "guacone collect gcs my-bucket --gcs-credentials-path /secret/sa.json",
+	Example: "guaccollect gcs my-bucket --gcp-credentials-path /secret/sa.json",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
@@ -45,6 +49,8 @@ var gcsCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -59,7 +65,7 @@ var gcsCmd = &cobra.Command{
 		// Credential flag is not mandatory since they can also be loaded from
 		// the environment variable GOOGLE_APPLICATION_CREDENTIALS by the client, by default
 		if credsPath := viper.GetString(gcsCredentialsPathFlag); credsPath != "" {
-			gcsOpts = append(gcsOpts, option.WithCredentialsFile(credsPath))
+			gcsOpts = append(gcsOpts, option.WithAuthCredentialsFile(option.ServiceAccount, credsPath))
 		}
 
 		client, err := storage.NewClient(ctx, gcsOpts...)
@@ -68,7 +74,12 @@ var gcsCmd = &cobra.Command{
 		}
 
 		// Register collector
-		gcsCollector, err := gcs.NewGCSCollector(gcs.WithBucket(opts.bucket), gcs.WithClient(client))
+		collectorOpts := []gcs.Opt{gcs.WithBucket(opts.bucket), gcs.WithClient(client)}
+		if opts.enablePrometheus {
+			m := startMetricsServer(ctx, "gcs", opts.prometheusPort, gcs.RegisterMetrics)
+			collectorOpts = append(collectorOpts, gcs.WithMetrics(m))
+		}
+		gcsCollector, err := gcs.NewGCSCollector(collectorOpts...)
 		if err != nil {
 			logger.Fatalf("unable to create gcs client: %v", err)
 		}
@@ -103,12 +114,17 @@ func validateGCSFlags(
 	csubTls,
 	csubTlsSkipVerify bool,
 	pubToQueue bool,
+	enablePrometheus bool,
+	prometheusPort int,
 	args []string,
 ) (gcsOptions, error) {
 	opts := gcsOptions{
 		pubSubAddr:     pubSubAddr,
 		blobAddr:       blobAddr,
 		publishToQueue: pubToQueue,
+
+		enablePrometheus: enablePrometheus,
+		prometheusPort:   prometheusPort,
 	}
 
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -130,7 +146,7 @@ func validateGCSFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{gcsCredentialsPathFlag})
+	set, err := cli.BuildFlags([]string{gcsCredentialsPathFlag, "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

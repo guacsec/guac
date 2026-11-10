@@ -18,25 +18,30 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	blobCollector "github.com/guacsec/guac/pkg/handler/collector/blob"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 type blobOptions struct {
-	pubsubAddr     string
-	blobAddr       string
-	storeURL       string
-	prefix         string
-	maxObjectSize  int64
-	poll           bool
-	pollInterval   time.Duration
-	publishToQueue bool
+	pubsubAddr       string
+	blobAddr         string
+	storeURL         string
+	prefix           string
+	maxObjectSize    int64
+	poll             bool
+	pollInterval     time.Duration
+	publishToQueue   bool
+	enablePrometheus bool
+	prometheusPort   int
 }
 
 const (
@@ -102,6 +107,8 @@ NOTE: every in-scope object is ingested as-is; point this only at buckets (or --
 			viper.GetBool("publish-to-queue"),
 			viper.GetString(blobPrefixFlag),
 			viper.GetInt64(blobMaxObjectSizeFlag),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 			args,
 		)
 		if err != nil {
@@ -120,6 +127,21 @@ NOTE: every in-scope object is ingested as-is; point this only at buckets (or --
 		}
 		if opts.maxObjectSize > 0 {
 			collectorOpts = append(collectorOpts, blobCollector.WithMaxObjectSize(opts.maxObjectSize))
+		}
+		if opts.enablePrometheus {
+			ctx = metrics.WithMetrics(ctx, "blob")
+			metricsCollector := metrics.FromContext(ctx, "blob")
+			if err := blobCollector.RegisterMetrics(ctx, metricsCollector); err != nil {
+				logger.Fatalf("unable to register metrics: %v", err)
+			}
+			collectorOpts = append(collectorOpts, blobCollector.WithMetrics(metricsCollector))
+			go func() {
+				http.Handle("/metrics", metricsCollector.MetricsHandler())
+				logger.Infof("Prometheus server is listening on: %d", opts.prometheusPort)
+				if err := http.ListenAndServe(fmt.Sprintf(":%d", opts.prometheusPort), nil); err != nil {
+					logger.Fatalf("Error starting HTTP server: %v", err)
+				}
+			}()
 		}
 
 		bc, err := blobCollector.NewBlobCollector(ctx, collectorOpts...)
@@ -140,7 +162,7 @@ NOTE: every in-scope object is ingested as-is; point this only at buckets (or --
 	},
 }
 
-func validateBlobFlags(pubsubAddr, blobAddr string, poll bool, interval string, pubToQueue bool, prefix string, maxObjectSize int64, args []string) (blobOptions, error) {
+func validateBlobFlags(pubsubAddr, blobAddr string, poll bool, interval string, pubToQueue bool, prefix string, maxObjectSize int64, enablePrometheus bool, prometheusPort int, args []string) (blobOptions, error) {
 	var opts blobOptions
 
 	opts.pubsubAddr = pubsubAddr
@@ -149,6 +171,8 @@ func validateBlobFlags(pubsubAddr, blobAddr string, poll bool, interval string, 
 	opts.publishToQueue = pubToQueue
 	opts.prefix = prefix
 	opts.maxObjectSize = maxObjectSize
+	opts.enablePrometheus = enablePrometheus
+	opts.prometheusPort = prometheusPort
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for store_url")
@@ -171,14 +195,16 @@ func validateBlobFlags(pubsubAddr, blobAddr string, poll bool, interval string, 
 }
 
 func init() {
-	blobCmd.PersistentFlags().String(blobPrefixFlag, "", "if set, only objects whose key begins with this prefix are collected")
-	blobCmd.PersistentFlags().Int64(blobMaxObjectSizeFlag, 0, "maximum object size in bytes to read; objects larger than this are logged and skipped (0 uses the built-in default)")
-	if err := viper.BindPFlag(blobPrefixFlag, blobCmd.PersistentFlags().Lookup(blobPrefixFlag)); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind %s flag: %v", blobPrefixFlag, err)
+	set, err := cli.BuildFlags([]string{"prometheus-port"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
-	if err := viper.BindPFlag(blobMaxObjectSizeFlag, blobCmd.PersistentFlags().Lookup(blobMaxObjectSizeFlag)); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind %s flag: %v", blobMaxObjectSizeFlag, err)
+	blobCmd.PersistentFlags().AddFlagSet(set)
+	blobCmd.PersistentFlags().String(blobPrefixFlag, "", "if set, only objects whose key begins with this prefix are collected")
+	blobCmd.PersistentFlags().Int64(blobMaxObjectSizeFlag, 0, "maximum object size in bytes to read; objects larger than this are logged and skipped (0 uses the built-in default)")
+	if err := viper.BindPFlags(blobCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
 	rootCmd.AddCommand(blobCmd)

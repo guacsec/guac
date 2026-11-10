@@ -196,6 +196,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 	index := 0
 	for _, occurs := range batches {
 		creates := make([]*ent.OccurrenceCreate, len(occurs))
+		createIDs := make([]string, len(occurs))
 		for i, occur := range occurs {
 			occur := occur
 			switch {
@@ -206,6 +207,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
+				createIDs[i] = isOccurrenceID.String()
 				ids = append(ids, isOccurrenceID.String())
 
 			case len(subjects.Sources) > 0:
@@ -215,12 +217,16 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
+				createIDs[i] = isOccurrenceID.String()
 				ids = append(ids, isOccurrenceID.String())
 			default:
 				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
 			}
 			index++
 		}
+
+		// Sort by deterministic ID so concurrent transactions lock shared rows in the same order, avoiding 40P01 deadlocks.
+		sortBatchByID(createIDs, creates)
 
 		err := tx.Occurrence.CreateBulk(creates...).
 			OnConflict(

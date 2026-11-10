@@ -32,6 +32,8 @@ type s3Options struct {
 	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
 	publishToQueue    bool                          // enable/disable message publish to queue
+	enablePrometheus  bool                          // enable prometheus server
+	prometheusPort    int                           // prometheus port
 
 }
 
@@ -88,6 +90,8 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("publish-to-queue"),
+			viper.GetBool("enable-prometheus"),
+			viper.GetInt("prometheus-port"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -97,6 +101,12 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 
 		signals := make(chan os.Signal, 1)
 		signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
+		var collectorOpts []s3.Opt
+		if s3Opts.enablePrometheus {
+			m := startMetricsServer(ctx, "s3", s3Opts.prometheusPort, s3.RegisterMetrics)
+			collectorOpts = append(collectorOpts, s3.WithMetrics(m))
+		}
 
 		s3Collector := s3.NewS3Collector(s3.S3CollectorConfig{
 			S3Url:                   s3Opts.s3url,
@@ -108,7 +118,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			MessageProviderEndpoint: s3Opts.mpEndpoint,
 			Queues:                  s3Opts.queues,
 			Poll:                    s3Opts.poll,
-		})
+		}, collectorOpts...)
 
 		if err := collector.RegisterDocumentCollector(s3Collector, s3.S3CollectorType); err != nil {
 			logger.Fatalf("unable to register s3 collector: %v\n", err)
@@ -146,6 +156,8 @@ func validateS3Opts(
 	csubTlsSkipVerify,
 	poll bool,
 	pubToQueue bool,
+	enablePrometheus bool,
+	prometheusPort int,
 ) (s3Options, error) {
 	var opts s3Options
 
@@ -183,13 +195,15 @@ func validateS3Opts(
 		poll:              poll,
 		csubClientOptions: csubClientOptions,
 		publishToQueue:    pubToQueue,
+		enablePrometheus:  enablePrometheus,
+		prometheusPort:    prometheusPort,
 	}
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-path", "s3-item", "s3-region", "s3-queues", "s3-mp", "s3-mp-endpoint"})
+	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-path", "s3-item", "s3-region", "s3-queues", "s3-mp", "s3-mp-endpoint", "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

@@ -139,7 +139,7 @@ func getHashEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HashEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getHashEqualFromCursor(ctx, cursor)
 }
@@ -240,7 +240,7 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest hashEquals: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	hashEqualList, err := getHashEqualFromCursor(ctx, cursor)
 	if err != nil {
@@ -278,7 +278,7 @@ RETURN { 'hashEqual_id': hashEqual._id }`
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest hashEqual: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	hashEqualList, err := getHashEqualFromCursor(ctx, cursor)
 	if err != nil {
@@ -370,7 +370,7 @@ func (c *arangoClient) queryHashEqualNodeByID(ctx context.Context, filter *model
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for hashEqual: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbHashEqual struct {
 		HashEqualID     string `json:"_id"`
@@ -436,7 +436,7 @@ func (c *arangoClient) hashEqualNeighbors(ctx context.Context, nodeID string, al
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hashEqualNeighbors", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 
 		type dbHashEqualNeighbor struct {
 			ArtifactID      string `json:"artifactID"`

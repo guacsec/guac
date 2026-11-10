@@ -195,7 +195,7 @@ func getSrcPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for PointOfContact: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getPointOfContactFromCursor(ctx, cursor, false)
 }
@@ -222,7 +222,7 @@ func getArtPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for PointOfContact: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getPointOfContactFromCursor(ctx, cursor, false)
 }
@@ -278,7 +278,7 @@ func getPkgPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for PointOfContact: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getPointOfContactFromCursor(ctx, cursor, false)
 }
@@ -382,7 +382,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		} else {
 			query := `
 			LET firstPkg = FIRST(
@@ -414,7 +414,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 
 	} else if subject.Artifact != nil {
@@ -440,7 +440,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact pointOfContact: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
@@ -472,7 +472,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source pointOfContact: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return "", fmt.Errorf("package, artifact, or source is specified for IngestPointOfContact")
 	}
@@ -553,7 +553,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		} else {
 			query := `
 			LET firstPkg = FIRST(
@@ -587,7 +587,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
-			defer cursor.Close()
+			defer func() { _ = cursor.Close() }()
 		}
 
 	} else if len(subjects.Artifacts) > 0 {
@@ -643,7 +643,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact pointOfContact: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -705,7 +705,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source pointOfContact: %w", err)
 		}
-		defer cursor.Close()
+		defer func() { _ = cursor.Close() }()
 	} else {
 		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestPointOfContacts")
 	}
@@ -828,7 +828,7 @@ func (c *arangoClient) queryPointOfContactNodeByID(ctx context.Context, filter *
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for pointOfContact: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbPointOfContact struct {
 		PointOfContactID string    `json:"_id"`

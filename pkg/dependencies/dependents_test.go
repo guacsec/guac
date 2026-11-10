@@ -227,7 +227,7 @@ func createNodes(t *testing.T, ctx context.Context, gqlClient graphql.Client, pk
 		t.Fatalf("failed to create dependency nodes: %v", err)
 	}
 
-	err, id := createOccurrenceAndArtifact(t, ctx, gqlClient, info)
+	id, err := createOccurrenceAndArtifact(t, ctx, gqlClient, info)
 
 	if err != nil {
 		t.Fatalf("failed to create occurrence and artifact: %v", err)
@@ -297,7 +297,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, dependencyIds, so
 
 // createOccurrenceAndArtifact creates a test artifact and a test occurrence.
 // The values in artifact and occurrence are fake values and won't work for anything other than tests
-func createOccurrenceAndArtifact(t *testing.T, ctx context.Context, gqlClient graphql.Client, info specInfo) (error, *model.IngestIsOccurrencePkgResponse) {
+func createOccurrenceAndArtifact(t *testing.T, ctx context.Context, gqlClient graphql.Client, info specInfo) (*model.IngestIsOccurrencePkgResponse, error) {
 	_, err := model.IngestArtifact(ctx, gqlClient, model.IDorArtifactInput{
 		ArtifactInput: &model.ArtifactInputSpec{
 			Algorithm: "sha265",
@@ -330,7 +330,7 @@ func createOccurrenceAndArtifact(t *testing.T, ctx context.Context, gqlClient gr
 		t.Fatalf("%v", err)
 	}
 
-	return err, id
+	return id, err
 }
 
 func check(t *testing.T, wantErr bool, want map[string]int, gqlClient graphql.Client) {

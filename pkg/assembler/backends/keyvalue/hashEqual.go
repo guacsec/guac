@@ -107,7 +107,7 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.IDorArt
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

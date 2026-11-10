@@ -44,7 +44,7 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for artifacts: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getArtifacts(ctx, cursor)
 }
@@ -115,7 +115,7 @@ func (c *arangoClient) getMaterialsByID(ctx context.Context, artifactIDs []strin
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Materials: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getArtifacts(ctx, cursor)
 }
@@ -166,7 +166,7 @@ func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.I
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Materials: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return getArtifacts(ctx, cursor)
 }
@@ -218,7 +218,7 @@ RETURN { "id": NEW._id }`
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest artifact: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	createdArtifacts, err := getArtifacts(ctx, cursor)
 	if err != nil {
@@ -243,7 +243,7 @@ RETURN { "id": NEW._id }`
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest artifact: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	createdArtifacts, err := getArtifacts(ctx, cursor)
 	if err != nil {
@@ -461,7 +461,7 @@ func (c *arangoClient) getNeighborIDFromCursor(ctx context.Context, arangoQueryB
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", callingFuncName, err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbNeighbor struct {
 		NeighborID *string `json:"neighbor"`

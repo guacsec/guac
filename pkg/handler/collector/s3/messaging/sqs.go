@@ -113,7 +113,7 @@ func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	// Get URL of queue
 	urlResult, err := s.client.GetQueueUrl(ctx, gQInput)
 	if err != nil {
-		return nil, fmt.Errorf("Got an error getting the queue URL : %w", err)
+		return nil, fmt.Errorf("got an error getting the queue URL : %w", err)
 	}
 
 	addr := urlResult.QueueUrl

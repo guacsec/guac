@@ -38,7 +38,7 @@ func Test_FileSourceGetDataSources(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to create temp dir")
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	path, err := createTestFile(tmpDir, "test1.yaml", simpleConfig)
 	if err != nil {
@@ -78,7 +78,7 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to create temp dir")
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	path, err := createTestFile(tmpDir, "test1.yaml", simpleConfig)
 	if err != nil {
@@ -130,7 +130,7 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 		if err != nil {
 			t.Errorf("unable to append to file: %v", err)
 		}
-		f.Close()
+		_ = f.Close()
 	}()
 	select {
 	case err = <-upChan:

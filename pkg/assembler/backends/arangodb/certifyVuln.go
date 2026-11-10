@@ -107,7 +107,7 @@ func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVuln: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	return geCertifyVulnFromCursor(ctx, cursor, false)
 }
@@ -269,7 +269,7 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDo
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest certifyVulns %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -323,7 +323,7 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgI
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest certifyVuln: %w", err)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor, true)
 	if err != nil {
@@ -450,7 +450,7 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyVuln: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
+	defer func() { _ = cursor.Close() }()
 
 	type dbVuln struct {
 		CertifyVulnID   string    `json:"_id"`

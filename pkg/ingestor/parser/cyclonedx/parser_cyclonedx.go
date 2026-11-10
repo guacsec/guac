@@ -143,12 +143,13 @@ func (c *cyclonedxParser) getTopLevelPackage() error {
 	if c.cdxBom.Metadata.Component != nil {
 		purl := c.cdxBom.Metadata.Component.PackageURL
 		if c.cdxBom.Metadata.Component.PackageURL == "" {
-			if c.cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
+			switch c.cdxBom.Metadata.Component.Type {
+			case cdx.ComponentTypeContainer:
 				purl = parseContainerType(c.cdxBom.Metadata.Component.Name, c.cdxBom.Metadata.Component.Version, true)
-			} else if c.cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
+			case cdx.ComponentTypeFile:
 				// example: file type ("/home/work/test/build/webserver")
 				purl = guacCDXFilePurl(c.cdxBom.Metadata.Component.Name, c.cdxBom.Metadata.Component.Version, true)
-			} else {
+			default:
 				purl = guacCDXPkgPurl(c.cdxBom.Metadata.Component.Name, c.cdxBom.Metadata.Component.Version, "", true)
 			}
 		}
@@ -229,11 +230,12 @@ func traverseComponents(c cyclonedxParser, components *[]cdx.Component) error {
 
 			purl := comp.PackageURL
 			if purl == "" {
-				if comp.Type == cdx.ComponentTypeContainer {
+				switch comp.Type {
+				case cdx.ComponentTypeContainer:
 					purl = parseContainerType(comp.Name, comp.Version, false)
-				} else if comp.Type == cdx.ComponentTypeFile {
+				case cdx.ComponentTypeFile:
 					purl = guacCDXFilePurl(comp.Name, comp.Version, false)
-				} else {
+				default:
 					purl = asmhelpers.GuacPkgPurl(comp.Name, &comp.Version)
 				}
 			}

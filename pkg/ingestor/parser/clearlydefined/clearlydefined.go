@@ -81,7 +81,7 @@ func parseLegalCertifyPredicate(p []byte) (*attestation_license.ClearlyDefinedSt
 }
 
 func (c *parser) parseSubject(s *attestation_license.ClearlyDefinedStatement) error {
-	for _, sub := range s.Statement.Subject {
+	for _, sub := range s.Subject {
 		p, err := helpers.PurlToPkg(sub.Uri)
 		if err != nil {
 			src, err := helpers.GuacSrcIdToSourceInput(sub.Uri)
@@ -110,7 +110,7 @@ The “licensed” -> “facets” -> “core” -> “attribution” -> “part
 func (c *parser) parseClearlyDefined(_ context.Context, s *attestation_license.ClearlyDefinedStatement) error {
 	if s.Predicate.Definition.Licensed.Declared != "" {
 		discoveredLicenses := make([]generated.LicenseInputSpec, 0)
-		var discoveredLicenseStr string = ""
+		var discoveredLicenseStr string
 		if len(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions) > 0 {
 			discoveredLicenseStr = common.CombineLicense(s.Predicate.Definition.Licensed.Facets.Core.Discovered.Expressions)
 			discoveredLicenses = append(discoveredLicenses, common.ParseLicenses(discoveredLicenseStr, nil, nil)...)

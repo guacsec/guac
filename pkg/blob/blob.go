@@ -72,7 +72,7 @@ func (b *BlobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read to bucket with error: %w", err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(r); err != nil {

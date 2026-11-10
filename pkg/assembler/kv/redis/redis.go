@@ -51,7 +51,7 @@ func (s *store) Get(ctx context.Context, c, k string, v any) error {
 	// TODO(jeffmendoza), should figure out error type and check it, instead just see if
 	// string is empty for now.
 	if j == "" {
-		return kv.NotFoundError
+		return kv.ErrNotFound
 	}
 	if err != nil {
 		return err
@@ -65,6 +65,17 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 		return err
 	}
 	return s.c.HSet(ctx, c, k, string(b)).Err()
+}
+
+func (s *store) Remove(ctx context.Context, c, k string) error {
+	n, err := s.c.HDel(ctx, c, k).Result()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return kv.ErrNotFound
+	}
+	return nil
 }
 
 func (s *store) Keys(c string) kv.Scanner {

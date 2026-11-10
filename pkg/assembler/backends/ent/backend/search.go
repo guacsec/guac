@@ -130,7 +130,8 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		LastScanTimeDB time.Time `json:"max"`
 	}
 
-	if queryType == model.QueryTypeVulnerability {
+	switch queryType {
+	case model.QueryTypeVulnerability:
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -145,7 +146,7 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		if err != nil {
 			return nil, fmt.Errorf("failed aggregate packages based on certifyVuln with error: %w", err)
 		}
-	} else if queryType == model.QueryTypeLicense {
+	case model.QueryTypeLicense:
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -160,7 +161,7 @@ func (b *EntBackend) FindPackagesThatNeedScanning(ctx context.Context, queryType
 		if err != nil {
 			return nil, fmt.Errorf("failed aggregate packages based on certifyLegal with error: %w", err)
 		}
-	} else { // queryType == model.QueryTypeEol via hasMetadata
+	default: // queryType == model.QueryTypeEol via hasMetadata
 		err := b.client.PackageVersion.Query().
 			Where(notGUACTypePackagePredicates()).
 			WithName(func(q *ent.PackageNameQuery) {}).
@@ -250,14 +251,32 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 	}
 
 	if len(shortenedQueryList) > 0 {
-		var queryErr error
-		pkgConn, queryErr = b.client.PackageVersion.Query().
-			Where(packageversion.IDIn(shortenedQueryList...)).
-			WithName(func(q *ent.PackageNameQuery) {}).
-			Paginate(ctx, afterCursor, first, nil, nil)
-
-		if queryErr != nil {
-			return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+		pkgConn = &ent.PackageVersionConnection{}
+		seen := make(map[uuid.UUID]bool)
+		// Bound both the ID predicate and name eager loading below the database
+		// parameter limit without changing the requested page's selected window.
+		for _, batch := range chunk(shortenedQueryList, MaxBatchSize) {
+			batchConn, queryErr := b.client.PackageVersion.Query().
+				Where(packageversion.IDIn(batch...)).
+				WithName(func(q *ent.PackageNameQuery) {}).
+				Paginate(ctx, afterCursor, first, nil, nil)
+			if queryErr != nil {
+				return nil, fmt.Errorf("failed package query based on package IDs that need scanning with error: %w", queryErr)
+			}
+			for _, edge := range batchConn.Edges {
+				// SQL IN collapses duplicates within a batch; retain that behavior
+				// for IDs repeated across batches as well.
+				if !seen[edge.Node.ID] {
+					seen[edge.Node.ID] = true
+					pkgConn.Edges = append(pkgConn.Edges, edge)
+				}
+			}
+			if batchConn.PageInfo.StartCursor != nil {
+				if pkgConn.PageInfo.StartCursor == nil {
+					pkgConn.PageInfo.StartCursor = batchConn.PageInfo.StartCursor
+				}
+				pkgConn.PageInfo.EndCursor = batchConn.PageInfo.EndCursor
+			}
 		}
 	}
 
@@ -266,10 +285,7 @@ func (b *EntBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []stri
 		return nil, nil
 	}
 
-	hasNextPage := true
-	if (startIndex + *first) > len(pkgIDs) {
-		hasNextPage = false
-	}
+	hasNextPage := (startIndex + *first) <= len(pkgIDs)
 
 	return constructPkgConn(pkgConn, len(pkgIDs), hasNextPage), nil
 }

@@ -2329,7 +2329,7 @@ func (e *Comparator) UnmarshalGQL(v any) error {
 }
 
 func (e Comparator) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *Comparator) UnmarshalJSON(b []byte) error {
@@ -2390,7 +2390,7 @@ func (e *DependencyType) UnmarshalGQL(v any) error {
 }
 
 func (e DependencyType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *DependencyType) UnmarshalJSON(b []byte) error {
@@ -2624,7 +2624,7 @@ func (e *Edge) UnmarshalGQL(v any) error {
 }
 
 func (e Edge) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *Edge) UnmarshalJSON(b []byte) error {
@@ -2679,7 +2679,7 @@ func (e *FilterOperation) UnmarshalGQL(v any) error {
 }
 
 func (e FilterOperation) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *FilterOperation) UnmarshalJSON(b []byte) error {
@@ -2736,7 +2736,7 @@ func (e *PkgMatchType) UnmarshalGQL(v any) error {
 }
 
 func (e PkgMatchType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *PkgMatchType) UnmarshalJSON(b []byte) error {
@@ -2799,7 +2799,7 @@ func (e *QueryType) UnmarshalGQL(v any) error {
 }
 
 func (e QueryType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *QueryType) UnmarshalJSON(b []byte) error {
@@ -2863,7 +2863,7 @@ func (e *VexJustification) UnmarshalGQL(v any) error {
 }
 
 func (e VexJustification) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *VexJustification) UnmarshalJSON(b []byte) error {
@@ -2923,7 +2923,7 @@ func (e *VexStatus) UnmarshalGQL(v any) error {
 }
 
 func (e VexStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *VexStatus) UnmarshalJSON(b []byte) error {
@@ -2991,7 +2991,7 @@ func (e *VulnerabilityScoreType) UnmarshalGQL(v any) error {
 }
 
 func (e VulnerabilityScoreType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *VulnerabilityScoreType) UnmarshalJSON(b []byte) error {

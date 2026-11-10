@@ -17,6 +17,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
@@ -32,6 +33,9 @@ const (
 	GetPackageDeps
 	GetArtifactVulns
 	GetArtifactDeps
+	ListSboms
+	GetSbom
+	DownloadSbom
 )
 
 // IsErrorResponse checks if the response status code indicates an error.
@@ -52,11 +56,17 @@ func handleErr(
 	if err == nil {
 		return createBadRequestResponse(endpointType, "Unknown error")
 	}
-	switch err {
-	case helpers.Err502:
+	// Callers wrap these with %w, so compare with errors.Is rather than by
+	// identity - otherwise a backend outage is reported as 400 Bad Request.
+	switch {
+	case errors.Is(err, helpers.Err503):
+		return createServiceUnavailableResponse(endpointType, err.Error())
+	case errors.Is(err, helpers.Err502):
 		return createBadGatewayResponse(endpointType, err.Error())
-	case helpers.Err500:
+	case errors.Is(err, helpers.Err500):
 		return createInternalServerErrorResponse(endpointType, err.Error())
+	case errors.Is(err, helpers.Err404):
+		return createNotFoundResponse(endpointType, err.Error())
 	default:
 		return createBadRequestResponse(endpointType, err.Error())
 	}
@@ -90,6 +100,24 @@ func createBadRequestResponse(endpointType EndpointType, message string) interfa
 		}
 	case GetArtifactVulns:
 		return gen.GetArtifactVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
+	case ListSboms:
+		return gen.ListSboms400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbom:
+		return gen.GetSbom400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
+	case DownloadSbom:
+		return gen.DownloadSbom400JSONResponse{
 			BadRequestJSONResponse: gen.BadRequestJSONResponse{
 				Message: message,
 			},
@@ -131,6 +159,24 @@ func createInternalServerErrorResponse(endpointType EndpointType, message string
 				Message: message,
 			},
 		}
+	case ListSboms:
+		return gen.ListSboms500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbom:
+		return gen.GetSbom500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
+	case DownloadSbom:
+		return gen.DownloadSbom500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -165,6 +211,56 @@ func createBadGatewayResponse(endpointType EndpointType, message string) interfa
 	case GetArtifactVulns:
 		return gen.GetArtifactVulns502JSONResponse{
 			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	case ListSboms:
+		return gen.ListSboms502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbom:
+		return gen.GetSbom502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	case DownloadSbom:
+		return gen.DownloadSbom502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
+	default:
+		return nil
+	}
+}
+
+func createNotFoundResponse(endpointType EndpointType, message string) interface{} {
+	switch endpointType {
+	case GetSbom:
+		return gen.GetSbom404JSONResponse{
+			NotFoundJSONResponse: gen.NotFoundJSONResponse{
+				Message: message,
+			},
+		}
+	case DownloadSbom:
+		return gen.DownloadSbom404JSONResponse{
+			NotFoundJSONResponse: gen.NotFoundJSONResponse{
+				Message: message,
+			},
+		}
+	default:
+		return nil
+	}
+}
+
+func createServiceUnavailableResponse(endpointType EndpointType, message string) interface{} {
+	switch endpointType {
+	case DownloadSbom:
+		return gen.DownloadSbom503JSONResponse{
+			ServiceUnavailableJSONResponse: gen.ServiceUnavailableJSONResponse{
 				Message: message,
 			},
 		}

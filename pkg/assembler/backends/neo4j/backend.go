@@ -22,6 +22,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,7 +50,13 @@ type Neo4jConfig struct {
 }
 
 type neo4jClient struct {
-	driver neo4j.Driver
+	driver neo4j.DriverWithContext
+}
+
+func closeSession(ctx context.Context, session neo4j.SessionWithContext) {
+	if err := session.Close(ctx); err != nil {
+		logging.FromContext(ctx).Warnf("failed to close neo4j session: %v", err)
+	}
 }
 
 // flags holds the command-line flags for Neo4j configuration
@@ -95,19 +102,21 @@ func parseFlags(ctx context.Context) (backends.BackendArgs, error) {
 	}, nil
 }
 
-func getBackend(_ context.Context, args backends.BackendArgs) (backends.Backend, error) {
+func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
 	config, ok := args.(*Neo4jConfig)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert neo4j config from backend args")
 	}
 	token := neo4j.BasicAuth(config.User, config.Pass, config.Realm)
-	driver, err := neo4j.NewDriver(config.DBAddr, token)
+	driver, err := neo4j.NewDriverWithContext(config.DBAddr, token)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = driver.VerifyConnectivity(); err != nil {
-		driver.Close()
+	if err = driver.VerifyConnectivity(ctx); err != nil {
+		if closeErr := driver.Close(ctx); closeErr != nil {
+			logging.FromContext(ctx).Warnf("failed to close neo4j driver: %v", closeErr)
+		}
 		return nil, err
 	}
 	client := &neo4jClient{driver: driver}

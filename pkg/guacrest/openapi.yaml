@@ -87,7 +87,8 @@ paths:
       description: >
         This endpoint will find all vulnerabilities for the purl passed in. 
         If the `includeDependencies` flag is set to true, it will also include 
-        vulnerabilities of the dependencies of the purl passed in.
+        vulnerabilities of the dependencies of the purl passed in. Records
+        certifying that a scan found nothing (novuln) are not returned.
       operationId: getPackageVulns
       parameters:
         - name: purl
@@ -143,6 +144,12 @@ paths:
   "/v0/artifact/{digest}/vulns":
     get:
       summary: Get vulnerabilities for an artifact, identified by a digest
+      description: >
+        This endpoint will find all vulnerabilities certified against the artifact's
+        own packages, its HashEqual and IsOccurrence equivalents, and every package
+        reachable through HasSBOM includes and the materials of HasSLSA attestations
+        the artifact is the subject of, followed transitively. Records certifying
+        that a scan found nothing (novuln) are not returned.
       operationId: getArtifactVulns
       parameters:
         - name: digest
@@ -181,6 +188,106 @@ paths:
           $ref: "#/components/responses/InternalServerError"
         "502":
           $ref: "#/components/responses/BadGateway"
+  "/v0/sbom":
+    get:
+      summary: List SBOMs in the graph, optionally filtered by package
+      description: >
+        Returns every HasSBOM node, sorted by knownSince descending.
+        If a package purl is provided, only SBOMs that contain that package
+        (as subject or in includedSoftware) are returned.
+      operationId: listSboms
+      parameters:
+        - $ref: "#/components/parameters/PaginationSpec"
+        - name: package
+          in: query
+          required: false
+          description: URL-encoded Package URL (purl)
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/SbomList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/v0/sbom/{id}":
+    get:
+      summary: Get a single SBOM by its ID
+      description: >
+        Returns the HasSBOM node with the given ID, the same object that
+        appears in a SbomList. Package contents (includedSoftware,
+        includedDependencies, includedOccurrences) are not included because
+        their size is not bounded.
+      operationId: getSbom
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The opaque HasSBOM node ID, as returned by GET /v0/sbom
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/Sbom"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/v0/sbom/{id}/download":
+    get:
+      summary: Download the original SBOM document
+      description: >
+        Returns the original SBOM document that was ingested into the blob store.
+      operationId: downloadSbom
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The opaque HasSBOM node ID, as returned by GET /v0/sbom
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The original SBOM document
+          headers:
+            Content-Disposition:
+              description: Attachment header with filename
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+            application/x-ndjson:
+              schema:
+                type: string
+                format: binary
+            application/xml:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
 components:
   parameters:
@@ -229,6 +336,14 @@ components:
           $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
+        ScorecardScore:
+          description: >
+            The OpenSSF Scorecard aggregate score of the source the package is
+            linked to, taken from that source's most recent scan. A package linked
+            to several scored sources reports the lowest of their scores. Absent
+            when no scored source is linked.
+          type: number
+          format: double
     Vulnerability:
       type: object
       required:
@@ -274,6 +389,51 @@ components:
           type: string
         collector:
           type: string
+    SbomSubject:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [package, artifact]
+        purl:
+          description: Set when type is "package".
+          $ref: "#/components/schemas/Purl"
+        artifact:
+          description: Set when type is "artifact", in the format <algorithm:digest>.
+          type: string
+    Sbom:
+      type: object
+      required:
+        - id
+        - subject
+        - uri
+        - algorithm
+        - digest
+        - knownSince
+      properties:
+        id:
+          type: string
+        subject:
+          $ref: "#/components/schemas/SbomSubject"
+        uri:
+          type: string
+        algorithm:
+          type: string
+        digest:
+          type: string
+        downloadLocation:
+          type: string
+        knownSince:
+          type: string
+          format: date-time
+        origin:
+          type: string
+        collector:
+          type: string
+        documentRef:
+          type: string
   responses:
     # for code 200
     PurlList:
@@ -292,6 +452,28 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/Purl"
+    SbomList:
+      description: A list of SBOMs
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - PaginationInfo
+              - SbomList
+            properties:
+              PaginationInfo:
+                $ref: "#/components/schemas/PaginationInfo"
+              SbomList:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sbom"
+    Sbom:
+      description: A single SBOM
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Sbom"
     PackageNameList:
       description: A list of package names with their dependent counts
       content:
@@ -323,6 +505,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+    # intended for code 404, resource not found
+    NotFound:
+      description: The requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
     # for code 500
     InternalServerError:
       description: Internal Server Error
@@ -333,6 +522,13 @@ components:
     # for code 502
     BadGateway:
       description: The server encountered an error connecting to the data backend
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    # for code 503
+    ServiceUnavailable:
+      description: The server is temporarily unavailable
       content:
         application/json:
           schema:

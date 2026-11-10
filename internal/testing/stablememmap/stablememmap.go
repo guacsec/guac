@@ -42,6 +42,10 @@ func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	return s.mm.Set(ctx, c, k, v)
 }
 
+func (s *store) Remove(ctx context.Context, c, k string) error {
+	return s.mm.Remove(ctx, c, k)
+}
+
 func (s *store) Keys(c string) kv.Scanner {
 	return &scanner{mms: s.mm.Keys(c)}
 }
@@ -56,7 +60,7 @@ func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
 		return nil, false, err
 	}
 	if !done {
-		return nil, false, errors.New("Expect memmap to always return all keys at once")
+		return nil, false, errors.New("expect memmap to always return all keys at once")
 	}
 	slices.Sort(keys)
 	return keys, true, nil

@@ -126,7 +126,7 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 	if err == nil {
 		return out.ThisID, nil
 	}
-	if !errors.Is(err, kv.NotFoundError) {
+	if !errors.Is(err, kv.ErrNotFound) {
 		return "", err
 	}
 

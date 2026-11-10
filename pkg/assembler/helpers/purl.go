@@ -18,7 +18,7 @@ package helpers
 import (
 	"fmt"
 	"net/url"
-	"path/filepath"
+	"path"
 	"sort"
 	"strings"
 
@@ -185,7 +185,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 
 		// Not technically part of the spec but some PURLs still include the namespace
 		// as part of the PURL
-		var ns string = p.Namespace
+		ns := p.Namespace
 		for k, v := range qs {
 			if k == "repository_url" {
 				ns = v
@@ -217,7 +217,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		}
 		delete(qs, "repository_url")
 
-		ns := filepath.Join(repUrl, p.Namespace)
+		ns := path.Join(repUrl, p.Namespace)
 		ns = strings.Trim(ns, "/")
 
 		r := pkg(p.Type, ns, p.Name, p.Version, p.Subpath, qs)

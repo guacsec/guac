@@ -19,11 +19,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"strings"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
@@ -900,4 +901,36 @@ func Test_DecompressDocumentLimit(t *testing.T) {
 			t.Fatalf("expected 262144 bytes decoded, got %d", len(doc.Blob))
 		}
 	})
+}
+
+func TestNotFoundTracker(t *testing.T) {
+	tracker := newNotFoundTracker()
+
+	if got := tracker.increment("a"); got != 1 {
+		t.Fatalf("first increment for 'a' = %d, want 1", got)
+	}
+	if got := tracker.increment("a"); got != 2 {
+		t.Fatalf("second increment for 'a' = %d, want 2", got)
+	}
+	if got := tracker.increment("b"); got != 1 {
+		t.Fatalf("first increment for 'b' = %d, want 1", got)
+	}
+
+	tracker.clear("a")
+	if got := tracker.increment("a"); got != 1 {
+		t.Fatalf("increment after clear for 'a' = %d, want 1", got)
+	}
+	// 'b' should be untouched by clearing 'a'
+	if got := tracker.increment("b"); got != 2 {
+		t.Fatalf("increment for 'b' after clearing 'a' = %d, want 2", got)
+	}
+}
+
+func TestDeliveryCountSource(t *testing.T) {
+	if got := deliveryCountSource(true); got != "broker" {
+		t.Errorf("deliveryCountSource(true) = %q, want %q", got, "broker")
+	}
+	if got := deliveryCountSource(false); got != "in_process" {
+		t.Errorf("deliveryCountSource(false) = %q, want %q", got, "in_process")
+	}
 }
