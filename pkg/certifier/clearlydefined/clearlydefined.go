@@ -214,8 +214,7 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 	for _, definition := range definitionMap {
 		if definition.Described.SourceLocation != nil {
 			sourceLocation := definition.Described.SourceLocation
-			srcType, namespace, name := normalizedSourceLocation(sourceLocation)
-			srcInput := helpers.SourceToSourceInput(srcType, namespace, name, &sourceLocation.Revision)
+			srcInput := attestation_license.SourceInputFromCD(sourceLocation)
 
 			nameID := helpers.SrcClientKey(srcInput).NameId
 
@@ -242,43 +241,6 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 		return generateDocument(definitionMap, docChannel)
 	}
 	return nil, nil
-}
-
-// normalizedSourceLocation returns the canonical GUAC source identity for a
-// ClearlyDefined source location. ClearlyDefined namespaces omit the VCS host
-// (for example "facebook"), while other GUAC data sources use VcsToSrc and
-// produce namespaces such as "github.com/facebook".
-//
-// Prefer the source URL for git sources so all ingestion paths reuse GUAC's
-// existing VCS normalization. ClearlyDefined source URLs may point at a
-// revision-specific browser path, so strip known revision suffixes first.
-// If the URL cannot be normalized, preserve the existing ClearlyDefined fields.
-func normalizedSourceLocation(sourceLocation *attestation_license.SourceLocation) (string, string, string) {
-	srcType := sourceLocation.Type
-	namespace := sourceLocation.Namespace
-	name := sourceLocation.Name
-
-	if sourceLocation.Type != "git" || sourceLocation.URL == "" {
-		return srcType, namespace, name
-	}
-
-	repositoryURL := strings.TrimSuffix(sourceLocation.URL, "/")
-	if sourceLocation.Revision != "" {
-		for _, suffix := range []string{
-			"/-/tree/" + sourceLocation.Revision,
-			"/tree/" + sourceLocation.Revision,
-			"/src/" + sourceLocation.Revision,
-		} {
-			repositoryURL = strings.TrimSuffix(repositoryURL, suffix)
-		}
-	}
-
-	normalized, err := helpers.VcsToSrc(repositoryURL)
-	if err != nil {
-		return srcType, namespace, name
-	}
-
-	return normalized.Type, normalized.Namespace, normalized.Name
 }
 
 // generateDocument generates the processor document for ingestion
