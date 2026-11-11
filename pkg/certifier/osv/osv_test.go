@@ -23,9 +23,12 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -41,6 +44,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 func TestOSVCertifier_CertifyVulns(t *testing.T) {
@@ -391,4 +395,38 @@ func TestOSVCertifierRateLimiter(t *testing.T) {
 	logOutput := logBuffer.String()
 
 	assert.Contains(t, logOutput, "Rate limit exceeded")
+}
+
+// erroringTransport always fails the request, simulating an OSV query
+// failure without depending on the network.
+type erroringTransport struct{}
+
+func (erroringTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, errors.New("boom")
+}
+
+func TestOSVCertifier_RecordsErrorMetric(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	ctx = metrics.WithMetrics(ctx, "osv_test")
+	collector := metrics.FromContext(ctx, "osv_test")
+
+	counter, err := collector.RegisterCounter(ctx, OSVQueryErrorsCounter)
+	assert.NoError(t, err)
+
+	cert := &osvCertifier{
+		osvHTTPClient: &http.Client{Transport: erroringTransport{}},
+		Metrics:       collector,
+	}
+
+	docChan := make(chan *processor.Document, 1)
+	err = cert.CertifyComponent(ctx, []*root_package.PackageNode{&testdata.Log4JPackage}, docChan)
+	assert.Error(t, err)
+
+	counterVec, ok := counter.(prometheus.Collector)
+	assert.True(t, ok, "counter should implement prometheus.Collector")
+	assert.NoError(t, testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_osv_test_osv_query_errors Counter for osv_test_osv_query_errors
+		# TYPE guac_osv_test_osv_query_errors counter
+		guac_osv_test_osv_query_errors 1
+	`)))
 }

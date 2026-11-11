@@ -19,10 +19,14 @@ package backend_test
 
 import (
 	"context"
+	"fmt"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -401,5 +405,175 @@ func TestQueryPackagesListForScan(t *testing.T) {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestQueryPackagesListForScanBatches(t *testing.T) {
+	if currentBackend != ent {
+		t.Skip("PostgreSQL parameter limit regression")
+	}
+	b := setupTest(t)
+	ctx := context.Background()
+	// Keep real matches separated by empty batches of valid, nonexistent IDs.
+	var realIDs []string
+	want := map[string]*model.Package{}
+	for _, pkg := range []*model.PkgInputSpec{testdata.P1, testdata.P2} {
+		ids, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: pkg})
+		if err != nil {
+			t.Fatal(err)
+		}
+		id := strings.TrimPrefix(ids.PackageVersionID, "package_versions:")
+		realIDs = append(realIDs, id)
+	}
+	sort.Strings(realIDs)
+	baseline, err := b.QueryPackagesListForScan(ctx, append([]string(nil), realIDs...), nil, ptrfrom.Int(3))
+	if err != nil || baseline == nil || len(baseline.Edges) != len(realIDs) {
+		t.Fatalf("baseline: %v, %v", baseline, err)
+	}
+	for _, edge := range baseline.Edges {
+		want[edge.Cursor] = edge.Node
+	}
+	var missing []string
+	for i := 0; i < 65536; i++ {
+		missing = append(missing, fmt.Sprintf("00000000-0000-0000-0000-%012x", i))
+	}
+	oversized := append(append([]string(nil), missing...), realIDs...)
+	// Put the first real match in an early batch and the second after empty batches.
+	nextID := uuid.MustParse(realIDs[0])
+	for i := 5000; i < len(missing); i++ {
+		for j := len(nextID) - 1; j >= 0; j-- {
+			nextID[j]++
+			if nextID[j] != 0 {
+				break
+			}
+		}
+		if nextID.String() >= realIDs[1] {
+			t.Fatal("insufficient UUID space between test packages")
+		}
+		oversized[i] = nextID.String()
+	}
+	// A repeated real ID straddles the 5,000-ID boundary.
+	duplicates := append([]string(nil), missing[:4999]...)
+	duplicates = append(duplicates, realIDs[0], realIDs[0], realIDs[1])
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	tests := []struct {
+		name    string
+		ids     []string
+		first   *int
+		after   *string
+		ctx     context.Context
+		wantErr string
+	}{
+		{name: "parameter limit", ids: oversized, first: ptrfrom.Int(len(oversized))},
+		{name: "below batch boundary", ids: append(append([]string(nil), missing[:4997]...), realIDs...), first: ptrfrom.Int(4999)},
+		{name: "at batch boundary", ids: append(append([]string(nil), missing[:4998]...), realIDs...), first: ptrfrom.Int(5000)},
+		{name: "duplicate across boundary", ids: duplicates, first: ptrfrom.Int(len(duplicates))},
+		{name: "default page", ids: oversized},
+		{name: "small page", ids: realIDs, first: ptrfrom.Int(1)},
+		{name: "later page", ids: oversized, first: ptrfrom.Int(len(oversized)), after: &baseline.Edges[0].Cursor},
+		{name: "no matches", ids: missing, first: ptrfrom.Int(len(missing))},
+		{name: "empty"},
+		{name: "malformed later batch", ids: append(append([]string(nil), oversized...), "zz-invalid"), first: ptrfrom.Int(len(oversized) + 1), wantErr: "failed to parse ID to UUID"},
+		{name: "invalid cursor", ids: realIDs, after: ptrfrom.String("package_versions:invalid"), wantErr: "failed to parse global ID"},
+		{name: "wrong cursor type", ids: realIDs, after: ptrfrom.String("artifacts:" + realIDs[0]), wantErr: "after cursor is not type"},
+		{name: "canceled", ids: oversized, first: ptrfrom.Int(len(oversized)), ctx: canceled, wantErr: "failed package query"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			queryCtx := tt.ctx
+			if queryCtx == nil {
+				queryCtx = ctx
+			}
+			ids := append([]string(nil), tt.ids...)
+			got, err := b.QueryPackagesListForScan(queryCtx, ids, tt.after, tt.first)
+			if tt.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) || got != nil {
+					t.Fatalf("got %v, %v; want nil and %q", got, err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			sort.Strings(ids)
+			start, limit := 0, 60000
+			if tt.first != nil {
+				limit = *tt.first
+			}
+			if tt.after != nil {
+				start = sort.SearchStrings(ids, strings.TrimPrefix(*tt.after, "package_versions:"))
+			}
+			var expected []string
+			for i := start; i < len(ids) && i < start+limit; i++ {
+				cursor := "package_versions:" + ids[i]
+				if want[cursor] != nil && (tt.after == nil || cursor > *tt.after) && (len(expected) == 0 || expected[len(expected)-1] != cursor) {
+					expected = append(expected, cursor)
+				}
+			}
+			if len(expected) == 0 {
+				if got != nil {
+					t.Fatalf("want nil, got %v", got)
+				}
+				return
+			}
+			if got == nil || len(got.Edges) != len(expected) {
+				t.Fatalf("want %d edges, got %v", len(expected), got)
+			}
+			for i, edge := range got.Edges {
+				if edge.Cursor != expected[i] {
+					t.Fatalf("edge %d: got %s, want %s", i, edge.Cursor, expected[i])
+				}
+				if diff := cmp.Diff(want[expected[i]], edge.Node, commonOpts); diff != "" {
+					t.Fatalf("package (-want +got): %s", diff)
+				}
+			}
+			if got.TotalCount != len(ids) || got.PageInfo.HasNextPage != (start+limit <= len(ids)) || *got.PageInfo.StartCursor != expected[0] || *got.PageInfo.EndCursor != expected[len(expected)-1] {
+				t.Fatalf("unexpected pagination: %+v, total %d", got.PageInfo, got.TotalCount)
+			}
+		})
+	}
+}
+
+func TestQueryPackagesListForScanHydratedBatches(t *testing.T) {
+	if currentBackend != ent {
+		t.Skip("PostgreSQL eager-loading parameter limit regression")
+	}
+	b := setupTest(t)
+	ctx := context.Background()
+	const count = 65536
+	var ids []string
+	names := map[string]string{}
+	for start := 0; start < count; start += 1000 {
+		var inputs []*model.IDorPkgInput
+		for i := start; i < count && i < start+1000; i++ {
+			inputs = append(inputs, &model.IDorPkgInput{PackageInput: &model.PkgInputSpec{Type: "generic", Name: fmt.Sprintf("scan-batch-%d", i), Version: ptrfrom.String("1")}})
+		}
+		ingested, err := b.IngestPackages(ctx, inputs)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, pkg := range ingested {
+			ids = append(ids, strings.TrimPrefix(pkg.PackageVersionID, "package_versions:"))
+			names[pkg.PackageVersionID] = inputs[i].PackageInput.Name
+		}
+	}
+	t.Logf("dataset=%d distinct package versions and names, first=%d", count, count)
+	got, err := b.QueryPackagesListForScan(ctx, ids, nil, ptrfrom.Int(count))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got == nil || len(got.Edges) != count {
+		t.Fatalf("want %d edges, got %v", count, got)
+	}
+	sort.Strings(ids)
+	for i, edge := range got.Edges {
+		cursor := "package_versions:" + ids[i]
+		if edge.Cursor != cursor || edge.Node.Namespaces[0].Names[0].Name != names[cursor] {
+			t.Fatalf("incorrect hydrated edge %d: %+v", i, edge)
+		}
+	}
+	if got.TotalCount != count || !got.PageInfo.HasNextPage || *got.PageInfo.StartCursor != got.Edges[0].Cursor || *got.PageInfo.EndCursor != got.Edges[count-1].Cursor {
+		t.Fatalf("unexpected pagination: %+v", got.PageInfo)
 	}
 }

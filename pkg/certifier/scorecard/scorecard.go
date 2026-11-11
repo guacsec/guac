@@ -20,11 +20,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/ossf/scorecard/v5/clients"
 	"github.com/ossf/scorecard/v5/docs/checks"
 	"github.com/ossf/scorecard/v5/log"
@@ -37,12 +39,45 @@ import (
 type scorecard struct {
 	scorecard Scorecard
 	ghToken   string
+	// Metrics is optional; when nil, no metrics are recorded.
+	Metrics metrics.MetricCollector
+}
+
+// ScorecardQueryErrorsCounter is the name of the counter metric that tracks
+// failed scorecard lookups.
+const ScorecardQueryErrorsCounter = "scorecard_query_errors"
+
+var registerMetricsOnce sync.Once
+
+// CertifierOpts configures a scorecard certifier.
+type CertifierOpts func(*scorecard)
+
+// WithMetrics configures the certifier to record metrics using the given
+// MetricCollector. Call RegisterMetrics once before any certifier built with
+// this option is used.
+func WithMetrics(m metrics.MetricCollector) CertifierOpts {
+	return func(s *scorecard) {
+		s.Metrics = m
+	}
+}
+
+// RegisterMetrics registers the Prometheus metrics recorded by the scorecard
+// certifier. It is safe to call multiple times; registration only happens
+// once per process.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, ScorecardQueryErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for scorecard query errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *source.SourceNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
-func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
 	if docChannel == nil {
 		return fmt.Errorf("docChannel cannot be nil")
 	}
@@ -68,6 +103,11 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 
 	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit, sourceNode.Tag)
 	if err != nil {
+		if s.Metrics != nil {
+			if metricsErr := s.Metrics.AddCounter(ctx, ScorecardQueryErrorsCounter, 1); metricsErr != nil {
+				logging.FromContext(ctx).Debugf("failed to record scorecard query error metric: %v", metricsErr)
+			}
+		}
 		return fmt.Errorf("error getting scorecard result: %w", err)
 	}
 
@@ -106,7 +146,7 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 // It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not,
 // a warning is logged; the scorecard API path still works without the token.
 // The token is used to access the GitHub API, https://github.com/ossf/scorecard#authentication.
-func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
+func NewScorecardCertifier(sc Scorecard, opts ...CertifierOpts) (certifier.Certifier, error) {
 	if sc == nil {
 		return nil, fmt.Errorf("scorecard cannot be nil")
 	}
@@ -120,8 +160,12 @@ func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 		logger.Warnf("GITHUB_AUTH_TOKEN not set - scorecard API will work, but local computation fallback will be disabled")
 	}
 
-	return &scorecard{
+	c := &scorecard{
 		scorecard: sc,
 		ghToken:   s,
-	}, nil
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c, nil
 }

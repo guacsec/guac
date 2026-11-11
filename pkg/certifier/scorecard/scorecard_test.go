@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,10 +28,16 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/ossf/scorecard/v5/checker"
 	"github.com/ossf/scorecard/v5/checks"
 	scpkg "github.com/ossf/scorecard/v5/pkg/scorecard"
 	"github.com/ossf/scorecard/v5/policy"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
@@ -496,4 +503,34 @@ func Test_scorecardRunner_commitForTag(t *testing.T) {
 			t.Fatal("commitForTag() error = nil, want a parse failure")
 		}
 	})
+}
+
+type failingScorecard struct{}
+
+func (failingScorecard) GetScore(string, string, string) (*scpkg.Result, error) {
+	return nil, fmt.Errorf("boom")
+}
+
+func TestScorecardCertifier_RecordsErrorMetric(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	ctx = metrics.WithMetrics(ctx, "scorecard_test")
+	collector := metrics.FromContext(ctx, "scorecard_test")
+
+	counter, err := collector.RegisterCounter(ctx, ScorecardQueryErrorsCounter)
+	require.NoError(t, err)
+
+	cert, err := NewScorecardCertifier(failingScorecard{}, WithMetrics(collector))
+	require.NoError(t, err)
+
+	docChan := make(chan *processor.Document, 1)
+	err = cert.CertifyComponent(ctx, &source.SourceNode{Repo: "github.com/guacsec/guac"}, docChan)
+	require.Error(t, err)
+
+	counterVec, ok := counter.(prometheus.Collector)
+	require.True(t, ok, "counter should implement prometheus.Collector")
+	assert.NoError(t, testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_scorecard_test_scorecard_query_errors Counter for scorecard_test_scorecard_query_errors
+		# TYPE guac_scorecard_test_scorecard_query_errors counter
+		guac_scorecard_test_scorecard_query_errors 1
+	`)))
 }

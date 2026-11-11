@@ -207,19 +207,20 @@ func findImpactStatement(tree *csaf.Vulnerability, product_id string) *string {
 
 // findPkgSpec finds the package specification for the product with the
 // given ID in the CSAF document. It returns a pointer to the package
-// specification if found, otherwise an error.
-func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*generated.PkgInputSpec, error) {
+// specification and the purl it was built from if found, otherwise an error.
+func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*generated.PkgInputSpec, string, error) {
 	pref := findProductRef(ctx, c.csaf.ProductTree, product_id)
 	if pref == nil {
-		return nil, fmt.Errorf("unable to locate product reference for id %s", product_id)
+		return nil, "", fmt.Errorf("unable to locate product reference for id %s", product_id)
 	}
 
 	purl := findPurl(ctx, c.csaf.ProductTree, *pref)
 	if purl == nil {
-		return nil, fmt.Errorf("unable to locate product url for reference %s", *pref)
+		return nil, "", fmt.Errorf("unable to locate product url for reference %s", *pref)
 	}
 
-	return helpers.PurlToPkg(*purl)
+	pkg, err := helpers.PurlToPkg(*purl)
+	return pkg, *purl, err
 }
 
 // generateVexIngest generates a VEX ingest object from a CSAF vulnerability and other input data.
@@ -267,14 +268,14 @@ func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated
 
 	vi.VexData = &vd
 	vi.Vulnerability = vulnInput
-	c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, product_id)
 
-	pkg, err := c.findPkgSpec(ctx, product_id)
+	pkg, purl, err := c.findPkgSpec(ctx, product_id)
 	if err != nil {
 		logger.Warnf("[csaf] unable to locate package for not-affected product %s", product_id)
 		return nil
 	}
 	vi.Pkg = pkg
+	c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
 
 	return vi
 }

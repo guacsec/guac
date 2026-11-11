@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
@@ -39,7 +40,32 @@ import (
 
 const (
 	OCICollector = "OCICollector"
+
+	// ArtifactErrorsCounter tracks OCI image/registry retrieval failures that are logged and skipped.
+	ArtifactErrorsCounter = "oci_artifact_errors"
 )
+
+var registerMetricsOnce sync.Once
+
+// RegisterMetrics is safe to call multiple times; it only registers once.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, ArtifactErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for oci artifact errors: %w", regErr)
+		}
+	})
+	return err
+}
+
+func recordArtifactError(ctx context.Context, m metrics.MetricCollector) {
+	if m == nil {
+		return
+	}
+	if err := m.AddCounter(ctx, ArtifactErrorsCounter, 1); err != nil {
+		logging.FromContext(ctx).Debugf("failed to record oci artifact error metric: %v", err)
+	}
+}
 
 // OCI artifact types
 const (
@@ -73,6 +99,14 @@ type ociCollector struct {
 	interval          time.Duration
 	// rcOpts are the regclient options
 	rcOpts []regclient.Opt
+	// Metrics is optional; when nil, no metrics are recorded.
+	Metrics metrics.MetricCollector
+}
+
+// WithMetrics wires m into the collector and returns it. Call RegisterMetrics once first.
+func (o *ociCollector) WithMetrics(m metrics.MetricCollector) *ociCollector {
+	o.Metrics = m
+	return o
 }
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
@@ -143,6 +177,7 @@ func (o *ociCollector) populateRepoRefs(ctx context.Context, repoRefs map[string
 		imageRef, err := ref.New(d.Value)
 		if err != nil {
 			logger.Errorf("unable to parse OCI path: %v", d.Value)
+			recordArtifactError(ctx, o.Metrics)
 			continue
 		}
 		imagePath := fmt.Sprintf("%s/%s", imageRef.Registry, imageRef.Repository)
