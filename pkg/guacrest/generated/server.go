@@ -49,6 +49,9 @@ type ServerInterface interface {
 	// Download the original SBOM document
 	// (GET /v0/sbom/{id}/download)
 	DownloadSbom(w http.ResponseWriter, r *http.Request, id string)
+	// Get vulnerabilities for the software in an SBOM
+	// (GET /v0/sbom/{id}/vulns)
+	GetSbomVulns(w http.ResponseWriter, r *http.Request, id string)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -112,6 +115,12 @@ func (_ Unimplemented) GetSbom(w http.ResponseWriter, r *http.Request, id string
 // Download the original SBOM document
 // (GET /v0/sbom/{id}/download)
 func (_ Unimplemented) DownloadSbom(w http.ResponseWriter, r *http.Request, id string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get vulnerabilities for the software in an SBOM
+// (GET /v0/sbom/{id}/vulns)
+func (_ Unimplemented) GetSbomVulns(w http.ResponseWriter, r *http.Request, id string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -476,6 +485,32 @@ func (siw *ServerInterfaceWrapper) DownloadSbom(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
+// GetSbomVulns operation middleware
+func (siw *ServerInterfaceWrapper) GetSbomVulns(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSbomVulns(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -618,6 +653,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v0/sbom/{id}/download", wrapper.DownloadSbom)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v0/sbom/{id}/vulns", wrapper.GetSbomVulns)
 	})
 
 	return r
@@ -1417,6 +1455,86 @@ func (response DownloadSbom503JSONResponse) VisitDownloadSbomResponse(w http.Res
 	return err
 }
 
+type GetSbomVulnsRequestObject struct {
+	Id string `json:"id"`
+}
+
+type GetSbomVulnsResponseObject interface {
+	VisitGetSbomVulnsResponse(w http.ResponseWriter) error
+}
+
+type GetSbomVulns200JSONResponse struct{ VulnerabilityListJSONResponse }
+
+func (response GetSbomVulns200JSONResponse) VisitGetSbomVulnsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbomVulns400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response GetSbomVulns400JSONResponse) VisitGetSbomVulnsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbomVulns404JSONResponse struct{ NotFoundJSONResponse }
+
+func (response GetSbomVulns404JSONResponse) VisitGetSbomVulnsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbomVulns500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetSbomVulns500JSONResponse) VisitGetSbomVulnsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSbomVulns502JSONResponse struct{ BadGatewayJSONResponse }
+
+func (response GetSbomVulns502JSONResponse) VisitGetSbomVulnsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(502)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Identify the most important dependencies
@@ -1449,6 +1567,9 @@ type StrictServerInterface interface {
 	// Download the original SBOM document
 	// (GET /v0/sbom/{id}/download)
 	DownloadSbom(ctx context.Context, request DownloadSbomRequestObject) (DownloadSbomResponseObject, error)
+	// Get vulnerabilities for the software in an SBOM
+	// (GET /v0/sbom/{id}/vulns)
+	GetSbomVulns(ctx context.Context, request GetSbomVulnsRequestObject) (GetSbomVulnsResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1735,6 +1856,32 @@ func (sh *strictHandler) DownloadSbom(w http.ResponseWriter, r *http.Request, id
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DownloadSbomResponseObject); ok {
 		if err := validResponse.VisitDownloadSbomResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSbomVulns operation middleware
+func (sh *strictHandler) GetSbomVulns(w http.ResponseWriter, r *http.Request, id string) {
+	var request GetSbomVulnsRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSbomVulns(ctx, request.(GetSbomVulnsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSbomVulns")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSbomVulnsResponseObject); ok {
+		if err := validResponse.VisitGetSbomVulnsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

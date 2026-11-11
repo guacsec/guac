@@ -390,3 +390,22 @@ func (s *DefaultServer) DownloadSbom(ctx context.Context, request gen.DownloadSb
 		body:               doc.Blob,
 	}, nil
 }
+
+func (s *DefaultServer) GetSbomVulns(ctx context.Context, request gen.GetSbomVulnsRequestObject) (gen.GetSbomVulnsResponseObject, error) {
+	vulns, err := GetVulnsForSbom(ctx, s.gqlClient, request.Id)
+	if err != nil {
+		errResp, ok := handleErr(ctx, err, GetSbomVulns).(gen.GetSbomVulnsResponseObject)
+		if ok {
+			return errResp, nil
+		}
+		return gen.GetSbomVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: err.Error(),
+			},
+		}, nil
+	}
+
+	return gen.GetSbomVulns200JSONResponse{
+		VulnerabilityListJSONResponse: vulns,
+	}, nil
+}

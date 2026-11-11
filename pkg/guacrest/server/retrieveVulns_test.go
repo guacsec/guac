@@ -19,6 +19,7 @@ import (
 	stdcmp "cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -31,6 +32,7 @@ import (
 	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	gql "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
+	"github.com/guacsec/guac/pkg/guacrest/helpers"
 	"github.com/guacsec/guac/pkg/guacrest/server"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -465,6 +467,314 @@ func Test_GetArtifactVulns_BackendFailures(t *testing.T) {
 			}
 			if fmt.Sprintf("%T", res) != fmt.Sprintf("%T", tt.want) {
 				t.Errorf("GetArtifactVulns returned %T, want %T", res, tt.want)
+			}
+		})
+	}
+}
+
+func sbomInputSpec(uri string) *gql.HasSBOMInputSpec {
+	return &gql.HasSBOMInputSpec{
+		Uri:        uri,
+		KnownSince: time.Now(),
+	}
+}
+
+func Test_GetVulnsForSbom(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	tests := []struct {
+		name     string
+		data     GuacData
+		sbomURI  string
+		expected []string
+	}{
+		{
+			name: "SBOM -> package with vuln",
+			data: GuacData{
+				Packages:        []string{"pkg:guac/subject", "pkg:guac/foo"},
+				Vulnerabilities: []string{"osv/CVE-2024-0001"},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"pkg:guac/foo"},
+						Spec:             sbomInputSpec("https://example.com/sbom-pkg"),
+					},
+				},
+				CertifyVulns: []CertifyVuln{
+					{Package: "pkg:guac/foo", Vulnerability: "osv/CVE-2024-0001", Metadata: vulnScanMeta()},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-pkg",
+			expected: []string{"cve-2024-0001"},
+		},
+		{
+			name: "SBOM -> artifact -> occurrence -> package with vuln",
+			data: GuacData{
+				Packages:        []string{"pkg:guac/subject", "pkg:guac/pkg1"},
+				Artifacts:       []string{"sha-xyz"},
+				Vulnerabilities: []string{"osv/CVE-2024-0002"},
+				IsOccurrences:   []IsOccurrence{{Subject: "pkg:guac/pkg1", Artifact: "sha-xyz"}},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"sha-xyz"},
+						Spec:             sbomInputSpec("https://example.com/sbom-art"),
+					},
+				},
+				CertifyVulns: []CertifyVuln{
+					{Package: "pkg:guac/pkg1", Vulnerability: "osv/CVE-2024-0002", Metadata: vulnScanMeta()},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-art",
+			expected: []string{"cve-2024-0002"},
+		},
+		{
+			name: "SBOM with package that has no vuln returns empty",
+			data: GuacData{
+				Packages: []string{"pkg:guac/subject", "pkg:guac/clean"},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"pkg:guac/clean"},
+						Spec:             sbomInputSpec("https://example.com/sbom-clean"),
+					},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-clean",
+			expected: []string{},
+		},
+		{
+			name: "SBOM -> package certified novuln returns empty",
+			data: GuacData{
+				Packages:        []string{"pkg:guac/subject", "pkg:guac/clean"},
+				Vulnerabilities: []string{"novuln/"},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"pkg:guac/clean"},
+						Spec:             sbomInputSpec("https://example.com/sbom-novuln"),
+					},
+				},
+				CertifyVulns: []CertifyVuln{
+					{Package: "pkg:guac/clean", Vulnerability: "novuln/", Metadata: vulnScanMeta()},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-novuln",
+			expected: []string{},
+		},
+		{
+			name: "SBOM with mixed packages and artifacts, novuln is filtered",
+			data: GuacData{
+				Packages:        []string{"pkg:guac/subject", "pkg:guac/pkg1", "pkg:guac/pkg2", "pkg:guac/clean"},
+				Artifacts:       []string{"sha-mixed"},
+				Vulnerabilities: []string{"osv/CVE-2024-0001", "osv/CVE-2024-0002", "novuln/"},
+				IsOccurrences:   []IsOccurrence{{Subject: "pkg:guac/pkg2", Artifact: "sha-mixed"}},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"pkg:guac/pkg1", "sha-mixed", "pkg:guac/clean"},
+						Spec:             sbomInputSpec("https://example.com/sbom-mixed"),
+					},
+				},
+				CertifyVulns: []CertifyVuln{
+					{Package: "pkg:guac/pkg1", Vulnerability: "osv/CVE-2024-0001", Metadata: vulnScanMeta()},
+					{Package: "pkg:guac/pkg2", Vulnerability: "osv/CVE-2024-0002", Metadata: vulnScanMeta()},
+					{Package: "pkg:guac/clean", Vulnerability: "novuln/", Metadata: vulnScanMeta()},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-mixed",
+			expected: []string{"cve-2024-0001", "cve-2024-0002"},
+		},
+		{
+			name: "SBOM does not follow nested SBOMs",
+			data: GuacData{
+				Packages:        []string{"pkg:guac/subject", "pkg:guac/child", "pkg:guac/nested"},
+				Vulnerabilities: []string{"osv/CVE-2024-0099"},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"pkg:guac/child"},
+						Spec:             sbomInputSpec("https://example.com/sbom-parent"),
+					},
+					{
+						Subject:          "pkg:guac/child",
+						IncludedSoftware: []string{"pkg:guac/nested"},
+						Spec:             sbomInputSpec("https://example.com/sbom-child"),
+					},
+				},
+				CertifyVulns: []CertifyVuln{
+					{Package: "pkg:guac/nested", Vulnerability: "osv/CVE-2024-0099", Metadata: vulnScanMeta()},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-parent",
+			expected: []string{},
+		},
+		{
+			name: "SBOM does not report vulns on the subject itself",
+			data: GuacData{
+				Packages:        []string{"pkg:guac/subject", "pkg:guac/dep"},
+				Vulnerabilities: []string{"osv/CVE-2024-0088"},
+				HasSboms: []HasSbom{
+					{
+						Subject:          "pkg:guac/subject",
+						IncludedSoftware: []string{"pkg:guac/dep"},
+						Spec:             sbomInputSpec("https://example.com/sbom-subj"),
+					},
+				},
+				CertifyVulns: []CertifyVuln{
+					{Package: "pkg:guac/subject", Vulnerability: "osv/CVE-2024-0088", Metadata: vulnScanMeta()},
+				},
+			},
+			sbomURI:  "https://example.com/sbom-subj",
+			expected: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gqlClient := SetupTest(t)
+			Ingest(ctx, t, gqlClient, tt.data)
+
+			sboms, err := gql.HasSBOMs(ctx, gqlClient, gql.HasSBOMSpec{})
+			if err != nil {
+				t.Fatalf("HasSBOMs query failed: %v", err)
+			}
+			var sbomID string
+			for _, s := range sboms.GetHasSBOM() {
+				if s.Uri == tt.sbomURI {
+					sbomID = s.Id
+					break
+				}
+			}
+			if sbomID == "" {
+				t.Fatalf("could not find ingested SBOM with URI %s", tt.sbomURI)
+			}
+
+			got, err := server.GetVulnsForSbom(ctx, gqlClient, sbomID)
+			if err != nil {
+				t.Fatalf("GetVulnsForSbom returned unexpected error: %v", err)
+			}
+			ids := vulnIDsFromResult(got)
+			if !cmp.Equal(ids, tt.expected, cmpopts.EquateEmpty(), cmpopts.SortSlices(stdcmp.Less[string])) {
+				t.Errorf("vuln IDs = %v, want %v", ids, tt.expected)
+			}
+		})
+	}
+
+	t.Run("Unknown SBOM id returns 404", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		_, err := server.GetVulnsForSbom(ctx, gqlClient, "missing-id")
+		if !errors.Is(err, helpers.Err404) {
+			t.Errorf("expected Err404, got %v", err)
+		}
+	})
+
+	t.Run("Malformed ID returns 404", func(t *testing.T) {
+		_, err := server.GetVulnsForSbom(ctx, malformedIDClient{}, "not-a-uuid")
+		if !errors.Is(err, helpers.Err404) {
+			t.Errorf("expected Err404, got %v", err)
+		}
+	})
+}
+
+func Test_GetSbomVulns_HTTP(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+
+	t.Run("Returns 200 with vuln list", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		Ingest(ctx, t, gqlClient, GuacData{
+			Packages:        []string{"pkg:guac/subject", "pkg:guac/foo"},
+			Vulnerabilities: []string{"osv/CVE-2024-0001"},
+			HasSboms: []HasSbom{
+				{
+					Subject:          "pkg:guac/subject",
+					IncludedSoftware: []string{"pkg:guac/foo"},
+				},
+			},
+			CertifyVulns: []CertifyVuln{
+				{Package: "pkg:guac/foo", Vulnerability: "osv/CVE-2024-0001", Metadata: vulnScanMeta()},
+			},
+		})
+		restApi := server.NewDefaultServer(gqlClient)
+
+		sboms, err := gql.HasSBOMs(ctx, gqlClient, gql.HasSBOMSpec{})
+		if err != nil || len(sboms.GetHasSBOM()) == 0 {
+			t.Fatalf("failed to find ingested SBOM: %v", err)
+		}
+		id := sboms.GetHasSBOM()[0].Id
+
+		res, err := restApi.GetSbomVulns(ctx, gen.GetSbomVulnsRequestObject{Id: id})
+		if err != nil {
+			t.Fatalf("GetSbomVulns returned unexpected error: %v", err)
+		}
+		ok, success := res.(gen.GetSbomVulns200JSONResponse)
+		if !success {
+			t.Fatalf("expected 200 response, got %T: %v", res, res)
+		}
+		if len(ok.VulnerabilityListJSONResponse) == 0 {
+			t.Errorf("expected at least one vulnerability in response")
+		}
+	})
+
+	t.Run("Returns 404 for unknown SBOM id", func(t *testing.T) {
+		gqlClient := SetupTest(t)
+		restApi := server.NewDefaultServer(gqlClient)
+
+		res, err := restApi.GetSbomVulns(ctx, gen.GetSbomVulnsRequestObject{Id: "missing-id"})
+		if err != nil {
+			t.Fatalf("GetSbomVulns returned unexpected error: %v", err)
+		}
+		if _, ok := res.(gen.GetSbomVulns404JSONResponse); !ok {
+			t.Fatalf("expected 404 response, got %T: %v", res, res)
+		}
+	})
+
+	t.Run("Returns 404 for malformed ID", func(t *testing.T) {
+		restApi := server.NewDefaultServer(malformedIDClient{})
+
+		res, err := restApi.GetSbomVulns(ctx, gen.GetSbomVulnsRequestObject{Id: "not-a-uuid"})
+		if err != nil {
+			t.Fatalf("GetSbomVulns returned unexpected error: %v", err)
+		}
+		if _, ok := res.(gen.GetSbomVulns404JSONResponse); !ok {
+			t.Fatalf("expected 404 response, got %T: %v", res, res)
+		}
+	})
+}
+
+func Test_GetSbomVulns_BackendFailures(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+
+	tests := []struct {
+		name   string
+		client stubClient
+		want   any
+	}{{
+		name:   "a failing HasSBOMs query is a 502, not a 400",
+		client: stubClient{"HasSBOMs": ""},
+		want:   gen.GetSbomVulns502JSONResponse{},
+	}, {
+		name:   "multiple HasSBOMs returned is a 500",
+		client: stubClient{"HasSBOMs": `{"HasSBOM":[{"id":"sbom-1"},{"id":"sbom-2"}]}`},
+		want:   gen.GetSbomVulns500JSONResponse{},
+	}, {
+		name: "a failing CertifyVuln query is a 502",
+		client: stubClient{
+			"HasSBOMs":    `{"HasSBOM":[{"id":"sbom-1","includedSoftware":[{"__typename":"Package","id":"pkg-1","type":"guac","namespaces":[{"id":"ns-1","namespace":"","names":[{"id":"n-1","name":"foo","versions":[{"id":"v-1","version":"1.0"}]}]}]}]}]}`,
+			"CertifyVuln": "",
+		},
+		want: gen.GetSbomVulns502JSONResponse{},
+	}}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			restApi := server.NewDefaultServer(tt.client)
+
+			res, err := restApi.GetSbomVulns(ctx, gen.GetSbomVulnsRequestObject{Id: "sbom-1"})
+			if err != nil {
+				t.Fatalf("GetSbomVulns returned unexpected error: %v", err)
+			}
+			if fmt.Sprintf("%T", res) != fmt.Sprintf("%T", tt.want) {
+				t.Errorf("GetSbomVulns returned %T, want %T", res, tt.want)
 			}
 		})
 	}
