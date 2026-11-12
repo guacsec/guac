@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
@@ -37,7 +38,9 @@ import (
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/types/descriptor"
+	"github.com/regclient/regclient/types/mediatype"
 	v1 "github.com/regclient/regclient/types/oci/v1"
+	"github.com/regclient/regclient/types/platform"
 )
 
 func TestOCIRegistryCollectionPipeline(t *testing.T) {
@@ -284,5 +287,153 @@ func TestOCIRegistryCollector_RecordsArtifactErrorMetric(t *testing.T) {
 		guac_oci_test_oci_artifact_errors 1
 	`)); err != nil {
 		t.Errorf("unexpected metric state: %v", err)
+	}
+}
+
+// docker buildx --provenance stores the SLSA provenance as an attestation manifest
+// of the image index, not as a referrer or a fallback tag.
+func TestOCICollectorBuildxIndexAttestation(t *testing.T) {
+	ctx := context.Background()
+
+	imageLayerBytes := []byte("mock image layer content")
+	imageLayerDigest := digest.FromBytes(imageLayerBytes)
+	imageBytes, err := json.Marshal(v1.Manifest{
+		Versioned: v1.ManifestSchemaVersion,
+		MediaType: mediatype.OCI1Manifest,
+		Config: descriptor.Descriptor{
+			MediaType: mediatype.OCI1ImageConfig,
+			Digest:    digest.FromString("mock image config"),
+			Size:      1,
+		},
+		Layers: []descriptor.Descriptor{{
+			MediaType: mediatype.OCI1LayerGzip,
+			Digest:    imageLayerDigest,
+			Size:      int64(len(imageLayerBytes)),
+		}},
+	})
+	if err != nil {
+		t.Fatalf("failed to marshal image manifest: %v", err)
+	}
+	imageDigest := digest.FromBytes(imageBytes)
+
+	provenanceBytes := []byte(`{"_type":"https://in-toto.io/Statement/v0.1",` +
+		`"predicateType":"https://slsa.dev/provenance/v0.2",` +
+		`"subject":[{"name":"pkg:docker/app@latest?platform=linux%2Famd64","digest":{"sha256":"` + imageDigest.Encoded() + `"}}],` +
+		`"predicate":{"builder":{"id":""},"buildType":"https://mobyproject.org/buildkit@v1"}}`)
+	provenanceDigest := digest.FromBytes(provenanceBytes)
+	attestationBytes, err := json.Marshal(v1.Manifest{
+		Versioned: v1.ManifestSchemaVersion,
+		MediaType: mediatype.OCI1Manifest,
+		Config: descriptor.Descriptor{
+			MediaType: mediatype.OCI1ImageConfig,
+			Digest:    digest.FromString("mock attestation config"),
+			Size:      1,
+		},
+		Layers: []descriptor.Descriptor{{
+			MediaType:   InTotoJson,
+			Digest:      provenanceDigest,
+			Size:        int64(len(provenanceBytes)),
+			Annotations: map[string]string{"in-toto.io/predicate-type": "https://slsa.dev/provenance/v0.2"},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("failed to marshal attestation manifest: %v", err)
+	}
+	attestationDigest := digest.FromBytes(attestationBytes)
+
+	indexBytes, err := json.Marshal(v1.Index{
+		Versioned: v1.ManifestSchemaVersion,
+		MediaType: mediatype.OCI1ManifestList,
+		Manifests: []descriptor.Descriptor{
+			{
+				MediaType: mediatype.OCI1Manifest,
+				Digest:    imageDigest,
+				Size:      int64(len(imageBytes)),
+				Platform:  &platform.Platform{OS: "linux", Architecture: "amd64"},
+			},
+			{
+				MediaType: mediatype.OCI1Manifest,
+				Digest:    attestationDigest,
+				Size:      int64(len(attestationBytes)),
+				Platform:  &platform.Platform{OS: "unknown", Architecture: "unknown"},
+				Annotations: map[string]string{
+					dockerReferenceTypeAnnotation: dockerAttestationManifest,
+					"vnd.docker.reference.digest": imageDigest.String(),
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("failed to marshal image index: %v", err)
+	}
+	indexDigest := digest.FromBytes(indexBytes)
+
+	registry := mockregistry.NewMockRegistry(&mockregistry.RegistryContent{
+		Repositories: map[string]*mockregistry.RepositoryContent{
+			"app": {
+				Tags: map[string]string{"latest": indexDigest.String()},
+				Manifests: map[string]mockregistry.ManifestContent{
+					indexDigest.String():       {Content: indexBytes, MediaType: mediatype.OCI1ManifestList, Digest: indexDigest},
+					imageDigest.String():       {Content: imageBytes, MediaType: mediatype.OCI1Manifest, Digest: imageDigest},
+					attestationDigest.String(): {Content: attestationBytes, MediaType: mediatype.OCI1Manifest, Digest: attestationDigest},
+				},
+				Blobs: map[string][]byte{
+					imageLayerDigest.String(): imageLayerBytes,
+					provenanceDigest.String(): provenanceBytes,
+				},
+			},
+		},
+	})
+	defer registry.Close()
+
+	parsedURL, err := url.Parse(registry.URL())
+	if err != nil {
+		t.Fatalf("failed to parse mock registry URL: %v", err)
+	}
+	registryHost := parsedURL.Host
+
+	ds, err := inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciDataSources: []datasource.Source{{Value: registryHost + "/app:latest"}},
+	})
+	if err != nil {
+		t.Fatalf("failed to create data source: %v", err)
+	}
+	rcOpts := append(getRegClientOptions(), regclient.WithConfigHost(config.Host{
+		Name:     registryHost,
+		Hostname: registryHost,
+		TLS:      config.TLSDisabled,
+	}))
+	c := NewOCICollector(ctx, ds, false, 0, rcOpts...)
+
+	docChannel := make(chan *processor.Document, 10)
+	if err := c.RetrieveArtifacts(ctx, docChannel); err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+	close(docChannel)
+	var docs []*processor.Document
+	for doc := range docChannel {
+		docs = append(docs, doc)
+	}
+
+	if len(docs) != 1 {
+		t.Fatalf("collected %d documents, want 1", len(docs))
+	}
+	doc := docs[0]
+	if string(doc.Blob) != string(provenanceBytes) {
+		t.Errorf("doc.Blob = %s, want the SLSA provenance statement", doc.Blob)
+	}
+	wantSource := fmt.Sprintf("%s/app@%s", registryHost, attestationDigest)
+	if doc.SourceInformation.Source != wantSource {
+		t.Errorf("doc.SourceInformation.Source = %v, want %v", doc.SourceInformation.Source, wantSource)
+	}
+	docType, _, err := guesser.GuessDocument(ctx, doc)
+	if err != nil {
+		t.Fatalf("GuessDocument() error = %v", err)
+	}
+	if docType != processor.DocumentITE6SLSA {
+		t.Errorf("guessed document type = %v, want %v", docType, processor.DocumentITE6SLSA)
+	}
+	if !c.isDigestCollected(registryHost+"/app", attestationDigest.String()) {
+		t.Errorf("attestation manifest %s not marked as collected", attestationDigest)
 	}
 }

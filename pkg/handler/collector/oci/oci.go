@@ -92,6 +92,13 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 // wellKnownSuffixes are the well known suffixes for fallback artifacts
 var wellKnownSuffixes = []string{"att", "sbom"}
 
+// docker buildx stores attestations, such as SLSA provenance from --provenance, as
+// manifests of the image index marked with this annotation.
+const (
+	dockerReferenceTypeAnnotation = "vnd.docker.reference.type"
+	dockerAttestationManifest     = "attestation-manifest"
+)
+
 type ociCollector struct {
 	collectDataSource datasource.CollectSource
 	checkedDigest     sync.Map
@@ -282,6 +289,10 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 		return fmt.Errorf("failed retrieving manifest: %w", err)
 	}
 
+	if err := o.fetchIndexAttestations(ctx, repo, rc, m, docChannel); err != nil {
+		return err
+	}
+
 	pl, err := manifest.GetPlatformList(m)
 	if err != nil {
 		return fmt.Errorf("failed retrieving manifest list: %w", err)
@@ -308,6 +319,10 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 			if err != nil {
 				errorChan <- fmt.Errorf("failed retrieving platform specific digest: %w", err)
 				cancel()
+				return
+			}
+			// attestation manifests are collected by fetchIndexAttestations
+			if isDockerAttestationManifest(*desc) {
 				return
 			}
 			platformImage := ref.Ref{
@@ -341,6 +356,41 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	}
 
 	return nil
+}
+
+// fetchIndexAttestations sends the layers of the attestation manifests in an image index,
+// as written by docker buildx, to the docChannel. The document type is left for the
+// processor to guess, since buildx stores both SLSA provenance and SBOM statements this way.
+func (o *ociCollector) fetchIndexAttestations(ctx context.Context, repo string, rc *regclient.RegClient, m manifest.Manifest, docChannel chan<- *processor.Document) error {
+	indexer, ok := m.(manifest.Indexer)
+	if !ok {
+		return nil
+	}
+	descs, err := indexer.GetManifestList()
+	if err != nil {
+		return fmt.Errorf("failed retrieving image index manifests: %w", err)
+	}
+
+	for _, desc := range descs {
+		if !isDockerAttestationManifest(desc) {
+			continue
+		}
+		attestationDigest := desc.Digest.String()
+		if o.isDigestCollected(repo, attestationDigest) {
+			continue
+		}
+		logging.FromContext(ctx).Infof("Fetching attestation manifest %s from image index", attestationDigest)
+		attestation := fmt.Sprintf("%v@%v", repo, attestationDigest)
+		if err := fetchOCIArtifactBlobs(ctx, rc, attestation, "", docChannel); err != nil {
+			return fmt.Errorf("failed retrieving attestation blobs from image index: %w", err)
+		}
+		o.markDigestAsCollected(repo, attestationDigest)
+	}
+	return nil
+}
+
+func isDockerAttestationManifest(desc descriptor.Descriptor) bool {
+	return desc.Annotations[dockerReferenceTypeAnnotation] == dockerAttestationManifest
 }
 
 // fetchFallbackArtifacts fetches fallback artifacts for the given image manifest and sends them to the docChannel.
