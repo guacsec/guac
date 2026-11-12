@@ -695,3 +695,59 @@ func noAnalysisVexPredicates() *assembler.IngestPredicates {
 		},
 	}
 }
+
+func Test_cyclonedxParser_getLicenseInformation(t *testing.T) {
+	tests := []struct {
+		name            string
+		licenses        []cdx.LicenseChoice
+		wantDeclared    string
+		wantNoLegalNode bool
+	}{{
+		name:         "two resolvable licenses",
+		licenses:     []cdx.LicenseChoice{{License: &cdx.License{ID: "MIT"}}, {License: &cdx.License{ID: "Apache-2.0"}}},
+		wantDeclared: "MIT AND Apache-2.0",
+	}, {
+		name:            "single license that resolves to nothing",
+		licenses:        []cdx.LicenseChoice{{License: &cdx.License{Name: "UNKNOWN"}}},
+		wantNoLegalNode: true,
+	}, {
+		name:         "unresolvable license listed alongside a real one",
+		licenses:     []cdx.LicenseChoice{{License: &cdx.License{Name: "UNKNOWN"}}, {License: &cdx.License{ID: "MIT"}}},
+		wantDeclared: "MIT",
+	}, {
+		name:            "every license in the list resolves to nothing",
+		licenses:        []cdx.LicenseChoice{{License: &cdx.License{Name: "UNKNOWN"}}, {License: &cdx.License{}}},
+		wantNoLegalNode: true,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &cyclonedxParser{
+				packageLegals: map[string][]*model.CertifyLegalInputSpec{},
+				licenseInLine: map[string]string{},
+			}
+			comp := cdx.Component{
+				BOMRef:   "comp-ref",
+				Type:     cdx.ComponentTypeLibrary,
+				Name:     "mylib",
+				Version:  "1.0.0",
+				Licenses: (*cdx.Licenses)(&tt.licenses),
+			}
+			if err := c.getLicenseInformation(comp); err != nil {
+				t.Fatalf("getLicenseInformation returned an error: %v", err)
+			}
+			got := c.packageLegals["comp-ref"]
+			if tt.wantNoLegalNode {
+				if len(got) != 0 {
+					t.Fatalf("expected no CertifyLegal, got %q", got[0].DeclaredLicense)
+				}
+				return
+			}
+			if len(got) != 1 {
+				t.Fatalf("expected one CertifyLegal, got %d", len(got))
+			}
+			if got[0].DeclaredLicense != tt.wantDeclared {
+				t.Errorf("DeclaredLicense = %q, want %q", got[0].DeclaredLicense, tt.wantDeclared)
+			}
+		})
+	}
+}
