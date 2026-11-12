@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	attestation_license "github.com/guacsec/guac/pkg/certifier/attestation/license"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -156,5 +157,82 @@ func TestParser(t *testing.T) {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestParserHasSourceAtMatchesCertifierIdentity(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	revision := "9e3b772b8cabbd8cadc7522ebe3dde3279e79d9e"
+	loc := &attestation_license.SourceLocation{
+		Type:      "git",
+		Provider:  "github",
+		Namespace: "facebook",
+		Name:      "react",
+		Revision:  revision,
+		URL:       "https://github.com/facebook/react/tree/" + revision,
+	}
+	wantSrc := attestation_license.SourceInputFromCD(loc)
+
+	// Minimal ClearlyDefined attestation whose described.sourceLocation is a
+	// git GitHub source. The package subject is enough for HasSourceAt.
+	blob := []byte(`{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [{"uri": "pkg:npm/react@18.2.0"}],
+  "predicateType": "https://in-toto.io/attestation/clearlydefined/v0.1",
+  "predicate": {
+    "definition": {
+      "described": {
+        "releaseDate": "2022-06-14",
+        "sourceLocation": {
+          "type": "git",
+          "provider": "github",
+          "namespace": "facebook",
+          "name": "react",
+          "revision": "9e3b772b8cabbd8cadc7522ebe3dde3279e79d9e",
+          "url": "https://github.com/facebook/react/tree/9e3b772b8cabbd8cadc7522ebe3dde3279e79d9e"
+        }
+      },
+      "licensed": {
+        "declared": "MIT",
+        "facets": {
+          "core": {
+            "attribution": {"parties": []},
+            "discovered": {"expressions": ["MIT"], "unknown": 0}
+          }
+        }
+      },
+      "coordinates": {
+        "type": "npm",
+        "provider": "npmjs",
+        "namespace": "-",
+        "name": "react",
+        "revision": "18.2.0"
+      },
+      "meta": {"schemaVersion": "1.6.1", "updated": "2022-11-21T17:45:50.520Z"}
+    },
+    "metadata": {"scannedOn": "2022-11-21T17:45:50.520Z"}
+  }
+}`)
+
+	s := NewLegalCertificationParser()
+	err := s.Parse(ctx, &processor.Document{
+		Blob:   blob,
+		Format: processor.FormatJSON,
+		Type:   processor.DocumentITE6ClearlyDefined,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	})
+	if err != nil {
+		t.Fatalf("Parse() unexpected error: %v", err)
+	}
+	preds := s.GetPredicates(ctx)
+	if len(preds.HasSourceAt) != 1 {
+		t.Fatalf("expected 1 HasSourceAt, got %d", len(preds.HasSourceAt))
+	}
+	got := preds.HasSourceAt[0].Src
+	if diff := cmp.Diff(wantSrc, got); diff != "" {
+		t.Errorf("HasSourceAt.Src does not match certifier SourceInputFromCD identity (-want +got):\n%s", diff)
 	}
 }

@@ -3,6 +3,20 @@
 This document includes information about the GUAC release process. Including
 the release cadence and the process to perform releases.
 
+
+## Draft notes for next release
+
+Maintainers: fold the following into the next release write-up.
+
+### Breaking / migration notes
+
+* **ClearlyDefined git source identity now includes the VCS host.** Git sources
+  ingested from ClearlyDefined previously used the bare ClearlyDefined
+  namespace (for example `facebook`). They now match every other GUAC ingestion
+  path and use a host-qualified namespace (for example `github.com/facebook`).
+  Existing deployments will keep ClearlyDefined sources under the old namespace
+  (without a VCS host) until those sources are re-ingested.
+
 ## Release cadence
 
 The GUAC release cadence aims to happen bi-monthly. 
