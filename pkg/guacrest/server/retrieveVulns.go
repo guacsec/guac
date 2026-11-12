@@ -71,6 +71,64 @@ func GetVulnsForPackage(ctx context.Context, gqlClient graphql.Client, purl stri
 	return vulnsForPackageIDs(ctx, gqlClient, pkgIDs)
 }
 
+// GetVulnsForSbom returns the vulnerabilities certified against the software
+// listed in the SBOM identified by id.
+func GetVulnsForSbom(ctx context.Context, gqlClient graphql.Client, id string) ([]gen.Vulnerability, error) {
+	logger := logging.FromContext(ctx)
+
+	response, err := gql.HasSBOMs(ctx, gqlClient, gql.HasSBOMSpec{Id: &id})
+	if err != nil {
+		if isMalformedIDError(err) {
+			return nil, helpers.Err404
+		}
+		logger.Errorf("HasSBOMs query returned error: %v", err)
+		return nil, helpers.Err502
+	}
+	if response == nil {
+		logger.Errorf("HasSBOMs query returned nil response")
+		return nil, helpers.Err500
+	}
+
+	sboms := response.GetHasSBOM()
+	switch len(sboms) {
+	case 0:
+		return nil, helpers.Err404
+	case 1:
+	default:
+		logger.Errorf("More than one HasSBOM was found with id %s", id)
+		return nil, helpers.Err500
+	}
+
+	sbom := sboms[0]
+	var pkgIDs []string
+	for _, software := range sbom.GetIncludedSoftware() {
+		switch s := software.(type) {
+		case *gql.AllHasSBOMTreeIncludedSoftwarePackage:
+			vers := helpers.GetVersionsOfAllPackageTree(s.AllPkgTree)
+			if len(vers) == 0 && s.Id != "" {
+				pkgIDs = append(pkgIDs, s.Id)
+			} else {
+				for _, v := range vers {
+					pkgIDs = append(pkgIDs, v.Id)
+				}
+			}
+		case *gql.AllHasSBOMTreeIncludedSoftwareArtifact:
+			artPkgIDs, err := packageIDsForArtifact(ctx, gqlClient, &s.AllArtifactTree)
+			if err != nil {
+				return nil, err
+			}
+			pkgIDs = append(pkgIDs, artPkgIDs...)
+		default:
+			logger.Warnf("HasSBOM %s includedSoftware has an unhandled software type: %T", id, software)
+		}
+	}
+
+	slices.Sort(pkgIDs)
+	pkgIDs = slices.Compact(pkgIDs)
+
+	return vulnsForPackageIDs(ctx, gqlClient, pkgIDs)
+}
+
 // packageIDsForArtifact returns the sorted IDs of every package version the
 // byDigest walk reaches, equivalents included - unlike GetDepsForArtifact.
 func packageIDsForArtifact(ctx context.Context, gqlClient graphql.Client, art *gql.AllArtifactTree) ([]string, error) {

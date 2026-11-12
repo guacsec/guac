@@ -288,6 +288,34 @@ paths:
           $ref: "#/components/responses/BadGateway"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  "/v0/sbom/{id}/vulns":
+    get:
+      summary: Get vulnerabilities for the software in an SBOM
+      description: >
+        Returns the vulnerabilities certified against the software listed in
+        the SBOM's includedSoftware. Artifact entries are expanded to their
+        reachable packages. Only this SBOM's contents are covered; nested
+        SBOMs are not followed. Records certifying that a scan found nothing
+        (novuln) are not returned.
+      operationId: getSbomVulns
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The opaque HasSBOM node ID, as returned by GET /v0/sbom
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/VulnerabilityList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
 
 components:
   parameters:

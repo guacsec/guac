@@ -36,6 +36,7 @@ const (
 	ListSboms
 	GetSbom
 	DownloadSbom
+	GetSbomVulns
 )
 
 // IsErrorResponse checks if the response status code indicates an error.
@@ -122,6 +123,12 @@ func createBadRequestResponse(endpointType EndpointType, message string) interfa
 				Message: message,
 			},
 		}
+	case GetSbomVulns:
+		return gen.GetSbomVulns400JSONResponse{
+			BadRequestJSONResponse: gen.BadRequestJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -173,6 +180,12 @@ func createInternalServerErrorResponse(endpointType EndpointType, message string
 		}
 	case DownloadSbom:
 		return gen.DownloadSbom500JSONResponse{
+			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbomVulns:
+		return gen.GetSbomVulns500JSONResponse{
 			InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
 				Message: message,
 			},
@@ -232,6 +245,12 @@ func createBadGatewayResponse(endpointType EndpointType, message string) interfa
 				Message: message,
 			},
 		}
+	case GetSbomVulns:
+		return gen.GetSbomVulns502JSONResponse{
+			BadGatewayJSONResponse: gen.BadGatewayJSONResponse{
+				Message: message,
+			},
+		}
 	default:
 		return nil
 	}
@@ -247,6 +266,12 @@ func createNotFoundResponse(endpointType EndpointType, message string) interface
 		}
 	case DownloadSbom:
 		return gen.DownloadSbom404JSONResponse{
+			NotFoundJSONResponse: gen.NotFoundJSONResponse{
+				Message: message,
+			},
+		}
+	case GetSbomVulns:
+		return gen.GetSbomVulns404JSONResponse{
 			NotFoundJSONResponse: gen.NotFoundJSONResponse{
 				Message: message,
 			},
