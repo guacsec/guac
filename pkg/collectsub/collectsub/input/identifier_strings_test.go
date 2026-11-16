@@ -61,7 +61,11 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 					"https://github.com/namespace/project/-/releases/permalink/latest",
 					"https://api.github.com/repos/grafana/grafana/releases/tags/v10.2.6",
 					"github.com/kubernetes/kubernetes/releases",
-					"github.com/kubernetes/kubernetes"},
+					"github.com/kubernetes/kubernetes",
+					"git+https://github.com/guacsec/guac",
+					"https://gitlab.com/gitlab-org/gitlab-runner.git",
+					"https://github.com/guacsec/guac/tree/main/pkg",
+					"https://example.com/guacsec/guac"},
 			},
 		},
 		expected: []*pb.CollectEntry{
@@ -71,6 +75,8 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "gcr.io/guacsec/local-organic-guac"},
 			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:golang/google.golang.org/genproto#googleapis/api/annotations"},
 			{Type: pb.CollectDataType_DATATYPE_GITHUB_RELEASE, Value: "github.com/kubernetes/kubernetes/releases"},
+			{Type: pb.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
+			{Type: pb.CollectDataType_DATATYPE_GIT, Value: "https://gitlab.com/gitlab-org/gitlab-runner.git"},
 		},
 	}, {
 		name: "simple slice test",
