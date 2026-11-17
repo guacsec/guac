@@ -18,6 +18,10 @@
 package backend_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -606,3 +610,27 @@ func cmpPackageOrArtifact(a, b model.PackageOrArtifact) int {
 	ba := b.(*model.Artifact)
 	return cmpArt(aa, ba)
 }
+
+var nodeIDField = regexp.MustCompile(`"id":"[^"]*",?`)
+
+// nodeKey renders a node as JSON with every "id" field removed, so nodes
+// can be ordered by content alone. Backends return neighbors in storage
+// order, which is not part of the API contract.
+func nodeKey(n model.Node) string {
+	b, err := json.Marshal(n)
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%T%s", n, nodeIDField.ReplaceAll(b, nil))
+}
+
+func lessNode(a, b model.Node) bool {
+	return nodeKey(a) < nodeKey(b)
+}
+
+// sortNodes orders top-level []model.Node results. The filter keeps it off
+// typed slices such as []*model.Artifact, which already have their own
+// sorters in commonOpts; two sorters on one slice make cmp panic.
+var sortNodes = cmp.FilterPath(func(p cmp.Path) bool {
+	return p.Last().Type() == reflect.TypeOf([]model.Node(nil))
+}, cmpopts.SortSlices(lessNode))
