@@ -314,7 +314,13 @@ func (c *cyclonedxParser) getLicenseInformation(comp cdx.Component) error {
 				if compLicense.License == nil {
 					continue
 				}
-				licenses = append(licenses, getLicenseFromName(c, compLicense))
+				// a license entry with neither a usable name nor an ID yields an
+				// empty string, which would otherwise be joined into the expression
+				license := getLicenseFromName(c, compLicense)
+				if license == "" {
+					continue
+				}
+				licenses = append(licenses, license)
 			}
 			if len(licenses) > 0 {
 				cl := &model.CertifyLegalInputSpec{
