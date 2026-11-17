@@ -162,13 +162,18 @@ func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDor
 
 	for _, artifacts := range batches {
 		creates := make([]*ent.ArtifactCreate, len(artifacts))
+		createIDs := make([]string, len(artifacts))
 		for i, art := range artifacts {
 			artInput := art
 			artifactID := generateUUIDKey([]byte(helpers.GetKey[*model.ArtifactInputSpec, string](artInput.ArtifactInput, helpers.ArtifactServerKey)))
 			creates[i] = generateArtifactCreate(tx, &artifactID, artInput)
+			createIDs[i] = artifactID.String()
 
 			ids = append(ids, artifactID.String())
 		}
+
+		// Sort by deterministic ID so concurrent transactions lock shared rows in the same order, avoiding 40P01 deadlocks.
+		sortBatchByID(createIDs, creates)
 
 		err := tx.Artifact.CreateBulk(creates...).
 			OnConflict(

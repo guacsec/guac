@@ -3780,7 +3780,7 @@ func TestNeighbors(t *testing.T) {
 				t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, commonOpts); diff != "" {
+			if diff := cmp.Diff(tt.want, got, commonOpts, sortNodes); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
