@@ -7,8 +7,8 @@ example in #3256.
 The current slice deliberately stops before graph ingestion. In particular, it
 does not project safety assertions into `HasMetadata`. The maintainer review of
 #3271 confirmed that the permanent implementation requires a dedicated,
-queryable safety-assertion ontology connecting the product, component,
-evidence, provenance, and review state.
+queryable safety-assertion ontology connecting the product, component, evidence,
+provenance, and review state.
 
 The proposed ontology and out-of-order resolution lifecycle are tracked in
 #3272. After maintainers approve that contract, the GUAC document guesser,
