@@ -19,6 +19,7 @@ package input
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -103,5 +104,30 @@ func guessUnknownIdentifierString(s string) (*pb.CollectEntry, error) {
 			Value: s,
 		}, nil
 	}
+
+	if isRepoVcsString(s) {
+		return &pb.CollectEntry{
+			Type:  pb.CollectDataType_DATATYPE_GIT,
+			Value: s,
+		}, nil
+	}
 	return nil, fmt.Errorf("unable to guess collect entry")
+}
+
+// isRepoVcsString reports whether s points at a source repository, either as a
+// <vcs_tool>+<transport> URI such as git+https://github.com/guacsec/guac or as a plain
+// https URL of a known git host with exactly an owner and a repository in the path.
+// Deeper https paths, such as release or tree pages, are not treated as repositories.
+func isRepoVcsString(s string) bool {
+	if !helpers.IsVcs(s) {
+		return false
+	}
+	u, err := url.Parse(s)
+	if err != nil {
+		return false
+	}
+	if strings.Contains(u.Scheme, "+") {
+		return true
+	}
+	return len(strings.Split(strings.Trim(u.Path, "/"), "/")) == 2
 }

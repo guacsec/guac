@@ -89,8 +89,10 @@ func (d *dsseParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 	//return d.identities
 }
 
+// GetIdentifiers returns an empty set. The envelope only carries signatures, and its payload
+// is parsed as a separate document whose parser reports the identifiers.
 func (d *dsseParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return &common.IdentifierStrings{}, nil
 }
 
 // TODO: Right now, trust information isn't encapsulated yet as nodes as edges
