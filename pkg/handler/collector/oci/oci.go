@@ -403,7 +403,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
 					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
 					if e != nil {
-						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
+						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", e)
 						cancel()
 						return
 					}

@@ -286,3 +286,135 @@ func TestOCIRegistryCollector_RecordsArtifactErrorMetric(t *testing.T) {
 		t.Errorf("unexpected metric state: %v", err)
 	}
 }
+
+func toOCIDataSource(t *testing.T, ociValues []string) datasource.CollectSource {
+	t.Helper()
+	values := []datasource.Source{}
+	for _, v := range ociValues {
+		values = append(values, datasource.Source{Value: v})
+	}
+
+	ds, err := inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciDataSources: values,
+	})
+	if err != nil {
+		t.Fatalf("could not build data source: %v", err)
+	}
+	return ds
+}
+
+// A referrer whose layer blob is missing from the registry makes
+// fetchOCIArtifactBlobs fail. The error that reaches the caller of
+// RetrieveArtifacts should still say why.
+func TestOCICollector_ReferrerFetchErrorKeepsCause(t *testing.T) {
+	ctx := context.Background()
+
+	imageLayerBytes := []byte("mock image layer content")
+	imageLayerDigest := digest.FromBytes(imageLayerBytes)
+
+	// This blob is deliberately never stored in the registry.
+	sbomBlobDigest := digest.FromString("missing sbom blob")
+
+	imageManifest := v1.Manifest{
+		Versioned: v1.ManifestSchemaVersion,
+		Config: descriptor.Descriptor{
+			MediaType: "application/vnd.oci.image.config.v1+json",
+			Digest:    digest.FromString("mock image config"),
+			Size:      1,
+		},
+		Layers: []descriptor.Descriptor{{
+			MediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
+			Digest:    imageLayerDigest,
+			Size:      int64(len(imageLayerBytes)),
+		}},
+	}
+	imageBytes, err := json.Marshal(imageManifest)
+	if err != nil {
+		t.Fatalf("Failed to marshal image manifest: %v", err)
+	}
+	imageDigest := digest.FromBytes(imageBytes)
+
+	sbomManifest := v1.Manifest{
+		Versioned: v1.ManifestSchemaVersion,
+		Config: descriptor.Descriptor{
+			MediaType: "application/vnd.example.sbom.config.v1+json",
+			Digest:    digest.FromString("mock sbom config"),
+			Size:      1,
+		},
+		ArtifactType: SpdxJson,
+		Layers: []descriptor.Descriptor{{
+			MediaType: "application/vnd.example.sbom.layer.v1+json",
+			Digest:    sbomBlobDigest,
+			Size:      17,
+		}},
+		Subject: &descriptor.Descriptor{
+			MediaType: "application/vnd.oci.image.manifest.v1+json",
+			Digest:    imageDigest,
+			Size:      int64(len(imageBytes)),
+		},
+	}
+	sbomBytes, err := json.Marshal(sbomManifest)
+	if err != nil {
+		t.Fatalf("Failed to marshal sbom manifest: %v", err)
+	}
+	sbomDigest := digest.FromBytes(sbomBytes)
+
+	content := &mockregistry.RegistryContent{
+		Repositories: map[string]*mockregistry.RepositoryContent{
+			"ubuntu": {
+				Tags: map[string]string{"latest": imageDigest.String()},
+				Manifests: map[string]mockregistry.ManifestContent{
+					imageDigest.String(): {
+						Content:   imageBytes,
+						MediaType: "application/vnd.oci.image.manifest.v1+json",
+						Digest:    imageDigest,
+						Referrers: []descriptor.Descriptor{{
+							MediaType:    "application/vnd.oci.image.manifest.v1+json",
+							Digest:       sbomDigest,
+							Size:         int64(len(sbomBytes)),
+							ArtifactType: SpdxJson,
+						}},
+					},
+					sbomDigest.String(): {
+						Content:      sbomBytes,
+						MediaType:    "application/vnd.oci.image.manifest.v1+json",
+						Digest:       sbomDigest,
+						ArtifactType: SpdxJson,
+					},
+				},
+				Blobs: map[string][]byte{
+					imageLayerDigest.String(): imageLayerBytes,
+				},
+			},
+		},
+	}
+
+	registry := mockregistry.NewMockRegistry(content)
+	defer registry.Close()
+
+	parsedURL, err := url.Parse(registry.URL())
+	if err != nil {
+		t.Fatalf("Failed to parse mock registry URL: %v", err)
+	}
+	registryHost := parsedURL.Host
+
+	rcOpts := append(getRegClientOptions(), regclient.WithConfigHost(config.Host{
+		Name:     registryHost,
+		Hostname: registryHost,
+		TLS:      config.TLSDisabled,
+	}))
+
+	c := NewOCICollector(ctx, toOCIDataSource(t, []string{registryHost + "/ubuntu:latest"}), false, 0, rcOpts...)
+
+	docChan := make(chan *processor.Document, 10)
+	err = c.RetrieveArtifacts(ctx, docChan)
+	if err == nil {
+		t.Fatalf("RetrieveArtifacts() error = nil, want a referrer fetch failure")
+	}
+	if strings.Contains(err.Error(), "%!w(<nil>)") {
+		t.Errorf("RetrieveArtifacts() error = %q, wrapped a nil error", err)
+	}
+	if !strings.Contains(err.Error(), "failed pulling layer") {
+		t.Errorf("RetrieveArtifacts() error = %q, want it to carry the blob fetch failure", err)
+	}
+}
