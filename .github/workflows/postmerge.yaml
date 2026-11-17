@@ -40,7 +40,7 @@ jobs:
       - name: Setup the project
         run: go mod download
       - name: Install atlas
-        uses: ariga/setup-atlas@28f0b75814c08b1a265b75713c120cfad46433ae # v0.5
+        uses: ariga/setup-atlas@c2de7bd12ab9f9a143ae5a6280b5b416c7c43021 # v0.6
       - name: Run integration merge test
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
