@@ -17,6 +17,7 @@ package depversion
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -350,18 +351,19 @@ func getConstraint(s string) (string, error) {
 			return "", fmt.Errorf("unable to parse semver with wildcard: %v", err)
 		}
 
-		constraint := ""
 		if minor == "x" {
-			constraint += fmt.Sprintf(">=%s.%s.%s,<%s.%s.%s",
-				major, "0", "0",
-				plusOne(major), "0", "0")
-		} else {
-			// assume wildcard on patch
-			constraint += fmt.Sprintf(">=%s.%s.%s,<%s.%s.%s",
-				major, minor, "0",
-				major, plusOne(minor), "0")
+			nextMajor, err := plusOne(major)
+			if err != nil {
+				return "", err
+			}
+			return fmt.Sprintf(">=%s.0.0,<%s.0.0", major, nextMajor), nil
 		}
-		return constraint, nil
+		// assume wildcard on patch
+		nextMinor, err := plusOne(minor)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf(">=%s.%s.0,<%s.%s.0", major, minor, major, nextMinor), nil
 	}
 
 	// NPM ^ for major versions
@@ -372,8 +374,11 @@ func getConstraint(s string) (string, error) {
 			return "", fmt.Errorf("unable to parse semver %v", err)
 		}
 
-		constraint := fmt.Sprintf(">=%v,<%s.%s.%s", semver, plusOne(major), "0", "0")
-		return constraint, nil
+		nextMajor, err := plusOne(major)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf(">=%v,<%s.0.0", semver, nextMajor), nil
 	}
 
 	// NPM ~ for minor version
@@ -384,8 +389,11 @@ func getConstraint(s string) (string, error) {
 			return "", fmt.Errorf("unable to parse semver %v", err)
 		}
 
-		constraint := fmt.Sprintf(">=%v,<%s.%s.%s", semver, major, plusOne(minor), "0")
-		return constraint, nil
+		nextMinor, err := plusOne(minor)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf(">=%v,<%s.%s.0", semver, major, nextMinor), nil
 	}
 
 	// check if its java ranges
@@ -474,10 +482,15 @@ func getConstraint(s string) (string, error) {
 	return "", errNoConstraintFound
 }
 
-func plusOne(s string) string {
+// plusOne returns the next number after s. It returns an error instead of
+// panicking when s is not a number or is too large to fit in an int.
+func plusOne(s string) (string, error) {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		panic(err)
+		return "", fmt.Errorf("unable to increment version number %q: %w", s, err)
 	}
-	return strconv.Itoa(i + 1)
+	if i == math.MaxInt {
+		return "", fmt.Errorf("unable to increment version number %q: value out of range", s)
+	}
+	return strconv.Itoa(i + 1), nil
 }
