@@ -24,6 +24,7 @@ import (
 	"math"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -36,6 +37,7 @@ import (
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/misc/coordinates"
 	"github.com/guacsec/guac/pkg/version"
 
@@ -56,21 +58,58 @@ const (
 	CDCollector string = "clearlydefined"
 	maxRetries         = 10
 	baseDelay          = 1 * time.Second
+
+	// CDQueryErrorsCounter is the name of the counter metric that tracks
+	// failed queries to clearly defined.
+	CDQueryErrorsCounter = "clearlydefined_query_errors"
 )
+
+var registerMetricsOnce sync.Once
 
 var ErrComponentTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type cdCertifier struct {
 	cdHTTPClient *http.Client
+	// Metrics is optional; when nil, no metrics are recorded.
+	Metrics metrics.MetricCollector
+}
+
+// CertifierOpts configures a cdCertifier.
+type CertifierOpts func(*cdCertifier)
+
+// WithMetrics configures the certifier to record metrics using the given
+// MetricCollector. Call RegisterMetrics once before any certifier built with
+// this option is used.
+func WithMetrics(m metrics.MetricCollector) CertifierOpts {
+	return func(c *cdCertifier) {
+		c.Metrics = m
+	}
+}
+
+// RegisterMetrics registers the Prometheus metrics recorded by the clearly
+// defined certifier. It is safe to call multiple times; registration only
+// happens once per process.
+func RegisterMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	var err error
+	registerMetricsOnce.Do(func() {
+		if _, regErr := m.RegisterCounter(ctx, CDQueryErrorsCounter); regErr != nil {
+			err = fmt.Errorf("failed to register counter for clearly defined query errors: %w", regErr)
+		}
+	})
+	return err
 }
 
 // NewClearlyDefinedCertifier initializes the cdCertifier
-func NewClearlyDefinedCertifier() certifier.Certifier {
+func NewClearlyDefinedCertifier(opts ...CertifierOpts) certifier.Certifier {
 	limiter := rate.NewLimiter(rate.Every(rateLimitInterval), rateLimit)
 	client := NewClearlyDefinedHTTPClient(limiter)
-	return &cdCertifier{
+	c := &cdCertifier{
 		cdHTTPClient: client,
 	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
 }
 
 func NewClearlyDefinedHTTPClient(limiter *rate.Limiter) *http.Client {
@@ -199,6 +238,11 @@ func (c *cdCertifier) CertifyComponent(ctx context.Context, rootComponent interf
 	}
 
 	if _, err := EvaluateClearlyDefinedDefinition(ctx, c.cdHTTPClient, purls, docChannel, true); err != nil {
+		if c.Metrics != nil {
+			if metricsErr := c.Metrics.AddCounter(ctx, CDQueryErrorsCounter, 1); metricsErr != nil {
+				logging.FromContext(ctx).Debugf("failed to record clearly defined query error metric: %v", metricsErr)
+			}
+		}
 		return fmt.Errorf("could not generate document from Clearly Defined results: %w", err)
 	}
 

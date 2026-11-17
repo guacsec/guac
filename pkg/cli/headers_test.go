@@ -39,7 +39,7 @@ func TestHTTPHeaderTransport(t *testing.T) {
 		{
 			name:       "creating a header transport with a non-existent file results in an error",
 			headerFile: "does-not-exist.txt",
-			wantErr:    "error reading header file: open does-not-exist.txt: no such file or directory",
+			wantErr:    "error reading header file: open does-not-exist.txt:",
 		},
 		{
 			name:       "creating a header transport with a valid RFC 822 header file works",
@@ -79,12 +79,15 @@ func TestHTTPHeaderTransport(t *testing.T) {
 				finished = true
 			}()
 
-			require.Equal(t, test.wantErr, <-recovered, "fatal error message")
-
+			rec := <-recovered
 			if test.wantErr != nil {
+				require.NotNil(t, rec, "fatal error message")
+				require.Contains(t, rec, test.wantErr, "fatal error message")
 				assert.False(t, finished, "call did not finish")
 				return
 			}
+
+			require.Nil(t, rec, "fatal error message")
 
 			assert.True(t, finished, "call finished")
 

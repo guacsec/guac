@@ -2450,6 +2450,9 @@ var (
 					"id":"GHSA-fxph-q3j8-mv87"
 				 },
 				 {
+					"id":"GHSA-h383-gmxw-35v2"
+				 },
+				 {
 					"id":"GHSA-jfh8-c2jp-5v3q"
 				 },
 				 {
@@ -2796,7 +2799,7 @@ var (
          "Scorecard":null,
          "Source":{
             "commit":null,
-            "name":"py-filelock",
+            "name":"filelock",
             "namespace":"github.com/tox-dev",
             "tag":null,
             "type":"git"

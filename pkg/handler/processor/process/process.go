@@ -404,7 +404,8 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 	return p.Unpack(i) // nolint:wrapcheck
 }
 
-func decodeDocument(ctx context.Context, i *processor.Document) error {
+// DecodeDocument decodes the document according to its encoding and updates i.Blob in place.
+func DecodeDocument(ctx context.Context, i *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	var reader io.Reader
 	var err error
@@ -436,6 +437,10 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 		}
 	}
 	return nil
+}
+
+func decodeDocument(ctx context.Context, i *processor.Document) error {
+	return DecodeDocument(ctx, i)
 }
 
 // maxDecompressedSize caps how many bytes a document may decompress to, so a

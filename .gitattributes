@@ -1,0 +1,14 @@
+# Set default behavior to automatically normalize line endings to LF across all platforms
+* text=auto eol=lf
+
+# Explicitly declare binary files to prevent line-ending normalization
+*.bz2 binary
+*.zst binary
+*.gz binary
+*.tar binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

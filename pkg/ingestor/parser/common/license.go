@@ -120,8 +120,11 @@ func CombineLicense(licenses []string) string {
 }
 
 func FixSPDXLicenseExpression(licenseExpression string, inLineMap map[string]string) string {
-	modifiedLicenseExpression := licenseExpression
-	for _, part := range strings.Split(licenseExpression, " ") {
+	// Rewrite each token in place. Replacing across the whole expression would
+	// also hit the matching prefix of a longer ref, so LicenseRef-1 would eat
+	// the front of LicenseRef-10 and leave a name that is in no map.
+	parts := strings.Split(licenseExpression, " ")
+	for i, part := range parts {
 		p := strings.Trim(part, "()+")
 		if slices.Contains(ignore, p) {
 			continue
@@ -130,9 +133,9 @@ func FixSPDXLicenseExpression(licenseExpression string, inLineMap map[string]str
 			if inline, ok := inLineMap[p]; ok {
 				newLicenseName := HashLicense(inline)
 				inLineMap[newLicenseName] = inline
-				modifiedLicenseExpression = strings.ReplaceAll(modifiedLicenseExpression, p, newLicenseName)
+				parts[i] = strings.Replace(part, p, newLicenseName, 1)
 			}
 		}
 	}
-	return modifiedLicenseExpression
+	return strings.Join(parts, " ")
 }

@@ -18,15 +18,24 @@ package blob
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 
+	"gocloud.dev/blob/fileblob"
 	"gocloud.dev/blob/memblob"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/metrics"
 )
 
 func TestNewBlobCollector(t *testing.T) {
@@ -337,6 +346,65 @@ func TestBlobCollector_DefaultMaxObjectSize(t *testing.T) {
 	}
 	if bc.maxObjectSize != DefaultMaxObjectSize {
 		t.Errorf("default maxObjectSize = %d, want %d", bc.maxObjectSize, DefaultMaxObjectSize)
+	}
+}
+
+// TestBlobCollector_RecordsObjectErrorMetric drives a real per-object read
+// failure (an unreadable file) through RetrieveArtifacts and checks the
+// counter fires, rather than calling the private recordObjectError helper
+// directly.
+func TestBlobCollector_RecordsObjectErrorMetric(t *testing.T) {
+	if runtime.GOOS == "windows" || os.Geteuid() == 0 {
+		t.Skip("relies on POSIX file permissions being enforced for a non-root user")
+	}
+
+	dir := t.TempDir()
+	unreadable := filepath.Join(dir, "unreadable.json")
+	if err := os.WriteFile(unreadable, []byte("test document content"), 0o644); err != nil {
+		t.Fatalf("failed to write test object: %v", err)
+	}
+	if err := os.Chmod(unreadable, 0o000); err != nil {
+		t.Fatalf("failed to chmod test object: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(unreadable, 0o644) })
+
+	bkt, err := fileblob.OpenBucket(dir, nil)
+	if err != nil {
+		t.Fatalf("failed to open bucket: %v", err)
+	}
+	defer func() { _ = bkt.Close() }()
+
+	ctx := metrics.WithMetrics(context.Background(), "blob_test")
+	collector := metrics.FromContext(ctx, "blob_test")
+	counter, err := collector.RegisterCounter(ctx, ObjectRetrievalErrorsCounter)
+	if err != nil {
+		t.Fatalf("failed to register counter: %v", err)
+	}
+
+	bc, err := NewBlobCollector(ctx, WithBucket(bkt), WithMetrics(collector))
+	if err != nil {
+		t.Fatalf("failed to create collector: %v", err)
+	}
+
+	docChan := make(chan *processor.Document, 10)
+	if err := bc.RetrieveArtifacts(ctx, docChan); err != nil {
+		t.Fatalf("RetrieveArtifacts() error = %v", err)
+	}
+	close(docChan)
+	for range docChan {
+		t.Error("expected no documents from an unreadable object")
+	}
+
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter should implement prometheus.Collector")
+	}
+	if err := testutil.CollectAndCompare(counterVec, strings.NewReader(`
+		# HELP guac_blob_test_blob_object_retrieval_errors Counter for blob_test_blob_object_retrieval_errors
+		# TYPE guac_blob_test_blob_object_retrieval_errors counter
+		guac_blob_test_blob_object_retrieval_errors 1
+	`)); err != nil {
+		t.Errorf("unexpected metric state: %v", err)
 	}
 }
 

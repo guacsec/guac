@@ -405,7 +405,8 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	for _, pkg := range s.spdxDoc.Packages {
 		pkgInputSpecs := s.packagePackages[string(pkg.PackageSPDXIdentifier)]
 		for _, extRef := range pkg.PackageExternalReferences {
-			if extRef.Category == spdx_common.CategorySecurity {
+			if extRef.Category == spdx_common.CategorySecurity &&
+				(extRef.RefType == spdx_common.TypeSecurityCPE22Type || extRef.RefType == spdx_common.TypeSecurityCPE23Type) {
 				locator := extRef.Locator
 				metadataInputSpec := &model.HasMetadataInputSpec{
 					Key:           "cpe",

@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
@@ -108,6 +110,15 @@ type ClientInterface interface {
 
 	// GetPackageVulns request
 	GetPackageVulns(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListSboms request
+	ListSboms(ctx context.Context, params *ListSbomsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSbom request
+	GetSbom(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DownloadSbom request
+	DownloadSbom(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -184,6 +195,42 @@ func (c *Client) GetPackageDeps(ctx context.Context, purl string, params *GetPac
 
 func (c *Client) GetPackageVulns(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetPackageVulnsRequest(c.Server, purl, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ListSboms(ctx context.Context, params *ListSbomsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListSbomsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSbom(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSbomRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DownloadSbom(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDownloadSbomRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -561,6 +608,140 @@ func NewGetPackageVulnsRequest(server string, purl string, params *GetPackageVul
 	return req, nil
 }
 
+// NewListSbomsRequest generates requests for ListSboms
+func NewListSbomsRequest(server string, params *ListSbomsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v0/sbom")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.PaginationSpec != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "paginationSpec", *params.PaginationSpec, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "object", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Package != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "package", *params.Package, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSbomRequest generates requests for GetSbom
+func NewGetSbomRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v0/sbom/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDownloadSbomRequest generates requests for DownloadSbom
+func NewDownloadSbomRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v0/sbom/%s/download", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -624,6 +805,15 @@ type ClientWithResponsesInterface interface {
 
 	// GetPackageVulnsWithResponse request
 	GetPackageVulnsWithResponse(ctx context.Context, purl string, params *GetPackageVulnsParams, reqEditors ...RequestEditorFn) (*GetPackageVulnsResponse, error)
+
+	// ListSbomsWithResponse request
+	ListSbomsWithResponse(ctx context.Context, params *ListSbomsParams, reqEditors ...RequestEditorFn) (*ListSbomsResponse, error)
+
+	// GetSbomWithResponse request
+	GetSbomWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetSbomResponse, error)
+
+	// DownloadSbomWithResponse request
+	DownloadSbomWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DownloadSbomResponse, error)
 }
 
 type AnalyzeDependenciesResponse struct {
@@ -854,6 +1044,109 @@ func (r GetPackageVulnsResponse) ContentType() string {
 	return ""
 }
 
+type ListSbomsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *SbomList
+	JSON400      *BadRequest
+	JSON500      *InternalServerError
+	JSON502      *BadGateway
+}
+
+// Status returns HTTPResponse.Status
+func (r ListSbomsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListSbomsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListSbomsResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetSbomResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Sbom
+	JSON400      *BadRequest
+	JSON404      *NotFound
+	JSON500      *InternalServerError
+	JSON502      *BadGateway
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSbomResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSbomResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetSbomResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DownloadSbomResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *openapi_types.File
+	XML200       *openapi_types.File
+	JSON400      *BadRequest
+	JSON404      *NotFound
+	JSON500      *InternalServerError
+	JSON502      *BadGateway
+	JSON503      *ServiceUnavailable
+}
+
+// Status returns HTTPResponse.Status
+func (r DownloadSbomResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DownloadSbomResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DownloadSbomResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 // AnalyzeDependenciesWithResponse request returning *AnalyzeDependenciesResponse
 func (c *ClientWithResponses) AnalyzeDependenciesWithResponse(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*AnalyzeDependenciesResponse, error) {
 	rsp, err := c.AnalyzeDependencies(ctx, params, reqEditors...)
@@ -915,6 +1208,33 @@ func (c *ClientWithResponses) GetPackageVulnsWithResponse(ctx context.Context, p
 		return nil, err
 	}
 	return ParseGetPackageVulnsResponse(rsp)
+}
+
+// ListSbomsWithResponse request returning *ListSbomsResponse
+func (c *ClientWithResponses) ListSbomsWithResponse(ctx context.Context, params *ListSbomsParams, reqEditors ...RequestEditorFn) (*ListSbomsResponse, error) {
+	rsp, err := c.ListSboms(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListSbomsResponse(rsp)
+}
+
+// GetSbomWithResponse request returning *GetSbomResponse
+func (c *ClientWithResponses) GetSbomWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetSbomResponse, error) {
+	rsp, err := c.GetSbom(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSbomResponse(rsp)
+}
+
+// DownloadSbomWithResponse request returning *DownloadSbomResponse
+func (c *ClientWithResponses) DownloadSbomWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DownloadSbomResponse, error) {
+	rsp, err := c.DownloadSbom(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDownloadSbomResponse(rsp)
 }
 
 // ParseAnalyzeDependenciesResponse parses an HTTP response from a AnalyzeDependenciesWithResponse call
@@ -1219,6 +1539,178 @@ func ParseGetPackageVulnsResponse(rsp *http.Response) (*GetPackageVulnsResponse,
 			return nil, err
 		}
 		response.JSON502 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListSbomsResponse parses an HTTP response from a ListSbomsWithResponse call
+func ParseListSbomsResponse(rsp *http.Response) (*ListSbomsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListSbomsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SbomList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSbomResponse parses an HTTP response from a GetSbomWithResponse call
+func ParseGetSbomResponse(rsp *http.Response) (*GetSbomResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSbomResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Sbom
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDownloadSbomResponse parses an HTTP response from a DownloadSbomWithResponse call
+func ParseDownloadSbomResponse(rsp *http.Response) (*DownloadSbomResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DownloadSbomResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest openapi_types.File
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest BadGateway
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ServiceUnavailable
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "xml") && rsp.StatusCode == 200:
+		var dest openapi_types.File
+		if err := xml.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.XML200 = &dest
+
+	case rsp.StatusCode == 200:
+		// Content-type (application/x-ndjson) unsupported
 
 	}
 

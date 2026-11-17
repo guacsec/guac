@@ -28,6 +28,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -697,6 +698,11 @@ func TestRevisedDocumentReEmitsAfterRefresh(t *testing.T) {
 	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
 		t.Fatalf("first call failed: %v", err)
 	}
+
+	// Sleep briefly so time.Now() advances past update_interval even on platforms
+	// with coarse system timer resolution (e.g. Windows ~15ms clock tick).
+	time.Sleep(25 * time.Millisecond)
+
 	// Second pass: the hub now serves a revised statement, which must get through.
 	if err := c.CertifyComponent(context.Background(), nodes, docChan); err != nil {
 		t.Fatalf("second call failed: %v", err)

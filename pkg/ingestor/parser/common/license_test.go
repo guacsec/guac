@@ -40,3 +40,54 @@ func TestCombineLicense(t *testing.T) {
 		})
 	}
 }
+
+func TestFixSPDXLicenseExpression(t *testing.T) {
+	// HashLicense is fnv32a over the inline text, so these are fixed.
+	one := HashLicense("text one")
+	ten := HashLicense("text ten")
+
+	tests := []struct {
+		name       string
+		expression string
+		inLineMap  map[string]string
+		want       string
+	}{{
+		name:       "no refs is untouched",
+		expression: "MIT AND Apache-2.0",
+		inLineMap:  map[string]string{},
+		want:       "MIT AND Apache-2.0",
+	}, {
+		name:       "single ref",
+		expression: "LicenseRef-1",
+		inLineMap:  map[string]string{"LicenseRef-1": "text one"},
+		want:       one,
+	}, {
+		name:       "ref not in the map is left alone",
+		expression: "LicenseRef-99",
+		inLineMap:  map[string]string{"LicenseRef-1": "text one"},
+		want:       "LicenseRef-99",
+	}, {
+		name:       "shorter ref first does not eat the longer one",
+		expression: "LicenseRef-1 AND LicenseRef-10",
+		inLineMap:  map[string]string{"LicenseRef-1": "text one", "LicenseRef-10": "text ten"},
+		want:       one + " AND " + ten,
+	}, {
+		name:       "longer ref first",
+		expression: "LicenseRef-10 OR LicenseRef-1",
+		inLineMap:  map[string]string{"LicenseRef-1": "text one", "LicenseRef-10": "text ten"},
+		want:       ten + " OR " + one,
+	}, {
+		name:       "parentheses are preserved",
+		expression: "(LicenseRef-1 OR LicenseRef-10)",
+		inLineMap:  map[string]string{"LicenseRef-1": "text one", "LicenseRef-10": "text ten"},
+		want:       "(" + one + " OR " + ten + ")",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FixSPDXLicenseExpression(tt.expression, tt.inLineMap)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
