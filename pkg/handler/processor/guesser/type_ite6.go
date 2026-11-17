@@ -56,6 +56,9 @@ func (*ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.FormatTy
 				return processor.DocumentITE6ClearlyDefined
 			} else if strings.HasPrefix(predicateType, "https://in-toto.io/attestation/malware/v0.1") {
 				return processor.DocumentITE6Malware
+			} else if strings.HasPrefix(predicateType, "https://spdx.dev/Document") ||
+				strings.HasPrefix(predicateType, "https://cyclonedx.org/bom") {
+				return processor.DocumentITE6SBOM
 			}
 			return processor.DocumentITE6Generic
 		}

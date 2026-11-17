@@ -48,6 +48,14 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 		blob:     []byte(`{"type": "https://in-toto.io/Statement/v1", "predicate_type": "https://slsa.dev/provenance/v0.2"}`),
 		expected: processor.DocumentITE6SLSA,
 	}, {
+		name:     "SPDX SBOM ITE6 Document",
+		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1", "predicateType": "https://spdx.dev/Document"}`),
+		expected: processor.DocumentITE6SBOM,
+	}, {
+		name:     "CycloneDX SBOM ITE6 v1 Document",
+		blob:     []byte(`{"type": "https://in-toto.io/Statement/v1", "predicate_type": "https://cyclonedx.org/bom/v1.5"}`),
+		expected: processor.DocumentITE6SBOM,
+	}, {
 		name:     "valid SLSA ITE6 Document with different versions",
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v1.1", "predicateType": "https://slsa.dev/provenance/v1.0"}`),
 		expected: processor.DocumentITE6SLSA,

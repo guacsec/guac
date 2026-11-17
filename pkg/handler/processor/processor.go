@@ -63,6 +63,8 @@ const (
 	DocumentITE6EOL       DocumentType = "ITE6EOL"
 	DocumentITE6Reference DocumentType = "ITE6REF"
 	DocumentITE6Malware   DocumentType = "ITE6MALWARE"
+	// DocumentITE6SBOM is an in-toto statement whose predicate is an SPDX or CycloneDX SBOM
+	DocumentITE6SBOM DocumentType = "ITE6SBOM"
 	// ClearlyDefined
 	DocumentITE6ClearlyDefined DocumentType = "ITE6CD"
 	DocumentDSSE               DocumentType = "DSSE"
