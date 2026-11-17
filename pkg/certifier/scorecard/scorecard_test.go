@@ -296,7 +296,7 @@ func Test_scorecardRunner_supportedChecksKeepsUnknownNames(t *testing.T) {
 	if !slices.Contains(got, unknown) {
 		t.Fatalf("supportedChecks() = %v, want it to keep %q", got, unknown)
 	}
-	if _, err := policy.GetEnabled(nil, got, []checker.RequestType{checker.CommitBased}); err == nil {
+	if _, err := policy.GetEnabled(nil, got, []checker.RequestType{checker.CommitBased}, ""); err == nil {
 		t.Error("policy.GetEnabled() error = nil, want rejection of the unknown check")
 	}
 }
@@ -308,13 +308,13 @@ func Test_scorecardRunner_supportedChecksPassPolicyGate(t *testing.T) {
 	if len(filtered) == 0 {
 		t.Fatal("supportedChecks() returned no checks for a pinned commit")
 	}
-	if _, err := policy.GetEnabled(nil, filtered, []checker.RequestType{checker.CommitBased}); err != nil {
+	if _, err := policy.GetEnabled(nil, filtered, []checker.RequestType{checker.CommitBased}, ""); err != nil {
 		t.Errorf("policy.GetEnabled() error = %v, want nil", err)
 	}
 }
 
 func Test_defaultCheckNamesPassPolicyGateAtHead(t *testing.T) {
-	if _, err := policy.GetEnabled(nil, defaultCheckNames(), nil); err != nil {
+	if _, err := policy.GetEnabled(nil, defaultCheckNames(), nil, ""); err != nil {
 		t.Errorf("policy.GetEnabled() error = %v, want nil", err)
 	}
 }
