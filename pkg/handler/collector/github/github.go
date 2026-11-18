@@ -62,7 +62,8 @@ type githubCollector struct {
 	workflowFileName  string
 	owner             string
 	repo              string
-	lastIngestedRun   int64
+	// lastIngestedRun records, per workflow id, the run already sent downstream.
+	lastIngestedRun   map[int64]int64
 	Metrics           metrics.MetricCollector
 }
 
@@ -86,6 +87,7 @@ func NewGithubCollector(opts ...Opt) (*githubCollector, error) {
 		assetSuffixes:     defaultAssetSuffixes(),
 		collectDataSource: nil,
 		isRelease:         true,
+		lastIngestedRun:   map[int64]int64{},
 	}
 
 	for _, opt := range opts {
@@ -352,7 +354,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 		}
 
 		// don't re-ingest the same run
-		if run.RunId == g.lastIngestedRun {
+		if last, ok := g.lastIngestedRun[workflow.Id]; ok && run.RunId == last {
 			continue
 		}
 
@@ -378,7 +380,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 			docChannel <- doc
 		}
 
-		g.lastIngestedRun = run.RunId
+		g.lastIngestedRun[workflow.Id] = run.RunId
 	}
 }
 
