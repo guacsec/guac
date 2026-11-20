@@ -1496,6 +1496,21 @@ func (mr *MockBackendMockRecorder) QueryPackagesListForScan(ctx, pkgIDs, after, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForScan", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForScan), ctx, pkgIDs, after, first)
 }
 
+// ReconcileSafetyAssertion mocks base method.
+func (m *MockBackend) ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReconcileSafetyAssertion", ctx, id)
+	ret0, _ := ret[0].(*model.SafetyAssertion)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ReconcileSafetyAssertion indicates an expected call of ReconcileSafetyAssertion.
+func (mr *MockBackendMockRecorder) ReconcileSafetyAssertion(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReconcileSafetyAssertion", reflect.TypeOf((*MockBackend)(nil).ReconcileSafetyAssertion), ctx, id)
+}
+
 // SafetyAssertionList mocks base method.
 func (m *MockBackend) SafetyAssertionList(ctx context.Context, spec model.SafetyAssertionSpec, after *string, first *int) (*model.SafetyAssertionConnection, error) {
 	m.ctrl.T.Helper()

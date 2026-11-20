@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
@@ -310,9 +311,174 @@ func (_u *SafetyAssertionUpdate) AppendEvidence(v []*model.SafetyEvidenceReferen
 	return _u
 }
 
+// SetCorrelationStatus sets the "correlation_status" field.
+func (_u *SafetyAssertionUpdate) SetCorrelationStatus(v safetyassertion.CorrelationStatus) *SafetyAssertionUpdate {
+	_u.mutation.SetCorrelationStatus(v)
+	return _u
+}
+
+// SetNillableCorrelationStatus sets the "correlation_status" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableCorrelationStatus(v *safetyassertion.CorrelationStatus) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetCorrelationStatus(*v)
+	}
+	return _u
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (_u *SafetyAssertionUpdate) SetCorrelationReason(v string) *SafetyAssertionUpdate {
+	_u.mutation.SetCorrelationReason(v)
+	return _u
+}
+
+// SetNillableCorrelationReason sets the "correlation_reason" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableCorrelationReason(v *string) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetCorrelationReason(*v)
+	}
+	return _u
+}
+
+// ClearCorrelationReason clears the value of the "correlation_reason" field.
+func (_u *SafetyAssertionUpdate) ClearCorrelationReason() *SafetyAssertionUpdate {
+	_u.mutation.ClearCorrelationReason()
+	return _u
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (_u *SafetyAssertionUpdate) SetLastEvaluatedAt(v time.Time) *SafetyAssertionUpdate {
+	_u.mutation.SetLastEvaluatedAt(v)
+	return _u
+}
+
+// SetNillableLastEvaluatedAt sets the "last_evaluated_at" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableLastEvaluatedAt(v *time.Time) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetLastEvaluatedAt(*v)
+	}
+	return _u
+}
+
+// ClearLastEvaluatedAt clears the value of the "last_evaluated_at" field.
+func (_u *SafetyAssertionUpdate) ClearLastEvaluatedAt() *SafetyAssertionUpdate {
+	_u.mutation.ClearLastEvaluatedAt()
+	return _u
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (_u *SafetyAssertionUpdate) SetCorrelationRevision(v int) *SafetyAssertionUpdate {
+	_u.mutation.ResetCorrelationRevision()
+	_u.mutation.SetCorrelationRevision(v)
+	return _u
+}
+
+// SetNillableCorrelationRevision sets the "correlation_revision" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableCorrelationRevision(v *int) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetCorrelationRevision(*v)
+	}
+	return _u
+}
+
+// AddCorrelationRevision adds value to the "correlation_revision" field.
+func (_u *SafetyAssertionUpdate) AddCorrelationRevision(v int) *SafetyAssertionUpdate {
+	_u.mutation.AddCorrelationRevision(v)
+	return _u
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (_u *SafetyAssertionUpdate) SetResolvedProductID(v uuid.UUID) *SafetyAssertionUpdate {
+	_u.mutation.SetResolvedProductID(v)
+	return _u
+}
+
+// SetNillableResolvedProductID sets the "resolved_product_id" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableResolvedProductID(v *uuid.UUID) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetResolvedProductID(*v)
+	}
+	return _u
+}
+
+// ClearResolvedProductID clears the value of the "resolved_product_id" field.
+func (_u *SafetyAssertionUpdate) ClearResolvedProductID() *SafetyAssertionUpdate {
+	_u.mutation.ClearResolvedProductID()
+	return _u
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (_u *SafetyAssertionUpdate) SetResolvedComponentID(v uuid.UUID) *SafetyAssertionUpdate {
+	_u.mutation.SetResolvedComponentID(v)
+	return _u
+}
+
+// SetNillableResolvedComponentID sets the "resolved_component_id" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableResolvedComponentID(v *uuid.UUID) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetResolvedComponentID(*v)
+	}
+	return _u
+}
+
+// ClearResolvedComponentID clears the value of the "resolved_component_id" field.
+func (_u *SafetyAssertionUpdate) ClearResolvedComponentID() *SafetyAssertionUpdate {
+	_u.mutation.ClearResolvedComponentID()
+	return _u
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (_u *SafetyAssertionUpdate) SetMatchedBy(v string) *SafetyAssertionUpdate {
+	_u.mutation.SetMatchedBy(v)
+	return _u
+}
+
+// SetNillableMatchedBy sets the "matched_by" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableMatchedBy(v *string) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetMatchedBy(*v)
+	}
+	return _u
+}
+
+// ClearMatchedBy clears the value of the "matched_by" field.
+func (_u *SafetyAssertionUpdate) ClearMatchedBy() *SafetyAssertionUpdate {
+	_u.mutation.ClearMatchedBy()
+	return _u
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (_u *SafetyAssertionUpdate) SetResolvedAt(v time.Time) *SafetyAssertionUpdate {
+	_u.mutation.SetResolvedAt(v)
+	return _u
+}
+
+// SetNillableResolvedAt sets the "resolved_at" field if the given value is not nil.
+func (_u *SafetyAssertionUpdate) SetNillableResolvedAt(v *time.Time) *SafetyAssertionUpdate {
+	if v != nil {
+		_u.SetResolvedAt(*v)
+	}
+	return _u
+}
+
+// ClearResolvedAt clears the value of the "resolved_at" field.
+func (_u *SafetyAssertionUpdate) ClearResolvedAt() *SafetyAssertionUpdate {
+	_u.mutation.ClearResolvedAt()
+	return _u
+}
+
 // SetDocument sets the "document" edge to the SafetyAssertionDocument entity.
 func (_u *SafetyAssertionUpdate) SetDocument(v *SafetyAssertionDocument) *SafetyAssertionUpdate {
 	return _u.SetDocumentID(v.ID)
+}
+
+// SetResolvedProduct sets the "resolved_product" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdate) SetResolvedProduct(v *PackageVersion) *SafetyAssertionUpdate {
+	return _u.SetResolvedProductID(v.ID)
+}
+
+// SetResolvedComponent sets the "resolved_component" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdate) SetResolvedComponent(v *PackageVersion) *SafetyAssertionUpdate {
+	return _u.SetResolvedComponentID(v.ID)
 }
 
 // Mutation returns the SafetyAssertionMutation object of the builder.
@@ -323,6 +489,18 @@ func (_u *SafetyAssertionUpdate) Mutation() *SafetyAssertionMutation {
 // ClearDocument clears the "document" edge to the SafetyAssertionDocument entity.
 func (_u *SafetyAssertionUpdate) ClearDocument() *SafetyAssertionUpdate {
 	_u.mutation.ClearDocument()
+	return _u
+}
+
+// ClearResolvedProduct clears the "resolved_product" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdate) ClearResolvedProduct() *SafetyAssertionUpdate {
+	_u.mutation.ClearResolvedProduct()
+	return _u
+}
+
+// ClearResolvedComponent clears the "resolved_component" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdate) ClearResolvedComponent() *SafetyAssertionUpdate {
+	_u.mutation.ClearResolvedComponent()
 	return _u
 }
 
@@ -363,6 +541,11 @@ func (_u *SafetyAssertionUpdate) check() error {
 	if v, ok := _u.mutation.DecisionStatus(); ok {
 		if err := safetyassertion.DecisionStatusValidator(v); err != nil {
 			return &ValidationError{Name: "decision_status", err: fmt.Errorf(`ent: validator failed for field "SafetyAssertion.decision_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CorrelationStatus(); ok {
+		if err := safetyassertion.CorrelationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "correlation_status", err: fmt.Errorf(`ent: validator failed for field "SafetyAssertion.correlation_status": %w`, err)}
 		}
 	}
 	if _u.mutation.DocumentCleared() && len(_u.mutation.DocumentIDs()) > 0 {
@@ -457,6 +640,39 @@ func (_u *SafetyAssertionUpdate) sqlSave(ctx context.Context) (_node int, err er
 			sqljson.Append(u, safetyassertion.FieldEvidence, value)
 		})
 	}
+	if value, ok := _u.mutation.CorrelationStatus(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.CorrelationReason(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationReason, field.TypeString, value)
+	}
+	if _u.mutation.CorrelationReasonCleared() {
+		_spec.ClearField(safetyassertion.FieldCorrelationReason, field.TypeString)
+	}
+	if value, ok := _u.mutation.LastEvaluatedAt(); ok {
+		_spec.SetField(safetyassertion.FieldLastEvaluatedAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastEvaluatedAtCleared() {
+		_spec.ClearField(safetyassertion.FieldLastEvaluatedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CorrelationRevision(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationRevision, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCorrelationRevision(); ok {
+		_spec.AddField(safetyassertion.FieldCorrelationRevision, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MatchedBy(); ok {
+		_spec.SetField(safetyassertion.FieldMatchedBy, field.TypeString, value)
+	}
+	if _u.mutation.MatchedByCleared() {
+		_spec.ClearField(safetyassertion.FieldMatchedBy, field.TypeString)
+	}
+	if value, ok := _u.mutation.ResolvedAt(); ok {
+		_spec.SetField(safetyassertion.FieldResolvedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ResolvedAtCleared() {
+		_spec.ClearField(safetyassertion.FieldResolvedAt, field.TypeTime)
+	}
 	if _u.mutation.DocumentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -479,6 +695,64 @@ func (_u *SafetyAssertionUpdate) sqlSave(ctx context.Context) (_node int, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(safetyassertiondocument.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResolvedProductCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedProductTable,
+			Columns: []string{safetyassertion.ResolvedProductColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResolvedProductIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedProductTable,
+			Columns: []string{safetyassertion.ResolvedProductColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResolvedComponentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedComponentTable,
+			Columns: []string{safetyassertion.ResolvedComponentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResolvedComponentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedComponentTable,
+			Columns: []string{safetyassertion.ResolvedComponentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -784,9 +1058,174 @@ func (_u *SafetyAssertionUpdateOne) AppendEvidence(v []*model.SafetyEvidenceRefe
 	return _u
 }
 
+// SetCorrelationStatus sets the "correlation_status" field.
+func (_u *SafetyAssertionUpdateOne) SetCorrelationStatus(v safetyassertion.CorrelationStatus) *SafetyAssertionUpdateOne {
+	_u.mutation.SetCorrelationStatus(v)
+	return _u
+}
+
+// SetNillableCorrelationStatus sets the "correlation_status" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableCorrelationStatus(v *safetyassertion.CorrelationStatus) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetCorrelationStatus(*v)
+	}
+	return _u
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (_u *SafetyAssertionUpdateOne) SetCorrelationReason(v string) *SafetyAssertionUpdateOne {
+	_u.mutation.SetCorrelationReason(v)
+	return _u
+}
+
+// SetNillableCorrelationReason sets the "correlation_reason" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableCorrelationReason(v *string) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetCorrelationReason(*v)
+	}
+	return _u
+}
+
+// ClearCorrelationReason clears the value of the "correlation_reason" field.
+func (_u *SafetyAssertionUpdateOne) ClearCorrelationReason() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearCorrelationReason()
+	return _u
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (_u *SafetyAssertionUpdateOne) SetLastEvaluatedAt(v time.Time) *SafetyAssertionUpdateOne {
+	_u.mutation.SetLastEvaluatedAt(v)
+	return _u
+}
+
+// SetNillableLastEvaluatedAt sets the "last_evaluated_at" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableLastEvaluatedAt(v *time.Time) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetLastEvaluatedAt(*v)
+	}
+	return _u
+}
+
+// ClearLastEvaluatedAt clears the value of the "last_evaluated_at" field.
+func (_u *SafetyAssertionUpdateOne) ClearLastEvaluatedAt() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearLastEvaluatedAt()
+	return _u
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (_u *SafetyAssertionUpdateOne) SetCorrelationRevision(v int) *SafetyAssertionUpdateOne {
+	_u.mutation.ResetCorrelationRevision()
+	_u.mutation.SetCorrelationRevision(v)
+	return _u
+}
+
+// SetNillableCorrelationRevision sets the "correlation_revision" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableCorrelationRevision(v *int) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetCorrelationRevision(*v)
+	}
+	return _u
+}
+
+// AddCorrelationRevision adds value to the "correlation_revision" field.
+func (_u *SafetyAssertionUpdateOne) AddCorrelationRevision(v int) *SafetyAssertionUpdateOne {
+	_u.mutation.AddCorrelationRevision(v)
+	return _u
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (_u *SafetyAssertionUpdateOne) SetResolvedProductID(v uuid.UUID) *SafetyAssertionUpdateOne {
+	_u.mutation.SetResolvedProductID(v)
+	return _u
+}
+
+// SetNillableResolvedProductID sets the "resolved_product_id" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableResolvedProductID(v *uuid.UUID) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetResolvedProductID(*v)
+	}
+	return _u
+}
+
+// ClearResolvedProductID clears the value of the "resolved_product_id" field.
+func (_u *SafetyAssertionUpdateOne) ClearResolvedProductID() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearResolvedProductID()
+	return _u
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (_u *SafetyAssertionUpdateOne) SetResolvedComponentID(v uuid.UUID) *SafetyAssertionUpdateOne {
+	_u.mutation.SetResolvedComponentID(v)
+	return _u
+}
+
+// SetNillableResolvedComponentID sets the "resolved_component_id" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableResolvedComponentID(v *uuid.UUID) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetResolvedComponentID(*v)
+	}
+	return _u
+}
+
+// ClearResolvedComponentID clears the value of the "resolved_component_id" field.
+func (_u *SafetyAssertionUpdateOne) ClearResolvedComponentID() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearResolvedComponentID()
+	return _u
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (_u *SafetyAssertionUpdateOne) SetMatchedBy(v string) *SafetyAssertionUpdateOne {
+	_u.mutation.SetMatchedBy(v)
+	return _u
+}
+
+// SetNillableMatchedBy sets the "matched_by" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableMatchedBy(v *string) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetMatchedBy(*v)
+	}
+	return _u
+}
+
+// ClearMatchedBy clears the value of the "matched_by" field.
+func (_u *SafetyAssertionUpdateOne) ClearMatchedBy() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearMatchedBy()
+	return _u
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (_u *SafetyAssertionUpdateOne) SetResolvedAt(v time.Time) *SafetyAssertionUpdateOne {
+	_u.mutation.SetResolvedAt(v)
+	return _u
+}
+
+// SetNillableResolvedAt sets the "resolved_at" field if the given value is not nil.
+func (_u *SafetyAssertionUpdateOne) SetNillableResolvedAt(v *time.Time) *SafetyAssertionUpdateOne {
+	if v != nil {
+		_u.SetResolvedAt(*v)
+	}
+	return _u
+}
+
+// ClearResolvedAt clears the value of the "resolved_at" field.
+func (_u *SafetyAssertionUpdateOne) ClearResolvedAt() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearResolvedAt()
+	return _u
+}
+
 // SetDocument sets the "document" edge to the SafetyAssertionDocument entity.
 func (_u *SafetyAssertionUpdateOne) SetDocument(v *SafetyAssertionDocument) *SafetyAssertionUpdateOne {
 	return _u.SetDocumentID(v.ID)
+}
+
+// SetResolvedProduct sets the "resolved_product" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdateOne) SetResolvedProduct(v *PackageVersion) *SafetyAssertionUpdateOne {
+	return _u.SetResolvedProductID(v.ID)
+}
+
+// SetResolvedComponent sets the "resolved_component" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdateOne) SetResolvedComponent(v *PackageVersion) *SafetyAssertionUpdateOne {
+	return _u.SetResolvedComponentID(v.ID)
 }
 
 // Mutation returns the SafetyAssertionMutation object of the builder.
@@ -797,6 +1236,18 @@ func (_u *SafetyAssertionUpdateOne) Mutation() *SafetyAssertionMutation {
 // ClearDocument clears the "document" edge to the SafetyAssertionDocument entity.
 func (_u *SafetyAssertionUpdateOne) ClearDocument() *SafetyAssertionUpdateOne {
 	_u.mutation.ClearDocument()
+	return _u
+}
+
+// ClearResolvedProduct clears the "resolved_product" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdateOne) ClearResolvedProduct() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearResolvedProduct()
+	return _u
+}
+
+// ClearResolvedComponent clears the "resolved_component" edge to the PackageVersion entity.
+func (_u *SafetyAssertionUpdateOne) ClearResolvedComponent() *SafetyAssertionUpdateOne {
+	_u.mutation.ClearResolvedComponent()
 	return _u
 }
 
@@ -850,6 +1301,11 @@ func (_u *SafetyAssertionUpdateOne) check() error {
 	if v, ok := _u.mutation.DecisionStatus(); ok {
 		if err := safetyassertion.DecisionStatusValidator(v); err != nil {
 			return &ValidationError{Name: "decision_status", err: fmt.Errorf(`ent: validator failed for field "SafetyAssertion.decision_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CorrelationStatus(); ok {
+		if err := safetyassertion.CorrelationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "correlation_status", err: fmt.Errorf(`ent: validator failed for field "SafetyAssertion.correlation_status": %w`, err)}
 		}
 	}
 	if _u.mutation.DocumentCleared() && len(_u.mutation.DocumentIDs()) > 0 {
@@ -961,6 +1417,39 @@ func (_u *SafetyAssertionUpdateOne) sqlSave(ctx context.Context) (_node *SafetyA
 			sqljson.Append(u, safetyassertion.FieldEvidence, value)
 		})
 	}
+	if value, ok := _u.mutation.CorrelationStatus(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.CorrelationReason(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationReason, field.TypeString, value)
+	}
+	if _u.mutation.CorrelationReasonCleared() {
+		_spec.ClearField(safetyassertion.FieldCorrelationReason, field.TypeString)
+	}
+	if value, ok := _u.mutation.LastEvaluatedAt(); ok {
+		_spec.SetField(safetyassertion.FieldLastEvaluatedAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastEvaluatedAtCleared() {
+		_spec.ClearField(safetyassertion.FieldLastEvaluatedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CorrelationRevision(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationRevision, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCorrelationRevision(); ok {
+		_spec.AddField(safetyassertion.FieldCorrelationRevision, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MatchedBy(); ok {
+		_spec.SetField(safetyassertion.FieldMatchedBy, field.TypeString, value)
+	}
+	if _u.mutation.MatchedByCleared() {
+		_spec.ClearField(safetyassertion.FieldMatchedBy, field.TypeString)
+	}
+	if value, ok := _u.mutation.ResolvedAt(); ok {
+		_spec.SetField(safetyassertion.FieldResolvedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ResolvedAtCleared() {
+		_spec.ClearField(safetyassertion.FieldResolvedAt, field.TypeTime)
+	}
 	if _u.mutation.DocumentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -983,6 +1472,64 @@ func (_u *SafetyAssertionUpdateOne) sqlSave(ctx context.Context) (_node *SafetyA
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(safetyassertiondocument.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResolvedProductCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedProductTable,
+			Columns: []string{safetyassertion.ResolvedProductColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResolvedProductIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedProductTable,
+			Columns: []string{safetyassertion.ResolvedProductColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResolvedComponentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedComponentTable,
+			Columns: []string{safetyassertion.ResolvedComponentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResolvedComponentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedComponentTable,
+			Columns: []string{safetyassertion.ResolvedComponentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

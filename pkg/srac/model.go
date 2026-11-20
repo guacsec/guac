@@ -1,3 +1,4 @@
+//
 // Copyright 2026 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package srac defines and validates the read-only Safety Relevance Assertion
-// Capability (SRAC) interchange document. Graph storage and resolution are
-// intentionally handled by the dedicated ontology proposed in #3272.
+// Package srac defines and validates the externally authored Safety Relevance
+// Assertion Capability (SRAC) interchange document. Its processor and parser
+// feed the dedicated safety-assertion ontology; a certifier owns graph resolution.
 package srac
 
 import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -43,16 +45,19 @@ type Source struct {
 }
 
 type Assertion struct {
-	ID                 string            `json:"id"`
-	Product            Subject           `json:"product"`
-	Component          Subject           `json:"component"`
-	SafetyRelevance    string            `json:"safetyRelevance"`
-	Classification     string            `json:"classification,omitempty"`
-	Rationale          string            `json:"rationale"`
-	Status             string            `json:"status"`
-	Reviewer           string            `json:"reviewer,omitempty"`
-	Evidence           []Evidence        `json:"evidence,omitempty"`
-	AdditionalMetadata map[string]string `json:"additionalMetadata,omitempty"`
+	ID                   string            `json:"id"`
+	Product              Subject           `json:"product"`
+	Component            Subject           `json:"component"`
+	SafetyRelevance      string            `json:"safetyRelevance"`
+	Classification       string            `json:"classification,omitempty"`
+	ClassificationScheme string            `json:"classificationScheme,omitempty"`
+	AssertedAt           *time.Time        `json:"assertedAt,omitempty"`
+	ValidUntil           *time.Time        `json:"validUntil,omitempty"`
+	Rationale            string            `json:"rationale"`
+	Status               string            `json:"status"`
+	Reviewer             string            `json:"reviewer,omitempty"`
+	Evidence             []Evidence        `json:"evidence,omitempty"`
+	AdditionalMetadata   map[string]string `json:"additionalMetadata,omitempty"`
 }
 
 type Subject struct {
@@ -86,7 +91,7 @@ func (d *Document) Validate() error {
 	if d.SchemaVersion != SchemaVersion {
 		return fmt.Errorf("unsupported SRAC schemaVersion %q", d.SchemaVersion)
 	}
-	if d.DocumentID == "" || d.Source.URI == "" || d.GeneratedAt.IsZero() {
+	if strings.TrimSpace(d.DocumentID) == "" || !absoluteURI(d.Source.URI) || d.GeneratedAt.IsZero() {
 		return fmt.Errorf("documentId, generatedAt, and source.uri are required")
 	}
 	if len(d.Assertions) == 0 {
@@ -97,6 +102,13 @@ func (d *Document) Validate() error {
 		if err := d.Assertions[i].validate(); err != nil {
 			return fmt.Errorf("assertions[%d]: %w", i, err)
 		}
+		assertedAt := d.GeneratedAt
+		if d.Assertions[i].AssertedAt != nil {
+			assertedAt = *d.Assertions[i].AssertedAt
+		}
+		if assertedAt.IsZero() || (d.Assertions[i].ValidUntil != nil && !d.Assertions[i].ValidUntil.After(assertedAt)) {
+			return fmt.Errorf("assertions[%d]: invalid assertion timestamp or expiry", i)
+		}
 		if seen[d.Assertions[i].ID] {
 			return fmt.Errorf("assertions[%d]: duplicate id %q", i, d.Assertions[i].ID)
 		}
@@ -106,7 +118,7 @@ func (d *Document) Validate() error {
 }
 
 func (a *Assertion) validate() error {
-	if a.ID == "" || a.Rationale == "" {
+	if strings.TrimSpace(a.ID) == "" || strings.TrimSpace(a.Rationale) == "" {
 		return fmt.Errorf("id and rationale are required")
 	}
 	if err := validateSubject("product", a.Product); err != nil {
@@ -121,13 +133,21 @@ func (a *Assertion) validate() error {
 	if !oneOf(a.Status, "draft", "reviewed", "approved", "rejected") {
 		return fmt.Errorf("invalid status %q", a.Status)
 	}
-	if (a.Status == "reviewed" || a.Status == "approved" || a.Status == "rejected") && a.Reviewer == "" {
+	if (a.Status == "reviewed" || a.Status == "approved" || a.Status == "rejected") && strings.TrimSpace(a.Reviewer) == "" {
 		return fmt.Errorf("reviewer is required for status %q", a.Status)
 	}
+	if a.ClassificationScheme != "" && (strings.TrimSpace(a.ClassificationScheme) == "" || strings.TrimSpace(a.Classification) == "") {
+		return fmt.Errorf("classificationScheme requires a nonblank scheme and classification value")
+	}
+	if a.Classification != "" && strings.TrimSpace(a.Classification) == "" {
+		return fmt.Errorf("classification cannot be blank")
+	}
+	seenEvidence := map[string]bool{}
 	for i, evidence := range a.Evidence {
-		if evidence.ID == "" || evidence.URI == "" {
+		if strings.TrimSpace(evidence.ID) == "" || !absoluteURI(evidence.URI) || seenEvidence[evidence.ID] {
 			return fmt.Errorf("evidence[%d]: id and uri are required", i)
 		}
+		seenEvidence[evidence.ID] = true
 		if evidence.SHA256 != "" && !validSHA256(evidence.SHA256) {
 			return fmt.Errorf("evidence[%d]: invalid sha256", i)
 		}
@@ -139,15 +159,26 @@ func validateSubject(name string, subject Subject) error {
 	if subject.PURL == "" {
 		return fmt.Errorf("%s.purl is required; name-only matching is not supported", name)
 	}
-	if _, err := packageurl.FromString(subject.PURL); err != nil {
+	purl, err := packageurl.FromString(subject.PURL)
+	if err != nil {
 		return fmt.Errorf("%s.purl: %w", name, err)
 	}
+	if purl.Version == "" {
+		return fmt.Errorf("%s.purl requires an exact version; name-only matching is not supported", name)
+	}
 	for algorithm, digest := range subject.Digests {
-		if strings.EqualFold(algorithm, "sha256") && !validSHA256(digest) {
-			return fmt.Errorf("%s.digests.sha256 is invalid", name)
+		size := map[string]int{"sha256": 32, "sha384": 48, "sha512": 64}[strings.ToLower(algorithm)]
+		decoded, err := hex.DecodeString(digest)
+		if size == 0 || err != nil || len(decoded) != size {
+			return fmt.Errorf("%s.digests.%s is invalid or unsupported", name, algorithm)
 		}
 	}
 	return nil
+}
+
+func absoluteURI(value string) bool {
+	u, err := url.Parse(value)
+	return err == nil && u.IsAbs() && strings.TrimSpace(value) == value
 }
 
 func canonicalPURL(value string) string {

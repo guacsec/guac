@@ -4323,6 +4323,38 @@ func (c *SafetyAssertionClient) QueryDocument(_m *SafetyAssertion) *SafetyAssert
 	return query
 }
 
+// QueryResolvedProduct queries the resolved_product edge of a SafetyAssertion.
+func (c *SafetyAssertionClient) QueryResolvedProduct(_m *SafetyAssertion) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, safetyassertion.ResolvedProductTable, safetyassertion.ResolvedProductColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryResolvedComponent queries the resolved_component edge of a SafetyAssertion.
+func (c *SafetyAssertionClient) QueryResolvedComponent(_m *SafetyAssertion) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, safetyassertion.ResolvedComponentTable, safetyassertion.ResolvedComponentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SafetyAssertionClient) Hooks() []Hook {
 	return c.hooks.SafetyAssertion

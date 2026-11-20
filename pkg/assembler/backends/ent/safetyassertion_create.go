@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -184,6 +185,118 @@ func (_c *SafetyAssertionCreate) SetEvidence(v []*model.SafetyEvidenceReferenceI
 	return _c
 }
 
+// SetCorrelationStatus sets the "correlation_status" field.
+func (_c *SafetyAssertionCreate) SetCorrelationStatus(v safetyassertion.CorrelationStatus) *SafetyAssertionCreate {
+	_c.mutation.SetCorrelationStatus(v)
+	return _c
+}
+
+// SetNillableCorrelationStatus sets the "correlation_status" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableCorrelationStatus(v *safetyassertion.CorrelationStatus) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetCorrelationStatus(*v)
+	}
+	return _c
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (_c *SafetyAssertionCreate) SetCorrelationReason(v string) *SafetyAssertionCreate {
+	_c.mutation.SetCorrelationReason(v)
+	return _c
+}
+
+// SetNillableCorrelationReason sets the "correlation_reason" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableCorrelationReason(v *string) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetCorrelationReason(*v)
+	}
+	return _c
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (_c *SafetyAssertionCreate) SetLastEvaluatedAt(v time.Time) *SafetyAssertionCreate {
+	_c.mutation.SetLastEvaluatedAt(v)
+	return _c
+}
+
+// SetNillableLastEvaluatedAt sets the "last_evaluated_at" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableLastEvaluatedAt(v *time.Time) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetLastEvaluatedAt(*v)
+	}
+	return _c
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (_c *SafetyAssertionCreate) SetCorrelationRevision(v int) *SafetyAssertionCreate {
+	_c.mutation.SetCorrelationRevision(v)
+	return _c
+}
+
+// SetNillableCorrelationRevision sets the "correlation_revision" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableCorrelationRevision(v *int) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetCorrelationRevision(*v)
+	}
+	return _c
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (_c *SafetyAssertionCreate) SetResolvedProductID(v uuid.UUID) *SafetyAssertionCreate {
+	_c.mutation.SetResolvedProductID(v)
+	return _c
+}
+
+// SetNillableResolvedProductID sets the "resolved_product_id" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableResolvedProductID(v *uuid.UUID) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetResolvedProductID(*v)
+	}
+	return _c
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (_c *SafetyAssertionCreate) SetResolvedComponentID(v uuid.UUID) *SafetyAssertionCreate {
+	_c.mutation.SetResolvedComponentID(v)
+	return _c
+}
+
+// SetNillableResolvedComponentID sets the "resolved_component_id" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableResolvedComponentID(v *uuid.UUID) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetResolvedComponentID(*v)
+	}
+	return _c
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (_c *SafetyAssertionCreate) SetMatchedBy(v string) *SafetyAssertionCreate {
+	_c.mutation.SetMatchedBy(v)
+	return _c
+}
+
+// SetNillableMatchedBy sets the "matched_by" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableMatchedBy(v *string) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetMatchedBy(*v)
+	}
+	return _c
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (_c *SafetyAssertionCreate) SetResolvedAt(v time.Time) *SafetyAssertionCreate {
+	_c.mutation.SetResolvedAt(v)
+	return _c
+}
+
+// SetNillableResolvedAt sets the "resolved_at" field if the given value is not nil.
+func (_c *SafetyAssertionCreate) SetNillableResolvedAt(v *time.Time) *SafetyAssertionCreate {
+	if v != nil {
+		_c.SetResolvedAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SafetyAssertionCreate) SetID(v uuid.UUID) *SafetyAssertionCreate {
 	_c.mutation.SetID(v)
@@ -201,6 +314,16 @@ func (_c *SafetyAssertionCreate) SetNillableID(v *uuid.UUID) *SafetyAssertionCre
 // SetDocument sets the "document" edge to the SafetyAssertionDocument entity.
 func (_c *SafetyAssertionCreate) SetDocument(v *SafetyAssertionDocument) *SafetyAssertionCreate {
 	return _c.SetDocumentID(v.ID)
+}
+
+// SetResolvedProduct sets the "resolved_product" edge to the PackageVersion entity.
+func (_c *SafetyAssertionCreate) SetResolvedProduct(v *PackageVersion) *SafetyAssertionCreate {
+	return _c.SetResolvedProductID(v.ID)
+}
+
+// SetResolvedComponent sets the "resolved_component" edge to the PackageVersion entity.
+func (_c *SafetyAssertionCreate) SetResolvedComponent(v *PackageVersion) *SafetyAssertionCreate {
+	return _c.SetResolvedComponentID(v.ID)
 }
 
 // Mutation returns the SafetyAssertionMutation object of the builder.
@@ -238,6 +361,14 @@ func (_c *SafetyAssertionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SafetyAssertionCreate) defaults() {
+	if _, ok := _c.mutation.CorrelationStatus(); !ok {
+		v := safetyassertion.DefaultCorrelationStatus
+		_c.mutation.SetCorrelationStatus(v)
+	}
+	if _, ok := _c.mutation.CorrelationRevision(); !ok {
+		v := safetyassertion.DefaultCorrelationRevision
+		_c.mutation.SetCorrelationRevision(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := safetyassertion.DefaultID()
 		_c.mutation.SetID(v)
@@ -285,6 +416,17 @@ func (_c *SafetyAssertionCreate) check() error {
 	}
 	if _, ok := _c.mutation.Evidence(); !ok {
 		return &ValidationError{Name: "evidence", err: errors.New(`ent: missing required field "SafetyAssertion.evidence"`)}
+	}
+	if _, ok := _c.mutation.CorrelationStatus(); !ok {
+		return &ValidationError{Name: "correlation_status", err: errors.New(`ent: missing required field "SafetyAssertion.correlation_status"`)}
+	}
+	if v, ok := _c.mutation.CorrelationStatus(); ok {
+		if err := safetyassertion.CorrelationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "correlation_status", err: fmt.Errorf(`ent: validator failed for field "SafetyAssertion.correlation_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CorrelationRevision(); !ok {
+		return &ValidationError{Name: "correlation_revision", err: errors.New(`ent: missing required field "SafetyAssertion.correlation_revision"`)}
 	}
 	if len(_c.mutation.DocumentIDs()) == 0 {
 		return &ValidationError{Name: "document", err: errors.New(`ent: missing required edge "SafetyAssertion.document"`)}
@@ -389,6 +531,30 @@ func (_c *SafetyAssertionCreate) createSpec() (*SafetyAssertion, *sqlgraph.Creat
 		_spec.SetField(safetyassertion.FieldEvidence, field.TypeJSON, value)
 		_node.Evidence = value
 	}
+	if value, ok := _c.mutation.CorrelationStatus(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationStatus, field.TypeEnum, value)
+		_node.CorrelationStatus = value
+	}
+	if value, ok := _c.mutation.CorrelationReason(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationReason, field.TypeString, value)
+		_node.CorrelationReason = &value
+	}
+	if value, ok := _c.mutation.LastEvaluatedAt(); ok {
+		_spec.SetField(safetyassertion.FieldLastEvaluatedAt, field.TypeTime, value)
+		_node.LastEvaluatedAt = &value
+	}
+	if value, ok := _c.mutation.CorrelationRevision(); ok {
+		_spec.SetField(safetyassertion.FieldCorrelationRevision, field.TypeInt, value)
+		_node.CorrelationRevision = value
+	}
+	if value, ok := _c.mutation.MatchedBy(); ok {
+		_spec.SetField(safetyassertion.FieldMatchedBy, field.TypeString, value)
+		_node.MatchedBy = &value
+	}
+	if value, ok := _c.mutation.ResolvedAt(); ok {
+		_spec.SetField(safetyassertion.FieldResolvedAt, field.TypeTime, value)
+		_node.ResolvedAt = &value
+	}
 	if nodes := _c.mutation.DocumentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -404,6 +570,40 @@ func (_c *SafetyAssertionCreate) createSpec() (*SafetyAssertion, *sqlgraph.Creat
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.DocumentID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ResolvedProductIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedProductTable,
+			Columns: []string{safetyassertion.ResolvedProductColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResolvedProductID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ResolvedComponentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   safetyassertion.ResolvedComponentTable,
+			Columns: []string{safetyassertion.ResolvedComponentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResolvedComponentID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -701,6 +901,144 @@ func (u *SafetyAssertionUpsert) SetEvidence(v []*model.SafetyEvidenceReferenceIn
 // UpdateEvidence sets the "evidence" field to the value that was provided on create.
 func (u *SafetyAssertionUpsert) UpdateEvidence() *SafetyAssertionUpsert {
 	u.SetExcluded(safetyassertion.FieldEvidence)
+	return u
+}
+
+// SetCorrelationStatus sets the "correlation_status" field.
+func (u *SafetyAssertionUpsert) SetCorrelationStatus(v safetyassertion.CorrelationStatus) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldCorrelationStatus, v)
+	return u
+}
+
+// UpdateCorrelationStatus sets the "correlation_status" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateCorrelationStatus() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldCorrelationStatus)
+	return u
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (u *SafetyAssertionUpsert) SetCorrelationReason(v string) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldCorrelationReason, v)
+	return u
+}
+
+// UpdateCorrelationReason sets the "correlation_reason" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateCorrelationReason() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldCorrelationReason)
+	return u
+}
+
+// ClearCorrelationReason clears the value of the "correlation_reason" field.
+func (u *SafetyAssertionUpsert) ClearCorrelationReason() *SafetyAssertionUpsert {
+	u.SetNull(safetyassertion.FieldCorrelationReason)
+	return u
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (u *SafetyAssertionUpsert) SetLastEvaluatedAt(v time.Time) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldLastEvaluatedAt, v)
+	return u
+}
+
+// UpdateLastEvaluatedAt sets the "last_evaluated_at" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateLastEvaluatedAt() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldLastEvaluatedAt)
+	return u
+}
+
+// ClearLastEvaluatedAt clears the value of the "last_evaluated_at" field.
+func (u *SafetyAssertionUpsert) ClearLastEvaluatedAt() *SafetyAssertionUpsert {
+	u.SetNull(safetyassertion.FieldLastEvaluatedAt)
+	return u
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (u *SafetyAssertionUpsert) SetCorrelationRevision(v int) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldCorrelationRevision, v)
+	return u
+}
+
+// UpdateCorrelationRevision sets the "correlation_revision" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateCorrelationRevision() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldCorrelationRevision)
+	return u
+}
+
+// AddCorrelationRevision adds v to the "correlation_revision" field.
+func (u *SafetyAssertionUpsert) AddCorrelationRevision(v int) *SafetyAssertionUpsert {
+	u.Add(safetyassertion.FieldCorrelationRevision, v)
+	return u
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (u *SafetyAssertionUpsert) SetResolvedProductID(v uuid.UUID) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldResolvedProductID, v)
+	return u
+}
+
+// UpdateResolvedProductID sets the "resolved_product_id" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateResolvedProductID() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldResolvedProductID)
+	return u
+}
+
+// ClearResolvedProductID clears the value of the "resolved_product_id" field.
+func (u *SafetyAssertionUpsert) ClearResolvedProductID() *SafetyAssertionUpsert {
+	u.SetNull(safetyassertion.FieldResolvedProductID)
+	return u
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (u *SafetyAssertionUpsert) SetResolvedComponentID(v uuid.UUID) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldResolvedComponentID, v)
+	return u
+}
+
+// UpdateResolvedComponentID sets the "resolved_component_id" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateResolvedComponentID() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldResolvedComponentID)
+	return u
+}
+
+// ClearResolvedComponentID clears the value of the "resolved_component_id" field.
+func (u *SafetyAssertionUpsert) ClearResolvedComponentID() *SafetyAssertionUpsert {
+	u.SetNull(safetyassertion.FieldResolvedComponentID)
+	return u
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (u *SafetyAssertionUpsert) SetMatchedBy(v string) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldMatchedBy, v)
+	return u
+}
+
+// UpdateMatchedBy sets the "matched_by" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateMatchedBy() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldMatchedBy)
+	return u
+}
+
+// ClearMatchedBy clears the value of the "matched_by" field.
+func (u *SafetyAssertionUpsert) ClearMatchedBy() *SafetyAssertionUpsert {
+	u.SetNull(safetyassertion.FieldMatchedBy)
+	return u
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (u *SafetyAssertionUpsert) SetResolvedAt(v time.Time) *SafetyAssertionUpsert {
+	u.Set(safetyassertion.FieldResolvedAt, v)
+	return u
+}
+
+// UpdateResolvedAt sets the "resolved_at" field to the value that was provided on create.
+func (u *SafetyAssertionUpsert) UpdateResolvedAt() *SafetyAssertionUpsert {
+	u.SetExcluded(safetyassertion.FieldResolvedAt)
+	return u
+}
+
+// ClearResolvedAt clears the value of the "resolved_at" field.
+func (u *SafetyAssertionUpsert) ClearResolvedAt() *SafetyAssertionUpsert {
+	u.SetNull(safetyassertion.FieldResolvedAt)
 	return u
 }
 
@@ -1036,6 +1374,167 @@ func (u *SafetyAssertionUpsertOne) SetEvidence(v []*model.SafetyEvidenceReferenc
 func (u *SafetyAssertionUpsertOne) UpdateEvidence() *SafetyAssertionUpsertOne {
 	return u.Update(func(s *SafetyAssertionUpsert) {
 		s.UpdateEvidence()
+	})
+}
+
+// SetCorrelationStatus sets the "correlation_status" field.
+func (u *SafetyAssertionUpsertOne) SetCorrelationStatus(v safetyassertion.CorrelationStatus) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetCorrelationStatus(v)
+	})
+}
+
+// UpdateCorrelationStatus sets the "correlation_status" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateCorrelationStatus() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateCorrelationStatus()
+	})
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (u *SafetyAssertionUpsertOne) SetCorrelationReason(v string) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetCorrelationReason(v)
+	})
+}
+
+// UpdateCorrelationReason sets the "correlation_reason" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateCorrelationReason() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateCorrelationReason()
+	})
+}
+
+// ClearCorrelationReason clears the value of the "correlation_reason" field.
+func (u *SafetyAssertionUpsertOne) ClearCorrelationReason() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearCorrelationReason()
+	})
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (u *SafetyAssertionUpsertOne) SetLastEvaluatedAt(v time.Time) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetLastEvaluatedAt(v)
+	})
+}
+
+// UpdateLastEvaluatedAt sets the "last_evaluated_at" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateLastEvaluatedAt() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateLastEvaluatedAt()
+	})
+}
+
+// ClearLastEvaluatedAt clears the value of the "last_evaluated_at" field.
+func (u *SafetyAssertionUpsertOne) ClearLastEvaluatedAt() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearLastEvaluatedAt()
+	})
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (u *SafetyAssertionUpsertOne) SetCorrelationRevision(v int) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetCorrelationRevision(v)
+	})
+}
+
+// AddCorrelationRevision adds v to the "correlation_revision" field.
+func (u *SafetyAssertionUpsertOne) AddCorrelationRevision(v int) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.AddCorrelationRevision(v)
+	})
+}
+
+// UpdateCorrelationRevision sets the "correlation_revision" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateCorrelationRevision() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateCorrelationRevision()
+	})
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (u *SafetyAssertionUpsertOne) SetResolvedProductID(v uuid.UUID) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetResolvedProductID(v)
+	})
+}
+
+// UpdateResolvedProductID sets the "resolved_product_id" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateResolvedProductID() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateResolvedProductID()
+	})
+}
+
+// ClearResolvedProductID clears the value of the "resolved_product_id" field.
+func (u *SafetyAssertionUpsertOne) ClearResolvedProductID() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearResolvedProductID()
+	})
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (u *SafetyAssertionUpsertOne) SetResolvedComponentID(v uuid.UUID) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetResolvedComponentID(v)
+	})
+}
+
+// UpdateResolvedComponentID sets the "resolved_component_id" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateResolvedComponentID() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateResolvedComponentID()
+	})
+}
+
+// ClearResolvedComponentID clears the value of the "resolved_component_id" field.
+func (u *SafetyAssertionUpsertOne) ClearResolvedComponentID() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearResolvedComponentID()
+	})
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (u *SafetyAssertionUpsertOne) SetMatchedBy(v string) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetMatchedBy(v)
+	})
+}
+
+// UpdateMatchedBy sets the "matched_by" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateMatchedBy() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateMatchedBy()
+	})
+}
+
+// ClearMatchedBy clears the value of the "matched_by" field.
+func (u *SafetyAssertionUpsertOne) ClearMatchedBy() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearMatchedBy()
+	})
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (u *SafetyAssertionUpsertOne) SetResolvedAt(v time.Time) *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetResolvedAt(v)
+	})
+}
+
+// UpdateResolvedAt sets the "resolved_at" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertOne) UpdateResolvedAt() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateResolvedAt()
+	})
+}
+
+// ClearResolvedAt clears the value of the "resolved_at" field.
+func (u *SafetyAssertionUpsertOne) ClearResolvedAt() *SafetyAssertionUpsertOne {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearResolvedAt()
 	})
 }
 
@@ -1538,6 +2037,167 @@ func (u *SafetyAssertionUpsertBulk) SetEvidence(v []*model.SafetyEvidenceReferen
 func (u *SafetyAssertionUpsertBulk) UpdateEvidence() *SafetyAssertionUpsertBulk {
 	return u.Update(func(s *SafetyAssertionUpsert) {
 		s.UpdateEvidence()
+	})
+}
+
+// SetCorrelationStatus sets the "correlation_status" field.
+func (u *SafetyAssertionUpsertBulk) SetCorrelationStatus(v safetyassertion.CorrelationStatus) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetCorrelationStatus(v)
+	})
+}
+
+// UpdateCorrelationStatus sets the "correlation_status" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateCorrelationStatus() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateCorrelationStatus()
+	})
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (u *SafetyAssertionUpsertBulk) SetCorrelationReason(v string) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetCorrelationReason(v)
+	})
+}
+
+// UpdateCorrelationReason sets the "correlation_reason" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateCorrelationReason() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateCorrelationReason()
+	})
+}
+
+// ClearCorrelationReason clears the value of the "correlation_reason" field.
+func (u *SafetyAssertionUpsertBulk) ClearCorrelationReason() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearCorrelationReason()
+	})
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (u *SafetyAssertionUpsertBulk) SetLastEvaluatedAt(v time.Time) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetLastEvaluatedAt(v)
+	})
+}
+
+// UpdateLastEvaluatedAt sets the "last_evaluated_at" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateLastEvaluatedAt() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateLastEvaluatedAt()
+	})
+}
+
+// ClearLastEvaluatedAt clears the value of the "last_evaluated_at" field.
+func (u *SafetyAssertionUpsertBulk) ClearLastEvaluatedAt() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearLastEvaluatedAt()
+	})
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (u *SafetyAssertionUpsertBulk) SetCorrelationRevision(v int) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetCorrelationRevision(v)
+	})
+}
+
+// AddCorrelationRevision adds v to the "correlation_revision" field.
+func (u *SafetyAssertionUpsertBulk) AddCorrelationRevision(v int) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.AddCorrelationRevision(v)
+	})
+}
+
+// UpdateCorrelationRevision sets the "correlation_revision" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateCorrelationRevision() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateCorrelationRevision()
+	})
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (u *SafetyAssertionUpsertBulk) SetResolvedProductID(v uuid.UUID) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetResolvedProductID(v)
+	})
+}
+
+// UpdateResolvedProductID sets the "resolved_product_id" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateResolvedProductID() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateResolvedProductID()
+	})
+}
+
+// ClearResolvedProductID clears the value of the "resolved_product_id" field.
+func (u *SafetyAssertionUpsertBulk) ClearResolvedProductID() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearResolvedProductID()
+	})
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (u *SafetyAssertionUpsertBulk) SetResolvedComponentID(v uuid.UUID) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetResolvedComponentID(v)
+	})
+}
+
+// UpdateResolvedComponentID sets the "resolved_component_id" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateResolvedComponentID() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateResolvedComponentID()
+	})
+}
+
+// ClearResolvedComponentID clears the value of the "resolved_component_id" field.
+func (u *SafetyAssertionUpsertBulk) ClearResolvedComponentID() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearResolvedComponentID()
+	})
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (u *SafetyAssertionUpsertBulk) SetMatchedBy(v string) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetMatchedBy(v)
+	})
+}
+
+// UpdateMatchedBy sets the "matched_by" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateMatchedBy() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateMatchedBy()
+	})
+}
+
+// ClearMatchedBy clears the value of the "matched_by" field.
+func (u *SafetyAssertionUpsertBulk) ClearMatchedBy() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearMatchedBy()
+	})
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (u *SafetyAssertionUpsertBulk) SetResolvedAt(v time.Time) *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.SetResolvedAt(v)
+	})
+}
+
+// UpdateResolvedAt sets the "resolved_at" field to the value that was provided on create.
+func (u *SafetyAssertionUpsertBulk) UpdateResolvedAt() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.UpdateResolvedAt()
+	})
+}
+
+// ClearResolvedAt clears the value of the "resolved_at" field.
+func (u *SafetyAssertionUpsertBulk) ClearResolvedAt() *SafetyAssertionUpsertBulk {
+	return u.Update(func(s *SafetyAssertionUpsert) {
+		s.ClearResolvedAt()
 	})
 }
 

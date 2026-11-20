@@ -31,6 +31,9 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
+			if err := ingestSafetyAssertions(ctx, gqlclient, p.SafetyAssertions); err != nil {
+				return err
+			}
 			packageIDs := make([]string, 0)
 			collectedIDorPkgInputs := make(map[string]*model.IDorPkgInput)
 			packages := p.GetPackages(ctx)

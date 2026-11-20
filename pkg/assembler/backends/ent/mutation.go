@@ -19705,9 +19705,20 @@ type SafetyAssertionMutation struct {
 	component_digest           *string
 	evidence                   *[]*model.SafetyEvidenceReferenceInput
 	appendevidence             []*model.SafetyEvidenceReferenceInput
+	correlation_status         *safetyassertion.CorrelationStatus
+	correlation_reason         *string
+	last_evaluated_at          *time.Time
+	correlation_revision       *int
+	addcorrelation_revision    *int
+	matched_by                 *string
+	resolved_at                *time.Time
 	clearedFields              map[string]struct{}
 	document                   *uuid.UUID
 	cleareddocument            bool
+	resolved_product           *uuid.UUID
+	clearedresolved_product    bool
+	resolved_component         *uuid.UUID
+	clearedresolved_component  bool
 	done                       bool
 	oldValue                   func(context.Context) (*SafetyAssertion, error)
 	predicates                 []predicate.SafetyAssertion
@@ -20535,6 +20546,392 @@ func (m *SafetyAssertionMutation) ResetEvidence() {
 	m.appendevidence = nil
 }
 
+// SetCorrelationStatus sets the "correlation_status" field.
+func (m *SafetyAssertionMutation) SetCorrelationStatus(ss safetyassertion.CorrelationStatus) {
+	m.correlation_status = &ss
+}
+
+// CorrelationStatus returns the value of the "correlation_status" field in the mutation.
+func (m *SafetyAssertionMutation) CorrelationStatus() (r safetyassertion.CorrelationStatus, exists bool) {
+	v := m.correlation_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCorrelationStatus returns the old "correlation_status" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldCorrelationStatus(ctx context.Context) (v safetyassertion.CorrelationStatus, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCorrelationStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCorrelationStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCorrelationStatus: %w", err)
+	}
+	return oldValue.CorrelationStatus, nil
+}
+
+// ResetCorrelationStatus resets all changes to the "correlation_status" field.
+func (m *SafetyAssertionMutation) ResetCorrelationStatus() {
+	m.correlation_status = nil
+}
+
+// SetCorrelationReason sets the "correlation_reason" field.
+func (m *SafetyAssertionMutation) SetCorrelationReason(s string) {
+	m.correlation_reason = &s
+}
+
+// CorrelationReason returns the value of the "correlation_reason" field in the mutation.
+func (m *SafetyAssertionMutation) CorrelationReason() (r string, exists bool) {
+	v := m.correlation_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCorrelationReason returns the old "correlation_reason" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldCorrelationReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCorrelationReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCorrelationReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCorrelationReason: %w", err)
+	}
+	return oldValue.CorrelationReason, nil
+}
+
+// ClearCorrelationReason clears the value of the "correlation_reason" field.
+func (m *SafetyAssertionMutation) ClearCorrelationReason() {
+	m.correlation_reason = nil
+	m.clearedFields[safetyassertion.FieldCorrelationReason] = struct{}{}
+}
+
+// CorrelationReasonCleared returns if the "correlation_reason" field was cleared in this mutation.
+func (m *SafetyAssertionMutation) CorrelationReasonCleared() bool {
+	_, ok := m.clearedFields[safetyassertion.FieldCorrelationReason]
+	return ok
+}
+
+// ResetCorrelationReason resets all changes to the "correlation_reason" field.
+func (m *SafetyAssertionMutation) ResetCorrelationReason() {
+	m.correlation_reason = nil
+	delete(m.clearedFields, safetyassertion.FieldCorrelationReason)
+}
+
+// SetLastEvaluatedAt sets the "last_evaluated_at" field.
+func (m *SafetyAssertionMutation) SetLastEvaluatedAt(t time.Time) {
+	m.last_evaluated_at = &t
+}
+
+// LastEvaluatedAt returns the value of the "last_evaluated_at" field in the mutation.
+func (m *SafetyAssertionMutation) LastEvaluatedAt() (r time.Time, exists bool) {
+	v := m.last_evaluated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastEvaluatedAt returns the old "last_evaluated_at" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldLastEvaluatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastEvaluatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastEvaluatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastEvaluatedAt: %w", err)
+	}
+	return oldValue.LastEvaluatedAt, nil
+}
+
+// ClearLastEvaluatedAt clears the value of the "last_evaluated_at" field.
+func (m *SafetyAssertionMutation) ClearLastEvaluatedAt() {
+	m.last_evaluated_at = nil
+	m.clearedFields[safetyassertion.FieldLastEvaluatedAt] = struct{}{}
+}
+
+// LastEvaluatedAtCleared returns if the "last_evaluated_at" field was cleared in this mutation.
+func (m *SafetyAssertionMutation) LastEvaluatedAtCleared() bool {
+	_, ok := m.clearedFields[safetyassertion.FieldLastEvaluatedAt]
+	return ok
+}
+
+// ResetLastEvaluatedAt resets all changes to the "last_evaluated_at" field.
+func (m *SafetyAssertionMutation) ResetLastEvaluatedAt() {
+	m.last_evaluated_at = nil
+	delete(m.clearedFields, safetyassertion.FieldLastEvaluatedAt)
+}
+
+// SetCorrelationRevision sets the "correlation_revision" field.
+func (m *SafetyAssertionMutation) SetCorrelationRevision(i int) {
+	m.correlation_revision = &i
+	m.addcorrelation_revision = nil
+}
+
+// CorrelationRevision returns the value of the "correlation_revision" field in the mutation.
+func (m *SafetyAssertionMutation) CorrelationRevision() (r int, exists bool) {
+	v := m.correlation_revision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCorrelationRevision returns the old "correlation_revision" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldCorrelationRevision(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCorrelationRevision is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCorrelationRevision requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCorrelationRevision: %w", err)
+	}
+	return oldValue.CorrelationRevision, nil
+}
+
+// AddCorrelationRevision adds i to the "correlation_revision" field.
+func (m *SafetyAssertionMutation) AddCorrelationRevision(i int) {
+	if m.addcorrelation_revision != nil {
+		*m.addcorrelation_revision += i
+	} else {
+		m.addcorrelation_revision = &i
+	}
+}
+
+// AddedCorrelationRevision returns the value that was added to the "correlation_revision" field in this mutation.
+func (m *SafetyAssertionMutation) AddedCorrelationRevision() (r int, exists bool) {
+	v := m.addcorrelation_revision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCorrelationRevision resets all changes to the "correlation_revision" field.
+func (m *SafetyAssertionMutation) ResetCorrelationRevision() {
+	m.correlation_revision = nil
+	m.addcorrelation_revision = nil
+}
+
+// SetResolvedProductID sets the "resolved_product_id" field.
+func (m *SafetyAssertionMutation) SetResolvedProductID(u uuid.UUID) {
+	m.resolved_product = &u
+}
+
+// ResolvedProductID returns the value of the "resolved_product_id" field in the mutation.
+func (m *SafetyAssertionMutation) ResolvedProductID() (r uuid.UUID, exists bool) {
+	v := m.resolved_product
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResolvedProductID returns the old "resolved_product_id" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldResolvedProductID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResolvedProductID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResolvedProductID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResolvedProductID: %w", err)
+	}
+	return oldValue.ResolvedProductID, nil
+}
+
+// ClearResolvedProductID clears the value of the "resolved_product_id" field.
+func (m *SafetyAssertionMutation) ClearResolvedProductID() {
+	m.resolved_product = nil
+	m.clearedFields[safetyassertion.FieldResolvedProductID] = struct{}{}
+}
+
+// ResolvedProductIDCleared returns if the "resolved_product_id" field was cleared in this mutation.
+func (m *SafetyAssertionMutation) ResolvedProductIDCleared() bool {
+	_, ok := m.clearedFields[safetyassertion.FieldResolvedProductID]
+	return ok
+}
+
+// ResetResolvedProductID resets all changes to the "resolved_product_id" field.
+func (m *SafetyAssertionMutation) ResetResolvedProductID() {
+	m.resolved_product = nil
+	delete(m.clearedFields, safetyassertion.FieldResolvedProductID)
+}
+
+// SetResolvedComponentID sets the "resolved_component_id" field.
+func (m *SafetyAssertionMutation) SetResolvedComponentID(u uuid.UUID) {
+	m.resolved_component = &u
+}
+
+// ResolvedComponentID returns the value of the "resolved_component_id" field in the mutation.
+func (m *SafetyAssertionMutation) ResolvedComponentID() (r uuid.UUID, exists bool) {
+	v := m.resolved_component
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResolvedComponentID returns the old "resolved_component_id" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldResolvedComponentID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResolvedComponentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResolvedComponentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResolvedComponentID: %w", err)
+	}
+	return oldValue.ResolvedComponentID, nil
+}
+
+// ClearResolvedComponentID clears the value of the "resolved_component_id" field.
+func (m *SafetyAssertionMutation) ClearResolvedComponentID() {
+	m.resolved_component = nil
+	m.clearedFields[safetyassertion.FieldResolvedComponentID] = struct{}{}
+}
+
+// ResolvedComponentIDCleared returns if the "resolved_component_id" field was cleared in this mutation.
+func (m *SafetyAssertionMutation) ResolvedComponentIDCleared() bool {
+	_, ok := m.clearedFields[safetyassertion.FieldResolvedComponentID]
+	return ok
+}
+
+// ResetResolvedComponentID resets all changes to the "resolved_component_id" field.
+func (m *SafetyAssertionMutation) ResetResolvedComponentID() {
+	m.resolved_component = nil
+	delete(m.clearedFields, safetyassertion.FieldResolvedComponentID)
+}
+
+// SetMatchedBy sets the "matched_by" field.
+func (m *SafetyAssertionMutation) SetMatchedBy(s string) {
+	m.matched_by = &s
+}
+
+// MatchedBy returns the value of the "matched_by" field in the mutation.
+func (m *SafetyAssertionMutation) MatchedBy() (r string, exists bool) {
+	v := m.matched_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatchedBy returns the old "matched_by" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldMatchedBy(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatchedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatchedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatchedBy: %w", err)
+	}
+	return oldValue.MatchedBy, nil
+}
+
+// ClearMatchedBy clears the value of the "matched_by" field.
+func (m *SafetyAssertionMutation) ClearMatchedBy() {
+	m.matched_by = nil
+	m.clearedFields[safetyassertion.FieldMatchedBy] = struct{}{}
+}
+
+// MatchedByCleared returns if the "matched_by" field was cleared in this mutation.
+func (m *SafetyAssertionMutation) MatchedByCleared() bool {
+	_, ok := m.clearedFields[safetyassertion.FieldMatchedBy]
+	return ok
+}
+
+// ResetMatchedBy resets all changes to the "matched_by" field.
+func (m *SafetyAssertionMutation) ResetMatchedBy() {
+	m.matched_by = nil
+	delete(m.clearedFields, safetyassertion.FieldMatchedBy)
+}
+
+// SetResolvedAt sets the "resolved_at" field.
+func (m *SafetyAssertionMutation) SetResolvedAt(t time.Time) {
+	m.resolved_at = &t
+}
+
+// ResolvedAt returns the value of the "resolved_at" field in the mutation.
+func (m *SafetyAssertionMutation) ResolvedAt() (r time.Time, exists bool) {
+	v := m.resolved_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResolvedAt returns the old "resolved_at" field's value of the SafetyAssertion entity.
+// If the SafetyAssertion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SafetyAssertionMutation) OldResolvedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResolvedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResolvedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResolvedAt: %w", err)
+	}
+	return oldValue.ResolvedAt, nil
+}
+
+// ClearResolvedAt clears the value of the "resolved_at" field.
+func (m *SafetyAssertionMutation) ClearResolvedAt() {
+	m.resolved_at = nil
+	m.clearedFields[safetyassertion.FieldResolvedAt] = struct{}{}
+}
+
+// ResolvedAtCleared returns if the "resolved_at" field was cleared in this mutation.
+func (m *SafetyAssertionMutation) ResolvedAtCleared() bool {
+	_, ok := m.clearedFields[safetyassertion.FieldResolvedAt]
+	return ok
+}
+
+// ResetResolvedAt resets all changes to the "resolved_at" field.
+func (m *SafetyAssertionMutation) ResetResolvedAt() {
+	m.resolved_at = nil
+	delete(m.clearedFields, safetyassertion.FieldResolvedAt)
+}
+
 // ClearDocument clears the "document" edge to the SafetyAssertionDocument entity.
 func (m *SafetyAssertionMutation) ClearDocument() {
 	m.cleareddocument = true
@@ -20560,6 +20957,60 @@ func (m *SafetyAssertionMutation) DocumentIDs() (ids []uuid.UUID) {
 func (m *SafetyAssertionMutation) ResetDocument() {
 	m.document = nil
 	m.cleareddocument = false
+}
+
+// ClearResolvedProduct clears the "resolved_product" edge to the PackageVersion entity.
+func (m *SafetyAssertionMutation) ClearResolvedProduct() {
+	m.clearedresolved_product = true
+	m.clearedFields[safetyassertion.FieldResolvedProductID] = struct{}{}
+}
+
+// ResolvedProductCleared reports if the "resolved_product" edge to the PackageVersion entity was cleared.
+func (m *SafetyAssertionMutation) ResolvedProductCleared() bool {
+	return m.ResolvedProductIDCleared() || m.clearedresolved_product
+}
+
+// ResolvedProductIDs returns the "resolved_product" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResolvedProductID instead. It exists only for internal usage by the builders.
+func (m *SafetyAssertionMutation) ResolvedProductIDs() (ids []uuid.UUID) {
+	if id := m.resolved_product; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResolvedProduct resets all changes to the "resolved_product" edge.
+func (m *SafetyAssertionMutation) ResetResolvedProduct() {
+	m.resolved_product = nil
+	m.clearedresolved_product = false
+}
+
+// ClearResolvedComponent clears the "resolved_component" edge to the PackageVersion entity.
+func (m *SafetyAssertionMutation) ClearResolvedComponent() {
+	m.clearedresolved_component = true
+	m.clearedFields[safetyassertion.FieldResolvedComponentID] = struct{}{}
+}
+
+// ResolvedComponentCleared reports if the "resolved_component" edge to the PackageVersion entity was cleared.
+func (m *SafetyAssertionMutation) ResolvedComponentCleared() bool {
+	return m.ResolvedComponentIDCleared() || m.clearedresolved_component
+}
+
+// ResolvedComponentIDs returns the "resolved_component" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResolvedComponentID instead. It exists only for internal usage by the builders.
+func (m *SafetyAssertionMutation) ResolvedComponentIDs() (ids []uuid.UUID) {
+	if id := m.resolved_component; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResolvedComponent resets all changes to the "resolved_component" edge.
+func (m *SafetyAssertionMutation) ResetResolvedComponent() {
+	m.resolved_component = nil
+	m.clearedresolved_component = false
 }
 
 // Where appends a list predicates to the SafetyAssertionMutation builder.
@@ -20596,7 +21047,7 @@ func (m *SafetyAssertionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SafetyAssertionMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 25)
 	if m.document != nil {
 		fields = append(fields, safetyassertion.FieldDocumentID)
 	}
@@ -20648,6 +21099,30 @@ func (m *SafetyAssertionMutation) Fields() []string {
 	if m.evidence != nil {
 		fields = append(fields, safetyassertion.FieldEvidence)
 	}
+	if m.correlation_status != nil {
+		fields = append(fields, safetyassertion.FieldCorrelationStatus)
+	}
+	if m.correlation_reason != nil {
+		fields = append(fields, safetyassertion.FieldCorrelationReason)
+	}
+	if m.last_evaluated_at != nil {
+		fields = append(fields, safetyassertion.FieldLastEvaluatedAt)
+	}
+	if m.correlation_revision != nil {
+		fields = append(fields, safetyassertion.FieldCorrelationRevision)
+	}
+	if m.resolved_product != nil {
+		fields = append(fields, safetyassertion.FieldResolvedProductID)
+	}
+	if m.resolved_component != nil {
+		fields = append(fields, safetyassertion.FieldResolvedComponentID)
+	}
+	if m.matched_by != nil {
+		fields = append(fields, safetyassertion.FieldMatchedBy)
+	}
+	if m.resolved_at != nil {
+		fields = append(fields, safetyassertion.FieldResolvedAt)
+	}
 	return fields
 }
 
@@ -20690,6 +21165,22 @@ func (m *SafetyAssertionMutation) Field(name string) (ent.Value, bool) {
 		return m.ComponentDigest()
 	case safetyassertion.FieldEvidence:
 		return m.Evidence()
+	case safetyassertion.FieldCorrelationStatus:
+		return m.CorrelationStatus()
+	case safetyassertion.FieldCorrelationReason:
+		return m.CorrelationReason()
+	case safetyassertion.FieldLastEvaluatedAt:
+		return m.LastEvaluatedAt()
+	case safetyassertion.FieldCorrelationRevision:
+		return m.CorrelationRevision()
+	case safetyassertion.FieldResolvedProductID:
+		return m.ResolvedProductID()
+	case safetyassertion.FieldResolvedComponentID:
+		return m.ResolvedComponentID()
+	case safetyassertion.FieldMatchedBy:
+		return m.MatchedBy()
+	case safetyassertion.FieldResolvedAt:
+		return m.ResolvedAt()
 	}
 	return nil, false
 }
@@ -20733,6 +21224,22 @@ func (m *SafetyAssertionMutation) OldField(ctx context.Context, name string) (en
 		return m.OldComponentDigest(ctx)
 	case safetyassertion.FieldEvidence:
 		return m.OldEvidence(ctx)
+	case safetyassertion.FieldCorrelationStatus:
+		return m.OldCorrelationStatus(ctx)
+	case safetyassertion.FieldCorrelationReason:
+		return m.OldCorrelationReason(ctx)
+	case safetyassertion.FieldLastEvaluatedAt:
+		return m.OldLastEvaluatedAt(ctx)
+	case safetyassertion.FieldCorrelationRevision:
+		return m.OldCorrelationRevision(ctx)
+	case safetyassertion.FieldResolvedProductID:
+		return m.OldResolvedProductID(ctx)
+	case safetyassertion.FieldResolvedComponentID:
+		return m.OldResolvedComponentID(ctx)
+	case safetyassertion.FieldMatchedBy:
+		return m.OldMatchedBy(ctx)
+	case safetyassertion.FieldResolvedAt:
+		return m.OldResolvedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown SafetyAssertion field %s", name)
 }
@@ -20861,6 +21368,62 @@ func (m *SafetyAssertionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEvidence(v)
 		return nil
+	case safetyassertion.FieldCorrelationStatus:
+		v, ok := value.(safetyassertion.CorrelationStatus)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCorrelationStatus(v)
+		return nil
+	case safetyassertion.FieldCorrelationReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCorrelationReason(v)
+		return nil
+	case safetyassertion.FieldLastEvaluatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastEvaluatedAt(v)
+		return nil
+	case safetyassertion.FieldCorrelationRevision:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCorrelationRevision(v)
+		return nil
+	case safetyassertion.FieldResolvedProductID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResolvedProductID(v)
+		return nil
+	case safetyassertion.FieldResolvedComponentID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResolvedComponentID(v)
+		return nil
+	case safetyassertion.FieldMatchedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatchedBy(v)
+		return nil
+	case safetyassertion.FieldResolvedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResolvedAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown SafetyAssertion field %s", name)
 }
@@ -20868,13 +21431,21 @@ func (m *SafetyAssertionMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SafetyAssertionMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcorrelation_revision != nil {
+		fields = append(fields, safetyassertion.FieldCorrelationRevision)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SafetyAssertionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case safetyassertion.FieldCorrelationRevision:
+		return m.AddedCorrelationRevision()
+	}
 	return nil, false
 }
 
@@ -20883,6 +21454,13 @@ func (m *SafetyAssertionMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *SafetyAssertionMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case safetyassertion.FieldCorrelationRevision:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCorrelationRevision(v)
+		return nil
 	}
 	return fmt.Errorf("unknown SafetyAssertion numeric field %s", name)
 }
@@ -20911,6 +21489,24 @@ func (m *SafetyAssertionMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(safetyassertion.FieldComponentDigest) {
 		fields = append(fields, safetyassertion.FieldComponentDigest)
+	}
+	if m.FieldCleared(safetyassertion.FieldCorrelationReason) {
+		fields = append(fields, safetyassertion.FieldCorrelationReason)
+	}
+	if m.FieldCleared(safetyassertion.FieldLastEvaluatedAt) {
+		fields = append(fields, safetyassertion.FieldLastEvaluatedAt)
+	}
+	if m.FieldCleared(safetyassertion.FieldResolvedProductID) {
+		fields = append(fields, safetyassertion.FieldResolvedProductID)
+	}
+	if m.FieldCleared(safetyassertion.FieldResolvedComponentID) {
+		fields = append(fields, safetyassertion.FieldResolvedComponentID)
+	}
+	if m.FieldCleared(safetyassertion.FieldMatchedBy) {
+		fields = append(fields, safetyassertion.FieldMatchedBy)
+	}
+	if m.FieldCleared(safetyassertion.FieldResolvedAt) {
+		fields = append(fields, safetyassertion.FieldResolvedAt)
 	}
 	return fields
 }
@@ -20946,6 +21542,24 @@ func (m *SafetyAssertionMutation) ClearField(name string) error {
 		return nil
 	case safetyassertion.FieldComponentDigest:
 		m.ClearComponentDigest()
+		return nil
+	case safetyassertion.FieldCorrelationReason:
+		m.ClearCorrelationReason()
+		return nil
+	case safetyassertion.FieldLastEvaluatedAt:
+		m.ClearLastEvaluatedAt()
+		return nil
+	case safetyassertion.FieldResolvedProductID:
+		m.ClearResolvedProductID()
+		return nil
+	case safetyassertion.FieldResolvedComponentID:
+		m.ClearResolvedComponentID()
+		return nil
+	case safetyassertion.FieldMatchedBy:
+		m.ClearMatchedBy()
+		return nil
+	case safetyassertion.FieldResolvedAt:
+		m.ClearResolvedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown SafetyAssertion nullable field %s", name)
@@ -21006,15 +21620,45 @@ func (m *SafetyAssertionMutation) ResetField(name string) error {
 	case safetyassertion.FieldEvidence:
 		m.ResetEvidence()
 		return nil
+	case safetyassertion.FieldCorrelationStatus:
+		m.ResetCorrelationStatus()
+		return nil
+	case safetyassertion.FieldCorrelationReason:
+		m.ResetCorrelationReason()
+		return nil
+	case safetyassertion.FieldLastEvaluatedAt:
+		m.ResetLastEvaluatedAt()
+		return nil
+	case safetyassertion.FieldCorrelationRevision:
+		m.ResetCorrelationRevision()
+		return nil
+	case safetyassertion.FieldResolvedProductID:
+		m.ResetResolvedProductID()
+		return nil
+	case safetyassertion.FieldResolvedComponentID:
+		m.ResetResolvedComponentID()
+		return nil
+	case safetyassertion.FieldMatchedBy:
+		m.ResetMatchedBy()
+		return nil
+	case safetyassertion.FieldResolvedAt:
+		m.ResetResolvedAt()
+		return nil
 	}
 	return fmt.Errorf("unknown SafetyAssertion field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SafetyAssertionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.document != nil {
 		edges = append(edges, safetyassertion.EdgeDocument)
+	}
+	if m.resolved_product != nil {
+		edges = append(edges, safetyassertion.EdgeResolvedProduct)
+	}
+	if m.resolved_component != nil {
+		edges = append(edges, safetyassertion.EdgeResolvedComponent)
 	}
 	return edges
 }
@@ -21027,13 +21671,21 @@ func (m *SafetyAssertionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.document; id != nil {
 			return []ent.Value{*id}
 		}
+	case safetyassertion.EdgeResolvedProduct:
+		if id := m.resolved_product; id != nil {
+			return []ent.Value{*id}
+		}
+	case safetyassertion.EdgeResolvedComponent:
+		if id := m.resolved_component; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SafetyAssertionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -21045,9 +21697,15 @@ func (m *SafetyAssertionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SafetyAssertionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.cleareddocument {
 		edges = append(edges, safetyassertion.EdgeDocument)
+	}
+	if m.clearedresolved_product {
+		edges = append(edges, safetyassertion.EdgeResolvedProduct)
+	}
+	if m.clearedresolved_component {
+		edges = append(edges, safetyassertion.EdgeResolvedComponent)
 	}
 	return edges
 }
@@ -21058,6 +21716,10 @@ func (m *SafetyAssertionMutation) EdgeCleared(name string) bool {
 	switch name {
 	case safetyassertion.EdgeDocument:
 		return m.cleareddocument
+	case safetyassertion.EdgeResolvedProduct:
+		return m.clearedresolved_product
+	case safetyassertion.EdgeResolvedComponent:
+		return m.clearedresolved_component
 	}
 	return false
 }
@@ -21069,6 +21731,12 @@ func (m *SafetyAssertionMutation) ClearEdge(name string) error {
 	case safetyassertion.EdgeDocument:
 		m.ClearDocument()
 		return nil
+	case safetyassertion.EdgeResolvedProduct:
+		m.ClearResolvedProduct()
+		return nil
+	case safetyassertion.EdgeResolvedComponent:
+		m.ClearResolvedComponent()
+		return nil
 	}
 	return fmt.Errorf("unknown SafetyAssertion unique edge %s", name)
 }
@@ -21079,6 +21747,12 @@ func (m *SafetyAssertionMutation) ResetEdge(name string) error {
 	switch name {
 	case safetyassertion.EdgeDocument:
 		m.ResetDocument()
+		return nil
+	case safetyassertion.EdgeResolvedProduct:
+		m.ResetResolvedProduct()
+		return nil
+	case safetyassertion.EdgeResolvedComponent:
+		m.ResetResolvedComponent()
 		return nil
 	}
 	return fmt.Errorf("unknown SafetyAssertion edge %s", name)

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
@@ -20,13 +21,15 @@ import (
 // SafetyAssertionQuery is the builder for querying SafetyAssertion entities.
 type SafetyAssertionQuery struct {
 	config
-	ctx          *QueryContext
-	order        []safetyassertion.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.SafetyAssertion
-	withDocument *SafetyAssertionDocumentQuery
-	modifiers    []func(*sql.Selector)
-	loadTotal    []func(context.Context, []*SafetyAssertion) error
+	ctx                   *QueryContext
+	order                 []safetyassertion.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.SafetyAssertion
+	withDocument          *SafetyAssertionDocumentQuery
+	withResolvedProduct   *PackageVersionQuery
+	withResolvedComponent *PackageVersionQuery
+	modifiers             []func(*sql.Selector)
+	loadTotal             []func(context.Context, []*SafetyAssertion) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,6 +81,50 @@ func (_q *SafetyAssertionQuery) QueryDocument() *SafetyAssertionDocumentQuery {
 			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, selector),
 			sqlgraph.To(safetyassertiondocument.Table, safetyassertiondocument.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, safetyassertion.DocumentTable, safetyassertion.DocumentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryResolvedProduct chains the current query on the "resolved_product" edge.
+func (_q *SafetyAssertionQuery) QueryResolvedProduct() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, selector),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, safetyassertion.ResolvedProductTable, safetyassertion.ResolvedProductColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryResolvedComponent chains the current query on the "resolved_component" edge.
+func (_q *SafetyAssertionQuery) QueryResolvedComponent() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, selector),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, safetyassertion.ResolvedComponentTable, safetyassertion.ResolvedComponentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -272,12 +319,14 @@ func (_q *SafetyAssertionQuery) Clone() *SafetyAssertionQuery {
 		return nil
 	}
 	return &SafetyAssertionQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]safetyassertion.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.SafetyAssertion{}, _q.predicates...),
-		withDocument: _q.withDocument.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]safetyassertion.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.SafetyAssertion{}, _q.predicates...),
+		withDocument:          _q.withDocument.Clone(),
+		withResolvedProduct:   _q.withResolvedProduct.Clone(),
+		withResolvedComponent: _q.withResolvedComponent.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -292,6 +341,28 @@ func (_q *SafetyAssertionQuery) WithDocument(opts ...func(*SafetyAssertionDocume
 		opt(query)
 	}
 	_q.withDocument = query
+	return _q
+}
+
+// WithResolvedProduct tells the query-builder to eager-load the nodes that are connected to
+// the "resolved_product" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *SafetyAssertionQuery) WithResolvedProduct(opts ...func(*PackageVersionQuery)) *SafetyAssertionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withResolvedProduct = query
+	return _q
+}
+
+// WithResolvedComponent tells the query-builder to eager-load the nodes that are connected to
+// the "resolved_component" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *SafetyAssertionQuery) WithResolvedComponent(opts ...func(*PackageVersionQuery)) *SafetyAssertionQuery {
+	query := (&PackageVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withResolvedComponent = query
 	return _q
 }
 
@@ -373,8 +444,10 @@ func (_q *SafetyAssertionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*SafetyAssertion{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			_q.withDocument != nil,
+			_q.withResolvedProduct != nil,
+			_q.withResolvedComponent != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -401,6 +474,18 @@ func (_q *SafetyAssertionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	if query := _q.withDocument; query != nil {
 		if err := _q.loadDocument(ctx, query, nodes, nil,
 			func(n *SafetyAssertion, e *SafetyAssertionDocument) { n.Edges.Document = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withResolvedProduct; query != nil {
+		if err := _q.loadResolvedProduct(ctx, query, nodes, nil,
+			func(n *SafetyAssertion, e *PackageVersion) { n.Edges.ResolvedProduct = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withResolvedComponent; query != nil {
+		if err := _q.loadResolvedComponent(ctx, query, nodes, nil,
+			func(n *SafetyAssertion, e *PackageVersion) { n.Edges.ResolvedComponent = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -441,6 +526,70 @@ func (_q *SafetyAssertionQuery) loadDocument(ctx context.Context, query *SafetyA
 	}
 	return nil
 }
+func (_q *SafetyAssertionQuery) loadResolvedProduct(ctx context.Context, query *PackageVersionQuery, nodes []*SafetyAssertion, init func(*SafetyAssertion), assign func(*SafetyAssertion, *PackageVersion)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*SafetyAssertion)
+	for i := range nodes {
+		if nodes[i].ResolvedProductID == nil {
+			continue
+		}
+		fk := *nodes[i].ResolvedProductID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(packageversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "resolved_product_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *SafetyAssertionQuery) loadResolvedComponent(ctx context.Context, query *PackageVersionQuery, nodes []*SafetyAssertion, init func(*SafetyAssertion), assign func(*SafetyAssertion, *PackageVersion)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*SafetyAssertion)
+	for i := range nodes {
+		if nodes[i].ResolvedComponentID == nil {
+			continue
+		}
+		fk := *nodes[i].ResolvedComponentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(packageversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "resolved_component_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *SafetyAssertionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -472,6 +621,12 @@ func (_q *SafetyAssertionQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withDocument != nil {
 			_spec.Node.AddColumnOnce(safetyassertion.FieldDocumentID)
+		}
+		if _q.withResolvedProduct != nil {
+			_spec.Node.AddColumnOnce(safetyassertion.FieldResolvedProductID)
+		}
+		if _q.withResolvedComponent != nil {
+			_spec.Node.AddColumnOnce(safetyassertion.FieldResolvedComponentID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

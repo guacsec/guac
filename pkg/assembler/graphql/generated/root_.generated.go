@@ -408,6 +408,7 @@ type ComplexityRoot struct {
 		IngestVulnerabilities           func(childComplexity int, vulns []*model.IDorVulnerabilityInput) int
 		IngestVulnerability             func(childComplexity int, vuln model.IDorVulnerabilityInput) int
 		IngestVulnerabilityMetadata     func(childComplexity int, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
+		ReconcileSafetyAssertion        func(childComplexity int, id string) int
 	}
 
 	NeighborConnection struct {
@@ -604,6 +605,7 @@ type ComplexityRoot struct {
 	SafetyAssertion struct {
 		AssertedAt              func(childComplexity int) int
 		AssertionID             func(childComplexity int) int
+		Binding                 func(childComplexity int) int
 		ClassificationScheme    func(childComplexity int) int
 		ClassificationValue     func(childComplexity int) int
 		Collector               func(childComplexity int) int
@@ -622,6 +624,13 @@ type ComplexityRoot struct {
 		ValidUntil              func(childComplexity int) int
 	}
 
+	SafetyAssertionBinding struct {
+		Component  func(childComplexity int) int
+		MatchedBy  func(childComplexity int) int
+		Product    func(childComplexity int) int
+		ResolvedAt func(childComplexity int) int
+	}
+
 	SafetyAssertionConnection struct {
 		Edges      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
@@ -638,7 +647,9 @@ type ComplexityRoot struct {
 		ComponentDigest          func(childComplexity int) int
 		ComponentDigestAlgorithm func(childComplexity int) int
 		ComponentPurl            func(childComplexity int) int
+		CorrelationReason        func(childComplexity int) int
 		CorrelationStatus        func(childComplexity int) int
+		LastEvaluatedAt          func(childComplexity int) int
 		ProductPurl              func(childComplexity int) int
 	}
 
@@ -2497,6 +2508,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
+	case "Mutation.reconcileSafetyAssertion":
+		if e.ComplexityRoot.Mutation.ReconcileSafetyAssertion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_reconcileSafetyAssertion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ReconcileSafetyAssertion(childComplexity, args["id"].(string)), true
 
 	case "NeighborConnection.edges":
 		if e.ComplexityRoot.NeighborConnection.Edges == nil {
@@ -3622,6 +3644,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SafetyAssertion.AssertionID(childComplexity), true
+	case "SafetyAssertion.binding":
+		if e.ComplexityRoot.SafetyAssertion.Binding == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Binding(childComplexity), true
 	case "SafetyAssertion.classificationScheme":
 		if e.ComplexityRoot.SafetyAssertion.ClassificationScheme == nil {
 			break
@@ -3719,6 +3747,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.SafetyAssertion.ValidUntil(childComplexity), true
 
+	case "SafetyAssertionBinding.component":
+		if e.ComplexityRoot.SafetyAssertionBinding.Component == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.Component(childComplexity), true
+	case "SafetyAssertionBinding.matchedBy":
+		if e.ComplexityRoot.SafetyAssertionBinding.MatchedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.MatchedBy(childComplexity), true
+	case "SafetyAssertionBinding.product":
+		if e.ComplexityRoot.SafetyAssertionBinding.Product == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.Product(childComplexity), true
+	case "SafetyAssertionBinding.resolvedAt":
+		if e.ComplexityRoot.SafetyAssertionBinding.ResolvedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.ResolvedAt(childComplexity), true
+
 	case "SafetyAssertionConnection.edges":
 		if e.ComplexityRoot.SafetyAssertionConnection.Edges == nil {
 			break
@@ -3775,12 +3828,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SafetyAssertionTarget.ComponentPurl(childComplexity), true
+	case "SafetyAssertionTarget.correlationReason":
+		if e.ComplexityRoot.SafetyAssertionTarget.CorrelationReason == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.CorrelationReason(childComplexity), true
 	case "SafetyAssertionTarget.correlationStatus":
 		if e.ComplexityRoot.SafetyAssertionTarget.CorrelationStatus == nil {
 			break
 		}
 
 		return e.ComplexityRoot.SafetyAssertionTarget.CorrelationStatus(childComplexity), true
+	case "SafetyAssertionTarget.lastEvaluatedAt":
+		if e.ComplexityRoot.SafetyAssertionTarget.LastEvaluatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.LastEvaluatedAt(childComplexity), true
 	case "SafetyAssertionTarget.productPurl":
 		if e.ComplexityRoot.SafetyAssertionTarget.ProductPurl == nil {
 			break
@@ -7552,6 +7617,10 @@ enum SafetyDecisionStatus {
 
 enum SafetyCorrelationStatus {
   PENDING
+  MATCHED
+  AMBIGUOUS
+  INVALID
+  STALE
 }
 
 "Declared identities survive ingestion before either package exists."
@@ -7562,6 +7631,16 @@ type SafetyAssertionTarget {
   componentDigestAlgorithm: String
   componentDigest: String
   correlationStatus: SafetyCorrelationStatus!
+  correlationReason: String
+  lastEvaluatedAt: Time
+}
+
+"A deterministic binding to two existing, specific package versions."
+type SafetyAssertionBinding {
+  product: Package!
+  component: Package!
+  matchedBy: String!
+  resolvedAt: Time!
 }
 
 type SafetyEvidenceReference {
@@ -7591,6 +7670,7 @@ type SafetyAssertion {
   assertedAt: Time!
   validUntil: Time
   target: SafetyAssertionTarget!
+  binding: SafetyAssertionBinding
   evidence: [SafetyEvidenceReference!]!
   sourceAuthority: String
   origin: String!
@@ -7654,6 +7734,8 @@ type SafetyAssertionConnection {
 
 extend type Mutation {
   ingestSafetyAssertion(assertion: SafetyAssertionInputSpec!): ID!
+  "Resolve from authoritative graph data; callers cannot supply arbitrary binding IDs."
+  reconcileSafetyAssertion(id: ID!): SafetyAssertion!
 }
 
 extend type Query {
@@ -9291,6 +9373,8 @@ func (ec *executionContext) childFields_SafetyAssertion(ctx context.Context, fie
 		return ec.fieldContext_SafetyAssertion_validUntil(ctx, field)
 	case "target":
 		return ec.fieldContext_SafetyAssertion_target(ctx, field)
+	case "binding":
+		return ec.fieldContext_SafetyAssertion_binding(ctx, field)
 	case "evidence":
 		return ec.fieldContext_SafetyAssertion_evidence(ctx, field)
 	case "sourceAuthority":
@@ -9307,6 +9391,20 @@ func (ec *executionContext) childFields_SafetyAssertion(ctx context.Context, fie
 		return ec.fieldContext_SafetyAssertion_documentDigest(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertion", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyAssertionBinding(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "product":
+		return ec.fieldContext_SafetyAssertionBinding_product(ctx, field)
+	case "component":
+		return ec.fieldContext_SafetyAssertionBinding_component(ctx, field)
+	case "matchedBy":
+		return ec.fieldContext_SafetyAssertionBinding_matchedBy(ctx, field)
+	case "resolvedAt":
+		return ec.fieldContext_SafetyAssertionBinding_resolvedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertionBinding", field.Name)
 }
 
 func (ec *executionContext) childFields_SafetyAssertionConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -9345,6 +9443,10 @@ func (ec *executionContext) childFields_SafetyAssertionTarget(ctx context.Contex
 		return ec.fieldContext_SafetyAssertionTarget_componentDigest(ctx, field)
 	case "correlationStatus":
 		return ec.fieldContext_SafetyAssertionTarget_correlationStatus(ctx, field)
+	case "correlationReason":
+		return ec.fieldContext_SafetyAssertionTarget_correlationReason(ctx, field)
+	case "lastEvaluatedAt":
+		return ec.fieldContext_SafetyAssertionTarget_lastEvaluatedAt(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertionTarget", field.Name)
 }

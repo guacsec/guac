@@ -47,7 +47,11 @@ func safetyAssertionTestBackend(t *testing.T) *EntBackend {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { admin.Close() })
+	t.Cleanup(func() {
+		if err := admin.Close(); err != nil {
+			t.Error(err)
+		}
+	})
 	name := "safety_test_" + strings.ReplaceAll(uuid.NewString(), "-", "")
 	if _, err := admin.Exec(`CREATE DATABASE "` + name + `"`); err != nil {
 		t.Fatal(err)
@@ -66,7 +70,11 @@ func safetyAssertionTestBackend(t *testing.T) *EntBackend {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { client.Close() })
+	t.Cleanup(func() {
+		if err := client.Close(); err != nil {
+			t.Error(err)
+		}
+	})
 	if err := client.Schema.Create(context.Background()); err != nil {
 		t.Fatal(err)
 	}

@@ -1,28 +1,42 @@
 # Dedicated safety-assertion graph model proposal
 
-Status: first implementation slice available for maintainer review
+Status: SRAC ingestion and reconciliation implementation available for
+maintainer review
 
 ## Implemented in this PR
 
-The first slice now includes GraphQL ingestion, filtered and paginated queries,
-generated server/client operations, backend interface methods, and dedicated
-Ent/PostgreSQL persistence with an additive migration. It retains versioned
-product/component PURLs before either package exists. Document provenance is
-stored separately; the one-to-one declared target is stored on the assertion,
-and assertion-owned evidence references are stored as a typed JSON array.
+The implementation includes SRAC document processing and parsing, GraphQL
+ingestion, filtered and paginated queries, generated server/client operations,
+backend interface methods, and dedicated Ent/PostgreSQL persistence with an
+additive migration. It retains versioned product/component PURLs before either
+package exists. Document provenance is stored separately; the one-to-one
+declared target is stored on the assertion, and assertion-owned evidence
+references are stored as a typed JSON array. The one-to-one resolved binding is
+stored as typed product/component package-version foreign keys on the assertion,
+with correlation status, reason, and timestamps.
 
 Ingestion validates decision state, reviewer requirements, timestamps, versioned
 identities, evidence IDs/URIs, and digest syntax. Retries return the existing
 ID; conflicting assertion content or document provenance is rejected atomically.
-Digest validation here checks encoding and length, not the source document's
-bytes or a component artifact. Those checks belong at ingestion/correlation
-boundaries with access to the corresponding bytes.
+The SRAC parser hashes the received document bytes. Direct GraphQL ingestion
+checks supplied digest syntax. Reconciliation compares a declared component
+digest with graph artifact-occurrence data; it does not fetch remote evidence.
 
-All targets are `PENDING` in this slice. Resolved bindings, the reconciliation
-certifier, parser integration from #3271, SPDX/CycloneDX mapping, and graph
-traversal through resolved packages remain follow-up work. Other backends return
-an explicit unsupported-feature error. The broader contract below describes the
-intended follow-up model; it is not a claim that those features are implemented.
+The `guacone certifier safety-assertions` command supports one-shot and polling
+runs. It preserves missing endpoints or missing digest observations as
+`PENDING`, binds unique exact versions as `MATCHED`, and exposes `AMBIGUOUS`,
+`INVALID`, and `STALE` results without an active binding. It never changes the
+external decision. Repeated or concurrent runs retain one binding, and later
+versions do not replace the declared product version. The backend derives
+matches from authoritative graph data rather than accepting caller-supplied
+package IDs.
+
+Native SPDX/CycloneDX safety-field mapping and generic neighbor traversal remain
+outside this PR. Existing SPDX/CycloneDX package ingestion supplies the graph
+nodes that the SRAC certifier resolves. Other persistence backends return
+explicit unsupported-feature errors. The broader design below includes possible
+later extensions in addition to the implemented SRAC ingestion and
+reconciliation path.
 
 See
 [the runnable example and test instructions](srac-safety-assertion-usage.md).

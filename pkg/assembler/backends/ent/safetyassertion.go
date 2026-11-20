@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -55,6 +56,22 @@ type SafetyAssertion struct {
 	ComponentDigest *string `json:"component_digest,omitempty"`
 	// Evidence holds the value of the "evidence" field.
 	Evidence []*model.SafetyEvidenceReferenceInput `json:"evidence,omitempty"`
+	// CorrelationStatus holds the value of the "correlation_status" field.
+	CorrelationStatus safetyassertion.CorrelationStatus `json:"correlation_status,omitempty"`
+	// CorrelationReason holds the value of the "correlation_reason" field.
+	CorrelationReason *string `json:"correlation_reason,omitempty"`
+	// LastEvaluatedAt holds the value of the "last_evaluated_at" field.
+	LastEvaluatedAt *time.Time `json:"last_evaluated_at,omitempty"`
+	// CorrelationRevision holds the value of the "correlation_revision" field.
+	CorrelationRevision int `json:"correlation_revision,omitempty"`
+	// ResolvedProductID holds the value of the "resolved_product_id" field.
+	ResolvedProductID *uuid.UUID `json:"resolved_product_id,omitempty"`
+	// ResolvedComponentID holds the value of the "resolved_component_id" field.
+	ResolvedComponentID *uuid.UUID `json:"resolved_component_id,omitempty"`
+	// MatchedBy holds the value of the "matched_by" field.
+	MatchedBy *string `json:"matched_by,omitempty"`
+	// ResolvedAt holds the value of the "resolved_at" field.
+	ResolvedAt *time.Time `json:"resolved_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SafetyAssertionQuery when eager-loading is set.
 	Edges        SafetyAssertionEdges `json:"edges"`
@@ -65,11 +82,15 @@ type SafetyAssertion struct {
 type SafetyAssertionEdges struct {
 	// Document holds the value of the document edge.
 	Document *SafetyAssertionDocument `json:"document,omitempty"`
+	// ResolvedProduct holds the value of the resolved_product edge.
+	ResolvedProduct *PackageVersion `json:"resolved_product,omitempty"`
+	// ResolvedComponent holds the value of the resolved_component edge.
+	ResolvedComponent *PackageVersion `json:"resolved_component,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [3]map[string]int
 }
 
 // DocumentOrErr returns the Document value or an error if the edge
@@ -83,16 +104,42 @@ func (e SafetyAssertionEdges) DocumentOrErr() (*SafetyAssertionDocument, error) 
 	return nil, &NotLoadedError{edge: "document"}
 }
 
+// ResolvedProductOrErr returns the ResolvedProduct value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SafetyAssertionEdges) ResolvedProductOrErr() (*PackageVersion, error) {
+	if e.ResolvedProduct != nil {
+		return e.ResolvedProduct, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: packageversion.Label}
+	}
+	return nil, &NotLoadedError{edge: "resolved_product"}
+}
+
+// ResolvedComponentOrErr returns the ResolvedComponent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SafetyAssertionEdges) ResolvedComponentOrErr() (*PackageVersion, error) {
+	if e.ResolvedComponent != nil {
+		return e.ResolvedComponent, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: packageversion.Label}
+	}
+	return nil, &NotLoadedError{edge: "resolved_component"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*SafetyAssertion) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case safetyassertion.FieldResolvedProductID, safetyassertion.FieldResolvedComponentID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case safetyassertion.FieldEvidence:
 			values[i] = new([]byte)
-		case safetyassertion.FieldAssertionID, safetyassertion.FieldContentHash, safetyassertion.FieldSafetyRelevance, safetyassertion.FieldClassificationScheme, safetyassertion.FieldClassificationValue, safetyassertion.FieldRationale, safetyassertion.FieldDecisionStatus, safetyassertion.FieldReviewer, safetyassertion.FieldProductPurl, safetyassertion.FieldComponentPurl, safetyassertion.FieldComponentBomRef, safetyassertion.FieldComponentDigestAlgorithm, safetyassertion.FieldComponentDigest:
+		case safetyassertion.FieldCorrelationRevision:
+			values[i] = new(sql.NullInt64)
+		case safetyassertion.FieldAssertionID, safetyassertion.FieldContentHash, safetyassertion.FieldSafetyRelevance, safetyassertion.FieldClassificationScheme, safetyassertion.FieldClassificationValue, safetyassertion.FieldRationale, safetyassertion.FieldDecisionStatus, safetyassertion.FieldReviewer, safetyassertion.FieldProductPurl, safetyassertion.FieldComponentPurl, safetyassertion.FieldComponentBomRef, safetyassertion.FieldComponentDigestAlgorithm, safetyassertion.FieldComponentDigest, safetyassertion.FieldCorrelationStatus, safetyassertion.FieldCorrelationReason, safetyassertion.FieldMatchedBy:
 			values[i] = new(sql.NullString)
-		case safetyassertion.FieldAssertedAt, safetyassertion.FieldValidUntil:
+		case safetyassertion.FieldAssertedAt, safetyassertion.FieldValidUntil, safetyassertion.FieldLastEvaluatedAt, safetyassertion.FieldResolvedAt:
 			values[i] = new(sql.NullTime)
 		case safetyassertion.FieldID, safetyassertion.FieldDocumentID:
 			values[i] = new(uuid.UUID)
@@ -228,6 +275,60 @@ func (_m *SafetyAssertion) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field evidence: %w", err)
 				}
 			}
+		case safetyassertion.FieldCorrelationStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field correlation_status", values[i])
+			} else if value.Valid {
+				_m.CorrelationStatus = safetyassertion.CorrelationStatus(value.String)
+			}
+		case safetyassertion.FieldCorrelationReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field correlation_reason", values[i])
+			} else if value.Valid {
+				_m.CorrelationReason = new(string)
+				*_m.CorrelationReason = value.String
+			}
+		case safetyassertion.FieldLastEvaluatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_evaluated_at", values[i])
+			} else if value.Valid {
+				_m.LastEvaluatedAt = new(time.Time)
+				*_m.LastEvaluatedAt = value.Time
+			}
+		case safetyassertion.FieldCorrelationRevision:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field correlation_revision", values[i])
+			} else if value.Valid {
+				_m.CorrelationRevision = int(value.Int64)
+			}
+		case safetyassertion.FieldResolvedProductID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field resolved_product_id", values[i])
+			} else if value.Valid {
+				_m.ResolvedProductID = new(uuid.UUID)
+				*_m.ResolvedProductID = *value.S.(*uuid.UUID)
+			}
+		case safetyassertion.FieldResolvedComponentID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field resolved_component_id", values[i])
+			} else if value.Valid {
+				_m.ResolvedComponentID = new(uuid.UUID)
+				*_m.ResolvedComponentID = *value.S.(*uuid.UUID)
+			}
+		case safetyassertion.FieldMatchedBy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field matched_by", values[i])
+			} else if value.Valid {
+				_m.MatchedBy = new(string)
+				*_m.MatchedBy = value.String
+			}
+		case safetyassertion.FieldResolvedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field resolved_at", values[i])
+			} else if value.Valid {
+				_m.ResolvedAt = new(time.Time)
+				*_m.ResolvedAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -244,6 +345,16 @@ func (_m *SafetyAssertion) Value(name string) (ent.Value, error) {
 // QueryDocument queries the "document" edge of the SafetyAssertion entity.
 func (_m *SafetyAssertion) QueryDocument() *SafetyAssertionDocumentQuery {
 	return NewSafetyAssertionClient(_m.config).QueryDocument(_m)
+}
+
+// QueryResolvedProduct queries the "resolved_product" edge of the SafetyAssertion entity.
+func (_m *SafetyAssertion) QueryResolvedProduct() *PackageVersionQuery {
+	return NewSafetyAssertionClient(_m.config).QueryResolvedProduct(_m)
+}
+
+// QueryResolvedComponent queries the "resolved_component" edge of the SafetyAssertion entity.
+func (_m *SafetyAssertion) QueryResolvedComponent() *PackageVersionQuery {
+	return NewSafetyAssertionClient(_m.config).QueryResolvedComponent(_m)
 }
 
 // Update returns a builder for updating this SafetyAssertion.
@@ -333,6 +444,42 @@ func (_m *SafetyAssertion) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("evidence=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Evidence))
+	builder.WriteString(", ")
+	builder.WriteString("correlation_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CorrelationStatus))
+	builder.WriteString(", ")
+	if v := _m.CorrelationReason; v != nil {
+		builder.WriteString("correlation_reason=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.LastEvaluatedAt; v != nil {
+		builder.WriteString("last_evaluated_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("correlation_revision=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CorrelationRevision))
+	builder.WriteString(", ")
+	if v := _m.ResolvedProductID; v != nil {
+		builder.WriteString("resolved_product_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.ResolvedComponentID; v != nil {
+		builder.WriteString("resolved_component_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.MatchedBy; v != nil {
+		builder.WriteString("matched_by=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.ResolvedAt; v != nil {
+		builder.WriteString("resolved_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

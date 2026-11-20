@@ -18,6 +18,7 @@ package arangodb
 import (
 	"context"
 	"fmt"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -28,5 +29,9 @@ func (c *arangoClient) SafetyAssertions(ctx context.Context, spec *model.SafetyA
 	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
 }
 func (c *arangoClient) SafetyAssertionList(ctx context.Context, spec model.SafetyAssertionSpec, after *string, first *int) (*model.SafetyAssertionConnection, error) {
+	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
+}
+
+func (c *arangoClient) ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error) {
 	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
 }

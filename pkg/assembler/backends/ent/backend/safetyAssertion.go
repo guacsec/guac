@@ -137,8 +137,11 @@ func safetyAssertionPredicates(spec *model.SafetyAssertionSpec) ([]predicate.Saf
 		}
 		p = append(p, sa.DecisionStatusEQ(sa.DecisionStatus(*spec.DecisionStatus)))
 	}
-	if spec.CorrelationStatus != nil && *spec.CorrelationStatus != model.SafetyCorrelationStatusPending {
-		return nil, fmt.Errorf("only PENDING correlation is supported by this implementation")
+	if spec.CorrelationStatus != nil {
+		if !spec.CorrelationStatus.IsValid() {
+			return nil, fmt.Errorf("invalid correlation status")
+		}
+		p = append(p, sa.CorrelationStatusEQ(sa.CorrelationStatus(*spec.CorrelationStatus)))
 	}
 	if spec.ClassificationScheme != nil {
 		p = append(p, sa.ClassificationScheme(*spec.ClassificationScheme))
@@ -170,7 +173,7 @@ func (b *EntBackend) SafetyAssertions(ctx context.Context, spec *model.SafetyAss
 	if err != nil {
 		return nil, err
 	}
-	rows, err := b.client.SafetyAssertion.Query().Where(p...).WithDocument().Order(ent.Asc(sa.FieldID)).All(ctx)
+	rows, err := safetyAssertionObjects(b.client.SafetyAssertion.Query().Where(p...)).Order(ent.Asc(sa.FieldID)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +200,7 @@ func (b *EntBackend) SafetyAssertionList(ctx context.Context, spec model.SafetyA
 	if err != nil {
 		return nil, err
 	}
-	conn, err := b.client.SafetyAssertion.Query().Where(p...).WithDocument().Paginate(ctx, cursor, first, nil, nil)
+	conn, err := safetyAssertionObjects(b.client.SafetyAssertion.Query().Where(p...)).Paginate(ctx, cursor, first, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -222,13 +225,26 @@ func toModelSafetyAssertion(row *ent.SafetyAssertion) *model.SafetyAssertion {
 	for _, e := range row.Evidence {
 		evidence = append(evidence, &model.SafetyEvidenceReference{EvidenceID: e.EvidenceID, URI: e.URI, DigestAlgorithm: e.DigestAlgorithm, Digest: e.Digest})
 	}
+	var binding *model.SafetyAssertionBinding
+	if row.CorrelationStatus == sa.CorrelationStatusMATCHED && row.Edges.ResolvedProduct != nil && row.Edges.ResolvedComponent != nil && row.MatchedBy != nil && row.ResolvedAt != nil {
+		binding = &model.SafetyAssertionBinding{
+			Product:   toModelPackage(backReferencePackageVersion(row.Edges.ResolvedProduct)),
+			Component: toModelPackage(backReferencePackageVersion(row.Edges.ResolvedComponent)),
+			MatchedBy: *row.MatchedBy, ResolvedAt: *row.ResolvedAt,
+		}
+	}
 	return &model.SafetyAssertion{
 		ID: toGlobalID(sa.Table, row.ID.String()), AssertionID: row.AssertionID,
 		SafetyRelevance: model.SafetyRelevance(row.SafetyRelevance), ClassificationScheme: row.ClassificationScheme, ClassificationValue: row.ClassificationValue,
 		Rationale: row.Rationale, DecisionStatus: model.SafetyDecisionStatus(row.DecisionStatus), Reviewer: row.Reviewer, AssertedAt: row.AssertedAt, ValidUntil: row.ValidUntil,
 		Target: &model.SafetyAssertionTarget{ProductPurl: row.ProductPurl, ComponentPurl: row.ComponentPurl, ComponentBomRef: row.ComponentBomRef,
-			ComponentDigestAlgorithm: row.ComponentDigestAlgorithm, ComponentDigest: row.ComponentDigest, CorrelationStatus: model.SafetyCorrelationStatusPending},
+			ComponentDigestAlgorithm: row.ComponentDigestAlgorithm, ComponentDigest: row.ComponentDigest, CorrelationStatus: model.SafetyCorrelationStatus(row.CorrelationStatus), CorrelationReason: row.CorrelationReason, LastEvaluatedAt: row.LastEvaluatedAt},
+		Binding:  binding,
 		Evidence: evidence, SourceAuthority: doc.SourceAuthority, Origin: doc.Origin, Collector: doc.Collector, DocumentRef: doc.DocumentRef,
 		DocumentDigestAlgorithm: doc.DigestAlgorithm, DocumentDigest: doc.Digest,
 	}
+}
+
+func safetyAssertionObjects(query *ent.SafetyAssertionQuery) *ent.SafetyAssertionQuery {
+	return query.WithDocument().WithResolvedProduct(withPackageVersionTree()).WithResolvedComponent(withPackageVersionTree())
 }

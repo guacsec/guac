@@ -182,6 +182,10 @@ func init() {
 	slsaattestation.DefaultID = slsaattestationDescID.Default.(func() uuid.UUID)
 	safetyassertionFields := schema.SafetyAssertion{}.Fields()
 	_ = safetyassertionFields
+	// safetyassertionDescCorrelationRevision is the schema descriptor for correlation_revision field.
+	safetyassertionDescCorrelationRevision := safetyassertionFields[21].Descriptor()
+	// safetyassertion.DefaultCorrelationRevision holds the default value on creation for the correlation_revision field.
+	safetyassertion.DefaultCorrelationRevision = safetyassertionDescCorrelationRevision.Default.(int)
 	// safetyassertionDescID is the schema descriptor for id field.
 	safetyassertionDescID := safetyassertionFields[0].Descriptor()
 	// safetyassertion.DefaultID holds the default value on creation for the id field.

@@ -1788,6 +1788,7 @@ type SafetyAssertion struct {
 	AssertedAt              time.Time                  `json:"assertedAt"`
 	ValidUntil              *time.Time                 `json:"validUntil,omitempty"`
 	Target                  *SafetyAssertionTarget     `json:"target"`
+	Binding                 *SafetyAssertionBinding    `json:"binding,omitempty"`
 	Evidence                []*SafetyEvidenceReference `json:"evidence"`
 	SourceAuthority         *string                    `json:"sourceAuthority,omitempty"`
 	Origin                  string                     `json:"origin"`
@@ -1795,6 +1796,14 @@ type SafetyAssertion struct {
 	DocumentRef             string                     `json:"documentRef"`
 	DocumentDigestAlgorithm string                     `json:"documentDigestAlgorithm"`
 	DocumentDigest          string                     `json:"documentDigest"`
+}
+
+// A deterministic binding to two existing, specific package versions.
+type SafetyAssertionBinding struct {
+	Product    *Package  `json:"product"`
+	Component  *Package  `json:"component"`
+	MatchedBy  string    `json:"matchedBy"`
+	ResolvedAt time.Time `json:"resolvedAt"`
 }
 
 type SafetyAssertionConnection struct {
@@ -1857,6 +1866,8 @@ type SafetyAssertionTarget struct {
 	ComponentDigestAlgorithm *string                 `json:"componentDigestAlgorithm,omitempty"`
 	ComponentDigest          *string                 `json:"componentDigest,omitempty"`
 	CorrelationStatus        SafetyCorrelationStatus `json:"correlationStatus"`
+	CorrelationReason        *string                 `json:"correlationReason,omitempty"`
+	LastEvaluatedAt          *time.Time              `json:"lastEvaluatedAt,omitempty"`
 }
 
 type SafetyEvidenceReference struct {
@@ -2917,16 +2928,24 @@ func (e QueryType) MarshalJSON() ([]byte, error) {
 type SafetyCorrelationStatus string
 
 const (
-	SafetyCorrelationStatusPending SafetyCorrelationStatus = "PENDING"
+	SafetyCorrelationStatusPending   SafetyCorrelationStatus = "PENDING"
+	SafetyCorrelationStatusMatched   SafetyCorrelationStatus = "MATCHED"
+	SafetyCorrelationStatusAmbiguous SafetyCorrelationStatus = "AMBIGUOUS"
+	SafetyCorrelationStatusInvalid   SafetyCorrelationStatus = "INVALID"
+	SafetyCorrelationStatusStale     SafetyCorrelationStatus = "STALE"
 )
 
 var AllSafetyCorrelationStatus = []SafetyCorrelationStatus{
 	SafetyCorrelationStatusPending,
+	SafetyCorrelationStatusMatched,
+	SafetyCorrelationStatusAmbiguous,
+	SafetyCorrelationStatusInvalid,
+	SafetyCorrelationStatusStale,
 }
 
 func (e SafetyCorrelationStatus) IsValid() bool {
 	switch e {
-	case SafetyCorrelationStatusPending:
+	case SafetyCorrelationStatusPending, SafetyCorrelationStatusMatched, SafetyCorrelationStatusAmbiguous, SafetyCorrelationStatusInvalid, SafetyCorrelationStatusStale:
 		return true
 	}
 	return false

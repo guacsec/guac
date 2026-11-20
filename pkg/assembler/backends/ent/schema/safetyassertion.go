@@ -24,8 +24,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// SafetyAssertion stores a decision and its one declared version pair. Package
-// foreign keys are deliberately absent until a certifier can resolve the pair.
+// SafetyAssertion stores a decision, its declared target, and an optional
+// one-to-one binding to existing package versions, resolved by the certifier.
 type SafetyAssertion struct{ ent.Schema }
 
 func (SafetyAssertion) Fields() []ent.Field {
@@ -49,12 +49,22 @@ func (SafetyAssertion) Fields() []ent.Field {
 		field.String("component_digest").Optional().Nillable(),
 		// Evidence is owned by the assertion, rather than a reusable graph node.
 		field.JSON("evidence", []*model.SafetyEvidenceReferenceInput{}),
+		field.Enum("correlation_status").Values("PENDING", "MATCHED", "AMBIGUOUS", "INVALID", "STALE").Default("PENDING"),
+		field.String("correlation_reason").Optional().Nillable(),
+		field.Time("last_evaluated_at").Optional().Nillable(),
+		field.Int("correlation_revision").Default(0),
+		field.UUID("resolved_product_id", uuid.UUID{}).Optional().Nillable(),
+		field.UUID("resolved_component_id", uuid.UUID{}).Optional().Nillable(),
+		field.String("matched_by").Optional().Nillable(),
+		field.Time("resolved_at").Optional().Nillable(),
 	}
 }
 
 func (SafetyAssertion) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("document", SafetyAssertionDocument.Type).Ref("assertions").Unique().Required().Field("document_id"),
+		edge.To("resolved_product", PackageVersion.Type).Unique().Field("resolved_product_id"),
+		edge.To("resolved_component", PackageVersion.Type).Unique().Field("resolved_component_id"),
 	}
 }
 
@@ -64,5 +74,6 @@ func (SafetyAssertion) Indexes() []ent.Index {
 		index.Fields("product_purl"),
 		index.Fields("component_purl"),
 		index.Fields("safety_relevance", "decision_status"),
+		index.Fields("correlation_status"),
 	}
 }

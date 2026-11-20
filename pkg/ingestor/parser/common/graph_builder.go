@@ -63,6 +63,17 @@ func AddMetadata(predicates *assembler.IngestPredicates, foundIdentities []Trust
 	// TODO: when trust information fields need to be added to GQL nodes
 	// and added here.
 	_ = foundIdentities
+	for _, assertion := range predicates.SafetyAssertions {
+		if srcInfo.Collector != "" {
+			assertion.Collector = srcInfo.Collector
+		}
+		if srcInfo.Source != "" {
+			assertion.Origin = srcInfo.Source
+		}
+		if srcInfo.DocumentRef != "" {
+			assertion.DocumentRef = srcInfo.DocumentRef
+		}
+	}
 
 	for _, v := range predicates.CertifyBad {
 		v.CertifyBad.Collector = srcInfo.Collector

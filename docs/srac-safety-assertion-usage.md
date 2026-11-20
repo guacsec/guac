@@ -1,9 +1,9 @@
 # Safety assertion ingestion and queries
 
-This first implementation stores externally authored assertions through GUAC's
-GraphQL and backend interfaces, using Ent/PostgreSQL. Assertions retain
-declared, versioned PURLs even when no corresponding packages have been
-ingested. GUAC does not infer or approve the supplied decision.
+This implementation ingests SRAC documents and stores externally authored
+assertions through GUAC's GraphQL and backend interfaces, using Ent/PostgreSQL.
+Assertions retain declared, versioned PURLs even when no corresponding packages
+have been ingested. GUAC does not infer or approve the supplied decision.
 
 ## Ingest an assertion
 
@@ -77,6 +77,38 @@ query {
           productPurl
           componentPurl
           correlationStatus
+          correlationReason
+          lastEvaluatedAt
+        }
+        binding {
+          product {
+            type
+            namespaces {
+              namespace
+              names {
+                name
+                versions {
+                  id
+                  version
+                }
+              }
+            }
+          }
+          component {
+            type
+            namespaces {
+              namespace
+              names {
+                name
+                versions {
+                  id
+                  version
+                }
+              }
+            }
+          }
+          matchedBy
+          resolvedAt
         }
         evidence {
           evidenceId
@@ -92,15 +124,72 @@ query {
 
 Pass `pageInfo.endCursor` as `after` for the next page. PURL filters use the
 complete declared identity, including version, qualifiers, and subpath. They do
-not query resolved graph bindings. Every correlation state is `PENDING` until
-the follow-up certifier and binding implementation is available.
+not substitute another version when a declared version is missing. `binding`
+returns the resolved graph endpoints after reconciliation succeeds.
+
+## Ingest SRAC documents and reconcile
+
+The normal document ingestion pipeline recognizes SRAC `0.2-draft` JSON. The
+fixture `docs/examples/srac/product-context.srac.json` demonstrates one
+component in two products with opposite safety relevance. The parser emits
+dedicated assertions, computes SHA-256 over the exact received bytes, and
+preserves source authority, ingestion provenance, evidence, and the authored
+decision. It does not ingest packages or generate scan requests from unresolved
+declarations.
+
+`assertedAt` is optional in the draft carrier and defaults to `generatedAt`.
+`validUntil` and `classificationScheme` are optional additions. For legacy
+`classification` strings without a scheme, the parser uses `unspecified` and
+retains the value verbatim; it does not infer a safety standard from the value.
+Without configured blob storage, the parser uses a `urn:sha256:` content
+identity as the document reference, which is not a claim that a blob was
+uploaded.
+
+The current target contract carries one component digest. SRAC inputs with
+multiple component digests or product digests are rejected explicitly, so no
+supplied digest constraint is silently discarded. Unmodeled draft metadata
+remains available in the original source document when blob storage is
+configured.
+
+After ingesting assertions and the relevant SBOMs, run:
+
+```sh
+guacone certifier safety-assertions --gql-addr http://localhost:8080/query
+```
+
+For repeated reconciliation as later SBOMs arrive:
+
+```sh
+guacone certifier safety-assertions --gql-addr http://localhost:8080/query \
+  --poll --interval 5m --page-size 100
+```
+
+The command uses the existing `--header-file` authentication option and supports
+cancellation. Each pass paginates through all assertions, including earlier
+matches, to re-evaluate expiry and new digest evidence. Query and mutation
+errors are returned to the caller. The same backend evaluation can be invoked
+for one assertion with `reconcileSafetyAssertion(id: ...)`.
+
+| State       | Meaning                                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `PENDING`   | A declared version or required digest observation is missing.                                                      |
+| `MATCHED`   | Both versioned identities resolve uniquely and any declared component digest is consistent with graph occurrences. |
+| `AMBIGUOUS` | An exact identity has multiple candidate package versions.                                                         |
+| `INVALID`   | An identity is unsupported or a component digest conflicts.                                                        |
+| `STALE`     | The assertion has expired.                                                                                         |
+
+Only `MATCHED` exposes an active binding. A missing digest observation remains
+pending, while a conflicting digest invalidates the binding. Repeated runs
+preserve `resolvedAt` for an unchanged binding. Correlation never changes
+`decisionStatus`, reviewer, relevance, or the authored rationale.
 
 ## Validation
 
 Run unit validation and resolver tests:
 
 ```sh
-go test ./pkg/assembler/backends/helper ./pkg/assembler/graphql/resolvers
+go test ./pkg/srac ./pkg/ingestor/parser/srac ./pkg/certifier/safetyassertion \
+  ./pkg/handler/processor/guesser ./pkg/assembler/graphql/resolvers
 ```
 
 Run PostgreSQL persistence and GraphQL round-trip tests with a PostgreSQL role
@@ -108,11 +197,13 @@ that can create temporary databases:
 
 ```sh
 ENT_TEST_DATABASE_URL='postgresql://guac:guac@localhost/postgres?sslmode=disable' \
-  go test -v ./pkg/assembler/backends/ent/backend -run TestSafetyAssertionPostgres
+  go test -v ./pkg/assembler/backends/ent/backend -run TestSafety
 ```
 
 The integration test creates and drops an isolated database. It covers missing
 packages, idempotent and concurrent retries, immutable content and provenance,
 two products with opposite relevance for one component, version-specific
-queries, pagination, invalid cursors, and GraphQL ingestion/retrieval. Without
+queries, pagination, invalid cursors, full SRAC/SBOM ingestion in both orders,
+later product versions, digest mismatch, missing digest observations, ambiguity,
+expiry, concurrent reconciliation, and typed GraphQL bindings. Without
 `ENT_TEST_DATABASE_URL`, the PostgreSQL test is skipped explicitly.

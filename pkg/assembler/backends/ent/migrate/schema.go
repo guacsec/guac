@@ -976,6 +976,14 @@ var (
 		{Name: "component_digest_algorithm", Type: field.TypeString, Nullable: true},
 		{Name: "component_digest", Type: field.TypeString, Nullable: true},
 		{Name: "evidence", Type: field.TypeJSON},
+		{Name: "correlation_status", Type: field.TypeEnum, Enums: []string{"PENDING", "MATCHED", "AMBIGUOUS", "INVALID", "STALE"}, Default: "PENDING"},
+		{Name: "correlation_reason", Type: field.TypeString, Nullable: true},
+		{Name: "last_evaluated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "correlation_revision", Type: field.TypeInt, Default: 0},
+		{Name: "matched_by", Type: field.TypeString, Nullable: true},
+		{Name: "resolved_at", Type: field.TypeTime, Nullable: true},
+		{Name: "resolved_product_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "resolved_component_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "document_id", Type: field.TypeUUID},
 	}
 	// SafetyAssertionsTable holds the schema information for the "safety_assertions" table.
@@ -985,8 +993,20 @@ var (
 		PrimaryKey: []*schema.Column{SafetyAssertionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "safety_assertions_package_versions_resolved_product",
+				Columns:    []*schema.Column{SafetyAssertionsColumns[23]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "safety_assertions_package_versions_resolved_component",
+				Columns:    []*schema.Column{SafetyAssertionsColumns[24]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "safety_assertions_safety_assertion_documents_assertions",
-				Columns:    []*schema.Column{SafetyAssertionsColumns[17]},
+				Columns:    []*schema.Column{SafetyAssertionsColumns[25]},
 				RefColumns: []*schema.Column{SafetyAssertionDocumentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -995,7 +1015,7 @@ var (
 			{
 				Name:    "safetyassertion_document_id_assertion_id",
 				Unique:  true,
-				Columns: []*schema.Column{SafetyAssertionsColumns[17], SafetyAssertionsColumns[1]},
+				Columns: []*schema.Column{SafetyAssertionsColumns[25], SafetyAssertionsColumns[1]},
 			},
 			{
 				Name:    "safetyassertion_product_purl",
@@ -1011,6 +1031,11 @@ var (
 				Name:    "safetyassertion_safety_relevance_decision_status",
 				Unique:  false,
 				Columns: []*schema.Column{SafetyAssertionsColumns[3], SafetyAssertionsColumns[7]},
+			},
+			{
+				Name:    "safetyassertion_correlation_status",
+				Unique:  false,
+				Columns: []*schema.Column{SafetyAssertionsColumns[17]},
 			},
 		},
 	}
@@ -1407,7 +1432,9 @@ func init() {
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}
-	SafetyAssertionsTable.ForeignKeys[0].RefTable = SafetyAssertionDocumentsTable
+	SafetyAssertionsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	SafetyAssertionsTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	SafetyAssertionsTable.ForeignKeys[2].RefTable = SafetyAssertionDocumentsTable
 	VulnEqualsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	VulnEqualsTable.ForeignKeys[1].RefTable = VulnerabilityIdsTable
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable

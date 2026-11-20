@@ -51,8 +51,28 @@ const (
 	FieldComponentDigest = "component_digest"
 	// FieldEvidence holds the string denoting the evidence field in the database.
 	FieldEvidence = "evidence"
+	// FieldCorrelationStatus holds the string denoting the correlation_status field in the database.
+	FieldCorrelationStatus = "correlation_status"
+	// FieldCorrelationReason holds the string denoting the correlation_reason field in the database.
+	FieldCorrelationReason = "correlation_reason"
+	// FieldLastEvaluatedAt holds the string denoting the last_evaluated_at field in the database.
+	FieldLastEvaluatedAt = "last_evaluated_at"
+	// FieldCorrelationRevision holds the string denoting the correlation_revision field in the database.
+	FieldCorrelationRevision = "correlation_revision"
+	// FieldResolvedProductID holds the string denoting the resolved_product_id field in the database.
+	FieldResolvedProductID = "resolved_product_id"
+	// FieldResolvedComponentID holds the string denoting the resolved_component_id field in the database.
+	FieldResolvedComponentID = "resolved_component_id"
+	// FieldMatchedBy holds the string denoting the matched_by field in the database.
+	FieldMatchedBy = "matched_by"
+	// FieldResolvedAt holds the string denoting the resolved_at field in the database.
+	FieldResolvedAt = "resolved_at"
 	// EdgeDocument holds the string denoting the document edge name in mutations.
 	EdgeDocument = "document"
+	// EdgeResolvedProduct holds the string denoting the resolved_product edge name in mutations.
+	EdgeResolvedProduct = "resolved_product"
+	// EdgeResolvedComponent holds the string denoting the resolved_component edge name in mutations.
+	EdgeResolvedComponent = "resolved_component"
 	// Table holds the table name of the safetyassertion in the database.
 	Table = "safety_assertions"
 	// DocumentTable is the table that holds the document relation/edge.
@@ -62,6 +82,20 @@ const (
 	DocumentInverseTable = "safety_assertion_documents"
 	// DocumentColumn is the table column denoting the document relation/edge.
 	DocumentColumn = "document_id"
+	// ResolvedProductTable is the table that holds the resolved_product relation/edge.
+	ResolvedProductTable = "safety_assertions"
+	// ResolvedProductInverseTable is the table name for the PackageVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "packageversion" package.
+	ResolvedProductInverseTable = "package_versions"
+	// ResolvedProductColumn is the table column denoting the resolved_product relation/edge.
+	ResolvedProductColumn = "resolved_product_id"
+	// ResolvedComponentTable is the table that holds the resolved_component relation/edge.
+	ResolvedComponentTable = "safety_assertions"
+	// ResolvedComponentInverseTable is the table name for the PackageVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "packageversion" package.
+	ResolvedComponentInverseTable = "package_versions"
+	// ResolvedComponentColumn is the table column denoting the resolved_component relation/edge.
+	ResolvedComponentColumn = "resolved_component_id"
 )
 
 // Columns holds all SQL columns for safetyassertion fields.
@@ -84,6 +118,14 @@ var Columns = []string{
 	FieldComponentDigestAlgorithm,
 	FieldComponentDigest,
 	FieldEvidence,
+	FieldCorrelationStatus,
+	FieldCorrelationReason,
+	FieldLastEvaluatedAt,
+	FieldCorrelationRevision,
+	FieldResolvedProductID,
+	FieldResolvedComponentID,
+	FieldMatchedBy,
+	FieldResolvedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -97,6 +139,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCorrelationRevision holds the default value on creation for the "correlation_revision" field.
+	DefaultCorrelationRevision int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -147,6 +191,35 @@ func DecisionStatusValidator(ds DecisionStatus) error {
 		return nil
 	default:
 		return fmt.Errorf("safetyassertion: invalid enum value for decision_status field: %q", ds)
+	}
+}
+
+// CorrelationStatus defines the type for the "correlation_status" enum field.
+type CorrelationStatus string
+
+// CorrelationStatusPENDING is the default value of the CorrelationStatus enum.
+const DefaultCorrelationStatus = CorrelationStatusPENDING
+
+// CorrelationStatus values.
+const (
+	CorrelationStatusPENDING   CorrelationStatus = "PENDING"
+	CorrelationStatusMATCHED   CorrelationStatus = "MATCHED"
+	CorrelationStatusAMBIGUOUS CorrelationStatus = "AMBIGUOUS"
+	CorrelationStatusINVALID   CorrelationStatus = "INVALID"
+	CorrelationStatusSTALE     CorrelationStatus = "STALE"
+)
+
+func (cs CorrelationStatus) String() string {
+	return string(cs)
+}
+
+// CorrelationStatusValidator is a validator for the "correlation_status" field enum values. It is called by the builders before save.
+func CorrelationStatusValidator(cs CorrelationStatus) error {
+	switch cs {
+	case CorrelationStatusPENDING, CorrelationStatusMATCHED, CorrelationStatusAMBIGUOUS, CorrelationStatusINVALID, CorrelationStatusSTALE:
+		return nil
+	default:
+		return fmt.Errorf("safetyassertion: invalid enum value for correlation_status field: %q", cs)
 	}
 }
 
@@ -238,10 +311,64 @@ func ByComponentDigest(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldComponentDigest, opts...).ToFunc()
 }
 
+// ByCorrelationStatus orders the results by the correlation_status field.
+func ByCorrelationStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCorrelationStatus, opts...).ToFunc()
+}
+
+// ByCorrelationReason orders the results by the correlation_reason field.
+func ByCorrelationReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCorrelationReason, opts...).ToFunc()
+}
+
+// ByLastEvaluatedAt orders the results by the last_evaluated_at field.
+func ByLastEvaluatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastEvaluatedAt, opts...).ToFunc()
+}
+
+// ByCorrelationRevision orders the results by the correlation_revision field.
+func ByCorrelationRevision(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCorrelationRevision, opts...).ToFunc()
+}
+
+// ByResolvedProductID orders the results by the resolved_product_id field.
+func ByResolvedProductID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResolvedProductID, opts...).ToFunc()
+}
+
+// ByResolvedComponentID orders the results by the resolved_component_id field.
+func ByResolvedComponentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResolvedComponentID, opts...).ToFunc()
+}
+
+// ByMatchedBy orders the results by the matched_by field.
+func ByMatchedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMatchedBy, opts...).ToFunc()
+}
+
+// ByResolvedAt orders the results by the resolved_at field.
+func ByResolvedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResolvedAt, opts...).ToFunc()
+}
+
 // ByDocumentField orders the results by document field.
 func ByDocumentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newDocumentStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByResolvedProductField orders the results by resolved_product field.
+func ByResolvedProductField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newResolvedProductStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByResolvedComponentField orders the results by resolved_component field.
+func ByResolvedComponentField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newResolvedComponentStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newDocumentStep() *sqlgraph.Step {
@@ -249,6 +376,20 @@ func newDocumentStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DocumentInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, DocumentTable, DocumentColumn),
+	)
+}
+func newResolvedProductStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ResolvedProductInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ResolvedProductTable, ResolvedProductColumn),
+	)
+}
+func newResolvedComponentStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ResolvedComponentInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ResolvedComponentTable, ResolvedComponentColumn),
 	)
 }
 
@@ -284,6 +425,24 @@ func (e *DecisionStatus) UnmarshalGQL(val interface{}) error {
 	*e = DecisionStatus(str)
 	if err := DecisionStatusValidator(*e); err != nil {
 		return fmt.Errorf("%s is not a valid DecisionStatus", str)
+	}
+	return nil
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e CorrelationStatus) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *CorrelationStatus) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = CorrelationStatus(str)
+	if err := CorrelationStatusValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid CorrelationStatus", str)
 	}
 	return nil
 }

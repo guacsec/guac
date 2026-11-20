@@ -18,6 +18,7 @@ package neo4j
 import (
 	"context"
 	"fmt"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -28,5 +29,9 @@ func (c *neo4jClient) SafetyAssertions(ctx context.Context, spec *model.SafetyAs
 	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
 }
 func (c *neo4jClient) SafetyAssertionList(ctx context.Context, spec model.SafetyAssertionSpec, after *string, first *int) (*model.SafetyAssertionConnection, error) {
+	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
+}
+
+func (c *neo4jClient) ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error) {
 	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
 }

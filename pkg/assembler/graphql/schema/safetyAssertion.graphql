@@ -28,6 +28,10 @@ enum SafetyDecisionStatus {
 
 enum SafetyCorrelationStatus {
   PENDING
+  MATCHED
+  AMBIGUOUS
+  INVALID
+  STALE
 }
 
 "Declared identities survive ingestion before either package exists."
@@ -38,6 +42,16 @@ type SafetyAssertionTarget {
   componentDigestAlgorithm: String
   componentDigest: String
   correlationStatus: SafetyCorrelationStatus!
+  correlationReason: String
+  lastEvaluatedAt: Time
+}
+
+"A deterministic binding to two existing, specific package versions."
+type SafetyAssertionBinding {
+  product: Package!
+  component: Package!
+  matchedBy: String!
+  resolvedAt: Time!
 }
 
 type SafetyEvidenceReference {
@@ -67,6 +81,7 @@ type SafetyAssertion {
   assertedAt: Time!
   validUntil: Time
   target: SafetyAssertionTarget!
+  binding: SafetyAssertionBinding
   evidence: [SafetyEvidenceReference!]!
   sourceAuthority: String
   origin: String!
@@ -130,6 +145,8 @@ type SafetyAssertionConnection {
 
 extend type Mutation {
   ingestSafetyAssertion(assertion: SafetyAssertionInputSpec!): ID!
+  "Resolve from authoritative graph data; callers cannot supply arbitrary binding IDs."
+  reconcileSafetyAssertion(id: ID!): SafetyAssertion!
 }
 
 extend type Query {

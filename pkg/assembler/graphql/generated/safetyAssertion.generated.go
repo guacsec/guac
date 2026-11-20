@@ -309,6 +309,40 @@ func (ec *executionContext) fieldContext_SafetyAssertion_target(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _SafetyAssertion_binding(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertion_binding(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Binding, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *model.SafetyAssertionBinding) graphql.Marshaler {
+			return ec.marshalOSafetyAssertionBinding2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSafetyAssertionBinding(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertion_binding(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SafetyAssertion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_SafetyAssertionBinding(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SafetyAssertion_evidence(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertion) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -491,6 +525,124 @@ func (ec *executionContext) _SafetyAssertion_documentDigest(ctx context.Context,
 }
 func (ec *executionContext) fieldContext_SafetyAssertion_documentDigest(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("SafetyAssertion", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _SafetyAssertionBinding_product(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionBinding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertionBinding_product(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Product, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Package) graphql.Marshaler {
+			return ec.marshalNPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertionBinding_product(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SafetyAssertionBinding",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Package(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SafetyAssertionBinding_component(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionBinding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertionBinding_component(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Component, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Package) graphql.Marshaler {
+			return ec.marshalNPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertionBinding_component(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SafetyAssertionBinding",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Package(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SafetyAssertionBinding_matchedBy(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionBinding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertionBinding_matchedBy(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.MatchedBy, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertionBinding_matchedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SafetyAssertionBinding", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _SafetyAssertionBinding_resolvedAt(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionBinding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertionBinding_resolvedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ResolvedAt, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v time.Time) graphql.Marshaler {
+			return ec.marshalNTime2timeᚐTime(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertionBinding_resolvedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SafetyAssertionBinding", field, false, false, errors.New("field of type Time does not have child fields"))
 }
 
 func (ec *executionContext) _SafetyAssertionConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionConnection) (ret graphql.Marshaler) {
@@ -793,6 +945,56 @@ func (ec *executionContext) _SafetyAssertionTarget_correlationStatus(ctx context
 }
 func (ec *executionContext) fieldContext_SafetyAssertionTarget_correlationStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("SafetyAssertionTarget", field, false, false, errors.New("field of type SafetyCorrelationStatus does not have child fields"))
+}
+
+func (ec *executionContext) _SafetyAssertionTarget_correlationReason(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionTarget) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertionTarget_correlationReason(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CorrelationReason, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertionTarget_correlationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SafetyAssertionTarget", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _SafetyAssertionTarget_lastEvaluatedAt(ctx context.Context, field graphql.CollectedField, obj *model.SafetyAssertionTarget) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SafetyAssertionTarget_lastEvaluatedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.LastEvaluatedAt, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *time.Time) graphql.Marshaler {
+			return ec.marshalOTime2ᚖtimeᚐTime(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_SafetyAssertionTarget_lastEvaluatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SafetyAssertionTarget", field, false, false, errors.New("field of type Time does not have child fields"))
 }
 
 func (ec *executionContext) _SafetyEvidenceReference_evidenceId(ctx context.Context, field graphql.CollectedField, obj *model.SafetyEvidenceReference) (ret graphql.Marshaler) {
@@ -1309,6 +1511,11 @@ func (ec *executionContext) _SafetyAssertion(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "binding":
+			out.Values[i] = ec._SafetyAssertion_binding(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "evidence":
 			out.Values[i] = ec._SafetyAssertion_evidence(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -1341,6 +1548,59 @@ func (ec *executionContext) _SafetyAssertion(ctx context.Context, sel ast.Select
 			}
 		case "documentDigest":
 			out.Values[i] = ec._SafetyAssertion_documentDigest(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var safetyAssertionBindingImplementors = []string{"SafetyAssertionBinding"}
+
+func (ec *executionContext) _SafetyAssertionBinding(ctx context.Context, sel ast.SelectionSet, obj *model.SafetyAssertionBinding) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, safetyAssertionBindingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SafetyAssertionBinding")
+		case "product":
+			out.Values[i] = ec._SafetyAssertionBinding_product(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "component":
+			out.Values[i] = ec._SafetyAssertionBinding_component(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "matchedBy":
+			out.Values[i] = ec._SafetyAssertionBinding_matchedBy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resolvedAt":
+			out.Values[i] = ec._SafetyAssertionBinding_resolvedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1496,6 +1756,16 @@ func (ec *executionContext) _SafetyAssertionTarget(ctx context.Context, sel ast.
 		case "correlationStatus":
 			out.Values[i] = ec._SafetyAssertionTarget_correlationStatus(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "correlationReason":
+			out.Values[i] = ec._SafetyAssertionTarget_correlationReason(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "lastEvaluatedAt":
+			out.Values[i] = ec._SafetyAssertionTarget_lastEvaluatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		default:
@@ -1721,6 +1991,13 @@ func (ec *executionContext) unmarshalNSafetyRelevance2githubᚗcomᚋguacsecᚋg
 
 func (ec *executionContext) marshalNSafetyRelevance2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSafetyRelevance(ctx context.Context, sel ast.SelectionSet, v model.SafetyRelevance) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalOSafetyAssertionBinding2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSafetyAssertionBinding(ctx context.Context, sel ast.SelectionSet, v *model.SafetyAssertionBinding) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SafetyAssertionBinding(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOSafetyAssertionConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSafetyAssertionConnection(ctx context.Context, sel ast.SelectionSet, v *model.SafetyAssertionConnection) graphql.Marshaler {

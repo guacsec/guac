@@ -27599,6 +27599,146 @@ var AllQueryType = []QueryType{
 	QueryTypeEol,
 }
 
+// ReconcileSafetyAssertionReconcileSafetyAssertion includes the requested fields of the GraphQL type SafetyAssertion.
+// The GraphQL type's documentation follows.
+//
+// An externally authored decision. GUAC does not approve safety decisions.
+type ReconcileSafetyAssertionReconcileSafetyAssertion struct {
+	Id      string                                                   `json:"id"`
+	Target  ReconcileSafetyAssertionReconcileSafetyAssertionTarget   `json:"target"`
+	Binding *ReconcileSafetyAssertionReconcileSafetyAssertionBinding `json:"binding"`
+}
+
+// GetId returns ReconcileSafetyAssertionReconcileSafetyAssertion.Id, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertion) GetId() string { return v.Id }
+
+// GetTarget returns ReconcileSafetyAssertionReconcileSafetyAssertion.Target, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertion) GetTarget() ReconcileSafetyAssertionReconcileSafetyAssertionTarget {
+	return v.Target
+}
+
+// GetBinding returns ReconcileSafetyAssertionReconcileSafetyAssertion.Binding, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertion) GetBinding() *ReconcileSafetyAssertionReconcileSafetyAssertionBinding {
+	return v.Binding
+}
+
+// ReconcileSafetyAssertionReconcileSafetyAssertionBinding includes the requested fields of the GraphQL type SafetyAssertionBinding.
+// The GraphQL type's documentation follows.
+//
+// A deterministic binding to two existing, specific package versions.
+type ReconcileSafetyAssertionReconcileSafetyAssertionBinding struct {
+	SafetyBinding `json:"-"`
+}
+
+// GetProduct returns ReconcileSafetyAssertionReconcileSafetyAssertionBinding.Product, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) GetProduct() SafetyBindingProductPackage {
+	return v.SafetyBinding.Product
+}
+
+// GetComponent returns ReconcileSafetyAssertionReconcileSafetyAssertionBinding.Component, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) GetComponent() SafetyBindingComponentPackage {
+	return v.SafetyBinding.Component
+}
+
+// GetMatchedBy returns ReconcileSafetyAssertionReconcileSafetyAssertionBinding.MatchedBy, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) GetMatchedBy() string {
+	return v.SafetyBinding.MatchedBy
+}
+
+// GetResolvedAt returns ReconcileSafetyAssertionReconcileSafetyAssertionBinding.ResolvedAt, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) GetResolvedAt() time.Time {
+	return v.SafetyBinding.ResolvedAt
+}
+
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ReconcileSafetyAssertionReconcileSafetyAssertionBinding
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ReconcileSafetyAssertionReconcileSafetyAssertionBinding = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.SafetyBinding)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalReconcileSafetyAssertionReconcileSafetyAssertionBinding struct {
+	Product SafetyBindingProductPackage `json:"product"`
+
+	Component SafetyBindingComponentPackage `json:"component"`
+
+	MatchedBy string `json:"matchedBy"`
+
+	ResolvedAt time.Time `json:"resolvedAt"`
+}
+
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionBinding) __premarshalJSON() (*__premarshalReconcileSafetyAssertionReconcileSafetyAssertionBinding, error) {
+	var retval __premarshalReconcileSafetyAssertionReconcileSafetyAssertionBinding
+
+	retval.Product = v.SafetyBinding.Product
+	retval.Component = v.SafetyBinding.Component
+	retval.MatchedBy = v.SafetyBinding.MatchedBy
+	retval.ResolvedAt = v.SafetyBinding.ResolvedAt
+	return &retval, nil
+}
+
+// ReconcileSafetyAssertionReconcileSafetyAssertionTarget includes the requested fields of the GraphQL type SafetyAssertionTarget.
+// The GraphQL type's documentation follows.
+//
+// Declared identities survive ingestion before either package exists.
+type ReconcileSafetyAssertionReconcileSafetyAssertionTarget struct {
+	CorrelationStatus SafetyCorrelationStatus `json:"correlationStatus"`
+	CorrelationReason *string                 `json:"correlationReason"`
+	LastEvaluatedAt   *time.Time              `json:"lastEvaluatedAt"`
+}
+
+// GetCorrelationStatus returns ReconcileSafetyAssertionReconcileSafetyAssertionTarget.CorrelationStatus, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionTarget) GetCorrelationStatus() SafetyCorrelationStatus {
+	return v.CorrelationStatus
+}
+
+// GetCorrelationReason returns ReconcileSafetyAssertionReconcileSafetyAssertionTarget.CorrelationReason, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionTarget) GetCorrelationReason() *string {
+	return v.CorrelationReason
+}
+
+// GetLastEvaluatedAt returns ReconcileSafetyAssertionReconcileSafetyAssertionTarget.LastEvaluatedAt, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionReconcileSafetyAssertionTarget) GetLastEvaluatedAt() *time.Time {
+	return v.LastEvaluatedAt
+}
+
+// ReconcileSafetyAssertionResponse is returned by ReconcileSafetyAssertion on success.
+type ReconcileSafetyAssertionResponse struct {
+	// Resolve from authoritative graph data; callers cannot supply arbitrary binding IDs.
+	ReconcileSafetyAssertion ReconcileSafetyAssertionReconcileSafetyAssertion `json:"reconcileSafetyAssertion"`
+}
+
+// GetReconcileSafetyAssertion returns ReconcileSafetyAssertionResponse.ReconcileSafetyAssertion, and is useful for accessing the field via an interface.
+func (v *ReconcileSafetyAssertionResponse) GetReconcileSafetyAssertion() ReconcileSafetyAssertionReconcileSafetyAssertion {
+	return v.ReconcileSafetyAssertion
+}
+
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
@@ -27658,6 +27798,82 @@ func (v *SLSAPredicateSpec) GetKey() string { return v.Key }
 
 // GetValue returns SLSAPredicateSpec.Value, and is useful for accessing the field via an interface.
 func (v *SLSAPredicateSpec) GetValue() string { return v.Value }
+
+// SafetyAssertionCandidatesResponse is returned by SafetyAssertionCandidates on success.
+type SafetyAssertionCandidatesResponse struct {
+	SafetyAssertionList *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection `json:"SafetyAssertionList"`
+}
+
+// GetSafetyAssertionList returns SafetyAssertionCandidatesResponse.SafetyAssertionList, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesResponse) GetSafetyAssertionList() *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection {
+	return v.SafetyAssertionList
+}
+
+// SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection includes the requested fields of the GraphQL type SafetyAssertionConnection.
+type SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection struct {
+	PageInfo SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo                   `json:"pageInfo"`
+	Edges    []SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge `json:"edges"`
+}
+
+// GetPageInfo returns SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection) GetPageInfo() SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetEdges returns SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection.Edges, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnection) GetEdges() []SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge {
+	return v.Edges
+}
+
+// SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge includes the requested fields of the GraphQL type SafetyAssertionEdge.
+type SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge struct {
+	Node SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion `json:"node"`
+}
+
+// GetNode returns SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge.Node, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge) GetNode() SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion {
+	return v.Node
+}
+
+// SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion includes the requested fields of the GraphQL type SafetyAssertion.
+// The GraphQL type's documentation follows.
+//
+// An externally authored decision. GUAC does not approve safety decisions.
+type SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion struct {
+	Id string `json:"id"`
+}
+
+// GetId returns SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Id, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetId() string {
+	return v.Id
+}
+
+// SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo struct {
+	HasNextPage bool    `json:"hasNextPage"`
+	EndCursor   *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionCandidatesSafetyAssertionListSafetyAssertionConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
 
 type SafetyAssertionInputSpec struct {
 	AssertionId              string                         `json:"assertionId"`
@@ -27872,6 +28088,7 @@ type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAsse
 	AssertedAt              time.Time                                                                                                                                `json:"assertedAt"`
 	ValidUntil              *time.Time                                                                                                                               `json:"validUntil"`
 	Target                  SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget                            `json:"target"`
+	Binding                 *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding                          `json:"binding"`
 	Evidence                []SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference `json:"evidence"`
 	SourceAuthority         *string                                                                                                                                  `json:"sourceAuthority"`
 	Origin                  string                                                                                                                                   `json:"origin"`
@@ -27936,6 +28153,11 @@ func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafety
 	return v.Target
 }
 
+// GetBinding returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Binding, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetBinding() *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding {
+	return v.Binding
+}
+
 // GetEvidence returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Evidence, and is useful for accessing the field via an interface.
 func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetEvidence() []SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference {
 	return v.Evidence
@@ -27969,6 +28191,87 @@ func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafety
 // GetDocumentDigest returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.DocumentDigest, and is useful for accessing the field via an interface.
 func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetDocumentDigest() string {
 	return v.DocumentDigest
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding includes the requested fields of the GraphQL type SafetyAssertionBinding.
+// The GraphQL type's documentation follows.
+//
+// A deterministic binding to two existing, specific package versions.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding struct {
+	SafetyBinding `json:"-"`
+}
+
+// GetProduct returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding.Product, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) GetProduct() SafetyBindingProductPackage {
+	return v.SafetyBinding.Product
+}
+
+// GetComponent returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding.Component, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) GetComponent() SafetyBindingComponentPackage {
+	return v.SafetyBinding.Component
+}
+
+// GetMatchedBy returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding.MatchedBy, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) GetMatchedBy() string {
+	return v.SafetyBinding.MatchedBy
+}
+
+// GetResolvedAt returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding.ResolvedAt, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) GetResolvedAt() time.Time {
+	return v.SafetyBinding.ResolvedAt
+}
+
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.SafetyBinding)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding struct {
+	Product SafetyBindingProductPackage `json:"product"`
+
+	Component SafetyBindingComponentPackage `json:"component"`
+
+	MatchedBy string `json:"matchedBy"`
+
+	ResolvedAt time.Time `json:"resolvedAt"`
+}
+
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding) __premarshalJSON() (*__premarshalSafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding, error) {
+	var retval __premarshalSafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionBinding
+
+	retval.Product = v.SafetyBinding.Product
+	retval.Component = v.SafetyBinding.Component
+	retval.MatchedBy = v.SafetyBinding.MatchedBy
+	retval.ResolvedAt = v.SafetyBinding.ResolvedAt
+	return &retval, nil
 }
 
 // SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference includes the requested fields of the GraphQL type SafetyEvidenceReference.
@@ -28010,6 +28313,8 @@ type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAsse
 	ComponentDigestAlgorithm *string                 `json:"componentDigestAlgorithm"`
 	ComponentDigest          *string                 `json:"componentDigest"`
 	CorrelationStatus        SafetyCorrelationStatus `json:"correlationStatus"`
+	CorrelationReason        *string                 `json:"correlationReason"`
+	LastEvaluatedAt          *time.Time              `json:"lastEvaluatedAt"`
 }
 
 // GetProductPurl returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.ProductPurl, and is useful for accessing the field via an interface.
@@ -28040,6 +28345,16 @@ func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafety
 // GetCorrelationStatus returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.CorrelationStatus, and is useful for accessing the field via an interface.
 func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetCorrelationStatus() SafetyCorrelationStatus {
 	return v.CorrelationStatus
+}
+
+// GetCorrelationReason returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.CorrelationReason, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetCorrelationReason() *string {
+	return v.CorrelationReason
+}
+
+// GetLastEvaluatedAt returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.LastEvaluatedAt, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetLastEvaluatedAt() *time.Time {
+	return v.LastEvaluatedAt
 }
 
 // SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
@@ -28075,14 +28390,209 @@ func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo) G
 	return v.EndCursor
 }
 
+// SafetyBinding includes the GraphQL fields of SafetyAssertionBinding requested by the fragment SafetyBinding.
+// The GraphQL type's documentation follows.
+//
+// A deterministic binding to two existing, specific package versions.
+type SafetyBinding struct {
+	Product    SafetyBindingProductPackage   `json:"product"`
+	Component  SafetyBindingComponentPackage `json:"component"`
+	MatchedBy  string                        `json:"matchedBy"`
+	ResolvedAt time.Time                     `json:"resolvedAt"`
+}
+
+// GetProduct returns SafetyBinding.Product, and is useful for accessing the field via an interface.
+func (v *SafetyBinding) GetProduct() SafetyBindingProductPackage { return v.Product }
+
+// GetComponent returns SafetyBinding.Component, and is useful for accessing the field via an interface.
+func (v *SafetyBinding) GetComponent() SafetyBindingComponentPackage { return v.Component }
+
+// GetMatchedBy returns SafetyBinding.MatchedBy, and is useful for accessing the field via an interface.
+func (v *SafetyBinding) GetMatchedBy() string { return v.MatchedBy }
+
+// GetResolvedAt returns SafetyBinding.ResolvedAt, and is useful for accessing the field via an interface.
+func (v *SafetyBinding) GetResolvedAt() time.Time { return v.ResolvedAt }
+
+// SafetyBindingComponentPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type SafetyBindingComponentPackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns SafetyBindingComponentPackage.Id, and is useful for accessing the field via an interface.
+func (v *SafetyBindingComponentPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns SafetyBindingComponentPackage.Type, and is useful for accessing the field via an interface.
+func (v *SafetyBindingComponentPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns SafetyBindingComponentPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *SafetyBindingComponentPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *SafetyBindingComponentPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SafetyBindingComponentPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SafetyBindingComponentPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSafetyBindingComponentPackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *SafetyBindingComponentPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SafetyBindingComponentPackage) __premarshalJSON() (*__premarshalSafetyBindingComponentPackage, error) {
+	var retval __premarshalSafetyBindingComponentPackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// SafetyBindingProductPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type SafetyBindingProductPackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns SafetyBindingProductPackage.Id, and is useful for accessing the field via an interface.
+func (v *SafetyBindingProductPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns SafetyBindingProductPackage.Type, and is useful for accessing the field via an interface.
+func (v *SafetyBindingProductPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns SafetyBindingProductPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *SafetyBindingProductPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *SafetyBindingProductPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SafetyBindingProductPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SafetyBindingProductPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSafetyBindingProductPackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *SafetyBindingProductPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SafetyBindingProductPackage) __premarshalJSON() (*__premarshalSafetyBindingProductPackage, error) {
+	var retval __premarshalSafetyBindingProductPackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
 type SafetyCorrelationStatus string
 
 const (
-	SafetyCorrelationStatusPending SafetyCorrelationStatus = "PENDING"
+	SafetyCorrelationStatusPending   SafetyCorrelationStatus = "PENDING"
+	SafetyCorrelationStatusMatched   SafetyCorrelationStatus = "MATCHED"
+	SafetyCorrelationStatusAmbiguous SafetyCorrelationStatus = "AMBIGUOUS"
+	SafetyCorrelationStatusInvalid   SafetyCorrelationStatus = "INVALID"
+	SafetyCorrelationStatusStale     SafetyCorrelationStatus = "STALE"
 )
 
 var AllSafetyCorrelationStatus = []SafetyCorrelationStatus{
 	SafetyCorrelationStatusPending,
+	SafetyCorrelationStatusMatched,
+	SafetyCorrelationStatusAmbiguous,
+	SafetyCorrelationStatusInvalid,
+	SafetyCorrelationStatusStale,
 }
 
 type SafetyDecisionStatus string
@@ -32007,6 +32517,26 @@ func (v *__QueryPackagesListForScanInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __QueryPackagesListForScanInput.First, and is useful for accessing the field via an interface.
 func (v *__QueryPackagesListForScanInput) GetFirst() *int { return v.First }
+
+// __ReconcileSafetyAssertionInput is used internally by genqlient
+type __ReconcileSafetyAssertionInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ReconcileSafetyAssertionInput.Id, and is useful for accessing the field via an interface.
+func (v *__ReconcileSafetyAssertionInput) GetId() string { return v.Id }
+
+// __SafetyAssertionCandidatesInput is used internally by genqlient
+type __SafetyAssertionCandidatesInput struct {
+	After *string `json:"after"`
+	First *int    `json:"first"`
+}
+
+// GetAfter returns __SafetyAssertionCandidatesInput.After, and is useful for accessing the field via an interface.
+func (v *__SafetyAssertionCandidatesInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __SafetyAssertionCandidatesInput.First, and is useful for accessing the field via an interface.
+func (v *__SafetyAssertionCandidatesInput) GetFirst() *int { return v.First }
 
 // __SafetyAssertionsInput is used internally by genqlient
 type __SafetyAssertionsInput struct {
@@ -39831,6 +40361,124 @@ func QueryPackagesListForScan(
 	return data_, err_
 }
 
+// The mutation executed by ReconcileSafetyAssertion.
+const ReconcileSafetyAssertion_Operation = `
+mutation ReconcileSafetyAssertion ($id: ID!) {
+	reconcileSafetyAssertion(id: $id) {
+		id
+		target {
+			correlationStatus
+			correlationReason
+			lastEvaluatedAt
+		}
+		binding {
+			... SafetyBinding
+		}
+	}
+}
+fragment SafetyBinding on SafetyAssertionBinding {
+	product {
+		... AllPkgTree
+	}
+	component {
+		... AllPkgTree
+	}
+	matchedBy
+	resolvedAt
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func ReconcileSafetyAssertion(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ReconcileSafetyAssertionResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ReconcileSafetyAssertion",
+		Query:  ReconcileSafetyAssertion_Operation,
+		Variables: &__ReconcileSafetyAssertionInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ReconcileSafetyAssertionResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by SafetyAssertionCandidates.
+const SafetyAssertionCandidates_Operation = `
+query SafetyAssertionCandidates ($after: ID, $first: Int) {
+	SafetyAssertionList(safetyAssertionSpec: {}, after: $after, first: $first) {
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+		edges {
+			node {
+				id
+			}
+		}
+	}
+}
+`
+
+func SafetyAssertionCandidates(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	after *string,
+	first *int,
+) (data_ *SafetyAssertionCandidatesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "SafetyAssertionCandidates",
+		Query:  SafetyAssertionCandidates_Operation,
+		Variables: &__SafetyAssertionCandidatesInput{
+			After: after,
+			First: first,
+		},
+	}
+
+	data_ = &SafetyAssertionCandidatesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by SafetyAssertions.
 const SafetyAssertions_Operation = `
 query SafetyAssertions ($spec: SafetyAssertionSpec!, $after: ID, $first: Int) {
@@ -39861,6 +40509,11 @@ query SafetyAssertions ($spec: SafetyAssertionSpec!, $after: ID, $first: Int) {
 					componentDigestAlgorithm
 					componentDigest
 					correlationStatus
+					correlationReason
+					lastEvaluatedAt
+				}
+				binding {
+					... SafetyBinding
 				}
 				evidence {
 					evidenceId
@@ -39874,6 +40527,38 @@ query SafetyAssertions ($spec: SafetyAssertionSpec!, $after: ID, $first: Int) {
 				documentRef
 				documentDigestAlgorithm
 				documentDigest
+			}
+		}
+	}
+}
+fragment SafetyBinding on SafetyAssertionBinding {
+	product {
+		... AllPkgTree
+	}
+	component {
+		... AllPkgTree
+	}
+	matchedBy
+	resolvedAt
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
 			}
 		}
 	}

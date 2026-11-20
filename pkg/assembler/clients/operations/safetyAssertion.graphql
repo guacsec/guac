@@ -49,6 +49,11 @@ query SafetyAssertions($spec: SafetyAssertionSpec!, $after: ID, $first: Int) {
           componentDigestAlgorithm
           componentDigest
           correlationStatus
+          correlationReason
+          lastEvaluatedAt
+        }
+        binding {
+          ...SafetyBinding
         }
         evidence {
           evidenceId
@@ -62,6 +67,45 @@ query SafetyAssertions($spec: SafetyAssertionSpec!, $after: ID, $first: Int) {
         documentRef
         documentDigestAlgorithm
         documentDigest
+      }
+    }
+  }
+}
+
+mutation ReconcileSafetyAssertion($id: ID!) {
+  reconcileSafetyAssertion(id: $id) {
+    id
+    target {
+      correlationStatus
+      correlationReason
+      lastEvaluatedAt
+    }
+    binding {
+      ...SafetyBinding
+    }
+  }
+}
+
+fragment SafetyBinding on SafetyAssertionBinding {
+  product {
+    ...AllPkgTree
+  }
+  component {
+    ...AllPkgTree
+  }
+  matchedBy
+  resolvedAt
+}
+
+query SafetyAssertionCandidates($after: ID, $first: Int) {
+  SafetyAssertionList(safetyAssertionSpec: {}, after: $after, first: $first) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        id
       }
     }
   }

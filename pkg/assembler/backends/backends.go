@@ -27,6 +27,7 @@ import (
 type Backend interface {
 	// Safety assertions retain declared identities even before packages exist.
 	IngestSafetyAssertion(ctx context.Context, assertion model.SafetyAssertionInputSpec) (string, error)
+	ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error)
 	SafetyAssertions(ctx context.Context, spec *model.SafetyAssertionSpec) ([]*model.SafetyAssertion, error)
 	SafetyAssertionList(ctx context.Context, spec model.SafetyAssertionSpec, after *string, first *int) (*model.SafetyAssertionConnection, error)
 	// Retrieval read-only queries for software trees

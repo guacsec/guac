@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"fmt"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -28,5 +29,9 @@ func (c *demoClient) SafetyAssertions(ctx context.Context, spec *model.SafetyAss
 	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
 }
 func (c *demoClient) SafetyAssertionList(ctx context.Context, spec model.SafetyAssertionSpec, after *string, first *int) (*model.SafetyAssertionConnection, error) {
+	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
+}
+
+func (c *demoClient) ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error) {
 	return nil, fmt.Errorf("safety assertions require the Ent/PostgreSQL backend")
 }

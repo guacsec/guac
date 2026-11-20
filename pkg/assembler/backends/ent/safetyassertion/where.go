@@ -126,6 +126,41 @@ func ComponentDigest(v string) predicate.SafetyAssertion {
 	return predicate.SafetyAssertion(sql.FieldEQ(FieldComponentDigest, v))
 }
 
+// CorrelationReason applies equality check predicate on the "correlation_reason" field. It's identical to CorrelationReasonEQ.
+func CorrelationReason(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldCorrelationReason, v))
+}
+
+// LastEvaluatedAt applies equality check predicate on the "last_evaluated_at" field. It's identical to LastEvaluatedAtEQ.
+func LastEvaluatedAt(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldLastEvaluatedAt, v))
+}
+
+// CorrelationRevision applies equality check predicate on the "correlation_revision" field. It's identical to CorrelationRevisionEQ.
+func CorrelationRevision(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldCorrelationRevision, v))
+}
+
+// ResolvedProductID applies equality check predicate on the "resolved_product_id" field. It's identical to ResolvedProductIDEQ.
+func ResolvedProductID(v uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldResolvedProductID, v))
+}
+
+// ResolvedComponentID applies equality check predicate on the "resolved_component_id" field. It's identical to ResolvedComponentIDEQ.
+func ResolvedComponentID(v uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldResolvedComponentID, v))
+}
+
+// MatchedBy applies equality check predicate on the "matched_by" field. It's identical to MatchedByEQ.
+func MatchedBy(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldMatchedBy, v))
+}
+
+// ResolvedAt applies equality check predicate on the "resolved_at" field. It's identical to ResolvedAtEQ.
+func ResolvedAt(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldResolvedAt, v))
+}
+
 // DocumentIDEQ applies the EQ predicate on the "document_id" field.
 func DocumentIDEQ(v uuid.UUID) predicate.SafetyAssertion {
 	return predicate.SafetyAssertion(sql.FieldEQ(FieldDocumentID, v))
@@ -1051,6 +1086,376 @@ func ComponentDigestContainsFold(v string) predicate.SafetyAssertion {
 	return predicate.SafetyAssertion(sql.FieldContainsFold(FieldComponentDigest, v))
 }
 
+// CorrelationStatusEQ applies the EQ predicate on the "correlation_status" field.
+func CorrelationStatusEQ(v CorrelationStatus) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldCorrelationStatus, v))
+}
+
+// CorrelationStatusNEQ applies the NEQ predicate on the "correlation_status" field.
+func CorrelationStatusNEQ(v CorrelationStatus) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldCorrelationStatus, v))
+}
+
+// CorrelationStatusIn applies the In predicate on the "correlation_status" field.
+func CorrelationStatusIn(vs ...CorrelationStatus) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldCorrelationStatus, vs...))
+}
+
+// CorrelationStatusNotIn applies the NotIn predicate on the "correlation_status" field.
+func CorrelationStatusNotIn(vs ...CorrelationStatus) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldCorrelationStatus, vs...))
+}
+
+// CorrelationReasonEQ applies the EQ predicate on the "correlation_reason" field.
+func CorrelationReasonEQ(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonNEQ applies the NEQ predicate on the "correlation_reason" field.
+func CorrelationReasonNEQ(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonIn applies the In predicate on the "correlation_reason" field.
+func CorrelationReasonIn(vs ...string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldCorrelationReason, vs...))
+}
+
+// CorrelationReasonNotIn applies the NotIn predicate on the "correlation_reason" field.
+func CorrelationReasonNotIn(vs ...string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldCorrelationReason, vs...))
+}
+
+// CorrelationReasonGT applies the GT predicate on the "correlation_reason" field.
+func CorrelationReasonGT(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGT(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonGTE applies the GTE predicate on the "correlation_reason" field.
+func CorrelationReasonGTE(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGTE(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonLT applies the LT predicate on the "correlation_reason" field.
+func CorrelationReasonLT(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLT(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonLTE applies the LTE predicate on the "correlation_reason" field.
+func CorrelationReasonLTE(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLTE(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonContains applies the Contains predicate on the "correlation_reason" field.
+func CorrelationReasonContains(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldContains(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonHasPrefix applies the HasPrefix predicate on the "correlation_reason" field.
+func CorrelationReasonHasPrefix(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldHasPrefix(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonHasSuffix applies the HasSuffix predicate on the "correlation_reason" field.
+func CorrelationReasonHasSuffix(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldHasSuffix(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonIsNil applies the IsNil predicate on the "correlation_reason" field.
+func CorrelationReasonIsNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIsNull(FieldCorrelationReason))
+}
+
+// CorrelationReasonNotNil applies the NotNil predicate on the "correlation_reason" field.
+func CorrelationReasonNotNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotNull(FieldCorrelationReason))
+}
+
+// CorrelationReasonEqualFold applies the EqualFold predicate on the "correlation_reason" field.
+func CorrelationReasonEqualFold(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEqualFold(FieldCorrelationReason, v))
+}
+
+// CorrelationReasonContainsFold applies the ContainsFold predicate on the "correlation_reason" field.
+func CorrelationReasonContainsFold(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldContainsFold(FieldCorrelationReason, v))
+}
+
+// LastEvaluatedAtEQ applies the EQ predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtEQ(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldLastEvaluatedAt, v))
+}
+
+// LastEvaluatedAtNEQ applies the NEQ predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtNEQ(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldLastEvaluatedAt, v))
+}
+
+// LastEvaluatedAtIn applies the In predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtIn(vs ...time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldLastEvaluatedAt, vs...))
+}
+
+// LastEvaluatedAtNotIn applies the NotIn predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtNotIn(vs ...time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldLastEvaluatedAt, vs...))
+}
+
+// LastEvaluatedAtGT applies the GT predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtGT(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGT(FieldLastEvaluatedAt, v))
+}
+
+// LastEvaluatedAtGTE applies the GTE predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtGTE(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGTE(FieldLastEvaluatedAt, v))
+}
+
+// LastEvaluatedAtLT applies the LT predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtLT(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLT(FieldLastEvaluatedAt, v))
+}
+
+// LastEvaluatedAtLTE applies the LTE predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtLTE(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLTE(FieldLastEvaluatedAt, v))
+}
+
+// LastEvaluatedAtIsNil applies the IsNil predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtIsNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIsNull(FieldLastEvaluatedAt))
+}
+
+// LastEvaluatedAtNotNil applies the NotNil predicate on the "last_evaluated_at" field.
+func LastEvaluatedAtNotNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotNull(FieldLastEvaluatedAt))
+}
+
+// CorrelationRevisionEQ applies the EQ predicate on the "correlation_revision" field.
+func CorrelationRevisionEQ(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldCorrelationRevision, v))
+}
+
+// CorrelationRevisionNEQ applies the NEQ predicate on the "correlation_revision" field.
+func CorrelationRevisionNEQ(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldCorrelationRevision, v))
+}
+
+// CorrelationRevisionIn applies the In predicate on the "correlation_revision" field.
+func CorrelationRevisionIn(vs ...int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldCorrelationRevision, vs...))
+}
+
+// CorrelationRevisionNotIn applies the NotIn predicate on the "correlation_revision" field.
+func CorrelationRevisionNotIn(vs ...int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldCorrelationRevision, vs...))
+}
+
+// CorrelationRevisionGT applies the GT predicate on the "correlation_revision" field.
+func CorrelationRevisionGT(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGT(FieldCorrelationRevision, v))
+}
+
+// CorrelationRevisionGTE applies the GTE predicate on the "correlation_revision" field.
+func CorrelationRevisionGTE(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGTE(FieldCorrelationRevision, v))
+}
+
+// CorrelationRevisionLT applies the LT predicate on the "correlation_revision" field.
+func CorrelationRevisionLT(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLT(FieldCorrelationRevision, v))
+}
+
+// CorrelationRevisionLTE applies the LTE predicate on the "correlation_revision" field.
+func CorrelationRevisionLTE(v int) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLTE(FieldCorrelationRevision, v))
+}
+
+// ResolvedProductIDEQ applies the EQ predicate on the "resolved_product_id" field.
+func ResolvedProductIDEQ(v uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldResolvedProductID, v))
+}
+
+// ResolvedProductIDNEQ applies the NEQ predicate on the "resolved_product_id" field.
+func ResolvedProductIDNEQ(v uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldResolvedProductID, v))
+}
+
+// ResolvedProductIDIn applies the In predicate on the "resolved_product_id" field.
+func ResolvedProductIDIn(vs ...uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldResolvedProductID, vs...))
+}
+
+// ResolvedProductIDNotIn applies the NotIn predicate on the "resolved_product_id" field.
+func ResolvedProductIDNotIn(vs ...uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldResolvedProductID, vs...))
+}
+
+// ResolvedProductIDIsNil applies the IsNil predicate on the "resolved_product_id" field.
+func ResolvedProductIDIsNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIsNull(FieldResolvedProductID))
+}
+
+// ResolvedProductIDNotNil applies the NotNil predicate on the "resolved_product_id" field.
+func ResolvedProductIDNotNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotNull(FieldResolvedProductID))
+}
+
+// ResolvedComponentIDEQ applies the EQ predicate on the "resolved_component_id" field.
+func ResolvedComponentIDEQ(v uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldResolvedComponentID, v))
+}
+
+// ResolvedComponentIDNEQ applies the NEQ predicate on the "resolved_component_id" field.
+func ResolvedComponentIDNEQ(v uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldResolvedComponentID, v))
+}
+
+// ResolvedComponentIDIn applies the In predicate on the "resolved_component_id" field.
+func ResolvedComponentIDIn(vs ...uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldResolvedComponentID, vs...))
+}
+
+// ResolvedComponentIDNotIn applies the NotIn predicate on the "resolved_component_id" field.
+func ResolvedComponentIDNotIn(vs ...uuid.UUID) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldResolvedComponentID, vs...))
+}
+
+// ResolvedComponentIDIsNil applies the IsNil predicate on the "resolved_component_id" field.
+func ResolvedComponentIDIsNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIsNull(FieldResolvedComponentID))
+}
+
+// ResolvedComponentIDNotNil applies the NotNil predicate on the "resolved_component_id" field.
+func ResolvedComponentIDNotNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotNull(FieldResolvedComponentID))
+}
+
+// MatchedByEQ applies the EQ predicate on the "matched_by" field.
+func MatchedByEQ(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldMatchedBy, v))
+}
+
+// MatchedByNEQ applies the NEQ predicate on the "matched_by" field.
+func MatchedByNEQ(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldMatchedBy, v))
+}
+
+// MatchedByIn applies the In predicate on the "matched_by" field.
+func MatchedByIn(vs ...string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldMatchedBy, vs...))
+}
+
+// MatchedByNotIn applies the NotIn predicate on the "matched_by" field.
+func MatchedByNotIn(vs ...string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldMatchedBy, vs...))
+}
+
+// MatchedByGT applies the GT predicate on the "matched_by" field.
+func MatchedByGT(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGT(FieldMatchedBy, v))
+}
+
+// MatchedByGTE applies the GTE predicate on the "matched_by" field.
+func MatchedByGTE(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGTE(FieldMatchedBy, v))
+}
+
+// MatchedByLT applies the LT predicate on the "matched_by" field.
+func MatchedByLT(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLT(FieldMatchedBy, v))
+}
+
+// MatchedByLTE applies the LTE predicate on the "matched_by" field.
+func MatchedByLTE(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLTE(FieldMatchedBy, v))
+}
+
+// MatchedByContains applies the Contains predicate on the "matched_by" field.
+func MatchedByContains(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldContains(FieldMatchedBy, v))
+}
+
+// MatchedByHasPrefix applies the HasPrefix predicate on the "matched_by" field.
+func MatchedByHasPrefix(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldHasPrefix(FieldMatchedBy, v))
+}
+
+// MatchedByHasSuffix applies the HasSuffix predicate on the "matched_by" field.
+func MatchedByHasSuffix(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldHasSuffix(FieldMatchedBy, v))
+}
+
+// MatchedByIsNil applies the IsNil predicate on the "matched_by" field.
+func MatchedByIsNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIsNull(FieldMatchedBy))
+}
+
+// MatchedByNotNil applies the NotNil predicate on the "matched_by" field.
+func MatchedByNotNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotNull(FieldMatchedBy))
+}
+
+// MatchedByEqualFold applies the EqualFold predicate on the "matched_by" field.
+func MatchedByEqualFold(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEqualFold(FieldMatchedBy, v))
+}
+
+// MatchedByContainsFold applies the ContainsFold predicate on the "matched_by" field.
+func MatchedByContainsFold(v string) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldContainsFold(FieldMatchedBy, v))
+}
+
+// ResolvedAtEQ applies the EQ predicate on the "resolved_at" field.
+func ResolvedAtEQ(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldEQ(FieldResolvedAt, v))
+}
+
+// ResolvedAtNEQ applies the NEQ predicate on the "resolved_at" field.
+func ResolvedAtNEQ(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNEQ(FieldResolvedAt, v))
+}
+
+// ResolvedAtIn applies the In predicate on the "resolved_at" field.
+func ResolvedAtIn(vs ...time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIn(FieldResolvedAt, vs...))
+}
+
+// ResolvedAtNotIn applies the NotIn predicate on the "resolved_at" field.
+func ResolvedAtNotIn(vs ...time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotIn(FieldResolvedAt, vs...))
+}
+
+// ResolvedAtGT applies the GT predicate on the "resolved_at" field.
+func ResolvedAtGT(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGT(FieldResolvedAt, v))
+}
+
+// ResolvedAtGTE applies the GTE predicate on the "resolved_at" field.
+func ResolvedAtGTE(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldGTE(FieldResolvedAt, v))
+}
+
+// ResolvedAtLT applies the LT predicate on the "resolved_at" field.
+func ResolvedAtLT(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLT(FieldResolvedAt, v))
+}
+
+// ResolvedAtLTE applies the LTE predicate on the "resolved_at" field.
+func ResolvedAtLTE(v time.Time) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldLTE(FieldResolvedAt, v))
+}
+
+// ResolvedAtIsNil applies the IsNil predicate on the "resolved_at" field.
+func ResolvedAtIsNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldIsNull(FieldResolvedAt))
+}
+
+// ResolvedAtNotNil applies the NotNil predicate on the "resolved_at" field.
+func ResolvedAtNotNil() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(sql.FieldNotNull(FieldResolvedAt))
+}
+
 // HasDocument applies the HasEdge predicate on the "document" edge.
 func HasDocument() predicate.SafetyAssertion {
 	return predicate.SafetyAssertion(func(s *sql.Selector) {
@@ -1066,6 +1471,52 @@ func HasDocument() predicate.SafetyAssertion {
 func HasDocumentWith(preds ...predicate.SafetyAssertionDocument) predicate.SafetyAssertion {
 	return predicate.SafetyAssertion(func(s *sql.Selector) {
 		step := newDocumentStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasResolvedProduct applies the HasEdge predicate on the "resolved_product" edge.
+func HasResolvedProduct() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ResolvedProductTable, ResolvedProductColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasResolvedProductWith applies the HasEdge predicate on the "resolved_product" edge with a given conditions (other predicates).
+func HasResolvedProductWith(preds ...predicate.PackageVersion) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(func(s *sql.Selector) {
+		step := newResolvedProductStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasResolvedComponent applies the HasEdge predicate on the "resolved_component" edge.
+func HasResolvedComponent() predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ResolvedComponentTable, ResolvedComponentColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasResolvedComponentWith applies the HasEdge predicate on the "resolved_component" edge with a given conditions (other predicates).
+func HasResolvedComponentWith(preds ...predicate.PackageVersion) predicate.SafetyAssertion {
+	return predicate.SafetyAssertion(func(s *sql.Selector) {
+		step := newResolvedComponentStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

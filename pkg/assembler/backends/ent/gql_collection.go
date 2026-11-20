@@ -3051,6 +3051,36 @@ func (_q *SafetyAssertionQuery) collectField(ctx context.Context, oneNode bool, 
 				selectedFields = append(selectedFields, safetyassertion.FieldDocumentID)
 				fieldSeen[safetyassertion.FieldDocumentID] = struct{}{}
 			}
+
+		case "resolvedProduct":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: _q.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
+				return err
+			}
+			_q.withResolvedProduct = query
+			if _, ok := fieldSeen[safetyassertion.FieldResolvedProductID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldResolvedProductID)
+				fieldSeen[safetyassertion.FieldResolvedProductID] = struct{}{}
+			}
+
+		case "resolvedComponent":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: _q.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
+				return err
+			}
+			_q.withResolvedComponent = query
+			if _, ok := fieldSeen[safetyassertion.FieldResolvedComponentID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldResolvedComponentID)
+				fieldSeen[safetyassertion.FieldResolvedComponentID] = struct{}{}
+			}
 		case "documentID":
 			if _, ok := fieldSeen[safetyassertion.FieldDocumentID]; !ok {
 				selectedFields = append(selectedFields, safetyassertion.FieldDocumentID)
@@ -3135,6 +3165,46 @@ func (_q *SafetyAssertionQuery) collectField(ctx context.Context, oneNode bool, 
 			if _, ok := fieldSeen[safetyassertion.FieldEvidence]; !ok {
 				selectedFields = append(selectedFields, safetyassertion.FieldEvidence)
 				fieldSeen[safetyassertion.FieldEvidence] = struct{}{}
+			}
+		case "correlationStatus":
+			if _, ok := fieldSeen[safetyassertion.FieldCorrelationStatus]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldCorrelationStatus)
+				fieldSeen[safetyassertion.FieldCorrelationStatus] = struct{}{}
+			}
+		case "correlationReason":
+			if _, ok := fieldSeen[safetyassertion.FieldCorrelationReason]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldCorrelationReason)
+				fieldSeen[safetyassertion.FieldCorrelationReason] = struct{}{}
+			}
+		case "lastEvaluatedAt":
+			if _, ok := fieldSeen[safetyassertion.FieldLastEvaluatedAt]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldLastEvaluatedAt)
+				fieldSeen[safetyassertion.FieldLastEvaluatedAt] = struct{}{}
+			}
+		case "correlationRevision":
+			if _, ok := fieldSeen[safetyassertion.FieldCorrelationRevision]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldCorrelationRevision)
+				fieldSeen[safetyassertion.FieldCorrelationRevision] = struct{}{}
+			}
+		case "resolvedProductID":
+			if _, ok := fieldSeen[safetyassertion.FieldResolvedProductID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldResolvedProductID)
+				fieldSeen[safetyassertion.FieldResolvedProductID] = struct{}{}
+			}
+		case "resolvedComponentID":
+			if _, ok := fieldSeen[safetyassertion.FieldResolvedComponentID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldResolvedComponentID)
+				fieldSeen[safetyassertion.FieldResolvedComponentID] = struct{}{}
+			}
+		case "matchedBy":
+			if _, ok := fieldSeen[safetyassertion.FieldMatchedBy]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldMatchedBy)
+				fieldSeen[safetyassertion.FieldMatchedBy] = struct{}{}
+			}
+		case "resolvedAt":
+			if _, ok := fieldSeen[safetyassertion.FieldResolvedAt]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldResolvedAt)
+				fieldSeen[safetyassertion.FieldResolvedAt] = struct{}{}
 			}
 		case "id":
 		case "__typename":

@@ -16,6 +16,11 @@ func (r *mutationResolver) IngestSafetyAssertion(ctx context.Context, assertion 
 	return r.Backend.IngestSafetyAssertion(ctx, assertion)
 }
 
+// ReconcileSafetyAssertion is the resolver for the reconcileSafetyAssertion field.
+func (r *mutationResolver) ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error) {
+	return r.Backend.ReconcileSafetyAssertion(ctx, id)
+}
+
 // SafetyAssertion is the resolver for the SafetyAssertion field.
 func (r *queryResolver) SafetyAssertion(ctx context.Context, safetyAssertionSpec model.SafetyAssertionSpec) ([]*model.SafetyAssertion, error) {
 	return r.Backend.SafetyAssertions(ctx, &safetyAssertionSpec)
