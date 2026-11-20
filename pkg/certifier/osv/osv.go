@@ -206,7 +206,7 @@ func filterVulnsAffectingPurl(raw string, vulns []osv_models.Vulnerability) []os
 				if identity.Type != pkg.Type || identity.Namespace != pkg.Namespace || identity.Name != pkg.Name {
 					continue
 				}
-			} else if ap.Name != pkg.Name && !(pkg.Type == "maven" && ap.Name == pkg.Namespace+":"+pkg.Name) {
+			} else if ap.Name != pkg.Name && (pkg.Type != "maven" || ap.Name != pkg.Namespace+":"+pkg.Name) {
 				continue
 			}
 			if len(affected.Versions) == 0 || slices.Contains(affected.Versions, pkg.Version) {
