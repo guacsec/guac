@@ -12918,6 +12918,16 @@ type IngestSLSAForArtifactsResponse struct {
 // GetIngestSLSAs returns IngestSLSAForArtifactsResponse.IngestSLSAs, and is useful for accessing the field via an interface.
 func (v *IngestSLSAForArtifactsResponse) GetIngestSLSAs() []string { return v.IngestSLSAs }
 
+// IngestSafetyAssertionResponse is returned by IngestSafetyAssertion on success.
+type IngestSafetyAssertionResponse struct {
+	IngestSafetyAssertion string `json:"ingestSafetyAssertion"`
+}
+
+// GetIngestSafetyAssertion returns IngestSafetyAssertionResponse.IngestSafetyAssertion, and is useful for accessing the field via an interface.
+func (v *IngestSafetyAssertionResponse) GetIngestSafetyAssertion() string {
+	return v.IngestSafetyAssertion
+}
+
 // IngestSourceIngestSourceSourceIDs includes the requested fields of the GraphQL type SourceIDs.
 // The GraphQL type's documentation follows.
 //
@@ -27649,6 +27659,481 @@ func (v *SLSAPredicateSpec) GetKey() string { return v.Key }
 // GetValue returns SLSAPredicateSpec.Value, and is useful for accessing the field via an interface.
 func (v *SLSAPredicateSpec) GetValue() string { return v.Value }
 
+type SafetyAssertionInputSpec struct {
+	AssertionId              string                         `json:"assertionId"`
+	SafetyRelevance          SafetyRelevance                `json:"safetyRelevance"`
+	ClassificationScheme     *string                        `json:"classificationScheme"`
+	ClassificationValue      *string                        `json:"classificationValue"`
+	Rationale                string                         `json:"rationale"`
+	DecisionStatus           SafetyDecisionStatus           `json:"decisionStatus"`
+	Reviewer                 *string                        `json:"reviewer"`
+	AssertedAt               time.Time                      `json:"assertedAt"`
+	ValidUntil               *time.Time                     `json:"validUntil"`
+	ProductPurl              string                         `json:"productPurl"`
+	ComponentPurl            string                         `json:"componentPurl"`
+	ComponentBomRef          *string                        `json:"componentBomRef"`
+	ComponentDigestAlgorithm *string                        `json:"componentDigestAlgorithm"`
+	ComponentDigest          *string                        `json:"componentDigest"`
+	Evidence                 []SafetyEvidenceReferenceInput `json:"evidence"`
+	SourceAuthority          *string                        `json:"sourceAuthority"`
+	Origin                   string                         `json:"origin"`
+	Collector                string                         `json:"collector"`
+	DocumentRef              string                         `json:"documentRef"`
+	DocumentDigestAlgorithm  string                         `json:"documentDigestAlgorithm"`
+	DocumentDigest           string                         `json:"documentDigest"`
+}
+
+// GetAssertionId returns SafetyAssertionInputSpec.AssertionId, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetAssertionId() string { return v.AssertionId }
+
+// GetSafetyRelevance returns SafetyAssertionInputSpec.SafetyRelevance, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetSafetyRelevance() SafetyRelevance { return v.SafetyRelevance }
+
+// GetClassificationScheme returns SafetyAssertionInputSpec.ClassificationScheme, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetClassificationScheme() *string { return v.ClassificationScheme }
+
+// GetClassificationValue returns SafetyAssertionInputSpec.ClassificationValue, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetClassificationValue() *string { return v.ClassificationValue }
+
+// GetRationale returns SafetyAssertionInputSpec.Rationale, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetRationale() string { return v.Rationale }
+
+// GetDecisionStatus returns SafetyAssertionInputSpec.DecisionStatus, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetDecisionStatus() SafetyDecisionStatus { return v.DecisionStatus }
+
+// GetReviewer returns SafetyAssertionInputSpec.Reviewer, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetReviewer() *string { return v.Reviewer }
+
+// GetAssertedAt returns SafetyAssertionInputSpec.AssertedAt, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetAssertedAt() time.Time { return v.AssertedAt }
+
+// GetValidUntil returns SafetyAssertionInputSpec.ValidUntil, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetValidUntil() *time.Time { return v.ValidUntil }
+
+// GetProductPurl returns SafetyAssertionInputSpec.ProductPurl, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetProductPurl() string { return v.ProductPurl }
+
+// GetComponentPurl returns SafetyAssertionInputSpec.ComponentPurl, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetComponentPurl() string { return v.ComponentPurl }
+
+// GetComponentBomRef returns SafetyAssertionInputSpec.ComponentBomRef, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetComponentBomRef() *string { return v.ComponentBomRef }
+
+// GetComponentDigestAlgorithm returns SafetyAssertionInputSpec.ComponentDigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetComponentDigestAlgorithm() *string {
+	return v.ComponentDigestAlgorithm
+}
+
+// GetComponentDigest returns SafetyAssertionInputSpec.ComponentDigest, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetComponentDigest() *string { return v.ComponentDigest }
+
+// GetEvidence returns SafetyAssertionInputSpec.Evidence, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetEvidence() []SafetyEvidenceReferenceInput { return v.Evidence }
+
+// GetSourceAuthority returns SafetyAssertionInputSpec.SourceAuthority, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetSourceAuthority() *string { return v.SourceAuthority }
+
+// GetOrigin returns SafetyAssertionInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns SafetyAssertionInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns SafetyAssertionInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// GetDocumentDigestAlgorithm returns SafetyAssertionInputSpec.DocumentDigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetDocumentDigestAlgorithm() string {
+	return v.DocumentDigestAlgorithm
+}
+
+// GetDocumentDigest returns SafetyAssertionInputSpec.DocumentDigest, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionInputSpec) GetDocumentDigest() string { return v.DocumentDigest }
+
+// PURL filters match the complete declared, versioned identity.
+type SafetyAssertionSpec struct {
+	Id                      *string                  `json:"id"`
+	AssertionId             *string                  `json:"assertionId"`
+	ProductPurl             *string                  `json:"productPurl"`
+	ComponentPurl           *string                  `json:"componentPurl"`
+	SafetyRelevance         *SafetyRelevance         `json:"safetyRelevance"`
+	ClassificationScheme    *string                  `json:"classificationScheme"`
+	ClassificationValue     *string                  `json:"classificationValue"`
+	DecisionStatus          *SafetyDecisionStatus    `json:"decisionStatus"`
+	CorrelationStatus       *SafetyCorrelationStatus `json:"correlationStatus"`
+	SourceAuthority         *string                  `json:"sourceAuthority"`
+	Origin                  *string                  `json:"origin"`
+	DocumentDigestAlgorithm *string                  `json:"documentDigestAlgorithm"`
+	DocumentDigest          *string                  `json:"documentDigest"`
+}
+
+// GetId returns SafetyAssertionSpec.Id, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetId() *string { return v.Id }
+
+// GetAssertionId returns SafetyAssertionSpec.AssertionId, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetAssertionId() *string { return v.AssertionId }
+
+// GetProductPurl returns SafetyAssertionSpec.ProductPurl, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetProductPurl() *string { return v.ProductPurl }
+
+// GetComponentPurl returns SafetyAssertionSpec.ComponentPurl, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetComponentPurl() *string { return v.ComponentPurl }
+
+// GetSafetyRelevance returns SafetyAssertionSpec.SafetyRelevance, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetSafetyRelevance() *SafetyRelevance { return v.SafetyRelevance }
+
+// GetClassificationScheme returns SafetyAssertionSpec.ClassificationScheme, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetClassificationScheme() *string { return v.ClassificationScheme }
+
+// GetClassificationValue returns SafetyAssertionSpec.ClassificationValue, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetClassificationValue() *string { return v.ClassificationValue }
+
+// GetDecisionStatus returns SafetyAssertionSpec.DecisionStatus, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetDecisionStatus() *SafetyDecisionStatus { return v.DecisionStatus }
+
+// GetCorrelationStatus returns SafetyAssertionSpec.CorrelationStatus, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetCorrelationStatus() *SafetyCorrelationStatus {
+	return v.CorrelationStatus
+}
+
+// GetSourceAuthority returns SafetyAssertionSpec.SourceAuthority, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetSourceAuthority() *string { return v.SourceAuthority }
+
+// GetOrigin returns SafetyAssertionSpec.Origin, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetOrigin() *string { return v.Origin }
+
+// GetDocumentDigestAlgorithm returns SafetyAssertionSpec.DocumentDigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetDocumentDigestAlgorithm() *string { return v.DocumentDigestAlgorithm }
+
+// GetDocumentDigest returns SafetyAssertionSpec.DocumentDigest, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionSpec) GetDocumentDigest() *string { return v.DocumentDigest }
+
+// SafetyAssertionsResponse is returned by SafetyAssertions on success.
+type SafetyAssertionsResponse struct {
+	SafetyAssertionList *SafetyAssertionsSafetyAssertionListSafetyAssertionConnection `json:"SafetyAssertionList"`
+}
+
+// GetSafetyAssertionList returns SafetyAssertionsResponse.SafetyAssertionList, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsResponse) GetSafetyAssertionList() *SafetyAssertionsSafetyAssertionListSafetyAssertionConnection {
+	return v.SafetyAssertionList
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnection includes the requested fields of the GraphQL type SafetyAssertionConnection.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnection struct {
+	TotalCount int                                                                                    `json:"totalCount"`
+	PageInfo   SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo                   `json:"pageInfo"`
+	Edges      []SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge `json:"edges"`
+}
+
+// GetTotalCount returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetPageInfo returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnection) GetPageInfo() SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetEdges returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnection.Edges, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnection) GetEdges() []SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge {
+	return v.Edges
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge includes the requested fields of the GraphQL type SafetyAssertionEdge.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge struct {
+	Cursor string                                                                                                  `json:"cursor"`
+	Node   SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion `json:"node"`
+}
+
+// GetCursor returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge.Node, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdge) GetNode() SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion {
+	return v.Node
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion includes the requested fields of the GraphQL type SafetyAssertion.
+// The GraphQL type's documentation follows.
+//
+// An externally authored decision. GUAC does not approve safety decisions.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion struct {
+	Id                      string                                                                                                                                   `json:"id"`
+	AssertionId             string                                                                                                                                   `json:"assertionId"`
+	SafetyRelevance         SafetyRelevance                                                                                                                          `json:"safetyRelevance"`
+	ClassificationScheme    *string                                                                                                                                  `json:"classificationScheme"`
+	ClassificationValue     *string                                                                                                                                  `json:"classificationValue"`
+	Rationale               string                                                                                                                                   `json:"rationale"`
+	DecisionStatus          SafetyDecisionStatus                                                                                                                     `json:"decisionStatus"`
+	Reviewer                *string                                                                                                                                  `json:"reviewer"`
+	AssertedAt              time.Time                                                                                                                                `json:"assertedAt"`
+	ValidUntil              *time.Time                                                                                                                               `json:"validUntil"`
+	Target                  SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget                            `json:"target"`
+	Evidence                []SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference `json:"evidence"`
+	SourceAuthority         *string                                                                                                                                  `json:"sourceAuthority"`
+	Origin                  string                                                                                                                                   `json:"origin"`
+	Collector               string                                                                                                                                   `json:"collector"`
+	DocumentRef             string                                                                                                                                   `json:"documentRef"`
+	DocumentDigestAlgorithm string                                                                                                                                   `json:"documentDigestAlgorithm"`
+	DocumentDigest          string                                                                                                                                   `json:"documentDigest"`
+}
+
+// GetId returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Id, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetId() string {
+	return v.Id
+}
+
+// GetAssertionId returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.AssertionId, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetAssertionId() string {
+	return v.AssertionId
+}
+
+// GetSafetyRelevance returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.SafetyRelevance, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetSafetyRelevance() SafetyRelevance {
+	return v.SafetyRelevance
+}
+
+// GetClassificationScheme returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.ClassificationScheme, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetClassificationScheme() *string {
+	return v.ClassificationScheme
+}
+
+// GetClassificationValue returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.ClassificationValue, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetClassificationValue() *string {
+	return v.ClassificationValue
+}
+
+// GetRationale returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Rationale, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetRationale() string {
+	return v.Rationale
+}
+
+// GetDecisionStatus returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.DecisionStatus, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetDecisionStatus() SafetyDecisionStatus {
+	return v.DecisionStatus
+}
+
+// GetReviewer returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Reviewer, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetReviewer() *string {
+	return v.Reviewer
+}
+
+// GetAssertedAt returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.AssertedAt, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetAssertedAt() time.Time {
+	return v.AssertedAt
+}
+
+// GetValidUntil returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.ValidUntil, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetValidUntil() *time.Time {
+	return v.ValidUntil
+}
+
+// GetTarget returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Target, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetTarget() SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget {
+	return v.Target
+}
+
+// GetEvidence returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Evidence, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetEvidence() []SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference {
+	return v.Evidence
+}
+
+// GetSourceAuthority returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.SourceAuthority, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetSourceAuthority() *string {
+	return v.SourceAuthority
+}
+
+// GetOrigin returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Origin, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetOrigin() string {
+	return v.Origin
+}
+
+// GetCollector returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.Collector, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetCollector() string {
+	return v.Collector
+}
+
+// GetDocumentRef returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.DocumentRef, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetDocumentRef() string {
+	return v.DocumentRef
+}
+
+// GetDocumentDigestAlgorithm returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.DocumentDigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetDocumentDigestAlgorithm() string {
+	return v.DocumentDigestAlgorithm
+}
+
+// GetDocumentDigest returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion.DocumentDigest, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertion) GetDocumentDigest() string {
+	return v.DocumentDigest
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference includes the requested fields of the GraphQL type SafetyEvidenceReference.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference struct {
+	EvidenceId      string  `json:"evidenceId"`
+	Uri             string  `json:"uri"`
+	DigestAlgorithm *string `json:"digestAlgorithm"`
+	Digest          *string `json:"digest"`
+}
+
+// GetEvidenceId returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference.EvidenceId, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference) GetEvidenceId() string {
+	return v.EvidenceId
+}
+
+// GetUri returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference.Uri, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference) GetUri() string {
+	return v.Uri
+}
+
+// GetDigestAlgorithm returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference.DigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference) GetDigestAlgorithm() *string {
+	return v.DigestAlgorithm
+}
+
+// GetDigest returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference.Digest, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionEvidenceSafetyEvidenceReference) GetDigest() *string {
+	return v.Digest
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget includes the requested fields of the GraphQL type SafetyAssertionTarget.
+// The GraphQL type's documentation follows.
+//
+// Declared identities survive ingestion before either package exists.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget struct {
+	ProductPurl              string                  `json:"productPurl"`
+	ComponentPurl            string                  `json:"componentPurl"`
+	ComponentBomRef          *string                 `json:"componentBomRef"`
+	ComponentDigestAlgorithm *string                 `json:"componentDigestAlgorithm"`
+	ComponentDigest          *string                 `json:"componentDigest"`
+	CorrelationStatus        SafetyCorrelationStatus `json:"correlationStatus"`
+}
+
+// GetProductPurl returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.ProductPurl, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetProductPurl() string {
+	return v.ProductPurl
+}
+
+// GetComponentPurl returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.ComponentPurl, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetComponentPurl() string {
+	return v.ComponentPurl
+}
+
+// GetComponentBomRef returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.ComponentBomRef, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetComponentBomRef() *string {
+	return v.ComponentBomRef
+}
+
+// GetComponentDigestAlgorithm returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.ComponentDigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetComponentDigestAlgorithm() *string {
+	return v.ComponentDigestAlgorithm
+}
+
+// GetComponentDigest returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.ComponentDigest, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetComponentDigest() *string {
+	return v.ComponentDigest
+}
+
+// GetCorrelationStatus returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget.CorrelationStatus, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionEdgesSafetyAssertionEdgeNodeSafetyAssertionTarget) GetCorrelationStatus() SafetyCorrelationStatus {
+	return v.CorrelationStatus
+}
+
+// SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo struct {
+	HasNextPage bool    `json:"hasNextPage"`
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetStartCursor returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *SafetyAssertionsSafetyAssertionListSafetyAssertionConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+type SafetyCorrelationStatus string
+
+const (
+	SafetyCorrelationStatusPending SafetyCorrelationStatus = "PENDING"
+)
+
+var AllSafetyCorrelationStatus = []SafetyCorrelationStatus{
+	SafetyCorrelationStatusPending,
+}
+
+type SafetyDecisionStatus string
+
+const (
+	SafetyDecisionStatusDraft    SafetyDecisionStatus = "DRAFT"
+	SafetyDecisionStatusReviewed SafetyDecisionStatus = "REVIEWED"
+	SafetyDecisionStatusApproved SafetyDecisionStatus = "APPROVED"
+	SafetyDecisionStatusRejected SafetyDecisionStatus = "REJECTED"
+)
+
+var AllSafetyDecisionStatus = []SafetyDecisionStatus{
+	SafetyDecisionStatusDraft,
+	SafetyDecisionStatusReviewed,
+	SafetyDecisionStatusApproved,
+	SafetyDecisionStatusRejected,
+}
+
+type SafetyEvidenceReferenceInput struct {
+	EvidenceId      string  `json:"evidenceId"`
+	Uri             string  `json:"uri"`
+	DigestAlgorithm *string `json:"digestAlgorithm"`
+	Digest          *string `json:"digest"`
+}
+
+// GetEvidenceId returns SafetyEvidenceReferenceInput.EvidenceId, and is useful for accessing the field via an interface.
+func (v *SafetyEvidenceReferenceInput) GetEvidenceId() string { return v.EvidenceId }
+
+// GetUri returns SafetyEvidenceReferenceInput.Uri, and is useful for accessing the field via an interface.
+func (v *SafetyEvidenceReferenceInput) GetUri() string { return v.Uri }
+
+// GetDigestAlgorithm returns SafetyEvidenceReferenceInput.DigestAlgorithm, and is useful for accessing the field via an interface.
+func (v *SafetyEvidenceReferenceInput) GetDigestAlgorithm() *string { return v.DigestAlgorithm }
+
+// GetDigest returns SafetyEvidenceReferenceInput.Digest, and is useful for accessing the field via an interface.
+func (v *SafetyEvidenceReferenceInput) GetDigest() *string { return v.Digest }
+
+type SafetyRelevance string
+
+const (
+	SafetyRelevanceSafetyRelated    SafetyRelevance = "SAFETY_RELATED"
+	SafetyRelevanceNotSafetyRelated SafetyRelevance = "NOT_SAFETY_RELATED"
+	SafetyRelevanceUndetermined     SafetyRelevance = "UNDETERMINED"
+)
+
+var AllSafetyRelevance = []SafetyRelevance{
+	SafetyRelevanceSafetyRelated,
+	SafetyRelevanceNotSafetyRelated,
+	SafetyRelevanceUndetermined,
+}
+
 // ScanMetadataInput represents the input for certifying vulnerability
 // scans in mutations.
 type ScanMetadataInput struct {
@@ -31213,6 +31698,14 @@ func (v *__IngestSLSAForArtifactsInput) GetBuilders() []IDorBuilderInput { retur
 // GetSlsaList returns __IngestSLSAForArtifactsInput.SlsaList, and is useful for accessing the field via an interface.
 func (v *__IngestSLSAForArtifactsInput) GetSlsaList() []SLSAInputSpec { return v.SlsaList }
 
+// __IngestSafetyAssertionInput is used internally by genqlient
+type __IngestSafetyAssertionInput struct {
+	Assertion SafetyAssertionInputSpec `json:"assertion"`
+}
+
+// GetAssertion returns __IngestSafetyAssertionInput.Assertion, and is useful for accessing the field via an interface.
+func (v *__IngestSafetyAssertionInput) GetAssertion() SafetyAssertionInputSpec { return v.Assertion }
+
 // __IngestSourceInput is used internally by genqlient
 type __IngestSourceInput struct {
 	Source IDorSourceInput `json:"source"`
@@ -31514,6 +32007,22 @@ func (v *__QueryPackagesListForScanInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __QueryPackagesListForScanInput.First, and is useful for accessing the field via an interface.
 func (v *__QueryPackagesListForScanInput) GetFirst() *int { return v.First }
+
+// __SafetyAssertionsInput is used internally by genqlient
+type __SafetyAssertionsInput struct {
+	Spec  SafetyAssertionSpec `json:"spec"`
+	After *string             `json:"after"`
+	First *int                `json:"first"`
+}
+
+// GetSpec returns __SafetyAssertionsInput.Spec, and is useful for accessing the field via an interface.
+func (v *__SafetyAssertionsInput) GetSpec() SafetyAssertionSpec { return v.Spec }
+
+// GetAfter returns __SafetyAssertionsInput.After, and is useful for accessing the field via an interface.
+func (v *__SafetyAssertionsInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __SafetyAssertionsInput.First, and is useful for accessing the field via an interface.
+func (v *__SafetyAssertionsInput) GetFirst() *int { return v.First }
 
 // __ScorecardsInput is used internally by genqlient
 type __ScorecardsInput struct {
@@ -36119,6 +36628,38 @@ func IngestSLSAForArtifacts(
 	return data_, err_
 }
 
+// The mutation executed by IngestSafetyAssertion.
+const IngestSafetyAssertion_Operation = `
+mutation IngestSafetyAssertion ($assertion: SafetyAssertionInputSpec!) {
+	ingestSafetyAssertion(assertion: $assertion)
+}
+`
+
+func IngestSafetyAssertion(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	assertion SafetyAssertionInputSpec,
+) (data_ *IngestSafetyAssertionResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IngestSafetyAssertion",
+		Query:  IngestSafetyAssertion_Operation,
+		Variables: &__IngestSafetyAssertionInput{
+			Assertion: assertion,
+		},
+	}
+
+	data_ = &IngestSafetyAssertionResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by IngestSource.
 const IngestSource_Operation = `
 mutation IngestSource ($source: IDorSourceInput!) {
@@ -39279,6 +39820,84 @@ func QueryPackagesListForScan(
 	}
 
 	data_ = &QueryPackagesListForScanResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by SafetyAssertions.
+const SafetyAssertions_Operation = `
+query SafetyAssertions ($spec: SafetyAssertionSpec!, $after: ID, $first: Int) {
+	SafetyAssertionList(safetyAssertionSpec: $spec, after: $after, first: $first) {
+		totalCount
+		pageInfo {
+			hasNextPage
+			startCursor
+			endCursor
+		}
+		edges {
+			cursor
+			node {
+				id
+				assertionId
+				safetyRelevance
+				classificationScheme
+				classificationValue
+				rationale
+				decisionStatus
+				reviewer
+				assertedAt
+				validUntil
+				target {
+					productPurl
+					componentPurl
+					componentBomRef
+					componentDigestAlgorithm
+					componentDigest
+					correlationStatus
+				}
+				evidence {
+					evidenceId
+					uri
+					digestAlgorithm
+					digest
+				}
+				sourceAuthority
+				origin
+				collector
+				documentRef
+				documentDigestAlgorithm
+				documentDigest
+			}
+		}
+	}
+}
+`
+
+func SafetyAssertions(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	spec SafetyAssertionSpec,
+	after *string,
+	first *int,
+) (data_ *SafetyAssertionsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "SafetyAssertions",
+		Query:  SafetyAssertions_Operation,
+		Variables: &__SafetyAssertionsInput{
+			Spec:  spec,
+			After: after,
+			First: first,
+		},
+	}
+
+	data_ = &SafetyAssertionsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

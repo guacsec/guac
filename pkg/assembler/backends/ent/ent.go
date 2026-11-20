@@ -30,6 +30,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -95,29 +97,31 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			artifact.Table:              artifact.ValidColumn,
-			billofmaterials.Table:       billofmaterials.ValidColumn,
-			builder.Table:               builder.ValidColumn,
-			certification.Table:         certification.ValidColumn,
-			certifylegal.Table:          certifylegal.ValidColumn,
-			certifyscorecard.Table:      certifyscorecard.ValidColumn,
-			certifyvex.Table:            certifyvex.ValidColumn,
-			certifyvuln.Table:           certifyvuln.ValidColumn,
-			dependency.Table:            dependency.ValidColumn,
-			hasmetadata.Table:           hasmetadata.ValidColumn,
-			hassourceat.Table:           hassourceat.ValidColumn,
-			hashequal.Table:             hashequal.ValidColumn,
-			license.Table:               license.ValidColumn,
-			occurrence.Table:            occurrence.ValidColumn,
-			packagename.Table:           packagename.ValidColumn,
-			packageversion.Table:        packageversion.ValidColumn,
-			pkgequal.Table:              pkgequal.ValidColumn,
-			pointofcontact.Table:        pointofcontact.ValidColumn,
-			slsaattestation.Table:       slsaattestation.ValidColumn,
-			sourcename.Table:            sourcename.ValidColumn,
-			vulnequal.Table:             vulnequal.ValidColumn,
-			vulnerabilityid.Table:       vulnerabilityid.ValidColumn,
-			vulnerabilitymetadata.Table: vulnerabilitymetadata.ValidColumn,
+			artifact.Table:                artifact.ValidColumn,
+			billofmaterials.Table:         billofmaterials.ValidColumn,
+			builder.Table:                 builder.ValidColumn,
+			certification.Table:           certification.ValidColumn,
+			certifylegal.Table:            certifylegal.ValidColumn,
+			certifyscorecard.Table:        certifyscorecard.ValidColumn,
+			certifyvex.Table:              certifyvex.ValidColumn,
+			certifyvuln.Table:             certifyvuln.ValidColumn,
+			dependency.Table:              dependency.ValidColumn,
+			hasmetadata.Table:             hasmetadata.ValidColumn,
+			hassourceat.Table:             hassourceat.ValidColumn,
+			hashequal.Table:               hashequal.ValidColumn,
+			license.Table:                 license.ValidColumn,
+			occurrence.Table:              occurrence.ValidColumn,
+			packagename.Table:             packagename.ValidColumn,
+			packageversion.Table:          packageversion.ValidColumn,
+			pkgequal.Table:                pkgequal.ValidColumn,
+			pointofcontact.Table:          pointofcontact.ValidColumn,
+			slsaattestation.Table:         slsaattestation.ValidColumn,
+			safetyassertion.Table:         safetyassertion.ValidColumn,
+			safetyassertiondocument.Table: safetyassertiondocument.ValidColumn,
+			sourcename.Table:              sourcename.ValidColumn,
+			vulnequal.Table:               vulnequal.ValidColumn,
+			vulnerabilityid.Table:         vulnerabilityid.ValidColumn,
+			vulnerabilitymetadata.Table:   vulnerabilitymetadata.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

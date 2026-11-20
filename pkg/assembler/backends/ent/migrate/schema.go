@@ -957,6 +957,87 @@ var (
 			},
 		},
 	}
+	// SafetyAssertionsColumns holds the columns for the "safety_assertions" table.
+	SafetyAssertionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "assertion_id", Type: field.TypeString},
+		{Name: "content_hash", Type: field.TypeString},
+		{Name: "safety_relevance", Type: field.TypeEnum, Enums: []string{"SAFETY_RELATED", "NOT_SAFETY_RELATED", "UNDETERMINED"}},
+		{Name: "classification_scheme", Type: field.TypeString, Nullable: true},
+		{Name: "classification_value", Type: field.TypeString, Nullable: true},
+		{Name: "rationale", Type: field.TypeString, Size: 2147483647},
+		{Name: "decision_status", Type: field.TypeEnum, Enums: []string{"DRAFT", "REVIEWED", "APPROVED", "REJECTED"}},
+		{Name: "reviewer", Type: field.TypeString, Nullable: true},
+		{Name: "asserted_at", Type: field.TypeTime},
+		{Name: "valid_until", Type: field.TypeTime, Nullable: true},
+		{Name: "product_purl", Type: field.TypeString, Size: 2147483647},
+		{Name: "component_purl", Type: field.TypeString, Size: 2147483647},
+		{Name: "component_bom_ref", Type: field.TypeString, Nullable: true},
+		{Name: "component_digest_algorithm", Type: field.TypeString, Nullable: true},
+		{Name: "component_digest", Type: field.TypeString, Nullable: true},
+		{Name: "evidence", Type: field.TypeJSON},
+		{Name: "document_id", Type: field.TypeUUID},
+	}
+	// SafetyAssertionsTable holds the schema information for the "safety_assertions" table.
+	SafetyAssertionsTable = &schema.Table{
+		Name:       "safety_assertions",
+		Columns:    SafetyAssertionsColumns,
+		PrimaryKey: []*schema.Column{SafetyAssertionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "safety_assertions_safety_assertion_documents_assertions",
+				Columns:    []*schema.Column{SafetyAssertionsColumns[17]},
+				RefColumns: []*schema.Column{SafetyAssertionDocumentsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "safetyassertion_document_id_assertion_id",
+				Unique:  true,
+				Columns: []*schema.Column{SafetyAssertionsColumns[17], SafetyAssertionsColumns[1]},
+			},
+			{
+				Name:    "safetyassertion_product_purl",
+				Unique:  false,
+				Columns: []*schema.Column{SafetyAssertionsColumns[11]},
+			},
+			{
+				Name:    "safetyassertion_component_purl",
+				Unique:  false,
+				Columns: []*schema.Column{SafetyAssertionsColumns[12]},
+			},
+			{
+				Name:    "safetyassertion_safety_relevance_decision_status",
+				Unique:  false,
+				Columns: []*schema.Column{SafetyAssertionsColumns[3], SafetyAssertionsColumns[7]},
+			},
+		},
+	}
+	// SafetyAssertionDocumentsColumns holds the columns for the "safety_assertion_documents" table.
+	SafetyAssertionDocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "digest_algorithm", Type: field.TypeString},
+		{Name: "digest", Type: field.TypeString},
+		{Name: "document_ref", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "source_authority", Type: field.TypeString, Nullable: true},
+		{Name: "received_at", Type: field.TypeTime},
+	}
+	// SafetyAssertionDocumentsTable holds the schema information for the "safety_assertion_documents" table.
+	SafetyAssertionDocumentsTable = &schema.Table{
+		Name:       "safety_assertion_documents",
+		Columns:    SafetyAssertionDocumentsColumns,
+		PrimaryKey: []*schema.Column{SafetyAssertionDocumentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "safetyassertiondocument_digest_algorithm_digest",
+				Unique:  true,
+				Columns: []*schema.Column{SafetyAssertionDocumentsColumns[1], SafetyAssertionDocumentsColumns[2]},
+			},
+		},
+	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -1269,6 +1350,8 @@ var (
 		PkgEqualsTable,
 		PointOfContactsTable,
 		SlsaAttestationsTable,
+		SafetyAssertionsTable,
+		SafetyAssertionDocumentsTable,
 		SourceNamesTable,
 		VulnEqualsTable,
 		VulnerabilityIdsTable,
@@ -1324,6 +1407,7 @@ func init() {
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}
+	SafetyAssertionsTable.ForeignKeys[0].RefTable = SafetyAssertionDocumentsTable
 	VulnEqualsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	VulnEqualsTable.ForeignKeys[1].RefTable = VulnerabilityIdsTable
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable

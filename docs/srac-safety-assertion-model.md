@@ -1,11 +1,37 @@
 # Dedicated safety-assertion graph model proposal
 
-Status: draft for maintainer review
+Status: first implementation slice available for maintainer review
+
+## Implemented in this PR
+
+The first slice now includes GraphQL ingestion, filtered and paginated queries,
+generated server/client operations, backend interface methods, and dedicated
+Ent/PostgreSQL persistence with an additive migration. It retains versioned
+product/component PURLs before either package exists. Document provenance is
+stored separately; the one-to-one declared target is stored on the assertion,
+and assertion-owned evidence references are stored as a typed JSON array.
+
+Ingestion validates decision state, reviewer requirements, timestamps, versioned
+identities, evidence IDs/URIs, and digest syntax. Retries return the existing
+ID; conflicting assertion content or document provenance is rejected atomically.
+Digest validation here checks encoding and length, not the source document's
+bytes or a component artifact. Those checks belong at ingestion/correlation
+boundaries with access to the corresponding bytes.
+
+All targets are `PENDING` in this slice. Resolved bindings, the reconciliation
+certifier, parser integration from #3271, SPDX/CycloneDX mapping, and graph
+traversal through resolved packages remain follow-up work. Other backends return
+an explicit unsupported-feature error. The broader contract below describes the
+intended follow-up model; it is not a claim that those features are implemented.
+
+See
+[the runnable example and test instructions](srac-safety-assertion-usage.md).
 
 Related work:
 
 - Use case: [#3256](https://github.com/guacsec/guac/issues/3256)
-- Standalone parser prototype: [#3271](https://github.com/guacsec/guac/pull/3271)
+- Standalone parser prototype:
+  [#3271](https://github.com/guacsec/guac/pull/3271)
 - GUAC certifier framework: [`pkg/certifier`](../pkg/certifier)
 
 ## Goal
@@ -33,10 +59,9 @@ requirements for the next iteration:
 1. define the ontology and the client queries before adding generated code;
 2. introduce first-class safety-assertion nouns and relationships rather than
    keeping the permanent model in `HasMetadata`;
-3. use a certifier to resolve assertions when documents arrive out of order;
-   and
-4. implement through GUAC's GraphQL and backend abstractions, with PostgreSQL
-   as the first persistence target rather than parser-owned SQL.
+3. use a certifier to resolve assertions when documents arrive out of order; and
+4. implement through GUAC's GraphQL and backend abstractions, with PostgreSQL as
+   the first persistence target rather than parser-owned SQL.
 
 This document records that proposed interpretation for maintainer confirmation.
 It does not claim that the names, schema, or implementation sequence have been
@@ -81,14 +106,14 @@ SafetyAssertionBinding
   Product PackageVersion ---- assertion ----> Component PackageVersion
 ```
 
-`SafetyAssertionTarget` preserves the identities supplied by the author even
-if either `PackageVersion` is absent. `SafetyAssertionBinding` is created only
-after deterministic resolution. This avoids dropping an assertion or creating
-a placeholder package solely because documents arrived in a different order.
+`SafetyAssertionTarget` preserves the identities supplied by the author even if
+either `PackageVersion` is absent. `SafetyAssertionBinding` is created only
+after deterministic resolution. This avoids dropping an assertion or creating a
+placeholder package solely because documents arrived in a different order.
 
-Both resolved endpoints are specific package versions. Name-only matching is
-not permitted. A BOM reference or component digest can be preserved as
-correlation evidence, but does not replace package identity.
+Both resolved endpoints are specific package versions. Name-only matching is not
+permitted. A BOM reference or component digest can be preserved as correlation
+evidence, but does not replace package identity.
 
 ## Proposed storage entities
 
@@ -110,8 +135,8 @@ Represents the received source document and its provenance.
 | `receivedAt`      | Ingestion timestamp                                  |
 
 The digest algorithm and value should be unique together for idempotent
-ingestion. The complete source document remains in configured blob storage;
-the graph retains the queryable, provenance-bearing subset.
+ingestion. The complete source document remains in configured blob storage; the
+graph retains the queryable, provenance-bearing subset.
 
 ### SafetyAssertion
 
@@ -210,9 +235,9 @@ A safety-assertion certifier should:
 6. keep missing endpoints `PENDING`; and
 7. be safe to run periodically, on demand, or after relevant package ingestion.
 
-When a new product version appears, existing assertions are not silently
-rebound to it. A new or updated assertion, or an explicit reevaluation rule,
-must identify the intended version.
+When a new product version appears, existing assertions are not silently rebound
+to it. A new or updated assertion, or an explicit reevaluation rule, must
+identify the intended version.
 
 ## Proposed GraphQL contract
 
@@ -373,10 +398,10 @@ The core use case is:
 > Which products use a vulnerable component in an asserted safety-relevant
 > context, and what evidence supports each assertion?
 
-The vulnerability-to-component portion uses GUAC's existing graph. The new
-model supplies product-specific safety context and evidence. A synthetic demo
-should show the same component in two products, with `SAFETY_RELATED` in one
-and `NOT_SAFETY_RELATED` in the other.
+The vulnerability-to-component portion uses GUAC's existing graph. The new model
+supplies product-specific safety context and evidence. A synthetic demo should
+show the same component in two products, with `SAFETY_RELATED` in one and
+`NOT_SAFETY_RELATED` in the other.
 
 ## Implementation slices
 
@@ -418,11 +443,10 @@ avoids coupling parser approval to generated database and GraphQL code.
 
 ## Open questions for maintainers
 
-1. Should the first-class noun be named `SafetyAssertion`,
-   `HasSafetyContext`, or something else consistent with GUAC ontology
-   conventions?
-2. Is the document -> assertion -> declared target -> resolved binding split
-   the preferred representation for out-of-order ingestion?
+1. Should the first-class noun be named `SafetyAssertion`, `HasSafetyContext`,
+   or something else consistent with GUAC ontology conventions?
+2. Is the document -> assertion -> declared target -> resolved binding split the
+   preferred representation for out-of-order ingestion?
 3. Should evidence references be reusable graph nodes or initially normalized
    under the assertion?
 4. Is PostgreSQL/Ent sufficient for the first implementation if all access is

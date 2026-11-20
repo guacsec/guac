@@ -63,6 +63,12 @@ type PointOfContact func(*sql.Selector)
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)
 
+// SafetyAssertion is the predicate function for safetyassertion builders.
+type SafetyAssertion func(*sql.Selector)
+
+// SafetyAssertionDocument is the predicate function for safetyassertiondocument builders.
+type SafetyAssertionDocument func(*sql.Selector)
+
 // SourceName is the predicate function for sourcename builders.
 type SourceName func(*sql.Selector)
 

@@ -24,6 +24,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -2995,6 +2997,272 @@ type slsaattestationPaginateArgs struct {
 
 func newSLSAAttestationPaginateArgs(rv map[string]any) *slsaattestationPaginateArgs {
 	args := &slsaattestationPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *SafetyAssertionQuery) CollectFields(ctx context.Context, satisfies ...string) (*SafetyAssertionQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *SafetyAssertionQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(safetyassertion.Columns))
+		selectedFields = []string{safetyassertion.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+
+		case "document":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SafetyAssertionDocumentClient{config: _q.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, safetyassertiondocumentImplementors)...); err != nil {
+				return err
+			}
+			_q.withDocument = query
+			if _, ok := fieldSeen[safetyassertion.FieldDocumentID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldDocumentID)
+				fieldSeen[safetyassertion.FieldDocumentID] = struct{}{}
+			}
+		case "documentID":
+			if _, ok := fieldSeen[safetyassertion.FieldDocumentID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldDocumentID)
+				fieldSeen[safetyassertion.FieldDocumentID] = struct{}{}
+			}
+		case "assertionID":
+			if _, ok := fieldSeen[safetyassertion.FieldAssertionID]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldAssertionID)
+				fieldSeen[safetyassertion.FieldAssertionID] = struct{}{}
+			}
+		case "contentHash":
+			if _, ok := fieldSeen[safetyassertion.FieldContentHash]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldContentHash)
+				fieldSeen[safetyassertion.FieldContentHash] = struct{}{}
+			}
+		case "safetyRelevance":
+			if _, ok := fieldSeen[safetyassertion.FieldSafetyRelevance]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldSafetyRelevance)
+				fieldSeen[safetyassertion.FieldSafetyRelevance] = struct{}{}
+			}
+		case "classificationScheme":
+			if _, ok := fieldSeen[safetyassertion.FieldClassificationScheme]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldClassificationScheme)
+				fieldSeen[safetyassertion.FieldClassificationScheme] = struct{}{}
+			}
+		case "classificationValue":
+			if _, ok := fieldSeen[safetyassertion.FieldClassificationValue]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldClassificationValue)
+				fieldSeen[safetyassertion.FieldClassificationValue] = struct{}{}
+			}
+		case "rationale":
+			if _, ok := fieldSeen[safetyassertion.FieldRationale]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldRationale)
+				fieldSeen[safetyassertion.FieldRationale] = struct{}{}
+			}
+		case "decisionStatus":
+			if _, ok := fieldSeen[safetyassertion.FieldDecisionStatus]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldDecisionStatus)
+				fieldSeen[safetyassertion.FieldDecisionStatus] = struct{}{}
+			}
+		case "reviewer":
+			if _, ok := fieldSeen[safetyassertion.FieldReviewer]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldReviewer)
+				fieldSeen[safetyassertion.FieldReviewer] = struct{}{}
+			}
+		case "assertedAt":
+			if _, ok := fieldSeen[safetyassertion.FieldAssertedAt]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldAssertedAt)
+				fieldSeen[safetyassertion.FieldAssertedAt] = struct{}{}
+			}
+		case "validUntil":
+			if _, ok := fieldSeen[safetyassertion.FieldValidUntil]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldValidUntil)
+				fieldSeen[safetyassertion.FieldValidUntil] = struct{}{}
+			}
+		case "productPurl":
+			if _, ok := fieldSeen[safetyassertion.FieldProductPurl]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldProductPurl)
+				fieldSeen[safetyassertion.FieldProductPurl] = struct{}{}
+			}
+		case "componentPurl":
+			if _, ok := fieldSeen[safetyassertion.FieldComponentPurl]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldComponentPurl)
+				fieldSeen[safetyassertion.FieldComponentPurl] = struct{}{}
+			}
+		case "componentBomRef":
+			if _, ok := fieldSeen[safetyassertion.FieldComponentBomRef]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldComponentBomRef)
+				fieldSeen[safetyassertion.FieldComponentBomRef] = struct{}{}
+			}
+		case "componentDigestAlgorithm":
+			if _, ok := fieldSeen[safetyassertion.FieldComponentDigestAlgorithm]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldComponentDigestAlgorithm)
+				fieldSeen[safetyassertion.FieldComponentDigestAlgorithm] = struct{}{}
+			}
+		case "componentDigest":
+			if _, ok := fieldSeen[safetyassertion.FieldComponentDigest]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldComponentDigest)
+				fieldSeen[safetyassertion.FieldComponentDigest] = struct{}{}
+			}
+		case "evidence":
+			if _, ok := fieldSeen[safetyassertion.FieldEvidence]; !ok {
+				selectedFields = append(selectedFields, safetyassertion.FieldEvidence)
+				fieldSeen[safetyassertion.FieldEvidence] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type safetyassertionPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []SafetyAssertionPaginateOption
+}
+
+func newSafetyAssertionPaginateArgs(rv map[string]any) *safetyassertionPaginateArgs {
+	args := &safetyassertionPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *SafetyAssertionDocumentQuery) CollectFields(ctx context.Context, satisfies ...string) (*SafetyAssertionDocumentQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *SafetyAssertionDocumentQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(safetyassertiondocument.Columns))
+		selectedFields = []string{safetyassertiondocument.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+
+		case "assertions":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SafetyAssertionClient{config: _q.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, safetyassertionImplementors)...); err != nil {
+				return err
+			}
+			_q.WithNamedAssertions(alias, func(wq *SafetyAssertionQuery) {
+				*wq = *query
+			})
+		case "digestAlgorithm":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldDigestAlgorithm]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldDigestAlgorithm)
+				fieldSeen[safetyassertiondocument.FieldDigestAlgorithm] = struct{}{}
+			}
+		case "digest":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldDigest]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldDigest)
+				fieldSeen[safetyassertiondocument.FieldDigest] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldDocumentRef)
+				fieldSeen[safetyassertiondocument.FieldDocumentRef] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldOrigin)
+				fieldSeen[safetyassertiondocument.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldCollector)
+				fieldSeen[safetyassertiondocument.FieldCollector] = struct{}{}
+			}
+		case "sourceAuthority":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldSourceAuthority]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldSourceAuthority)
+				fieldSeen[safetyassertiondocument.FieldSourceAuthority] = struct{}{}
+			}
+		case "receivedAt":
+			if _, ok := fieldSeen[safetyassertiondocument.FieldReceivedAt]; !ok {
+				selectedFields = append(selectedFields, safetyassertiondocument.FieldReceivedAt)
+				fieldSeen[safetyassertiondocument.FieldReceivedAt] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type safetyassertiondocumentPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []SafetyAssertionDocumentPaginateOption
+}
+
+func newSafetyAssertionDocumentPaginateArgs(rv map[string]any) *safetyassertiondocumentPaginateArgs {
+	args := &safetyassertiondocumentPaginateArgs{}
 	if rv == nil {
 		return args
 	}
