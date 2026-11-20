@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -39,6 +40,7 @@ import (
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestationv1 "github.com/in-toto/attestation/go/v1"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/package-url/packageurl-go"
 	"golang.org/x/time/rate"
 )
 
@@ -156,29 +158,64 @@ func EvaluateOSVResponse(ctx context.Context, client *http.Client, purls []strin
 		return nil, fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
 	responseMap := make(map[string][]osv_models.Vulnerability, len(packMap))
-	if withVulnerabilityMetadata {
-		hydratedResp, err := osv_scanner.HydrateWithClient(resp, client)
-		if err != nil {
-			return nil, fmt.Errorf("hydrating vulnerability with metadata failed: %w", err)
-		}
-		for i, query := range query.Queries {
-			res := hydratedResp.Results[i]
-			purl := query.Package.PURL
-			responseMap[purl] = res.Vulns
-		}
-	} else {
-		for i, query := range query.Queries {
-			res := resp.Results[i]
-			purl := query.Package.PURL
-
-			vulns := make([]osv_models.Vulnerability, 0, len(res.Vulns))
-			for _, minimal := range res.Vulns {
-				vulns = append(vulns, minimalVulnerabilityToVulnerability(&minimal))
+	hydratedResp, err := osv_scanner.HydrateWithClient(resp, client)
+	if err != nil {
+		return nil, fmt.Errorf("hydrating vulnerability with metadata failed: %w", err)
+	}
+	for i, q := range query.Queries {
+		purl := q.Package.PURL
+		vulns := filterVulnsAffectingPurl(purl, hydratedResp.Results[i].Vulns)
+		if !withVulnerabilityMetadata {
+			for j := range vulns {
+				vulns[j] = osv_models.Vulnerability{ID: vulns[j].ID}
 			}
-			responseMap[purl] = vulns
 		}
+		responseMap[purl] = vulns
 	}
 	return generateDocument(responseMap, docChannel)
+}
+
+func filterVulnsAffectingPurl(raw string, vulns []osv_models.Vulnerability) []osv_models.Vulnerability {
+	pkg, err := packageurl.FromString(raw)
+	if err != nil || pkg.Version == "" {
+		return slices.Clone(vulns)
+	}
+
+	ecosystem := ""
+	if pkg.Type == "maven" {
+		ecosystem = "Maven"
+	}
+	if pkg.Type == "apk" && pkg.Namespace == "alpine" {
+		distro := pkg.Qualifiers.Map()["distro"]
+		if version, ok := strings.CutPrefix(distro, "alpine-"); ok && version != "" {
+			ecosystem = "Alpine:v" + version
+		}
+	}
+	var kept []osv_models.Vulnerability
+	for _, vuln := range vulns {
+		if len(vuln.Affected) == 0 {
+			kept = append(kept, vuln)
+			continue
+		}
+		for _, affected := range vuln.Affected {
+			ap := affected.Package
+			if ecosystem != "" && ap.Ecosystem != "" && string(ap.Ecosystem) != ecosystem {
+				continue
+			}
+			if identity, err := packageurl.FromString(ap.Purl); err == nil {
+				if identity.Type != pkg.Type || identity.Namespace != pkg.Namespace || identity.Name != pkg.Name {
+					continue
+				}
+			} else if ap.Name != pkg.Name && !(pkg.Type == "maven" && ap.Name == pkg.Namespace+":"+pkg.Name) {
+				continue
+			}
+			if len(affected.Versions) == 0 || slices.Contains(affected.Versions, pkg.Version) {
+				kept = append(kept, vuln)
+				break
+			}
+		}
+	}
+	return kept
 }
 
 // generateDocument generated the processor document for ingestion
@@ -256,10 +293,4 @@ func createAttestation(purl string, vulns []osv_models.Vulnerability, currentTim
 		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, result)
 	}
 	return attestation
-}
-
-func minimalVulnerabilityToVulnerability(minimal *osv_scanner.MinimalVulnerability) osv_models.Vulnerability {
-	return osv_models.Vulnerability{
-		ID: minimal.ID,
-	}
 }
