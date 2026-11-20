@@ -1,0 +1,161 @@
+#
+# Copyright 2026 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+enum SafetyRelevance {
+  SAFETY_RELATED
+  NOT_SAFETY_RELATED
+  UNDETERMINED
+}
+
+enum SafetyDecisionStatus {
+  DRAFT
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+enum SafetyCorrelationStatus {
+  PENDING
+  MATCHED
+  AMBIGUOUS
+  INVALID
+  STALE
+}
+
+"Declared identities survive ingestion before either package exists."
+type SafetyAssertionTarget {
+  productPurl: String!
+  componentPurl: String!
+  componentBomRef: String
+  componentDigestAlgorithm: String
+  componentDigest: String
+  correlationStatus: SafetyCorrelationStatus!
+  correlationReason: String
+  lastEvaluatedAt: Time
+}
+
+"A deterministic binding to two existing, specific package versions."
+type SafetyAssertionBinding {
+  product: Package!
+  component: Package!
+  matchedBy: String!
+  resolvedAt: Time!
+}
+
+type SafetyEvidenceReference {
+  evidenceId: String!
+  uri: String!
+  digestAlgorithm: String
+  digest: String
+}
+
+input SafetyEvidenceReferenceInput {
+  evidenceId: String!
+  uri: String!
+  digestAlgorithm: String
+  digest: String
+}
+
+"An externally authored decision. GUAC does not approve safety decisions."
+type SafetyAssertion {
+  id: ID!
+  assertionId: String!
+  safetyRelevance: SafetyRelevance!
+  classificationScheme: String
+  classificationValue: String
+  rationale: String!
+  decisionStatus: SafetyDecisionStatus!
+  reviewer: String
+  assertedAt: Time!
+  validUntil: Time
+  target: SafetyAssertionTarget!
+  binding: SafetyAssertionBinding
+  evidence: [SafetyEvidenceReference!]!
+  sourceAuthority: String
+  origin: String!
+  collector: String!
+  documentRef: String!
+  documentDigestAlgorithm: String!
+  documentDigest: String!
+}
+
+input SafetyAssertionInputSpec {
+  assertionId: String!
+  safetyRelevance: SafetyRelevance!
+  classificationScheme: String
+  classificationValue: String
+  rationale: String!
+  decisionStatus: SafetyDecisionStatus!
+  reviewer: String
+  assertedAt: Time!
+  validUntil: Time
+  productPurl: String!
+  componentPurl: String!
+  componentBomRef: String
+  componentDigestAlgorithm: String
+  componentDigest: String
+  evidence: [SafetyEvidenceReferenceInput!]!
+  sourceAuthority: String
+  origin: String!
+  collector: String!
+  documentRef: String!
+  documentDigestAlgorithm: String!
+  documentDigest: String!
+}
+
+"PURL filters match the complete declared, versioned identity."
+input SafetyAssertionSpec {
+  id: ID
+  assertionId: String
+  productPurl: String
+  componentPurl: String
+  safetyRelevance: SafetyRelevance
+  classificationScheme: String
+  classificationValue: String
+  decisionStatus: SafetyDecisionStatus
+  correlationStatus: SafetyCorrelationStatus
+  sourceAuthority: String
+  origin: String
+  documentDigestAlgorithm: String
+  documentDigest: String
+}
+
+type SafetyAssertionEdge {
+  cursor: ID!
+  node: SafetyAssertion!
+}
+
+type SafetyAssertionConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [SafetyAssertionEdge!]!
+}
+
+extend type Mutation {
+  ingestSafetyAssertion(assertion: SafetyAssertionInputSpec!): ID!
+  "Resolve from authoritative graph data; callers cannot supply arbitrary binding IDs."
+  reconcileSafetyAssertion(id: ID!): SafetyAssertion!
+}
+
+extend type Query {
+  SafetyAssertion(
+    safetyAssertionSpec: SafetyAssertionSpec!
+  ): [SafetyAssertion!]!
+  SafetyAssertionList(
+    safetyAssertionSpec: SafetyAssertionSpec!
+    after: ID
+    first: Int
+  ): SafetyAssertionConnection
+}

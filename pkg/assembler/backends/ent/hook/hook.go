@@ -237,6 +237,30 @@ func (f SLSAAttestationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SLSAAttestationMutation", m)
 }
 
+// The SafetyAssertionFunc type is an adapter to allow the use of ordinary
+// function as SafetyAssertion mutator.
+type SafetyAssertionFunc func(context.Context, *ent.SafetyAssertionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SafetyAssertionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SafetyAssertionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SafetyAssertionMutation", m)
+}
+
+// The SafetyAssertionDocumentFunc type is an adapter to allow the use of ordinary
+// function as SafetyAssertionDocument mutator.
+type SafetyAssertionDocumentFunc func(context.Context, *ent.SafetyAssertionDocumentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SafetyAssertionDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SafetyAssertionDocumentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SafetyAssertionDocumentMutation", m)
+}
+
 // The SourceNameFunc type is an adapter to allow the use of ordinary
 // function as SourceName mutator.
 type SourceNameFunc func(context.Context, *ent.SourceNameMutation) (ent.Value, error)

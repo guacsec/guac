@@ -24,6 +24,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/schema"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -178,6 +180,26 @@ func init() {
 	slsaattestationDescID := slsaattestationFields[0].Descriptor()
 	// slsaattestation.DefaultID holds the default value on creation for the id field.
 	slsaattestation.DefaultID = slsaattestationDescID.Default.(func() uuid.UUID)
+	safetyassertionFields := schema.SafetyAssertion{}.Fields()
+	_ = safetyassertionFields
+	// safetyassertionDescCorrelationRevision is the schema descriptor for correlation_revision field.
+	safetyassertionDescCorrelationRevision := safetyassertionFields[21].Descriptor()
+	// safetyassertion.DefaultCorrelationRevision holds the default value on creation for the correlation_revision field.
+	safetyassertion.DefaultCorrelationRevision = safetyassertionDescCorrelationRevision.Default.(int)
+	// safetyassertionDescID is the schema descriptor for id field.
+	safetyassertionDescID := safetyassertionFields[0].Descriptor()
+	// safetyassertion.DefaultID holds the default value on creation for the id field.
+	safetyassertion.DefaultID = safetyassertionDescID.Default.(func() uuid.UUID)
+	safetyassertiondocumentFields := schema.SafetyAssertionDocument{}.Fields()
+	_ = safetyassertiondocumentFields
+	// safetyassertiondocumentDescReceivedAt is the schema descriptor for received_at field.
+	safetyassertiondocumentDescReceivedAt := safetyassertiondocumentFields[7].Descriptor()
+	// safetyassertiondocument.DefaultReceivedAt holds the default value on creation for the received_at field.
+	safetyassertiondocument.DefaultReceivedAt = safetyassertiondocumentDescReceivedAt.Default.(func() time.Time)
+	// safetyassertiondocumentDescID is the schema descriptor for id field.
+	safetyassertiondocumentDescID := safetyassertiondocumentFields[0].Descriptor()
+	// safetyassertiondocument.DefaultID holds the default value on creation for the id field.
+	safetyassertiondocument.DefaultID = safetyassertiondocumentDescID.Default.(func() uuid.UUID)
 	sourcenameFields := schema.SourceName{}.Fields()
 	_ = sourcenameFields
 	// sourcenameDescID is the schema descriptor for id field.

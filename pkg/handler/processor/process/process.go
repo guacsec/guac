@@ -48,6 +48,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/open_vex"
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
+	"github.com/guacsec/guac/pkg/handler/processor/srac"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
 	jsoniter "github.com/json-iterator/go"
@@ -90,6 +91,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&cyclonedx.CycloneDXProcessor{}, processor.DocumentCycloneDX)
 	_ = RegisterDocumentProcessor(&deps_dev.DepsDev{}, processor.DocumentDepsDev)
 	_ = RegisterDocumentProcessor(&jsonlines.JsonLinesProcessor{}, processor.DocumentOpaque)
+	_ = RegisterDocumentProcessor(&srac.Processor{}, processor.DocumentSRAC)
 }
 
 func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {

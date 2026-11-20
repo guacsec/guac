@@ -115,6 +115,7 @@ func MergedIngest(
 			return fmt.Errorf("unable to ingest doc tree: %v", err)
 		}
 		for i := range preds {
+			predicates[0].SafetyAssertions = append(predicates[0].SafetyAssertions, preds[i].SafetyAssertions...)
 			predicates[0].CertifyScorecard = append(predicates[0].CertifyScorecard, preds[i].CertifyScorecard...)
 			predicates[0].IsDependency = append(predicates[0].IsDependency, preds[i].IsDependency...)
 			predicates[0].IsOccurrence = append(predicates[0].IsOccurrence, preds[i].IsOccurrence...)

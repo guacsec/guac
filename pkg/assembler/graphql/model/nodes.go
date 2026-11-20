@@ -1775,6 +1775,115 @@ type SLSAPredicateSpec struct {
 	Value string `json:"value"`
 }
 
+// An externally authored decision. GUAC does not approve safety decisions.
+type SafetyAssertion struct {
+	ID                      string                     `json:"id"`
+	AssertionID             string                     `json:"assertionId"`
+	SafetyRelevance         SafetyRelevance            `json:"safetyRelevance"`
+	ClassificationScheme    *string                    `json:"classificationScheme,omitempty"`
+	ClassificationValue     *string                    `json:"classificationValue,omitempty"`
+	Rationale               string                     `json:"rationale"`
+	DecisionStatus          SafetyDecisionStatus       `json:"decisionStatus"`
+	Reviewer                *string                    `json:"reviewer,omitempty"`
+	AssertedAt              time.Time                  `json:"assertedAt"`
+	ValidUntil              *time.Time                 `json:"validUntil,omitempty"`
+	Target                  *SafetyAssertionTarget     `json:"target"`
+	Binding                 *SafetyAssertionBinding    `json:"binding,omitempty"`
+	Evidence                []*SafetyEvidenceReference `json:"evidence"`
+	SourceAuthority         *string                    `json:"sourceAuthority,omitempty"`
+	Origin                  string                     `json:"origin"`
+	Collector               string                     `json:"collector"`
+	DocumentRef             string                     `json:"documentRef"`
+	DocumentDigestAlgorithm string                     `json:"documentDigestAlgorithm"`
+	DocumentDigest          string                     `json:"documentDigest"`
+}
+
+// A deterministic binding to two existing, specific package versions.
+type SafetyAssertionBinding struct {
+	Product    *Package  `json:"product"`
+	Component  *Package  `json:"component"`
+	MatchedBy  string    `json:"matchedBy"`
+	ResolvedAt time.Time `json:"resolvedAt"`
+}
+
+type SafetyAssertionConnection struct {
+	TotalCount int                    `json:"totalCount"`
+	PageInfo   *PageInfo              `json:"pageInfo"`
+	Edges      []*SafetyAssertionEdge `json:"edges"`
+}
+
+type SafetyAssertionEdge struct {
+	Cursor string           `json:"cursor"`
+	Node   *SafetyAssertion `json:"node"`
+}
+
+type SafetyAssertionInputSpec struct {
+	AssertionID              string                          `json:"assertionId"`
+	SafetyRelevance          SafetyRelevance                 `json:"safetyRelevance"`
+	ClassificationScheme     *string                         `json:"classificationScheme,omitempty"`
+	ClassificationValue      *string                         `json:"classificationValue,omitempty"`
+	Rationale                string                          `json:"rationale"`
+	DecisionStatus           SafetyDecisionStatus            `json:"decisionStatus"`
+	Reviewer                 *string                         `json:"reviewer,omitempty"`
+	AssertedAt               time.Time                       `json:"assertedAt"`
+	ValidUntil               *time.Time                      `json:"validUntil,omitempty"`
+	ProductPurl              string                          `json:"productPurl"`
+	ComponentPurl            string                          `json:"componentPurl"`
+	ComponentBomRef          *string                         `json:"componentBomRef,omitempty"`
+	ComponentDigestAlgorithm *string                         `json:"componentDigestAlgorithm,omitempty"`
+	ComponentDigest          *string                         `json:"componentDigest,omitempty"`
+	Evidence                 []*SafetyEvidenceReferenceInput `json:"evidence"`
+	SourceAuthority          *string                         `json:"sourceAuthority,omitempty"`
+	Origin                   string                          `json:"origin"`
+	Collector                string                          `json:"collector"`
+	DocumentRef              string                          `json:"documentRef"`
+	DocumentDigestAlgorithm  string                          `json:"documentDigestAlgorithm"`
+	DocumentDigest           string                          `json:"documentDigest"`
+}
+
+// PURL filters match the complete declared, versioned identity.
+type SafetyAssertionSpec struct {
+	ID                      *string                  `json:"id,omitempty"`
+	AssertionID             *string                  `json:"assertionId,omitempty"`
+	ProductPurl             *string                  `json:"productPurl,omitempty"`
+	ComponentPurl           *string                  `json:"componentPurl,omitempty"`
+	SafetyRelevance         *SafetyRelevance         `json:"safetyRelevance,omitempty"`
+	ClassificationScheme    *string                  `json:"classificationScheme,omitempty"`
+	ClassificationValue     *string                  `json:"classificationValue,omitempty"`
+	DecisionStatus          *SafetyDecisionStatus    `json:"decisionStatus,omitempty"`
+	CorrelationStatus       *SafetyCorrelationStatus `json:"correlationStatus,omitempty"`
+	SourceAuthority         *string                  `json:"sourceAuthority,omitempty"`
+	Origin                  *string                  `json:"origin,omitempty"`
+	DocumentDigestAlgorithm *string                  `json:"documentDigestAlgorithm,omitempty"`
+	DocumentDigest          *string                  `json:"documentDigest,omitempty"`
+}
+
+// Declared identities survive ingestion before either package exists.
+type SafetyAssertionTarget struct {
+	ProductPurl              string                  `json:"productPurl"`
+	ComponentPurl            string                  `json:"componentPurl"`
+	ComponentBomRef          *string                 `json:"componentBomRef,omitempty"`
+	ComponentDigestAlgorithm *string                 `json:"componentDigestAlgorithm,omitempty"`
+	ComponentDigest          *string                 `json:"componentDigest,omitempty"`
+	CorrelationStatus        SafetyCorrelationStatus `json:"correlationStatus"`
+	CorrelationReason        *string                 `json:"correlationReason,omitempty"`
+	LastEvaluatedAt          *time.Time              `json:"lastEvaluatedAt,omitempty"`
+}
+
+type SafetyEvidenceReference struct {
+	EvidenceID      string  `json:"evidenceId"`
+	URI             string  `json:"uri"`
+	DigestAlgorithm *string `json:"digestAlgorithm,omitempty"`
+	Digest          *string `json:"digest,omitempty"`
+}
+
+type SafetyEvidenceReferenceInput struct {
+	EvidenceID      string  `json:"evidenceId"`
+	URI             string  `json:"uri"`
+	DigestAlgorithm *string `json:"digestAlgorithm,omitempty"`
+	Digest          *string `json:"digest,omitempty"`
+}
+
 // ScanMetadata is the metadata attached to vulnerability certification.
 //
 // It contains metadata about the scanner process that created the certification.
@@ -2811,6 +2920,183 @@ func (e *QueryType) UnmarshalJSON(b []byte) error {
 }
 
 func (e QueryType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SafetyCorrelationStatus string
+
+const (
+	SafetyCorrelationStatusPending   SafetyCorrelationStatus = "PENDING"
+	SafetyCorrelationStatusMatched   SafetyCorrelationStatus = "MATCHED"
+	SafetyCorrelationStatusAmbiguous SafetyCorrelationStatus = "AMBIGUOUS"
+	SafetyCorrelationStatusInvalid   SafetyCorrelationStatus = "INVALID"
+	SafetyCorrelationStatusStale     SafetyCorrelationStatus = "STALE"
+)
+
+var AllSafetyCorrelationStatus = []SafetyCorrelationStatus{
+	SafetyCorrelationStatusPending,
+	SafetyCorrelationStatusMatched,
+	SafetyCorrelationStatusAmbiguous,
+	SafetyCorrelationStatusInvalid,
+	SafetyCorrelationStatusStale,
+}
+
+func (e SafetyCorrelationStatus) IsValid() bool {
+	switch e {
+	case SafetyCorrelationStatusPending, SafetyCorrelationStatusMatched, SafetyCorrelationStatusAmbiguous, SafetyCorrelationStatusInvalid, SafetyCorrelationStatusStale:
+		return true
+	}
+	return false
+}
+
+func (e SafetyCorrelationStatus) String() string {
+	return string(e)
+}
+
+func (e *SafetyCorrelationStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SafetyCorrelationStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SafetyCorrelationStatus", str)
+	}
+	return nil
+}
+
+func (e SafetyCorrelationStatus) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SafetyCorrelationStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SafetyCorrelationStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SafetyDecisionStatus string
+
+const (
+	SafetyDecisionStatusDraft    SafetyDecisionStatus = "DRAFT"
+	SafetyDecisionStatusReviewed SafetyDecisionStatus = "REVIEWED"
+	SafetyDecisionStatusApproved SafetyDecisionStatus = "APPROVED"
+	SafetyDecisionStatusRejected SafetyDecisionStatus = "REJECTED"
+)
+
+var AllSafetyDecisionStatus = []SafetyDecisionStatus{
+	SafetyDecisionStatusDraft,
+	SafetyDecisionStatusReviewed,
+	SafetyDecisionStatusApproved,
+	SafetyDecisionStatusRejected,
+}
+
+func (e SafetyDecisionStatus) IsValid() bool {
+	switch e {
+	case SafetyDecisionStatusDraft, SafetyDecisionStatusReviewed, SafetyDecisionStatusApproved, SafetyDecisionStatusRejected:
+		return true
+	}
+	return false
+}
+
+func (e SafetyDecisionStatus) String() string {
+	return string(e)
+}
+
+func (e *SafetyDecisionStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SafetyDecisionStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SafetyDecisionStatus", str)
+	}
+	return nil
+}
+
+func (e SafetyDecisionStatus) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SafetyDecisionStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SafetyDecisionStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SafetyRelevance string
+
+const (
+	SafetyRelevanceSafetyRelated    SafetyRelevance = "SAFETY_RELATED"
+	SafetyRelevanceNotSafetyRelated SafetyRelevance = "NOT_SAFETY_RELATED"
+	SafetyRelevanceUndetermined     SafetyRelevance = "UNDETERMINED"
+)
+
+var AllSafetyRelevance = []SafetyRelevance{
+	SafetyRelevanceSafetyRelated,
+	SafetyRelevanceNotSafetyRelated,
+	SafetyRelevanceUndetermined,
+}
+
+func (e SafetyRelevance) IsValid() bool {
+	switch e {
+	case SafetyRelevanceSafetyRelated, SafetyRelevanceNotSafetyRelated, SafetyRelevanceUndetermined:
+		return true
+	}
+	return false
+}
+
+func (e SafetyRelevance) String() string {
+	return string(e)
+}
+
+func (e *SafetyRelevance) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SafetyRelevance(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SafetyRelevance", str)
+	}
+	return nil
+}
+
+func (e SafetyRelevance) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SafetyRelevance) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SafetyRelevance) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

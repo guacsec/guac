@@ -30,6 +30,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -4844,6 +4846,504 @@ func (_m *SLSAAttestation) ToEdge(order *SLSAAttestationOrder) *SLSAAttestationE
 		order = DefaultSLSAAttestationOrder
 	}
 	return &SLSAAttestationEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
+// SafetyAssertionEdge is the edge representation of SafetyAssertion.
+type SafetyAssertionEdge struct {
+	Node   *SafetyAssertion `json:"node"`
+	Cursor Cursor           `json:"cursor"`
+}
+
+// SafetyAssertionConnection is the connection containing edges to SafetyAssertion.
+type SafetyAssertionConnection struct {
+	Edges      []*SafetyAssertionEdge `json:"edges"`
+	PageInfo   PageInfo               `json:"pageInfo"`
+	TotalCount int                    `json:"totalCount"`
+}
+
+func (c *SafetyAssertionConnection) build(nodes []*SafetyAssertion, pager *safetyassertionPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *SafetyAssertion
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *SafetyAssertion {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *SafetyAssertion {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*SafetyAssertionEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &SafetyAssertionEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// SafetyAssertionPaginateOption enables pagination customization.
+type SafetyAssertionPaginateOption func(*safetyassertionPager) error
+
+// WithSafetyAssertionOrder configures pagination ordering.
+func WithSafetyAssertionOrder(order *SafetyAssertionOrder) SafetyAssertionPaginateOption {
+	if order == nil {
+		order = DefaultSafetyAssertionOrder
+	}
+	o := *order
+	return func(pager *safetyassertionPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultSafetyAssertionOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithSafetyAssertionFilter configures pagination filter.
+func WithSafetyAssertionFilter(filter func(*SafetyAssertionQuery) (*SafetyAssertionQuery, error)) SafetyAssertionPaginateOption {
+	return func(pager *safetyassertionPager) error {
+		if filter == nil {
+			return errors.New("SafetyAssertionQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type safetyassertionPager struct {
+	reverse bool
+	order   *SafetyAssertionOrder
+	filter  func(*SafetyAssertionQuery) (*SafetyAssertionQuery, error)
+}
+
+func newSafetyAssertionPager(opts []SafetyAssertionPaginateOption, reverse bool) (*safetyassertionPager, error) {
+	pager := &safetyassertionPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultSafetyAssertionOrder
+	}
+	return pager, nil
+}
+
+func (p *safetyassertionPager) applyFilter(query *SafetyAssertionQuery) (*SafetyAssertionQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *safetyassertionPager) toCursor(_m *SafetyAssertion) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *safetyassertionPager) applyCursors(query *SafetyAssertionQuery, after, before *Cursor) (*SafetyAssertionQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultSafetyAssertionOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *safetyassertionPager) applyOrder(query *SafetyAssertionQuery) *SafetyAssertionQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultSafetyAssertionOrder.Field {
+		query = query.Order(DefaultSafetyAssertionOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *safetyassertionPager) orderExpr(query *SafetyAssertionQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultSafetyAssertionOrder.Field {
+			b.Comma().Ident(DefaultSafetyAssertionOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to SafetyAssertion.
+func (_m *SafetyAssertionQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...SafetyAssertionPaginateOption,
+) (*SafetyAssertionConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newSafetyAssertionPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &SafetyAssertionConnection{Edges: []*SafetyAssertionEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// SafetyAssertionOrderField defines the ordering field of SafetyAssertion.
+type SafetyAssertionOrderField struct {
+	// Value extracts the ordering value from the given SafetyAssertion.
+	Value    func(*SafetyAssertion) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) safetyassertion.OrderOption
+	toCursor func(*SafetyAssertion) Cursor
+}
+
+// SafetyAssertionOrder defines the ordering of SafetyAssertion.
+type SafetyAssertionOrder struct {
+	Direction OrderDirection             `json:"direction"`
+	Field     *SafetyAssertionOrderField `json:"field"`
+}
+
+// DefaultSafetyAssertionOrder is the default ordering of SafetyAssertion.
+var DefaultSafetyAssertionOrder = &SafetyAssertionOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &SafetyAssertionOrderField{
+		Value: func(_m *SafetyAssertion) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: safetyassertion.FieldID,
+		toTerm: safetyassertion.ByID,
+		toCursor: func(_m *SafetyAssertion) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts SafetyAssertion into SafetyAssertionEdge.
+func (_m *SafetyAssertion) ToEdge(order *SafetyAssertionOrder) *SafetyAssertionEdge {
+	if order == nil {
+		order = DefaultSafetyAssertionOrder
+	}
+	return &SafetyAssertionEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
+// SafetyAssertionDocumentEdge is the edge representation of SafetyAssertionDocument.
+type SafetyAssertionDocumentEdge struct {
+	Node   *SafetyAssertionDocument `json:"node"`
+	Cursor Cursor                   `json:"cursor"`
+}
+
+// SafetyAssertionDocumentConnection is the connection containing edges to SafetyAssertionDocument.
+type SafetyAssertionDocumentConnection struct {
+	Edges      []*SafetyAssertionDocumentEdge `json:"edges"`
+	PageInfo   PageInfo                       `json:"pageInfo"`
+	TotalCount int                            `json:"totalCount"`
+}
+
+func (c *SafetyAssertionDocumentConnection) build(nodes []*SafetyAssertionDocument, pager *safetyassertiondocumentPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *SafetyAssertionDocument
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *SafetyAssertionDocument {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *SafetyAssertionDocument {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*SafetyAssertionDocumentEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &SafetyAssertionDocumentEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// SafetyAssertionDocumentPaginateOption enables pagination customization.
+type SafetyAssertionDocumentPaginateOption func(*safetyassertiondocumentPager) error
+
+// WithSafetyAssertionDocumentOrder configures pagination ordering.
+func WithSafetyAssertionDocumentOrder(order *SafetyAssertionDocumentOrder) SafetyAssertionDocumentPaginateOption {
+	if order == nil {
+		order = DefaultSafetyAssertionDocumentOrder
+	}
+	o := *order
+	return func(pager *safetyassertiondocumentPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultSafetyAssertionDocumentOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithSafetyAssertionDocumentFilter configures pagination filter.
+func WithSafetyAssertionDocumentFilter(filter func(*SafetyAssertionDocumentQuery) (*SafetyAssertionDocumentQuery, error)) SafetyAssertionDocumentPaginateOption {
+	return func(pager *safetyassertiondocumentPager) error {
+		if filter == nil {
+			return errors.New("SafetyAssertionDocumentQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type safetyassertiondocumentPager struct {
+	reverse bool
+	order   *SafetyAssertionDocumentOrder
+	filter  func(*SafetyAssertionDocumentQuery) (*SafetyAssertionDocumentQuery, error)
+}
+
+func newSafetyAssertionDocumentPager(opts []SafetyAssertionDocumentPaginateOption, reverse bool) (*safetyassertiondocumentPager, error) {
+	pager := &safetyassertiondocumentPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultSafetyAssertionDocumentOrder
+	}
+	return pager, nil
+}
+
+func (p *safetyassertiondocumentPager) applyFilter(query *SafetyAssertionDocumentQuery) (*SafetyAssertionDocumentQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *safetyassertiondocumentPager) toCursor(_m *SafetyAssertionDocument) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *safetyassertiondocumentPager) applyCursors(query *SafetyAssertionDocumentQuery, after, before *Cursor) (*SafetyAssertionDocumentQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultSafetyAssertionDocumentOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *safetyassertiondocumentPager) applyOrder(query *SafetyAssertionDocumentQuery) *SafetyAssertionDocumentQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultSafetyAssertionDocumentOrder.Field {
+		query = query.Order(DefaultSafetyAssertionDocumentOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *safetyassertiondocumentPager) orderExpr(query *SafetyAssertionDocumentQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultSafetyAssertionDocumentOrder.Field {
+			b.Comma().Ident(DefaultSafetyAssertionDocumentOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to SafetyAssertionDocument.
+func (_m *SafetyAssertionDocumentQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...SafetyAssertionDocumentPaginateOption,
+) (*SafetyAssertionDocumentConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newSafetyAssertionDocumentPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &SafetyAssertionDocumentConnection{Edges: []*SafetyAssertionDocumentEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// SafetyAssertionDocumentOrderField defines the ordering field of SafetyAssertionDocument.
+type SafetyAssertionDocumentOrderField struct {
+	// Value extracts the ordering value from the given SafetyAssertionDocument.
+	Value    func(*SafetyAssertionDocument) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) safetyassertiondocument.OrderOption
+	toCursor func(*SafetyAssertionDocument) Cursor
+}
+
+// SafetyAssertionDocumentOrder defines the ordering of SafetyAssertionDocument.
+type SafetyAssertionDocumentOrder struct {
+	Direction OrderDirection                     `json:"direction"`
+	Field     *SafetyAssertionDocumentOrderField `json:"field"`
+}
+
+// DefaultSafetyAssertionDocumentOrder is the default ordering of SafetyAssertionDocument.
+var DefaultSafetyAssertionDocumentOrder = &SafetyAssertionDocumentOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &SafetyAssertionDocumentOrderField{
+		Value: func(_m *SafetyAssertionDocument) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: safetyassertiondocument.FieldID,
+		toTerm: safetyassertiondocument.ByID,
+		toCursor: func(_m *SafetyAssertionDocument) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts SafetyAssertionDocument into SafetyAssertionDocumentEdge.
+func (_m *SafetyAssertionDocument) ToEdge(order *SafetyAssertionDocumentOrder) *SafetyAssertionDocumentEdge {
+	if order == nil {
+		order = DefaultSafetyAssertionDocumentOrder
+	}
+	return &SafetyAssertionDocumentEdge{
 		Node:   _m,
 		Cursor: order.Field.toCursor(_m),
 	}

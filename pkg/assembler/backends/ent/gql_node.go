@@ -27,6 +27,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -134,6 +136,16 @@ var slsaattestationImplementors = []string{"SLSAAttestation", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*SLSAAttestation) IsNode() {}
+
+var safetyassertionImplementors = []string{"SafetyAssertion", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*SafetyAssertion) IsNode() {}
+
+var safetyassertiondocumentImplementors = []string{"SafetyAssertionDocument", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*SafetyAssertionDocument) IsNode() {}
 
 var sourcenameImplementors = []string{"SourceName", "Node"}
 
@@ -380,6 +392,24 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 			Where(slsaattestation.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, slsaattestationImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case safetyassertion.Table:
+		query := c.SafetyAssertion.Query().
+			Where(safetyassertion.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, safetyassertionImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case safetyassertiondocument.Table:
+		query := c.SafetyAssertionDocument.Query().
+			Where(safetyassertiondocument.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, safetyassertiondocumentImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -785,6 +815,38 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.IDIn(ids...))
 		query, err := query.CollectFields(ctx, slsaattestationImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case safetyassertion.Table:
+		query := c.SafetyAssertion.Query().
+			Where(safetyassertion.IDIn(ids...))
+		query, err := query.CollectFields(ctx, safetyassertionImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case safetyassertiondocument.Table:
+		query := c.SafetyAssertionDocument.Query().
+			Where(safetyassertiondocument.IDIn(ids...))
+		query, err := query.CollectFields(ctx, safetyassertiondocumentImplementors...)
 		if err != nil {
 			return nil, err
 		}
