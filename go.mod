@@ -7,7 +7,7 @@ require (
 	deps.dev/api/v3 v3.0.0-20260727054525-2946ae4a6141
 	entgo.io/contrib v0.7.0
 	entgo.io/ent v0.14.6
-	github.com/99designs/gqlgen v0.17.95
+	github.com/99designs/gqlgen v0.17.98
 	github.com/CycloneDX/cyclonedx-go v0.12.0
 	github.com/Khan/genqlient v0.8.1
 	github.com/Masterminds/semver v1.5.0
@@ -68,7 +68,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
-	github.com/vektah/gqlparser/v2 v2.5.37
+	github.com/vektah/gqlparser/v2 v2.5.64
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	go.opentelemetry.io/otel v1.47.0
@@ -140,7 +140,7 @@ require (
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/aead/serpent v0.0.0-20160714141033-fba169763ea6 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/agnivade/levenshtein v1.2.1 // indirect
+	github.com/agnivade/levenshtein v1.2.2 // indirect
 	github.com/alexflint/go-arg v1.5.1 // indirect
 	github.com/alexflint/go-scalar v1.2.0 // indirect
 	github.com/anchore/clio v0.0.0-20250319180342-2cfe4b0cb716 // indirect
@@ -334,7 +334,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/lunixbochs/struc v0.0.0-20241101090106-8d528fa2c543 // indirect
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-runewidth v0.0.28 // indirect
 	github.com/mattn/go-shellwords v1.0.14 // indirect
@@ -429,7 +429,7 @@ require (
 	github.com/tonistiigi/go-csvvalue v0.0.0-20240814133006-030d3b2625d0 // indirect
 	github.com/twmb/murmur3 v1.1.3 // indirect
 	github.com/ulikunitz/xz v0.5.16 // indirect
-	github.com/urfave/cli/v3 v3.11.0 // indirect
+	github.com/urfave/cli/v3 v3.14.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
