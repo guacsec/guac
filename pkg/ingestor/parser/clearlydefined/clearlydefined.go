@@ -162,8 +162,7 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation_license.C
 
 	if s.Predicate.Definition.Described.SourceLocation != nil {
 		sourceLocation := s.Predicate.Definition.Described.SourceLocation
-		srcInput := helpers.SourceToSourceInput(sourceLocation.Type, sourceLocation.Namespace,
-			sourceLocation.Name, &sourceLocation.Revision)
+		srcInput := attestation_license.SourceInputFromCD(sourceLocation)
 		if c.pkg != nil {
 			c.hasSourceAt = append(c.hasSourceAt, assembler.HasSourceAtIngest{
 				Pkg:          c.pkg,

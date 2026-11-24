@@ -257,18 +257,18 @@ func evaluateDefinitionForSource(ctx context.Context, client *http.Client, defin
 	var sourceInputs []string
 	for _, definition := range definitionMap {
 		if definition.Described.SourceLocation != nil {
-			srcInput := helpers.SourceToSourceInput(definition.Described.SourceLocation.Type, definition.Described.SourceLocation.Namespace,
-				definition.Described.SourceLocation.Name, &definition.Described.SourceLocation.Revision)
+			sourceLocation := definition.Described.SourceLocation
+			srcInput := attestation_license.SourceInputFromCD(sourceLocation)
 
 			nameID := helpers.SrcClientKey(srcInput).NameId
 
 			if _, ok := sourceMap[nameID]; !ok {
 				coordinate := &coordinates.Coordinate{
-					CoordinateType: definition.Described.SourceLocation.Type,
-					Provider:       definition.Described.SourceLocation.Provider,
-					Namespace:      definition.Described.SourceLocation.Namespace,
-					Name:           definition.Described.SourceLocation.Name,
-					Revision:       definition.Described.SourceLocation.Revision,
+					CoordinateType: sourceLocation.Type,
+					Provider:       sourceLocation.Provider,
+					Namespace:      sourceLocation.Namespace,
+					Name:           sourceLocation.Name,
+					Revision:       sourceLocation.Revision,
 				}
 				sourceMap[nameID] = true
 				sourceInputs = append(sourceInputs, nameID)
