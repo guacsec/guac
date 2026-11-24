@@ -430,3 +430,17 @@ func TestOSVCertifier_RecordsErrorMetric(t *testing.T) {
 		guac_osv_test_osv_query_errors 1
 	`)))
 }
+
+func TestFilterVulnsAffectingPurl(t *testing.T) {
+	const purl = "pkg:apk/alpine/busybox@1.36.1-r19?arch=x86_64&distro=alpine-3.19"
+	affected := osv_models.Affected{Versions: []string{"1.36.1-r18"}}
+	affected.Package.Name = "busybox"
+	affected.Package.Ecosystem = "Alpine:v3.19"
+	fixed := osv_models.Vulnerability{ID: "CVE-2023-42363", Affected: []osv_models.Affected{affected}}
+	affected.Package.Purl = "pkg:apk/alpine/busybox?arch=source"
+	affected.Versions = []string{"1.36.1-r19"}
+	current := osv_models.Vulnerability{ID: "affected", Affected: []osv_models.Affected{affected}}
+	affected.Package.Ecosystem = "Alpine:v3.18"
+	other := osv_models.Vulnerability{ID: "other-release", Affected: []osv_models.Affected{affected}}
+	assert.Equal(t, []osv_models.Vulnerability{current}, filterVulnsAffectingPurl(purl, []osv_models.Vulnerability{fixed, current, other}))
+}
