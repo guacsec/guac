@@ -22,12 +22,15 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	attestation_license "github.com/guacsec/guac/pkg/certifier/attestation/license"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
@@ -154,6 +157,89 @@ func TestParser(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.wantHSA, ip.HasSourceAt, ignoreHSATimestamp); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestGetIdentifiers(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	gitBlob := []byte(`{
+		"_type": "https://in-toto.io/Statement/v1",
+		"subject": [{"uri": "pkg:npm/lodash@4.17.21"}],
+		"predicateType": "https://in-toto.io/attestation/clearlydefined/v0.1",
+		"predicate": {
+			"definition": {
+				"licensed": {"declared": "MIT"},
+				"described": {
+					"sourceLocation": {
+						"type": "git",
+						"provider": "github",
+						"namespace": "lodash",
+						"name": "lodash",
+						"revision": "f299b52f39486275a9e6483b60a410e06520c538",
+						"url": "https://github.com/lodash/lodash/tree/f299b52f39486275a9e6483b60a410e06520c538"
+					}
+				},
+				"_meta": {"updated": "2022-11-21T17:45:50.52Z"}
+			},
+			"metadata": {"scannedOn": "2022-11-21T17:45:50.52Z"}
+		}
+	}`)
+	tests := []struct {
+		name string
+		blob []byte
+		want *common.IdentifierStrings
+	}{{
+		name: "git source location becomes a vcs string",
+		blob: gitBlob,
+		want: &common.IdentifierStrings{VcsStrings: []string{"git+https://github.com/lodash/lodash"}},
+	}, {
+		name: "source archive has no vcs string",
+		blob: testdata.ITE6CDLog4j,
+		want: &common.IdentifierStrings{},
+	}, {
+		name: "no source location",
+		blob: testdata.ITE6CDSourceLog4j,
+		want: &common.IdentifierStrings{},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := NewLegalCertificationParser()
+			if err := s.Parse(ctx, &processor.Document{
+				Blob:   tt.blob,
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentITE6ClearlyDefined,
+			}); err != nil {
+				t.Fatalf("parser.Parse() error = %v", err)
+			}
+			got, err := s.GetIdentifiers(ctx)
+			if err != nil {
+				t.Fatalf("parser.GetIdentifiers() error = %v", err)
+			}
+			if diff := cmp.Diff(tt.want, got, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("Unexpected identifiers (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestSourceLocationToVcs(t *testing.T) {
+	tests := []struct {
+		name string
+		loc  attestation_license.SourceLocation
+		want string
+	}{
+		{name: "github", loc: attestation_license.SourceLocation{Type: "git", Provider: "github", Namespace: "guacsec", Name: "guac", Revision: "v0.1.0"}, want: "git+https://github.com/guacsec/guac"},
+		{name: "gitlab", loc: attestation_license.SourceLocation{Type: "git", Provider: "gitlab", Namespace: "gitlab-org", Name: "gitlab-runner"}, want: "git+https://gitlab.com/gitlab-org/gitlab-runner"},
+		{name: "unknown git provider", loc: attestation_license.SourceLocation{Type: "git", Provider: "bitbucket", Namespace: "a", Name: "b"}},
+		{name: "source archive", loc: attestation_license.SourceLocation{Type: "sourcearchive", Provider: "mavencentral", Namespace: "org.apache.logging.log4j", Name: "log4j-core"}},
+		{name: "missing namespace", loc: attestation_license.SourceLocation{Type: "git", Provider: "github", Name: "guac"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := sourceLocationToVcs(&tt.loc); got != tt.want {
+				t.Errorf("sourceLocationToVcs() = %q, want %q", got, tt.want)
 			}
 		})
 	}

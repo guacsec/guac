@@ -41,6 +41,7 @@ type parser struct {
 	src                   *generated.SourceInputSpec
 	collectedCertifyLegal []assembler.CertifyLegalIngest
 	hasSourceAt           []assembler.HasSourceAtIngest
+	identifierStrings     *common.IdentifierStrings
 }
 
 // NewLegalCertificationParser initializes the parser
@@ -54,6 +55,7 @@ func (c *parser) initializeCDParser() {
 	c.src = nil
 	c.collectedCertifyLegal = make([]assembler.CertifyLegalIngest, 0)
 	c.hasSourceAt = make([]assembler.HasSourceAtIngest, 0)
+	c.identifierStrings = &common.IdentifierStrings{}
 }
 
 // Parse breaks out the document into the graph components
@@ -162,6 +164,9 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation_license.C
 
 	if s.Predicate.Definition.Described.SourceLocation != nil {
 		sourceLocation := s.Predicate.Definition.Described.SourceLocation
+		if vcs := sourceLocationToVcs(sourceLocation); vcs != "" {
+			c.identifierStrings.VcsStrings = append(c.identifierStrings.VcsStrings, vcs)
+		}
 		srcInput := helpers.SourceToSourceInput(sourceLocation.Type, sourceLocation.Namespace,
 			sourceLocation.Name, &sourceLocation.Revision)
 		if c.pkg != nil {
@@ -179,6 +184,27 @@ func (c *parser) parseClearlyDefined(_ context.Context, s *attestation_license.C
 	return nil
 }
 
+// sourceLocationToVcs turns a ClearlyDefined git source location into a VCS string, such as
+// git+https://github.com/guacsec/guac, so collectors can follow the package to its repository.
+// The revision is left out because the GitHub collector treats a VCS revision as a release tag,
+// and ClearlyDefined revisions are usually commit hashes. Source archives and other providers
+// have no repository to collect from, so they return an empty string.
+func sourceLocationToVcs(loc *attestation_license.SourceLocation) string {
+	if loc.Type != "git" || loc.Namespace == "" || loc.Name == "" {
+		return ""
+	}
+	var host string
+	switch loc.Provider {
+	case "github":
+		host = "github.com"
+	case "gitlab":
+		host = "gitlab.com"
+	default:
+		return ""
+	}
+	return fmt.Sprintf("git+https://%s/%s/%s", host, loc.Namespace, loc.Name)
+}
+
 func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	return &assembler.IngestPredicates{
 		CertifyLegal: c.collectedCertifyLegal,
@@ -191,6 +217,9 @@ func (c *parser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 
+// GetIdentifiers returns the source repositories found in the definitions. The subject purls
+// are left out, they come from documents that were already ingested.
 func (c *parser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	common.RemoveDuplicateIdentifiers(c.identifierStrings)
+	return c.identifierStrings, nil
 }

@@ -72,3 +72,14 @@ func Test_DsseParser(t *testing.T) {
 		})
 	}
 }
+
+func Test_DsseParserGetIdentifiers(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	got, err := NewDSSEParser().GetIdentifiers(ctx)
+	if err != nil {
+		t.Fatalf("GetIdentifiers() error = %v", err)
+	}
+	if diff := cmp.Diff(&common.IdentifierStrings{}, got); diff != "" {
+		t.Errorf("Unexpected identifiers (-want +got):\n%s", diff)
+	}
+}
