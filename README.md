@@ -67,7 +67,8 @@ refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
 - [CycloneDX](https://github.com/CycloneDX/specification)
 - [Dead Simple Signing Envelope](https://github.com/secure-systems-lab/dsse)
 - [Deps.dev API](https://deps.dev/)
-- [In-toto ITE6](https://github.com/in-toto/attestation)
+- [In-toto ITE6](https://github.com/in-toto/attestation), including statements
+  with an SPDX or CycloneDX predicate (e.g. from `syft attest`)
 - [OpenSSF Scorecard](https://github.com/ossf/scorecard)
 - [OSV](https://osv.dev/)
 - [SLSA](https://github.com/slsa-framework/slsa)

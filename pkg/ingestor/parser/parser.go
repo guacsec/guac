@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/deps_dev"
 	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
 	"github.com/guacsec/guac/pkg/ingestor/parser/eol"
+	"github.com/guacsec/guac/pkg/ingestor/parser/intoto_sbom"
 	"github.com/guacsec/guac/pkg/ingestor/parser/malware"
 	"github.com/guacsec/guac/pkg/ingestor/parser/opaque"
 	"github.com/guacsec/guac/pkg/ingestor/parser/open_vex"
@@ -53,6 +54,7 @@ func init() {
 	_ = RegisterDocumentParser(open_vex.NewOpenVEXParser, processor.DocumentOpenVEX)
 	_ = RegisterDocumentParser(eol.NewEOLCertificationParser, processor.DocumentITE6EOL)
 	_ = RegisterDocumentParser(malware.NewMalwareCertificationParser, processor.DocumentITE6Malware)
+	_ = RegisterDocumentParser(intoto_sbom.NewIntotoSBOMParser, processor.DocumentITE6SBOM)
 	_ = RegisterDocumentParser(reference.NewReferenceParser, processor.DocumentITE6Reference)
 	_ = RegisterDocumentParser(opaque.NewOpaqueParser, processor.DocumentOpaque)
 }
