@@ -29,23 +29,24 @@ type assembler struct{} //nolint: unused
 // ingestion of the software trees are implicit and handled by the
 // client library.
 type IngestPredicates struct {
-	CertifyScorecard []CertifyScorecardIngest `json:"certifyScorecard,omitempty"`
-	IsDependency     []IsDependencyIngest     `json:"isDependency,omitempty"`
-	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
-	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
-	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`
-	VulnEqual        []VulnEqualIngest        `json:"vulnEqual,omitempty"`
-	HasSourceAt      []HasSourceAtIngest      `json:"hasSourceAt,omitempty"`
-	CertifyBad       []CertifyBadIngest       `json:"certifyBad,omitempty"`
-	CertifyGood      []CertifyGoodIngest      `json:"certifyGood,omitempty"`
-	HasSBOM          []HasSBOMIngest          `json:"hasSBOM,omitempty"`
-	HashEqual        []HashEqualIngest        `json:"hashEqual,omitempty"`
-	PkgEqual         []PkgEqualIngest         `json:"pkgEqual,omitempty"`
-	Vex              []VexIngest              `json:"vex,omitempty"`
-	PointOfContact   []PointOfContactIngest   `json:"contact,omitempty"`
-	VulnMetadata     []VulnMetadataIngest     `json:"vulnMetadata,omitempty"`
-	HasMetadata      []HasMetadataIngest      `json:"hasMetadata,omitempty"`
-	CertifyLegal     []CertifyLegalIngest     `json:"certifyLegal,omitempty"`
+	SafetyAssertions []*generated.SafetyAssertionInputSpec `json:"safetyAssertions,omitempty"`
+	CertifyScorecard []CertifyScorecardIngest              `json:"certifyScorecard,omitempty"`
+	IsDependency     []IsDependencyIngest                  `json:"isDependency,omitempty"`
+	IsOccurrence     []IsOccurrenceIngest                  `json:"isOccurrence,omitempty"`
+	HasSlsa          []HasSlsaIngest                       `json:"hasSlsa,omitempty"`
+	CertifyVuln      []CertifyVulnIngest                   `json:"certifyVuln,omitempty"`
+	VulnEqual        []VulnEqualIngest                     `json:"vulnEqual,omitempty"`
+	HasSourceAt      []HasSourceAtIngest                   `json:"hasSourceAt,omitempty"`
+	CertifyBad       []CertifyBadIngest                    `json:"certifyBad,omitempty"`
+	CertifyGood      []CertifyGoodIngest                   `json:"certifyGood,omitempty"`
+	HasSBOM          []HasSBOMIngest                       `json:"hasSBOM,omitempty"`
+	HashEqual        []HashEqualIngest                     `json:"hashEqual,omitempty"`
+	PkgEqual         []PkgEqualIngest                      `json:"pkgEqual,omitempty"`
+	Vex              []VexIngest                           `json:"vex,omitempty"`
+	PointOfContact   []PointOfContactIngest                `json:"contact,omitempty"`
+	VulnMetadata     []VulnMetadataIngest                  `json:"vulnMetadata,omitempty"`
+	HasMetadata      []HasMetadataIngest                   `json:"hasMetadata,omitempty"`
+	CertifyLegal     []CertifyLegalIngest                  `json:"certifyLegal,omitempty"`
 }
 
 type CertifyScorecardIngest struct {

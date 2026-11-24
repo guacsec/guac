@@ -34,6 +34,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/safetyassertiondocument"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -84,6 +86,10 @@ type Client struct {
 	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
+	// SafetyAssertion is the client for interacting with the SafetyAssertion builders.
+	SafetyAssertion *SafetyAssertionClient
+	// SafetyAssertionDocument is the client for interacting with the SafetyAssertionDocument builders.
+	SafetyAssertionDocument *SafetyAssertionDocumentClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
@@ -122,6 +128,8 @@ func (c *Client) init() {
 	c.PkgEqual = NewPkgEqualClient(c.config)
 	c.PointOfContact = NewPointOfContactClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
+	c.SafetyAssertion = NewSafetyAssertionClient(c.config)
+	c.SafetyAssertionDocument = NewSafetyAssertionDocumentClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.VulnEqual = NewVulnEqualClient(c.config)
 	c.VulnerabilityID = NewVulnerabilityIDClient(c.config)
@@ -216,31 +224,33 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                   ctx,
-		config:                cfg,
-		Artifact:              NewArtifactClient(cfg),
-		BillOfMaterials:       NewBillOfMaterialsClient(cfg),
-		Builder:               NewBuilderClient(cfg),
-		Certification:         NewCertificationClient(cfg),
-		CertifyLegal:          NewCertifyLegalClient(cfg),
-		CertifyScorecard:      NewCertifyScorecardClient(cfg),
-		CertifyVex:            NewCertifyVexClient(cfg),
-		CertifyVuln:           NewCertifyVulnClient(cfg),
-		Dependency:            NewDependencyClient(cfg),
-		HasMetadata:           NewHasMetadataClient(cfg),
-		HasSourceAt:           NewHasSourceAtClient(cfg),
-		HashEqual:             NewHashEqualClient(cfg),
-		License:               NewLicenseClient(cfg),
-		Occurrence:            NewOccurrenceClient(cfg),
-		PackageName:           NewPackageNameClient(cfg),
-		PackageVersion:        NewPackageVersionClient(cfg),
-		PkgEqual:              NewPkgEqualClient(cfg),
-		PointOfContact:        NewPointOfContactClient(cfg),
-		SLSAAttestation:       NewSLSAAttestationClient(cfg),
-		SourceName:            NewSourceNameClient(cfg),
-		VulnEqual:             NewVulnEqualClient(cfg),
-		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
-		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Artifact:                NewArtifactClient(cfg),
+		BillOfMaterials:         NewBillOfMaterialsClient(cfg),
+		Builder:                 NewBuilderClient(cfg),
+		Certification:           NewCertificationClient(cfg),
+		CertifyLegal:            NewCertifyLegalClient(cfg),
+		CertifyScorecard:        NewCertifyScorecardClient(cfg),
+		CertifyVex:              NewCertifyVexClient(cfg),
+		CertifyVuln:             NewCertifyVulnClient(cfg),
+		Dependency:              NewDependencyClient(cfg),
+		HasMetadata:             NewHasMetadataClient(cfg),
+		HasSourceAt:             NewHasSourceAtClient(cfg),
+		HashEqual:               NewHashEqualClient(cfg),
+		License:                 NewLicenseClient(cfg),
+		Occurrence:              NewOccurrenceClient(cfg),
+		PackageName:             NewPackageNameClient(cfg),
+		PackageVersion:          NewPackageVersionClient(cfg),
+		PkgEqual:                NewPkgEqualClient(cfg),
+		PointOfContact:          NewPointOfContactClient(cfg),
+		SLSAAttestation:         NewSLSAAttestationClient(cfg),
+		SafetyAssertion:         NewSafetyAssertionClient(cfg),
+		SafetyAssertionDocument: NewSafetyAssertionDocumentClient(cfg),
+		SourceName:              NewSourceNameClient(cfg),
+		VulnEqual:               NewVulnEqualClient(cfg),
+		VulnerabilityID:         NewVulnerabilityIDClient(cfg),
+		VulnerabilityMetadata:   NewVulnerabilityMetadataClient(cfg),
 	}, nil
 }
 
@@ -258,31 +268,33 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                   ctx,
-		config:                cfg,
-		Artifact:              NewArtifactClient(cfg),
-		BillOfMaterials:       NewBillOfMaterialsClient(cfg),
-		Builder:               NewBuilderClient(cfg),
-		Certification:         NewCertificationClient(cfg),
-		CertifyLegal:          NewCertifyLegalClient(cfg),
-		CertifyScorecard:      NewCertifyScorecardClient(cfg),
-		CertifyVex:            NewCertifyVexClient(cfg),
-		CertifyVuln:           NewCertifyVulnClient(cfg),
-		Dependency:            NewDependencyClient(cfg),
-		HasMetadata:           NewHasMetadataClient(cfg),
-		HasSourceAt:           NewHasSourceAtClient(cfg),
-		HashEqual:             NewHashEqualClient(cfg),
-		License:               NewLicenseClient(cfg),
-		Occurrence:            NewOccurrenceClient(cfg),
-		PackageName:           NewPackageNameClient(cfg),
-		PackageVersion:        NewPackageVersionClient(cfg),
-		PkgEqual:              NewPkgEqualClient(cfg),
-		PointOfContact:        NewPointOfContactClient(cfg),
-		SLSAAttestation:       NewSLSAAttestationClient(cfg),
-		SourceName:            NewSourceNameClient(cfg),
-		VulnEqual:             NewVulnEqualClient(cfg),
-		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
-		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Artifact:                NewArtifactClient(cfg),
+		BillOfMaterials:         NewBillOfMaterialsClient(cfg),
+		Builder:                 NewBuilderClient(cfg),
+		Certification:           NewCertificationClient(cfg),
+		CertifyLegal:            NewCertifyLegalClient(cfg),
+		CertifyScorecard:        NewCertifyScorecardClient(cfg),
+		CertifyVex:              NewCertifyVexClient(cfg),
+		CertifyVuln:             NewCertifyVulnClient(cfg),
+		Dependency:              NewDependencyClient(cfg),
+		HasMetadata:             NewHasMetadataClient(cfg),
+		HasSourceAt:             NewHasSourceAtClient(cfg),
+		HashEqual:               NewHashEqualClient(cfg),
+		License:                 NewLicenseClient(cfg),
+		Occurrence:              NewOccurrenceClient(cfg),
+		PackageName:             NewPackageNameClient(cfg),
+		PackageVersion:          NewPackageVersionClient(cfg),
+		PkgEqual:                NewPkgEqualClient(cfg),
+		PointOfContact:          NewPointOfContactClient(cfg),
+		SLSAAttestation:         NewSLSAAttestationClient(cfg),
+		SafetyAssertion:         NewSafetyAssertionClient(cfg),
+		SafetyAssertionDocument: NewSafetyAssertionDocumentClient(cfg),
+		SourceName:              NewSourceNameClient(cfg),
+		VulnEqual:               NewVulnEqualClient(cfg),
+		VulnerabilityID:         NewVulnerabilityIDClient(cfg),
+		VulnerabilityMetadata:   NewVulnerabilityMetadataClient(cfg),
 	}, nil
 }
 
@@ -316,7 +328,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
 		c.HasSourceAt, c.HashEqual, c.License, c.Occurrence, c.PackageName,
 		c.PackageVersion, c.PkgEqual, c.PointOfContact, c.SLSAAttestation,
-		c.SourceName, c.VulnEqual, c.VulnerabilityID, c.VulnerabilityMetadata,
+		c.SafetyAssertion, c.SafetyAssertionDocument, c.SourceName, c.VulnEqual,
+		c.VulnerabilityID, c.VulnerabilityMetadata,
 	} {
 		n.Use(hooks...)
 	}
@@ -330,7 +343,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
 		c.HasSourceAt, c.HashEqual, c.License, c.Occurrence, c.PackageName,
 		c.PackageVersion, c.PkgEqual, c.PointOfContact, c.SLSAAttestation,
-		c.SourceName, c.VulnEqual, c.VulnerabilityID, c.VulnerabilityMetadata,
+		c.SafetyAssertion, c.SafetyAssertionDocument, c.SourceName, c.VulnEqual,
+		c.VulnerabilityID, c.VulnerabilityMetadata,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -377,6 +391,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PointOfContact.mutate(ctx, m)
 	case *SLSAAttestationMutation:
 		return c.SLSAAttestation.mutate(ctx, m)
+	case *SafetyAssertionMutation:
+		return c.SafetyAssertion.mutate(ctx, m)
+	case *SafetyAssertionDocumentMutation:
+		return c.SafetyAssertionDocument.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
 	case *VulnEqualMutation:
@@ -4181,6 +4199,336 @@ func (c *SLSAAttestationClient) mutate(ctx context.Context, m *SLSAAttestationMu
 	}
 }
 
+// SafetyAssertionClient is a client for the SafetyAssertion schema.
+type SafetyAssertionClient struct {
+	config
+}
+
+// NewSafetyAssertionClient returns a client for the SafetyAssertion from the given config.
+func NewSafetyAssertionClient(c config) *SafetyAssertionClient {
+	return &SafetyAssertionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `safetyassertion.Hooks(f(g(h())))`.
+func (c *SafetyAssertionClient) Use(hooks ...Hook) {
+	c.hooks.SafetyAssertion = append(c.hooks.SafetyAssertion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `safetyassertion.Intercept(f(g(h())))`.
+func (c *SafetyAssertionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SafetyAssertion = append(c.inters.SafetyAssertion, interceptors...)
+}
+
+// Create returns a builder for creating a SafetyAssertion entity.
+func (c *SafetyAssertionClient) Create() *SafetyAssertionCreate {
+	mutation := newSafetyAssertionMutation(c.config, OpCreate)
+	return &SafetyAssertionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SafetyAssertion entities.
+func (c *SafetyAssertionClient) CreateBulk(builders ...*SafetyAssertionCreate) *SafetyAssertionCreateBulk {
+	return &SafetyAssertionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SafetyAssertionClient) MapCreateBulk(slice any, setFunc func(*SafetyAssertionCreate, int)) *SafetyAssertionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SafetyAssertionCreateBulk{err: fmt.Errorf("calling to SafetyAssertionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SafetyAssertionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SafetyAssertionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SafetyAssertion.
+func (c *SafetyAssertionClient) Update() *SafetyAssertionUpdate {
+	mutation := newSafetyAssertionMutation(c.config, OpUpdate)
+	return &SafetyAssertionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SafetyAssertionClient) UpdateOne(_m *SafetyAssertion) *SafetyAssertionUpdateOne {
+	mutation := newSafetyAssertionMutation(c.config, OpUpdateOne, withSafetyAssertion(_m))
+	return &SafetyAssertionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SafetyAssertionClient) UpdateOneID(id uuid.UUID) *SafetyAssertionUpdateOne {
+	mutation := newSafetyAssertionMutation(c.config, OpUpdateOne, withSafetyAssertionID(id))
+	return &SafetyAssertionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SafetyAssertion.
+func (c *SafetyAssertionClient) Delete() *SafetyAssertionDelete {
+	mutation := newSafetyAssertionMutation(c.config, OpDelete)
+	return &SafetyAssertionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SafetyAssertionClient) DeleteOne(_m *SafetyAssertion) *SafetyAssertionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SafetyAssertionClient) DeleteOneID(id uuid.UUID) *SafetyAssertionDeleteOne {
+	builder := c.Delete().Where(safetyassertion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SafetyAssertionDeleteOne{builder}
+}
+
+// Query returns a query builder for SafetyAssertion.
+func (c *SafetyAssertionClient) Query() *SafetyAssertionQuery {
+	return &SafetyAssertionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSafetyAssertion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SafetyAssertion entity by its id.
+func (c *SafetyAssertionClient) Get(ctx context.Context, id uuid.UUID) (*SafetyAssertion, error) {
+	return c.Query().Where(safetyassertion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SafetyAssertionClient) GetX(ctx context.Context, id uuid.UUID) *SafetyAssertion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDocument queries the document edge of a SafetyAssertion.
+func (c *SafetyAssertionClient) QueryDocument(_m *SafetyAssertion) *SafetyAssertionDocumentQuery {
+	query := (&SafetyAssertionDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, id),
+			sqlgraph.To(safetyassertiondocument.Table, safetyassertiondocument.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, safetyassertion.DocumentTable, safetyassertion.DocumentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryResolvedProduct queries the resolved_product edge of a SafetyAssertion.
+func (c *SafetyAssertionClient) QueryResolvedProduct(_m *SafetyAssertion) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, safetyassertion.ResolvedProductTable, safetyassertion.ResolvedProductColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryResolvedComponent queries the resolved_component edge of a SafetyAssertion.
+func (c *SafetyAssertionClient) QueryResolvedComponent(_m *SafetyAssertion) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertion.Table, safetyassertion.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, safetyassertion.ResolvedComponentTable, safetyassertion.ResolvedComponentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SafetyAssertionClient) Hooks() []Hook {
+	return c.hooks.SafetyAssertion
+}
+
+// Interceptors returns the client interceptors.
+func (c *SafetyAssertionClient) Interceptors() []Interceptor {
+	return c.inters.SafetyAssertion
+}
+
+func (c *SafetyAssertionClient) mutate(ctx context.Context, m *SafetyAssertionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SafetyAssertionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SafetyAssertionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SafetyAssertionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SafetyAssertionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SafetyAssertion mutation op: %q", m.Op())
+	}
+}
+
+// SafetyAssertionDocumentClient is a client for the SafetyAssertionDocument schema.
+type SafetyAssertionDocumentClient struct {
+	config
+}
+
+// NewSafetyAssertionDocumentClient returns a client for the SafetyAssertionDocument from the given config.
+func NewSafetyAssertionDocumentClient(c config) *SafetyAssertionDocumentClient {
+	return &SafetyAssertionDocumentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `safetyassertiondocument.Hooks(f(g(h())))`.
+func (c *SafetyAssertionDocumentClient) Use(hooks ...Hook) {
+	c.hooks.SafetyAssertionDocument = append(c.hooks.SafetyAssertionDocument, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `safetyassertiondocument.Intercept(f(g(h())))`.
+func (c *SafetyAssertionDocumentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SafetyAssertionDocument = append(c.inters.SafetyAssertionDocument, interceptors...)
+}
+
+// Create returns a builder for creating a SafetyAssertionDocument entity.
+func (c *SafetyAssertionDocumentClient) Create() *SafetyAssertionDocumentCreate {
+	mutation := newSafetyAssertionDocumentMutation(c.config, OpCreate)
+	return &SafetyAssertionDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SafetyAssertionDocument entities.
+func (c *SafetyAssertionDocumentClient) CreateBulk(builders ...*SafetyAssertionDocumentCreate) *SafetyAssertionDocumentCreateBulk {
+	return &SafetyAssertionDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SafetyAssertionDocumentClient) MapCreateBulk(slice any, setFunc func(*SafetyAssertionDocumentCreate, int)) *SafetyAssertionDocumentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SafetyAssertionDocumentCreateBulk{err: fmt.Errorf("calling to SafetyAssertionDocumentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SafetyAssertionDocumentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SafetyAssertionDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SafetyAssertionDocument.
+func (c *SafetyAssertionDocumentClient) Update() *SafetyAssertionDocumentUpdate {
+	mutation := newSafetyAssertionDocumentMutation(c.config, OpUpdate)
+	return &SafetyAssertionDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SafetyAssertionDocumentClient) UpdateOne(_m *SafetyAssertionDocument) *SafetyAssertionDocumentUpdateOne {
+	mutation := newSafetyAssertionDocumentMutation(c.config, OpUpdateOne, withSafetyAssertionDocument(_m))
+	return &SafetyAssertionDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SafetyAssertionDocumentClient) UpdateOneID(id uuid.UUID) *SafetyAssertionDocumentUpdateOne {
+	mutation := newSafetyAssertionDocumentMutation(c.config, OpUpdateOne, withSafetyAssertionDocumentID(id))
+	return &SafetyAssertionDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SafetyAssertionDocument.
+func (c *SafetyAssertionDocumentClient) Delete() *SafetyAssertionDocumentDelete {
+	mutation := newSafetyAssertionDocumentMutation(c.config, OpDelete)
+	return &SafetyAssertionDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SafetyAssertionDocumentClient) DeleteOne(_m *SafetyAssertionDocument) *SafetyAssertionDocumentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SafetyAssertionDocumentClient) DeleteOneID(id uuid.UUID) *SafetyAssertionDocumentDeleteOne {
+	builder := c.Delete().Where(safetyassertiondocument.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SafetyAssertionDocumentDeleteOne{builder}
+}
+
+// Query returns a query builder for SafetyAssertionDocument.
+func (c *SafetyAssertionDocumentClient) Query() *SafetyAssertionDocumentQuery {
+	return &SafetyAssertionDocumentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSafetyAssertionDocument},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SafetyAssertionDocument entity by its id.
+func (c *SafetyAssertionDocumentClient) Get(ctx context.Context, id uuid.UUID) (*SafetyAssertionDocument, error) {
+	return c.Query().Where(safetyassertiondocument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SafetyAssertionDocumentClient) GetX(ctx context.Context, id uuid.UUID) *SafetyAssertionDocument {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAssertions queries the assertions edge of a SafetyAssertionDocument.
+func (c *SafetyAssertionDocumentClient) QueryAssertions(_m *SafetyAssertionDocument) *SafetyAssertionQuery {
+	query := (&SafetyAssertionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(safetyassertiondocument.Table, safetyassertiondocument.FieldID, id),
+			sqlgraph.To(safetyassertion.Table, safetyassertion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, safetyassertiondocument.AssertionsTable, safetyassertiondocument.AssertionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SafetyAssertionDocumentClient) Hooks() []Hook {
+	return c.hooks.SafetyAssertionDocument
+}
+
+// Interceptors returns the client interceptors.
+func (c *SafetyAssertionDocumentClient) Interceptors() []Interceptor {
+	return c.inters.SafetyAssertionDocument
+}
+
+func (c *SafetyAssertionDocumentClient) mutate(ctx context.Context, m *SafetyAssertionDocumentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SafetyAssertionDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SafetyAssertionDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SafetyAssertionDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SafetyAssertionDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SafetyAssertionDocument mutation op: %q", m.Op())
+	}
+}
+
 // SourceNameClient is a client for the SourceName schema.
 type SourceNameClient struct {
 	config
@@ -4959,14 +5307,16 @@ type (
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
 		HasSourceAt, HashEqual, License, Occurrence, PackageName, PackageVersion,
-		PkgEqual, PointOfContact, SLSAAttestation, SourceName, VulnEqual,
-		VulnerabilityID, VulnerabilityMetadata []ent.Hook
+		PkgEqual, PointOfContact, SLSAAttestation, SafetyAssertion,
+		SafetyAssertionDocument, SourceName, VulnEqual, VulnerabilityID,
+		VulnerabilityMetadata []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
 		HasSourceAt, HashEqual, License, Occurrence, PackageName, PackageVersion,
-		PkgEqual, PointOfContact, SLSAAttestation, SourceName, VulnEqual,
-		VulnerabilityID, VulnerabilityMetadata []ent.Interceptor
+		PkgEqual, PointOfContact, SLSAAttestation, SafetyAssertion,
+		SafetyAssertionDocument, SourceName, VulnEqual, VulnerabilityID,
+		VulnerabilityMetadata []ent.Interceptor
 	}
 )

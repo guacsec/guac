@@ -1,19 +1,19 @@
-# SRAC document validation foundation
+# SRAC document ingestion and reconciliation
 
-This change defines and validates the externally authored Safety Relevance
-Assertion Capability (SRAC) interchange document used by the product-context
-example in #3256.
+GUAC validates and ingests the externally authored Safety Relevance Assertion
+Capability (SRAC) interchange document used by the product-context example in
+#3256.
 
-The current slice deliberately stops before graph ingestion. In particular, it
-does not project safety assertions into `HasMetadata`. The maintainer review of
-#3271 confirmed that the permanent implementation requires a dedicated,
-queryable safety-assertion ontology connecting the product, component, evidence,
-provenance, and review state.
+SRAC documents are recognized by the document guesser and processed through the
+normal parser and assembler pipeline. They create dedicated safety assertions
+connecting declared product/component identities, evidence, provenance, and
+review state. They do not create package placeholders or `HasMetadata`
+projections.
 
-The proposed ontology and out-of-order resolution lifecycle are tracked in
-#3272. After maintainers approve that contract, the GUAC document guesser,
-processor, parser, backend, GraphQL API, and certifier can be wired to the same
-first-class predicate.
+The Ent/PostgreSQL implementation and GraphQL API support out-of-order
+resolution with `guacone certifier safety-assertions`, once or with
+`--poll --interval 5m`. See
+[usage, supported draft fields, and tests](srac-safety-assertion-usage.md).
 
 ## Validation performed here
 
@@ -27,27 +27,27 @@ The `pkg/srac` package:
 - rejects name-only component matching;
 - validates safety-relevance and decision-status values;
 - requires a reviewer for reviewed, approved, or rejected assertions;
-- validates supplied SHA-256 evidence and component digests; and
+- validates SHA-256 evidence digests and SHA-256/384/512 subject digests; and
 - rejects duplicate assertion identifiers within a document.
 
 The synthetic fixture in `docs/examples/srac/product-context.srac.json` shows
 the same component used in two products with different externally authored
 safety contexts.
 
-## Follow-up implementation boundary
+## Resolution
 
-The accepted ontology must provide queryable fields rather than an opaque JSON
-value. The planned resolution flow is:
+The resolution flow is:
 
 ```text
 SRAC document -> declared assertion target -> certifier resolution -> typed
 product/assertion/component graph binding
 ```
 
-The certifier will own correlation after the ontology exists. It will normalize
-pURLs before comparison, preserve missing endpoints as pending or unmatched,
-distinguish missing digest data from a conflicting digest, and avoid creating
-placeholder package nodes solely because an assertion arrived first.
+The certifier resolves complete package identities, including qualifiers and
+subpaths. Missing endpoints or digest observations remain `PENDING`; unique
+matches produce a typed `MATCHED` binding. Ambiguous identities, conflicting
+digests, and expired assertions remain visible without an active binding.
+Repeated runs preserve one binding and do not retarget a later product version.
 
-GUAC will preserve and expose externally authored assertions. It will not infer
+GUAC preserves and exposes externally authored assertions. It does not infer
 safety relevance or approve safety decisions.

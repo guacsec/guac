@@ -39,6 +39,9 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 		ingestedIDs := &AssemblerIngestedIDs{}
 
 		for _, p := range preds {
+			if err := ingestSafetyAssertions(ctx, gqlclient, p.SafetyAssertions); err != nil {
+				return nil, err
+			}
 
 			// Ingest Packages
 			packageIDs := make([]string, 0)

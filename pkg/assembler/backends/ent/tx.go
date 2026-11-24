@@ -50,6 +50,10 @@ type Tx struct {
 	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
+	// SafetyAssertion is the client for interacting with the SafetyAssertion builders.
+	SafetyAssertion *SafetyAssertionClient
+	// SafetyAssertionDocument is the client for interacting with the SafetyAssertionDocument builders.
+	SafetyAssertionDocument *SafetyAssertionDocumentClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
@@ -208,6 +212,8 @@ func (tx *Tx) init() {
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
 	tx.PointOfContact = NewPointOfContactClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
+	tx.SafetyAssertion = NewSafetyAssertionClient(tx.config)
+	tx.SafetyAssertionDocument = NewSafetyAssertionDocumentClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.VulnEqual = NewVulnEqualClient(tx.config)
 	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)

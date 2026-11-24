@@ -808,6 +808,42 @@ func (_m *SLSAAttestation) Subject(ctx context.Context) (*Artifact, error) {
 	return result, err
 }
 
+func (_m *SafetyAssertion) Document(ctx context.Context) (*SafetyAssertionDocument, error) {
+	result, err := _m.Edges.DocumentOrErr()
+	if IsNotLoaded(err) {
+		result, err = _m.QueryDocument().Only(ctx)
+	}
+	return result, err
+}
+
+func (_m *SafetyAssertion) ResolvedProduct(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.ResolvedProductOrErr()
+	if IsNotLoaded(err) {
+		result, err = _m.QueryResolvedProduct().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (_m *SafetyAssertion) ResolvedComponent(ctx context.Context) (*PackageVersion, error) {
+	result, err := _m.Edges.ResolvedComponentOrErr()
+	if IsNotLoaded(err) {
+		result, err = _m.QueryResolvedComponent().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (_m *SafetyAssertionDocument) Assertions(ctx context.Context) (result []*SafetyAssertion, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = _m.NamedAssertions(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = _m.Edges.AssertionsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = _m.QueryAssertions().All(ctx)
+	}
+	return result, err
+}
+
 func (_m *SourceName) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = _m.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)

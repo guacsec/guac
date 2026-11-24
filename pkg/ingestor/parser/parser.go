@@ -37,6 +37,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/scorecard"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
+	"github.com/guacsec/guac/pkg/ingestor/parser/srac"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 )
 
@@ -55,6 +56,7 @@ func init() {
 	_ = RegisterDocumentParser(malware.NewMalwareCertificationParser, processor.DocumentITE6Malware)
 	_ = RegisterDocumentParser(reference.NewReferenceParser, processor.DocumentITE6Reference)
 	_ = RegisterDocumentParser(opaque.NewOpaqueParser, processor.DocumentOpaque)
+	_ = RegisterDocumentParser(srac.NewParser, processor.DocumentSRAC)
 }
 
 var (

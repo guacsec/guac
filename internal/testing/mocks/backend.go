@@ -1046,6 +1046,21 @@ func (mr *MockBackendMockRecorder) IngestSLSAs(ctx, subjects, builtFromList, bui
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestSLSAs", reflect.TypeOf((*MockBackend)(nil).IngestSLSAs), ctx, subjects, builtFromList, builtByList, slsaList)
 }
 
+// IngestSafetyAssertion mocks base method.
+func (m *MockBackend) IngestSafetyAssertion(ctx context.Context, assertion model.SafetyAssertionInputSpec) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestSafetyAssertion", ctx, assertion)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestSafetyAssertion indicates an expected call of IngestSafetyAssertion.
+func (mr *MockBackendMockRecorder) IngestSafetyAssertion(ctx, assertion any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestSafetyAssertion", reflect.TypeOf((*MockBackend)(nil).IngestSafetyAssertion), ctx, assertion)
+}
+
 // IngestScorecard mocks base method.
 func (m *MockBackend) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
 	m.ctrl.T.Helper()
@@ -1479,6 +1494,51 @@ func (m *MockBackend) QueryPackagesListForScan(ctx context.Context, pkgIDs []str
 func (mr *MockBackendMockRecorder) QueryPackagesListForScan(ctx, pkgIDs, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryPackagesListForScan", reflect.TypeOf((*MockBackend)(nil).QueryPackagesListForScan), ctx, pkgIDs, after, first)
+}
+
+// ReconcileSafetyAssertion mocks base method.
+func (m *MockBackend) ReconcileSafetyAssertion(ctx context.Context, id string) (*model.SafetyAssertion, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReconcileSafetyAssertion", ctx, id)
+	ret0, _ := ret[0].(*model.SafetyAssertion)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ReconcileSafetyAssertion indicates an expected call of ReconcileSafetyAssertion.
+func (mr *MockBackendMockRecorder) ReconcileSafetyAssertion(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReconcileSafetyAssertion", reflect.TypeOf((*MockBackend)(nil).ReconcileSafetyAssertion), ctx, id)
+}
+
+// SafetyAssertionList mocks base method.
+func (m *MockBackend) SafetyAssertionList(ctx context.Context, spec model.SafetyAssertionSpec, after *string, first *int) (*model.SafetyAssertionConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SafetyAssertionList", ctx, spec, after, first)
+	ret0, _ := ret[0].(*model.SafetyAssertionConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SafetyAssertionList indicates an expected call of SafetyAssertionList.
+func (mr *MockBackendMockRecorder) SafetyAssertionList(ctx, spec, after, first any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SafetyAssertionList", reflect.TypeOf((*MockBackend)(nil).SafetyAssertionList), ctx, spec, after, first)
+}
+
+// SafetyAssertions mocks base method.
+func (m *MockBackend) SafetyAssertions(ctx context.Context, spec *model.SafetyAssertionSpec) ([]*model.SafetyAssertion, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SafetyAssertions", ctx, spec)
+	ret0, _ := ret[0].([]*model.SafetyAssertion)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SafetyAssertions indicates an expected call of SafetyAssertions.
+func (mr *MockBackendMockRecorder) SafetyAssertions(ctx, spec any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SafetyAssertions", reflect.TypeOf((*MockBackend)(nil).SafetyAssertions), ctx, spec)
 }
 
 // Scorecards mocks base method.

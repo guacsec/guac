@@ -395,6 +395,7 @@ type ComplexityRoot struct {
 		IngestPointOfContact            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
 		IngestPointOfContacts           func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) int
 		IngestSLSAs                     func(childComplexity int, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) int
+		IngestSafetyAssertion           func(childComplexity int, assertion model.SafetyAssertionInputSpec) int
 		IngestScorecard                 func(childComplexity int, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) int
 		IngestScorecards                func(childComplexity int, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) int
 		IngestSlsa                      func(childComplexity int, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) int
@@ -407,6 +408,7 @@ type ComplexityRoot struct {
 		IngestVulnerabilities           func(childComplexity int, vulns []*model.IDorVulnerabilityInput) int
 		IngestVulnerability             func(childComplexity int, vuln model.IDorVulnerabilityInput) int
 		IngestVulnerabilityMetadata     func(childComplexity int, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
+		ReconcileSafetyAssertion        func(childComplexity int, id string) int
 	}
 
 	NeighborConnection struct {
@@ -568,6 +570,8 @@ type ComplexityRoot struct {
 		PointOfContact                 func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
 		PointOfContactList             func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
 		QueryPackagesListForScan       func(childComplexity int, pkgIDs []string, after *string, first *int) int
+		SafetyAssertion                func(childComplexity int, safetyAssertionSpec model.SafetyAssertionSpec) int
+		SafetyAssertionList            func(childComplexity int, safetyAssertionSpec model.SafetyAssertionSpec, after *string, first *int) int
 		Scorecards                     func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
 		ScorecardsList                 func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
 		Sources                        func(childComplexity int, sourceSpec model.SourceSpec) int
@@ -596,6 +600,64 @@ type ComplexityRoot struct {
 	SLSAPredicate struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
+	}
+
+	SafetyAssertion struct {
+		AssertedAt              func(childComplexity int) int
+		AssertionID             func(childComplexity int) int
+		Binding                 func(childComplexity int) int
+		ClassificationScheme    func(childComplexity int) int
+		ClassificationValue     func(childComplexity int) int
+		Collector               func(childComplexity int) int
+		DecisionStatus          func(childComplexity int) int
+		DocumentDigest          func(childComplexity int) int
+		DocumentDigestAlgorithm func(childComplexity int) int
+		DocumentRef             func(childComplexity int) int
+		Evidence                func(childComplexity int) int
+		ID                      func(childComplexity int) int
+		Origin                  func(childComplexity int) int
+		Rationale               func(childComplexity int) int
+		Reviewer                func(childComplexity int) int
+		SafetyRelevance         func(childComplexity int) int
+		SourceAuthority         func(childComplexity int) int
+		Target                  func(childComplexity int) int
+		ValidUntil              func(childComplexity int) int
+	}
+
+	SafetyAssertionBinding struct {
+		Component  func(childComplexity int) int
+		MatchedBy  func(childComplexity int) int
+		Product    func(childComplexity int) int
+		ResolvedAt func(childComplexity int) int
+	}
+
+	SafetyAssertionConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	SafetyAssertionEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	SafetyAssertionTarget struct {
+		ComponentBomRef          func(childComplexity int) int
+		ComponentDigest          func(childComplexity int) int
+		ComponentDigestAlgorithm func(childComplexity int) int
+		ComponentPurl            func(childComplexity int) int
+		CorrelationReason        func(childComplexity int) int
+		CorrelationStatus        func(childComplexity int) int
+		LastEvaluatedAt          func(childComplexity int) int
+		ProductPurl              func(childComplexity int) int
+	}
+
+	SafetyEvidenceReference struct {
+		Digest          func(childComplexity int) int
+		DigestAlgorithm func(childComplexity int) int
+		EvidenceID      func(childComplexity int) int
+		URI             func(childComplexity int) int
 	}
 
 	ScanMetadata struct {
@@ -2303,6 +2365,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.IngestSLSAs(childComplexity, args["subjects"].([]*model.IDorArtifactInput), args["builtFromList"].([][]*model.IDorArtifactInput), args["builtByList"].([]*model.IDorBuilderInput), args["slsaList"].([]*model.SLSAInputSpec)), true
+	case "Mutation.ingestSafetyAssertion":
+		if e.ComplexityRoot.Mutation.IngestSafetyAssertion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestSafetyAssertion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.IngestSafetyAssertion(childComplexity, args["assertion"].(model.SafetyAssertionInputSpec)), true
 	case "Mutation.ingestScorecard":
 		if e.ComplexityRoot.Mutation.IngestScorecard == nil {
 			break
@@ -2435,6 +2508,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
+	case "Mutation.reconcileSafetyAssertion":
+		if e.ComplexityRoot.Mutation.ReconcileSafetyAssertion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_reconcileSafetyAssertion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ReconcileSafetyAssertion(childComplexity, args["id"].(string)), true
 
 	case "NeighborConnection.edges":
 		if e.ComplexityRoot.NeighborConnection.Edges == nil {
@@ -3341,6 +3425,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.QueryPackagesListForScan(childComplexity, args["pkgIDs"].([]string), args["after"].(*string), args["first"].(*int)), true
+	case "Query.SafetyAssertion":
+		if e.ComplexityRoot.Query.SafetyAssertion == nil {
+			break
+		}
+
+		args, err := ec.field_Query_SafetyAssertion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.SafetyAssertion(childComplexity, args["safetyAssertionSpec"].(model.SafetyAssertionSpec)), true
+	case "Query.SafetyAssertionList":
+		if e.ComplexityRoot.Query.SafetyAssertionList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_SafetyAssertionList_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.SafetyAssertionList(childComplexity, args["safetyAssertionSpec"].(model.SafetyAssertionSpec), args["after"].(*string), args["first"].(*int)), true
 	case "Query.scorecards":
 		if e.ComplexityRoot.Query.Scorecards == nil {
 			break
@@ -3525,6 +3631,252 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SLSAPredicate.Value(childComplexity), true
+
+	case "SafetyAssertion.assertedAt":
+		if e.ComplexityRoot.SafetyAssertion.AssertedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.AssertedAt(childComplexity), true
+	case "SafetyAssertion.assertionId":
+		if e.ComplexityRoot.SafetyAssertion.AssertionID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.AssertionID(childComplexity), true
+	case "SafetyAssertion.binding":
+		if e.ComplexityRoot.SafetyAssertion.Binding == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Binding(childComplexity), true
+	case "SafetyAssertion.classificationScheme":
+		if e.ComplexityRoot.SafetyAssertion.ClassificationScheme == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.ClassificationScheme(childComplexity), true
+	case "SafetyAssertion.classificationValue":
+		if e.ComplexityRoot.SafetyAssertion.ClassificationValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.ClassificationValue(childComplexity), true
+	case "SafetyAssertion.collector":
+		if e.ComplexityRoot.SafetyAssertion.Collector == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Collector(childComplexity), true
+	case "SafetyAssertion.decisionStatus":
+		if e.ComplexityRoot.SafetyAssertion.DecisionStatus == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.DecisionStatus(childComplexity), true
+	case "SafetyAssertion.documentDigest":
+		if e.ComplexityRoot.SafetyAssertion.DocumentDigest == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.DocumentDigest(childComplexity), true
+	case "SafetyAssertion.documentDigestAlgorithm":
+		if e.ComplexityRoot.SafetyAssertion.DocumentDigestAlgorithm == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.DocumentDigestAlgorithm(childComplexity), true
+	case "SafetyAssertion.documentRef":
+		if e.ComplexityRoot.SafetyAssertion.DocumentRef == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.DocumentRef(childComplexity), true
+	case "SafetyAssertion.evidence":
+		if e.ComplexityRoot.SafetyAssertion.Evidence == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Evidence(childComplexity), true
+	case "SafetyAssertion.id":
+		if e.ComplexityRoot.SafetyAssertion.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.ID(childComplexity), true
+	case "SafetyAssertion.origin":
+		if e.ComplexityRoot.SafetyAssertion.Origin == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Origin(childComplexity), true
+	case "SafetyAssertion.rationale":
+		if e.ComplexityRoot.SafetyAssertion.Rationale == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Rationale(childComplexity), true
+	case "SafetyAssertion.reviewer":
+		if e.ComplexityRoot.SafetyAssertion.Reviewer == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Reviewer(childComplexity), true
+	case "SafetyAssertion.safetyRelevance":
+		if e.ComplexityRoot.SafetyAssertion.SafetyRelevance == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.SafetyRelevance(childComplexity), true
+	case "SafetyAssertion.sourceAuthority":
+		if e.ComplexityRoot.SafetyAssertion.SourceAuthority == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.SourceAuthority(childComplexity), true
+	case "SafetyAssertion.target":
+		if e.ComplexityRoot.SafetyAssertion.Target == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.Target(childComplexity), true
+	case "SafetyAssertion.validUntil":
+		if e.ComplexityRoot.SafetyAssertion.ValidUntil == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertion.ValidUntil(childComplexity), true
+
+	case "SafetyAssertionBinding.component":
+		if e.ComplexityRoot.SafetyAssertionBinding.Component == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.Component(childComplexity), true
+	case "SafetyAssertionBinding.matchedBy":
+		if e.ComplexityRoot.SafetyAssertionBinding.MatchedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.MatchedBy(childComplexity), true
+	case "SafetyAssertionBinding.product":
+		if e.ComplexityRoot.SafetyAssertionBinding.Product == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.Product(childComplexity), true
+	case "SafetyAssertionBinding.resolvedAt":
+		if e.ComplexityRoot.SafetyAssertionBinding.ResolvedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionBinding.ResolvedAt(childComplexity), true
+
+	case "SafetyAssertionConnection.edges":
+		if e.ComplexityRoot.SafetyAssertionConnection.Edges == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionConnection.Edges(childComplexity), true
+	case "SafetyAssertionConnection.pageInfo":
+		if e.ComplexityRoot.SafetyAssertionConnection.PageInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionConnection.PageInfo(childComplexity), true
+	case "SafetyAssertionConnection.totalCount":
+		if e.ComplexityRoot.SafetyAssertionConnection.TotalCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionConnection.TotalCount(childComplexity), true
+
+	case "SafetyAssertionEdge.cursor":
+		if e.ComplexityRoot.SafetyAssertionEdge.Cursor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionEdge.Cursor(childComplexity), true
+	case "SafetyAssertionEdge.node":
+		if e.ComplexityRoot.SafetyAssertionEdge.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionEdge.Node(childComplexity), true
+
+	case "SafetyAssertionTarget.componentBomRef":
+		if e.ComplexityRoot.SafetyAssertionTarget.ComponentBomRef == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.ComponentBomRef(childComplexity), true
+	case "SafetyAssertionTarget.componentDigest":
+		if e.ComplexityRoot.SafetyAssertionTarget.ComponentDigest == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.ComponentDigest(childComplexity), true
+	case "SafetyAssertionTarget.componentDigestAlgorithm":
+		if e.ComplexityRoot.SafetyAssertionTarget.ComponentDigestAlgorithm == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.ComponentDigestAlgorithm(childComplexity), true
+	case "SafetyAssertionTarget.componentPurl":
+		if e.ComplexityRoot.SafetyAssertionTarget.ComponentPurl == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.ComponentPurl(childComplexity), true
+	case "SafetyAssertionTarget.correlationReason":
+		if e.ComplexityRoot.SafetyAssertionTarget.CorrelationReason == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.CorrelationReason(childComplexity), true
+	case "SafetyAssertionTarget.correlationStatus":
+		if e.ComplexityRoot.SafetyAssertionTarget.CorrelationStatus == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.CorrelationStatus(childComplexity), true
+	case "SafetyAssertionTarget.lastEvaluatedAt":
+		if e.ComplexityRoot.SafetyAssertionTarget.LastEvaluatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.LastEvaluatedAt(childComplexity), true
+	case "SafetyAssertionTarget.productPurl":
+		if e.ComplexityRoot.SafetyAssertionTarget.ProductPurl == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyAssertionTarget.ProductPurl(childComplexity), true
+
+	case "SafetyEvidenceReference.digest":
+		if e.ComplexityRoot.SafetyEvidenceReference.Digest == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyEvidenceReference.Digest(childComplexity), true
+	case "SafetyEvidenceReference.digestAlgorithm":
+		if e.ComplexityRoot.SafetyEvidenceReference.DigestAlgorithm == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyEvidenceReference.DigestAlgorithm(childComplexity), true
+	case "SafetyEvidenceReference.evidenceId":
+		if e.ComplexityRoot.SafetyEvidenceReference.EvidenceID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyEvidenceReference.EvidenceID(childComplexity), true
+	case "SafetyEvidenceReference.uri":
+		if e.ComplexityRoot.SafetyEvidenceReference.URI == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SafetyEvidenceReference.URI(childComplexity), true
 
 	case "ScanMetadata.collector":
 		if e.ComplexityRoot.ScanMetadata.Collector == nil {
@@ -4087,6 +4439,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSLSAInputSpec,
 		ec.unmarshalInputSLSAPredicateInputSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
+		ec.unmarshalInputSafetyAssertionInputSpec,
+		ec.unmarshalInputSafetyAssertionSpec,
+		ec.unmarshalInputSafetyEvidenceReferenceInput,
 		ec.unmarshalInputScanMetadataInput,
 		ec.unmarshalInputScorecardCheckInputSpec,
 		ec.unmarshalInputScorecardCheckSpec,
@@ -7232,6 +7587,168 @@ extend type Mutation {
   ): [ID!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/safetyAssertion.graphql", Input: `#
+# Copyright 2026 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+enum SafetyRelevance {
+  SAFETY_RELATED
+  NOT_SAFETY_RELATED
+  UNDETERMINED
+}
+
+enum SafetyDecisionStatus {
+  DRAFT
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+enum SafetyCorrelationStatus {
+  PENDING
+  MATCHED
+  AMBIGUOUS
+  INVALID
+  STALE
+}
+
+"Declared identities survive ingestion before either package exists."
+type SafetyAssertionTarget {
+  productPurl: String!
+  componentPurl: String!
+  componentBomRef: String
+  componentDigestAlgorithm: String
+  componentDigest: String
+  correlationStatus: SafetyCorrelationStatus!
+  correlationReason: String
+  lastEvaluatedAt: Time
+}
+
+"A deterministic binding to two existing, specific package versions."
+type SafetyAssertionBinding {
+  product: Package!
+  component: Package!
+  matchedBy: String!
+  resolvedAt: Time!
+}
+
+type SafetyEvidenceReference {
+  evidenceId: String!
+  uri: String!
+  digestAlgorithm: String
+  digest: String
+}
+
+input SafetyEvidenceReferenceInput {
+  evidenceId: String!
+  uri: String!
+  digestAlgorithm: String
+  digest: String
+}
+
+"An externally authored decision. GUAC does not approve safety decisions."
+type SafetyAssertion {
+  id: ID!
+  assertionId: String!
+  safetyRelevance: SafetyRelevance!
+  classificationScheme: String
+  classificationValue: String
+  rationale: String!
+  decisionStatus: SafetyDecisionStatus!
+  reviewer: String
+  assertedAt: Time!
+  validUntil: Time
+  target: SafetyAssertionTarget!
+  binding: SafetyAssertionBinding
+  evidence: [SafetyEvidenceReference!]!
+  sourceAuthority: String
+  origin: String!
+  collector: String!
+  documentRef: String!
+  documentDigestAlgorithm: String!
+  documentDigest: String!
+}
+
+input SafetyAssertionInputSpec {
+  assertionId: String!
+  safetyRelevance: SafetyRelevance!
+  classificationScheme: String
+  classificationValue: String
+  rationale: String!
+  decisionStatus: SafetyDecisionStatus!
+  reviewer: String
+  assertedAt: Time!
+  validUntil: Time
+  productPurl: String!
+  componentPurl: String!
+  componentBomRef: String
+  componentDigestAlgorithm: String
+  componentDigest: String
+  evidence: [SafetyEvidenceReferenceInput!]!
+  sourceAuthority: String
+  origin: String!
+  collector: String!
+  documentRef: String!
+  documentDigestAlgorithm: String!
+  documentDigest: String!
+}
+
+"PURL filters match the complete declared, versioned identity."
+input SafetyAssertionSpec {
+  id: ID
+  assertionId: String
+  productPurl: String
+  componentPurl: String
+  safetyRelevance: SafetyRelevance
+  classificationScheme: String
+  classificationValue: String
+  decisionStatus: SafetyDecisionStatus
+  correlationStatus: SafetyCorrelationStatus
+  sourceAuthority: String
+  origin: String
+  documentDigestAlgorithm: String
+  documentDigest: String
+}
+
+type SafetyAssertionEdge {
+  cursor: ID!
+  node: SafetyAssertion!
+}
+
+type SafetyAssertionConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [SafetyAssertionEdge!]!
+}
+
+extend type Mutation {
+  ingestSafetyAssertion(assertion: SafetyAssertionInputSpec!): ID!
+  "Resolve from authoritative graph data; callers cannot supply arbitrary binding IDs."
+  reconcileSafetyAssertion(id: ID!): SafetyAssertion!
+}
+
+extend type Query {
+  SafetyAssertion(
+    safetyAssertionSpec: SafetyAssertionSpec!
+  ): [SafetyAssertion!]!
+  SafetyAssertionList(
+    safetyAssertionSpec: SafetyAssertionSpec!
+    after: ID
+    first: Int
+  ): SafetyAssertionConnection
+}
+`, BuiltIn: false},
 	{Name: "../schema/search.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -8830,6 +9347,122 @@ func (ec *executionContext) childFields_SLSAPredicate(ctx context.Context, field
 		return ec.fieldContext_SLSAPredicate_value(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type SLSAPredicate", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyAssertion(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_SafetyAssertion_id(ctx, field)
+	case "assertionId":
+		return ec.fieldContext_SafetyAssertion_assertionId(ctx, field)
+	case "safetyRelevance":
+		return ec.fieldContext_SafetyAssertion_safetyRelevance(ctx, field)
+	case "classificationScheme":
+		return ec.fieldContext_SafetyAssertion_classificationScheme(ctx, field)
+	case "classificationValue":
+		return ec.fieldContext_SafetyAssertion_classificationValue(ctx, field)
+	case "rationale":
+		return ec.fieldContext_SafetyAssertion_rationale(ctx, field)
+	case "decisionStatus":
+		return ec.fieldContext_SafetyAssertion_decisionStatus(ctx, field)
+	case "reviewer":
+		return ec.fieldContext_SafetyAssertion_reviewer(ctx, field)
+	case "assertedAt":
+		return ec.fieldContext_SafetyAssertion_assertedAt(ctx, field)
+	case "validUntil":
+		return ec.fieldContext_SafetyAssertion_validUntil(ctx, field)
+	case "target":
+		return ec.fieldContext_SafetyAssertion_target(ctx, field)
+	case "binding":
+		return ec.fieldContext_SafetyAssertion_binding(ctx, field)
+	case "evidence":
+		return ec.fieldContext_SafetyAssertion_evidence(ctx, field)
+	case "sourceAuthority":
+		return ec.fieldContext_SafetyAssertion_sourceAuthority(ctx, field)
+	case "origin":
+		return ec.fieldContext_SafetyAssertion_origin(ctx, field)
+	case "collector":
+		return ec.fieldContext_SafetyAssertion_collector(ctx, field)
+	case "documentRef":
+		return ec.fieldContext_SafetyAssertion_documentRef(ctx, field)
+	case "documentDigestAlgorithm":
+		return ec.fieldContext_SafetyAssertion_documentDigestAlgorithm(ctx, field)
+	case "documentDigest":
+		return ec.fieldContext_SafetyAssertion_documentDigest(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertion", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyAssertionBinding(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "product":
+		return ec.fieldContext_SafetyAssertionBinding_product(ctx, field)
+	case "component":
+		return ec.fieldContext_SafetyAssertionBinding_component(ctx, field)
+	case "matchedBy":
+		return ec.fieldContext_SafetyAssertionBinding_matchedBy(ctx, field)
+	case "resolvedAt":
+		return ec.fieldContext_SafetyAssertionBinding_resolvedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertionBinding", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyAssertionConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_SafetyAssertionConnection_totalCount(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_SafetyAssertionConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_SafetyAssertionConnection_edges(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertionConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyAssertionEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "cursor":
+		return ec.fieldContext_SafetyAssertionEdge_cursor(ctx, field)
+	case "node":
+		return ec.fieldContext_SafetyAssertionEdge_node(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertionEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyAssertionTarget(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "productPurl":
+		return ec.fieldContext_SafetyAssertionTarget_productPurl(ctx, field)
+	case "componentPurl":
+		return ec.fieldContext_SafetyAssertionTarget_componentPurl(ctx, field)
+	case "componentBomRef":
+		return ec.fieldContext_SafetyAssertionTarget_componentBomRef(ctx, field)
+	case "componentDigestAlgorithm":
+		return ec.fieldContext_SafetyAssertionTarget_componentDigestAlgorithm(ctx, field)
+	case "componentDigest":
+		return ec.fieldContext_SafetyAssertionTarget_componentDigest(ctx, field)
+	case "correlationStatus":
+		return ec.fieldContext_SafetyAssertionTarget_correlationStatus(ctx, field)
+	case "correlationReason":
+		return ec.fieldContext_SafetyAssertionTarget_correlationReason(ctx, field)
+	case "lastEvaluatedAt":
+		return ec.fieldContext_SafetyAssertionTarget_lastEvaluatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyAssertionTarget", field.Name)
+}
+
+func (ec *executionContext) childFields_SafetyEvidenceReference(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "evidenceId":
+		return ec.fieldContext_SafetyEvidenceReference_evidenceId(ctx, field)
+	case "uri":
+		return ec.fieldContext_SafetyEvidenceReference_uri(ctx, field)
+	case "digestAlgorithm":
+		return ec.fieldContext_SafetyEvidenceReference_digestAlgorithm(ctx, field)
+	case "digest":
+		return ec.fieldContext_SafetyEvidenceReference_digest(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SafetyEvidenceReference", field.Name)
 }
 
 func (ec *executionContext) childFields_ScanMetadata(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
