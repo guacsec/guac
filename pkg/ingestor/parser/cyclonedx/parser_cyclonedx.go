@@ -446,10 +446,6 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	preds.Vex = c.vulnData.vex
 	preds.VulnMetadata = c.vulnData.vulnMetadata
 	preds.CertifyVuln = c.vulnData.certifyVuln
-	if c.cdxBom.Dependencies == nil {
-		return preds
-	}
-
 	// license information
 	for id, cls := range c.packageLegals {
 		for _, cl := range cls {
@@ -465,6 +461,10 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 				preds.CertifyLegal = append(preds.CertifyLegal, cli)
 			}
 		}
+	}
+
+	if c.cdxBom.Dependencies == nil {
+		return preds
 	}
 
 	var directDependencies, indirectDependencies []string
