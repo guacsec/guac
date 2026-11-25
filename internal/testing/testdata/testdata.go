@@ -1314,6 +1314,23 @@ var (
 		},
 	}
 
+	cdxNetbaseLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: cdxNetbasePack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: &lvUnknown,
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense: "GPL-2.0-only",
+				Justification:   "Found in CycloneDX document",
+				TimeScanned:     cdxTime,
+			},
+		},
+	}
+
 	CdxIngestionPredicates = assembler.IngestPredicates{
 		IsOccurrence: []assembler.IsOccurrenceIngest{
 			{
@@ -1327,6 +1344,7 @@ var (
 		},
 		IsDependency: CdxDeps,
 		HasSBOM:      CdxHasSBOM,
+		CertifyLegal: cdxNetbaseLegal,
 	}
 
 	CdxHasSBOMInvalidVersion = []assembler.HasSBOMIngest{
@@ -1372,6 +1390,7 @@ var (
 	CdxIngestionInvalidVersionPredicates = assembler.IngestPredicates{
 		IsDependency: CdxInvalidVersionDeps,
 		HasSBOM:      CdxHasSBOMInvalidVersion,
+		CertifyLegal: cdxNetbaseLegal,
 	}
 
 	cdxTopQuarkusPack, _ = asmhelpers.PurlToPkg("pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar")
