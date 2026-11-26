@@ -260,13 +260,19 @@ func SanitizeString(s string) string {
 	if strings.Contains(s, "/") {
 		var ns []string
 		for _, item := range strings.Split(s, "/") {
-			ns = append(ns, url.QueryEscape(item))
+			ns = append(ns, escapeSegment(item))
 		}
 		escapedName = strings.Join(ns, "/")
 	} else {
-		escapedName = url.QueryEscape(s)
+		escapedName = escapeSegment(s)
 	}
 	return escapedName
+}
+
+// escapeSegment escapes a PURL segment. QueryEscape writes a space as "+",
+// which a PURL parser reads as a literal plus sign. A real plus is "%2B".
+func escapeSegment(s string) string {
+	return strings.ReplaceAll(url.QueryEscape(s), "+", "%20")
 }
 
 func GuacPkgPurl(pkgName string, pkgVersion *string) string {
@@ -274,7 +280,8 @@ func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 	if pkgVersion == nil {
 		return fmt.Sprintf(PurlPkgGuac+"%s", escapedName)
 	}
-	return fmt.Sprintf(PurlPkgGuac+"%s@%s", escapedName, *pkgVersion)
+	// An unescaped "#" or "?" would start the subpath or the qualifiers.
+	return fmt.Sprintf(PurlPkgGuac+"%s@%s", escapedName, url.PathEscape(*pkgVersion))
 }
 
 func GuacFilePurl(alg string, digest string, filename *string) string {
