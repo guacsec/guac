@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sort"
@@ -297,4 +298,49 @@ func TestCDCertifier_RecordsErrorMetric(t *testing.T) {
 		# TYPE guac_cd_test_clearlydefined_query_errors counter
 		guac_cd_test_clearlydefined_query_errors 1
 	`)))
+}
+
+// retryableTransport always answers with a status the retry loop treats as
+// retryable, so every attempt is used up without a usable response.
+type retryableTransport struct {
+	status int
+	calls  int
+}
+
+func (t *retryableTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	t.calls++
+	return &http.Response{
+		StatusCode: t.status,
+		Body:       io.NopCloser(strings.NewReader("")),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestCDCertifier_ErrorsWhenRetriesAreExhausted(t *testing.T) {
+	oldBaseDelay := baseDelay
+	baseDelay = time.Millisecond
+	defer func() { baseDelay = oldBaseDelay }()
+
+	for _, status := range []int{
+		http.StatusTooManyRequests,
+		http.StatusRequestTimeout,
+		http.StatusGatewayTimeout,
+		524,
+	} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			ctx := logging.WithLogger(context.Background())
+			transport := &retryableTransport{status: status}
+			cert := &cdCertifier{cdHTTPClient: &http.Client{Transport: transport}}
+
+			rootComponent := []*root_package.PackageNode{
+				{Purl: "pkg:npm/lodash@4.17.21"},
+			}
+			docChan := make(chan *processor.Document, 1)
+
+			err := cert.CertifyComponent(ctx, rootComponent, docChan)
+			require.Error(t, err)
+			assert.Equal(t, maxRetries, transport.calls)
+			assert.Len(t, docChan, 0)
+		})
+	}
 }
