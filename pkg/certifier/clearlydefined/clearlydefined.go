@@ -51,13 +51,15 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 var (
 	rateLimit         = 250
 	rateLimitInterval = time.Minute / time.Duration(rateLimit)
+	// baseDelay is the unit of the exponential retry backoff. It is a variable
+	// rather than a constant so that tests can shorten it.
+	baseDelay = 1 * time.Second
 )
 
 const (
 	PRODUCER_ID string = "guacsec/guac"
 	CDCollector string = "clearlydefined"
 	maxRetries         = 10
-	baseDelay          = 1 * time.Second
 
 	// CDQueryErrorsCounter is the name of the counter metric that tracks
 	// failed queries to clearly defined.
@@ -346,6 +348,7 @@ func retryWithBackoff(ctx context.Context, operation retryFunc) retryFunc {
 	logger := logging.FromContext(ctx)
 	return func() (*http.Response, error) {
 		var collectedResp *http.Response
+		var lastStatus int
 		for i := 0; i < maxRetries; i++ {
 			resp, err := operation()
 			if err != nil {
@@ -358,6 +361,8 @@ func retryWithBackoff(ctx context.Context, operation retryFunc) retryFunc {
 					// otherwise return an error
 					return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 				} else {
+					lastStatus = resp.StatusCode
+					_ = resp.Body.Close()
 					secRetry := math.Pow(2, float64(i))
 					logger.Infof("Retrying operation in %f seconds\n", secRetry)
 					delay := time.Duration(secRetry) * baseDelay
@@ -367,6 +372,9 @@ func retryWithBackoff(ctx context.Context, operation retryFunc) retryFunc {
 				collectedResp = resp
 				break
 			}
+		}
+		if collectedResp == nil {
+			return nil, fmt.Errorf("clearly defined POST request still returned a retryable status code %d after %d attempts", lastStatus, maxRetries)
 		}
 		return collectedResp, nil
 	}
