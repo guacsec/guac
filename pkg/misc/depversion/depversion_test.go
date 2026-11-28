@@ -305,6 +305,26 @@ func Test_VersionRangeParse(t *testing.T) {
 	}
 }
 
+// Version numbers too large for an int used to make ParseVersionRange panic.
+func Test_VersionRangeParseOverflow(t *testing.T) {
+	testCases := []string{
+		"99999999999999999999.x",
+		"1.99999999999999999999.x",
+		"^99999999999999999999",
+		"~1.99999999999999999999",
+		"~9223372036854775807.9223372036854775807",
+		"^9223372036854775807",
+	}
+
+	for _, input := range testCases {
+		t.Run(input, func(t *testing.T) {
+			if _, err := ParseVersionRange(input); err == nil {
+				t.Errorf("expected an error from ParseVersionRange(%q), got nil", input)
+			}
+		})
+	}
+}
+
 func Test_ParseVersionValue(t *testing.T) {
 	testCases := []struct {
 		input  string
